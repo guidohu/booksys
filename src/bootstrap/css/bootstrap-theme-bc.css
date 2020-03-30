@@ -1,0 +1,236 @@
+/* Override the panel to change opacity of background */
+.panel {
+  margin-bottom: 20px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 1px solid transparent;
+  border-radius: 4px;
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+          box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  overflow: visible;
+}
+
+/* overflow should be visible because of the drop-down menus */
+.panel-group .panel {
+  overflow: visible;
+}
+
+.panel-padded{
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+
+/* have a smaller top/bottom padding in the original panel body */
+.panel-body {
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  color: rgba(45, 45, 45, 0.95);
+}
+
+.bootstrap-switch { 
+    height: 2.4em;
+}
+
+.table thead > tr > th > .highlight {
+  background-color: rgba(240, 240, 20, 0.95);
+}
+
+.panel-row-odd{
+	background-color: rgba(240, 240, 240, 0.95);
+}
+
+.panel-row-even{
+	background-color: rgba(250, 250, 250, 0.95);
+}
+
+.panel-row-odd:hover,
+.panel-row-even:hover{
+	background-color: rgba(255, 255, 255, 1);
+}
+
+.form-control{
+	background-color: rgba(0, 0, 0, 0.4);
+	color: rgba(240,240,240,1);
+}
+
+.form-control-white{
+	background-color: rgba(240, 240, 240, 0.8);
+	color: rgba(20,20,20,1);
+}
+
+/* Override the shadow of form inputs */
+.form-control:focus {
+  border-color: #599EB9;
+  outline: 0;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(41, 171, 182, 0.8);
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(41, 171, 182, 0.8);
+}
+
+/* Add spacing to labels */
+.label-sm{
+	margin-top: 5px;
+}
+
+/* Change the spacing for page-headers */
+.page-header{
+	margin: 0px 0px 10px;
+	padding-bottom: 0px;
+	padding-left: 15px;
+}
+
+/* Make the text area not resizable */
+textarea {
+	resize: none;
+}
+
+.navbar-fixed-bottom{
+	min-height: 50px;
+}
+
+.nav-pills-vcenter{
+	padding: 3px;
+}
+
+.glyphicon{
+	padding-right: 5px;
+}
+
+/* Override tab-pane of default bootstrap */
+.tab-pane{
+	margin-top: 10px;
+}
+
+/* have some padding below the a tab-pane's content */
+.tab-content{
+	padding-bottom: 10px;
+}
+
+/* Quadratic button on the dashboard */
+.btn-dashboard{
+	height: 120px;
+	width:  120px;
+	border-color: rgb(204, 204, 0);
+	border: 1px solid;
+}
+
+/* No padding around the button */
+.btn-inline{
+	padding: 0px;
+}
+
+.row-dashboard{
+	margin: 20px;
+}
+
+.row-padded{
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.row-top-padded{
+	padding-top: 10px;
+}
+
+/* Make buttons having a green shadow */
+/*.btn:hover,
+.btn:focus {
+  color: #333333;
+  text-decoration: none;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(65, 171, 38, 0.6);
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(65, 171, 38, 0.6);
+}*/
+
+/*
+ ICONS
+*/
+@font-face {
+  font-family: 'Glyphicons BC';
+  src: url('../fonts/glyphicons-bc.eot');
+  src: url('../fonts/glyphicons-bc.eot?#iefix') format('embedded-opentype'), url('../fonts/glyphicons-bc.woff') format('woff'), url('../fonts/glyphicons-bc.ttf') format('truetype'), url('../fonts/glyphicons-bc.svg#glyphicons-halflingsregular') format('svg');
+}
+
+.bc_icon {
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  font-family: 'Glyphicons BC';
+  -webkit-font-smoothing: antialiased;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+}
+
+.bc_icon_tab{
+    display: block;
+	font-size: 40px;
+}
+
+.bc_icon_dashboard {
+	display: block;
+	font-size: 90px;
+}
+
+.bc_icon_boat:before{
+	content: "b";
+}
+
+.bc_icon_calendar:before{
+	content: "c";
+}
+
+.bc_icon_calendar_add:before{
+	content: "C";
+}
+
+.bc_icon_fuel:before{
+	content: "F";
+}
+
+.bc_icon_info:before{
+	content: "i";
+}
+
+.bc_icon_login:before{
+	content: "L";
+}
+
+.bc_icon_logout:before {
+	content: "l";
+}
+
+.bc_icon_money:before{
+	content: "M";
+}
+
+.bc_icon_setting:before {
+	content: "s";
+}
+
+.bc_icon_statistics:before{
+	content: "S";
+}
+
+.bc_icon_tacho:before{
+	content: "T";
+}
+
+.bc_icon_user:before{
+	content: "u";
+}
+
+.bc_icon_users:before{
+	content: "U";
+}
+
+.bc_icon_wakeboard:before {
+	content: "w";
+}
+
+.bc_icon_wrench:before{
+	content: "W";
+}
+
+.bc_inline{
+	display: inline !important;
+}

@@ -1,0 +1,105 @@
+v1.8 2020.03.30
+ - adjust directory structure
+ - currency is dynamic and can be set via the configuration table in the database
+ - address and map can be set via the configuration table in the database
+ - payment information can be set via the configuration table in the database
+ - improve rounding to the next 0.05 for heats
+ - redirect to setup page if no user configured
+
+v1.7.1 2020.03.21
+ - fix Dockerfile for booksys_ui
+ - fix links on forgot_password site
+
+v1.7 2020.03.21
+ - fix display of heats in non private sessions
+ - improve landing page according to Nu Html Checker
+ - introduce reCaptcha functionality for sign-up page
+ - remove PHP dependency from sign-up page
+
+v1.6 2020.03.20
+ - migrate the stop watch to a vuejs object
+ - feature to add comments to heats
+ - feature to display heats in a session
+ - add db version 1.6
+ - fix overlay styling for stopwatch and heat list
+ - remove bottom naviation for stopwatch
+
+v1.5.1 2020.03.08
+ - includes and library clean-up
+ - upgrade all parts to use dataTables 1.10.18
+ - upgrade jquery to version 3.4.1
+ - generate kubernetes configuration for prod deployment
+ - move all javascript code to the js folder and delete script and jslib
+ - clean-up icons
+ - fix login status messages
+ - improve update mechanism
+ - dynamic version display on dashboard
+
+v1.5 2020.03.07
+ - add database setup for fresh installations
+ - add configuration setup from scratch
+ - support multiple version database updates
+ - remove PHP dependency from users.php and thus rename it to users.html
+ - minor fix in today overview to remove users after session is deleted
+ - minor fix in boat view to properly show the driver
+ - minor fix to show proper styling in session editor
+ - remove php dependency from payments.php, thus rename it to payments.html
+ - drive by cleanup of unused libraries
+ - remove php dependency from admin
+ - fix bug in user API caused by typo
+ - improve password change to always create a salted password and remove the unsalted one
+ - adjust dashboard links for account
+ - remove php dependency from account.php
+ - added production system docker-compose configuration
+
+v1.4.1 2020.02.14
+ - fix automated user selection in Boat submenu
+
+v1.4  2020.02.14
+ - remove friend/friendship functionalities
+ - remove deprecated lib and other functionalities
+ - add Docker functionalities for development
+ - improve Docker compatibility by supporting environment variables for database connection
+ - add backend status API
+ - remove PHP dependencies from index.php -> index.html
+ - remove PHP dependencies from dashboard.php -> dashboard.html
+ - remove PHP dependencies from boat.php -> boat.html
+ - allow changing fuel entries
+ - fixed fuel consumption chart sizing issues
+ - show visuals on fuel consumption on request only
+ - fixed issue with printing fuel log and engine log multiple times upon save
+ - allow changing type of engine log entries (course/private)
+ - refactoring of "Ride" functionality to allow creation of sessions
+ - refactoring of "Ride" functionality to allow adding users
+ - refactoring of entire session creation to use moment.js and porper timezone handling
+ - remove book.php as it is un-used
+ - remove PHP dependencies for calendar.php and thus rename it to calendar.html
+ - remove PHP dependencies for today.php and thus rename it to today.php
+ - Adjust booking.php API to return the ID of the newly created session
+ - Move today.html to the new modules to create a session and to add users
+ - Extend pie.js to allow selection of a specific section of the pie
+ - remove PHP dependencies for schedule.php and thus rename it to schedule.html
+ - use momentJS and timezones within schedule.html
+
+ BREAKING CHANGE with v1.4:
+ - config.php needs config['timezone'] set to e.g. Europe/Berlin
+
+v1.3  2019.06.25
+ - only show admins in private session
+ - remove the legacy friends construct from session booking
+ - fix timezones and sunset in session creation
+ - fix timezones everywhere where sessions are displayed
+
+v1.2  2019.04.04
+ - fix user sign up
+
+v1.1  2018.11.01
+ - get_users in lib_user uses DBAccess module
+ - improved login flow and usage of salted password hashes
+ - fix schedule queries
+ - additional 'User Group' tab
+ - differentiate between 'User Group' and 'User Role' everywhere
+ - fix welcome link to point to account page
+
+v1.0  2017.08.05
+ - Initial Commit

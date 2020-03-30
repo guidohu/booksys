@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Booking System for Boat Communities</title>
+
+<link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap-theme-bc.css" />
+<link rel="stylesheet" type="text/css" href="style.css" />
+<link rel="icon" type="image/png" sizes="32x32" href="/img/apple-touch-icon-32x32.png" />
+<script src="js/jquery-latest.min.js"></script>
+<script src="bootstrap/js/bootstrap.min.js"></script>
+<script src="js/sha.js"></script>
+<script src="js/jquery.stayInWebApp.min.js"></script>
+<script src="js/vue.js"></script>
+<script src="js/booksys/browser.js"></script>
+<script src="js/booksys/view_user_signup.js"></script>
+<script src="js/booksys/recaptcha.js"></script>
+</head>
+
+<body>
+	<!--This is the form where the user is created-->
+	<div id="sign_up_user"></div>
+
+	<script>
+		// Initialize reCAPTCHA
+		var recaptchaOnloadCallback = function(){
+			recaptcha.render(document.getElementById("captcha"));
+		};
+		let recaptcha = new BooksysRecaptcha("recaptchaOnloadCallback");
+
+		// Check if mobile browser first,
+        // then continue with the page logic
+        $(function() { 
+            if(BooksysBrowser.isMobile()){
+                // Make it behave like an app
+                BooksysBrowser.setViewportMobile();
+                BooksysBrowser.setManifest();
+                BooksysBrowser.setMetaMobile();
+                // Add mobile style dynamically
+				BooksysBrowser.addMobileCSS();
+				$.stayInWebApp();
+    
+				loadContent();
+            } else {
+				// Do not add mobile style in desktop mode
+				loadContent();
+			}
+		});
+
+		function loadContent(){			
+			// handle returning from the user setup
+			let userSetupCallback = {
+				success: function(){
+					BooksysViewUserSignup.destroyView('sign_up_user');
+					window.location.href = "/index.html";
+				},
+				cancel: function(){
+					BooksysViewUserSignup.destroyView('sign_up_user');
+					window.location.href = "/index.html";
+				}
+			};
+			BooksysViewUserSignup.display('sign_up_user', userSetupCallback, recaptcha);
+		}
+	</script>
+</body>
+</html>

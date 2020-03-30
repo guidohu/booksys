@@ -1,0 +1,232 @@
+/* Basic definition of the website body */
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	/*background-image: url(img/background.jpg);*/
+	/*text-align: center;*/
+    background-color: #090909;
+    background-image: url(img/water_drops_low_2015.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+	color: #a1a1a1;
+}
+
+/* The round-corner central screen */
+div.display {
+	border-radius: 15px;
+	background-color: rgba(32, 32, 32, 0.5);
+	max-width: 970px;
+	min-width: 970px;
+	max-height: 600px;
+	min-height: 600px;
+	left: 50%;
+	right: 50%;
+	top: 50%;
+	bottom: 50%;
+	position: absolute;
+	margin-top:-300px;
+	margin-left:-478px;
+	border:1px solid #646464;
+}
+
+div.noborder {
+    border:0px solid #646464;
+}
+
+div.nobackground {
+	background-color: transparent;
+}
+
+/* The small frame for the pies in the calendar overview */
+.pie-small {
+    border-radius: 5px;
+	height: 70px;
+	background-color: rgba(255, 255, 255, 0.95);
+	color: rgba(30, 30, 30, 0.95);
+}
+
+.pie-small:hover {
+	background-color: rgba(235, 235, 235, 0.95);
+	cursor: pointer;
+	cursor: hand;
+}
+
+.pie-small-inactive{
+	background-color: rgba(220, 220, 220, 0.75);
+	color: rgba(20, 20, 20, 0.9);
+}
+
+/* The calendar number for the date in the calendar overview */
+.calendar-day {
+	top: -20px;
+	position: relative;
+}
+
+.session-details {
+	max-height: 350px;
+	overflow-y: auto;
+
+}
+
+.inline-block {
+	display: inline-block;
+}
+
+/* Allows to center vertically */
+div.vcenter_placeholder{
+	display: table;
+	width: 100%;
+	height: 100%;
+}
+
+/* Allows to center vertically */
+div.vcenter_content{
+	display: table-cell;
+	vertical-align: middle;
+}
+/* Shift the dashboard icons 40px to the top because the header is 40px */
+div.vcenter-dashboard{
+	top: -40px;
+	position: relative;
+}
+
+div.vcenter_with_title{
+	top: -70px;
+	position: relative;
+}
+
+/* Keep things inline */
+div.inline{
+	display: inline;
+}
+
+/* Copyright note on the bottom of the page */
+footer{
+    position: fixed;
+    font-size: 10px;
+    color: #bbbbbb;
+    bottom: 2px;
+    right: 10px;
+}
+
+header.welcome{
+	position: relative;
+	font-size: 14px;
+	color: #bbbbbb;
+	text-align: right;
+	padding: 10px;
+	z-index: 2;
+}
+
+/* Set validations messages color */
+validate_msg.error{
+	color: #ee0000;
+	background-color: rgba(255,255,255,0.5);
+}
+
+/* Set validations messages color */
+validate_msg.success{
+	color: #00dd00;
+}
+
+/* The for warnings should not be displayed */
+#panel-warning{
+	display: none;
+	color: #ee0000;
+}
+
+/* Bottom line for back buttons and home buttons */
+.bottom{
+	bottom: 0px;
+	right: 0px;
+	padding-bottom: 5px;
+	padding-right: 10px;
+	clear: both;
+    position: absolute;
+	width: 100%;
+	text-align: right;
+}
+
+/* Definition of Link colors */
+a:active{
+	font-weight: bold;
+}
+
+a:hover, a:focus{
+	color: #b1b1b1;
+	text-decoration: none;
+}
+
+a{
+	color: #919191;
+}
+
+.table-black{
+	color: #555555;
+}
+
+/* sets a default padding to the right side */
+.padding-right {
+	padding-right: 15px;
+}
+
+/* Slider label spacing for Oil Check */
+.three-columns li {
+	width:calc(100%/3);
+}
+
+.eight-columns li {
+	width:calc(100%/7);
+}
+
+.no-ui-slider .slider-labels {
+	list-style: none;
+	padding:0;
+    margin-top: 5px;
+	margin-left: -3px;
+	width: 100%;
+	text-align: left;
+	font-size: 13px;
+    color: rgb(0,0,0);
+	text-align: left;
+}
+
+.no-ui-slider .slider-labels li {
+	color: #d3d3d3;
+	display: inline;
+	float:left;
+	cursor: pointer;
+    color: rgb(0,0,0);
+}
+
+.no-ui-slider .slider-labels li:nth-last-child(1) {
+	position: absolute;
+	margin-left: -3px;
+}
+
+.no-ui-slider .slider-labels li:hover {
+   color: #333333;
+}
+
+.no-ui-slider .slider-labels li.active {
+   color: #333333;
+}
+
+.padding-top-8px {
+	padding-top: 8px;
+}
+
+.padding-top-16px {
+	padding-top: 16px;
+}
+
+.no-padding {
+	padding: 0px;
+}
+
+.overflow-hidden {
+	overflow: hidden;
+}
+
+.stop-watch-button {
+	height: 60px;
+}

@@ -1,0 +1,28 @@
+version: '3.3'
+
+services:
+  db:
+    image: booksys_db
+    environment:
+      # Database setup
+      MYSQL_DATABASE: 'booksys'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'userpassword'
+      MYSQL_ROOT_PASSWORD: 'rootpassword'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - db-datavolume:/var/lib/mysql
+  ui:
+    image: booksys_ui
+    ports:
+      - '80:80'
+    expose:
+      - '80'
+    volumes:
+      - ${PWD}/config.php:/var/www/html/config/config.php
+
+volumes:
+  db-datavolume:

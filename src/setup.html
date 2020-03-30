@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>Booking System for Boat Communities</title>
+
+<!-- CSS includes -->
+<link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css" />
+<link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap-theme-bc.css" />
+<link rel="stylesheet" type="text/css" href="style.css" />
+<link rel="icon" type="image/png" sizes="32x32" href="/img/apple-touch-icon-32x32.png" />
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+
+<script src="js/jquery-latest.min.js"></script>
+<script src="bootstrap/js/bootstrap.min.js"></script>
+<script src="js/booksys/browser.js"></script>
+<script src="js/vue.js"></script>
+<script src="js/sha.js"></script>
+<script src="js/booksys/view_database_setup.js"></script>
+<script src="js/booksys/view_admin_setup.js"></script>
+</head>
+
+<body>
+    <div id="body"></div>
+
+    <script>
+        // Check if mobile browser first,
+        // then continue with checks
+        $(function() { 
+            if(BooksysBrowser.isMobile()){
+                // Make it behave like an app
+                BooksysBrowser.setViewportMobile();
+                BooksysBrowser.setManifest();
+                BooksysBrowser.setMetaMobile();
+                // Add mobile style dynamically
+                BooksysBrowser.addMobileCSS();
+    
+                // $("#body").load("res/index_mobile.html", function(){
+                //     backendStatus();
+                // });
+                loadContent();
+            } else {
+                // $("#body").load("res/index.html", function(){
+                //     backendStatus();
+                // });
+                loadContent();
+            }
+        });
+
+        // loads the content
+        function loadContent(){
+            // handle returning from the user setup
+            let userSetupCallback = {
+                success: function(){
+                    BooksysViewAdminSetup.destroyView('body');
+                    window.location.href = "/index.html";
+                },
+                cancel: function(){
+                    BooksysViewAdminSetup.destroyView('body');
+                    window.location.href = "/index.html";
+                }
+            };
+
+            // handle returning from the database setup
+            let dbSetupCallback = {
+                success: function(){
+                    BooksysViewDatabaseSetup.destroyView('body');
+                    BooksysViewAdminSetup.displayEntry('body', userSetupCallback);
+                },
+                cancel: function(){
+                    BooksysViewDatabaseSetup.destroyView('body');
+                    window.location.href = "/index.html";
+                }
+            }
+
+            BooksysViewDatabaseSetup.displayEntry('body', dbSetupCallback);
+        }
+    </script>
+</body>

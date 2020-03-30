@@ -1,0 +1,22 @@
+version: '3.3'
+
+services:
+  db:
+    image: booksys_db
+    environment:
+      MYSQL_DATABASE: 'booksys'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'userpassword'
+      MYSQL_ROOT_PASSWORD: 'rootpassword'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+  ui:
+    image: booksys_ui
+    ports:
+      - '80:80'
+    expose:
+      - '80'
+    volumes:
+      - "../../src:/var/www/html"

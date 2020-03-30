@@ -1,0 +1,150 @@
+<div id="select_session">
+	<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">SELECT SESSION</a>
+		</div>
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<ul class="nav navbar-nav">
+				<li>
+					<a href="dashboard.html" class="inline">
+						<span class="glyphicon glyphicon-home"></span>
+						Home
+					</a>
+				</li>          
+			</ul>
+		</div>
+	</div>
+	
+	<div class="panel panel-default panel-padded" id="status-panel-select-session">
+		<div class="row">
+			<div class="col-xs-1 col-sm-1"></div>
+			<div class="col-xs-10 col-sm-10 text-center" id="status-msg-select-session">
+				Loading data...
+			</div>
+		</div>
+	</div>
+
+	<div class="panel panel-default">
+		<div class="row text-center" id="session_pie">
+			<div class="col-sm-1 col-xs-1"></div> <!-- there is a bug in col-xs-offset-1 -->
+			<div class="col-sm-10 col-xs-10">
+				<div class="pie-mobile" id="pie"></div>
+			</div>
+		</div>
+	</div>
+
+	<div id="session_details">
+		<!-- dynamically loaded -->
+	</div>
+
+	<div id="user_dialog">
+		<!-- dynamically loaded -->
+	</div>"
+	
+	<div class="navbar navbar-default navbar-fixed-bottom">
+		<ul class="nav nav-pills">
+			<li>
+				<a id="session_btn_private" href="#" onClick="showPrivateWatch()">
+					<span class="glyphicon glyphicon-user"></span>
+					PRIVATE
+				</a>
+			</li>
+			<li>
+				<a id="session_btn_continue" href="#" onClick="showSessionWatch()">
+					<span class="glyphicon glyphicon-time"></span>
+					CONTINUE
+				</a>
+			</li>
+		</ul>
+	</div>
+</div>
+
+<div id="watch">
+	<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-2" aria-expanded="false">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="#">RIDE</a>
+		</div>
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2">
+			<ul class="nav navbar-nav">
+				<li>
+					<a href="dashboard.html" class="inline">
+						<span class="glyphicon glyphicon-home"></span>
+						Home
+					</a>
+				</li>          
+			</ul>
+		</div>
+	</div>
+	
+	<div class="panel panel-default panel-padded" id="status-panel">
+		<div class="panel-body">
+			<div class="row">
+				<div class="col-xs-1 col-sm-1"></div>
+				<div class="col-xs-10 col-sm-10 text-center" id="status-msg">
+					STATUS
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="stopwatch">
+		<!-- stop watch goes here -->
+	</div>
+
+	<div id="heatlist">
+		<!-- heat list goes here -->
+	</div>
+	
+	<div class="panel panel-default panel-padded">
+		<div class="panel-body">
+			<div class="row text-left">
+				<!-- <div class="col-sm-1 col-xs-1"></div> -->
+				<div class="col-sm-12 col-xs-12">
+					<div class="row">
+						<div class="col-sm-2 col-xs-2">
+							Date
+						</div>
+						<div class="col-sm-10 col-xs-10" id="watch_date">                            
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-2 col-xs-2">
+							Time
+						</div>
+						<div class="col-sm-10 col-xs-10" id="watch_time">
+							-
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-2 col-xs-2">
+							Title
+						</div>
+						<div class="col-sm-10 col-xs-10" id="watch_title">
+							-
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-2 col-xs-2">
+							Sunset
+						</div>
+						<div class="col-sm-10 col-xs-10" id="watch_sunset">
+							-
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
