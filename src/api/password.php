@@ -64,13 +64,13 @@
 	$db->execute();
 	$res = $db->fetch_stmt_hash();
 	if(!isset($res) or count($res)<1){
-		echo "The provided email cannot be found in the user database.";
 		HttpHeader::setResponseCode(400);
+		echo "No user with the given email address.";
 		$db->disconnect();
 		exit;
 	}elseif(count($res)>1){
-		echo "The provided email is not unique. Please contact an administrator.";
 		HttpHeader::setResponseCode(400);
+		echo "The provided email is not unique. Please contact an administrator.";
 		$db->disconnect();
 		exit;
 	}

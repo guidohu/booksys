@@ -1,3 +1,8 @@
+unreleased
+ - fix order in setting status code and output content to client
+ - add httponly and samesite cookie settings
+ - verify that session cookie is present before logging out a client
+
 v1.8.2 2020.03.30
  - version bump to test CI
 

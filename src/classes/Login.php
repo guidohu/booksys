@@ -282,7 +282,19 @@ class Login{
 			$session_info->insert_session();
 
 			// set the session cookie in the browser
-			setcookie("SESSION", $session_info->session_secret, time()+(3600*24*7*56), '/');
+			// secure flag cannot be set in non HTTPS environments (such as testing)
+			// domain is unknown generally
+			setcookie(
+				"SESSION", 
+				$session_info->session_secret, 
+				[   'expires' => time()+(3600*24*7*56), 
+					'path'    => '/', 
+					'domain'  => '', 
+					'secure'  => FALSE,
+					'httponly' => TRUE,
+					'samesite'=> "strict"
+				]
+			);
 		} catch (Exception $e){
 			HttpHeader::setResponseCode(500);
 			$db->disconnect();
@@ -297,6 +309,11 @@ class Login{
 
 	// Logout the current user
 	static public function logout($configuration){
+		// check that we have a session cookie
+		if(!isset($_COOKIE['SESSION'])){
+			return FALSE;
+		}
+
 		// DB Connection
 		$db = new DBAccess($configuration);
 		if(!$db->connect()){
@@ -312,10 +329,10 @@ class Login{
 		if($db->execute()){
 			setcookie('SESSION', '', -1, '/');
 			$db->disconnect();
-			return true;
+			return TRUE;
 		}else{
 			$db->disconnect();
-			return null;
+			return FALSE;
 		}
 	}
 
