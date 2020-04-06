@@ -132,41 +132,6 @@ class Login{
 		}
 	}
 
-	// configuration	A Configuration object
-	static public function updateSessionData($data, $configuration, $db=NULL){
-		// DB Connection
-		$disconnect_again = FALSE;
-		if(!isset($db)){
-			$db = new DBAccess($configuration);
-			if(!$db->connect()){
-				HttpHeader::setResponseCode(500);
-				exit;
-			}
-			$disconnect_again = TRUE;
-		}
-
-		$query = 'UPDATE browser_session SET
-						  session_data = ?,
-						  valid_thru = ?,
-						  last_activity = ?,
-		                  WHERE session_secret = ?;';
-		$db->prepare($query);
-		$db->bind_param('ssss', json_encode($data),
-		                        date('Y-m-d H:i:s', time()+$configuration->browser_session_timeout_max),
-								date('Y-m-d H:i:s', time()),
-								$_COOKIE['SESSION']);
-		$db->execute();
-		$res = $db->fetch_stmt_hash();
-		if($res){
-			$_SESSION = $data;
-			if($disconnect_again === TRUE) $db->disconnect();
-			return $_SESSION;
-		}else{
-			if($disconnect_again === TRUE) $db->disconnect();
-			return null;
-		}
-	}
-
 	// Login with username and password
 	// - username	either the username or the email
 	// - password   the password hash
