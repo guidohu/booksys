@@ -70,7 +70,7 @@
 				  
 		// Limit the number of returned log line for mobile browsers
 		if(MobileDevice::isMobileBrowser() or isset($_GET['mobile'])){
-			$query .= "  LIMIT 0, 100";
+			$query .= "  LIMIT 0, 200";
 		}
 				  
 		$res = $db->fetch_data_hash($query, -1);
