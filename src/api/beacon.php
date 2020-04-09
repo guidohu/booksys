@@ -13,14 +13,12 @@
 	$lc = new Login($configuration);
 	if(!$lc->isLoggedIn()){
 		$status['ok'] = FALSE;
-		$status['redirect'] = '/index.html';
 		$status['msg'] = "you are not logged in";
-		echo json_encode($status);
-		exit;
+	} else {
+		$status['ok'] = TRUE;
+		$status['msg'] = "you are logged in";
 	}
 	
-	$status['ok'] = TRUE;
-	$status['msg'] = "you are logged in";
 	echo json_encode($status);
 	exit;
 
