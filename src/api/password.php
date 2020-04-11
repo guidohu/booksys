@@ -13,11 +13,15 @@
 
   $configuration = new Configuration();
   $lc = new Login($configuration);
+  $response = array(
+	  'ok'	=> FALSE,
+	  'msg' => 'unknown API call'
+  );
   
   switch($_GET['action']){
 	case 'token_request':
-		token_request($configuration);
-		exit;
+		$response = token_request($configuration);
+		break;
 	case 'change_password_by_token':
 		change_password_by_token($configuration);
 		exit;
@@ -32,8 +36,8 @@
 		change_password_by_password($configuration);
 		exit;
   }
-  
-  HttpHeader::setResponseCode(400);
+
+  echo json_encode($response);
   return;
   
   function token_request($configuration){
@@ -49,16 +53,14 @@
 	if(!isset($data->email) or !$sanitizer->isEmail($data->email)){
 		$response['ok'] = FALSE;
 		$response['message'] = "Your provided Email is not a valid email address";
-		echo json_encode($response);
-		return;
+		return $response;
 	}
 
 	if(isset($configuration->recaptcha_privatekey)){
 		if(!isset($data->recaptcha_token)){
 			$response['ok'] = FALSE;
 			$response['message'] = "reCAPTCHA token missing, are you a robot? Pleaes click I'm not a robot.";
-			echo json_encode($response);
-			return;
+			return $response;
 		}
 		// check recaptcha
 		$recaptcha_url      = 'https://www.google.com/recaptcha/api/siteverify';
@@ -73,8 +75,7 @@
 		if($recaptcha->success != 1){
 			$response['ok'] = FALSE;
 			$response['message'] = "reCAPTCHA token not valid";
-			echo json_encode($response);
-			return;
+			return $response;
 		} 
 	}
 	
@@ -99,17 +100,15 @@
 		$response['ok'] = TRUE;
 		$response['message'] = "token requested, please check your email inbox";
 		error_log("api/password: The provided email is not known: $data->email");
-		echo json_encode($response);
 		$db->disconnect();
-		exit;
+		return $response;
 	}elseif(count($res)>1){
 		// do not give any information
 		$response['ok'] = TRUE;
 		$response['message'] = "token requested, please check your email inbox";
-		echo json_encode($response);
 		error_log("api/password: The provided email is not unique: $data->email");
 		$db->disconnect();
-		exit;
+		return $response;
 	}
 	
 	$user_id    = $res[0]['id'];
@@ -119,6 +118,7 @@
 	
 	# generate random token
 	$token = rand(100000, 999999);
+	error_log("new token generated: " . $token); // TODO delete
 	$token_hash = hash('sha256', $token);
 	
 	# store token in db
@@ -157,8 +157,7 @@ _END;
 	}
 	
 	$response['message'] = "token requested, please check your email inbox";
-	echo json_encode($response);
-	return;
+	return $response;
   }
   
   /* Change the password of a user */

@@ -24,12 +24,18 @@ $(function() {
 });
 
 function loadContent(){
+    let email = "";
     let pwResetEmail = new BooksysViewPasswordResetEmail();
     let pwResetEmailCallback = {
         cancel: function(){
             pwResetEmail.destroyView();
             window.location.href = "/index.html";
         },
+        success: function(emailProvided){
+            pwResetEmail.destroyView();
+            email = emailProvided;
+            alert(email);
+        }
     };
     pwResetEmail.display("password_reset", pwResetEmailCallback, recaptcha);
 }

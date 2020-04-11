@@ -55,7 +55,8 @@
                             <!-- captcha -->
                             <div class="row row-top-padded">
                                 <div class="col-sm-1 col-xs-1"></div>
-                                <div class="col-sm-10 col-xs-10">
+                                <div class="col-sm-3 col-xs-3"></div>
+                                <div class="col-sm-7 col-xs-7">
                                     <div id="captcha"></div>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>

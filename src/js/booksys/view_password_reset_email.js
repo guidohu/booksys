@@ -4,9 +4,10 @@ class BooksysViewPasswordResetEmail {
         
     }
 
-    // call this function to display the session details
+    // call this function to display the email address dialog
     // - location       ID of the element where to place it
-    // - sessionId      the ID of the session to display
+    // - cb             the callback functions (cancel/success)
+    // - captcha        reference to a reCaptcha object
     display(location, cb, captcha){
         // load session/user data and display
         this.location  = location;
@@ -20,7 +21,7 @@ class BooksysViewPasswordResetEmail {
 
     // loads the vue template and creates a vue instance
     loadView(){
-        let that         = this;
+        let that = this;
 
         $('#'+this.location).load("res/view_password_reset_email.vue", function(){
             var App = new Vue({
@@ -38,7 +39,13 @@ class BooksysViewPasswordResetEmail {
                         this.errors = that.validate();
 
                         if(this.errors.length == 0){
-                            that.requestToken();
+                            let callbacks = {
+                                success: that.cb.success,
+                                failure: function(errors){
+                                    App.errors = errors;
+                                }
+                            }
+                            that.requestToken(callbacks);
                         }
                     },
                 }
@@ -60,7 +67,7 @@ class BooksysViewPasswordResetEmail {
         return errors;
     }
 
-    requestToken(){
+    requestToken(callbacks){
         // send the ajax call to the api
         let request = {
             email:  this.email
@@ -78,8 +85,13 @@ class BooksysViewPasswordResetEmail {
             url: "api/password.php?action=token_request",
             data: JSON.stringify(request),
             success: function(data, textStatus, jqXHR){
-                json = $.parseJSON(data);
-                
+                let json = $.parseJSON(data);
+                if(json.ok){
+                    callbacks.success(that.email);
+                }else{
+                    console.log(json);
+                    callbacks.failure([ json.message ]);
+                }
             },
             error: function(data, text, errorCode){
                 console.log(data);
