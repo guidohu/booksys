@@ -41,10 +41,41 @@
   
     # input validation
 	$sanitizer = new Sanitizer();
+	$response  = array(
+		'ok' 		=> TRUE,
+		'message' 	=> 'token requested'
+	);
+
 	if(!isset($data->email) or !$sanitizer->isEmail($data->email)){
-	    HttpHeader::setResponseCode(400);
-		echo "Your Email is not a valid email address";
+		$response['ok'] = FALSE;
+		$response['message'] = "Your provided Email is not a valid email address";
+		echo json_encode($response);
 		return;
+	}
+
+	if(isset($configuration->recaptcha_privatekey)){
+		if(!isset($data->recaptcha_token)){
+			$response['ok'] = FALSE;
+			$response['message'] = "reCAPTCHA token missing, are you a robot? Pleaes click I'm not a robot.";
+			echo json_encode($response);
+			return;
+		}
+		// check recaptcha
+		$recaptcha_url      = 'https://www.google.com/recaptcha/api/siteverify';
+		$recaptcha_secret   = $configuration->recaptcha_privatekey;
+		$recaptcha_response = $data->recaptcha_token;
+
+		// Make and decode POST request:
+		$recaptcha = file_get_contents($recaptcha_url . '?secret=' . $recaptcha_secret . '&response=' . $recaptcha_response);
+		$recaptcha = json_decode($recaptcha);
+
+		// Take action based on the result returned
+		if($recaptcha->success != 1){
+			$response['ok'] = FALSE;
+			$response['message'] = "reCAPTCHA token not valid";
+			echo json_encode($response);
+			return;
+		} 
 	}
 	
 	# get user by email
@@ -64,13 +95,19 @@
 	$db->execute();
 	$res = $db->fetch_stmt_hash();
 	if(!isset($res) or count($res)<1){
-		HttpHeader::setResponseCode(400);
-		echo "No user with the given email address.";
+		// do not give any information
+		$response['ok'] = TRUE;
+		$response['message'] = "token requested, please check your email inbox";
+		error_log("api/password: The provided email is not known: $data->email");
+		echo json_encode($response);
 		$db->disconnect();
 		exit;
 	}elseif(count($res)>1){
-		HttpHeader::setResponseCode(400);
-		echo "The provided email is not unique. Please contact an administrator.";
+		// do not give any information
+		$response['ok'] = TRUE;
+		$response['message'] = "token requested, please check your email inbox";
+		echo json_encode($response);
+		error_log("api/password: The provided email is not unique: $data->email");
 		$db->disconnect();
 		exit;
 	}
@@ -85,15 +122,16 @@
 	$token_hash = hash('sha256', $token);
 	
 	# store token in db
-	$query = sprintf('INSERT INTO password_reset (user_id, token, valid)
-	                  VALUES ( "%d", "%s", 1);',
-					  $user_id,
-					  $token_hash);
+	$query = sprintf(
+		'INSERT INTO password_reset (user_id, token, valid) VALUES ( "%d", "%s", 1);',
+		$user_id,
+		$token_hash
+	);
 	$res = $db->query($query);
 	if($res == FALSE){
+		HttpHeader::setResponseCode(500);
 		echo "Internal server error";
 		$db->disconnect();
-		HttpHeader::setResponseCode(500);
 		exit;
 	}
 	$db->disconnect();
@@ -113,13 +151,13 @@ See you on the lake soon
 _END;
  
 	if(!$mail->sendMail($data->email, 'Password Reset Token', $message)){
+		HttpHeader:setResponseCode(500);
 		echo "Password reset token could not be sent, please verify your<br>input or contact us.";
-		http_reponse_code(500);
+		exit;
 	}
 	
-	$ret = Array();
-	$ret['user_id'] = $user_id;
-	echo json_encode($ret);
+	$response['message'] = "token requested, please check your email inbox";
+	echo json_encode($response);
 	return;
   }
   
