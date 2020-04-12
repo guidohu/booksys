@@ -489,7 +489,7 @@
 		}
 
 		// inform invitees
-		_inform_invitees($data->session_id, $session_data, $db);
+		_inform_invitees($data->session_id, $session_data, $db, $configuration);
 
 		// delete the invitations
 		$query = 'DELETE FROM invitation
@@ -501,7 +501,7 @@
 		}
 
 		// inform riders of this session
-		_inform_registered($data->session_id, $session_data, $db);
+		_inform_registered($data->session_id, $session_data, $db, $configuration);
 
 		// delete registered users
 		$query = 'DELETE FROM user_to_session WHERE session_id = ?';
@@ -525,7 +525,7 @@
 		return;
 	}
 
-	function _inform_invitees($session_id, $session_data, $db){
+	function _inform_invitees($session_id, $session_data, $db, $configuration){
 		$query = 'SELECT u.first_name AS fn, u.last_name AS ln,
                          u.email AS email,
                          s.date AS date, s.start AS start, s.end AS end,
@@ -555,11 +555,11 @@
 			$message .= " Date : " . date("D d.m.Y", $start) . "\n";
 			$message .= "        " . date("H:i", $start) . " to " . date("H:i", $end) . "\n";
 			$message .= "\nSee you soon on the lake\n";
-			Email::sendMail($res[$i]['email'], 'Session Cancelled', $message);
+			Email::sendMail($res[$i]['email'], 'Session Cancelled', $message, $configuration);
 		}
 	}
 
-	function _inform_registered($session_id, $session_data, $db){
+	function _inform_registered($session_id, $session_data, $db, $configuration){
 		$query = 'SELECT u.first_name AS fn, u.last_name AS ln,
                          u.email AS email,
                          s.date AS date, s.start AS start, s.end AS end,
@@ -588,7 +588,7 @@
 			$message .= " Date : " . date("D d.m.Y", $start) . "\n";
 			$message .= "        " . date("H:i", $start) . " to " . date("H:i", $end) . "\n";
 			$message .= "\nSee you soon on the lake\n";
-			Email::sendMail($res[$i]['email'], 'Session Cancelled', $message);
+			Email::sendMail($res[$i]['email'], 'Session Cancelled', $message, $configuration);
 		}
 	}
 
@@ -761,7 +761,7 @@
 				$message .= "        " . date("H:i", $start) . " to " . date("H:i", $end) . "\n";
 				$message .= "\nPlease login to www.wakeandsurf.ch and check your Schedule to decline.\n";
 				$message .= "\nSee you on the lake soon\n";
-				Email::sendMail($res[0]['email'], 'Session Confirmation', $message);
+				Email::sendMail($res[0]['email'], 'Session Confirmation', $message, $configuration);
 			}
 		}
 	}

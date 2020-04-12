@@ -1,10 +1,14 @@
-class BooksysViewPasswordResetEmail {
+class BooksysViewPasswordResetToken {
 
-    constructor(){
-        
+    constructor(email){
+        this.email = email;
+        console.log(this.email);
+        this.token = null;
+        this.password = "";
+        this.password2 = "";
     }
 
-    // call this function to display the email address dialog
+    // call this function to display the new password dialog
     // - location       ID of the element where to place it
     // - cb             the callback functions (cancel/success)
     // - captcha        reference to a reCaptcha object
@@ -13,7 +17,6 @@ class BooksysViewPasswordResetEmail {
         this.location  = location;
         this.cb        = cb;
         this.captcha   = captcha;
-        this.email     = "";
         this.errors    = [];
 
         this.loadView();
@@ -22,27 +25,36 @@ class BooksysViewPasswordResetEmail {
     // loads the vue template and creates a vue instance
     loadView(){
         let that = this;
+        let reset = {
+            email:      that.email,
+            token:      that.token,
+            password:   that.password,
+            password2:  that.password2,
+            errors:     that.errors,
+        }
 
-        $('#'+this.location).load("res/view_password_reset_email.vue", function(){
+        $('#'+this.location).load("res/view_password_reset_token.vue", function(){
             var App = new Vue({
-                el: "#view_password_reset_email",
+                el: "#view_password_reset_token",
                 data: {
-                    email:       that.email,
-                    errors:      that.errors,
+                    reset:       reset,
                 },
                 methods: {
                     "cancel": function(){
                         that.cb.cancel();
                     },
                     "save": function(){
-                        that.email  = this.email;
-                        this.errors = that.validate();
+                        this.reset.errors = that.validate(reset);
 
-                        if(this.errors.length == 0){
+                        if(this.reset.errors.length == 0){
+                            that.email = this.reset.email;
+                            that.token = this.reset.token;
+                            that.password = this.reset.password;
+                            
                             let callbacks = {
                                 success: that.cb.success,
                                 failure: function(errors){
-                                    App.errors = errors;
+                                    App.reset.errors = errors;
                                 }
                             }
                             that.requestToken(callbacks);
@@ -55,13 +67,23 @@ class BooksysViewPasswordResetEmail {
         });
     }
 
-    validate(){
+    validate(data){
         let errors = [];
 
-        // lazy isEmail() check
-        let mailRegex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/;
-        if(this.email.match(mailRegex) == null){
-            errors.push("Please provide a valid Email address");
+        // token
+        let tokenRegex = /^[0-9]+$/;
+        if(data.token == null){
+            errors.push("Please provide a valid token");
+        }else if(data.token.match(tokenRegex) == null){
+            errors.push("Please provide a valid token");
+        }
+
+        // password
+        if(data.password == ""){
+            errors.push("Please provide a password");
+        }
+        if(data.password != data.password2){
+            errors.push("Password and its confirmation are not identical");
         }
 
         return errors;
@@ -71,19 +93,22 @@ class BooksysViewPasswordResetEmail {
     requestToken(callbacks){
         // send the ajax call to the api
         let request = {
-            email:  this.email
-        }
+            email:  this.email,
+            token:  this.token,
+        };
 
-        // get the recaptcha_token
-        if(this.captcha != null){
-            request.recaptcha_token = this.captcha.getToken();
+        // calculate password hash
+        request.password = this.calculateHash(this.password);
+        if(request.password == null){
+            callbacks.failure(["Cannot generate hash of password"]);
+            return;
         }
 
         let that = this;
 
         $.ajax({
             type: "POST",
-            url: "api/password.php?action=token_request",
+            url: "api/password.php?action=change_password_by_token",
             data: JSON.stringify(request),
             success: function(data, textStatus, jqXHR){
                 let json = $.parseJSON(data);
@@ -103,17 +128,29 @@ class BooksysViewPasswordResetEmail {
         });
     }
 
+    calculateHash(password){
+        try {
+            let hashInput = password;
+            let hashObj = new jsSHA(hashInput, "TEXT");
+            let hashOutput = hashObj.getHash("SHA-256","HEX");
+            return hashOutput;
+        } catch(e) {
+            console.error("Password could not be sent encrypted: " + e);
+            return null;
+        }
+    }
+
     showApp(){
-        $('#view_password_reset_email_modal').modal({
+        $('#view_password_reset_token_modal').modal({
             backdrop: 'static',
             keyboard: false,
             show: true,
         });
-        $('#view_password_reset_email_modal').modal('show');
+        $('#view_password_reset_token_modal').modal('show');
     }
 
     hideApp(){
-        $('#view_password_reset_email_modal').modal('hide');
+        $('#view_password_reset_token_modal').modal('hide');
 		$('.modal-backdrop').remove();
     }
 

@@ -23,8 +23,8 @@
 		$response = token_request($configuration);
 		break;
 	case 'change_password_by_token':
-		change_password_by_token($configuration);
-		exit;
+		$response = change_password_by_token($configuration);
+		break;
 	case 'change_password_by_password':
 	    // only a user which is logged in is allowed to change a 
 		// password
@@ -143,15 +143,14 @@ Dear $first_name $last_name
 
 Please use this token to reset your password:
 
- Username: $username
  Token   : $token
  
 See you on the lake soon
  
 _END;
  
-	if(!$mail->sendMail($data->email, 'Password Reset Token', $message)){
-		HttpHeader:setResponseCode(500);
+	if(!$mail->sendMail($data->email, 'Password Reset Token', $message, $configuration)){
+		HttpHeader::setResponseCode(500);
 		echo "Password reset token could not be sent, please verify your<br>input or contact us.";
 		exit;
 	}
@@ -166,20 +165,24 @@ _END;
 	
 	# validate input
 	$sanitizer = new Sanitizer();
+	$response  = array(
+		'ok' 		=> TRUE,
+		'message' 	=> 'token requested'
+	);
 	if(!isset($data->token) or !$sanitizer->isCookie($data->token)){
-	    HttpHeader::setResponseCode(400);
-		echo "Wrong token format";
-		return;
+	    $response['ok'] = FALSE;
+		$response['message'] = "Your provided token is not in a valid format";
+		return $response;
 	}	
-	if(!isset($data->user_id) or !$sanitizer->isInt($data->user_id)){
-	    HttpHeader::setResponseCode(400);
-		echo "Illegal user_id request";
-		return;
+	if(!isset($data->email) or !$sanitizer->isEmail($data->email)){
+		$response['ok'] = FALSE;
+		$response['message'] = "Your provided email is not in a valid format";
+		return $response;
 	}
 	if(!isset($data->password) or !$sanitizer->isCookie($data->password)){
-	    HttpHeader::setResponseCode(400);
-		echo "Wrong password format";
-		return;
+	    $response['ok'] = FALSE;
+		$response['message'] = "Your provided password is not in a valid format";
+		return $response;
 	}
 	
 	# calculate hash of token
@@ -192,43 +195,57 @@ _END;
 		echo "Internal server error.";
 		exit;
 	}	
-	$query = 'SELECT id FROM password_reset
-	          WHERE user_id = ?
-				AND token   = ?
-				AND valid   = 1';
+	$query = 'SELECT pr.id FROM password_reset pr JOIN user u ON pr.user_id = u.id
+	          WHERE u.email = ?
+				AND pr.token   = ?
+				AND pr.valid   = 1';
 	$db->prepare($query);
-	$db->bind_param('is', $data->user_id, $token_hash);
+	$db->bind_param(
+		'ss', 
+		$data->email, 
+		$token_hash
+	);
 	$db->execute();
 	$res = $db->fetch_stmt_hash();
 	if(!isset($res) or count($res)<1){
-		echo "The token code is not correct.";
-		HttpHeader::setResponseCode(400);
-		$db->disconnect();
-		exit;
+		# we do not know this token code
+		$response['ok'] = FALSE;
+		$response['message'] = "Your provided token code is not correct, please request a new one";
+	}else{
+		# change password
+		$query = 'UPDATE user SET password = ? WHERE email = ?';
+		$db->prepare($query);
+		$db->bind_param(
+			'ss', 
+			$data->password, 
+			$data->email
+		);
+		if(!$db->execute()){
+			error_log('Change password did not work: ' . $query);
+			HttpHeader::setResponseCode(500);
+			echo "Internal error, password could not be changed.<br>Please try again or contact us";
+			$db->disconnect();
+		}
+
+		$response['ok'] = TRUE;
+		$response['message'] = "Password has been reset";
 	}
 	
 	# set all tokens of this user to invalid
-	$query = 'UPDATE password_reset SET valid = 0 WHERE user_id = ?';
+	$query = 'UPDATE password_reset pr 
+		JOIN user u ON u.id = pr.user_id 
+		SET pr.valid = 0 
+		WHERE u.email = ?';
 	$db->prepare($query);
-	$db->bind_param('i', $data->user_id);
+	$db->bind_param(
+		'i', 
+		$data->email);
 	if(! $db->execute()){
-		error_log('Could not set all tokens to valid=0 for user '. $data->user_id.' and in function change_password_by_token');        
+		error_log('Could not set all tokens to valid=0 for user '. $data->email.' and in function change_password_by_token');        
 	}
-	
-	# change password
-	$query = 'UPDATE user SET password = ? WHERE id = ?';
-	$db->prepare($query);
-	$db->bind_param('si', $data->password, $data->user_id);
-	if(!$db->execute()){
-		error_log('Change password did not work: ' . $query);
-		echo "Internal error, password could not be changed.<br>Please try again or contact us";
-		$db->disconnect();
-		HttpHeader::setResponseCode(500);
-	}
-	
-	HttpHeader::setResponseCode(200);
 	$db->disconnect();
-	return;	
+
+	return $response;	
   }
   
   /* Change the password of a user */
