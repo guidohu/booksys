@@ -29,6 +29,7 @@ class BooksysViewPasswordResetEmail {
                 data: {
                     email:       that.email,
                     errors:      that.errors,
+                    sending:     false,
                 },
                 methods: {
                     "cancel": function(){
@@ -43,6 +44,12 @@ class BooksysViewPasswordResetEmail {
                                 success: that.cb.success,
                                 failure: function(errors){
                                     App.errors = errors;
+                                },
+                                startSending: function(){
+                                    App.sending = true;
+                                },
+                                doneSending: function(){
+                                    App.sending = false;
                                 }
                             }
                             that.requestToken(callbacks);
@@ -69,6 +76,9 @@ class BooksysViewPasswordResetEmail {
 
     // requests a password reset token from the backend
     requestToken(callbacks){
+        // indicate start sending of email
+        callbacks.startSending();
+
         // send the ajax call to the api
         let request = {
             email:  this.email
@@ -86,6 +96,8 @@ class BooksysViewPasswordResetEmail {
             url: "api/password.php?action=token_request",
             data: JSON.stringify(request),
             success: function(data, textStatus, jqXHR){
+                callbacks.doneSending();
+
                 let json = $.parseJSON(data);
                 if(json.ok){
                     callbacks.success(that.email);
@@ -95,6 +107,8 @@ class BooksysViewPasswordResetEmail {
                 }
             },
             error: function(data, text, errorCode){
+                callbacks.doneSending();
+                
                 console.log(data);
                 console.log(text);
                 console.log(errorCode);

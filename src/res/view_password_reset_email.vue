@@ -1,22 +1,4 @@
 <div id="view_password_reset_email">
-    <!-- <div class="modal fade text-left" id="view_user_signup_created_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content" id="view_user_signup_content">
-                <div class="modal-header">
-                    Sign Up Successful
-                </div>
-                <div class="modal-body" id="view_user_signup_dialog">
-                    Your account has been created successfully. We will activate it soon and let you know, when your account is ready for your first login.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" v-on:click="done">
-                        <span class="glyphicon glyphicon-ok"></span>
-                        Done
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div> -->
     <div class="modal fade text-left" id="view_password_reset_email_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content" id="view_user_signup_content">
@@ -35,7 +17,7 @@
                                 </ul>
                             </div>
                         </div>
-                        <div>
+                        <div v-if="sending==false">
                             <div class="alert alert-info">
                                 Please enter your Email address to reset your password:
                             </div>
@@ -62,9 +44,9 @@
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
                         </div>
-                        <div v-else>
-                            <div class="alert alert-warning">
-                                Something went wrong.
+                        <div v-if="sending==true">
+                            <div class="alert alert-info">
+                                Sending token reset email to you.
                             </div>
                         </div>
                     </div>
@@ -73,7 +55,11 @@
                             <span class="glyphicon glyphicon-remove"></span>
                             Cancel
                         </button>
-                        <button type="button" class="btn btn-default" v-on:click="save">
+                        <button v-if="sending==true" type="button" class="btn btn-default" v-on:click="save">
+                            <span class="glyphicon glyphicon-arrow-right"></span>
+                            Continue
+                        </button>
+                        <button v-if="sending==false" type="button" class="btn btn-default" v-on:click="save">
                             <span class="glyphicon glyphicon-arrow-right"></span>
                             Continue
                         </button>

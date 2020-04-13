@@ -11,12 +11,10 @@ class BooksysViewPasswordResetToken {
     // call this function to display the new password dialog
     // - location       ID of the element where to place it
     // - cb             the callback functions (cancel/success)
-    // - captcha        reference to a reCaptcha object
-    display(location, cb, captcha){
+    display(location, cb){
         // load session/user data and display
         this.location  = location;
         this.cb        = cb;
-        this.captcha   = captcha;
         this.errors    = [];
 
         this.loadView();
@@ -40,8 +38,8 @@ class BooksysViewPasswordResetToken {
                     reset:       reset,
                 },
                 methods: {
-                    "cancel": function(){
-                        that.cb.cancel();
+                    "back": function(){
+                        that.cb.back();
                     },
                     "save": function(){
                         this.reset.errors = that.validate(reset);
@@ -57,7 +55,7 @@ class BooksysViewPasswordResetToken {
                                     App.reset.errors = errors;
                                 }
                             }
-                            that.requestToken(callbacks);
+                            that.changePassword(callbacks);
                         }
                     },
                 }
@@ -78,6 +76,23 @@ class BooksysViewPasswordResetToken {
             errors.push("Please provide a valid token");
         }
 
+        // password strength
+        let pwUpperRegex = /[A-Z]+/;
+        let pwLowerRegex = /[a-z]+/;
+        let pwDigitRegex = /[0-9]+/;
+        if(data.password.match(pwUpperRegex) == null){
+            errors.push("The password needs to contain at least one upper case letter (A-Z)");
+        }
+        if(data.password.match(pwLowerRegex) == null){
+            errors.push("The password needs to contain at least one lower case letter (a-z)");
+        }
+        if(data.password.match(pwDigitRegex) == null){
+            errors.push("The password needs to contain at least one digit (0-9)");
+        }
+        if(data.password.length < 10){
+            errors.push("The password needs to be at least 10 characters long");
+        }
+
         // password
         if(data.password == ""){
             errors.push("Please provide a password");
@@ -90,7 +105,7 @@ class BooksysViewPasswordResetToken {
     }
 
     // requests a password reset token from the backend
-    requestToken(callbacks){
+    changePassword(callbacks){
         // send the ajax call to the api
         let request = {
             email:  this.email,
@@ -115,7 +130,7 @@ class BooksysViewPasswordResetToken {
                 if(json.ok){
                     callbacks.success(that.email);
                 }else{
-                    console.log(json);
+                    console.error(json);
                     callbacks.failure([ json.message ]);
                 }
             },

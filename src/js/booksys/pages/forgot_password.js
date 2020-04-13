@@ -43,9 +43,12 @@ function loadContent(){
 function showResetPassword(email){
     let pwResetToken = new BooksysViewPasswordResetToken(email);
     let pwResetPasswordCallback = {
-        cancel: function(){
+        back: function(){
             pwResetToken.destroyView();
-            window.location.href = "/index.html";
+            // generate a new recaptcha instance
+            recaptcha = new BooksysRecaptcha("recaptchaOnloadCallback");
+            // show email dialog again
+            loadContent();
         },
         success: function(){
             pwResetToken.destroyView();

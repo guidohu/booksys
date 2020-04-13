@@ -1,4 +1,10 @@
-<?php  
+<?php
+  /**
+   * The password API provides workflows to change the password, either through getting
+   * a password reset token via email or by changing the password by providing the old
+   * password too.
+   */
+
   // automatically load all classes
   spl_autoload_register('password_autoloader');
   function password_autoloader($class){
@@ -18,6 +24,7 @@
 	  'msg' => 'unknown API call'
   );
   
+  // check which action to perform
   switch($_GET['action']){
 	case 'token_request':
 		$response = token_request($configuration);
@@ -29,17 +36,30 @@
 	    // only a user which is logged in is allowed to change a 
 		// password
 		if(! $lc->isLoggedIn()){
-		    HttpHeader::setResponseCode('401');
-			echo "You have been logged out. Please login again.";
-		    exit;
+			$response['ok'] = FALSE;
+			$response['message'] = "You are not logged in.";
+			break;
 	    }
-		change_password_by_password($configuration);
-		exit;
+		$response = change_password_by_password($configuration);
+		break;
   }
 
   echo json_encode($response);
   return;
   
+  /**
+   * token_request will generate a password reset token that is sent to the user via email
+   *
+   * @param $configuration		configuration object
+   * @return $response of the form
+   * {
+   * 	ok		=>	TRUE|FALSE		indicating success or failure
+   * 	message => "somestring"		indicating additional information especially for failures
+   * }
+   * 
+   * Note: the function does hide non existing users requests towards the frontend to prevent
+   *       user enumeration
+   */
   function token_request($configuration){
 	$data = json_decode(file_get_contents('php://input'));
   
@@ -141,9 +161,9 @@
 	$message = <<< _END
 Dear $first_name $last_name
 
-Please use this token to reset your password:
+You've just requested a password reset. Please use this token when asked, to reset your password:
 
- Token   : $token
+Token: $token
  
 See you on the lake soon
  
@@ -159,7 +179,18 @@ _END;
 	return $response;
   }
   
-  /* Change the password of a user */
+  /**
+   * change_password_by_token changes a user's password given the presented token is valid.
+   * It only allows one attempt after that one, all tokens of this user are invalidated and a
+   * new one has to be requested.
+   *
+   * @param $configuration		configuration object
+   * @return $response of the form
+   * {
+   * 	ok		=>	TRUE|FALSE		indicating success or failure
+   * 	message => "somestring"		indicating additional information especially for failures
+   * }
+   */
   function change_password_by_token($configuration){
 	$data = json_decode(file_get_contents('php://input'));
 	
@@ -188,11 +219,11 @@ _END;
 	# calculate hash of token
 	$token_hash = hash('sha256', $data->token);
 	
-	# check if we have a user_id with this token
+	# check if we have a user_id with this hashed token
 	$db = new DBAccess($configuration);
 	if(!$db->connect()){
 		HttpHeader::setResponseCode(500);
-		echo "Internal server error.";
+		echo "Internal server error. Please let us know and try later.";
 		exit;
 	}	
 	$query = 'SELECT pr.id FROM password_reset pr JOIN user u ON pr.user_id = u.id
@@ -238,42 +269,59 @@ _END;
 		WHERE u.email = ?';
 	$db->prepare($query);
 	$db->bind_param(
-		'i', 
+		's', 
 		$data->email);
 	if(! $db->execute()){
 		error_log('Could not set all tokens to valid=0 for user '. $data->email.' and in function change_password_by_token');        
 	}
 	$db->disconnect();
 
+	// TODO send an email to the user indicating that password has been reset
+
 	return $response;	
   }
   
-  /* Change the password of a user */
+  /**
+   * change_password_by_password allows to change the current password to a new one by presenting
+   * both old and new password
+   *
+   * @param $configuration		configuration object
+   * @return $response of the form
+   * {
+   * 	ok		=>	TRUE|FALSE		indicating success or failure
+   * 	message => "somestring"		indicating additional information especially for failures
+   * }
+   */
   function change_password_by_password($configuration){
 	$data = json_decode(file_get_contents('php://input'));
+
+	$response  = array(
+		'ok' 		=> TRUE,
+		'message' 	=> 'password changed'
+	);
 	
 	# validate input
 	$sanitizer = new Sanitizer();
 	if(!isset($data->password_old) or !$sanitizer->isAsciiText($data->password_old)){
-	    HttpHeader::setResponseCode(400);
-		echo "Illegal password provided";
-		return;
+	    $response['ok'] 	 = FALSE;
+		$response['message'] = "Your provided old password is not in a valid format";
+		return $response;
 	}	
 	if(!isset($data->password_new) or !$sanitizer->isAsciiText($data->password_new)){
-	    HttpHeader::setResponseCode(400);
-		echo "Illegal password provided";
-		return;
+	    $response['ok'] 	 = FALSE;
+		$response['message'] = "Your provided new password is not in a valid format";
+		return $response;
 	}
 	
 	# get user object by session id and password
-	$user = new User($configuration);
+	$user      = new User($configuration);
 	$user_data = $user->getUser();
 	
 	# check that the old password was correct
 	if(! $user->isPasswordCorrect($data->password_old)){
-		HttpHeader::setResponseCode(400);
-		echo "Wrong password provided";
-		return;
+		$response['ok'] 	 = FALSE;
+		$response['message'] = "Wrong password provided";
+		return $response;
 	}
 
 	# generate new password salt/hash
@@ -284,6 +332,7 @@ _END;
 	$db = new DBAccess($configuration);
 	if(!$db->connect()){
 		HttpHeader::setResponseCode(500);
+		error_log("Cannot connect to database");
 		echo "Internal server error.";
 		exit;
 	}
@@ -296,17 +345,18 @@ _END;
 	$db->bind_param('isi', 
 		$new_salt,  
 		$new_password_hash,
-		$user_data['id']);
+		$user_data['id']
+	);
 	if(!$db->execute()){
 		error_log('Change password did not work: ' . $query);
 		$db->disconnect();
-		echo "Internal error, password could not be changed.<br>Please try again or contact us";
 		HttpHeader::setResponseCode(500);
+		echo "Internal error, password could not be changed. Please try again or contact us";
+		exit;
 	}
-	
-	HttpHeader::setResponseCode(200);
+
 	$db->disconnect();
-	return;	
+	return $response;	
   }
     
 ?>

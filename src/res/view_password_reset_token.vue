@@ -19,7 +19,7 @@
                         </div>
                         <div>
                             <div class="alert alert-info">
-                                Please enter the token that you received and a new password:
+                                Please enter the token that you received by email and a new password of your choice:
                             </div>
                             <!-- email -->
                             <div class="row">
@@ -73,26 +73,12 @@
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
-                            <!-- captcha -->
-                            <div class="row row-top-padded">
-                                <div class="col-sm-1 col-xs-1"></div>
-                                <div class="col-sm-3 col-xs-3"></div>
-                                <div class="col-sm-7 col-xs-7">
-                                    <div id="captcha"></div>
-                                </div>
-                                <div class="col-sm-1 col-xs-1"></div>
-                            </div>
-                        </div>
-                        <div v-else>
-                            <div class="alert alert-warning">
-                                Something went wrong.
-                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" v-on:click="cancel">
-                            <span class="glyphicon glyphicon-remove"></span>
-                            Cancel
+                        <button type="button" class="btn btn-default" v-on:click="back">
+                            <span class="glyphicon glyphicon-arrow-left"></span>
+                            Back
                         </button>
                         <button type="button" class="btn btn-default" v-on:click="save">
                             <span class="glyphicon glyphicon-ok"></span>

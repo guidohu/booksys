@@ -4,7 +4,7 @@ class Email{
 	
 	public static function sendMail($to, $subject, $message, $configuration){
 		if(isset($to)){
-			$to = "ghungerbuehler@gmail.com";
+			$to = "ghungerbuehler@gmail.com"; # TODO remove
 			$command = "/usr/bin/sendemail";
 			$command .= " -f "  . escapeshellarg($configuration->smtp_sender);
 			$command .= " -t "  . escapeshellarg($to);

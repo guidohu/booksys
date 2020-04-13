@@ -152,7 +152,7 @@
      */
     function admin_check_database_update($configuration){
         // check that the user is admin indeed
-        is_admin_or_return($configuration);
+        _is_admin_or_return($configuration);
 
         // prepare response
         $response = array();
@@ -189,7 +189,7 @@
      */
     function update_database($configuration){
         // only an administrator is supposed to do this
-        is_admin_or_return($configuration);
+        _is_admin_or_return($configuration);
 
         // get current schema version
         $db_schema_version = _get_database_version($configuration);
@@ -227,7 +227,7 @@
     }
 
     // returns http status permission denied in case the user is not an admin
-    function is_admin_or_return($configuration){
+    function _is_admin_or_return($configuration){
         $lc = new Login($configuration);
         if(!$lc->isLoggedIn($configuration->admin_user_status_id)){
             HttpHeader::setResponseCode(403);
