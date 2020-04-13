@@ -2,6 +2,13 @@ unreleased
  - fix order in setting status code and output content to client
  - add httponly and samesite cookie settings
  - verify that session cookie is present before logging out a client
+ - add sendemail to the UI docker container
+ - fix scrolling for mobile devices on today and calendar page
+ - remove PHP dependency from forgot_password.php and thus rename to forgot_password.html
+ - remove inline javascript from sign_up page
+ - remove inline javascript from forgot_password page
+ - remove inline javascript from index page
+ - add recaptcha to password reset workflow
 
 v1.8.2 2020.03.30
  - version bump to test CI

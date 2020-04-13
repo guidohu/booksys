@@ -47,11 +47,6 @@
 			}
         });
 
-        // Stay in the WebApp
-        $(function() {
-            $.stayInWebApp();
-        });
-
         let userGroups;
         let displayCurrency;
 
@@ -61,6 +56,8 @@
 
         // Load all content for this page
         function loadContent() {
+            $.stayInWebApp();
+
             $.ajax({
                 type: "GET",
                 url: "api/user.php?action=get_user_groups",

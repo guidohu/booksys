@@ -481,7 +481,7 @@
 				 . 'added the amount to your account balance.'."\n\n"
 				 . 'See you soon on the boat' . "\n"
 				 . 'wakeandsurf Crew';
-			Email::sendMail($user_data['email'], 'Payment received', $msg);
+			Email::sendMail($user_data['email'], 'Payment received', $msg, $configuration);
 		}
 		
 		HttpHeader::setResponseCode(200);
