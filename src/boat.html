@@ -19,9 +19,13 @@
 <script src="bootstrap/js/bootstrap.min.js"></script>
 <script src="js/jquery.validate.min.js"></script>
 <script src="js/noUiSlider/jquery.nouislider.all.js"></script>
-<script src="js/highcharts/highcharts.js"></script>
 <script src="bootstrap/js/bootstrap-switch.min.js"></script>
 <script src="js/jquery.stayInWebApp.min.js"></script>
+<script src="js/moment-with-locales.min.js"></script>
+<script src="js/moment-timezone-with-data.min.js"></script>
+<script src="js/Chart.min.js"></script>
+<script src="js/chartjs-adapter-moment.js"></script>
+<script src="js/chartjs-plugin-colorschemes.min.js"></script>
 <script src="js/booksys/browser.js"></script>
 <script src="js/vue.js"></script>
 <script src="js/booksys/view_fuel_entry.js"></script>
@@ -56,13 +60,10 @@
 			}
 		});
 		
-		// Stay in the WebApp
-		$(function() {
-        	$.stayInWebApp();
-		});
-		
 		// Load dynamic content
 		function loadContent(){
+			$.stayInWebApp();
+			
 			// Set default values
 			Date.prototype.toDateInputValue = (function() {
 				var local = new Date(this);
@@ -283,71 +284,69 @@
 					fuel_series[date.getFullYear()] = [[Date.UTC(1970, date.getMonth(), date.getDate()), fuel_consumption]];
 				}			
 			}
-			
-			// convert to highgraph format
-			var fuel_series_highgraph = [];
-			var size = Object.keys(fuel_series).length;
-			var counter = 0;
-			for ( var year in fuel_series){
+
+			// convert to charts.js format
+			let datasets = [];
+			let counter = 0;
+			let size = Object.keys(fuel_series).length;
+			for ( let year in fuel_series ) {
 				counter++;
-				var series = { 
-					name : "Year " + year,
-					data : fuel_series[year]
+				let dataset = {
+					label:		year,
+					data: 		[],
+					showLine: 	true,
+					fill: 		false,
+					hidden:		true,
 				};
-				if(counter != size){
-					series.visible = false;
+
+				// display the current year
+				if(counter == size){
+					dataset.hidden = false;
 				}
-				fuel_series_highgraph.push(series);
-				
+
+				fuel_series[year].forEach(element => {
+					dataset.data.push(
+						{
+							x: moment(element[0], 'x'),
+							y: element[1]
+						}
+					);
+				});
+
+				datasets.push(dataset);
 			}
 
-			// get the window width
-			var width = window.innerWidth;
-			
-			$('#fuel_graph').highcharts({
-				chart: {
-					type: 'spline',
-					width: width*0.925
+			let myLineChart = new Chart('fuel_chart', {
+				type: 'scatter',
+				data: {
+					datasets: datasets
 				},
-				title: {
-					text: 'Fuel Consumption'
-				},
-				xAxis: {
-					type: 'datetime',
-					dateTimeLabelFormats: { // don't display the dummy year
-						month: '%e. %b',
-						year: '%b'
+				options: {
+					tooltips: {
+						enabled: true,
+						callbacks: {
+							title: function(tooltipItem, data) {
+								return "Average Fuel Consumption";
+							},
+							label: function(tooltipItem, data) {
+								time = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index].x.format("DD. MMM");
+								liters = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index].y
+								liters = Math.round(liters * 10)/10;
+								return time + " - " + liters + " L";
+							},
+							afterLabel: function(tooltipItem, data) {
+								return '';
+							}
+						},
 					},
-					title: {
-						text: 'Date',
-						style: {
-							color: '#a1a1a1',
-							fontSize: '9px',
-
-						}
-					}
-				},
-				yAxis: {
-					title: {
-						text: 'Fuel (liter/hour)'
+					scales: {
+						xAxes: [{
+							type: 'time',
+							distribution: 'series'
+						}]
 					},
-					min: 0,
-					max: 50
-				},
-				tooltip: {
-					headerFormat: '<b>{series.name}</b><br>',
-					pointFormat: '{point.x:%e. %b}: {point.y:.2f} l/h'
-				},
-
-				plotOptions: {
-					spline: {
-						marker: {
-							enabled: true
-						}
-					}
-				},
-				
-				series : fuel_series_highgraph
+					responsive: true
+				}
 			});
 		}
 		
