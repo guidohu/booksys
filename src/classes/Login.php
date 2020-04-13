@@ -132,41 +132,6 @@ class Login{
 		}
 	}
 
-	// configuration	A Configuration object
-	static public function updateSessionData($data, $configuration, $db=NULL){
-		// DB Connection
-		$disconnect_again = FALSE;
-		if(!isset($db)){
-			$db = new DBAccess($configuration);
-			if(!$db->connect()){
-				HttpHeader::setResponseCode(500);
-				exit;
-			}
-			$disconnect_again = TRUE;
-		}
-
-		$query = 'UPDATE browser_session SET
-						  session_data = ?,
-						  valid_thru = ?,
-						  last_activity = ?,
-		                  WHERE session_secret = ?;';
-		$db->prepare($query);
-		$db->bind_param('ssss', json_encode($data),
-		                        date('Y-m-d H:i:s', time()+$configuration->browser_session_timeout_max),
-								date('Y-m-d H:i:s', time()),
-								$_COOKIE['SESSION']);
-		$db->execute();
-		$res = $db->fetch_stmt_hash();
-		if($res){
-			$_SESSION = $data;
-			if($disconnect_again === TRUE) $db->disconnect();
-			return $_SESSION;
-		}else{
-			if($disconnect_again === TRUE) $db->disconnect();
-			return null;
-		}
-	}
-
 	// Login with username and password
 	// - username	either the username or the email
 	// - password   the password hash
@@ -282,7 +247,19 @@ class Login{
 			$session_info->insert_session();
 
 			// set the session cookie in the browser
-			setcookie("SESSION", $session_info->session_secret, time()+(3600*24*7*56), '/');
+			// secure flag cannot be set in non HTTPS environments (such as testing)
+			// domain is unknown generally
+			setcookie(
+				"SESSION", 
+				$session_info->session_secret, 
+				[   'expires' => time()+(3600*24*7*56), 
+					'path'    => '/', 
+					'domain'  => '', 
+					'secure'  => FALSE,
+					'httponly' => TRUE,
+					'samesite'=> "strict"
+				]
+			);
 		} catch (Exception $e){
 			HttpHeader::setResponseCode(500);
 			$db->disconnect();
@@ -297,6 +274,11 @@ class Login{
 
 	// Logout the current user
 	static public function logout($configuration){
+		// check that we have a session cookie
+		if(!isset($_COOKIE['SESSION'])){
+			return FALSE;
+		}
+
 		// DB Connection
 		$db = new DBAccess($configuration);
 		if(!$db->connect()){
@@ -312,10 +294,10 @@ class Login{
 		if($db->execute()){
 			setcookie('SESSION', '', -1, '/');
 			$db->disconnect();
-			return true;
+			return TRUE;
 		}else{
 			$db->disconnect();
-			return null;
+			return FALSE;
 		}
 	}
 

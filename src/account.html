@@ -411,6 +411,9 @@
 		}
 		
 		function hideEditPassword(){
+			$('#user_password_old').val('');
+			$('#user_password_new').val('');
+			$('#user_password_new_2').val('');
 			$('#user_password_modal').modal('hide');
 		}
 		
@@ -427,9 +430,21 @@
 				url: "api/password.php?action=change_password_by_password",
 				data: JSON.stringify(data),
 				success: function(data, textStatus, jqXHR){
-					$('#user_password_save').html('OK');
-					hideEditPassword();
-					showStatus('Password Change Successful', 'Your password has been changed.');
+					let response = JSON.parse(data);
+					if(response.ok){
+						$('#user_password_save').html('OK');
+						hideEditPassword();
+						showStatus('Password Change Successful', 'Your password has been changed.');
+					}else{
+						if(response.message == "You are not logged in."){
+							console.log('user not logged in, redirecting to login page');
+            				window.location.href = "/index.html";
+						}else{
+							$('#user_password_save').html('OK');
+							hideEditPassword();
+							showStatus('Error', response.message);
+						}
+					}
 				},
 				error: function(data, text, errorCode){
 					$('#user_password_save').html('OK');

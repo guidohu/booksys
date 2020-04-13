@@ -35,7 +35,7 @@ class BooksysBeacon {
                     that.cbSuccess();
                 }else{
                     if(json.msg == "you are not logged in"){
-                        that.cbRedirect(json.redirect);
+                        that.cbRedirect("/index.html");
                         return;
                     }
                 }

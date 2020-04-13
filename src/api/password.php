@@ -1,4 +1,10 @@
-<?php  
+<?php
+  /**
+   * The password API provides workflows to change the password, either through getting
+   * a password reset token via email or by changing the password by providing the old
+   * password too.
+   */
+
   // automatically load all classes
   spl_autoload_register('password_autoloader');
   function password_autoloader($class){
@@ -13,38 +19,84 @@
 
   $configuration = new Configuration();
   $lc = new Login($configuration);
+  $response = array(
+	  'ok'	=> FALSE,
+	  'msg' => 'unknown API call'
+  );
   
+  // check which action to perform
   switch($_GET['action']){
 	case 'token_request':
-		token_request($configuration);
-		exit;
+		$response = token_request($configuration);
+		break;
 	case 'change_password_by_token':
-		change_password_by_token($configuration);
-		exit;
+		$response = change_password_by_token($configuration);
+		break;
 	case 'change_password_by_password':
 	    // only a user which is logged in is allowed to change a 
 		// password
 		if(! $lc->isLoggedIn()){
-		    HttpHeader::setResponseCode('401');
-			echo "You have been logged out. Please login again.";
-		    exit;
+			$response['ok'] = FALSE;
+			$response['message'] = "You are not logged in.";
+			break;
 	    }
-		change_password_by_password($configuration);
-		exit;
+		$response = change_password_by_password($configuration);
+		break;
   }
-  
-  HttpHeader::setResponseCode(400);
+
+  echo json_encode($response);
   return;
   
+  /**
+   * token_request will generate a password reset token that is sent to the user via email
+   *
+   * @param $configuration		configuration object
+   * @return $response of the form
+   * {
+   * 	ok		=>	TRUE|FALSE		indicating success or failure
+   * 	message => "somestring"		indicating additional information especially for failures
+   * }
+   * 
+   * Note: the function does hide non existing users requests towards the frontend to prevent
+   *       user enumeration
+   */
   function token_request($configuration){
 	$data = json_decode(file_get_contents('php://input'));
   
     # input validation
 	$sanitizer = new Sanitizer();
+	$response  = array(
+		'ok' 		=> TRUE,
+		'message' 	=> 'token requested'
+	);
+
 	if(!isset($data->email) or !$sanitizer->isEmail($data->email)){
-	    HttpHeader::setResponseCode(400);
-		echo "Your Email is not a valid email address";
-		return;
+		$response['ok'] = FALSE;
+		$response['message'] = "Your provided Email is not a valid email address";
+		return $response;
+	}
+
+	if(isset($configuration->recaptcha_privatekey)){
+		if(!isset($data->recaptcha_token)){
+			$response['ok'] = FALSE;
+			$response['message'] = "reCAPTCHA token missing, are you a robot? Pleaes click I'm not a robot.";
+			return $response;
+		}
+		// check recaptcha
+		$recaptcha_url      = 'https://www.google.com/recaptcha/api/siteverify';
+		$recaptcha_secret   = $configuration->recaptcha_privatekey;
+		$recaptcha_response = $data->recaptcha_token;
+
+		// Make and decode POST request:
+		$recaptcha = file_get_contents($recaptcha_url . '?secret=' . $recaptcha_secret . '&response=' . $recaptcha_response);
+		$recaptcha = json_decode($recaptcha);
+
+		// Take action based on the result returned
+		if($recaptcha->success != 1){
+			$response['ok'] = FALSE;
+			$response['message'] = "reCAPTCHA token not valid";
+			return $response;
+		} 
 	}
 	
 	# get user by email
@@ -64,15 +116,19 @@
 	$db->execute();
 	$res = $db->fetch_stmt_hash();
 	if(!isset($res) or count($res)<1){
-		echo "The provided email cannot be found in the user database.";
-		HttpHeader::setResponseCode(400);
+		// do not give any information
+		$response['ok'] = TRUE;
+		$response['message'] = "token requested, please check your email inbox";
+		error_log("api/password: The provided email is not known: $data->email");
 		$db->disconnect();
-		exit;
+		return $response;
 	}elseif(count($res)>1){
-		echo "The provided email is not unique. Please contact an administrator.";
-		HttpHeader::setResponseCode(400);
+		// do not give any information
+		$response['ok'] = TRUE;
+		$response['message'] = "token requested, please check your email inbox";
+		error_log("api/password: The provided email is not unique: $data->email");
 		$db->disconnect();
-		exit;
+		return $response;
 	}
 	
 	$user_id    = $res[0]['id'];
@@ -82,18 +138,20 @@
 	
 	# generate random token
 	$token = rand(100000, 999999);
+	error_log("new token generated: " . $token); // TODO delete
 	$token_hash = hash('sha256', $token);
 	
 	# store token in db
-	$query = sprintf('INSERT INTO password_reset (user_id, token, valid)
-	                  VALUES ( "%d", "%s", 1);',
-					  $user_id,
-					  $token_hash);
+	$query = sprintf(
+		'INSERT INTO password_reset (user_id, token, valid) VALUES ( "%d", "%s", 1);',
+		$user_id,
+		$token_hash
+	);
 	$res = $db->query($query);
 	if($res == FALSE){
+		HttpHeader::setResponseCode(500);
 		echo "Internal server error";
 		$db->disconnect();
-		HttpHeader::setResponseCode(500);
 		exit;
 	}
 	$db->disconnect();
@@ -103,123 +161,167 @@
 	$message = <<< _END
 Dear $first_name $last_name
 
-Please use this token to reset your password:
+You've just requested a password reset. Please use this token when asked, to reset your password:
 
- Username: $username
- Token   : $token
+Token: $token
  
 See you on the lake soon
  
 _END;
  
-	if(!$mail->sendMail($data->email, 'Password Reset Token', $message)){
+	if(!$mail->sendMail($data->email, 'Password Reset Token', $message, $configuration)){
+		HttpHeader::setResponseCode(500);
 		echo "Password reset token could not be sent, please verify your<br>input or contact us.";
-		http_reponse_code(500);
+		exit;
 	}
 	
-	$ret = Array();
-	$ret['user_id'] = $user_id;
-	echo json_encode($ret);
-	return;
+	$response['message'] = "token requested, please check your email inbox";
+	return $response;
   }
   
-  /* Change the password of a user */
+  /**
+   * change_password_by_token changes a user's password given the presented token is valid.
+   * It only allows one attempt after that one, all tokens of this user are invalidated and a
+   * new one has to be requested.
+   *
+   * @param $configuration		configuration object
+   * @return $response of the form
+   * {
+   * 	ok		=>	TRUE|FALSE		indicating success or failure
+   * 	message => "somestring"		indicating additional information especially for failures
+   * }
+   */
   function change_password_by_token($configuration){
 	$data = json_decode(file_get_contents('php://input'));
 	
 	# validate input
 	$sanitizer = new Sanitizer();
+	$response  = array(
+		'ok' 		=> TRUE,
+		'message' 	=> 'token requested'
+	);
 	if(!isset($data->token) or !$sanitizer->isCookie($data->token)){
-	    HttpHeader::setResponseCode(400);
-		echo "Wrong token format";
-		return;
+	    $response['ok'] = FALSE;
+		$response['message'] = "Your provided token is not in a valid format";
+		return $response;
 	}	
-	if(!isset($data->user_id) or !$sanitizer->isInt($data->user_id)){
-	    HttpHeader::setResponseCode(400);
-		echo "Illegal user_id request";
-		return;
+	if(!isset($data->email) or !$sanitizer->isEmail($data->email)){
+		$response['ok'] = FALSE;
+		$response['message'] = "Your provided email is not in a valid format";
+		return $response;
 	}
 	if(!isset($data->password) or !$sanitizer->isCookie($data->password)){
-	    HttpHeader::setResponseCode(400);
-		echo "Wrong password format";
-		return;
+	    $response['ok'] = FALSE;
+		$response['message'] = "Your provided password is not in a valid format";
+		return $response;
 	}
 	
 	# calculate hash of token
 	$token_hash = hash('sha256', $data->token);
 	
-	# check if we have a user_id with this token
+	# check if we have a user_id with this hashed token
 	$db = new DBAccess($configuration);
 	if(!$db->connect()){
 		HttpHeader::setResponseCode(500);
-		echo "Internal server error.";
+		echo "Internal server error. Please let us know and try later.";
 		exit;
 	}	
-	$query = 'SELECT id FROM password_reset
-	          WHERE user_id = ?
-				AND token   = ?
-				AND valid   = 1';
+	$query = 'SELECT pr.id FROM password_reset pr JOIN user u ON pr.user_id = u.id
+	          WHERE u.email = ?
+				AND pr.token   = ?
+				AND pr.valid   = 1';
 	$db->prepare($query);
-	$db->bind_param('is', $data->user_id, $token_hash);
+	$db->bind_param(
+		'ss', 
+		$data->email, 
+		$token_hash
+	);
 	$db->execute();
 	$res = $db->fetch_stmt_hash();
 	if(!isset($res) or count($res)<1){
-		echo "The token code is not correct.";
-		HttpHeader::setResponseCode(400);
-		$db->disconnect();
-		exit;
+		# we do not know this token code
+		$response['ok'] = FALSE;
+		$response['message'] = "Your provided token code is not correct, please request a new one";
+	}else{
+		# change password
+		$query = 'UPDATE user SET password = ? WHERE email = ?';
+		$db->prepare($query);
+		$db->bind_param(
+			'ss', 
+			$data->password, 
+			$data->email
+		);
+		if(!$db->execute()){
+			error_log('Change password did not work: ' . $query);
+			HttpHeader::setResponseCode(500);
+			echo "Internal error, password could not be changed.<br>Please try again or contact us";
+			$db->disconnect();
+		}
+
+		$response['ok'] = TRUE;
+		$response['message'] = "Password has been reset";
 	}
 	
 	# set all tokens of this user to invalid
-	$query = 'UPDATE password_reset SET valid = 0 WHERE user_id = ?';
+	$query = 'UPDATE password_reset pr 
+		JOIN user u ON u.id = pr.user_id 
+		SET pr.valid = 0 
+		WHERE u.email = ?';
 	$db->prepare($query);
-	$db->bind_param('i', $data->user_id);
+	$db->bind_param(
+		's', 
+		$data->email);
 	if(! $db->execute()){
-		error_log('Could not set all tokens to valid=0 for user '. $data->user_id.' and in function change_password_by_token');        
+		error_log('Could not set all tokens to valid=0 for user '. $data->email.' and in function change_password_by_token');        
 	}
-	
-	# change password
-	$query = 'UPDATE user SET password = ? WHERE id = ?';
-	$db->prepare($query);
-	$db->bind_param('si', $data->password, $data->user_id);
-	if(!$db->execute()){
-		error_log('Change password did not work: ' . $query);
-		echo "Internal error, password could not be changed.<br>Please try again or contact us";
-		$db->disconnect();
-		HttpHeader::setResponseCode(500);
-	}
-	
-	HttpHeader::setResponseCode(200);
 	$db->disconnect();
-	return;	
+
+	// TODO send an email to the user indicating that password has been reset
+
+	return $response;	
   }
   
-  /* Change the password of a user */
+  /**
+   * change_password_by_password allows to change the current password to a new one by presenting
+   * both old and new password
+   *
+   * @param $configuration		configuration object
+   * @return $response of the form
+   * {
+   * 	ok		=>	TRUE|FALSE		indicating success or failure
+   * 	message => "somestring"		indicating additional information especially for failures
+   * }
+   */
   function change_password_by_password($configuration){
 	$data = json_decode(file_get_contents('php://input'));
+
+	$response  = array(
+		'ok' 		=> TRUE,
+		'message' 	=> 'password changed'
+	);
 	
 	# validate input
 	$sanitizer = new Sanitizer();
 	if(!isset($data->password_old) or !$sanitizer->isAsciiText($data->password_old)){
-	    HttpHeader::setResponseCode(400);
-		echo "Illegal password provided";
-		return;
+	    $response['ok'] 	 = FALSE;
+		$response['message'] = "Your provided old password is not in a valid format";
+		return $response;
 	}	
 	if(!isset($data->password_new) or !$sanitizer->isAsciiText($data->password_new)){
-	    HttpHeader::setResponseCode(400);
-		echo "Illegal password provided";
-		return;
+	    $response['ok'] 	 = FALSE;
+		$response['message'] = "Your provided new password is not in a valid format";
+		return $response;
 	}
 	
 	# get user object by session id and password
-	$user = new User($configuration);
+	$user      = new User($configuration);
 	$user_data = $user->getUser();
 	
 	# check that the old password was correct
 	if(! $user->isPasswordCorrect($data->password_old)){
-		HttpHeader::setResponseCode(400);
-		echo "Wrong password provided";
-		return;
+		$response['ok'] 	 = FALSE;
+		$response['message'] = "Wrong password provided";
+		return $response;
 	}
 
 	# generate new password salt/hash
@@ -230,6 +332,7 @@ _END;
 	$db = new DBAccess($configuration);
 	if(!$db->connect()){
 		HttpHeader::setResponseCode(500);
+		error_log("Cannot connect to database");
 		echo "Internal server error.";
 		exit;
 	}
@@ -242,17 +345,18 @@ _END;
 	$db->bind_param('isi', 
 		$new_salt,  
 		$new_password_hash,
-		$user_data['id']);
+		$user_data['id']
+	);
 	if(!$db->execute()){
 		error_log('Change password did not work: ' . $query);
 		$db->disconnect();
-		echo "Internal error, password could not be changed.<br>Please try again or contact us";
 		HttpHeader::setResponseCode(500);
+		echo "Internal error, password could not be changed. Please try again or contact us";
+		exit;
 	}
-	
-	HttpHeader::setResponseCode(200);
+
 	$db->disconnect();
-	return;	
+	return $response;	
   }
     
 ?>

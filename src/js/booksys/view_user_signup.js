@@ -134,6 +134,23 @@ class BooksysViewUserSignup {
             errors.push("Please accept our conditions. If you are not familiar with them, please contact one of the team members.");
         }
 
+        // password strength
+        let pwUpperRegex = /[A-Z]+/;
+        let pwLowerRegex = /[a-z]+/;
+        let pwDigitRegex = /[0-9]+/;
+        if(user.password.match(pwUpperRegex) == null){
+            errors.push("The password needs to contain at least one upper case letter (A-Z)");
+        }
+        if(user.password.match(pwLowerRegex) == null){
+            errors.push("The password needs to contain at least one lower case letter (a-z)");
+        }
+        if(user.password.match(pwDigitRegex) == null){
+            errors.push("The password needs to contain at least one digit (0-9)");
+        }
+        if(user.password.length < 10){
+            errors.push("The password needs to be at least 10 characters long");
+        }
+
         return errors;
     }
 

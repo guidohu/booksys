@@ -1,4 +1,10 @@
-<?php	
+<?php
+    /**
+     * The beacon API allows to know whether a client is connected or not and to
+	 * update the session of the user
+	 *  
+     */
+
 	// automatically load all classes
 	spl_autoload_register('beacon_autoloader');
 	function beacon_autoloader($class){
@@ -13,14 +19,12 @@
 	$lc = new Login($configuration);
 	if(!$lc->isLoggedIn()){
 		$status['ok'] = FALSE;
-		$status['redirect'] = '/index.html';
 		$status['msg'] = "you are not logged in";
-		echo json_encode($status);
-		exit;
+	} else {
+		$status['ok'] = TRUE;
+		$status['msg'] = "you are logged in";
 	}
 	
-	$status['ok'] = TRUE;
-	$status['msg'] = "you are logged in";
 	echo json_encode($status);
 	exit;
 

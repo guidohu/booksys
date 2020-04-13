@@ -26,6 +26,10 @@ class Configuration{
 	public $session_cancel_graceperiod;
 	public $recaptcha_publickey;
 	public $recaptcha_privatekey;
+	public $smtp_sender;
+	public $smtp_server;
+	public $smtp_username;
+	public $smtp_password;
 
 	// customization
 	public $currency;
@@ -75,8 +79,8 @@ class Configuration{
 
 		// set hard defaults
 		$this->login_page          = '/index.html';
-		$this->version             = "1.8.2";
-		$this->required_db_version = "1.8";
+		$this->version             = "1.9";
+		$this->required_db_version = "1.9";
 	}
 
 	// TODO: deprecate this function
@@ -212,6 +216,18 @@ class Configuration{
 				case 'payment.account.comment':
 					$this->payment_account_comment = $property['value'];
 					break;
+				case 'smtp.sender':
+					$this->smtp_sender = $property['value'];
+					break;
+				case 'smtp.server':
+					$this->smtp_server = $property['value'];
+					break;
+				case 'smtp.username':
+					$this->smtp_username = $property['value'];
+					break;
+				case 'smtp.password':
+					$this->smtp_password = $property['value'];
+					break;
 			}
 		}
 
@@ -241,19 +257,5 @@ class Configuration{
 			$this->currency = "CHF";
 		}
 	}
-
-// ("browser.session.timeout.default", "10800"),
-// DONE ("browser.session.timeout.max",     "604800"),
-// DONE ("location.longitude",              "8.542939"),
-// DONE ("location.latitude",               "47.367658"),
-// ("location.gmt_offset",             "1"),
-// DONE ("location.timezone",               "Europe/Berlin"),
-// DONE ("business.day.start",              "08:00:00"),
-// DONE ("business.day.end",                "21:00:00"),
-// ("business.day.startatsunrise",     "false"),
-// ("business.day.endatsunset",        "false"),
-// DONE ("session.cancel.graceperiod",      "86400");
-	
-
 }
 ?>

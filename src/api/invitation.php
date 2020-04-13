@@ -142,7 +142,7 @@
 	}
 	
 	// send an email notification to all the users that have invitation status 5
-	send_invitation_email($data->session_id, $session_data['user_id'], $db);
+	send_invitation_email($data->session_id, $session_data['user_id'], $db, $config);
 	
 	$db->disconnect();
 	HttpHeader::setResponseCode(200);
@@ -294,7 +294,7 @@
 		error_log('api/invitation: Cannot check for needed boat-full-messages for session, session not found: ' . $data->session_id);
 	}elseif($res[0]['free'] < 1){
 		// Inform users that their invitation is gone
-		send_session_full_email($data->session_id, $session_data['user_id'], $db);
+		send_session_full_email($data->session_id, $session_data['user_id'], $db, $config);
 		
 		// Set all the still existing invitations to 'boat-is-full'
 		$query = 'UPDATE invitation SET status = 1
@@ -312,7 +312,7 @@
   }
   
   // send notification to the users that they got invited to a session
-  function send_invitation_email($session_id, $my_user_id, $db){
+  function send_invitation_email($session_id, $my_user_id, $db, $config){
 	$query = 'SELECT u.first_name AS fn, u.last_name AS ln,
                      u.email AS email, 
                      s.date AS date, s.start AS start, s.end AS end,
@@ -343,7 +343,7 @@
         $message .= "        " . date("H:i", $start) . " to " . date("H:i", $end) . "\n";
         $message .= "\nPlease login to your account on www.wakeandsurf.ch and check your Schedule to accept or decline.\n";
         $message .= "\nSee you on the lake soon\n";
-        Email::sendMail($res[$i]['email'], 'Session Invitation', $message);
+        Email::sendMail($res[$i]['email'], 'Session Invitation', $message, $config);
 	}
 	
 	$query = 'UPDATE invitation 
@@ -360,7 +360,7 @@
   }
   
   // send 'session full' to the invitees
-  function send_session_full_email($session_id, $my_user_id, $db){
+  function send_session_full_email($session_id, $my_user_id, $db, $config){
 	$query = 'SELECT u.first_name AS fn, u.last_name AS ln,
                         u.email AS email, 
                         s.date AS date, s.start AS start, s.end AS end,
@@ -391,7 +391,7 @@
         $message .= " Date : " . date("D d.m.Y", $start) . "\n";
         $message .= "        " . date("H:i", $start) . " to " . date("H:i", $end) . "\n";
         $message .= "\nSee you on the lake soon\n";
-        Email::sendMail($res[$i]['email'], 'Session Invitation', $message);
+        Email::sendMail($res[$i]['email'], 'Session Invitation', $message, $config);
 	}
 	
 	$query = 'UPDATE invitation 
