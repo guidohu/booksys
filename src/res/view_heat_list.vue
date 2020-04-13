@@ -3,7 +3,7 @@
         <div class="panel-body">
             <div class="row text-left">
                 <div class="col-sm-12 col-xs-12 overflow-hidden">
-                    <table class="table table-striped table-hover table-black">
+                    <table class="table table-striped table-hover">
                         <thead>
                             <tr>
                                 <th>Name</th>

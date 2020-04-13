@@ -160,22 +160,9 @@ a{
 	color: #919191;
 }
 
-.table-black{
-	color: #555555;
-}
-
 /* sets a default padding to the right side */
-.padding-right {
-	padding-right: 15px;
-}
-
-/* Slider label spacing for Oil Check */
-.three-columns li {
-	width:calc(100%/3);
-}
-
-.eight-columns li {
-	width:calc(100%/7);
+.padding-right-16px {
+	padding-right: 16px;
 }
 
 .no-ui-slider .slider-labels {
@@ -193,7 +180,7 @@ a{
 .no-ui-slider .slider-labels li {
 	color: #d3d3d3;
 	display: inline;
-	float:left;
+	/* float: left; */
 	cursor: pointer;
     color: rgb(0,0,0);
 }
