@@ -4,7 +4,6 @@ class Email{
 	
 	public static function sendMail($to, $subject, $message, $configuration){
 		if(isset($to)){
-			$to = "ghungerbuehler@gmail.com"; # TODO remove
 			$command = "/usr/bin/sendemail";
 			$command .= " -f "  . escapeshellarg($configuration->smtp_sender);
 			$command .= " -t "  . escapeshellarg($to);
@@ -18,7 +17,7 @@ class Email{
 			$result = "";
 			$return_code = 0;
 
-			// execute command
+			// execute command to send an email
 			exec($command, $result, $return_code);
 
 			if($return_code != 0){
