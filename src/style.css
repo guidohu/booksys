@@ -221,3 +221,7 @@ a{
 .stop-watch-button {
 	height: 60px;
 }
+
+.fuel-chart {
+	height: 250px;
+}

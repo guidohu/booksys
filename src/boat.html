@@ -315,8 +315,10 @@
 
 				datasets.push(dataset);
 			}
+			
+			let ctx = document.getElementById("fuel_chart");
 
-			let myLineChart = new Chart('fuel_chart', {
+			let myLineChart = new Chart(ctx, {
 				type: 'scatter',
 				data: {
 					datasets: datasets
@@ -345,7 +347,8 @@
 							distribution: 'series'
 						}]
 					},
-					responsive: true
+					// responsive: true,
+                    maintainAspectRatio: false,
 				}
 			});
 		}
