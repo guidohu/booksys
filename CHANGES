@@ -1,4 +1,4 @@
-unreleased
+v1.9 2020.04.13
  - fix order in setting status code and output content to client
  - add httponly and samesite cookie settings
  - verify that session cookie is present before logging out a client
