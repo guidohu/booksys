@@ -1,7 +1,5 @@
 class BooksysPie {
 
-    static pie = null;
-
     // draws the pie chart
     // - location       where to draw the pie chart
     // - data           the data we got from the server (get_booking_day)
@@ -249,3 +247,5 @@ class BooksysPie {
         BooksysPie.pie.selectSector(id);
     }
 }
+
+BooksysPie.pie = null;
