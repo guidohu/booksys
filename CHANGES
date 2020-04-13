@@ -1,3 +1,6 @@
+unreleased
+ - remove highcharts dependency
+
 v1.9.1 2020.04.13
  - fix type in pie.js
 

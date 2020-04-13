@@ -38,5 +38,4 @@ Go to [http://localhost](http://localhost) assuming docker runs on your local ma
 
 - Customization of configuration parameters can only be done in the database directly (configuration table).
 - Not every site is available as mobile and desktop version yet.
-- Some third party components (such as highcharts.js) are using restricted licenses and thus the project cannot be used commercially currently.
 - The setup should also work with mariaDB but this has not been tested.
