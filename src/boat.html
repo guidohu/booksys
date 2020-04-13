@@ -304,18 +304,21 @@
 					dataset.hidden = false;
 				}
 
-				fuel_series[year].forEach(element => {
-					dataset.data.push(
-						{
-							x: moment(element[0], 'x'),
-							y: element[1]
-						}
-					);
-				});
+				// only add the last 3 years
+				if(counter > size-3){
+					fuel_series[year].forEach(element => {
+						dataset.data.push(
+							{
+								x: moment(element[0], 'x'),
+								y: element[1]
+							}
+						);
+					});
 
-				datasets.push(dataset);
+					datasets.push(dataset);
+				}
 			}
-			
+
 			let ctx = document.getElementById("fuel_chart");
 
 			let myLineChart = new Chart(ctx, {
