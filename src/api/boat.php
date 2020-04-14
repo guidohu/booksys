@@ -57,9 +57,6 @@
         case 'update_maintenance_log':
             update_maintenance_log($configuration);
             exit;
-        case 'get_oil_status':
-            get_oil_status($configuration);
-            exit;
     }
 
     HttpHeader::setResponseCode(400);
@@ -143,12 +140,6 @@
             HttpHeader::setResponseCode(500);
         }
         echo json_encode($res);
-    }
-
-    /* Returns the estimated oil status */
-    function get_oil_status($configuration){
-        echo 1;
-        // TODO
     }
 
     /* Returns the latest log_book entry, even if not complete yet */
