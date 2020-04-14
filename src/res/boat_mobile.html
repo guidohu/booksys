@@ -1,10 +1,3 @@
-<?php
-    // only admins see this
-    if($_SESSION['user_role_id'] != $config['admin']){
-        exit;
-    }
-?>
-
 <div class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="navbar-header">
         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
@@ -259,17 +252,6 @@
 								</select>
 							</div>
 						<div class="col-sm-1 col-xs-1"></div>
-					</div>
-					<div class="row form-group" style="display: none;">
-						<div class="col-sm-1 col-xs-1"></div>
-							<div class="col-sm-2 col-xs-2 text-left">
-								<label>Oil Level</label>
-							</div>
-							<div class="col-sm-8 col-xs-8 text-left">
-								<button type="button" class="btn btn-success btn-block" onclick="showOilDialog()">OK</button>
-							</div>
-						<div class="col-sm-1 col-xs-1"></div>
-						<hr>
 					</div>
 					<div class="row form-group">
 						<div class="col-sm-1 col-xs-1"></div>
