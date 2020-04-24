@@ -11,14 +11,24 @@ $(function() {
 
         $("#body").load("res/index_mobile.html", function(){
             $.stayInWebApp();
+            setupEventListeners();
             backendStatus();
         });
     } else {
         $("#body").load("res/index.html", function(){
             backendStatus();
+            setupEventListeners();
         });
     }
 });
+
+function setupEventListeners(){
+    // register custom submit action
+    document.getElementById("login_form").addEventListener("submit", function(event){
+        event.preventDefault();
+        login();
+    });
+}
 
 // Check backend status and abort or continue
 function backendStatus(){

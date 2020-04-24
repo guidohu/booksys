@@ -1,6 +1,8 @@
 <?php
     /**
-     * The API allows to check basic backend status and to perform actions on the backend such as a database
+     * The API allows to check basic backend status 
+     * and to perform actions on the backend such as 
+     * a database
      * update.
      * 
      */
