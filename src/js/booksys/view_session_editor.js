@@ -94,12 +94,6 @@ class BooksysViewSessionEditor {
     //                   title, 
     // - cb              used in case a new session is created / or an existing session got altered
     static loadView(location, session, sessionPresets, cb){
-        // console.log(location)
-        // console.log(session);
-        // console.log(sessionPresets);
-        // console.log("Session:");
-        // console.log(session);
-
         if(session == null){
             // this is a new session, use presets if any
             session             = new Object();
