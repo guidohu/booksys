@@ -65,7 +65,7 @@ class BooksysPie {
                 duration_offset = data.window_start - sessions[i].start;
             }
             if(sessions[i].end > data.window_end){
-                duration_offset = session[i].end - data.window_end;
+                duration_offset = sessions[i].end - data.window_end;
             }
 
             // get color for this slot
