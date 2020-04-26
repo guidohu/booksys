@@ -1,5 +1,10 @@
 unreleased
  - remove highcharts dependency
+ - fuel chart improvements
+ - add SMTP settings to setup from scratch
+ - separate javascript from HTML pages
+ - improve autocomplete for password managers
+ - add test for session start/end times
 
 v1.9.1 2020.04.13
  - fix type in pie.js
