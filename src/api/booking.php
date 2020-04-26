@@ -249,6 +249,13 @@
 			echo json_encode($error);
 			return;
 		}
+		if($data->start >= $data->end){
+			error_log('api/booking.php: Session start cannot be after end: ' . $data->start . ' to ' . $data->end);
+			HttpHeader::setResponseCode(400);
+			$error["error"] = 'Session start is after the end and that does not make sense.';
+			echo json_encode($error);
+			return;
+		}
 
 		// check validity of data
 		// check type of session

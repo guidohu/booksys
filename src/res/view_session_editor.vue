@@ -13,6 +13,18 @@
                 </h4>
             </div>
             <div class="modal-body">
+                <div v-if="errors.length" class="row">
+                    <div class="col-sm-1 col-xs-1"></div>
+                    <div class="col-sm-10 col-xs-10">
+                        <div class="alert alert-danger alert-dismissible" role="alert">
+                            <b>Please correct the following error(s):</b>
+                            <ul>
+                                <li v-for="error in errors">{{ error }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-sm-1 col-xs-1"></div>
+                </div>
                 <div class="row">
                 <form id="edit_session_form">
                     <div class="form-group">

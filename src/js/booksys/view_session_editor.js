@@ -94,12 +94,6 @@ class BooksysViewSessionEditor {
     //                   title, 
     // - cb              used in case a new session is created / or an existing session got altered
     static loadView(location, session, sessionPresets, cb){
-        // console.log(location)
-        // console.log(session);
-        // console.log(sessionPresets);
-        // console.log("Session:");
-        // console.log(session);
-
         if(session == null){
             // this is a new session, use presets if any
             session             = new Object();
@@ -127,10 +121,17 @@ class BooksysViewSessionEditor {
                 el: "#view_session_editor_modal",
                 data: {
                     "session": session,
+                    "errors" : [],
                 },
                 methods: {
                     save: function(event){
-                        BooksysViewSessionEditor.save(this.session, cb);
+                        let callbacks = {
+                            success: cb,
+                            failure: function(errs){
+                                App.errors = errs
+                            }
+                        };
+                        BooksysViewSessionEditor.save(this.session, callbacks);
                     },
                     cancel: function(){
                         BooksysViewSessionEditor.hideApp();
@@ -203,14 +204,14 @@ class BooksysViewSessionEditor {
                 data: JSON.stringify(req),
                 success: function(response){
                     var json = $.parseJSON(response);
-                    cb(json.session_id);
+                    cb.success(json.session_id);
                 },
                 error: function(xhr,status,error){
                     console.log(xhr);
                     console.log(status);
                     console.log(error);
                     var errorMsg = $.parseJSON(xhr.responseText);
-                    alert(errorMsg.error);
+                    cb.failure([errorMsg.error]);
                 },
             });
         }
