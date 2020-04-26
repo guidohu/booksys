@@ -121,10 +121,17 @@ class BooksysViewSessionEditor {
                 el: "#view_session_editor_modal",
                 data: {
                     "session": session,
+                    "errors" : [],
                 },
                 methods: {
                     save: function(event){
-                        BooksysViewSessionEditor.save(this.session, cb);
+                        let callbacks = {
+                            success: cb,
+                            failure: function(errs){
+                                App.errors = errs
+                            }
+                        };
+                        BooksysViewSessionEditor.save(this.session, callbacks);
                     },
                     cancel: function(){
                         BooksysViewSessionEditor.hideApp();
@@ -197,14 +204,14 @@ class BooksysViewSessionEditor {
                 data: JSON.stringify(req),
                 success: function(response){
                     var json = $.parseJSON(response);
-                    cb(json.session_id);
+                    cb.success(json.session_id);
                 },
                 error: function(xhr,status,error){
                     console.log(xhr);
                     console.log(status);
                     console.log(error);
                     var errorMsg = $.parseJSON(xhr.responseText);
-                    alert(errorMsg.error);
+                    cb.failure([errorMsg.error]);
                 },
             });
         }
