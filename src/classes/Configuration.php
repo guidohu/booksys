@@ -168,7 +168,7 @@ class Configuration{
 		// go through result
 		foreach($res as $property){
 			switch($property['name']){
-				case 'browser.session.timeout.max':
+				case 'browser.session.timeout.max': // TODO
 					$this->browser_session_timeout_max = (int) $property['value'];
 					break;
 				case 'location.timezone':
@@ -180,13 +180,13 @@ class Configuration{
 				case 'location.latitude':
 					$this->location_latitude = $property['value'];
 					break;
-				case 'business.day.start':
+				case 'business.day.start': // TODO
 					$this->business_day_start = $property['value'];
 					break;
-				case 'business.day.end':
+				case 'business.day.end': // TODO
 					$this->business_day_end = $property['value'];
 					break;
-				case 'session.cancel.graceperiod':
+				case 'session.cancel.graceperiod': // TODO
 					$this->session_cancel_graceperiod = $property['value'];
 					break;
 				case 'recaptcha.publickey':
@@ -219,7 +219,7 @@ class Configuration{
 				case 'smtp.sender':
 					$this->smtp_sender = $property['value'];
 					break;
-				case 'smtp.server':
+				case 'smtp.server': 
 					$this->smtp_server = $property['value'];
 					break;
 				case 'smtp.username':
