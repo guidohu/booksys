@@ -1,4 +1,4 @@
-unreleased
+v1.10 2020.04.27
  - remove highcharts dependency
  - fuel chart improvements
  - add SMTP settings to setup from scratch
