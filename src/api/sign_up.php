@@ -1,7 +1,6 @@
 <?php
 	// Function which handles signing up of a user
 	/// It adds a user to the database but sets him
-	// include_once '../config/config.php';
 	
 	// automatically load all classes
 	spl_autoload_register('sign_up_autoloader');

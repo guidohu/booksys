@@ -1,10 +1,3 @@
-<?php
-    // only admins see this
-    if($_SESSION['user_role_id'] != $config['admin']){
-        exit;
-    }
-?>
-
 <div class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="navbar-header">
         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
@@ -206,7 +199,7 @@
 				<div class="row">
 					<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
 						<div class="panel panel-default panel-border">
-							<div class="panel-heading panel-heading-small" role="tab" id="header_card_graph">
+							<div class="panel-heading" role="tab" id="header_card_graph">
 								<div class="panel-title" >
 									<div class="row">
 										<div class="col-sm-1 col-xs-1"></div>
@@ -218,10 +211,8 @@
 								</div>
 							</div>
 							<div class="panel-collapse collapse" id="fuel_graph_collapse" aria-labelledby="header_card_graph" data-parent="#accordion" role="tabpanel">
-								<div class="panel-body">
-									<div id="fuel_graph" class="text-center">
-									<!-- Fuel consumption -->
-									</div>
+								<div class="panel-body fuel-chart" id="fuel_chart_parent">
+									<canvas id="fuel_chart"></canvas>
 								</div>
 							</div>
 						</div>
@@ -261,17 +252,6 @@
 								</select>
 							</div>
 						<div class="col-sm-1 col-xs-1"></div>
-					</div>
-					<div class="row form-group" style="display: none;">
-						<div class="col-sm-1 col-xs-1"></div>
-							<div class="col-sm-2 col-xs-2 text-left">
-								<label>Oil Level</label>
-							</div>
-							<div class="col-sm-8 col-xs-8 text-left">
-								<button type="button" class="btn btn-success btn-block" onclick="showOilDialog()">OK</button>
-							</div>
-						<div class="col-sm-1 col-xs-1"></div>
-						<hr>
 					</div>
 					<div class="row form-group">
 						<div class="col-sm-1 col-xs-1"></div>
@@ -329,57 +309,3 @@
 
 <!-- Where we want to show the vue modals -->
 <div id="user_dialog_modal"></div>
-
-<!-- Show the oil-check modal -->
-<div class="modal fade text-left" id="oil_check_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<form id="oil_form">
-				<div class="modal-header">
-					<h4>
-						Oil Check
-					</h4>
-				</div>
-				<div class="modal-body">
-					<div class="row">
-						<div class="form-group">
-							<div class="col-sm-12 col-xs-12">
-								<label class="label-sm">Current Oil Level</label>
-								<div id="oil-slider" class="no-ui-slider">
-									<div class="slider" id="oil-slider-value"></div>
-									<ul class="slider-labels three-columns">
-									    <li>Empty</li>
-									    <li class="text-center">Add</li>
-									    <li class="text-right">Full</li>
-									</ul>
-								</div>
-							</div>
-						</div>
-						<div class="form-group">
-							<div class="col-sm-12 col-xs-12">
-								<label class="label-sm">Added Oil (ltr)</label>
-								<div id="add-oil-slider" class="no-ui-slider">
-									<div class="slider" id="add-oil-slider-value"></div>
-									<ul class="slider-labels eight-columns">
-									    <li>0</li>
-									    <li>0.2</li>
-									    <li>0.4</li>
-									    <li>0.6</li>
-									    <li>0.8</li>
-									    <li>1.0</li>
-									    <li>1.2</li>
-									    <li>1.4</li>
-									</ul>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" onclick="hideOilDialog();">CANCEL</button>					
-					<button type="button" class="btn btn-default" onclick="submitOilCheck();" id="oil_check_save" >SAVE</button>
-				</div>
-			</form>
-		</div>
-	</div>
-</div>

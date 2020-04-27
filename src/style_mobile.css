@@ -56,18 +56,9 @@ div .panel-group{
     margin-top: 20px;
 }
 
-div .panel-heading-small{
-    /* padding-t: 0px; */
-}
-
 div .panel-border{
     border-color: #a1a1a1;
 }
-
-
-/* OLD */
-
-
 
 div .text-big{
     font-size: 25px;

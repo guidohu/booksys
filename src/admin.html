@@ -12,35 +12,12 @@
 <script src="bootstrap/js/bootstrap.min.js"></script>
 <script src="js/jquery.stayInWebApp.min.js"></script>
 <script src="js/booksys/browser.js"></script>
+<script src="js/booksys/pages/admin.js"></script>
     
 </head>
 
 <body>
     <!-- content is dynamically loaded -->
-    <div id="body"></div>
-
-    <script >
-		// Check if mobile browser first,
-        // then continue with the page logic
-        $(function() { 
-            if(BooksysBrowser.isMobile()){
-                // Make it behave like an app
-                BooksysBrowser.setViewportMobile();
-                BooksysBrowser.setManifest();
-                BooksysBrowser.setMetaMobile();
-                // Add mobile style dynamically
-                BooksysBrowser.addMobileCSS();
-    
-                $("#body").load("res/admin_mobile.html");
-            } else {
-                $("#body").load("res/admin.html");
-			}
-        });
-
-        // Stay in the WebApp
-        $(function() {
-            $.stayInWebApp();
-        });
-    </script>   
+    <div id="body"></div> 
 </body>
 </html>

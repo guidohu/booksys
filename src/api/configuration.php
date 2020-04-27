@@ -206,6 +206,18 @@
         return;
     }
 
+    /**
+     * make_user_admin allows a user to become admin during the
+     * initial setup of the application. As soon as an admin user
+     * exits this function will not perform any action
+     *
+     * @param $configuration    configurtaion object
+     * @return response of the form
+     * {
+     *      ok      =>  TRUE|FALSE
+     *      message =>  "description message"
+     * }
+     */
     function make_user_admin($configuration){
         $data = json_decode(file_get_contents('php://input'));
 

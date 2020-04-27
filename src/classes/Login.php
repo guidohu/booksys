@@ -257,7 +257,7 @@ class Login{
 					'domain'  => '', 
 					'secure'  => FALSE,
 					'httponly' => TRUE,
-					'samesite'=> "strict"
+					'samesite'=> "lax"
 				]
 			);
 		} catch (Exception $e){
