@@ -73,15 +73,16 @@ class BooksysViewSettings {
                             return;
                         }
 
-                        // // setup db configuration and database
-                        // let saveCallback = {
-                        //     success: function(){
-                        //     },
-                        //     failure: function(sErrors){
-                        //         databaseSetupApp.errors = sErrors;
-                        //     }
-                        // };
-                        // BooksysViewSettings.saveEntry(this.user, saveCallback, captcha);
+                        // setup db configuration and database
+                        let saveCallback = {
+                            success: function(){
+                                cb.success();
+                            },
+                            failure: function(sErrors){
+                                databaseSetupApp.errors = sErrors;
+                            }
+                        };
+                        BooksysViewSettings.saveEntry(this.settings, saveCallback);
                     },
                     cancel: function(event){
                         BooksysViewSettings.hideApp();
@@ -177,60 +178,51 @@ class BooksysViewSettings {
     }
 
     // save the database configuration
-    static saveEntry(user, callbackFn, captcha){
-        // calculate password hash
-        let password = '';
-        try {
-			var hashInput  = user.password;
-			var hashObj    = new jsSHA(hashInput, "TEXT");
-			password       = hashObj.getHash("SHA-256","HEX");	
-		} catch(e) {
-			callbackFn.failure([ "Password could not be transformed to a Sha256 hash: " + e ]);
-			return;
-		};
+    static saveEntry(user, callbackFn){
+        callbackFn.success();
 
-        // construct user data
-        let drivingLicense  = false;
-        if(user.driving_license){
-            drivingLicense = true;
-        }
-        let userData = {
-            username:   user.email,
-            password:   password,
-            first_name: user.firstName,
-            last_name:  user.lastName,
-            address:    user.address,
-            mobile:     user.phone,
-            plz:        user.zipCode,
-            city:       user.city,
-            email:      user.email,
-            license:    drivingLicense,
-        };
-        if(captcha != null){
-            userData.recaptcha_token = captcha.getToken();
-        }
+        // // construct user data
+        // let drivingLicense  = false;
+        // if(user.driving_license){
+        //     drivingLicense = true;
+        // }
+        // let userData = {
+        //     username:   user.email,
+        //     password:   password,
+        //     first_name: user.firstName,
+        //     last_name:  user.lastName,
+        //     address:    user.address,
+        //     mobile:     user.phone,
+        //     plz:        user.zipCode,
+        //     city:       user.city,
+        //     email:      user.email,
+        //     license:    drivingLicense,
+        // };
+        // if(captcha != null){
+        //     userData.recaptcha_token = captcha.getToken();
+        // }
 
-        // sign-up user and make it admin
-        $.ajax({
-            type: "POST",
-            url: "api/sign_up.php?action=sign_up",
-            cache: false,
-            data: JSON.stringify(userData),
-            success: function(resp){
-                let data = $.parseJSON(resp);
-                console.log(data);
-                if(data.ok == true){
-                    console.log("User created");
-                    callbackFn.success();
-                }else{
-                    console.log("User not created");
-                    callbackFn.failure([ data.msg ]);
-                }    
-            },
-            error: function(resp){
-                console.log(resp);
-                callbackFn.failure("Cannot create user due to unknown error.");
-            }
-        });
+        // // sign-up user and make it admin
+        // $.ajax({
+        //     type: "POST",
+        //     url: "api/sign_up.php?action=sign_up",
+        //     cache: false,
+        //     data: JSON.stringify(userData),
+        //     success: function(resp){
+        //         let data = $.parseJSON(resp);
+        //         console.log(data);
+        //         if(data.ok == true){
+        //             console.log("User created");
+        //             callbackFn.success();
+        //         }else{
+        //             console.log("User not created");
+        //             callbackFn.failure([ data.msg ]);
+        //         }    
+        //     },
+        //     error: function(resp){
+        //         console.log(resp);
+        //         callbackFn.failure("Cannot create user due to unknown error.");
+        //     }
+        // });
     }
 }

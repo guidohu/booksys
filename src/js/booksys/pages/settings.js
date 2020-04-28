@@ -20,10 +20,10 @@ $(function() {
 function loadContent(){			
     // handle returning from the user setup
     let settingsCallback = {
-        // success: function(){
-        //     BooksysViewUserSignup.destroyView('sign_up_user');
-        //     window.location.href = "/index.html";
-        // },
+        success: function(){
+            BooksysViewSettings.destroyView('settings');
+            window.location.href = "/admin.html";
+        },
         cancel: function(){
             BooksysViewSettings.destroyView('settings');
             window.location.href = "/admin.html";

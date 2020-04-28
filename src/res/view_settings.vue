@@ -243,7 +243,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" v-on:click="cancel">
                             <span class="glyphicon glyphicon-remove"></span>
-                            Back
+                            Cancel
                         </button>
                         <button type="button" class="btn btn-default" v-on:click="save">
                             <span class="glyphicon glyphicon-check"></span>
