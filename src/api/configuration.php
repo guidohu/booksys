@@ -26,6 +26,10 @@
         case 'get_customization_parameters':
             get_customization_parameters($configuration);
             exit;
+        case 'get_configuration':
+            $response = get_configuration($configuration);
+            echo json_encode($response);
+            exit;
         case 'setup_db_config':
             setup_db_config($configuration);
             exit;
@@ -91,6 +95,45 @@
         $response['payment_account_comment'] = $configuration->payment_account_comment;
         echo json_encode($response);
         return;
+    }
+
+    function get_configuration($configuration){
+        $response = [
+            "ok" => TRUE,
+        ];
+        // either there is no config yet
+        // or the user is admin user
+        if(!_is_db_configured($configuration)){
+            $response["ok"] = FALSE;
+            $response["msg"] = "no db configuration found";
+            return $response;
+        }
+        
+        // only admins can retrieve configuration data
+        // returns with a HTTP 403
+        _is_admin_or_return($configuration);
+
+        $response = [
+            "ok"                        => TRUE,
+            "location_time_zone"        => $configuration->location_time_zone,
+            "location_longitude"        => $configuration->location_longitude,
+            "location_latitude"         => $configuration->location_latitude,
+            "location_map"              => $configuration->location_map,
+            "location_address"          => $configuration->location_address,
+            "currency"                  => $configuration->currency,
+            "payment_account_owner"     => $configuration->payment_account_owner,
+            "payment_account_iban"      => $configuration->payment_account_iban,
+            "payment_account_bic"       => $configuration->payment_account_bic,
+            "payment_account_comment"   => $configuration->payment_account_comment,
+            "smtp_sender"               => $configuration->smtp_sender,
+            "smtp_server"               => $configuration->smtp_server,
+            "smtp_username"             => $configuration->smtp_username,
+            "smtp_password"             => "hidden", // $configuration->smtp_password,
+            "recaptcha_publickey"       => $configuration->recaptcha_publickey,
+            "recaptcha_privatekey"      => $configuration->recaptcha_privatekey
+        ];
+
+        return $response;
     }
 
     function setup_db_config($configuration){

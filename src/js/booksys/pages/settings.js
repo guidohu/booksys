@@ -19,15 +19,15 @@ $(function() {
 
 function loadContent(){			
     // handle returning from the user setup
-    // let userSetupCallback = {
-    //     success: function(){
-    //         BooksysViewUserSignup.destroyView('sign_up_user');
-    //         window.location.href = "/index.html";
-    //     },
-    //     cancel: function(){
-    //         BooksysViewUserSignup.destroyView('sign_up_user');
-    //         window.location.href = "/index.html";
-    //     }
-    // };
-    BooksysViewSettings.display('settings', null);
+    let settingsCallback = {
+        // success: function(){
+        //     BooksysViewUserSignup.destroyView('sign_up_user');
+        //     window.location.href = "/index.html";
+        // },
+        cancel: function(){
+            BooksysViewSettings.destroyView('settings');
+            window.location.href = "/admin.html";
+        }
+    };
+    BooksysViewSettings.display('settings', settingsCallback);
 }

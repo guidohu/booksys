@@ -1,22 +1,4 @@
 <div id="view_settings_modal">
-    <div class="modal fade text-left" id="view_settings_created_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content" id="view_settings_signup_content">
-                <div class="modal-header">
-                    Sign Up Successful
-                </div>
-                <div class="modal-body" id="view_settings_dialog">
-                    Your account has been created successfully. We will activate it soon and let you know, when your account is ready for your first login.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" v-on:click="done">
-                        <span class="glyphicon glyphicon-ok"></span>
-                        Done
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
     <div class="modal fade text-left" id="view_settings_form_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content" id="view_settings_content">
@@ -26,15 +8,7 @@
                     </h4>
                 </div>
                 <form>
-                    <div class="modal-body" id="view_settings_dialog">               
-                        <div v-if="errors.length" class="row">
-                            <div class="alert alert-danger alert-dismissible" role="alert">
-                                <b>Please correct the following error(s):</b>
-                                <ul>
-                                    <li v-for="error in errors">{{ error }}</li>
-                                </ul>
-                            </div>
-                        </div>
+                    <div class="modal-body" id="view_settings_dialog">
                         <div>
                             <div class="alert alert-info">
                                 Timezone and location settings. Users will see the times in the timezone defined by these settings, also sunrise and sunset will be calculated based on these settings.
@@ -44,11 +18,11 @@
                                 <div class="col-sm-1 col-xs-1"></div>
                                 <div class="col-sm-3 col-xs-3">
                                     <div>
-                                        <label class="label-sm" for="">Timezone</label>
+                                        <label class="label-sm" for="">Timezone*</label>
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="user.email" type="text" class="form-control form-control-white input-sm" placeholder="Europe/Berlin"/>
+                                    <input v-model="settings.location_time_zone" type="text" class="form-control form-control-white input-sm" placeholder="Europe/Berlin"/>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
@@ -57,11 +31,11 @@
                                 <div class="col-sm-1 col-xs-1"></div>
                                 <div class="col-sm-3 col-xs-3">
                                     <div>
-                                        <label class="label-sm" for="">Longitude</label>
+                                        <label class="label-sm" for="">Longitude*</label>
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="user.email" type="text" class="form-control form-control-white input-sm" placeholder="8.542939"/>
+                                    <input v-model="settings.location_longitude" type="text" class="form-control form-control-white input-sm" placeholder="8.542939"/>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
@@ -70,11 +44,11 @@
                                 <div class="col-sm-1 col-xs-1"></div>
                                 <div class="col-sm-3 col-xs-3">
                                     <div>
-                                        <label class="label-sm" for="">Latitude</label>
+                                        <label class="label-sm" for="">Latitude*</label>
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="user.email" type="text" class="form-control form-control-white input-sm" placeholder="47.367658"/>
+                                    <input v-model="settings.location_latitude" type="text" class="form-control form-control-white input-sm" placeholder="47.367658"/>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
@@ -87,7 +61,7 @@
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="user.email" type="text" class="form-control form-control-white input-sm" placeholder=""/>
+                                    <input v-model="settings.location_map" type="text" class="form-control form-control-white input-sm" placeholder=""/>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
@@ -100,7 +74,7 @@
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="user.email" type="text" class="form-control form-control-white input-sm" placeholder="Street 1, 8000 Zurich"/>
+                                    <input v-model="settings.location_address" type="text" class="form-control form-control-white input-sm" placeholder="Street 1, 8000 Zurich"/>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
@@ -112,11 +86,11 @@
                                 <div class="col-sm-1 col-xs-1"></div>
                                 <div class="col-sm-3 col-xs-3">
                                     <div>
-                                        <label class="label-sm" for="">Currency</label>
+                                        <label class="label-sm" for="">Currency*</label>
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="user.email" type="text" class="form-control form-control-white input-sm" placeholder="CHF"/>
+                                    <input v-model="settings.currency" type="text" class="form-control form-control-white input-sm" placeholder="CHF"/>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
@@ -125,11 +99,11 @@
                                 <div class="col-sm-1 col-xs-1"></div>
                                 <div class="col-sm-3 col-xs-3">
                                     <div>
-                                        <label class="label-sm" for="">Payment Account Owner</label>
+                                        <label class="label-sm" for="">Account Owner</label>
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="user.email" type="text" class="form-control form-control-white input-sm" placeholder="John Doe"/>
+                                    <input v-model="settings.payment_account_owner" type="text" class="form-control form-control-white input-sm" placeholder="John Doe"/>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
@@ -142,7 +116,7 @@
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="user.email" type="text" class="form-control form-control-white input-sm" placeholder=""/>
+                                    <input v-model="settings.payment_account_iban" type="text" class="form-control form-control-white input-sm" placeholder=""/>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
@@ -151,11 +125,11 @@
                                 <div class="col-sm-1 col-xs-1"></div>
                                 <div class="col-sm-3 col-xs-3">
                                     <div>
-                                        <label class="label-sm" for="">BIC</label>
+                                        <label class="label-sm" for="">BIC/ SWIFT</label>
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="user.email" type="text" class="form-control form-control-white input-sm" placeholder=""/>
+                                    <input v-model="settings.payment_account_bic" type="text" class="form-control form-control-white input-sm" placeholder=""/>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
@@ -168,7 +142,7 @@
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="user.email" type="text" class="form-control form-control-white input-sm" placeholder="Please transfer the money via wire transfer and indicate your name in the payment reference"/>
+                                    <input v-model="settings.payment_account_comment" type="text" class="form-control form-control-white input-sm" placeholder="Please transfer the money via wire transfer and indicate your name in the payment reference"/>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
@@ -184,7 +158,7 @@
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="user.email" type="text" class="form-control form-control-white input-sm" placeholder="foo@bar.com"/>
+                                    <input v-model="settings.smtp_sender" type="text" class="form-control form-control-white input-sm" placeholder="foo@bar.com"/>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
@@ -197,7 +171,7 @@
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="user.email" type="text" class="form-control form-control-white input-sm" placeholder="smtp.myserver.com:589"/>
+                                    <input v-model="settings.smtp_server" type="text" class="form-control form-control-white input-sm" placeholder="smtp.myserver.com:589"/>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
@@ -210,7 +184,7 @@
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="user.email" type="text" class="form-control form-control-white input-sm" placeholder="foobar"/>
+                                    <input v-model="settings.smtp_username" type="text" class="form-control form-control-white input-sm" placeholder="foobar"/>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
@@ -223,7 +197,7 @@
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="user.email" type="text" class="form-control form-control-white input-sm" placeholder="mypassword"/>
+                                    <input v-model="settings.smtp_password" type="password" class="form-control form-control-white input-sm" placeholder="mypassword"/>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
@@ -239,7 +213,7 @@
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="user.email" type="text" class="form-control form-control-white input-sm" placeholder=""/>
+                                    <input v-model="settings.recaptcha_privatekey" type="text" class="form-control form-control-white input-sm" placeholder=""/>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>
@@ -252,9 +226,17 @@
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="user.email" type="text" class="form-control form-control-white input-sm" placeholder=""/>
+                                    <input v-model="settings.recaptcha_publickey" type="text" class="form-control form-control-white input-sm" placeholder=""/>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
+                            </div>
+                        </div>
+                        <div v-if="errors.length" class="padding-top-16px">
+                            <div class="alert alert-danger alert-dismissible" role="alert">
+                                <b>Please correct the following error(s):</b>
+                                <ul>
+                                    <li v-for="error in errors">{{ error }}</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
