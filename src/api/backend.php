@@ -195,10 +195,9 @@
 
         // get current schema version
         $db_schema_version = _get_database_version($configuration);
-        $backend_version   = $configuration->version;
 
         // get the update files
-        $update_files = _get_update_files($db_schema_version, $configuration->version);
+        $update_files = _get_update_files($db_schema_version, $configuration->required_db_version);
         
         $db = new DBAccess($configuration);
         if(!$db->connect()){
