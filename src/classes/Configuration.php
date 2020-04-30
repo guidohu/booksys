@@ -79,8 +79,8 @@ class Configuration{
 
 		// set hard defaults
 		$this->login_page          = '/index.html';
-		$this->version             = "1.11";
-		$this->required_db_version = "1.9";
+		$this->version             = "1.12";
+		$this->required_db_version = "1.12";
 	}
 
 	// TODO: deprecate this function

@@ -259,7 +259,5 @@ class DBAccess{
 
 		return $array;
 	}
-
-
 }
 ?>

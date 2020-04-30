@@ -50,7 +50,7 @@ class User{
 	}
 	
 	public function getUserById($id){
-		// sanitize cookie
+		// sanitize id
 		$sanitize = new Sanitizer();
 		if(!$sanitize->isInt($id)){
 			error_log('classes/User: No valid id provided');
@@ -66,9 +66,12 @@ class User{
 		
 		$query = 'SELECT u.id, u.username, u.first_name, u.last_name,
 						 u.address, u.city, u.plz, u.mobile, u.email,
-						 u.license, u.status, u.locked, u.comment
+						 u.license, u.status, u.locked, u.comment, 
+						 ur.id as user_role_id, ur.name as user_role_name
 					FROM user u
-					WHERE u.id = ?;';
+					JOIN user_status us ON us.id = u.status
+					JOIN user_role ur ON ur.id = us.user_role_id
+					WHERE u.id = ? AND u.deleted = 0;';
 		$db->prepare($query);
 		$db->bind_param('i', $id);
 		$db->execute();
@@ -82,6 +85,74 @@ class User{
 		
 		return $res[0];
 	}
+
+	public function getUserBalance($id){
+		// sanitize cookie
+		$sanitize = new Sanitizer();
+		if(!$sanitize->isInt($id)){
+			error_log('classes/User: No valid id provided');
+			return null;
+		}
+
+		// connect to the database
+		$db = new DBAccess($this->config);
+		if(!$db->connect()){
+			error_log('classes/User: Cannot connect to the database');
+			return null;
+		}
+		
+		// get heats
+		$query = 'SELECT SUM(cost_chf) as cost
+			FROM heat 
+			WHERE user_id = ?;';
+		$db->prepare($query);
+		$db->bind_param('i', $id);
+		$db->execute();
+		$res = $db->fetch_stmt_hash();
+		if(! isset($res) or $res === FALSE){
+			error_log('classes/User: Cannot retrieve user heats by id');
+			return null;
+		}
+		$heats = $res[0]['cost'];
+
+		// get payment refunds
+		$query = 'SELECT SUM(amount_chf) as cost
+			FROM expenditure 
+			WHERE user_id = ?
+			AND type_id = 4;';
+		$db->prepare($query);
+		$db->bind_param('i', $id);
+		$db->execute();
+		$res = $db->fetch_stmt_hash();
+		if(! isset($res) or $res === FALSE){
+			error_log('classes/User: Cannot retrieve user session payment refunds by id');
+			return null;
+		}
+		$refunds = $res[0]['cost'];
+
+		// get payments
+		$query = 'SELECT SUM(amount_chf) as payments
+			FROM payment 
+			WHERE user_id = ? 
+			AND type_id = 4;';
+		$db->prepare($query);
+		$db->bind_param('i', $id);
+		$db->execute();
+		$res = $db->fetch_stmt_hash();
+		if(! isset($res) or $res === FALSE){
+			error_log('classes/User: Cannot retrieve user payments by id');
+			return null;
+		}
+		$payments = $res[0]['payments'];
+
+		$db->disconnect();
+
+		// calculate the balance with a 2 digit precision
+		$total_balance = $payments - $refunds - $heats;
+		$total_balance = round($total_balance, 2);
+		
+		return $total_balance;
+	}
 	
 	// Returns true if the password is correct
 	public function isPasswordCorrect($password){
@@ -93,8 +164,8 @@ class User{
 		}
 		
 		$query = 'SELECT u.id, u.password, u.password_salt, u.password_hash
-				  FROM user u, browser_session bs 
-				  WHERE u.id = ?';
+			FROM user u, browser_session bs 
+			WHERE u.id = ? AND u.deleted = 0';
 		$db->prepare($query);
 		$db->bind_param('i', $this->user['id']);
 		$db->execute();
