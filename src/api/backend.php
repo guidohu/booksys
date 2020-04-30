@@ -345,10 +345,11 @@
         $version_a = array();
         $version_b = array();
         // in index 1 there will be the entire preg_match
-        preg_match('/^(\d)+\.(\d)+\.*(\d+)*$/', $a, $version_a);
-        preg_match('/^(\d)+\.(\d)+\.*(\d+)*$/', $b, $version_b);
+        preg_match('/^(\d+)\.(\d+)\.?(\d+)?$/', $a, $version_a);
+        preg_match('/^(\d+)\.(\d+)\.?(\d+)?$/', $b, $version_b);
 
         // go through every version segment
+        // start with 1 as 0 is reserveved for the entire match in the regex
         for ($i=1; $i<max(count($version_a), count($version_b)); $i++){
             if(isset($version_a[$i]) && isset($version_b[$i])){
                 if ($version_a[$i] < $version_b[$i]){

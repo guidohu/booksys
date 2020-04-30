@@ -70,10 +70,96 @@
     case 'delete_user_group':
         delete_user_group($configuration, $lc);
         exit;
+    case 'delete_user':
+        $response = delete_user($configuration, $lc);
+        echo json_encode($response);
+        exit;
   }
   
   HttpHeader::setResponseCode(400);
   return;
+
+  function delete_user($configuration, $lc){
+    // user needs to be admin
+    if(!$lc->isAdmin()){
+        HttpHeader::setResponseCode(403);
+        exit;
+    }
+
+    $data = json_decode(file_get_contents('php://input'));
+
+    $r = [
+        "ok" => TRUE,
+        "msg" => "user deleted"
+    ];
+
+    // sanitize
+    $sanitizer = new Sanitizer();
+    if(! isset($data->id) or !$sanitizer->isInt($data->id)){
+        $r['ok']  = FALSE;
+        $r['msg'] = "No valid user id given";
+        return $r;
+    }
+
+    // do not delete yourself
+    $current_user = $lc->getSessionData($configuration);
+    if($data->id == $current_user['user_id']){
+        $r['ok']  = FALSE;
+        $r['msg'] = "You cannot delete yourself";
+        return $r;
+    }
+
+    // the user that should be deleted cannot be admin
+    $userAPI = new User($configuration);
+    $user    = $userAPI->getUserById($data->id);
+    if($user['user_role_name'] == 'admin'){
+        $r['ok']  = FALSE;
+        $r['msg'] = "You cannot delete administrator users";
+        return $r;
+    }
+
+    // the user that should be deleted has to have a zero balance
+    $balance = $userAPI->getUserBalance($user['id']);
+    if($balance != 0){
+        $r['ok']  = FALSE;
+        $r['msg'] = "A user can only be deleted if its balance is 0, current balance is: " . $balance;
+        return $r;
+    }
+
+    // delete user
+    $db = new DBAccess($configuration);
+    if(!$db->connect()){
+        error_log('api/user: Cannot connect to the database');
+        HttpHeader::setResponseCode(500);
+        exit;
+    }
+    $query = "UPDATE user
+        SET deleted = 1,
+            comment = NULL,
+            locked  = 1,
+            license = 0,
+            email   = NULL,
+            mobile  = NULL,
+            plz     = NULL,
+            city    = NULL,
+            address = NULL,
+            last_name = 'user',
+            first_name = 'deleted',
+            password = NULL,
+            password_hash = NULL,
+            password_salt = NULL,
+            username = NULL
+        WHERE id = ?;";
+    $db->prepare($query);
+    $db->bind_param('i', $user['id']);
+    if(!$db->execute()){
+        $r['ok']  = FALSE;
+        $r['msg'] = "User could not be deleted.";
+        return $r;
+    }
+
+    return $r;
+  }
 
   function delete_user_group($configuration, $lc){
     // only admins are allowed to call this function
@@ -452,7 +538,7 @@
     $query = "SELECT id, username, first_name, last_name,   
 	                 address, city, plz, mobile, email,
 					 license, status, locked, comment 
-			  FROM user";
+			  FROM user WHERE deleted = 0";
 	$db->prepare($query);
 	$db->execute();
 	$res = $db->fetch_stmt_hash();
@@ -480,23 +566,30 @@
 	}
     
     # get cost info from heats
-    $query = "SELECT user_id as id, 
-                sum(cost_chf) as cost, 
-                sum(duration_s) as time
-              FROM heat GROUP BY user_id";
+    $query = "SELECT h.user_id as id, 
+            sum(h.cost_chf) as cost, 
+            sum(h.duration_s) as time
+        FROM heat h 
+        JOIN user u ON h.user_id = u.id 
+        WHERE u.deleted = 0 
+        GROUP BY h.user_id";
 	$db->prepare($query);
 	$db->execute();
 	$res = $db->fetch_stmt_hash();
 	foreach ($res as $row){
-		$id = $row['id'];
-		$ret[$id]['total_heat_cost'] = floatval($row['cost']);
-		$ret[$id]['total_heat_min'] = intval($row['time']/60);
+        $id = $row['id'];
+        $ret[$id]['total_heat_cost'] = floatval($row['cost']);
+        $ret[$id]['total_heat_min'] = intval($row['time']/60);
 	}
 	    
     # get payment info
-    $query = "SELECT user_id as id, 
-               sum(amount_chf) as pay
-              FROM payment WHERE type_id = 4 GROUP BY user_id";
+    $query = "SELECT p.user_id as id, 
+            sum(p.amount_chf) as pay
+        FROM payment p
+        JOIN user u ON u.id = p.user_id
+        WHERE p.type_id = 4 
+        AND u.deleted = 0
+        GROUP BY p.user_id";
 	$db->prepare($query);
 	$db->execute();
 	$res = $db->fetch_stmt_hash();
@@ -510,9 +603,13 @@
 	}
 	
 	# get payback info
-	$query = "SELECT user_id as id,
-	          sum(amount_chf) as payback
-			FROM expenditure WHERE type_id = 4 GROUP BY user_id";
+	$query = "SELECT e.user_id as id,
+            sum(e.amount_chf) as payback
+        FROM expenditure e
+        JOIN user u ON u.id = e.user_id
+        WHERE e.type_id = 4
+        AND u.deleted = 0 
+        GROUP BY e.user_id";
 	$db->prepare($query);
 	$db->execute();
 	$res = $db->fetch_stmt_hash();
@@ -521,8 +618,13 @@
 		if(!isset($ret[$id])){
 			error_log('lib_user: Packback to a user that does not exist: ' . $row['payback'] . ' ' . $configuration->currency . ' to user with ID: ' . $row['id']);
 			continue;
-		}
-		$ret[$id]['payment'] = $ret[$id]['payment'] - floatval($row['payback']);
+        }
+        error_log(print_r($row, TRUE));
+        if(isset($ret[$id]['total_payment'])){
+            $ret[$id]['total_payment'] = $ret[$id]['total_payment'] - floatval($row['payback']);
+        }else{
+            $ret[$id]['total_payment'] = floatval($row['payback']) * -1;
+        }
     }
     
     $response = array();
@@ -757,6 +859,7 @@
         first_name as first_name, 
         last_name as last_name 
         FROM user 
+        WHERE deleted = 0
         ORDER BY first_name, last_name;';
     $res = $db->fetch_data_hash($query);
     $db->disconnect();
@@ -786,6 +889,7 @@
         JOIN user_status us ON u.status = us.id
         JOIN user_role ur ON us.user_role_id = ur.id
         WHERE ur.name = "admin" 
+        AND u.deleted = 0
         ORDER BY u.first_name, u.last_name;';
     $res = $db->fetch_data_hash($query, 0);
     $db->disconnect();
@@ -820,6 +924,7 @@
         FROM user u
         JOIN user_to_session us ON u.id = us.user_id
         WHERE us.session_id = ? 
+        AND u.deleted = 0
         ORDER BY u.first_name, u.last_name;';
     $db->prepare($query);
     $db->bind_param('i', $data->session_id);

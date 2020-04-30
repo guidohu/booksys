@@ -445,7 +445,7 @@ class Login{
 	}
 
 	private function has_salted_password($username, $db){
-		$query = 'SELECT id, password, password_hash FROM user WHERE username = ? OR email = ?';
+		$query = 'SELECT id, password, password_hash FROM user WHERE (username = ? OR email = ?)';
 		$db->prepare($query);
 		$db->bind_param('ss',
 			$username,
@@ -571,7 +571,7 @@ class Login{
 			      FROM user u
 				  JOIN user_status us ON us.id = u.status
 				  JOIN user_role ur ON ur.id = us.user_role_id
-			      WHERE (username = ? OR email = ?)';
+				  WHERE (username = ? OR email = ?)';
 		$db->prepare($query);
 		$db->bind_param('ss',
 			$username,
