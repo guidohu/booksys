@@ -210,6 +210,10 @@ a{
 	padding-top: 16px;
 }
 
+.margin-top-16px {
+	margin-top: 16px;
+}
+
 .no-padding {
 	padding: 0px;
 }
