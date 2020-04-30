@@ -132,7 +132,7 @@
             "smtp_sender"               => $configuration->smtp_sender,
             "smtp_server"               => $configuration->smtp_server,
             "smtp_username"             => $configuration->smtp_username,
-            "smtp_password"             => "hidden", // $configuration->smtp_password,
+            "smtp_password"             => "hidden", // the proper value is hidden, $configuration->smtp_password,
             "recaptcha_publickey"       => $configuration->recaptcha_publickey,
             "recaptcha_privatekey"      => $configuration->recaptcha_privatekey
         ];

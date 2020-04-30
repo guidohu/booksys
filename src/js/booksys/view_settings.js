@@ -17,7 +17,6 @@ class BooksysViewSettings {
             url: "api/configuration.php?action=get_configuration",
             cache: false,
             success: function(data){
-                console.log(data);
                 let response = JSON.parse(data);
                 if(response.ok){
                     callback(response);
@@ -180,12 +179,10 @@ class BooksysViewSettings {
     // save the database configuration
     static saveEntry(settings, callbackFn){
         // get the URL from the iframe (if given as entire iframe)
-        console.log(settings);
         let mapUrl = [];
         if(settings.location_map != null && settings.location_map != ''){
             let mapUrlRegex = /https:\/\/www\.google\.com\/maps\/embed\?pb=[^"\s]+/;
             mapUrl = [...settings.location_map.match(mapUrlRegex)];
-            console.log(mapUrl);
             if(mapUrl.length != 1){
                 callbackFn.failure(["The Google Maps IFrame URL could not be recognized"]);
                 return;
@@ -208,10 +205,14 @@ class BooksysViewSettings {
             "smtp_sender"               : settings.smtp_sender,
             "smtp_server"               : settings.smtp_server,
             "smtp_username"             : settings.smtp_username,
-            "smtp_password"             : settings.smtp_password,
             "recaptcha_privatekey"      : settings.recaptcha_privatekey,
             "recaptcha_publickey"       : settings.recaptcha_publickey,
         };
+
+        // only submit password in case it is a new one (it is hidden by the API)
+        if(settings.smtp_password != "hidden"){
+            request["smtp_password"] = settings.smtp_password
+        }
 
         $.ajax({
             type: "POST",
