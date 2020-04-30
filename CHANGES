@@ -1,4 +1,4 @@
-unreleased
+v1.11 2020.04.30
  - settings (most of) can now be configured using the UI
  - add HTML escape functionality for settings derived from the database
  - fix iframe to work with CSP policy
