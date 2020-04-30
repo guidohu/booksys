@@ -71,7 +71,7 @@ class User{
 					FROM user u
 					JOIN user_status us ON us.id = u.status
 					JOIN user_role ur ON ur.id = us.user_role_id
-					WHERE u.id = ?;';
+					WHERE u.id = ? AND u.deleted = 0;';
 		$db->prepare($query);
 		$db->bind_param('i', $id);
 		$db->execute();
@@ -164,8 +164,8 @@ class User{
 		}
 		
 		$query = 'SELECT u.id, u.password, u.password_salt, u.password_hash
-				  FROM user u, browser_session bs 
-				  WHERE u.id = ?';
+			FROM user u, browser_session bs 
+			WHERE u.id = ? AND u.deleted = 0';
 		$db->prepare($query);
 		$db->bind_param('i', $this->user['id']);
 		$db->execute();
