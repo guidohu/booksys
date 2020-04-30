@@ -113,7 +113,6 @@
         return FALSE;
     }
     $res = $db->fetch_stmt_hash();
-    error_log(var_dump($res));
     if($res[0]['count'] > 0){
         HttpHeader::setResponseCode(400);
         echo "Cannot delete group, still in use";
