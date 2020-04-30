@@ -1,3 +1,7 @@
+unreleased
+ - add safe deletion of users
+ - fix balance calculation issue with session payment refunds
+
 v1.11 2020.04.30
  - settings (most of) can now be configured using the UI
  - add HTML escape functionality for settings derived from the database
