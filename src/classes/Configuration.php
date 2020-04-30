@@ -257,5 +257,77 @@ class Configuration{
 			$this->currency = "CHF";
 		}
 	}
+
+	public function set_configuration_property($key, $value){
+		$db = new DBAccess($this);
+        if(!$db->connect()){
+			error_log("Cannot connect to database");
+            return FALSE;
+        }
+		$db->prepare('REPLACE INTO configuration (property, value) VALUES (?, ?);');
+		
+		$db_key = '';
+		switch ($key) {
+			case 'location_time_zone':
+				$db_key = "location.timezone";
+				break;
+			case 'location_latitude':
+				$db_key = "location.latitude";
+				break;
+			case 'location_longitude':
+				$db_key = "location.longitude";
+				break;
+			case 'location_map':
+				$db_key = "location.map";
+				break;
+			case 'location_address':
+				$db_key = "location.address";
+				break;
+			case 'currency':
+				$db_key = "currency";
+				break;
+			case 'payment_account_owner':
+				$db_key = "payment.account.owner";
+				break;
+			case 'payment_account_iban':
+				$db_key = "payment.account.iban";
+				break;
+			case 'payment_account_bic':
+				$db_key = "payment.account.bic";
+				break;
+			case 'payment_account_comment':
+				$db_key = "payment.account.comment";
+				break;
+			case 'smtp_sender':
+				$db_key = "smtp.sender";
+				break;
+			case 'smtp_server':
+				$db_key = "smtp.server";
+				break;
+			case 'smtp_username':
+				$db_key = "smtp.username";
+				break;
+			case 'smtp_password':
+				$db_key = "smtp.password";
+				break;
+			case 'recaptcha_privatekey':
+				$db_key = "recaptcha.privatekey";
+				break;
+			case 'recaptcha_publickey':
+				$db_key = "recaptcha.publickey";
+				break;
+			default:
+				return FALSE;
+		}
+
+		$db->bind_param('ss',
+			$db_key,
+			$value
+		);
+		if(! $db->execute()){
+			return FALSE;
+		}
+		return TRUE;
+	}
 }
 ?>

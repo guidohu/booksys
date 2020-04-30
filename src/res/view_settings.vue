@@ -74,7 +74,7 @@
                                     </div>
                                 </div>
                                 <div class="cold-sm-7 col-xs-7">
-                                    <input v-model="settings.location_address" type="text" class="form-control form-control-white input-sm" placeholder="Street 1, 8000 Zurich"/>
+                                    <textarea v-model="settings.location_address" class="form-control form-control-white input-sm" rows="3"></textarea>
                                 </div>
                                 <div class="col-sm-1 col-xs-1"></div>
                             </div>

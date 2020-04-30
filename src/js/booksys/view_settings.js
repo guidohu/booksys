@@ -79,7 +79,7 @@ class BooksysViewSettings {
                                 cb.success();
                             },
                             failure: function(sErrors){
-                                databaseSetupApp.errors = sErrors;
+                                settingsApp.errors = sErrors;
                             }
                         };
                         BooksysViewSettings.saveEntry(this.settings, saveCallback);
@@ -114,7 +114,7 @@ class BooksysViewSettings {
         // lazy validation (proper validation done on backend)
 
         // timezone
-        let timezoneRegex = /\w\/\w/;
+        let timezoneRegex = /^[A-Za-z]+\/[A-Za-z]+$/;
         if(settings.location_time_zone.match(timezoneRegex) == null){
             errors.push("Please define a time zone with the timezone database name (e.g., Europe/Berlin)");
         }
@@ -178,51 +178,64 @@ class BooksysViewSettings {
     }
 
     // save the database configuration
-    static saveEntry(user, callbackFn){
-        callbackFn.success();
+    static saveEntry(settings, callbackFn){
+        // get the URL from the iframe (if given as entire iframe)
+        console.log(settings);
+        let mapUrl = [];
+        if(settings.location_map != null && settings.location_map != ''){
+            let mapUrlRegex = /https:\/\/www\.google\.com\/maps\/embed\?pb=[^"\s]+/;
+            mapUrl = [...settings.location_map.match(mapUrlRegex)];
+            console.log(mapUrl);
+            if(mapUrl.length != 1){
+                callbackFn.failure(["The Google Maps IFrame URL could not be recognized"]);
+                return;
+            }
+        }
+        
 
-        // // construct user data
-        // let drivingLicense  = false;
-        // if(user.driving_license){
-        //     drivingLicense = true;
-        // }
-        // let userData = {
-        //     username:   user.email,
-        //     password:   password,
-        //     first_name: user.firstName,
-        //     last_name:  user.lastName,
-        //     address:    user.address,
-        //     mobile:     user.phone,
-        //     plz:        user.zipCode,
-        //     city:       user.city,
-        //     email:      user.email,
-        //     license:    drivingLicense,
-        // };
-        // if(captcha != null){
-        //     userData.recaptcha_token = captcha.getToken();
-        // }
+        // build the data object
+        let request = {
+            "location_time_zone"        : settings.location_time_zone,
+            "location_longitude"        : settings.location_longitude,
+            "location_latitude"         : settings.location_latitude,
+            "location_map"              : mapUrl[0],
+            "location_address"          : settings.location_address,
+            "currency"                  : settings.currency,
+            "payment_account_owner"     : settings.payment_account_owner,
+            "payment_account_iban"      : settings.payment_account_iban,
+            "payment_account_bic"       : settings.payment_account_bic,
+            "payment_account_comment"   : settings.payment_account_comment,
+            "smtp_sender"               : settings.smtp_sender,
+            "smtp_server"               : settings.smtp_server,
+            "smtp_username"             : settings.smtp_username,
+            "smtp_password"             : settings.smtp_password,
+            "recaptcha_privatekey"      : settings.recaptcha_privatekey,
+            "recaptcha_publickey"       : settings.recaptcha_publickey,
+        };
 
-        // // sign-up user and make it admin
-        // $.ajax({
-        //     type: "POST",
-        //     url: "api/sign_up.php?action=sign_up",
-        //     cache: false,
-        //     data: JSON.stringify(userData),
-        //     success: function(resp){
-        //         let data = $.parseJSON(resp);
-        //         console.log(data);
-        //         if(data.ok == true){
-        //             console.log("User created");
-        //             callbackFn.success();
-        //         }else{
-        //             console.log("User not created");
-        //             callbackFn.failure([ data.msg ]);
-        //         }    
-        //     },
-        //     error: function(resp){
-        //         console.log(resp);
-        //         callbackFn.failure("Cannot create user due to unknown error.");
-        //     }
-        // });
+        $.ajax({
+            type: "POST",
+            url: "/api/configuration.php?action=set_configuration",
+            cache: false,
+            data: JSON.stringify(request),
+            success: function(resp){
+                let r = JSON.parse(resp);
+                if(r.ok){
+                    callbackFn.success();
+                }else{
+                    if(r.errors.length > 0){
+                        callbackFn.failure(r.errors);
+                    }else{
+                        callbackFn.failure(r.msg);
+                    }
+                }
+            },
+            error: function(xhr, textStatus, error){
+                console.error(xhr);
+                console.error(textStatus);
+                console.error(error);
+                callbackFn.failure([error]);
+            }
+        });
     }
 }

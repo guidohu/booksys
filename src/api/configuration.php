@@ -30,6 +30,10 @@
             $response = get_configuration($configuration);
             echo json_encode($response);
             exit;
+        case 'set_configuration':
+            $response = set_configuration($configuration);
+            echo json_encode($response);
+            exit;
         case 'setup_db_config':
             setup_db_config($configuration);
             exit;
@@ -132,6 +136,93 @@
             "recaptcha_publickey"       => $configuration->recaptcha_publickey,
             "recaptcha_privatekey"      => $configuration->recaptcha_privatekey
         ];
+
+        return $response;
+    }
+
+    function set_configuration($configuration){
+        $response = [
+            "ok" => TRUE,
+            "msg" => "configuration updated",
+            "errors" => [],
+        ];
+
+        $data = json_decode(file_get_contents('php://input'));
+
+        // sanitize input
+        $sanitizer = new Sanitizer();
+        if(!isset($data->location_time_zone) || !$sanitizer->isTimeZone($data->location_time_zone)){
+            return _get_status(FALSE, "The provided timezone is missing or not in a valid format (valid e.g., Europe/Berlin)");
+        }
+        if(!isset($data->location_longitude) || !$sanitizer->isLongitude($data->location_longitude)){
+            return _get_status(FALSE, "The provided longitude is missing or not in a valid format.");
+        }
+        if(!isset($data->location_latitude) || !$sanitizer->isLatitude($data->location_latitude)){
+            return _get_status(FALSE, "The provided latitude is missing or not in a valid format.");
+        }
+        if(isset($data->location_map) && !$sanitizer->isGoogleMapsURL($data->location_map)){
+            return _get_status(FALSE, "The provided google maps embedded URL is not in a valid format.");
+        }        
+        if(!isset($data->currency) || !$sanitizer->isCurrency($data->currency)){
+            return _get_status(FALSE, "The provided currency is not in a valid format.");
+        }
+        if(isset($data->payment_account_iban) && !$sanitizer->isIBAN($data->payment_account_iban)){
+            return _get_status(FALSE, "The provided IBAN is not in a valid format.");
+        }
+        if(isset($data->payment_account_bic) && !$sanitizer->isBIC($data->payment_account_bic)){
+            return _get_status(FALSE, "The provided BIC/SWIFT code is not in a valid format.");
+        }
+        if(isset($data->smtp_sender) && !$sanitizer->isEmail($data->smtp_sender)){
+            return _get_status(FALSE, "The provided sender email address is not in a valid format.");
+        }
+        if(isset($data->smtp_server) && !$sanitizer->isServerAddress($data->smtp_server)){
+            return _get_status(FALSE, "The provided SMTP server address is not in a valid format. (e.g., smtp.gmail.com:587");
+        }
+        if(isset($data->recaptcha_privatekey) && !$sanitizer->isAlphaNum($data->recaptcha_privatekey)){
+            return _get_status(FALSE, "The provided recaptcha private key is not in a valid format.");
+        }
+        if(isset($data->recaptcha_publickey) && !$sanitizer->isAlphaNum($data->recaptcha_publickey)){
+            return _get_status(FALSE, "The provided recaptcha public key is not in a valid format.");
+        }
+        // no sanitization for location address
+        //                     payment account owner
+        //                     payment account comment
+        //                     smtp_username
+        //                     smtp_password
+        // parameters will be stored as text and will be escaped where used
+
+        // update database
+        $keys = array(
+            'location_time_zone',
+            'location_longitude',
+            'location_latitude',
+            'location_map',
+            'location_address',
+            'currency',
+            'payment_account_owner',
+            'payment_account_iban',
+            'payment_account_bic',
+            'payment_account_comment',
+            'smtp_sender',
+            'smtp_server',
+            'smtp_username',
+            'smtp_password',
+            'recaptcha_privatekey',
+            'recaptcha_publickey'
+        );
+        foreach ($keys as $key) {
+            // if the key is not defined, we do not store anything
+            if(!isset($data->$key)){
+                continue;
+            }
+
+            if(! $configuration->set_configuration_property($key, $data->$key)){
+                error_log("Cannot update property $key with value " . $data->$key);
+                $response["ok"] = FALSE;
+                $response["msg"] = "Errors with some of the properties";
+                array_push($response["errors"], "Cannot update property $key with value " . $data->$key);
+            }
+        }
 
         return $response;
     }
@@ -335,7 +426,14 @@
 		$status['msg'] = $msg;
 		echo json_encode($status);
 		return;
-	}
+    }
+    
+    function _get_status($ok, $msg){
+		$status = array();
+		$status['ok'] = $ok;
+		$status['msg'] = $msg;
+        return $status;
+    }
     
     function _is_db_configured($configuration){
         // get the configuration if it exists
