@@ -151,25 +151,25 @@ function getPaymentInfo(){
 
             // add the owner
             if(json.payment_account_owner != null){
-                $('#payment_account_owner').html(json.payment_account_owner);
+                $('#payment_account_owner').html(escapeHTML(json.payment_account_owner));
             }else{
                 $('#payment_account_owner').html("not available");
             }
             // add the owner
             if(json.payment_account_iban != null){
-                $('#payment_account_iban').html(json.payment_account_iban);
+                $('#payment_account_iban').html(escapeHTML(json.payment_account_iban));
             }else{
                 $('#payment_account_iban').html("not available");
             }
             // add the owner
             if(json.payment_account_bic != null){
-                $('#payment_account_bic').html(json.payment_account_bic);
+                $('#payment_account_bic').html(escapeHTML(json.payment_account_bic));
             }else{
                 $('#payment_account_bic').html("not available");
             }
             // add the owner
             if(json.payment_account_comment != null){
-                $('#payment_account_comment').html(json.payment_account_comment);
+                $('#payment_account_comment').html(escapeHTML(json.payment_account_comment));
             }else{
                 $('#payment_account_comment').html("not available");
             }
@@ -442,4 +442,8 @@ function calcHash(id) {
         alert("Password could not be sent encrypted: " + e);
         return;
     }
+}
+
+function escapeHTML(text) {
+    return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }

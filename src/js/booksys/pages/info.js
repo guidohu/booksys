@@ -36,15 +36,21 @@ function displayLocationMap(){
 
             // add the address
             if(json.location_address != null){
-                $('#location-address').html(json.location_address);
+                let address = escapeHTML(json.location_address);
+                // replace \n with </br>
+                console.log(address);
+                address = address.replace(/\n/g, '<br>');
+                $('#location-address').html(address);
             }else{
-                $('#location-address').html("< no address provided for display >");
+                $('#location-address').html("< no address provided by the site owner >");
             }
 
-            // create the map
+            // create the map in the iframe
             if(json.location_map_iframe != null){
-                $('#location-map').html(json.location_map_iframe);
-                let iframe = document.getElementById("location-map").firstElementChild;
+                let iframe = document.createElement("iframe");
+                iframe.setAttribute("src", json.location_map_iframe);
+                iframe.setAttribute("frameborder", 0);
+                iframe.setAttribute("style", "border:0;");
                 if(BooksysBrowser.isMobile()){
                     iframe.setAttribute("width", "340");
                     iframe.setAttribute("height", "350");
@@ -52,6 +58,7 @@ function displayLocationMap(){
                     iframe.setAttribute("width", "600");
                     iframe.setAttribute("height", "300");
                 }
+                document.getElementById("location-map").appendChild(iframe);
             }else{
                 $('#location-map').html("< no map available >");
             }
@@ -66,4 +73,8 @@ function displayLocationMap(){
             $('#location-map').html("< Location cannot be displayed on a map ></br>You might need to login first.");
         }
     });
+}
+
+function escapeHTML(text) {
+    return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }

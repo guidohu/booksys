@@ -1,3 +1,9 @@
+v1.11 2020.04.30
+ - settings (most of) can now be configured using the UI
+ - add HTML escape functionality for settings derived from the database
+ - fix iframe to work with CSP policy
+ - fix database update functionality
+
 v1.10 2020.04.27
  - remove highcharts dependency
  - fuel chart improvements
