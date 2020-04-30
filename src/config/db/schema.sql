@@ -285,6 +285,7 @@ CREATE TABLE `user` (
   `status` int(11) DEFAULT '0',
   `locked` tinyint(1) DEFAULT '1',
   `comment` text CHARACTER SET utf8,
+  `deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 

@@ -132,7 +132,7 @@ function updateUsers(data){
 
     // The users table
     if(userTable != null){
-        userTable.fnDestroy();
+        userTable.destroy();
     }
 
     userTable = $('#user_table').DataTable({
@@ -168,7 +168,23 @@ function updateUsers(data){
         "retrieve": true,
         "scrollY": "350px",
     });
+    userTable.on('select', updateUserNavigation);
+    userTable.on('deselect', updateUserNavigation);
+}
 
+function updateUserNavigation(){
+    let selected = getSelectedUserTableRow();
+    if(Object.keys(selected).length < 1){
+        $("#btnViewUser").attr("disabled", "disabled");
+        $("#btnDeleteUser").attr("disabled", "disabled");
+        document.getElementById("btnViewUser").removeEventListener("click", viewUser);
+        document.getElementById("btnDeleteUser").removeEventListener("click", deleteUser);
+    }else{
+        $("#btnViewUser").removeAttr("disabled");
+        $("#btnDeleteUser").removeAttr("disabled");
+        document.getElementById("btnViewUser").addEventListener("click", viewUser);
+        document.getElementById("btnDeleteUser").addEventListener("click", deleteUser);
+    }
 }
 
 // licenseRender renders the 1|0 boolean into icons
@@ -253,6 +269,60 @@ function unlockUser(row_index){
         },
         complete: hideStatusModal,
     });
+}
+
+function viewUser(event){
+    let user = getSelectedUserTableRow();
+    console.log(event);
+    alert("Not implemented to display user" + user.id);
+}
+
+function deleteUser(event){
+    let user = getSelectedUserTableRow();
+    let r = confirm("Do you really want to delete user '"+user.first_name +" "+user.last_name+"'? This cannot be undone.");
+    if(r==true){
+        $.ajax({
+            type: "POST",
+            url:  "/api/user.php?action=delete_user",
+            cache: false,
+            data: JSON.stringify(user),
+            success: function(resp){
+                let r = JSON.parse(resp);
+                if(r.ok){
+                    getUsers();
+                }else{
+                    alert(r.msg);
+                }
+            },
+            error: function(xhr, error, text){
+                console.log(xhr);
+                console.log(error);
+                console.log(text);
+            }
+        });
+    }else{
+        return;
+    }
+}
+
+function getSelectedUserTableRow(){
+    let data = {};
+    let table = $('#user_table').DataTable();
+    if(table.rows({ selected: true})){
+        let rowData = table.rows({ selected: true}).data();
+        if(rowData.length == 1){
+            data['id']         = rowData[0][0];
+            data['first_name'] = rowData[0][1];
+            data['last_name']  = rowData[0][2];
+            data['mobile']     = rowData[0][3];
+            data['email']      = rowData[0][4];
+            data['license']    = rowData[0][5];
+            data['balance']    = rowData[0][6];
+            data['user_group'] = rowData[0][7];
+            data['locked']     = rowData[0][8];
+        }
+    }
+    return data;
 }
 
 // Update the status of a user
