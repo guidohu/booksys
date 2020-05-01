@@ -108,7 +108,6 @@ function login(){
     let data = new Object();
     data['username']  = userInput;
     data['password']  = hashPwd;
-    data['remember']  = 1;
 
     // check that a username and password was specified
     if(userInput == "" || passwordInput == ""){

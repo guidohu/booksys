@@ -66,17 +66,11 @@
 		error_log('No valid password provided for user: "' . $post_data->username . '"');
 		echo 'No valid password given';
 		return;
-	}
-	if(!isset($post_data->remember) or !$sanitizer->isBoolean($post_data->remember)){
-		HttpHeader::setResponseCode(400);
-		error_log('No remember flag given for: ' . $post_data->username);
-		echo 'Are you kidding?';
-		return;
-	}  
+	} 
 	
 	// input is valid and we can try to login
 	$login  = new Login($configuration);
-	$result = $login->login($post_data->username, $post_data->password, $post_data->remember, $configuration);
+	$result = $login->login($post_data->username, $post_data->password, $configuration);
 	$response = array();
 	switch ($result){
 		case -1:
