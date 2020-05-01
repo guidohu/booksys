@@ -241,10 +241,10 @@ function updateAccount(info){
 function updateStatistics(info){
     $("#statistic_time").html(
         "Riding Time: " + info.heat_time_min_ytd + " min</br>(Total: " + info.heat_time_min + " min)"
-        + "</br>Riding Cost: " + info.heat_cost_ytd + " " + info.currency + "</br>(Total: " + info.heat_cost + " " + info.currency + ")"
+        + "</br>Riding Cost: " + sprintf('%.2f', info.heat_cost_ytd) + " " + info.currency + "</br>(Total: " + sprintf('%.2f', info.heat_cost) + " " + info.currency + ")"
     );
                             
-    $("#balance_current").html("Your Balance: " + info.balance_current + " " + info.currency);
+    $("#balance_current").html("Your Balance: " + sprintf('%.2f', info.balance_current) + " " + info.currency);
     
     var content = '';
     
