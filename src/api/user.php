@@ -655,7 +655,7 @@
     $sum = $db->fetch_stmt_hash();
     if(count($sum)>0){
         $res['heat_time_min'] = (int) ($sum[0]['time'] / 60);
-        $res['heat_cost'] = (int) $sum[0]['cost'];
+        $res['heat_cost'] = round(floatval($sum[0]['cost']), 2);
     }
 
     // get the total minutes and costs (YTD)
@@ -669,7 +669,7 @@
     $sum = $db->fetch_stmt_hash();
     if(count($sum)>0){
         $res['heat_time_min_ytd'] = (int) ($sum[0]['time'] / 60);
-        $res['heat_cost_ytd'] = (int) $sum[0]['cost'];
+        $res['heat_cost_ytd'] = round(floatval($sum[0]['cost']), 2);
     }
     
     // get the actual balance of the user
@@ -681,8 +681,8 @@
     $db->execute();
     $payment = $db->fetch_stmt_hash();
     if(count($payment)>0){
-        $res['payment_total'] = $payment[0]['total'];
-        $res['balance_current'] = $payment[0]['total'] - $res['heat_cost'];
+        $res['payment_total']   = round(floatval($payment[0]['total']), 2);
+        $res['balance_current'] = $res['payment_total'] - $res['heat_cost'];
     }
     
     // deduct the payback from the user's balance_current
@@ -694,8 +694,8 @@
     $db->execute();
     $payback = $db->fetch_stmt_hash();
     if(count($payback)>0){
-        $res['payback_total']   = $payback[0]['payback'];
-        $res['balance_current'] = $res['balance_current'] - $payback[0]['payback'];
+        $res['payback_total']   = round(floatval($payback[0]['payback']), 2);
+        $res['balance_current'] = $res['balance_current'] - $res['payback_total'];
     }
     
     // Get the user's last heats
@@ -715,6 +715,7 @@
     }
 
     $res['currency'] = $configuration->currency;
+    $res['balance_current'] = round($res['balance_current'], 2);
     
     echo json_encode($res);    
   }
