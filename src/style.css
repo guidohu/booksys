@@ -111,7 +111,7 @@ footer{
 header.welcome{
 	position: relative;
 	font-size: 14px;
-	color: #bbbbbb;
+	color: #dddddd;
 	text-align: right;
 	padding: 10px;
 	z-index: 2;
@@ -157,7 +157,7 @@ a:hover, a:focus{
 }
 
 a{
-	color: #919191;
+	color: #bdbdbd;
 }
 
 /* sets a default padding to the right side */
