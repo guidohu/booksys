@@ -1,3 +1,7 @@
+unreleased
+ - remove remember functionality for logins
+ - remove non salted password login (some users might need to set a new password)
+
 v1.12 2020.04.30
  - add safe deletion of users
  - fix balance calculation issue with session payment refunds

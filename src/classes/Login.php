@@ -19,7 +19,6 @@ class SessionInfo {
 	public $first_name;
 	public $last_name;
 	public $last_activity;
-	public $remember;
 	public $valid_thru;
 	public $session_secret;
 	public $user_role_id;
@@ -39,7 +38,6 @@ class SessionInfo {
 		$string_representation['first_name']     = $this->first_name;
 		$string_representation['last_name']      = $this->last_name;
 		$string_representation['last_activity']  = $this->last_activity;
-		$string_representation['remember']       = $this->remember;
 		$string_representation['valid_thru']     = $this->valid_thru;
 		$string_representation['session_secret'] = $this->session_secret;
 		$string_representation['user_role_id']   = $this->user_role_id;
@@ -50,16 +48,15 @@ class SessionInfo {
 
 	public function insert_session(){
 		$query = 'INSERT INTO browser_session
-						  (session_secret, valid_thru, last_activity, remember,
-						   user_id, username, first_name, last_name, user_status, user_role_id, session_data)
+						  (session_secret, valid_thru, last_activity, 
+						  user_id, username, first_name, last_name, user_status, user_role_id, session_data)
 						  VALUES
-						  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);';
+						  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);';
 		$this->dbh->prepare($query);
-		$this->dbh->bind_param('sssssssssis',
+		$this->dbh->bind_param('ssssssssis',
 			$this->session_secret,
 			date('Y-m-d H:i:s', $this->valid_thru),
 			date('Y-m-d H:i:s', $this->last_activity),
-			(int) $this->remember,
 			$this->user_id,
 			$this->username,
 			$this->first_name,
@@ -135,7 +132,6 @@ class Login{
 	// Login with username and password
 	// - username	either the username or the email
 	// - password   the password hash
-	// - remember   true for the maximum session timeout, false for default session timeout
 	// - config     the configuration object
 	//
 	// exits with Code 500 in case of an error or returns
@@ -144,7 +140,7 @@ class Login{
 	// -1: wrong username/password
 	// -2: user is locked
 	//  1: in case the login was successful and the session is stored in the database
-	public function login($username, $password, $remember, $configuration){
+	public function login($username, $password, $configuration){
 		$password_salt = 0;
 
 		// DB connection
@@ -155,9 +151,9 @@ class Login{
 			exit;
 		}
 
-		// get salt of this user (or create one if the user has none)
+		// get salt of this user
 		$query = 'SELECT id AS user_id, 
-			password_salt AS password_salt
+				password_salt AS password_salt
 			FROM user
 			WHERE (username = ? OR email = ?)';
 		$db->prepare($query);
@@ -182,42 +178,24 @@ class Login{
 				// check whether this user has a salt already
 				$password_salt = $res[0]['password_salt'];
 				if(! isset($password_salt)){
-					$password_salt = self::generate_password_salt($username, $db);
+					error_log('classes/Login.php: Wrong username/password (user salt not found): ' . $username . '/' . $password);
+					return -1;
 				}
 			}
 		}
 
-		// check if the user can login with salted password
-		//  -> yes: use new flow
-		//  -> no : use old flow
-		if(self::has_salted_password($username, $db)){
-			try {
-				$login_status = self::verify_password_hash($username, $password, $password_salt, $db);
-				if($login_status == LoginStatus::WrongPassword){
-					return -1;
-				}elseif($login_status == LoginStatus::Locked){
-					return -2;
-				}
-			} catch (Exception $e){
-				HttpHeader::setResponseCode(500);
-				$db->disconnect();
-				error_log('classes/Login.php: Cannot login, error: ' . $e->getMessage());
+		try {
+			$login_status = self::verify_password_hash($username, $password, $password_salt, $db);
+			if($login_status == LoginStatus::WrongPassword){
+				return -1;
+			}elseif($login_status == LoginStatus::Locked){
+				return -2;
 			}
-		}else{
-			try {
-				$login_status = self::verify_password($username, $password, $password_salt, $db);
-				if($login_status == LoginStatus::WrongPassword){
-					error_log("Wrong password for user $username");
-					return -1;
-				}elseif($login_status == LoginStatus::Locked){
-					error_log("User locked for user $username");
-					return -2;
-				}
-			} catch (Exception $e){
-				HttpHeader::setResponseCode(500);
-				$db->disconnect();
-				error_log('classes/Login.php: Cannot login, error: ' . $e->getMessage());
-			}
+		} catch (Exception $e){
+			HttpHeader::setResponseCode(500);
+			$db->disconnect();
+			error_log('classes/Login.php: Cannot login, error: ' . $e->getMessage());
+			return -1;
 		}
 
 		// update session information
@@ -234,13 +212,7 @@ class Login{
 			$session_info->user_role_id   = $user_info['user_role_id'];
 			$session_info->user_role_name = $user_info['user_role_name'];
 			$session_info->last_activity  = time();
-			if($remember){
-				$session_info->remember   = TRUE;
-				$session_info->valid_thru = time() + $configuration->browser_session_timeout_max;
-			}else{
-				$session_info->remember   = FALSE;
-				$session_info->valid_thru = time() + $configuration->browser_session_timeout_max;
-			}
+			$session_info->valid_thru = time() + $configuration->browser_session_timeout_max;
 			$session_info->session_secret = self::get_session_secret();
 
 			// insert new session information to database
@@ -287,8 +259,8 @@ class Login{
 			exit;
 		}
 		$query = 'UPDATE browser_session SET
-						  valid_thru = ?
-		                  WHERE session_secret = ?;';
+			valid_thru = ?
+			WHERE session_secret = ?;';
 		$db->prepare($query);
 		$db->bind_param('ss', date("Y-m-d H:i:s", time()), $_COOKIE['SESSION']);
 		if($db->execute()){
@@ -322,10 +294,10 @@ class Login{
 
 		// query for the user's session in the database
 		$query = 'SELECT user_id as uid, username as uname, first_name as fn,
-		                 last_name as ln, user_status as status, user_role_id as user_role_id, remember as remember
-				  FROM browser_session
-				  WHERE session_secret = ?
-				    AND valid_thru > ?;';
+				last_name as ln, user_status as status, user_role_id as user_role_id
+			FROM browser_session
+			WHERE session_secret = ?
+			AND valid_thru > ?;';
 		$db->prepare($query);
 		$db->bind_param('ss', $_COOKIE['SESSION'], date("Y-m-d H:i:s", time()));
 		$db->execute();
@@ -340,8 +312,8 @@ class Login{
 		if(count($result) > 1){
 			error_log('More than one active session. Destroy all for :' . $_COOKIE['SESSION']);
 			$query = 'UPDATE browser_session
-			          SET valid_thru = ?
-                      WHERE session_secret = ?';
+				SET valid_thru = ?
+				WHERE session_secret = ?';
 			$db->prepare($query);
 			$db->bind_param('ss', date("Y-m-d H:i:s", time()-1), $_COOKIE['SESSION']);
 			$db->execute();
@@ -361,8 +333,8 @@ class Login{
 		if(isset($role) and $role != $result[0]['user_role_id']){
 			error_log('Access to resources which need more permissions. Destroy all for :' . $_COOKIE['SESSION']);
 			$query = 'UPDATE browser_session
-			          SET valid_thru = ?
-                      WHERE session_secret = ?';
+				SET valid_thru = ?
+				WHERE session_secret = ?';
 			$db->prepare($query);
 			$db->bind_param('ss',
 				date("Y-m-d H:i:s", time()-1),
@@ -377,9 +349,9 @@ class Login{
 		// The user is logged in:
 		// prolong user-session in database by the default time
 		$query = 'UPDATE browser_session
-			      SET valid_thru = ?,
-				      last_activity = ?
-				  WHERE session_secret = ?;';
+			SET valid_thru = ?,
+				last_activity = ?
+			WHERE session_secret = ?;';
 		$db->prepare($query);
 		$db->bind_param('sss',
 			date("Y-m-d H:i:s", time()+ $this->config->browser_session_timeout_max),
@@ -429,42 +401,6 @@ class Login{
 		}
 	}
 
-	private function generate_password_salt($username, $db){
-		$password_salt = rand(0, 65635);
-
-		$query = 'UPDATE user SET password_salt = ? WHERE username = ? OR email = ?';
-		$db->prepare($query);
-		$db->bind_param('sss',
-			$password_salt,
-			$username,
-			$username
-		);
-		$db->execute();
-
-		return $password_salt;
-	}
-
-	private function has_salted_password($username, $db){
-		$query = 'SELECT id, password, password_hash FROM user WHERE (username = ? OR email = ?)';
-		$db->prepare($query);
-		$db->bind_param('ss',
-			$username,
-			$username
-		);
-		$db->execute();
-		$result = $db->fetch_stmt_hash();
-		if(!isset($result)){
-			error_log("Cannot query database");
-			return FALSE;
-		}else{
-			if(isset($result[0]['password_hash']) and !isset($result[0]['password'])){
-				return TRUE;
-			}else{
-				return FALSE;
-			}
-		}
-	}
-
 	private function verify_password_hash($username, $password, $password_salt, $db){
 		// generate password hash
 		$password_hash = self::get_password_hash($password, $password_salt);
@@ -491,42 +427,6 @@ class Login{
 			return LoginStatus::WrongPassword;
 		}
 		if(sizeof($res) == 1){
-			if($res[0]['locked'] == 1){
-				return LoginStatus::Locked;
-			}else{
-				return LoginStatus::CorrectPassword;
-			}
-		}
-
-		throw new Exception('classes/Login.php: Unknown Error while checking login');
-	}
-
-
-	private function verify_password($username, $password, $password_salt, $db){
-		$query = 'SELECT id, username, first_name, last_name, email, status, locked
-		          FROM user
-				  WHERE (username = ? OR email = ?)
-					AND password = ? AND password IS NOT NULL';
-		$db->prepare($query);
-		$db->bind_param('sss',
-			$username,
-			$username,
-			$password
-		);
-		$db->execute();
-		$res = $db->fetch_stmt_hash();
-		if(! isset($res)){
-			throw new Exception('classes/Login.php: Cannot login, SQL error for ' . $username . ' and password ***');
-		}
-		if(sizeof($res) > 1){
-			throw new Exception('classes/Login.php: Username not unique for user ' . $username);
-		}
-		if(sizeof($res) == 0){
-			return LoginStatus::WrongPassword;
-		}
-		if(sizeof($res) == 1){
-			// set the password_hash which is salted
-			self::set_password_hash($username, $password, $password_salt, $db);
 			if($res[0]['locked'] == 1){
 				return LoginStatus::Locked;
 			}else{
