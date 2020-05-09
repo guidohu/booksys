@@ -243,12 +243,17 @@ _END;
 		$response['ok'] = FALSE;
 		$response['message'] = "Your provided token code is not correct, please request a new one";
 	}else{
+		# calculate the password hash
+		$new_salt          = rand(0, 65635);
+		$new_password_hash = crypt($data->password, '$6$rounds=5000$'.$new_salt);
+
 		# change password
-		$query = 'UPDATE user SET password = ? WHERE email = ?';
+		$query = 'UPDATE user SET password_salt = ?, password_hash = ? WHERE email = ?';
 		$db->prepare($query);
 		$db->bind_param(
-			'ss', 
-			$data->password, 
+			'sss', 
+			$new_salt,
+			$new_password_hash, 
 			$data->email
 		);
 		if(!$db->execute()){

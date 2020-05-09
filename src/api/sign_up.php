@@ -120,18 +120,23 @@
 			$db->disconnect();
 			return;
 		}
+
+		// calculate the password hash
+		$password_salt = rand(0, 65635);
+		$password_hash = crypt($data->password, '$6$rounds=5000$'.$password_salt);
 		
 		// add the user to the database
 		$query = 'INSERT INTO user 
-					(username, password, first_name, last_name, 
+					(username, password_salt, password_hash, first_name, last_name, 
 					address, city, plz, mobile, email, license, 
 					status, locked, comment)
 								VALUES 
-					(?,?,?,?,?,?,?,?,?,?,?,1,?);';
+					(?,?,?,?,?,?,?,?,?,?,?,?,1,?);';
 		$db->prepare($query);
-		$db->bind_param('ssssssissiis',
+		$db->bind_param('sssssssissiis',
 			$data->username,
-			$data->password,
+			$password_salt,
+			$password_hash,
 			$data->first_name,
 			$data->last_name,
 			$data->address,

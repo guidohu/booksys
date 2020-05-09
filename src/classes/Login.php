@@ -447,16 +447,7 @@ class Login{
 			$username,
 			$username
 		);
-		if($db->execute()){
-			// delete the old password
-			$query = 'UPDATE user SET password = NULL WHERE username = ? OR email = ?';
-			$db->prepare($query);
-			$db->bind_param('ss',
-				$username,
-				$username
-			);
-			$db->execute();
-		}else{
+		if(!$db->execute()){
 			error_log("Cannot set password_hash for user $username");
 		}
 	}

@@ -145,7 +145,6 @@
             address = NULL,
             last_name = 'user',
             first_name = 'deleted',
-            password = NULL,
             password_hash = NULL,
             password_salt = NULL,
             username = NULL
