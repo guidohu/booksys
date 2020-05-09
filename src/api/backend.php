@@ -102,7 +102,6 @@
         }
 
         $res = $db->fetch_data_hash("SELECT count(*) AS users FROM user;");
-        error_log(print_r($res, TRUE));
         if($res == NULL || $res[0] == NULL || $res[0]['users'] == NULL || $res[0]['users'] < 1){
             error_log('api/backend: No user configured');
             $status['ok'] = FALSE;

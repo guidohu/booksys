@@ -10,9 +10,6 @@ class DBAccess{
 
 	/* Connect to the database */
     public function connect(){
-		// get the configuration
-		$db_config = $this->config->get_db_config();
-
 		try{
 			// redefine error handler to not print PHP warnings to the console
 			set_error_handler(function($errno, $errstr, $errfile, $errline, $errcontext) {
@@ -20,10 +17,10 @@ class DBAccess{
 			});
 
 			$this->dbh = new mysqli(
-				$db_config['db_server'],
-				$db_config['db_user'],
-				$db_config['db_password'],
-				$db_config['db_name']
+				$this->config->db_server,
+				$this->config->db_user,
+				$this->config->db_password,
+				$this->config->db_name
 			);
 			if($this->dbh->connect_errno){
 				error_log("Could not connect to database: " . $this->dbh->connect_errno

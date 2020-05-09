@@ -83,22 +83,6 @@ class Configuration{
 		$this->required_db_version = "1.13";
 	}
 
-	// TODO: deprecate this function
-	public function get_old_config(){
-		return $this->config_file_variables;
-	}
-
-	// TODO: deprecate this function
-	public function get_db_config(){
-		$db_conf = array();
-		$db_conf['db_server']   = $this->db_server;
-		$db_conf['db_name']     = $this->db_name;
-		$db_conf['db_user']     = $this->db_user;
-		$db_conf['db_password'] = $this->db_password;
-
-		return $db_conf;
-	}
-
 	// Gets the content from the configuration file into
 	// the public variables of this class
 	private function get_configuration_file($config){
