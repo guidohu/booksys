@@ -365,8 +365,8 @@
 
 		// calculate sunrise/sunset for that day
 		// Location is configurable
-		$res['sunrise']       = date_sunrise($end+$timezoneOffset, SUNFUNCS_RET_TIMESTAMP, $configuration->location_latitude, $configuration->location_longitude);
-		$res['sunset']        = date_sunset($end+$timezoneOffset, SUNFUNCS_RET_TIMESTAMP, $configuration->location_latitude, $configuration->location_longitude);
+		$res['sunrise']       = date_sunrise($start+$timezoneOffset, SUNFUNCS_RET_TIMESTAMP, $configuration->location_latitude, $configuration->location_longitude);
+		$res['sunset']        = date_sunset($start+$timezoneOffset, SUNFUNCS_RET_TIMESTAMP, $configuration->location_latitude, $configuration->location_longitude);
 		
 		$res['error']               = "";
 		$res['business_day_start']  = $configuration->business_day_start;
