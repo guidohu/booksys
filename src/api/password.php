@@ -63,7 +63,7 @@
   function token_request($configuration){
 	$data = json_decode(file_get_contents('php://input'));
   
-    # input validation
+    // input validation
 	$sanitizer = new Sanitizer();
 	$response  = array(
 		'ok' 		=> TRUE,
@@ -98,8 +98,15 @@
 			return $response;
 		} 
 	}
+
+	// check that sending emails is even configured
+	if(!isset($configuration->smtp_server) || !isset($configuration->smtp_sender)){
+		$response['ok'] = FALSE;
+		$response['message'] = "The password reset mechanism is not configured properly. Please get in contact with the site owner to get this fixed.";
+		return $response;
+	}
 	
-	# get user by email
+	// get user by email
 	$db = new DBAccess($configuration);
 	if(!$db->connect()){
 		HttpHeader::setResponseCode(500);
@@ -136,12 +143,12 @@
 	$first_name = $res[0]['first_name'];
 	$last_name  = $res[0]['last_name'];
 	
-	# generate random token
+	// generate random token
 	$token = rand(100000, 999999);
 	error_log("new token generated: " . $token); // TODO delete
 	$token_hash = hash('sha256', $token);
 	
-	# store token in db
+	// store token in db
 	$query = sprintf(
 		'INSERT INTO password_reset (user_id, token, valid) VALUES ( "%d", "%s", 1);',
 		$user_id,
@@ -156,7 +163,7 @@
 	}
 	$db->disconnect();
 	
-	# send token by mail
+	// send token by mail
 	$mail = new Email();
 	$message = <<< _END
 Dear $first_name $last_name
@@ -170,12 +177,12 @@ See you on the lake soon
 _END;
  
 	if(!$mail->sendMail($data->email, 'Password Reset Token', $message, $configuration)){
-		HttpHeader::setResponseCode(500);
-		echo "Password reset token could not be sent, please verify your<br>input or contact us.";
-		exit;
+		$response['ok'] = FALSE;
+		$response['message'] = "Password reset token could not be sent, please verify your input or contact the site owner in case you are sure that the provided email is correct.";
+		return $response;
 	}
 	
-	$response['message'] = "token requested, please check your email inbox";
+	$response['message'] = "Token requested, please check your email inbox.";
 	return $response;
   }
   
@@ -194,7 +201,7 @@ _END;
   function change_password_by_token($configuration){
 	$data = json_decode(file_get_contents('php://input'));
 	
-	# validate input
+	// validate input
 	$sanitizer = new Sanitizer();
 	$response  = array(
 		'ok' 		=> TRUE,
@@ -216,10 +223,10 @@ _END;
 		return $response;
 	}
 	
-	# calculate hash of token
+	// calculate hash of token
 	$token_hash = hash('sha256', $data->token);
 	
-	# check if we have a user_id with this hashed token
+	// check if we have a user_id with this hashed token
 	$db = new DBAccess($configuration);
 	if(!$db->connect()){
 		HttpHeader::setResponseCode(500);
@@ -239,15 +246,15 @@ _END;
 	$db->execute();
 	$res = $db->fetch_stmt_hash();
 	if(!isset($res) or count($res)<1){
-		# we do not know this token code
+		// we do not know this token code
 		$response['ok'] = FALSE;
 		$response['message'] = "Your provided token code is not correct, please request a new one";
 	}else{
-		# calculate the password hash
+		// calculate the password hash
 		$new_salt          = rand(0, 65635);
 		$new_password_hash = crypt($data->password, '$6$rounds=5000$'.$new_salt);
 
-		# change password
+		// change password
 		$query = 'UPDATE user SET password_salt = ?, password_hash = ? WHERE email = ?';
 		$db->prepare($query);
 		$db->bind_param(
@@ -267,7 +274,7 @@ _END;
 		$response['message'] = "Password has been reset";
 	}
 	
-	# set all tokens of this user to invalid
+	// set all tokens of this user to invalid
 	$query = 'UPDATE password_reset pr 
 		JOIN user u ON u.id = pr.user_id 
 		SET pr.valid = 0 
@@ -305,7 +312,7 @@ _END;
 		'message' 	=> 'password changed'
 	);
 	
-	# validate input
+	// validate input
 	$sanitizer = new Sanitizer();
 	if(!isset($data->password_old) or !$sanitizer->isAsciiText($data->password_old)){
 	    $response['ok'] 	 = FALSE;
@@ -318,22 +325,22 @@ _END;
 		return $response;
 	}
 	
-	# get user object by session id and password
+	// get user object by session id and password
 	$user      = new User($configuration);
 	$user_data = $user->getUser();
 	
-	# check that the old password was correct
+	// check that the old password was correct
 	if(! $user->isPasswordCorrect($data->password_old)){
 		$response['ok'] 	 = FALSE;
 		$response['message'] = "Wrong password provided";
 		return $response;
 	}
 
-	# generate new password salt/hash
+	// generate new password salt/hash
 	$new_salt          = rand(0, 65635);
 	$new_password_hash = crypt($data->password_new, '$6$rounds=5000$'.$new_salt);
 	
-	# update password
+	// update password
 	$db = new DBAccess($configuration);
 	if(!$db->connect()){
 		HttpHeader::setResponseCode(500);

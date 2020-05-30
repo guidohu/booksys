@@ -1,3 +1,8 @@
+v1.16 2020.05.30
+ - catch unconfigured SMTP settings before attempting to send an email
+ - minor configuration code cleanup
+ - fix pie visualization
+
 v1.15 2020.05.09
  - fix forgot password functionality and sign-up
 
