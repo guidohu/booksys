@@ -465,9 +465,16 @@ function displayFuelLog(data){
     // fill the table with all the entries we got
     // --> sorting: latest has highest array index
     for(var i=totalEntries-1; i>=0; i--){
+        console.log(data[i]);
         var date = new Date(data[i].timestamp*1000);
         var row = table.insertRow(0);
         row.id = data[i].id;
+
+        // highlight rows with discount
+        if(data[i].cost_brutto != "undefined" && data[i].cost_brutto != null){
+            row.classList.add("highlight");
+        }
+
         var dateCell = row.insertCell(0);
         var userCell = row.insertCell(1);
         var engineHoursCell = row.insertCell(2);
