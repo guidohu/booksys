@@ -83,6 +83,23 @@ class Configuration{
 		$this->required_db_version = "1.13";
 	}
 
+	public function is_db_configured(){
+		// check if configuration is set
+        if(!isset($this->db_server) or $this->db_server == ''){
+            return FALSE;
+        }
+        // check if db_name is set
+        if(!isset($this->db_name) or $this->db_name == ''){
+            return FALSE;
+        }
+        // check if db_user is set
+        if(!isset($this->db_user) or $this->db_user == ''){
+            return FALSE;
+        }
+
+        return TRUE;
+	}
+
 	// Gets the content from the configuration file into
 	// the public variables of this class
 	private function get_configuration_file($config){

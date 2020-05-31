@@ -441,22 +441,7 @@
             return FALSE;
         }
 
-        $db_config = $configuration->get_db_config();
-
-        // check if db_server is set
-        if(!isset($db_config['db_server']) or $db_config['db_server'] == ''){
-            return FALSE;
-        }
-        // check if db_name is set
-        if(!isset($db_config['db_name']) or $db_config['db_name'] == ''){
-            return FALSE;
-        }
-        // check if db_user is set
-        if(!isset($db_config['db_user']) or $db_config['db_user'] == ''){
-            return FALSE;
-        }
-
-        return TRUE;
+        return $configuration->is_db_configured();
     }
 
     // returns http status permission denied in case the user is not an admin
