@@ -1,5 +1,6 @@
 unreleased
  - highlight fuel entries with discount
+ - allow admins to adjust heats
  - fix maintenance work row format
  - fix check whether database is configured
 

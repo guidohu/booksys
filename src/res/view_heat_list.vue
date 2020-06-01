@@ -13,7 +13,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="heat in heats">
+                            <tr v-for="(heat, i) in heats" v-on:click="showDetails(i)">
                                 <td>{{heat.first_name}} {{heat.last_name}}</td>
                                 <td>{{heat.duration_string}}</td>
                                 <td>{{heat.cost}} {{currency}}</td>
