@@ -86,7 +86,7 @@
 		$sanitizer = new Sanitizer();
 		if(!isset($data->session_id) or !$sanitizer->isInt($data->session_id)){
 			error_log('api/heat.php: No "session_id" provided: ' . $data->from);
-			return error_status('No "session_id" provided');
+			return Status::errorStatus('No "session_id" provided');
 		}
 
 		// query the heats
@@ -128,11 +128,11 @@
 		$sanitizer = new Sanitizer();
 		if(!isset($data->from) or !$sanitizer->isInt($data->from)){
 			error_log('api/heat.php: No "from" time-range provided: ' . $data->from);
-			return error_status('No "from" time-range provided');
+			return Status::errorStatus('No "from" time-range provided');
 		}
 		if(!isset($data->to) or !$sanitizer->isInt($data->to)){
 			error_log('api/heat.php: No "to" time-range provided: ' . $data->from);
-			return error_status('No "to" time-range provided');
+			return Status::errorStatus('No "to" time-range provided');
 		}
 		if(!$response['ok']){
 			return $response;
@@ -178,7 +178,7 @@
 		$sanitizer = new Sanitizer();
 		$error = validate_heat_id($data->heat_id, $sanitizer);
 		if($error != NULL){
-			return error_status($error);
+			return Status::errorStatus($error);
 		}
 
 		// get heat details
@@ -219,26 +219,26 @@
 		$sanitizer = new Sanitizer();
 		$error = validate_heat_id($data->heat_id, $sanitizer);
 		if($error != NULL){
-			return error_status($error);
+			return Status::errorStatus($error);
 		}
 		$error = validate_user_id($data->user_id, $sanitizer);
 		if($error != NULL){
-			return error_status($error);
+			return Status::errorStatus($error);
 		}
 		$error = validate_duration($data->duration_s, $sanitizer);
 		if($error != NULL){
-			return error_status($error);
+			return Status::errorStatus($error);
 		}
 
 		// check for existing user
 		$error = validate_user_exists($configuration, $data->user_id);
 		if($error != NULL){
-			return error_status($error);
+			return Status::errorStatus($error);
 		}
 		// check for existing heat
 		$error = validate_heat_exists($db, $data->heat_id);
 		if($error != NULL){
-			return error_status($error);
+			return Status::errorStatus($error);
 		}
 
 		// get cost for this user and heat
@@ -246,7 +246,7 @@
 		try{
 			$cost = get_cost_for_heat($configuration, $db, $data->user_id, $data->duration_s);
 		}catch (Exception $e){
-			return error_status($e->getMessage());
+			return Status::errorStatus($e->getMessage());
 		}
 
 		// update heat in database
@@ -258,10 +258,10 @@
 			$cost,
 			$data->heat_id);
 		if($db->execute()){
-			return success_status("heat updated");
+			return Status::successStatus("heat updated");
 		}else{
 			error_log("api/heat.php: Cannot update heat for user/time:" . $data->user_id . "/".$data->duration_s);
-			return error_status("Cannot update heat.");
+			return Status::errorStatus("Cannot update heat.");
 		}
 	}
 
@@ -271,22 +271,20 @@
 		// sanitize input
 		$sanitized_msg = validate_heat_input($data);
 		if($sanitized_msg != 'ok'){
-			$status['ok']  = FALSE;
-			$status['msg'] = $sanitized_msg;
-			return $status;
+			return Status::errorStatus($sanitized_msg);
 		}
 
 		// check if user exists
 		$error = validate_user_exists($configuration, $data->user_id);
 		if($error != NULL){
-			return error_status($error);
+			return Status::errorStatus($error);
 		}
 
 		// check if session_id exists / or is Null
 		if($data->session_id != NULL && $data->session_id != ''){
 			$error = validate_session_exists($db, $data->session_id);
 			if($error != NULL){
-				return error_status($error);
+				return Status::errorStatus($error);
 			}
 		}
 
@@ -295,7 +293,7 @@
 		try{
 			$cost = get_cost_for_heat($configuration, $db, $data->user_id, $data->duration_s);
 		}catch (Exception $e){
-			return error_status($e->getMessage());
+			return Status::errorStatus($e->getMessage());
 		}
 				
 		// enter the heat to the database
@@ -307,13 +305,9 @@
 		$entry['comment']    = $data->comment;
 
 		if(db_add_heat($db, $entry)){
-			$status['ok']  = TRUE;
-			$status['msg'] = "Added heat for user $data->user_id";
-			return $status;
+			return Status::successStatus("Added heat for user $data->user_id");
 		}else{
-			$status['ok']  = FALSE;
-			$status['msg'] = "Could not add heat for user $data->user_id";
-			return $status;
+			return Status::errorStatus("Could not add heat for user $data->user_id");
 		}
 	}
 
@@ -462,21 +456,4 @@
 			return FALSE;
 		}
 	}
-
-	function error_status($error){
-		return status(FALSE, $error);
-	}
-
-	function success_status($msg){
-		return status(TRUE, $msg);
-	}
-
-	function status($flag, $msg){
-		$status = array();
-		$status['ok'] = $flag;
-		$status['msg'] = $msg;
-		return $status;
-	}
-
-
 ?>
