@@ -95,6 +95,16 @@ class BooksysViewHeatEntry {
                         };
                         BooksysViewHeatEntry.saveHeatEntry(this.heat, callback);
                     },
+                    remove: function(event){
+                        // delete heat entry
+                        let callback = {
+                            success: cb,
+                            failure: function(errors){
+                                this.errors = errors;
+                            },
+                        };
+                        BooksysViewHeatEntry.deleteHeatEntry(this.heat, callback);
+                    },
                     cancel: function(event){
                         BooksysViewHeatEntry.hideApp();
                         cb();
@@ -137,7 +147,7 @@ class BooksysViewHeatEntry {
         }
     }
 
-    // save the updated fuel entry
+    // save the updated heat entry
     static saveHeatEntry(heat, callbackFn){
         let request = {
             heat_id:    heat.heat_id,
@@ -148,6 +158,35 @@ class BooksysViewHeatEntry {
         $.ajax({
             type: "POST",
             url: "api/heat.php?action=update_heat",
+            cache: false,
+            data: JSON.stringify(request),
+            success: function(data){
+                let response = JSON.parse(data);
+                if(response.ok){
+                    BooksysViewHeatEntry.hideApp(); 
+                    callbackFn.success();
+                }else{
+                    callbackFn.failure([ response.msg ]);
+                } 
+            },
+            error: function(request, status, error){
+                console.error(request);
+                console.error(status);
+                console.error(error);
+                callbackFn.failure([ error ]);
+            }
+        });
+    }
+
+    // delete the heat entry
+    static deleteHeatEntry(heat, callbackFn){
+        let request = {
+            heat_id:    heat.heat_id
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "api/heat.php?action=delete_heat",
             cache: false,
             data: JSON.stringify(request),
             success: function(data){

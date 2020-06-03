@@ -46,6 +46,9 @@
 		case 'update_heat':
 			$response = update_heat($configuration, $db);
 			break;
+		case 'delete_heat':
+			$response = delete_heat($configuration, $db);
+			break;
 		case 'get_session_heats':
 			$response = get_session_heats($configuration, $db);
 			break;
@@ -168,6 +171,7 @@
 		return $response;
 	}
 
+	// get a specific heat given its id
 	function get_heat($configuration, $db){
 		$data = json_decode(file_get_contents('php://input'));
 
@@ -209,6 +213,8 @@
 		return $response;
 	}
 
+	// update a specific heat
+	// - only the duration_s of a given heat_id/user_id is changed
 	function update_heat($configuration, $db){
 		$data = json_decode(file_get_contents('php://input'));
 
@@ -262,6 +268,39 @@
 		}else{
 			error_log("api/heat.php: Cannot update heat for user/time:" . $data->user_id . "/".$data->duration_s);
 			return Status::errorStatus("Cannot update heat.");
+		}
+	}
+
+	// delete a specific heat
+	function delete_heat($configuration, $db){
+		$data = json_decode(file_get_contents('php://input'));
+
+		$response = array();
+		$response['ok'] = TRUE;
+
+		// sanitize input
+		$sanitizer = new Sanitizer();
+		$error = validate_heat_id($data->heat_id, $sanitizer);
+		if($error != NULL){
+			return Status::errorStatus($error);
+		}
+
+		// check for existing heat
+		$error = validate_heat_exists($db, $data->heat_id);
+		if($error != NULL){
+			return Status::errorStatus($error);
+		}
+
+		// remove heat from database
+		$query = 'DELETE FROM heat
+			WHERE id = ?;';
+		$db->prepare($query);
+		$db->bind_param('i', $data->heat_id);
+		if($db->execute()){
+			return Status::successStatus("heat deleted");
+		}else{
+			error_log("api/heat.php: Cannot delete heat with id: " . $data->heat_id);
+			return Status::errorStatus("Cannot delete heat.");
 		}
 	}
 

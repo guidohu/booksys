@@ -2,6 +2,7 @@
 	<div class="modal-dialog" role="document">
         <div class="modal-content" id="view_heat_entry_content">
             <div class="modal-header">
+                <button type="button" v-on:click="cancel" class="close"><span aria-hidden="true">&times;</span></button>
                 <h4>
                     Heat Entry
                 </h4>
@@ -87,14 +88,25 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button v-if="showSave==true" type="button" class="btn btn-default" v-on:click="save">
-                        <span class="glyphicon glyphicon-save"></span>
-                        Save
-                    </button>
-                    <button type="button" class="btn btn-default" v-on:click="cancel">
-                        <span class="glyphicon glyphicon-remove"></span>
-                        Cancel
-                    </button>
+                    <div class="row row-top-padded">
+                        <div class="col-sm-1 col-xs-1 text-left"></div>
+                        <div class="col-sm-5 col-xs-5 text-left">
+                            <button type="button" class="btn btn-danger" v-on:click="remove">
+                                <span class="glyphicon glyphicon-remove"></span>
+                                Delete
+                            </button>
+                        </div>
+                        <div class="col-sm-5 col-xs-5">
+                            <button v-if="showSave==true" type="button" class="btn btn-info" v-on:click="save">
+                                <span class="glyphicon glyphicon-save"></span>
+                                Save
+                            </button>
+                            <button type="button" class="btn btn-default" v-on:click="cancel">
+                                <span class="glyphicon glyphicon-remove"></span>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
