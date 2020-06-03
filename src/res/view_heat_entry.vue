@@ -89,14 +89,14 @@
                 </div>
                 <div class="modal-footer">
                     <div class="row row-top-padded">
-                        <div class="col-sm-1 col-xs-1 text-left"></div>
+                        <div class="col-sm-1 hidden-xs"></div>
                         <div class="col-sm-3 col-xs-3 text-left">
                             <button type="button" class="btn btn-danger" v-on:click="remove">
-                                <span class="glyphicon glyphicon-remove"></span>
+                                <span class="glyphicon glyphicon-trash"></span>
                                 Delete
                             </button>
                         </div>
-                        <div class="col-sm-7 col-xs-7">
+                        <div class="col-sm-7 col-xs-9">
                             <button v-if="showSave==true" type="button" class="btn btn-info" v-on:click="save">
                                 <span class="glyphicon glyphicon-save"></span>
                                 Save
