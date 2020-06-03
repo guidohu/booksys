@@ -1,7 +1,7 @@
 class BooksysViewHeatList {
 
-    constructor(){
-        
+    constructor(parameters){
+        this.heatDetailsCb = parameters.heatDetailsCb
     }
 
     // call this function to display the session details
@@ -48,7 +48,6 @@ class BooksysViewHeatList {
             });
         }else{
             // get the heats of the given session
-            console.log("get heats for session: " + sessionId);
             let query = {
                 "session_id": sessionId
             };
@@ -128,6 +127,10 @@ class BooksysViewHeatList {
                     currency:    that.currency,
                 },
                 methods: {
+                    showDetails: function(heatIndex){
+                        // callback to show heat details
+                        that.heatDetailsCb(that.heats[heatIndex].heat_id);
+                    }
                 }
             });
         });

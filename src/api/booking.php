@@ -357,9 +357,9 @@
 		// get my offset to UTC (Timezone configured in configuration)
 		$dateTimeZoneLocation = new DateTimeZone($configuration->location_time_zone);
 		$dateTimeZoneUTC      = new DateTimeZone("UTC");
-		$dateTimeLocation     = new DateTime("now", $dateTimeZoneLocation);
+		$dateTimeLocation     = new DateTime("@".$end, $dateTimeZoneLocation);
 		$dateTimeLocation->setTimestamp($end);
-		$dateTimeUTC          = new DateTime("now", $dateTimeZoneUTC);
+		$dateTimeUTC          = new DateTime("@".$end, $dateTimeZoneUTC);
 		$dateTimeLocation->setTimestamp($end);
 		$timezoneOffset       = $dateTimeZoneLocation->getOffset($dateTimeUTC);
 

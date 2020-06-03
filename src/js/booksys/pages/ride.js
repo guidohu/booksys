@@ -69,7 +69,16 @@
 
             // create a new stop watch
             watch = new BooksysViewStopWatch();
-            heatlist = new BooksysViewHeatList();
+            heatlist = new BooksysViewHeatList(
+                {
+                    heatDetailsCb: function(id){
+                        BooksysViewHeatEntry.displayHeatEntry("heatentry", id, function(){
+                            BooksysViewHeatEntry.destroyView("heatentry");
+                            refreshHeatlist();
+                        });
+                    },
+                }
+            );
 
             // check for existing session and switch to watch
             // if required
@@ -267,6 +276,11 @@
             
             // display the watch
             $("#watch").show();       
+        }
+
+        // refresh the heat list
+        function refreshHeatlist(){
+            heatlist.display("heatlist", watch.getSessionId());
         }
            
         // Shows the view to select a session

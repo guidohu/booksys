@@ -457,6 +457,8 @@
         $db->disconnect();
         if(!isset($res[0])){
             HttpHeader::setResponseCode(500);
+            echo "No entry found";
+            error_log("api/boat: cannot find a fuel entry for ID: $post_data->id");
             return;
         }
 

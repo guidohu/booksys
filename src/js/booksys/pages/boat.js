@@ -468,6 +468,12 @@ function displayFuelLog(data){
         var date = new Date(data[i].timestamp*1000);
         var row = table.insertRow(0);
         row.id = data[i].id;
+
+        // highlight rows with discount
+        if(data[i].cost_brutto != "undefined" && data[i].cost_brutto != null){
+            row.classList.add("highlight");
+        }
+
         var dateCell = row.insertCell(0);
         var userCell = row.insertCell(1);
         var engineHoursCell = row.insertCell(2);
@@ -504,18 +510,30 @@ function displayFuelEntry(event){
 
 /* Display the Maintenance Logbook */
 function displayMaintenanceLog(data){
-    var maintlog = '';
+    var table = document.getElementById("maintenance_log_content");
+
+    // remove old entries
+    while(table.rows.length > 0) {
+        table.deleteRow(0)
+    }
+
+    // fill the table with all the entries we have
+    // --> sorting: latest has highest array index
     for(var i=0; i<Object.keys(data).length; i++){
         var date = new Date(data[i].timestamp*1000);
-        maintlog += '<tr>';
-        maintlog += '<th>'+dateToString(date)+'</td>';
-        maintlog += '<th>'+data[i].engine_hours+'</td>';
-        maintlog += '<th>'+data[i].user_first_name+'</td>';
-        var descr = data[i].description.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        maintlog += '<th>'+descr+'</td>';
-        maintlog += '</tr>';
+        var row = table.insertRow(0);
+        row.id = data[i].id;
+
+        var dateCell = row.insertCell(0);
+        var engineHoursCell = row.insertCell(1);
+        var userCell = row.insertCell(2);
+        var descCell = row.insertCell(3);
+
+        dateCell.innerHTML = dateToString(date);
+        engineHoursCell.innerHTML = data[i].engine_hours;
+        userCell.innerHTML = data[i].user_first_name;
+        descCell.innerHTML = data[i].description.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
-    $('#maintenance_log_content').html(maintlog);
 }
 
 /* Get the latest engine hour entry from the database */
