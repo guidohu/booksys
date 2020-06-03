@@ -52,10 +52,7 @@
             break;
         default:
             HttpHeader::setResponseCode(400);
-            $status = array(
-                'ok'        => FALSE,
-                'message'   => 'invalid action requested',
-            );
+            $status = Status::errorStatus('invalid action requested');
             break;
     }
 
@@ -87,25 +84,20 @@
         // check if db is configured
         if(! _is_db_configured($configuration)){
             error_log('api/backend: No database configured');
-            $status['ok'] = FALSE;
-            $status['message'] = 'no database configured';
-            return $status;
+            return Status::errorStatus('no database configured');
         }
         
         // check if db access works
         $db = new DBAccess($configuration);
         if(!$db->connect()){
             error_log('api/backend: Cannot connect to the database');
-            $status['ok'] = FALSE;
-            $status['message'] = 'database connection is not working';
-            return $status;
+            return Status::errorStatus('database connection is not working');
         }
 
         $res = $db->fetch_data_hash("SELECT count(*) AS users FROM user;");
         if($res == NULL || $res[0] == NULL || $res[0]['users'] == NULL || $res[0]['users'] < 1){
             error_log('api/backend: No user configured');
-            $status['ok'] = FALSE;
-            $status['message'] = 'no user configured';
+            $status = Status::errorStatus('no user configured');
         }
 
         $db->disconnect();
@@ -200,19 +192,15 @@
         
         $db = new DBAccess($configuration);
         if(!$db->connect()){
-            $status['ok'] = FALSE;
-            $status['msg'] = 'DB access not working with the provided settings. Please check for typos or make sure the database is reachable.';
-            return $status;
+            return Status::errorStatus('DB access not working with the provided settings. Please check for typos or make sure the database is reachable.');
         }
 
         // apply changes for every update file
         foreach ($update_files as $file){
             // setup a new database
             if(!$db->apply_sql_file(__DIR__."/../config/db/updates/".$file)){
-                $status['ok']  = FALSE;
-                $status['msg'] = "DB update in file $file could not be applied to database, please check error logs";
                 $db->disconnect();
-                return $status;
+                return Status::errorStatus("DB update in file $file could not be applied to database, please check error logs");
             }
         }
 
@@ -221,9 +209,7 @@
 
         // update was successful
         $db->disconnect();
-        $status['ok'] = TRUE;
-        $status['msg'] = 'database upgrade successful.';
-        return $status;
+        return Status::successStatus('database upgrade successful.');
     }
 
     // returns http status permission denied in case the user is not an admin

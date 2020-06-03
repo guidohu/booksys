@@ -108,9 +108,7 @@
         // either there is no config yet
         // or the user is admin user
         if(!_is_db_configured($configuration)){
-            $response["ok"] = FALSE;
-            $response["msg"] = "no db configuration found";
-            return $response;
+            return Status::errorStatus("no db configuration found");
         }
         
         // only admins can retrieve configuration data
@@ -152,37 +150,37 @@
         // sanitize input
         $sanitizer = new Sanitizer();
         if(!isset($data->location_time_zone) || !$sanitizer->isTimeZone($data->location_time_zone)){
-            return _get_status(FALSE, "The provided timezone is missing or not in a valid format (valid e.g., Europe/Berlin)");
+            return Status::errorStatus("The provided timezone is missing or not in a valid format (valid e.g., Europe/Berlin)");
         }
         if(!isset($data->location_longitude) || !$sanitizer->isLongitude($data->location_longitude)){
-            return _get_status(FALSE, "The provided longitude is missing or not in a valid format.");
+            return Status::errorStatus("The provided longitude is missing or not in a valid format.");
         }
         if(!isset($data->location_latitude) || !$sanitizer->isLatitude($data->location_latitude)){
-            return _get_status(FALSE, "The provided latitude is missing or not in a valid format.");
+            return Status::errorStatus("The provided latitude is missing or not in a valid format.");
         }
         if(isset($data->location_map) && !$sanitizer->isGoogleMapsURL($data->location_map)){
-            return _get_status(FALSE, "The provided google maps embedded URL is not in a valid format.");
+            return Status::errorStatus("The provided google maps embedded URL is not in a valid format.");
         }        
         if(!isset($data->currency) || !$sanitizer->isCurrency($data->currency)){
-            return _get_status(FALSE, "The provided currency is not in a valid format.");
+            return Status::errorStatus("The provided currency is not in a valid format.");
         }
         if(isset($data->payment_account_iban) && !$sanitizer->isIBAN($data->payment_account_iban)){
-            return _get_status(FALSE, "The provided IBAN is not in a valid format.");
+            return Status::errorStatus("The provided IBAN is not in a valid format.");
         }
         if(isset($data->payment_account_bic) && !$sanitizer->isBIC($data->payment_account_bic)){
-            return _get_status(FALSE, "The provided BIC/SWIFT code is not in a valid format.");
+            return Status::errorStatus("The provided BIC/SWIFT code is not in a valid format.");
         }
         if(isset($data->smtp_sender) && !$sanitizer->isEmail($data->smtp_sender)){
-            return _get_status(FALSE, "The provided sender email address is not in a valid format.");
+            return Status::errorStatus("The provided sender email address is not in a valid format.");
         }
         if(isset($data->smtp_server) && !$sanitizer->isServerAddress($data->smtp_server)){
-            return _get_status(FALSE, "The provided SMTP server address is not in a valid format. (e.g., smtp.gmail.com:587");
+            return Status::errorStatus("The provided SMTP server address is not in a valid format. (e.g., smtp.gmail.com:587");
         }
         if(isset($data->recaptcha_privatekey) && !$sanitizer->isAlphaNum($data->recaptcha_privatekey)){
-            return _get_status(FALSE, "The provided recaptcha private key is not in a valid format.");
+            return Status::errorStatus("The provided recaptcha private key is not in a valid format.");
         }
         if(isset($data->recaptcha_publickey) && !$sanitizer->isAlphaNum($data->recaptcha_publickey)){
-            return _get_status(FALSE, "The provided recaptcha public key is not in a valid format.");
+            return Status::errorStatus("The provided recaptcha public key is not in a valid format.");
         }
         // no sanitization for location address
         //                     payment account owner
@@ -236,45 +234,36 @@
 
         // get and validate user input
         $data = json_decode(file_get_contents('php://input'));
-        $status = array();
-        $status['OK'] = TRUE;
-        $status['msg'] = "configuration applied and database setup";
         
         $host = parse_url($data->db_server, PHP_URL_HOST);
         if(!isset($host)){
-            $status['OK'] = FALSE;
-            $status['msg'] = 'no proper hostname specified';
+            $status = Status::errorStatus('no proper hostname specified');
             echo json_encode($status);
             return;
         }
         $port = parse_url($data->db_server, PHP_URL_PORT);
         if(!isset($port)){
-            $status['OK'] = FALSE;
-            $status['msg'] = 'no port specified';
+            $status = Status::errorStatus('no port specified');
             echo json_encode($status);
             return;
         }
         if(!preg_match('/^[a-zA-Z0-9-_]+:[0-9]+$/', $data->db_server)){
-            $status['OK'] = FALSE;
-            $status['msg'] = 'only [ip|hostname]:[port] format supported for database host';
+            $status = Status::errorStatus('only [ip|hostname]:[port] format supported for database host');
             echo json_encode($status);
             return;
         }
         if(!isset($data->db_name) || !preg_match('/^[a-zA-Z0-9-_]+$/', $data->db_name)){
-            $status['OK'] = FALSE;
-            $status['msg'] = 'invalid database name';
+            $status = Status::errorStatus('invalid database name');
             echo json_encode($status);
             return;
         }
         if(!isset($data->db_user) || !preg_match('/^[a-zA-Z0-9-_]+$/', $data->db_user)){
-            $status['OK'] = FALSE;
-            $status['msg'] = 'invalid database user';
+            $status = Status::errorStatus('invalid database user');
             echo json_encode($status);
             return;
         }
         if(!isset($data->db_password) || preg_match('/\s+/', $data->db_password)){
-            $status['OK'] = FALSE;
-            $status['msg'] = 'invalid database password (containing spaces)';
+            $status = Status::errorStatus('invalid database password (containing spaces)');
             echo json_encode($status);
             return;
         }
@@ -287,16 +276,14 @@
         $new_config->db_password = $data->db_password;
         $db = new DBAccess($new_config);
         if(!$db->connect()){
-            $status['OK'] = FALSE;
-            $status['msg'] = 'DB access not working with the provided settings. Please check for typos, make sure that the database is reachable and that your username and password are correct.';
+            $status = Status::errorStatus('DB access not working with the provided settings. Please check for typos, make sure that the database is reachable and that your username and password are correct.');
             echo json_encode($status);
             return;
         }
 
         // setup a new database
         if(!file_exists("../config/db/schema.sql") || !$db->apply_sql_file("../config/db/schema.sql")){
-            $status['OK']  = FALSE;
-            $status['msg'] = "DB scheme could not be applied to database, please check error logs";
+            $status = Status::errorStatus("DB scheme could not be applied to database, please check error logs");
             echo json_encode($status);
             return;
         }
@@ -317,6 +304,7 @@
         file_put_contents ("../config/config.php", $config_string);
 
         // return status
+        $status = Status::successStatus("configuration applied and database setup");
         echo json_encode($status);
         return;
     }
@@ -361,21 +349,24 @@
         // if there is already one admin user
         // we do not allow this operation
         if(_is_admin_user_configured($configuration)){
-            _print_status(FALSE, "one admin user already exists, this operation is not permitted");
+            $status = Status::errorStatus("one admin user already exists, this operation is not permitted");
+            echo json_encode($status);
             return;
         }
 
         // input validation
         $sanitizer = new Sanitizer();
         if(! isset($data->user_id) or !$sanitizer->isInt($data->user_id)){
-			_print_status(FALSE, "No valid user_id specified.");
+			$status = Status::errorStatus("No valid user_id specified.");
+            echo json_encode($status);
 			return;
         }
 
         // unlock user and make admin
         $db = new DBAccess($configuration);
         if(!$db->connect()){
-            _print_status(FALSE, "Cannot connect to database.");
+            $status = Status::errorStatus("Cannot connect to database.");
+            echo json_encode($status);
 			return;
         }
         $query = 'UPDATE user 
@@ -390,7 +381,8 @@
         );
         if(!$db->execute()){
             $db->disconnect();
-            _print_status(FALSE, "Cannot make user admin");
+            $status = Status::errorStatus("Cannot make user admin");
+            echo json_encode($status);
             return;
         }
 
@@ -417,22 +409,6 @@
             return TRUE;
         }
         return FALSE;
-    }
-
-    // helper function to print the status
-	function _print_status($ok, $msg){
-		$status = array();
-		$status['ok'] = $ok;
-		$status['msg'] = $msg;
-		echo json_encode($status);
-		return;
-    }
-    
-    function _get_status($ok, $msg){
-		$status = array();
-		$status['ok'] = $ok;
-		$status['msg'] = $msg;
-        return $status;
     }
     
     function _is_db_configured($configuration){
