@@ -79,7 +79,7 @@ class Configuration{
 
 		// set hard defaults
 		$this->login_page          = '/index.html';
-		$this->version             = "1.16";
+		$this->version             = "1.17";
 		$this->required_db_version = "1.13";
 	}
 
