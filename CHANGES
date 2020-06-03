@@ -1,8 +1,10 @@
 unreleased
  - highlight fuel entries with discount
  - allow admins to adjust heats
+ - allow admins to delete heats
  - fix maintenance work row format
  - fix check whether database is configured
+ - added new status class to standardise API responses
 
 v1.16 2020.05.30
  - catch unconfigured SMTP settings before attempting to send an email
