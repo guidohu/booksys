@@ -1,3 +1,6 @@
+v1.18 2020.06.03
+ - remove vue-dev include
+
 v1.17 2020.06.03
  - highlight fuel entries with discount
  - allow admins to adjust heats
