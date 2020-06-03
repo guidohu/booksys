@@ -1,3 +1,6 @@
+unreleased
+ - catch invalid durations for heats
+
 v1.18 2020.06.03
  - remove vue-dev include
 

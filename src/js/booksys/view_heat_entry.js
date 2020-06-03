@@ -113,7 +113,7 @@ class BooksysViewHeatEntry {
                         let duration_text = this.heat.duration_text;
 
                         // check that it is a valid format
-                        let re = /^\d+:\d{2}$/;
+                        let re = /^\d+:[0-5]\d$/;
                         if(re.test(duration_text)){
                             let duration_arr     = duration_text.split(":");
                             let duration_s       = 60*parseInt(duration_arr[0]) + parseInt(duration_arr[1]);
