@@ -61,7 +61,7 @@
         // Load dynamic content
         function loadContent(){
             $("#watch").hide();
-            $("#session_btn_continue").hide();
+            $("#btn_continue").hide();
             $("#status-panel").hide();
 
             // setup our beacon
@@ -149,9 +149,9 @@
             
             // Display the continue button if riders are available
             if(typeof selectedSession.riders != "undefined" && selectedSession.riders.length > 0){
-                $("#session_btn_continue").fadeIn();
+                $("#btn_continue").fadeIn();
             }else{
-                $("#session_btn_continue").fadeOut();
+                $("#btn_continue").fadeOut();
             }
             
             // Update stopwatch info
@@ -246,10 +246,6 @@
                     }
                 }
             );
-        }
-
-        function showPrivateWatch(){
-            showWatch(null);
         }
 
         function showSessionWatch(){

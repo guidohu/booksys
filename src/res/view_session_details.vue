@@ -71,7 +71,7 @@
                         </div>
                     </div>
                     <div v-if="session.isCreate==false">
-                        <div class="row text-left">
+                        <div v-if="session.title != null" class="row text-left">
                             <span class="col-sm-2 col-xs-2">
                                 Title
                             </span>
