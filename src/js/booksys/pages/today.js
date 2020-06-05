@@ -13,13 +13,13 @@ var selectedSessionIdx = null;
 $(function() { 
     if(BooksysBrowser.isMobile()){
         // Make it behave like an app
-        // BooksysBrowser.setViewportMobile();
-        // BooksysBrowser.setManifest();
-        // BooksysBrowser.setMetaMobile();
+        BooksysBrowser.setViewportMobile();
+        BooksysBrowser.setManifest();
+        BooksysBrowser.setMetaMobile();
         // Add mobile style dynamically
-        // BooksysBrowser.addMobileCSS(); (not required here)
+        BooksysBrowser.addMobileCSS();
 
-        $("#body").load("res/today.html", function(){
+        $("#body").load("res/today_mobile.html", function(){
             loadContent();
         });
     } else {
@@ -49,9 +49,7 @@ function loadContent(){
 
     $("#detail_session_create").hide();
     $("#detail_rider_book").hide();
-    $("#create_session_modal").modal("hide");
     updateBookings(start, end);
-    $('#accordion').collapse();
 }
 
 // returns the URL variables
@@ -133,7 +131,7 @@ function updateBookings(start, end, sessionId){
             $("#menu_session").hide();
             
             // Draw the pie and get the pie content returned
-            var properties = {
+            let properties = {
                 containerHeight: 454,
                 containerWidth:  700,
                 circleX:         350,
@@ -141,7 +139,19 @@ function updateBookings(start, end, sessionId){
                 circleRadius:    100,
                 animation:       true,
                 labels:          true,
-            };
+            }
+            if(BooksysBrowser.isMobile()){
+                properties = {
+                    containerHeight: 350,
+                    containerWidth:  350,
+                    circleX:         175,
+                    circleY:         175,
+                    circleRadius:    100,
+                    animation:       false,
+                    labels:          true,
+                }
+            }
+            
             pieSessions = BooksysPie.drawPie("pie", json, updateDetail, properties);
 
             // we might need to display a specific session
@@ -159,7 +169,7 @@ function updateBookings(start, end, sessionId){
 // Updates the details on the right side
 function updateDetail(idx){
     selectedSessionIdx     = idx;
-    var session            = pieSessions[idx];
+    let session            = pieSessions[idx];
 
     // display session information
     if(session.title){
