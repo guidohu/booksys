@@ -1,3 +1,6 @@
+v1.20 2020.06.06
+ - mobile view for calendar page
+
 v1.19 2020.06.06
  - catch invalid durations for heats
  - make use of status class where possible
