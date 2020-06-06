@@ -199,6 +199,9 @@ function updateDetail(idx){
             updateBookings(date_start, date_end);
         });
     }
+    callbacks.removeRider = function(sessionId, userId){
+        removeRider(userId, sessionId);
+    };
     BooksysViewSessionDetails.display("session_details", selectedSession.id, presets, callbacks);
 }
 
@@ -221,6 +224,27 @@ function deleteSession(id){
             var errorMsg = $.parseJSON(xhr.responseText);
             alert(errorMsg.error);
         },
+    });
+}
+
+// delete user from session
+function removeRider(userId, sessionId){
+    // delete the rider from the session
+    var data = {
+        session_id: sessionId,
+        user_id:    userId
+    }
+    
+    $.ajax({
+        type: "POST",
+        url: "api/booking.php?action=delete_user",
+        data: JSON.stringify(data),
+        success: function(resp){		
+            updateBookings(date_start, date_end);
+        },
+        error: function(resp){
+            alert("Ooops. There was an error.");
+        }
     });
 }
 

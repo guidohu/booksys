@@ -119,6 +119,10 @@ class BooksysViewSessionDetails {
                     "addRider": function(){
                         cb.addRider(session.id);
                     },
+                    "removeRider": function(e, id){
+                        console.log("Remove rider"+id);
+                        cb.removeRider(session.id, id);
+                    }
                 }
             });
         });

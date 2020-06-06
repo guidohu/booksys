@@ -79,10 +79,17 @@
                             <div class="col-sm-12 col-xs-12">
                                 Riders <span class="badge">{{ session.riders.length }}</span> / <span class="badge">{{ session.riders_max}}</span>
                             </div>
-                            <div class="col-sm-10 col-xs-10">
-                                <ul class="unstyled" id="session_lst_riders">
-                                    <li v-for="rider in session.riders">{{rider.first_name}} {{rider.last_name}}</li>
-                                </ul>					
+                            <div class="col-sm-12 col-xs-12">
+                                <div v-for="rider in session.riders">
+                                    <div class="col-sm-10 col-xs-10">
+                                        {{ rider.first_name}} {{ rider.last_name }}
+                                    </div>
+                                    <div class="col-sm-2 col-xs-2 text-right">
+                                        <button class="btn btn-default btn-inline text-center" v-on:click="removeRider($event, rider.id)" :id="rider.id" :value="rider.id" :key="rider.id">
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </button>
+                                    </div>
+                                </div>				
                             </div>
                         </div>
                         <div v-else class="row padding-top-8px text-left">
