@@ -3,9 +3,9 @@ var startDay = null;
 var endDay   = null;
 
 // Sessions that are displayed in the pie
-var pieSessions = [];
+var pieSessions = new Array();
 // the ID of the pie that is currently selected
-var selectedSessionIdx = null;
+var selectedSessionIdx = -1;
 
 
 // Check if mobile browser first,
@@ -97,7 +97,7 @@ function prevDay(){
 // Requests the new data from the server and
 // updates the view
 // - idx	the position of the session in the pieSession array that should be updated and highlighted
-function updateBookings(start, end, sessionId){
+function updateBookings(start, end, idx){
     // get the session-information from the database
     var data = {
         start:	start.tz(getTimeZone()).format("X"),
@@ -112,7 +112,7 @@ function updateBookings(start, end, sessionId){
 
             // in case we are not logged in --> redirect to login page
             if(typeof json.redirect != "undefined"){
-                location.href = json.redirect;
+                window.location.replace = json.redirect;
                 return;
             }
             
@@ -142,25 +142,29 @@ function updateBookings(start, end, sessionId){
             }
             if(BooksysBrowser.isMobile()){
                 properties = {
-                    containerHeight: 350,
+                    containerHeight: 300,
                     containerWidth:  350,
                     circleX:         175,
-                    circleY:         175,
+                    circleY:         150,
                     circleRadius:    100,
                     animation:       false,
                     labels:          true,
                 }
+                BooksysViewSessionDetails.display("session_details", null, null, function(){});
             }
             
-            pieSessions = BooksysPie.drawPie("pie", json, updateDetail, properties);
+            pieSessions = BooksysPie.drawPie("pie", json, function(id){
+                updateDetail(id);
+            }, properties);
 
             // we might need to display a specific session
-            if(sessionId != null){
-                selectedSessionIdx = getPieIdBySessionId(sessionId);
+            if(selectedSessionIdx != -1){
+                //selectedSessionIdx = getPieIdBySessionId(sessionId);
                 BooksysPie.selectSector(selectedSessionIdx);
                 updateDetail(selectedSessionIdx);
             }else{
-                selectedSessionIdx = null;
+                // show the session details but without a selected session
+                BooksysViewSessionDetails.display("session_details", null, null, function(){});
             }
         }
     });	
@@ -171,68 +175,103 @@ function updateDetail(idx){
     selectedSessionIdx     = idx;
     let session            = pieSessions[idx];
 
-    // display session information
-    if(session.title){
-        $("#detail_title").text(session.title.substring(0,24));
-    }else{
-        $("#detail_title").text('-');
-    }
-    if(session.start){
-        $("#detail_date").text(session.start.tz(getTimeZone()).format('HH:mm') + " - " + session.end.tz(getTimeZone()).format('HH:mm'));
-    }else{
-        $("#detail_date").text("-");
-    }
-    if(session.comment){
-        $("#detail_description").text(session.comment.substring(0,24));
-    }else{
-        $("#detail_description").text("-");
-    }
-    
-    // TODO (if this page gets displayed to others than admins) check if user is admin and if we have to display the 'create' button
-    $("#menu_session").show();
-    if(session.id == null){
-        // no session yet
-        $("#detail_session_create").show();
-        $("#menu_session").hide();
-        $("#detail_rider_book").hide();
-        $("#menu_booking").hide();
-    }else if(session.free != null && session.free == 0){
-        // session is full
-        $("#detail_session_create").hide();
-        $("#detail_session").show();
-        $("#menu_session").show();
-        $("#detail_rider_book").hide();
-        $("#menu_booking").show();
-    }else{
-        // show the create session button
-        $("#detail_session_create").hide();
-        $("#detail_rider_book").show();
-        $("#detail_session").show();
-        $("#menu_session").show();
-        $("#menu_booking").show();
-    }
-    
-    // update badges for rider and rider information
-    var riders = "";
-    if(session.riders != null){
-        $("#detail_rider_count").text(session.riders.length);
-        var max_space = parseInt(session.riders.length) + parseInt(session.free);
-        $("#detail_rider_max_space").text(max_space);
-
-        for(var i=0; i<session.riders.length; i++){
-        var id = "delete_" + i;
-        riders += "<div class=\"col-sm-10 col-xs-10\">"
-                    + session.riders[i].name
-                    + "</div>"
-                    + "<div class=\"col-sm-2 col-xs-2\">"
-                    + "<button class=\"btn btn-default btn-xs text-center\" onclick=\"deleteRiderSession(" + session.riders[i].id + ", " + session.id + ")\">"
-                    + "<span class=\"glyphicon glyphicon-remove\"></span>"
-                    + "</button>"
-                    + "</div>"
-                    + "<div class='clear'></div>";
+    if(BooksysBrowser.isMobile()){
+        // display details mobile version
+        let presets = null;
+        let timezone = getTimeZone();
+        if(session.id == null){
+            presets             = new Object();
+            presets.title       = null;
+            presets.description = null;
+            presets.start       = session.start.tz(getTimeZone());
+            presets.end         = session.end.tz(getTimeZone());
+            presets.maxRiders   = 10;
+            presets.type        = 0; // 0: private
         }
-        $("#detail_rider_list").html(riders);
-    }	
+        // Display the proper session details and regiser
+        // required callback functions
+        var callbacks = new Object();
+        callbacks.createSession = function(){
+            BooksysViewSessionEditor.display("user_dialog", session.id, presets, function(){
+                BooksysViewSessionEditor.hideApp();
+                BooksysViewSessionEditor.destroyView("user_dialog");
+                updateBookings(startDay, endDay);
+            });
+        };
+        callbacks.deleteSession = function(id){
+            deleteSession(id);
+        }
+        callbacks.addRider = function(id){
+            BooksysViewSessionRiderSelection.display("user_dialog", id, function(){
+                BooksysViewSessionRiderSelection.destroyView("user_dialog");
+                updateBookings(startDay, endDay, session.id);
+            });
+        }
+        BooksysViewSessionDetails.display("session_details", session.id, presets, callbacks);
+    }else{
+        // display session information (non-mobile version)
+        if(session.title){
+            $("#detail_title").text(session.title.substring(0,24));
+        }else{
+            $("#detail_title").text('-');
+        }
+        if(session.start){
+            $("#detail_date").text(session.start.tz(getTimeZone()).format('HH:mm') + " - " + session.end.tz(getTimeZone()).format('HH:mm'));
+        }else{
+            $("#detail_date").text("-");
+        }
+        if(session.comment){
+            $("#detail_description").text(session.comment.substring(0,24));
+        }else{
+            $("#detail_description").text("-");
+        }
+        
+        // TODO (if this page gets displayed to others than admins) check if user is admin and if we have to display the 'create' button
+        $("#menu_session").show();
+        if(session.id == null){
+            // no session yet
+            $("#detail_session_create").show();
+            $("#menu_session").hide();
+            $("#detail_rider_book").hide();
+            $("#menu_booking").hide();
+        }else if(session.free != null && session.free == 0){
+            // session is full
+            $("#detail_session_create").hide();
+            $("#detail_session").show();
+            $("#menu_session").show();
+            $("#detail_rider_book").hide();
+            $("#menu_booking").show();
+        }else{
+            // show the create session button
+            $("#detail_session_create").hide();
+            $("#detail_rider_book").show();
+            $("#detail_session").show();
+            $("#menu_session").show();
+            $("#menu_booking").show();
+        }
+        
+        // update badges for rider and rider information
+        var riders = "";
+        if(session.riders != null){
+            $("#detail_rider_count").text(session.riders.length);
+            var max_space = parseInt(session.riders.length) + parseInt(session.free);
+            $("#detail_rider_max_space").text(max_space);
+
+            for(var i=0; i<session.riders.length; i++){
+            var id = "delete_" + i;
+            riders += "<div class=\"col-sm-10 col-xs-10\">"
+                        + session.riders[i].name
+                        + "</div>"
+                        + "<div class=\"col-sm-2 col-xs-2\">"
+                        + "<button class=\"btn btn-default btn-xs text-center\" onclick=\"deleteRiderSession(" + session.riders[i].id + ", " + session.id + ")\">"
+                        + "<span class=\"glyphicon glyphicon-remove\"></span>"
+                        + "</button>"
+                        + "</div>"
+                        + "<div class='clear'></div>";
+            }
+            $("#detail_rider_list").html(riders);
+        }
+    }
 }
 
 // Just books the actual user to the selected session
