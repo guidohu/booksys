@@ -18,7 +18,7 @@
                         </li>-->
                         <li v-if="session.exists==true">
                             <a href="#" v-on:click="addRider">
-                                <span class="glyphicon glyphicon-plus"></span>
+                                <span class="glyphicon glyphicon-user"></span>
                                 Add Riders
                             </a>
                         </li>
@@ -75,25 +75,22 @@
                                 {{session.title}}                            
                             </div>
                         </div>
-                        <div v-if="typeof session.riders != 'undefined' && session.riders.length > 0" class="row text-left">
-                            <span class="col-sm-2 col-xs-2">
-                                Riders
-                            </span>
+                        <div v-if="typeof session.riders != 'undefined' && session.riders.length > 0" class="row padding-top-8px text-left">
+                            <div class="col-sm-12 col-xs-12">
+                                Riders <span class="badge">{{ session.riders.length }}</span> / <span class="badge">{{ session.riders_max}}</span>
+                            </div>
                             <div class="col-sm-10 col-xs-10">
-                                <div v-if="session.riders.length==0">
-                                    no riders yet
-                                </div>
                                 <ul class="unstyled" id="session_lst_riders">
                                     <li v-for="rider in session.riders">{{rider.first_name}} {{rider.last_name}}</li>
                                 </ul>					
                             </div>
                         </div>
-                        <div v-else class="row text-left">
+                        <div v-else class="row padding-top-8px text-left">
                             <span class="col-sm-2 col-xs-2">
                                 Riders
                             </span>
                             <div class="col-sm-10 col-xs-10">
-                                <button class="btn btn-sm btn-success" v-on:click="addRider">
+                                <button class="btn btn-xs btn-success" v-on:click="addRider">
                                     <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
                                     Add Riders
                                 </button>					
@@ -105,7 +102,7 @@
                             <span class="col-sm-2 col-xs-2">
                             </span>
                             <div class="col-sm-10 col-xs-10">
-                                <button class="btn btn-sm btn-success" v-on:click="createSession">
+                                <button class="btn btn-xs btn-success" v-on:click="createSession">
                                     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
                                     Create Session
                                 </button>                      
