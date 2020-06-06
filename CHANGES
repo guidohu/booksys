@@ -1,3 +1,6 @@
+unreleased
+ - fix ordering of maintenance log
+
 v1.20 2020.06.06
  - mobile view for calendar page
 
