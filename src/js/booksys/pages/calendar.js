@@ -3,15 +3,16 @@
 $(function() { 
     if(BooksysBrowser.isMobile()){
         // Make it behave like an app
-        // BooksysBrowser.setViewportMobile();
-        // BooksysBrowser.setManifest();
-        // BooksysBrowser.setMetaMobile();
+        BooksysBrowser.setViewportMobile();
+        BooksysBrowser.setManifest();
+        BooksysBrowser.setMetaMobile();
+        // Add mobile style dynamically
+        BooksysBrowser.addMobileCSS();
 
-        $("#body").load("res/calendar.html", function(){
+        $("#body").load("res/calendar_mobile.html", function(){
             loadContent();
         });
     } else {
-        // Add mobile style also in desktop mode
         $("#body").load("res/calendar.html", function(){
             loadContent();
         });
@@ -169,6 +170,18 @@ function drawPies(data, displayedMonth){
         circleY:            34,
         circleRadius:       23,
         animate:            false,
+    }
+    if(BooksysBrowser.isMobile()){
+        console.log(document.getElementById('calendar_container').getBoundingClientRect());
+        let tileWidth = document.getElementById('calendar_container').getBoundingClientRect().width / 7;
+        properties = {
+            containerHeight:	66,
+            containerWidth:     tileWidth,
+            circleX:			tileWidth/2,
+            circleY:            34,
+            circleRadius:       20,
+            animate:            false,
+        }
     }
     for(var j=0; j<data.length; j++){
         BooksysPie.drawPie("pieChart"+j, data[j], null, properties);
