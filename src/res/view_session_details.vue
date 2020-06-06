@@ -1,10 +1,8 @@
 <div class="panel panel-default" id="view_session_details">
     <div class="panel-heading">
         <div class="row">
-            <div class="col-xm-6 col-xs-6">
-                <h5 class="text-left">
+            <div class="col-xm-6 col-xs-6 text-left">
                 Session Details
-                </h5>
             </div>
             <div v-if="session!=null" class="col-sm-6 col-xs-6 text-right">
                 <div class="btn-group dropdown" id="menu_session">
@@ -43,9 +41,7 @@
     </div>
     <div class="panel-body">
         <div class="row">
-            <div class="col-sm-1 col-xs-1">			
-            </div>
-            <div class="col-sm-10 col-xs-10">
+            <div class="col-sm-12 col-xs-12">
                 <div v-if="session == null">
                     <div class="row text-center">
                         <div class="alert alert-light">
