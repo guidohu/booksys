@@ -77,7 +77,6 @@ class BooksysViewSessionDetails {
     //                   title, 
     // - cb              used in case a new session is created / or an existing session got altered
     static loadView(location, session, sessionPresets, cb){
-                
         if((typeof session == 'undefined' || session == null) && (typeof sessionPresets == 'undefined' || sessionPresets == null)){
             // no session selected
             // - nothing to do currently
@@ -120,6 +119,10 @@ class BooksysViewSessionDetails {
                     "addRider": function(){
                         cb.addRider(session.id);
                     },
+                    "removeRider": function(e, id){
+                        console.log("Remove rider"+id);
+                        cb.removeRider(session.id, id);
+                    }
                 }
             });
         });

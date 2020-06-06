@@ -18,11 +18,9 @@
 	// only users which are logged in are allowed to see booking information
 	$lc = new Login($configuration);
 	if(!$lc->isLoggedIn()){
-		$status['ok'] = FALSE;
-		$status['msg'] = "you are not logged in";
+		Status::errorStatus("you are not logged in");
 	} else {
-		$status['ok'] = TRUE;
-		$status['msg'] = "you are logged in";
+		Status::successStatus("you are logged in");
 	}
 	
 	echo json_encode($status);

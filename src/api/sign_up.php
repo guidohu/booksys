@@ -37,39 +37,48 @@
 		// input validation
 		$sanitizer = new Sanitizer();
 		if(! isset($data->username) or !$sanitizer->isAlphaNumEmail($data->username)){
-			print_status(FALSE, "Username is not valid, no special characters are allowed.");
+			$status = Status::errorStatus("Username is not valid, no special characters are allowed.");
+			echo json_encode($status);
 			return;
 		}
 		if(! isset($data->password) or !$sanitizer->isAsciiText($data->password)){
-			print_status(FALSE, "Password is somehow corrupt.");
+			$status = Status::errorStatus("Password is somehow corrupt.");
+			echo json_encode($status);
 			return;
 		}
 		if(! isset($data->first_name)){
-			print_status(FALSE, "No first name provided.");
+			$status = Status::errorStatus("No first name provided.");
+			echo json_encode($status);
 			return;
 		}
 		if(! isset($data->last_name)){
-			print_status(FALSE, "No last name provided");
+			$status = Status::errorStatus("No last name provided.");
+			echo json_encode($status);
 			return;
 		}
 		if(! isset($data->address)){
-			print_status(FALSE, "No address given");
+			$status = Status::errorStatus("No address given.");
+			echo json_encode($status);
 			return;
 		}
 		if(! isset($data->mobile) or !$sanitizer->isMobileNumber($data->mobile)){
-			print_status(FALSE, "The mobile number is not correct.");
+			$status = Status::errorStatus("The mobile number is not correct.");
+			echo json_encode($status);
 			return;
 		}
 		if(! isset($data->plz) or !$sanitizer->isInt($data->plz)){
-			print_status(FALSE, "Your Zip Code is wrong");
+			$status = Status::errorStatus("Your Zip Code is wrong");
+			echo json_encode($status);
 			return;
 		}
 		if(! isset($data->city)){
-			print_status(FALSE, "No city provided");
+			$status = Status::errorStatus("No city provided");
+			echo json_encode($status);
 			return;
 		}
 		if(! isset($data->email) or !$sanitizer->isEmail($data->email)){
-			print_status(FALSE, "Please check your Email again.");
+			$status = Status::errorStatus("Please check your Email again.");
+			echo json_encode($status);
 			return;
 		}
 		if(!isset($data->license) or $data->license != 1){
@@ -84,7 +93,8 @@
 
 		if(isset($configuration->recaptcha_privatekey)){
 			if(!isset($data->recaptcha_token)){
-				print_status(FALSE, "reCAPTCHA token missing, are you a robot? Pleaes click I'm not a robot.");
+				$status = Status::errorStatus("reCAPTCHA token missing, are you a robot? Pleaes click I'm not a robot.");
+				echo json_encode($status);
 				return;
 			}
 			// check recaptcha
@@ -98,7 +108,8 @@
 
 			// Take action based on the result returned
 			if($recaptcha->success != 1){
-				print_status(FALSE, "reCAPTCHA token not valid");
+				$status = Status::errorStatus("reCAPTCHA token not valid.");
+				echo json_encode($status);
 				return;
 			} 
 		}
@@ -108,7 +119,8 @@
 		$query = 'SELECT username FROM user WHERE username = ?';
 		$db = new DBAccess($configuration);
 		if(!$db->connect()){
-			print_status(FALSE, "The backend cannot connect to the database");
+			$status = Status::errorStatus("The backend cannot connect to the database.");
+			echo json_encode($status);
 			return;
 		}
 		$db->prepare($query);
@@ -116,7 +128,8 @@
 		$db->execute();
 		$res = $db->fetch_stmt_hash();
 		if(!isset($res) or count($res)>0){
-			print_status(FALSE, "Username/Email already taken");
+			$status = Status::errorStatus("Username/Email already taken.");
+			echo json_encode($status);
 			$db->disconnect();
 			return;
 		}
@@ -151,7 +164,8 @@
 		if(!$db->execute()){
 			$db->disconnect();
 			error_log('api/sign_up: Cannot add user to database');
-			print_status(FALSE, "User cannot be added due to unknown reason. Please contact the administrator.");
+			$status = Status::errorStatus("User cannot be added due to unknown reason. Please contact the administrator.");
+			echo json_encode($status);
 			return;
 		}
 
@@ -162,14 +176,16 @@
 		if(!$db->execute()){
 			$db->disconnect();
 			error_log('api/sign_up: Cannot get ID of newly created user');
-			print_status(FALSE, "User was not created and cannot be found in the database. Please contact the administrator.");
+			$status = Status::errorStatus("User was not created and cannot be found in the database. Please contact the administrator.");
+			echo json_encode($status);
 			return;
 		}
 		$result = $db->fetch_stmt_hash();
 		if(count($result) != 1){
 			$db->disconnect();
 			error_log('api/sign_up: Cannot get ID of newly created user (non-unique)');
-			print_status(FALSE, "User was not created and cannot be found in the database. Please contact the administrator.");
+			$status = Status::errorStatus("User was not created and cannot be found in the database. Please contact the administrator.");
+			echo json_encode($status);
 			return;
 		}
 		$db->disconnect();
@@ -179,15 +195,5 @@
 		echo json_encode($status);
 
 		return;
-	}
-
-	// helper function to print the status
-	function print_status($ok, $msg){
-		$status = array();
-		$status['ok'] = $ok;
-		$status['msg'] = $msg;
-		echo json_encode($status);
-		return;
-	}
-  
+	}  
 ?>

@@ -3,9 +3,9 @@ var startDay = null;
 var endDay   = null;
 
 // Sessions that are displayed in the pie
-var pieSessions = [];
+var pieSessions = new Array();
 // the ID of the pie that is currently selected
-var selectedSessionIdx = null;
+var selectedSessionIdx = -1;
 
 
 // Check if mobile browser first,
@@ -13,13 +13,13 @@ var selectedSessionIdx = null;
 $(function() { 
     if(BooksysBrowser.isMobile()){
         // Make it behave like an app
-        // BooksysBrowser.setViewportMobile();
-        // BooksysBrowser.setManifest();
-        // BooksysBrowser.setMetaMobile();
+        BooksysBrowser.setViewportMobile();
+        BooksysBrowser.setManifest();
+        BooksysBrowser.setMetaMobile();
         // Add mobile style dynamically
-        // BooksysBrowser.addMobileCSS(); (not required here)
+        BooksysBrowser.addMobileCSS();
 
-        $("#body").load("res/today.html", function(){
+        $("#body").load("res/today_mobile.html", function(){
             loadContent();
         });
     } else {
@@ -47,11 +47,7 @@ function loadContent(){
     startDay  = start.clone();
     endDay    = end.clone();
 
-    $("#detail_session_create").hide();
-    $("#detail_rider_book").hide();
-    $("#create_session_modal").modal("hide");
     updateBookings(start, end);
-    $('#accordion').collapse();
 }
 
 // returns the URL variables
@@ -84,7 +80,6 @@ function getTimeZone(){
 function nextDay(){
     startDay = startDay.tz(getTimeZone()).add(1, 'day').startOf('day');
     endDay   = endDay.tz(getTimeZone()).add(1, 'day').endOf('day');
-    $("#detail_session_create").hide();
     updateBookings(startDay, endDay);
 }
 
@@ -92,14 +87,13 @@ function nextDay(){
 function prevDay(){
     startDay = startDay.tz(getTimeZone()).subtract(1, 'day').startOf('day');
     endDay   = endDay.tz(getTimeZone()).subtract(1, 'day').endOf('day');
-    $("#detail_session_create").hide();
     updateBookings(startDay, endDay);
 }
 
 // Requests the new data from the server and
 // updates the view
 // - idx	the position of the session in the pieSession array that should be updated and highlighted
-function updateBookings(start, end, sessionId){
+function updateBookings(start, end, idx){
     // get the session-information from the database
     var data = {
         start:	start.tz(getTimeZone()).format("X"),
@@ -114,7 +108,7 @@ function updateBookings(start, end, sessionId){
 
             // in case we are not logged in --> redirect to login page
             if(typeof json.redirect != "undefined"){
-                location.href = json.redirect;
+                window.location.replace = json.redirect;
                 return;
             }
             
@@ -124,16 +118,9 @@ function updateBookings(start, end, sessionId){
             var sunset  = moment(json.sunset, "X").tz(getTimeZone());
             $("#detail_sunrise").html(sunrise.format('HH:mm'));
             $("#detail_sunset").html(sunset.format('HH:mm'));
-            $("#detail_date").html("please select a session");
-            $("#detail_description").html("-");
-            $("#detail_rider_count").html(0);
-            $("#detail_rider_max_space").html(0);
-            $("#detail_rider_list").html("");
-            $("#menu_booking").hide();
-            $("#menu_session").hide();
             
             // Draw the pie and get the pie content returned
-            var properties = {
+            let properties = {
                 containerHeight: 454,
                 containerWidth:  700,
                 circleX:         350,
@@ -141,16 +128,31 @@ function updateBookings(start, end, sessionId){
                 circleRadius:    100,
                 animation:       true,
                 labels:          true,
-            };
-            pieSessions = BooksysPie.drawPie("pie", json, updateDetail, properties);
+            }
+            if(BooksysBrowser.isMobile()){
+                properties = {
+                    containerHeight: 300,
+                    containerWidth:  350,
+                    circleX:         175,
+                    circleY:         150,
+                    circleRadius:    100,
+                    animation:       false,
+                    labels:          true,
+                }
+                BooksysViewSessionDetails.display("session_details", null, null, function(){});
+            }
+            
+            pieSessions = BooksysPie.drawPie("pie", json, function(id){
+                updateDetail(id);
+            }, properties);
 
             // we might need to display a specific session
-            if(sessionId != null){
-                selectedSessionIdx = getPieIdBySessionId(sessionId);
+            if(selectedSessionIdx != -1){
                 BooksysPie.selectSector(selectedSessionIdx);
                 updateDetail(selectedSessionIdx);
             }else{
-                selectedSessionIdx = null;
+                // show the session details but without a selected session
+                BooksysViewSessionDetails.display("session_details", null, null, function(){});
             }
         }
     });	
@@ -159,88 +161,45 @@ function updateBookings(start, end, sessionId){
 // Updates the details on the right side
 function updateDetail(idx){
     selectedSessionIdx     = idx;
-    var session            = pieSessions[idx];
+    let session            = pieSessions[idx];
 
-    // display session information
-    if(session.title){
-        $("#detail_title").text(session.title.substring(0,24));
-    }else{
-        $("#detail_title").text('-');
-    }
-    if(session.start){
-        $("#detail_date").text(session.start.tz(getTimeZone()).format('HH:mm') + " - " + session.end.tz(getTimeZone()).format('HH:mm'));
-    }else{
-        $("#detail_date").text("-");
-    }
-    if(session.comment){
-        $("#detail_description").text(session.comment.substring(0,24));
-    }else{
-        $("#detail_description").text("-");
-    }
-    
-    // TODO (if this page gets displayed to others than admins) check if user is admin and if we have to display the 'create' button
-    $("#menu_session").show();
+    // display details mobile version
+    let presets = null;
+    let timezone = getTimeZone();
     if(session.id == null){
-        // no session yet
-        $("#detail_session_create").show();
-        $("#menu_session").hide();
-        $("#detail_rider_book").hide();
-        $("#menu_booking").hide();
-    }else if(session.free != null && session.free == 0){
-        // session is full
-        $("#detail_session_create").hide();
-        $("#detail_session").show();
-        $("#menu_session").show();
-        $("#detail_rider_book").hide();
-        $("#menu_booking").show();
-    }else{
-        // show the create session button
-        $("#detail_session_create").hide();
-        $("#detail_rider_book").show();
-        $("#detail_session").show();
-        $("#menu_session").show();
-        $("#menu_booking").show();
+        presets             = new Object();
+        presets.title       = null;
+        presets.description = null;
+        presets.start       = session.start.tz(getTimeZone());
+        presets.end         = session.end.tz(getTimeZone());
+        presets.maxRiders   = 10;
+        presets.type        = 0; // 0: private
     }
-    
-    // update badges for rider and rider information
-    var riders = "";
-    if(session.riders != null){
-        $("#detail_rider_count").text(session.riders.length);
-        var max_space = parseInt(session.riders.length) + parseInt(session.free);
-        $("#detail_rider_max_space").text(max_space);
-
-        for(var i=0; i<session.riders.length; i++){
-        var id = "delete_" + i;
-        riders += "<div class=\"col-sm-10 col-xs-10\">"
-                    + session.riders[i].name
-                    + "</div>"
-                    + "<div class=\"col-sm-2 col-xs-2\">"
-                    + "<button class=\"btn btn-default btn-xs text-center\" onclick=\"deleteRiderSession(" + session.riders[i].id + ", " + session.id + ")\">"
-                    + "<span class=\"glyphicon glyphicon-remove\"></span>"
-                    + "</button>"
-                    + "</div>"
-                    + "<div class='clear'></div>";
-        }
-        $("#detail_rider_list").html(riders);
-    }	
-}
-
-// Just books the actual user to the selected session
-function db_simpleBook(){
-    // send a booking request to the server
-    var data = new Object();
-    data['session_id'] = pieSessions[selectedSessionIdx].id;
-    $.ajax({
-        type: "POST",
-        url: "api/booking.php?action=add_self",
-        data: JSON.stringify(data),
-        success: function(resp){
-            updateBookings(startDay, endDay, pieSessions[selectedSessionIdx].id);
-        },
-        error: function(resp){
-            alert("Ooops. There was an error.");
-        }
-    });
+    // Display the proper session details and regiser
+    // required callback functions
+    var callbacks = new Object();
+    callbacks.createSession = function(){
+        BooksysViewSessionEditor.display("user_dialog", session.id, presets, function(){
+            BooksysViewSessionEditor.hideApp();
+            BooksysViewSessionEditor.destroyView("user_dialog");
+            updateBookings(startDay, endDay);
+        });
+    };
+    callbacks.deleteSession = function(id){
+        deleteSession(id);
+    };
+    callbacks.addRider = function(id){
+        BooksysViewSessionRiderSelection.display("user_dialog", id, function(){
+            BooksysViewSessionRiderSelection.destroyView("user_dialog");
+            updateBookings(startDay, endDay, session.id);
+        });
+    };
+    callbacks.removeRider = function(sessionId, userId){
+        // TODO supply this function within BooksysViewSessionDetails to be used
+        // directly instead of implementing it everywhere where this module is used
+        deleteRiderSession(userId, sessionId);
+    };
+    BooksysViewSessionDetails.display("session_details", session.id, presets, callbacks);
 }
 
 // deletes a rider from a session
@@ -264,32 +223,6 @@ function deleteRiderSession(user_id, session_id){
     });
 }
 
-// Shows the create session dialog
-function showCreateSession(){
-    let presets = {
-        title:			null,
-        description: 	null,
-        maxRiders:      10,
-        type:           0, 		// 0: private
-    };
-    // if a session is pre-selected -> use its start/end time
-    if(selectedSessionIdx != null){
-        session = pieSessions[selectedSessionIdx];
-        presets.start = session.start.tz(getTimeZone());
-        presets.end   = session.end.tz(getTimeZone());
-    }
-    else{
-        presets.start = startDay;
-        presets.end   = endDay;
-    }
-
-    BooksysViewSessionEditor.display("user_dialog", null, presets, function(newSessionId){
-        BooksysViewSessionEditor.hideApp();
-        BooksysViewSessionEditor.destroyView("user_dialog");
-        updateBookings(startDay, endDay, newSessionId);
-    });
-}
-
 // Deletes a session
 function deleteSession(){
     var req = {
@@ -308,28 +241,4 @@ function deleteSession(){
             alert('Cannot delete session.');
         },
     });
-}
-
-// Shows the add rider dialog where users can be added to the session
-function showAddRider(){
-    var sessionId = pieSessions[selectedSessionIdx].id;
-    BooksysViewSessionRiderSelection.display("user_dialog", sessionId, function(){
-        BooksysViewSessionRiderSelection.destroyView("user_dialog");
-        updateBookings(startDay, endDay, sessionId);
-    });
-}
-
-function showEditSession(){
-    alert("TODO");	
-}
-
-// Given a session_id it returns the position in pieSessions of that session or null if not found
-function getPieIdBySessionId(session_id){
-    // get the position in pieSession that is affected
-    for(var i = 0; i<pieSessions.length; i++){
-        if(pieSessions[i].id != null && pieSessions[i].id == session_id){
-            return i;
-        }
-    }
-    return null;	
 }

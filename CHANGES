@@ -1,3 +1,12 @@
+v1.19 2020.06.06
+ - catch invalid durations for heats
+ - make use of status class where possible
+ - mobile version of today's view
+ - removed private sessions
+ - change continue-button in ride page to be more consistent
+ - add consistent behaviour in navigation
+ - fix pie sector selection in ride menu
+
 v1.18 2020.06.03
  - remove vue-dev include
 

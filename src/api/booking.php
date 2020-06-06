@@ -210,6 +210,7 @@
 		);
 		$db->execute();
 		$res["riders"] = $db->fetch_stmt_hash();
+		$res["riders_max"] = count($res["riders"]) + $res["free"];
 
 		echo json_encode($res);
 		return;
