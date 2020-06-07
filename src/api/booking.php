@@ -663,6 +663,28 @@
 			return;
 		}
 
+		// check if the user already had a heat in that session
+		$query = "SELECT count(*) as nbr_of_heats
+			FROM heat h 
+			WHERE user_id = ? 
+				AND session_id = ?;";
+		$db->prepare($query);
+		$db->bind_param("ii",
+			$data->user_id,
+			$data->session_id
+		);
+		if(!$db->execute()){
+			error_log('api/booking.php: Attempt to check whether user already had a heat did not work.');
+			HttpHeater::setResponseCode(500);
+			echo "Cannot check whether user already had sessions";
+			return;
+		}
+		$res = $db->fetch_stmt_hash();
+		if($res[0]["nbr_of_heats"] > 0){
+			echo "This user cannot be removed because there are heats from this user in the selected session.";
+			return;
+		}		
+
 		// Delete the user from the session
 		$query = "DELETE FROM user_to_session "
 		        ."WHERE session_id = ?"

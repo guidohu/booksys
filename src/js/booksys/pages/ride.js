@@ -13,9 +13,7 @@ $(function() {
             loadContent();
         });
     } else {
-        // Add mobile style also in desktop mode
-        BooksysBrowser.addMobileCSS();
-        $("#body").load("res/ride_mobile.html", function(){
+        $("#body").load("res/ride.html", function(){
             loadContent();
         });
     }
@@ -239,8 +237,12 @@ function removeRider(userId, sessionId){
         type: "POST",
         url: "api/booking.php?action=delete_user",
         data: JSON.stringify(data),
-        success: function(resp){		
-            updateBookings(date_start, date_end);
+        success: function(resp){
+            if(resp != ""){
+                alert(resp);
+            }else{
+                updateBookings(date_start, date_end);
+            }
         },
         error: function(resp){
             alert("Ooops. There was an error.");
