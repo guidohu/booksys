@@ -237,8 +237,12 @@ function removeRider(userId, sessionId){
         type: "POST",
         url: "api/booking.php?action=delete_user",
         data: JSON.stringify(data),
-        success: function(resp){		
-            updateBookings(date_start, date_end);
+        success: function(resp){
+            if(resp != ""){
+                alert(resp);
+            }else{
+                updateBookings(date_start, date_end);
+            }
         },
         error: function(resp){
             alert("Ooops. There was an error.");

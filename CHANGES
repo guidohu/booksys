@@ -1,5 +1,6 @@
 unreleased
  - fix duplicate listing of sessions in "my cal"
+ - do not allow to remove users from sessions if user already had a heat
  - add desktop view for boat management
  - add desktop view for stop watch
 
