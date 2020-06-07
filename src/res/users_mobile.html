@@ -1,0 +1,144 @@
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/admin.html">USER MANAGEMENT</a>
+    </div>
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+            <li>
+                <a href="/dashboard.html" class="inline">
+                    <span class="glyphicon glyphicon-home"></span>
+                    Home
+                </a>
+			</li>
+			<li>
+                <a href="/admin.html" class="inline">
+                    <span class="glyphicon glyphicon-cog"></span>
+                    Administrator Menu
+                </a>
+            </li>
+            <li>
+                <a href="/logout.php" class="inline" tabindex=3>
+                    <span class="glyphicon glyphicon-log-out"></span>
+                    Logout
+                </a>
+            </li>           
+        </ul>
+    </div>
+</div>
+
+
+<div class="panel panel-default test-left">
+	<!-- Nav tabs -->
+	<div class="row row-padded">
+		<div class="col-sm-12 col-xs-12">
+			<ul class="nav nav-tabs" role="tablist" id="tablist">
+				<li role="presentation" class="active">
+					<a href="#users" aria-controls="users" role="tab" data-toggle="tab" id="userTab">
+						Users
+					</a>
+				</li>
+				<li role="presentation">
+					<a href="#types" aria-controls="types" role="tab" data-toggle="tab" id="userTypeTab">
+						User Groups
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
+
+	<!-- Tab panes -->
+	<div class="tab-content">
+		<div role="tabpanel" class="tab-pane active" id="users">
+			<div class="row row-padded">
+				<div class="col-sm-12 col-xs-12">
+					<div class="panel">
+						<div class="panel-body">
+							<div class="row text-left">
+								<a class="btn btn-default btn-xs" href="#" role="button" id="btnViewUser" disabled>
+									<span class="glyphicon glyphicon-eye-open"></span>
+									View
+								</a>
+								<!-- <a class="btn btn-default btn-xs" href="#" role="button">
+									<span class="glyphicon glyphicon-plus"></span>
+									Add
+								</a> -->
+								<a class="btn btn-default btn-xs" href="#" role="button" id="btnDeleteUser" disabled>
+									<span class="glyphicon glyphicon-trash"></span>
+									Delete
+								</a>
+							</div>
+							<div class="row">
+								<table id="user_table" class="compact stripe">
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div role="tabpanel" class="tab-pane" id="types">
+			<div class="row row-padded">
+				<div class="col-sm-12 col-xs-12">
+					<div class="panel">
+						<div class="panel-body">
+							<div class="row text-left">
+								<a class="btn btn-default btn-xs" href="#" id="btnViewUserGroup" onclick="showUserGroupView()" role="button" disabled>
+									<span class="glyphicon glyphicon-eye-open"></span>
+									View
+								</a>
+								<a class="btn btn-default btn-xs" href="#" id="btnEditUserGroup" onclick="editUserGroupView()" role="button" disabled>
+									<span class="glyphicon glyphicon-pencil"></span>
+									Edit
+								</a>
+								<a class="btn btn-default btn-xs" href="#" id="btnNewUserGroup" onclick="createUserGroupView()" role="button">
+									<span class="glyphicon glyphicon-plus"></span>
+									New
+								</a>
+								<a class="btn btn-default btn-xs" href="#" id="btnDeleteUserGroup" onclick="deleteUserGroupView()" role="button" disabled>
+									<span class="glyphicon glyphicon-trash"></span>
+									Delete
+									</a>
+							</div>
+							<div class="row text-left">
+								<table id="user_type_table">
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Status information -->
+<div class="modal fade" id="status_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog text-left">
+		<div class="modal-content" id="status_modal_content">
+			<div class="modal-header" id="status_header">
+				<h4>
+					<span class="glyphicon glyphicon-refresh"></span> Loading
+				</h4>
+			</div>
+			<div class="modal-body" id="status_body">
+				Please wait while content is retrieved...
+			</div>
+			<div class="modal-footer" id="status_footer">
+				<button type="button" class="btn btn-default" onclick="hideStatus();">OK</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- View user group -->
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog text-left">
+		<div class="modal-content" id="modal_content"></div>
+	</div>
+</div>

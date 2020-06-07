@@ -400,7 +400,7 @@ function displayBoatLog(data){
     }
 
     // fill the table with all the entries we got
-    for(var i=0; i<totalEntries; i++){
+    for(var i=0; i<data.length; i++){
         var date = new Date(data[i].time*1000);
         var after = '-';
         var diff  = '-';
@@ -510,7 +510,7 @@ function displayFuelEntry(event){
 
 /* Display the Maintenance Logbook */
 function displayMaintenanceLog(data){
-    var table = document.getElementById("maintenance_log_content");
+    let table = document.getElementById("maintenance_log_content");
 
     // remove old entries
     while(table.rows.length > 0) {
@@ -519,15 +519,15 @@ function displayMaintenanceLog(data){
 
     // fill the table with all the entries we have
     // --> sorting: latest has highest array index
-    for(var i=0; i<Object.keys(data).length; i++){
-        var date = new Date(data[i].timestamp*1000);
-        var row = table.insertRow(0);
+    for(let i=data.length-1; i>=0; i--){
+        let date = new Date(data[i].timestamp*1000);
+        let row = table.insertRow(0);
         row.id = data[i].id;
 
-        var dateCell = row.insertCell(0);
-        var engineHoursCell = row.insertCell(1);
-        var userCell = row.insertCell(2);
-        var descCell = row.insertCell(3);
+        let dateCell = row.insertCell(0);
+        let engineHoursCell = row.insertCell(1);
+        let userCell = row.insertCell(2);
+        let descCell = row.insertCell(3);
 
         dateCell.innerHTML = dateToString(date);
         engineHoursCell.innerHTML = data[i].engine_hours;

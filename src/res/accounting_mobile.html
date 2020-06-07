@@ -1,0 +1,320 @@
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/admin.html">PAYMENTS</a>
+    </div>
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+            <li>
+                <a href="/dashboard.html" class="inline">
+                    <span class="glyphicon glyphicon-home"></span>
+                    Home
+                </a>
+			</li>
+			<li>
+                <a href="/admin.html" class="inline">
+                    <span class="glyphicon glyphicon-cog"></span>
+                    Administrator Menu
+                </a>
+            </li>
+            <li>
+                <a href="/logout.php" class="inline" tabindex=3>
+                    <span class="glyphicon glyphicon-log-out"></span>
+                    Logout
+                </a>
+            </li>           
+        </ul>
+    </div>
+</div>
+
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class="row">
+			<div class="col-sm-7 col-xs-7 text-left">
+				Payments
+			</div>
+			<div class="col-sm-5 col-xs-5 text-right">
+				<select class="form-control" id="selectYear">
+				</select>
+			</div>
+		</div>
+	</div>
+	<div class="panel-body">
+		<div class="row">
+			<div class="col-sm-8 col-xs-8 text-left">
+				<button onClick="showPaymentDialog()" class="btn btn-default btn-xs">
+					<span class="glyphicon glyphicon-plus"></span>
+					Add In-Flow
+				</button>
+				<button onClick="showExpenditureDialog()" class="btn btn-default btn-xs">
+					<i class="glyphicon glyphicon-minus"></i>
+					Add Out-Flow
+				</button>
+			</div>
+		</div>
+		
+		<div class="row">
+			<table id="payment_table">
+			</table>
+		</div>
+	</div>		
+</div>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		<div class="row">
+			<div class="col-sm-6 col-xs-6 text-left">
+				Statistics
+			</div>
+		</div>
+	</div>
+	<div class="panel-body text-left">
+		<div class="row padding-top-8px">
+			<div class="col-sm-3 col-xs-3">
+				Total Payments:
+			</div>
+			<div class="col-sm-3 col-xs-3" id="total_payments">
+				<!-- here comes data -->
+			</div>
+			<div class="col-sm-3 col-xs-3">
+				Total Expenditures:
+			</div>
+			<div class="col-sm-3 col-xs-3" id="total_expenditures">
+				<!-- here comes data -->
+			</div>
+		</div>
+		<div class="row padding-top-8px">
+			<div class="col-sm-3 col-xs-3">
+				Total Session Used:
+			</div>
+			<div class="col-sm-3 col-xs-3" id="total_used">
+				<!-- here comes data -->
+			</div>
+			<div class="col-sm-3 col-xs-3">
+				Balance Today:
+			</div>
+			<div class="col-sm-3 col-xs-3" id="total_balance">
+				<!-- here comes data -->
+			</div>
+		</div>
+		<div class="row padding-top-8px">
+			<div class="col-sm-3 col-xs-3">
+				Total Session Open Today:
+			</div>
+			<div class="col-sm-3 col-xs-3" id="total_open">
+				<!-- here comes data -->
+			</div>
+			<div class="col-sm-3 col-xs-3">
+				Current Session Profit:
+			</div>
+			<div class="col-sm-3 col-xs-3" id="total_current_profit">
+				<!-- here comes data -->
+			</div>
+		</div>
+	</div>		
+</div>
+
+<!-- Status information -->
+<div class="modal fade" id="status_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content" id="status_modal_content">
+			<div class="modal-header" id="status_header">
+				<h4>
+					<span class="glyphicon glyphicon-refresh"></span> Loading
+				</h4>
+			</div>
+			<div class="modal-body" id="status_body">
+				Please wait while content is retrieved...
+			</div>
+			<div class="modal-footer" id="status_footer">
+				<button type="button" class="btn btn-default" onclick="hideStatus();">OK</button>
+			</div>
+		</div>
+	</div>
+</div>
+	
+<!-- Add payment -->
+<div class="modal fade" id="add_payment_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog text-left">
+		<div class="modal-content">
+			<form id="add_payment_form">
+				<div class="modal-header">
+					<h4>
+						Getting Money
+					</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div class="form-group">
+							<div class="col-sm-12 col-xs-12">
+								<label class="label-sm" for="add_payment_name">From</label>
+								<select id="add_payment_name" class="form-control form-control-white input-sm" name="add_payment_name">
+									<!-- here comes the name -->
+								</select>
+							</div>
+							<div class="clearfix"></div>
+							<div class="col-sm-12 col-xs-12">
+								<label class="label-sm" for="add_payment_amount">Amount</label>
+								<div class="input-group">
+									<input type="text" id="add_payment_amount" class="form-control form-control-white input-sm" name="add_payment_amount"/>
+									<span class="input-group-addon" id="add_payment_currency"><!-- here comes the currency --></span>
+								</div>
+							</div>
+							<div class="clearfix"></div>
+							<div class="col-sm-12 col-xs-12">
+								<label class="label-sm" for="add_payment_type">Category</label>
+								<select id="add_payment_type" class="form-control form-control-white input-sm" name="add_payment_type">
+									<!-- here comes the name -->
+								</select>
+							</div>
+							<div class="clearfix"></div>
+							<div class="col-sm-12 col-xs-12">
+								<label class="label-sm" for="add_payment_date">Date</label>
+								<input type="date" id="add_payment_date" class="form-control form-control-white input-sm" name="add_payment_date"/>
+							</div>
+							<div class="clearfix"></div>
+							<div id="add_payment_comment_line">
+								<div class="col-sm-12 col-xs-12">
+									<label class="label-sm" for="add_payment_comment">Comment</label>
+									<textarea id="add_payment_comment" name="add_payment_comment" rows="3" class="form-control form-control-white input-sm"></textarea>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="col-sm-12 col-xs-12 text-center" id="add_payment_status">
+								<!-- here comes status text -->
+							</div>					
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" onclick="hidePayment()">
+						<span class="glyphicon glyphicon-remove"></span>
+						Cancel
+					</button>
+					<button type="submit" class="btn btn-default primary" id="add_payment_add_btn">
+						<span class="glyphicon glyphicon-plus"></span>
+						Add
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+	
+<!-- Add expenditure -->
+<div class="modal fade" id="add_expenditure_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog text-left">
+		<div class="modal-content">
+			<form id="add_expenditure_form">
+				<div class="modal-header">
+					<h4>
+						Spending Money
+					</h4>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div class="form-group">
+							<div class="col-sm-1 col-xs-1"></div>
+							<div class="col-sm-10 col-xs-10">
+								<label class="label-sm" for="add_expenditure_user">To</label>
+								<select id="add_expenditure_user" class="form-control form-control-white input-sm" name="add_expenditure_user">
+									<!-- here come user names -->
+								</select>
+							</div>
+							<div class="col-sm-1 col-xs-1">
+							</div>
+							<div class="clearfix"></div>
+							<div class="col-sm-1 col-xs-1"></div>
+							<div class="col-sm-10 col-xs-10">
+								<label class="label-sm" for="add_expenditure_amount">Amount</label>
+								<div class="input-group">
+									<input type="text" id="add_expenditure_amount" class="form-control form-control-white input-sm" name="add_expenditure_amount"/>
+									<span class="input-group-addon" id="add_expenditure_currency"><!-- here comes the currency --></span>
+								</div>
+							</div>
+							<div class="col-sm-1 col-xs-1">
+							</div>
+							<div class="clearfix"></div>
+							<div class="col-sm-1 col-xs-1"></div>
+							<div class="col-sm-10 col-xs-10">
+								<label class="label-sm" for="add_expenditure_type">Category</label>
+								<select id="add_expenditure_type" class="form-control form-control-white input-sm" name="add_expenditure_type">
+								
+								</select>
+							</div>								
+							<div class="col-sm-1 col-xs-1">
+							</div>
+							<div class="clearfix"></div>
+							<div id="add_expenditure_liters_line">
+								<div class="col-sm-1 col-xs-1"></div>
+								<div class="col-sm-10 col-xs-10">
+									<label class="label-sm" for="add_expenditure_liters">Liters</label>
+									<div class="input-group">
+										<input type="text" id="add_expenditure_liters" class="form-control form-control-white input-sm" name="add_expenditure_liters"/>
+										<span class="input-group-addon">LTR</span>
+									</div>
+								</div>
+								<div class="col-sm-1 col-xs-1">
+								</div>
+							</div><div class="clearfix"></div>
+							<div id="add_expenditure_engine_hours_line">
+								<div class="col-sm-1 col-xs-1"></div>
+								<div class="col-sm-10 col-xs-10">
+									<label class="label-sm" for="add_expenditure_engine_hours">Engine Hours</label>
+									<div class="input-group">
+										<input type="text" id="add_expenditure_engine_hours" class="form-control form-control-white input-sm" name="add_expenditure_engine_hours"/>
+										<span class="input-group-addon">HRS</span>
+									</div>
+								</div>
+								<div class="col-sm-1 col-xs-1">
+								</div>
+							</div>
+							<div class="clearfix"></div>
+							<div class="col-sm-1 col-xs-1"></div>
+							<div class="col-sm-10 col-xs-10">
+								<label class="label-sm" for="add_expenditure_date">Date</label>
+								<input type="date" id="add_expenditure_date" class="form-control form-control-white input-sm" name="add_expenditure_date"/>
+							</div>
+							<div class="col-sm-1 col-xs-1">
+							</div>
+							<div class="clearfix"></div>
+							<div id="add_expenditure_comment_line">
+								<div class="col-sm-1 col-xs-1"></div>
+								<div class="col-sm-10 col-xs-10">
+									<label class="label-sm" for="add_expenditure_comment">Comment</label>
+									<textarea id="add_expenditure_comment" name="add_expenditure_comment" rows="3" class="form-control form-control-white input-sm"></textarea>
+								</div>
+								<div class="col-sm-1 col-xs-1">
+								</div>
+							</div>
+							<div class="clearfix"></div>
+						</div>
+						<div class="form-group">
+							<div class="col-sm-1 col-xs-1"></div>
+							<div class="col-sm-10 col-xs-10 text-center" id="add_expenditure_status">
+								<!-- here comes status text -->
+							</div>
+							<div class="col-sm-1 col-xs-1">
+							</div>						
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" onclick="hideExpenditure()">
+						<span class="glyphicon glyphicon-remove"></span>
+						Cancel
+					</button>
+					<button type="submit" class="btn btn-default primary" id="add_expenditure_add_btn">
+						<span class="glyphicon glyphicon-plus"></span>
+						Add
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>

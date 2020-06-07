@@ -37,5 +37,4 @@ Go to [http://localhost](http://localhost) assuming docker runs on your local ma
 ## Limitations
 
 - Some minor configuration parameters can only be updated in the database directly (see configuration table).
-- Not every site is available as mobile and desktop version yet.
 - The setup should also work with mariaDB but this has not been tested.
