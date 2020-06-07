@@ -1065,7 +1065,9 @@
   }
   
   function get_my_user_sessions($configuration){
+    // the upcoming sessions
     $res['sessions']     = Array();
+    // the past sessions
     $res['sessions_old'] = Array();
     
     // get the user's ID
@@ -1081,12 +1083,13 @@
     
     // select all sessions where the user is either creator, booked in session
     // invited or has to drive the course
-    $query = 'SELECT a_s.id AS id, 
+    $query = 'SELECT DISTINCT a_s.id AS id, 
                     UNIX_TIMESTAMP(a_s.start_time) AS start_time, 
                     UNIX_TIMESTAMP(a_s.end_time) AS end_time, 
                     a_s.title AS title, 
                     a_s.type AS type,
-                    a_s.status AS status
+                    a_s.status AS status,
+                    a_s.start_time AS native_start_time
               FROM 
               (SELECT a.id, a.start_time, a.end_time, a.title, a.type, 3 as status
                FROM `session` a 

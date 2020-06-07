@@ -1,3 +1,6 @@
+unreleased
+ - fix duplicate listing of sessions in "my cal"
+
 v1.21 2020.06.07
  - fix ordering of maintenance log
  - add mobile version for payment page
