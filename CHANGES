@@ -3,6 +3,7 @@ unreleased
  - remove jquery.number.js dependency
  - update jQuery library
  - update moment.js
+ - fix error message on payment page
 
 v1.22 2020.06.07
  - fix duplicate listing of sessions in "my cal"

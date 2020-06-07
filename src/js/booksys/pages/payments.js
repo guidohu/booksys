@@ -423,6 +423,11 @@ function deleteEntry(idx){
 
 // Update payment info table
 function updatePaymentInfo(data){
+    // we might call this function with undefined data
+    if(data.transactions == null){
+        return;
+    }
+
     table_data  = new Array();
     
     for(var i=0; i<data.transactions.length; i++){
