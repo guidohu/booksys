@@ -19,7 +19,7 @@
             </div>
             <div class="row">
                 <div class="col-sm-12 col-xs-12">
-                    <select v-model="selected" class="form-control text-big line-high" placeholder=".col-sm-10 .col-xs-10" @change="onChange" id="watchRiderSelect" :disabled="watch.running==true">
+                    <select v-model="selected" class="form-control form-control-white text-big line-high" placeholder=".col-sm-10 .col-xs-10" @change="onChange" id="watchRiderSelect" :disabled="watch.running==true">
                         <option value="-1">please select rider</option>
                         <option v-for="user in users" :value="user.id">{{user.first_name}} {{user.last_name}}</option>
                     </select>	

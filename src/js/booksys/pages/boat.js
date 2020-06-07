@@ -300,7 +300,7 @@ function displayFuelChart(data){
                         return "Average Fuel Consumption";
                     },
                     label: function(tooltipItem, data) {
-                        time = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index].x.format("DD. MMM");
+                        time   = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index].x.format("DD. MMM");
                         liters = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index].y
                         liters = Math.round(liters * 10)/10;
                         return time + " - " + liters + " L";
