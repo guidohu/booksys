@@ -1,4 +1,4 @@
-unreleased
+v1.21 2020.06.07
  - fix ordering of maintenance log
  - add mobile version for payment page
  - add mobile version for user management page
