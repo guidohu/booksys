@@ -1,16 +1,24 @@
 # Wake and Surf Booksys
 
-A booking and management tool for small boat communities to schedule boat usage and simplify maintenance as well as accounting.
+A booking and management tool small boat communities to schedule boat usage and simplify maintenance as well as accounting.
 
 ![dashboard view](https://raw.githubusercontent.com/guidohu/booksys/master/img/dashboard.png)
+
+It comes with the following features:
+- **Boat Management** Track engine hours, fuel consumption and maintenance logs.
+- **Session Management** Create sessions, invite users to sessions, track time behind the boat and much more.
+- **Multi User Support** with different roles such as Administrators, Members, Guests and flexible pricing models for different users.
+- **Accounting** to track the finances of the boat community.
 
 ## Installation
 
 ### Prerequisites
 It is strongly recommended to run the application behind a simple reverse proxy (nginx, apache, ...) to enforce https.
 
+To have a simple deployment scenario it is suggested to run the application in a docker container as described below.
+
 ### Setup
-To run it on your machine, follow these steps:
+To run it on your local machine, follow these steps:
 
 ```
 # build the application itself
@@ -26,15 +34,16 @@ echo '' > config.php
 docker-compose up -d
 ```
 
-Go to [http://localhost](http://localhost) assuming docker runs on your local machine. You will be guided through the setup process.
+Go to [http://localhost](http://localhost). You will be guided through the setup process.
 
 ### Security Considerations
 
 - Change passwords in `docker/booksys_db/Dockerfile` before building the container.
 - Expose the application through a reverse proxy to enforce HTTPS.
-- Restrict access to `classes` and `config` folders
+- Restrict access to `classes` and `config` folders, in case you do not run the default docker containers.
 
 ## Limitations
 
 - Some minor configuration parameters can only be updated in the database directly (see configuration table).
 - The setup should also work with mariaDB but this has not been tested.
+- So far, no official payment system (paypal, ...) is integrated. Please get in contact with me in case this is required or feel free to submit a pull request.
