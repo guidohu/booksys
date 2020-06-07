@@ -1,3 +1,8 @@
+unreleased
+ - remove date.format.js dependency
+ - remove jquery.number.js dependency
+ - update jQuery library
+
 v1.22 2020.06.07
  - fix duplicate listing of sessions in "my cal"
  - do not allow to remove users from sessions if user already had a heat
