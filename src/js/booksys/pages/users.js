@@ -3,13 +3,13 @@
 $(function() { 
     if(BooksysBrowser.isMobile()){
         // // Make it behave like an app
-        // BooksysBrowser.setViewportMobile();
-        // BooksysBrowser.setManifest();
-        // BooksysBrowser.setMetaMobile();
+        BooksysBrowser.setViewportMobile();
+        BooksysBrowser.setManifest();
+        BooksysBrowser.setMetaMobile();
         // // Add mobile style dynamically
-        // BooksysBrowser.addMobileCSS();
+        BooksysBrowser.addMobileCSS();
 
-        $("#body").load("res/users.html", function(){
+        $("#body").load("res/users_mobile.html", function(){
             loadContent();
         });
     } else {

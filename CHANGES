@@ -1,6 +1,7 @@
 unreleased
  - fix ordering of maintenance log
  - add mobile version for payment page
+ - add mobile version for user management page
 
 v1.20 2020.06.06
  - mobile view for calendar page
