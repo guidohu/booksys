@@ -237,3 +237,20 @@ a{
 .fuel-chart {
 	height: 250px;
 }
+
+div .text-bigger{
+    font-size: 50px;
+}
+
+.tab-content-desktop-height {
+	height: 420px;
+	max-height: 420px;
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
+
+.heatlist-desktop-height {
+	max-height: 300px;
+	overflow-y: scroll;
+	overflow-x: hidden;
+}

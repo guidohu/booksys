@@ -13,9 +13,7 @@ $(function() {
             loadContent();
         });
     } else {
-        // Add mobile style also in desktop mode
-        BooksysBrowser.addMobileCSS();
-        $("#body").load("res/ride_mobile.html", function(){
+        $("#body").load("res/ride.html", function(){
             loadContent();
         });
     }

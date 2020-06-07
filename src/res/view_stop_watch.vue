@@ -29,7 +29,7 @@
                         {{watch.comment}}
                     </div>
                 </div>
-                <div class="col-sm-12 col-xs-12 padding-top-8px">
+                <div class="col-sm-12 col-xs-12 padding-top-8px text-center">
                     <div class="btn-group btn-group-lg">
                         <button v-if="watch.running==false && watch.isPaused==false" type="button" class="btn btn-default stop-watch-button" v-on:click="back">
                             <span class="glyphicon glyphicon-menu-left"></span>BACK

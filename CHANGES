@@ -1,5 +1,7 @@
 unreleased
  - fix duplicate listing of sessions in "my cal"
+ - add desktop view for boat management
+ - add desktop view for stop watch
 
 v1.21 2020.06.07
  - fix ordering of maintenance log

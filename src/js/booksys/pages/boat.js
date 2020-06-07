@@ -14,8 +14,7 @@ $(function() {
         });
     } else {
         // Add mobile style also in desktop mode
-        BooksysBrowser.addMobileCSS();
-        $("#body").load("res/boat_mobile.html", function(){
+        $("#body").load("res/boat.html", function(){
             loadContent();
         });
     }
