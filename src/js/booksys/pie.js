@@ -246,6 +246,10 @@ class BooksysPie {
     static selectSector(id){
         BooksysPie.pie.selectSector(id);
     }
+
+    static resetSelection(){
+        BooksysPie.pie.reset();
+    }
 }
 
 BooksysPie.pie = null;
