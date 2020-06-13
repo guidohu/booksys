@@ -11,7 +11,7 @@ class BooksysPie {
         // define colors (hardcode for now)
         let colorNoSlot = "#424242";
         let colorCourse = "#EC002A"; //"#3AAFA9"; // "#FC4445";
-        let colorSlot   = "#40D800";
+        let colorSlot   = "#38BA00";
         let colorSlotFull = "#EC002A";
         let colorOffHour = "#212121";
 
