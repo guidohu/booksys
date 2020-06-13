@@ -78,6 +78,8 @@ function getTimeZone(){
 
 // Go to the next day
 function nextDay(){
+    selectedSessionIdx = -1;
+    BooksysPie.resetSelection();
     startDay = startDay.tz(getTimeZone()).add(1, 'day').startOf('day');
     endDay   = endDay.tz(getTimeZone()).add(1, 'day').endOf('day');
     updateBookings(startDay, endDay);
@@ -85,6 +87,8 @@ function nextDay(){
 
 // Go to the previous day
 function prevDay(){
+    selectedSessionIdx = -1;
+    BooksysPie.resetSelection();
     startDay = startDay.tz(getTimeZone()).subtract(1, 'day').startOf('day');
     endDay   = endDay.tz(getTimeZone()).subtract(1, 'day').endOf('day');
     updateBookings(startDay, endDay);
@@ -92,8 +96,7 @@ function prevDay(){
 
 // Requests the new data from the server and
 // updates the view
-// - idx	the position of the session in the pieSession array that should be updated and highlighted
-function updateBookings(start, end, idx){
+function updateBookings(start, end){
     // get the session-information from the database
     var data = {
         start:	start.tz(getTimeZone()).format("X"),

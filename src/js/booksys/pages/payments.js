@@ -423,6 +423,11 @@ function deleteEntry(idx){
 
 // Update payment info table
 function updatePaymentInfo(data){
+    // we might call this function with undefined data
+    if(data.transactions == null){
+        return;
+    }
+
     table_data  = new Array();
     
     for(var i=0; i<data.transactions.length; i++){
@@ -436,7 +441,7 @@ function updatePaymentInfo(data){
             data.transactions[i].timestamp,
             data.transactions[i].type_name,
             data.transactions[i].fn + ' ' + data.transactions[i].ln,
-            $.number(sign*data.transactions[i].amount, 2),
+            sprintf("%.2f", sign*data.transactions[i].amount),
             data.transactions[i].comment,
             "<a class='text-center' id='deleteAction' value='"+i+"'><icon class='glyphicon glyphicon-remove text-center'></icon></a>",
             data.currency
@@ -497,16 +502,16 @@ function updatePaymentInfo(data){
 
 // Updates the statistics
 function updateStatistics(data){
-    $('#total_payments').html($.number(data.total_payment_selected_year, 2) + ' ' + data.currency);
-    $('#total_expenditures').html($.number(data.total_expenditure_selected_year, 2) + ' ' + data.currency);
-    $('#total_used').html($.number(data.total_used_selected_year, 2) + ' ' + data.currency);
-    $('#total_open').html($.number(data.total_open, 2) + ' ' + data.currency);
-    $('#total_balance').html($.number(data.current_balance, 2) + ' ' + data.currency);
-    $('#total_current_profit').html($.number(data.current_session_profit_selected_year, 2) + ' ' + data.currency);
+    $('#total_payments').html(sprintf("%.2f", data.total_payment_selected_year) + ' ' + data.currency);
+    $('#total_expenditures').html(sprintf("%.2f", data.total_expenditure_selected_year) + ' ' + data.currency);
+    $('#total_used').html(sprintf("%.2f", data.total_used_selected_year) + ' ' + data.currency);
+    $('#total_open').html(sprintf("%.2f", data.total_open) + ' ' + data.currency);
+    $('#total_balance').html(sprintf("%.2f", data.current_balance) + ' ' + data.currency);
+    $('#total_current_profit').html(sprintf("%.2f", data.current_session_profit_selected_year) + ' ' + data.currency);
     $('#total_used').popover({placement: 'top', trigger: 'hover', html: true, title: "Minute Distribution", 
-                            content:   "<div class='row row-padded'><div class='col-sm-5 col-xs-5'><label>Admin</label></div><div class='col-sm-7 col-xs-7 text-right'>" + $.number(data.admin_minutes_selected_year, 2) + "min</div></div>"
-                                    + "<div class='row row-padded'><div class='col-sm-5 col-xs-5'><label>Member</label></div><div class='col-sm-7 col-xs-7 text-right'>" + $.number(data.member_minutes_selected_year, 2) + "min</div></div>"
-                                    + "<div class='row row-padded'><div class='col-sm-5 col-xs-5'><label>Guest</label></div><div class='col-sm-7 col-xs-7 text-right'>" + $.number(data.guest_minutes_selected_year, 2) + "min</div></div>"});
+                            content:   "<div class='row row-padded'><div class='col-sm-5 col-xs-5'><label>Admin</label></div><div class='col-sm-7 col-xs-7 text-right'>" + sprintf("%.2f", data.admin_minutes_selected_year) + "min</div></div>"
+                                    + "<div class='row row-padded'><div class='col-sm-5 col-xs-5'><label>Member</label></div><div class='col-sm-7 col-xs-7 text-right'>" + sprintf("%.2f", data.member_minutes_selected_year) + "min</div></div>"
+                                    + "<div class='row row-padded'><div class='col-sm-5 col-xs-5'><label>Guest</label></div><div class='col-sm-7 col-xs-7 text-right'>" + sprintf("%.2f", data.guest_minutes_selected_year) + "min</div></div>"});
 }
 
 // Show the payment dialog

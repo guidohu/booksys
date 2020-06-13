@@ -7,6 +7,14 @@ class BooksysPie {
     //
     // Returns an object containing all the data of the pie.
     static drawPie(location, data, callback, properties){
+
+        // define colors (hardcode for now)
+        let colorNoSlot = "#424242";
+        let colorCourse = "#EC002A"; //"#3AAFA9"; // "#FC4445";
+        let colorSlot   = "#38BA00";
+        let colorSlotFull = "#EC002A";
+        let colorOffHour = "#212121";
+
         // reset current content
         $('#'+location).html("");
 
@@ -50,7 +58,7 @@ class BooksysPie {
                 labels.push(lastEnd.tz(getTimeZone()).format("HH:mm") 
                     + " - " 
                     + moment(sessions[i].start, "X").tz(getTimeZone()).format("HH:mm"));
-                colors.push("#333");
+                colors.push(colorNoSlot);
                 pieSessions.push({
                     id:    null,
                     start: lastEnd,
@@ -69,11 +77,15 @@ class BooksysPie {
             }
 
             // get color for this slot
-            var color = "red";
-            if(sessions[i].free > 0){
-                color = "green";
+            var color = "";
+            console.log(sessions[i]);
+            // check if free and is not course
+            if(sessions[i].free > 0 && sessions[i].type != 1){
+                color = colorSlot;
+            } else if(sessions[i].type == 1) {
+                color = colorCourse;
             } else {
-                color = "red";
+                color = colorSlotFull;
             }
 
 
@@ -107,7 +119,7 @@ class BooksysPie {
             labels.push(dayStart.tz(getTimeZone()).format("HH:mm")
                 + " - "
                 + dayEnd.tz(getTimeZone()).format("HH:mm"));
-            colors.push("#333");
+            colors.push(colorNoSlot);
 
             pieSessions.push({
                 id:     null,
@@ -130,7 +142,7 @@ class BooksysPie {
                 + " - "
                 + session.start.tz(getTimeZone()).format("HH:mm")
             );
-            colors.unshift("#111");
+            colors.unshift(colorOffHour);
 
             pieSessions.unshift({
                 id:     null,
@@ -150,7 +162,7 @@ class BooksysPie {
                 session.end.tz(getTimeZone()).format("HH:mm") 
                 + " - " 
                 + dayEnd.tz(getTimeZone()).format("HH:mm"));
-            colors.push("#333");
+            colors.push(colorNoSlot);
 
             pieSessions.push({
                 id:     null,
@@ -171,7 +183,7 @@ class BooksysPie {
                 session.end.tz(getTimeZone()).format("HH:mm") 
                 + " - " 
                 + moment(data.window_end, "X").tz(getTimeZone()).format("HH:mm"));
-            colors.push("#111");
+            colors.push(colorOffHour);
 
             pieSessions.push({
                 id:     null,
@@ -245,6 +257,10 @@ class BooksysPie {
     // selects a specific sector of the pie
     static selectSector(id){
         BooksysPie.pie.selectSector(id);
+    }
+
+    static resetSelection(){
+        BooksysPie.pie.reset();
     }
 }
 
