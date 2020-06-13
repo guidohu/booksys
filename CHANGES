@@ -1,4 +1,4 @@
-unreleased
+v1.23 2020.06.13
  - remove date.format.js dependency
  - remove jquery.number.js dependency
  - update jQuery library
