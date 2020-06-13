@@ -4,6 +4,9 @@ unreleased
  - update jQuery library
  - update moment.js
  - fix error message on payment page
+ - reset pie selection if day changes
+ - change pie coloring
+ - courses are colored red too
 
 v1.22 2020.06.07
  - fix duplicate listing of sessions in "my cal"
