@@ -421,6 +421,7 @@
 				'title'      => $result[$i]['title'],
 				'comment'    => $result[$i]['description'],
 				'free'       => $result[$i]['free'],
+				'type'       => $result[$i]['type'],
 				'creator_id' => $result[$i]['creator_id'],
 				'duration'   => $result[$i]['end'] - $result[$i]['start']);
 		}
