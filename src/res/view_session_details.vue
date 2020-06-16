@@ -85,8 +85,8 @@
                                         {{ rider.first_name}} {{ rider.last_name }}
                                     </div>
                                     <div class="col-sm-2 col-xs-2 text-right">
-                                        <button class="btn btn-default btn-inline text-center" v-on:click="removeRider($event, rider.id)" :id="rider.id" :value="rider.id" :key="rider.id">
-                                            <span class="glyphicon glyphicon-remove"></span>
+                                        <button class="btn btn-default btn-inline" v-on:click="removeRider($event, rider.id)" :id="rider.id" :value="rider.id" :key="rider.id">
+                                            <i class="fa fa-user-minus"></i>
                                         </button>
                                     </div>
                                 </div>				

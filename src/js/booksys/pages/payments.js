@@ -524,8 +524,8 @@ function showPaymentDialog(){
     $('#add_payment_name').html(name_text);
     
     $('#add_payment_amount').val('');
-    var date = new Date();
-    var date_str = date.format('yyyy-mm-dd');
+
+    var date_str = moment().tz(getTimeZone()).format('YYYY-MM-DD');
     $('#add_payment_date').val(date_str);
     $('#add_payment_comment').val('');
     
@@ -564,8 +564,7 @@ function showExpenditureDialog(){
 
     // reset all values
     $('#add_expenditure_amount').val('');
-    var date = new Date();
-    var date_str = date.format('yyyy-mm-dd');
+    var date_str = moment().tz(getTimeZone()).format('YYYY-MM-DD');
     $('#add_expenditure_date').val(date_str);
     $('#add_expenditure_comment').val('');
     $('#add_expenditure_engine_hours').val('');
@@ -665,3 +664,21 @@ function addExpenditure(){
         },
     });
 }
+
+// gets the user's timezone or returns the default
+function getTimeZone(){
+    if (typeof(Storage) !== "undefined") {
+        var timezone = localStorage.getItem("timezone");
+        if(timezone != null){
+            return timezone;
+        }
+        else{
+            // TODO let user set his timezone
+            return "Europe/Berlin";
+        }
+    } else {
+        // Sorry! No Web Storage support..
+        return "Europe/Berlin";
+    }
+}
+

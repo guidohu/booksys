@@ -1,3 +1,8 @@
+v1.24 2020.06.16
+ - improve coloring for pie
+ - fix payment dialog
+ - improve rider removal button
+
 v1.23 2020.06.13
  - remove date.format.js dependency
  - remove jquery.number.js dependency
