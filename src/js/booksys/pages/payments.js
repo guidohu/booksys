@@ -111,6 +111,7 @@ function setValidation(){
     
     $('#add_expenditure_form').validate({
         submitHandler: function(form){
+            console.log("Call add Expenditure");
             addExpenditure();
         },
         rules: {

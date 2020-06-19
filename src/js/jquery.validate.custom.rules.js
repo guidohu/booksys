@@ -29,3 +29,16 @@ $.validator.addMethod('optionSelected', function(value, element){
 		}
 	}
 }, "Please select an option");
+
+$.validator.addMethod('notEmpty', function(value, element){
+	if(this.optional(element)){
+		return true;
+	}else{
+		this.hideErrors();
+		if(element.value != ''){
+			return true;
+		}else{
+			return false;
+		}
+	}
+}, "Please add some content");
