@@ -1,5 +1,6 @@
 // Check if mobile browser first,
 // then continue with the page logic
+// depending on the device
 $(function() { 
     if(BooksysBrowser.isMobile()){
         // Make it behave like an app
@@ -82,7 +83,6 @@ function updateBookings(date){
 
             // in case we are not logged in --> redirect to login page
             if(typeof json.redirect != "undefined"){
-                console.log(window);
                 location.href = json.redirect;
                 return;
             }
@@ -139,7 +139,6 @@ function drawPies(data, displayedMonth){
         var html    = "<div id='pieChart"+index+"''></div>\n";
         html       += "<div class='calendar-day'>" + day +"<div>";
         $(this).html(html)
-        //$(this).html("<div class='calendar-day'>" + day +"<div>");
         $(this).bind('mouseenter', function(){
             showDetails(session);
         });
@@ -172,7 +171,6 @@ function drawPies(data, displayedMonth){
         animate:            false,
     }
     if(BooksysBrowser.isMobile()){
-        console.log(document.getElementById('calendar_container').getBoundingClientRect());
         let tileWidth = document.getElementById('calendar_container').getBoundingClientRect().width / 7;
         properties = {
             containerHeight:	66,
@@ -231,12 +229,7 @@ function showDetails(day){
 
 // click action for tiles
 function clickDay(day){
-    var startOfDay = moment(day.window_start, "X").tz(getTimeZone());
-    var dateStr    = startOfDay.format("YYYY-MM-DD");
-    goToURL("today.html?getdate="+dateStr);
-}
-
-// go to a given URL
-function goToURL(url){
-    window.location.href = url;
+    let startOfDay = moment(day.window_start, "X").tz(getTimeZone());
+    let dateStr    = startOfDay.format("YYYY-MM-DD");
+    window.location.href = "today.html?getdate="+dateStr;
 }
