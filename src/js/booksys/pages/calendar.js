@@ -21,10 +21,20 @@ $(function() {
 });
 
 // the month we currently display
-var displayedMonth = moment().tz(getTimeZone()).startOf('month');
+var displayedMonth = null;
 
 // load all the dynamic content
 function loadContent(){
+    // get specific month to display if set
+    // otherwise default to current month
+    let displayedMonth = moment().tz(getTimeZone()).startOf('month');
+    let searchParams = new URLSearchParams(window.location.search);
+    let dateStr = searchParams.get('date');
+    if(dateStr != null){
+        date = moment(dateStr, "YYYY-MM-DD").tz(getTimeZone()).startOf('month');
+        displayedMonth = date;
+    }
+
     $('#calendar').hide();
     updateBookings(displayedMonth);
 
@@ -90,7 +100,6 @@ function updateBookings(date){
             $("#titleDate").text(monthText);
             $("#detail_rider").html("-");
             $("#detail_date").html("please select a session");
-            // console.log(displayedMonth.format());
             drawPies(json, date);
             $("#calendar").fadeIn();
             $('#status_modal').modal('hide');				

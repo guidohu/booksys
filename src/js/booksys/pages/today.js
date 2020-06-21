@@ -34,7 +34,7 @@ function loadContent(){
     $.stayInWebApp();
 
     // get date from GET parameter
-    var dateStr = getUrlVars()['getdate'];
+    let dateStr = getUrlVars('getdate');
     if(dateStr == null){
         dateStr = moment().tz(getTimeZone()).format("YYYY-MM-DD");
     }
@@ -51,12 +51,10 @@ function loadContent(){
 }
 
 // returns the URL variables
-function getUrlVars() {
-    var vars = {};
-    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-        vars[key] = value;
-    });
-    return vars;
+function getUrlVars(key) {
+    let searchParams = new URLSearchParams(window.location.search);
+    let value = searchParams.get(key);
+    return value;
 }
 
 // gets the user's timezone or returns the default
@@ -121,6 +119,12 @@ function updateBookings(start, end){
             var sunset  = moment(json.sunset, "X").tz(getTimeZone());
             $("#detail_sunrise").html(sunrise.format('HH:mm'));
             $("#detail_sunset").html(sunset.format('HH:mm'));
+
+            // add event listener for titleDate
+            document.getElementById("titleDate").addEventListener("click", function(){
+                // alert("clicked");
+                window.location.href = "/calendar.html?";
+            });
             
             // Draw the pie and get the pie content returned
             let properties = {
