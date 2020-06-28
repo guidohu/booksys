@@ -1,3 +1,6 @@
+unreleased
+ - fix stop watch finish after pause
+
 v1.25 2020.06.19
  - fix add expenditure validation
 
