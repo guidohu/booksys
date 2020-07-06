@@ -150,7 +150,7 @@ function showWatch(sessionId){
     let callbacks = {
         back: function(){
             watch.destroyView();
-            window.location.href = '/ride.html'
+            window.location.href = '/ride.html?selectedSessionId='+sessionId;
         },
         success: function(){
             heatlist.display("heatlist", watch.getSessionId());

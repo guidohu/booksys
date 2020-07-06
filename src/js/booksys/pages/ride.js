@@ -62,8 +62,9 @@ function loadContent(){
     watch = new BooksysViewStopWatch();
 
     // get the specific session ID from the URL
-    let searchParams = new URLSearchParams(window.location.search);
-    let uriSessionId = searchParams.get('sessionId');
+    let searchParams   = new URLSearchParams(window.location.search);
+    let uriSessionId   = searchParams.get('sessionId');
+    let selectedSector = searchParams.get('selectedSessionId');
 
     // switch to stop watch for the following reasons:
     // - the user is already taking the time currently
@@ -75,13 +76,13 @@ function loadContent(){
     }else if(uriSessionId != null){
         window.location.href = '/watch.html?sessionId='+sessionId;
     }else{
-        updateBookings(date_start, date_end);
+        updateBookings(date_start, date_end, selectedSector);
     }
 }
 
 // Requests the new data from the server and
 // updates the view
-function updateBookings(date_start, date_end){
+function updateBookings(date_start, date_end, selectedSectorSessionId){
     // get the session-information from the database
     var data = {
         start: date_start.format('X'),
@@ -118,6 +119,15 @@ function updateBookings(date_start, date_end){
             if(selectedSessionIdx != -1){
                 BooksysPie.selectSector(selectedSessionIdx);
                 updateDetail(selectedSessionIdx);
+            }else if(selectedSectorSessionId != null){
+                // get the index of the selected session ID
+                for(let i=0; i< pieSessions.length; i++){
+                    // if(pieSessions[i].)
+                    if(pieSessions[i].id == selectedSectorSessionId){
+                        BooksysPie.selectSector(i);
+                        updateDetail(i);
+                    }
+                }
             }else{
                 // show the session details but without a selected session
                 BooksysViewSessionDetails.display("session_details", null, null, function(){});
