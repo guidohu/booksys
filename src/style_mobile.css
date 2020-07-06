@@ -11,6 +11,10 @@ body {
     background-size: 100% auto;
 }
 
+.navbar-nav>li>a {
+    height: 50px;
+}
+
 td.highlight{
 	color: rgb(255,255,255) !important;
 	background-color: rgb(91,192,222) !important;

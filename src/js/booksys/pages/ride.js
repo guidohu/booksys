@@ -36,9 +36,6 @@ let selectedSessionIdx = -1;
 // Variable that gives access to the watch instance
 let watch;
 
-// Variable that gives access to the heatlist instance
-let heatlist;
-
 // gets the user's timezone or returns the default
 function getTimeZone(){
     if (typeof(Storage) !== "undefined") {
@@ -58,31 +55,25 @@ function getTimeZone(){
 
 // Load dynamic content
 function loadContent(){
-    $("#watch").hide();
     $("#btn_continue").hide();
     $("#status-panel").hide();
 
-    // setup our beacon
-    setupBeacon();
-
     // create a new stop watch
     watch = new BooksysViewStopWatch();
-    heatlist = new BooksysViewHeatList(
-        {
-            heatDetailsCb: function(id){
-                BooksysViewHeatEntry.displayHeatEntry("heatentry", id, function(){
-                    BooksysViewHeatEntry.destroyView("heatentry");
-                    refreshHeatlist();
-                });
-            },
-        }
-    );
 
-    // check for existing session and switch to watch
-    // if required
+    // get the specific session ID from the URL
+    let searchParams = new URLSearchParams(window.location.search);
+    let uriSessionId = searchParams.get('sessionId');
+
+    // switch to stop watch for the following reasons:
+    // - the user is already taking the time currently
+    // - the link is to a specific session
+    // otherwise display the selection of sessions for today
     if(watch.isActive()){
         let sessionId = watch.getSessionId();
-        showWatch(sessionId);
+        window.location.href = '/watch.html?sessionId='+sessionId;
+    }else if(uriSessionId != null){
+        window.location.href = '/watch.html?sessionId='+sessionId;
     }else{
         updateBookings(date_start, date_end);
     }
@@ -110,13 +101,6 @@ function updateBookings(date_start, date_end){
                 return;
             }
 
-            // Display daily info
-            var date = moment(json.window_start, "X");
-            $("#watch_date").html(date.tz(getTimeZone()).format("dddd DD.MM.YYYY"));
-            $("#watch_time").html("-");
-            // Calculate sunset time and display it
-            var sunsetTime = moment(json.sunset, "X");
-            $("#watch_sunset").html(sunsetTime.tz(getTimeZone()).format("HH:mm"));
             pieSessions = BooksysPie.drawPie("pie", json, function(id){
                 updateDetail(id);
             }, {
@@ -153,21 +137,10 @@ function updateDetail(idx){
     }else{
         $("#btn_continue").fadeOut();
     }
-    
-    // Update stopwatch info
-    var start = selectedSession.start;
-    var end   = selectedSession.end;
-    $("#watch_time").html(start.tz(getTimeZone()).format('HH:MM') + " - " + end.tz(getTimeZone()).format('HH:MM'));
-    if(selectedSession.title){
-        $("#watch_title").html(selectedSession.title);
-    }else{
-        $("#watch_title").html('-');
-    }
 
     // In case this is a free slot, we like to provide some
     // presets for the creation of a new session
     var presets = null;
-    var timezone = getTimeZone();
     if(selectedSession.id == null){
         presets             = new Object();
         presets.title       = null;
@@ -250,68 +223,6 @@ function removeRider(userId, sessionId){
     });
 }
 
-// send regular beacons
-function setupBeacon(){
-    // setup beacons
-    let beacon = new BooksysBeacon(
-        {
-            timeout:    10000,
-        },
-        {
-            success:    function(){
-                var content = '<span class="glyhpicon glyphicon-ok"></span> connected';
-                $('#status-panel').fadeOut(5000);
-                $('#status-msg').html(content);
-            },
-            redirect:   function(url){
-                window.location.href = url;
-                return;
-            },
-            failure:    function(){
-                var content = '<span class="glyphicon glyphicon-exclamation-sign"></span> bad connection';
-                $('#status-msg').html(content);                    
-                $('#status-panel').fadeIn(2000);
-            }
-        }
-    );
-}
-
-function showSessionWatch(){
-    showWatch(selectedSession.id);
-}
-
-function showWatch(sessionId){
-    $("#select_session").hide();
-
-    // define callback actions for the watch
-    let callbacks = {
-        back: function(){
-            watch.destroyView();
-            showSessionSelect();
-        },
-        success: function(){
-            heatlist.display("heatlist", watch.getSessionId());
-        }
-    };
-
-    // setup the watch and heatlist
-    watch.display("stopwatch", sessionId, callbacks);
-    heatlist.display("heatlist", sessionId);
-    
-    // display the watch
-    $("#watch").show();       
-}
-
-// refresh the heat list
-function refreshHeatlist(){
-    heatlist.display("heatlist", watch.getSessionId());
-}
-    
-// Shows the view to select a session
-function showSessionSelect(){
-    $("#watch").hide();
-    $("#select_session").show();
-    watch.destroyView();
-    
-    updateBookings(date_start, date_end);
+function continueToWatch(){
+    window.location.href = '/watch.html?sessionId='+selectedSession.id;
 }
