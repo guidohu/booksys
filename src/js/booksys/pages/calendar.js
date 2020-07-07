@@ -27,9 +27,9 @@ var displayedMonth = null;
 function loadContent(){
     // get specific month to display if set
     // otherwise default to current month
-    let displayedMonth = moment().tz(getTimeZone()).startOf('month');
-    let searchParams = new URLSearchParams(window.location.search);
-    let dateStr = searchParams.get('date');
+    displayedMonth = moment().tz(getTimeZone()).startOf('month');
+    let searchParams   = new URLSearchParams(window.location.search);
+    let dateStr        = searchParams.get('date');
     if(dateStr != null){
         date = moment(dateStr, "YYYY-MM-DD").tz(getTimeZone()).startOf('month');
         displayedMonth = date;
@@ -182,9 +182,9 @@ function drawPies(data, displayedMonth){
     if(BooksysBrowser.isMobile()){
         let tileWidth = document.getElementById('calendar_container').getBoundingClientRect().width / 7;
         properties = {
-            containerHeight:	66,
-            containerWidth:     tileWidth,
-            circleX:			tileWidth/2,
+            containerHeight:	65,
+            containerWidth:     tileWidth-2,
+            circleX:			(tileWidth-2)/2,
             circleY:            34,
             circleRadius:       20,
             animate:            false,

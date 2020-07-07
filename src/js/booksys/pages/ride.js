@@ -122,7 +122,6 @@ function updateBookings(date_start, date_end, selectedSectorSessionId){
             }else if(selectedSectorSessionId != null){
                 // get the index of the selected session ID
                 for(let i=0; i< pieSessions.length; i++){
-                    // if(pieSessions[i].)
                     if(pieSessions[i].id == selectedSectorSessionId){
                         BooksysPie.selectSector(i);
                         updateDetail(i);
