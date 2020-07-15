@@ -36,6 +36,10 @@ div.nobackground {
 	background-color: transparent;
 }
 
+.pie-session-container {
+	min-height: 428px;
+}
+
 /* The small frame for the pies in the calendar overview */
 .pie-small {
 	margin: 0.5px;
