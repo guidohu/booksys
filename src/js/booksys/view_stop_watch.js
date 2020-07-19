@@ -221,6 +221,7 @@ class BooksysViewStopWatch {
     cancel(){
         clearTimeout(this.timeout);
         this.watch.running = false;
+        this.watch.isPaused = false;
         this.watch.startTime = null;
         this.watch.display = "00:00";
         

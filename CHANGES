@@ -1,3 +1,9 @@
+v1.26 2020.07.19
+ - fix stop watch finish after pause
+ - improve linking between calendar and single-day view
+ - separate watch and ride functionality
+ - link today view with watch for current day
+
 v1.25 2020.06.19
  - fix add expenditure validation
 

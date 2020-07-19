@@ -6,6 +6,7 @@ var endDay   = null;
 var pieSessions = new Array();
 // the ID of the pie that is currently selected
 var selectedSessionIdx = -1;
+var selectedSession    = null;
 
 
 // Check if mobile browser first,
@@ -31,19 +32,22 @@ $(function() {
 
 // loads the content of the site
 function loadContent(){
+    // hide button to get to stop watch
+    $('#btn_stop_watch').hide()
+
     $.stayInWebApp();
 
     // get date from GET parameter
-    var dateStr = getUrlVars()['getdate'];
+    let dateStr = getUrlVars('getdate');
     if(dateStr == null){
         dateStr = moment().tz(getTimeZone()).format("YYYY-MM-DD");
     }
 
     // get start/end of day
     moment.tz.add("Europe/Berlin|CET CEST CEMT|-10 -20 -30|01010101010101210101210101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010|-2aFe0 11d0 1iO0 11A0 1o00 11A0 Qrc0 6i00 WM0 1fA0 1cM0 1cM0 1cM0 kL0 Nc0 m10 WM0 1ao0 1cp0 dX0 jz0 Dd0 1io0 17c0 1fA0 1a00 1ehA0 1a00 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1cM0 1fA0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00 11A0 1qM0 WM0 1qM0 WM0 1qM0 WM0 1qM0 11A0 1o00 11A0 1o00|41e5");
-    var day   = moment.tz(dateStr + "T00:00:00", getTimeZone());
-    var start = day.tz(getTimeZone()).startOf('day').clone();
-    var end   = day.tz(getTimeZone()).endOf('day').clone();
+    let day   = moment.tz(dateStr + "T00:00:00", getTimeZone());
+    let start = day.tz(getTimeZone()).startOf('day').clone();
+    let end   = day.tz(getTimeZone()).endOf('day').clone();
     startDay  = start.clone();
     endDay    = end.clone();
 
@@ -51,12 +55,10 @@ function loadContent(){
 }
 
 // returns the URL variables
-function getUrlVars() {
-    var vars = {};
-    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-        vars[key] = value;
-    });
-    return vars;
+function getUrlVars(key) {
+    let searchParams = new URLSearchParams(window.location.search);
+    let value = searchParams.get(key);
+    return value;
 }
 
 // gets the user's timezone or returns the default
@@ -97,6 +99,9 @@ function prevDay(){
 // Requests the new data from the server and
 // updates the view
 function updateBookings(start, end){
+    // hide continue button upon reload
+    $("#btn_stop_watch").hide();
+
     // get the session-information from the database
     var data = {
         start:	start.tz(getTimeZone()).format("X"),
@@ -121,13 +126,19 @@ function updateBookings(start, end){
             var sunset  = moment(json.sunset, "X").tz(getTimeZone());
             $("#detail_sunrise").html(sunrise.format('HH:mm'));
             $("#detail_sunset").html(sunset.format('HH:mm'));
+
+            // add event listener for titleDate
+            document.getElementById("titleDate").addEventListener("click", function(){
+                // alert("clicked");
+                window.location.href = "/calendar.html?";
+            });
             
             // Draw the pie and get the pie content returned
             let properties = {
-                containerHeight: 454,
+                containerHeight: 350,
                 containerWidth:  700,
-                circleX:         350,
-                circleY:         199,
+                circleX:         300,
+                circleY:         170,
                 circleRadius:    100,
                 animation:       true,
                 labels:          true,
@@ -165,6 +176,19 @@ function updateBookings(start, end){
 function updateDetail(idx){
     selectedSessionIdx     = idx;
     let session            = pieSessions[idx];
+    selectedSession        = session;
+
+    // allow to continue to stop watch
+    // if session is today
+    // and it has riders
+    let today = moment().tz(getTimeZone()).startOf('day').format("X");
+    let session_date = session.start.tz(getTimeZone()).startOf('day').format("X");
+    $("#btn_stop_watch").hide();
+    if(today == session_date){
+        if(session.riders != null && session.riders.length > 0){
+            $("#btn_stop_watch").show();
+        }
+    }
 
     // display details mobile version
     let presets = null;
@@ -203,6 +227,10 @@ function updateDetail(idx){
         deleteRiderSession(userId, sessionId);
     };
     BooksysViewSessionDetails.display("session_details", session.id, presets, callbacks);
+}
+
+function continueToWatch(){
+    window.location.href = '/watch.html?sessionId='+selectedSession.id;
 }
 
 // deletes a rider from a session

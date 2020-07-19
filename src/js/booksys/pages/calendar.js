@@ -21,10 +21,20 @@ $(function() {
 });
 
 // the month we currently display
-var displayedMonth = moment().tz(getTimeZone()).startOf('month');
+var displayedMonth = null;
 
 // load all the dynamic content
 function loadContent(){
+    // get specific month to display if set
+    // otherwise default to current month
+    displayedMonth = moment().tz(getTimeZone()).startOf('month');
+    let searchParams   = new URLSearchParams(window.location.search);
+    let dateStr        = searchParams.get('date');
+    if(dateStr != null){
+        date = moment(dateStr, "YYYY-MM-DD").tz(getTimeZone()).startOf('month');
+        displayedMonth = date;
+    }
+
     $('#calendar').hide();
     updateBookings(displayedMonth);
 
@@ -90,7 +100,6 @@ function updateBookings(date){
             $("#titleDate").text(monthText);
             $("#detail_rider").html("-");
             $("#detail_date").html("please select a session");
-            // console.log(displayedMonth.format());
             drawPies(json, date);
             $("#calendar").fadeIn();
             $('#status_modal').modal('hide');				
@@ -173,9 +182,9 @@ function drawPies(data, displayedMonth){
     if(BooksysBrowser.isMobile()){
         let tileWidth = document.getElementById('calendar_container').getBoundingClientRect().width / 7;
         properties = {
-            containerHeight:	66,
-            containerWidth:     tileWidth,
-            circleX:			tileWidth/2,
+            containerHeight:	65,
+            containerWidth:     tileWidth-2,
+            circleX:			(tileWidth-2)/2,
             circleY:            34,
             circleRadius:       20,
             animate:            false,

@@ -195,6 +195,11 @@
 		}
 
 		$res = $res[0];
+
+		// get sunset and sunrise
+		$sun_info = _get_sunrise_and_sunset($res["start_time"], $res["end_time"], $configuration);
+		$res['sunrise'] = $sun_info["sunrise"];
+		$res['sunset']  = $sun_info["sunset"];
 		
 		// build the query to get its riders
 		$query = 'SELECT 
@@ -347,6 +352,24 @@
 		HttpHeader::setResponseCode(200);
 		echo json_encode($res[0]);
 		return;
+	}
+
+	function _get_sunrise_and_sunset($start, $end, $configuration){
+		// get my offset to UTC (Timezone configured in configuration)
+		$dateTimeZoneLocation = new DateTimeZone($configuration->location_time_zone);
+		$dateTimeZoneUTC      = new DateTimeZone("UTC");
+		$dateTimeLocation     = new DateTime("@".$end, $dateTimeZoneLocation);
+		$dateTimeLocation->setTimestamp($end);
+		$dateTimeUTC          = new DateTime("@".$end, $dateTimeZoneUTC);
+		$dateTimeLocation->setTimestamp($end);
+		$timezoneOffset       = $dateTimeZoneLocation->getOffset($dateTimeUTC);
+
+		// calculate sunrise/sunset for that day
+		// Location is configurable
+		$res = array();
+		$res['sunrise']       = date_sunrise($start+$timezoneOffset, SUNFUNCS_RET_TIMESTAMP, $configuration->location_latitude, $configuration->location_longitude);
+		$res['sunset']        = date_sunset($start+$timezoneOffset, SUNFUNCS_RET_TIMESTAMP, $configuration->location_latitude, $configuration->location_longitude);
+		return $res;	
 	}
 
 	function get_booking($start, $end, $configuration, $db){

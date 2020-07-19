@@ -16,20 +16,25 @@
 				</div>
 			
 				<div class="panel panel-default">
-					<div class="row text-center" id="session_pie">
-						<div class="col-sm-1 col-xs-1"></div> <!-- there is a bug in col-xs-offset-1 -->
-						<div class="col-sm-10 col-xs-10">
-							<div class="pie-mobile" id="pie"></div>
-						</div>
+					<div class="panel-heading">
+						Sessions
 					</div>
-					<div class="row text-center margin-bottom-16px" id="btn_continue">
-						<div class="col-sm-1 col-xs-1"></div>
-						<div class="col-sm-10 col-xs-10">
-							<!-- <div class="btn-group btn-lg"> -->
-								<button type="button" class="btn btn-success btn-lg btn-block" onClick="showSessionWatch()">
-									<span class="glyphicon glyphicon-time"></span>Continue
-								</button>
-							<!-- </div> -->
+					<div class="panel-body pie-session-container">
+						<div class="row text-center" id="session_pie">
+							<div class="col-sm-1 col-xs-1"></div> <!-- there is a bug in col-xs-offset-1 -->
+							<div class="col-sm-10 col-xs-10">
+								<div class="pie-mobile" id="pie"></div>
+							</div>
+						</div>
+						<div class="row text-center margin-bottom-16px" id="btn_continue">
+							<div class="col-sm-1 col-xs-1"></div>
+							<div class="col-sm-10 col-xs-10">
+								<!-- <div class="btn-group btn-lg"> -->
+									<button type="button" class="btn btn-success btn-lg btn-block" onClick="continueToWatch()">
+										<span class="glyphicon glyphicon-time"></span>Continue
+									</button>
+								<!-- </div> -->
+							</div>
 						</div>
 					</div>
 				</div>
@@ -41,84 +46,6 @@
 			
 				<div id="user_dialog">
 					<!-- dynamically loaded -->
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<div id="watch">
-		<div class="page-header">
-			<h3>Stop Watch</h3>
-		</div>
-
-		<div class="row row-padded">
-			<div class="col-sm-8 col-xs-8">
-
-		
-				<div class="panel panel-default panel-padded" id="status-panel">
-					<div class="panel-body">
-						<div class="row">
-							<div class="col-xs-1 col-sm-1"></div>
-							<div class="col-xs-10 col-sm-10 text-center" id="status-msg">
-								STATUS
-							</div>
-						</div>
-					</div>
-				</div>
-			
-				<div id="stopwatch">
-					<!-- stop watch goes here -->
-				</div>
-			</div>
-			<div class="col-sm-4 col-xs-4">
-			
-				<div id="heatlist" class="heatlist-desktop-height">
-					<!-- heat list goes here -->
-				</div>
-			
-				<div id="heatentry">
-					<!-- heat entry goes here -->
-				</div>
-		
-				<div class="panel panel-default panel-padded">
-					<div class="panel-body">
-						<div class="row text-left">
-							<!-- <div class="col-sm-1 col-xs-1"></div> -->
-							<div class="col-sm-12 col-xs-12">
-								<div class="row">
-									<div class="col-sm-2 col-xs-2">
-										Date
-									</div>
-									<div class="col-sm-10 col-xs-10" id="watch_date">                            
-									</div>
-								</div>
-								<div class="row">
-									<div class="col-sm-2 col-xs-2">
-										Time
-									</div>
-									<div class="col-sm-10 col-xs-10" id="watch_time">
-										-
-									</div>
-								</div>
-								<div class="row">
-									<div class="col-sm-2 col-xs-2">
-										Title
-									</div>
-									<div class="col-sm-10 col-xs-10" id="watch_title">
-										-
-									</div>
-								</div>
-								<div class="row">
-									<div class="col-sm-2 col-xs-2">
-										Sunset
-									</div>
-									<div class="col-sm-10 col-xs-10" id="watch_sunset">
-										-
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
 				</div>
 			</div>
 		</div>

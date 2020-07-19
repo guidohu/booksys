@@ -7,7 +7,7 @@ class BooksysViewHeatList {
     // call this function to display the session details
     // - location       ID of the element where to place it
     // - sessionId      the ID of the session to display
-    display(location, sessionId){
+    display(location, sessionId, autoupdate){
         // load session/user data and display
         this.location  = location;
         this.sessionId = sessionId;
@@ -119,7 +119,7 @@ class BooksysViewHeatList {
         }
 
         $('#'+location).load("res/view_heat_list.vue", function(){
-            var App = new Vue({
+            let App = new Vue({
                 el: "#view_heat_list",
                 data: {
                     heats:       that.heats,
