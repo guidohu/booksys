@@ -1,4 +1,4 @@
-unreleased
+v1.26 2020.07.19
  - fix stop watch finish after pause
  - improve linking between calendar and single-day view
  - separate watch and ride functionality
