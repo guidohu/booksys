@@ -1,0 +1,313 @@
+<div class="panel panel-default" id="panel-warning">
+	TEST
+</div>
+
+<div class="display">
+	<div class="page-header">
+		<h3>Boat Management</h3>
+	</div>
+
+	<div class="row row-padded">
+		<div class="col-sm-12 col-xs-12">
+			<div class="panel panel-default">
+				<!-- Nav tabs -->
+				<ul class="nav nav-tabs" id="boatTab">
+					<li>
+						<a href="#engine" data-toggle="tab">
+							<div class="bc_icon bc_icon_tab bc_icon_tacho inline"></div>
+							Engine Hours
+						</a>
+					</li>
+					<li>
+						<a href="#fuel" data-toggle="tab">
+							<div class="bc_icon bc_icon_tab bc_icon_fuel inline "></div>
+							Fuel
+						</a>
+					</li>
+					<li>
+						<a href="#maintenance" data-toggle="tab">
+							<div class="bc_icon bc_icon_tab bc_icon_wrench inline"></div>
+							Maintenance
+						</a>
+					</li>
+				</ul>
+			
+				<!-- Tab panes -->
+				<div class="tab-content tab-content-desktop-height">
+					<!-- Engine Hours Content -->
+					<div class="tab-pane active" id="engine">
+						<form id="engine_hours_form">
+							<div class="form-horizontal">
+								<div class="form-group">
+									<div class="col-sm-1 col-xs-1"></div>
+									<div class="col-sm-2 col-xs-2 text-left">
+										<label for="user">Driver</label>
+									</div>
+									<div class="col-sm-8 col-xs-8 text-left">
+										<select id="engine_hours_user" class="form-control form-control-white">
+											<!-- here comes the driver -->						
+										</select>
+									</div>
+									<div class="col-sm-1 col-xs-1"></div>
+								</div>
+								<div class="form-group">
+									<div class="col-sm-1 col-xs-1"></div>
+									<div class="col-sm-2 col-xs-2 text-left">
+										<label for="engine_hours_before">Before</label>
+									</div>
+									<div class="col-sm-8 col-xs-8 text-left">
+										<div class="input-group">
+											<input type="text" class="form-control form-control-white" name="engine_hours_before" id="engine_hours_before"/>
+											<span class="input-group-addon">hrs</span>
+										</div>
+									</div>
+									<div class="col-sm-1 col-xs-1"></div>
+								</div>
+								<div class="form-group" id="engine_hours_after_row">
+									<div class="col-sm-1 col-xs-1"></div>
+									<div class="col-sm-2 col-xs-2 text-left">
+										<label for="engine_hours_after">After</label>
+									</div>
+									<div class="col-sm-8 col-xs-8 text-left">
+										<div class="input-group">
+											<input type="text" class="form-control form-control-white" name="engine_hours_after" id="engine_hours_after"/>
+											<span class="input-group-addon">hrs</span>
+										</div>
+									</div>
+									<div class="col-sm-1 col-xs-1"></div>
+								</div>
+								<div class="form-group" id="engine_hours_type_row">
+									<div class="col-sm-1 col-xs-1"></div>
+									<div class="col-sm-2 col-xs-2 text-left">
+										<label for="start">Type</label>
+									</div>
+									<div class="col-sm-8 col-xs-8 text-left">
+											<input type="checkbox" name="boatUsageType" id="boatUsageType"/>
+									</div>
+									<div class="col-sm-1 col-xs-1"></div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-1 col-xs-1"></div>
+								<div class="col-sm-10 col-xs-10">
+									<button type="submit" class="btn btn-default btn-block" id="engine_hours_btn">
+										Start
+									</button>
+								</div>				
+								<div class="col-sm-1 col-xs-1"></div>
+							</div>			
+							<hr>
+							<div class="row">
+								<div class="col-sm-12 col-xs-12 text-left">
+									<table class="table table-striped table-hover">
+										<thead>
+											<tr>
+												<th>Date</th>
+												<th>Driver</th>
+												<th>Before</th>
+												<th>After</th>
+												<th>Diff</th>
+											</tr>
+										</thead>
+										<tbody id="logbook_content">
+											<!-- logbook -->
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</form>
+					</div>
+				
+					<!-- Fuel Content -->
+					<div class="tab-pane" id="fuel">
+						<form id="fuel_form">
+							<div class="form-horizontal">
+								<div class="form-group">
+									<div class="col-sm-1 col-xs-1"></div>
+									<div class="col-sm-2 col-xs-2 text-left">
+										<label for="user">Driver</label>
+									</div>
+									<div class="col-sm-8 col-xs-8 text-left">
+										<select id="fuel_user" class="form-control form-control-white">
+											<!-- here comes the driver -->						
+										</select>
+									</div>
+									<div class="col-sm-1 col-xs-1"></div>
+								</div>
+								<div class="form-group">
+									<div class="col-sm-1 col-xs-1"></div>
+									<div class="col-sm-2 col-xs-2 text-left">
+										<label for="fuel_engine_hours">Engine Hours</label>
+									</div>
+									<div class="col-sm-8 col-xs-8 text-left">
+										<div class="input-group">
+											<input type="text" class="form-control form-control-white" name="fuel_engine_hours" id="fuel_engine_hours"/>
+											<span class="input-group-addon">hrs</span>
+										</div>
+									</div>
+									<div class="col-sm-1 col-xs-1"></div>
+								</div>
+								<div class="form-group">
+									<div class="col-sm-1 col-xs-1"></div>
+									<div class="col-sm-2 col-xs-2 text-left">
+										<label for="fuel_liters">Fuel</label>
+									</div>
+									<div class="col-sm-8 col-xs-8 text-left">
+										<div class="input-group">
+											<input type="text" class="form-control form-control-white" name="fuel_liters" id="fuel_liters"/>
+											<span class="input-group-addon">ltrs</span>
+										</div>
+									</div>
+									<div class="col-sm-1 col-xs-1"></div>
+								</div>
+								<div class="form-group">
+									<div class="col-sm-1 col-xs-1"></div>
+									<div class="col-sm-2 col-xs-2 text-left">
+										<label for="fuel_cost">Cost</label>
+									</div>
+									<div class="col-sm-8 col-xs-8 text-left">
+										<div class="input-group">
+											<input type="text" class="form-control form-control-white" name="fuel_cost" id="fuel_cost"/>
+											<span class="input-group-addon" id="fuel_cost_currency"><!-- here comes the currency --></span>
+										</div>
+									</div>
+									<div class="col-sm-1 col-xs-1"></div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-1 col-xs-1"></div>
+								<div class="col-sm-10 col-xs-10">
+									<button type="submit" class="btn btn-default btn-block" id="fuel_btn">
+										Add
+									</button>
+								</div>				
+								<div class="col-sm-1 col-xs-1"></div>
+							</div>
+							<div class="row">
+								<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+									<div class="panel panel-default panel-border">
+										<div class="panel-heading" role="tab" id="header_card_graph">
+											<div class="panel-title" >
+												<div class="row">
+													<div class="col-sm-1 col-xs-1"></div>
+													<div class="col-sm-10 col-xs-10 text-center">
+														<a role="button" data-toggle="collapse" data-target="#fuel_graph_collapse" data-parent="#accordion" aria-expanded="false" aria-controls="fuel_graph_collapse" href="#fuel_graph_collapse">Visualisation</a>
+													</div>
+													<div class="col-sm-1 col-xs-1"></div>
+												</div>
+											</div>
+										</div>
+										<div class="panel-collapse collapse" id="fuel_graph_collapse" aria-labelledby="header_card_graph" data-parent="#accordion" role="tabpanel">
+											<div class="panel-body fuel-chart" id="fuel_chart_parent">
+												<canvas id="fuel_chart"></canvas>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-12 col-xs-12 text-left">
+									<table class="table table-striped table-hover">
+										<thead>
+											<tr>
+												<th>Date</th>
+												<th>Driver</th>
+												<th>Engine Hrs</th>
+												<th>Fuel</th>
+												<th>Cost</th>
+											</tr>
+										</thead>
+										<tbody id="fuel_log_content">
+											<!-- fuel logbook -->
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</form>
+					</div>
+				
+					<!-- Maintenance Content -->
+					<div class="tab-pane" id="maintenance">
+						<form id="maintenance_form">
+							<div class="form-horizontal">
+								<div class="row form-group">
+									<div class="col-sm-1 col-xs-1"></div>
+										<div class="col-sm-2 col-xs-2 text-left">
+											<label for="maintenance_user">Driver</label>
+										</div>
+										<div class="col-sm-8 col-xs-8 text-left">
+											<select id="maintenance_user" class="form-control form-control-white">
+												<!-- here comes the driver -->						
+											</select>
+										</div>
+									<div class="col-sm-1 col-xs-1"></div>
+								</div>
+								<div class="row form-group">
+									<div class="col-sm-1 col-xs-1"></div>
+										<div class="col-sm-2 col-xs-2 text-left">
+											<label for="maintenance_engine_hours">Engine Hours</label>
+										</div>
+										<div class="col-sm-8 col-xs-8 text-left">
+											<div class="input-group">
+												<input type="text" id="maintenance_engine_hours" class="form-control form-control-white input-sm" name="maintenance_engine_hours"/>
+												<span class="input-group-addon">hrs</span>
+											</div>
+										</div>
+									<div class="col-sm-1 col-xs-1"></div>
+								</div>
+								<div class="row form-group">
+									<div class="col-sm-1 col-xs-1"></div>
+										<div class="col-sm-2 col-xs-2 text-left">
+											<label for="maintenance_description">Description</label>
+										</div>
+										<div class="col-sm-8 col-xs-8 text-left">
+												<textarea rows="2" class="form-control form-control-white input-sm" name="maintenance_description" id="maintenance_description" placeholder="What maintenance has been done?"></textarea>
+										</div>
+									<div class="col-sm-1 col-xs-1"></div>
+								</div>
+								<div class="row">
+									<div class="col-sm-1 col-xs-1"></div>
+									<div class="col-sm-10 col-xs-10">
+										<button type="submit" class="btn btn-default btn-block" id="maintenance_btn">
+											Add
+										</button>
+									</div>				
+									<div class="col-sm-1 col-xs-1"></div>
+								</div>
+								<hr>
+								<div class="row">
+									<div class="col-sm-12 col-xs-12 text-left">
+										<table class="table table-striped table-hover">
+											<thead>
+												<tr>
+													<th>Date</th>
+													<th>EngineHrs</th>
+													<th>Driver</th>
+													<th>Maintenance Work</th>
+												</tr>
+											</thead>
+											<tbody id="maintenance_log_content">
+												<!-- maintenance logbook -->
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- The back button line -->
+	<div class="bottom">
+		<a class="btn btn-default" href="dashboard.html">
+		   <span class="glyphicon glyphicon-home"></span>
+		  HOME
+		 </a>
+	</div>
+</div>
+
+
+
+<!-- Where we want to show the vue modals -->
+<div id="user_dialog_modal"></div>
