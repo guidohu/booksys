@@ -12,7 +12,7 @@ Vue.config.devtools = process.env.NODE_ENV === 'development'
 new Vue({ // eslint-disable-line no-new
   el: '#app',
   router: router,
-  // store: store,
+  store: store,
   render: h => h(App)
 })
 // .$mount('#app')

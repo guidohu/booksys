@@ -8,6 +8,7 @@
               </div>
               <div class="panel-body" id="status_body">
                   <!-- status messages go here -->
+                  {{ msg }}
               </div>
           </div>
       </div>
@@ -15,13 +16,18 @@
   </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+<script>
+import Vue from 'vue'
 
-@Component
-export default class NotificationModal extends Vue {
-  @Prop() private msg!: string;
-}
+export default Vue.extend({
+    name: "NotificationModal",
+    props: [ 'message' ],
+    data: function() {
+        return {
+            msg: this.message
+        }
+    }
+})
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

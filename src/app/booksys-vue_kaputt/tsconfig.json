@@ -28,10 +28,11 @@
   },
   "include": [
     "src/**/*.ts",
+    "src/**/*.js",
     "src/**/*.tsx",
     "src/**/*.vue",
     "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "tests/**/*.tsx", "src/main.js", "src/store/index.js", "src/store/modules/login.js"
   ],
   "exclude": [
     "node_modules"

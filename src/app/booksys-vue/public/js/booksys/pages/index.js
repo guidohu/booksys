@@ -2,13 +2,6 @@
 // then continue with checks
 $(function() {
     if(BooksysBrowser.isMobile()){
-        // Make it behave like an app
-        BooksysBrowser.setViewportMobile();
-        BooksysBrowser.setManifest();
-        BooksysBrowser.setMetaMobile();
-        // Add mobile style dynamically
-        BooksysBrowser.addMobileCSS();
-
         $("#body").load("res/index_mobile.html", function(){
             $.stayInWebApp();
             setupEventListeners();
@@ -30,56 +23,6 @@ function setupEventListeners(){
     });
 }
 
-// Check backend status and abort or continue
-function backendStatus(){
-    $("#status_panel").hide();
-
-    BooksysBackend.getStatus({
-        green: function(text, redirect){
-            console.log("backend status ok");
-            isLoggedIn();
-            setFocusToUsername();
-        },
-        red: function(text, redirect){
-            switch(text){
-                case "no database configured":
-                    console.log("Server reports: " + text); 
-                    window.location.href = "/setup.html";
-                    break;
-                case "no user configured":
-                    console.log("Server reports: " + text); 
-                    window.location.href = "/setup.html";
-                    break;
-                case "no config":
-                    console.log("Server reports: " + text);
-                    window.location.href = "/setup.html";
-                    break;
-                default:
-                    $('#login_form').hide();
-                    $("#status_panel").show();
-                    console.error("backend status not ok");
-                    console.error(text);
-                    var div = document.createElement('div');
-                    div.className = 'alert alert-danger';
-                    div.innerHTML = "The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible.";
-                    document.getElementById("status_body").appendChild(div);
-            }
-        }
-    });
-}
-
-// Check if we are already logged in
-function isLoggedIn() {
-    let login = new BooksysLoginCheck();
-    login.check(function(){
-        window.location.href = "dashboard.html";
-    });
-}
-
-// Sets the focus to the username input
-function setFocusToUsername() {
-    $('#username').focus();
-}
 
 // Calculate the SHA-256 hash of the password on user-side
 // to never transmit a user's password in clear text
@@ -182,20 +125,4 @@ function removeUserInStorage(){
         localStorage.removeItem('userRole');
         localStorage.removeItem('userRoleName');
     }
-}
-
-function setStatus(text){
-    // remove a previous status
-    let status = document.getElementById("login_label"); 
-    let child = status.lastElementChild;  
-    while (child) { 
-        status.removeChild(child); 
-        child = status.lastElementChild; 
-    }
-
-    var div = document.createElement('label');
-    div.className = 'label label-danger';
-    div.innerHTML = text;
-    document.getElementById("login_label").appendChild(div);
-    return;
 }

@@ -1,4 +1,4 @@
-# booksys-vue
+# hello-world
 
 ## Project setup
 ```

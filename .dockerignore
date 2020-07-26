@@ -1,3 +1,4 @@
 Dockerfile
+src/app
 config/config.php
 img/Menu.psd
