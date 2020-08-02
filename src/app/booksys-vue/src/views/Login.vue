@@ -31,9 +31,28 @@ export default {
       this.loginStatusMessage = "Cannot login"
       let successCb = () => {
         console.log("Login Successful")
+        this.loginStatusMessage = null
+        // send login state to store
+        let loadDashboard = () => {
+          // store in store
+
+          // route to /dashboard
+          window.location.href = "/dashboard.html";
+        }
+        let errorCase = (error) => {
+          console.log(error)
+        }
+        ApiLogin.getMyUser(loadDashboard, errorCase) 
       }
-      let failCb = () => {
-        console.log("Login Failed")
+      let failCb = (message) => {
+        if(message.login_status_code == -1){
+          this.loginStatusMessage = "incorrect username or password"
+        } else if(message.login_status_code == -2){
+          this.loginStatusMessage = "please be patient until we activate your account"
+        } else {
+          this.loginStatusMessage = message
+        }
+        console.log("Login Failed", message)
       }
 
       ApiLogin.login(username, password, successCb, failCb)

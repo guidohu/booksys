@@ -1,4 +1,4 @@
-import axios from 'axios'
+// import axios from 'axios'
 import sha256 from 'crypto-js/sha256';
 import hex from 'crypto-js/enc-hex';
 
@@ -6,7 +6,6 @@ export class Login {
 
     // perform backend login
     static login(username, password, cbSuccess, cbFailed){
-        console.log("login called")
         if(username == null || username == "") {
             cbFailed("No username given")
             return
@@ -18,22 +17,42 @@ export class Login {
 
         // calculate the hash of the password (historic reason)
         let pwHash = Login.calcHash(password)
-        axios.post('http://localhost/api/login.php?action=login', {
+        Login.postData({
             username: username,
-            password: pwHash,
-          })
-          .then(function (response) {
-            console.log(response);
-            if(cbSuccess != null) {
+            password: pwHash
+        }).then(response => {
+            if(response.login_successful){
                 cbSuccess()
+            }else{
+                cbFailed(response)
             }
-          })
-          .catch(function (error) {
-            console.log(error);
-            if(cbFailed != null) {
+        })
+    }
+
+    static getMyUser(cbSuccess, cbFailed){
+        Login.getData('http://localhost/api/user.php?action=get_my_user')
+            .then(response => {
+                console.log(response)
+                cbSuccess()
                 cbFailed()
-            }
-          });
+            })
+    }
+
+    static async postData(data) {
+        const result = await fetch('http://localhost/api/login.php?action=login', {
+            method: 'POST',
+            cache: 'no-cache',
+            body: JSON.stringify(data)
+        })
+        return result.json()
+    }
+
+    static async getData(url) {
+        const result = await fetch(url, {
+            method: 'GET',
+            cache: 'no-cache'
+        })
+        return result.json()
     }
 
     static calcHash(password) {
