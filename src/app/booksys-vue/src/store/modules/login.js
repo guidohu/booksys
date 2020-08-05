@@ -2,7 +2,8 @@
 // shape: [{ id, quantity }]
 const state = () => ({
   username: '',
-  role: ''
+  role: '',
+  userInfo: {}
 })
 
 // getters
@@ -19,6 +20,9 @@ const actions = {
   },
   setUsername ({ commit }, value) {
     commit('setUsername', value)
+  },
+  setUserInfo ({ commit }, value) {
+    commit('setUserInfo', value)
   }
 }
 
@@ -27,6 +31,10 @@ const mutations = {
   setUsername (state, message) {
     state.username = message
     console.log('username: ', state.username)
+  },
+  setUserInfo (state, value) {
+    state.userInfo = value
+    console.log('userInfo set to', value)
   }
 }
 

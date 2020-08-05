@@ -30,16 +30,16 @@ export class Login {
     }
 
     static getMyUser(cbSuccess, cbFailed){
-        Login.getData('http://localhost/api/user.php?action=get_my_user')
+        Login.getData('/api/user.php?action=get_my_user')
             .then(response => {
                 console.log(response)
-                cbSuccess()
+                cbSuccess(response)
                 cbFailed()
             })
     }
 
     static async postData(data) {
-        const result = await fetch('http://localhost/api/login.php?action=login', {
+        const result = await fetch('/api/login.php?action=login', {
             method: 'POST',
             cache: 'no-cache',
             body: JSON.stringify(data)

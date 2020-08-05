@@ -62,7 +62,7 @@ export default {
     const resF = (x) => {
       this.backendStatus = x
       if(BooksysBackend.needsSetup(this.backendStatus)){
-        window.location.href = "/setup.html";
+        this.$router.push('/dashboard');
       }
     }
     BooksysBackend.getStatus(resF)

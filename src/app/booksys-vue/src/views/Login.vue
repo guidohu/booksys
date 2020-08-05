@@ -5,11 +5,13 @@
 </template>
 
 <script>
+import Vue from 'vue'
+import { mapActions } from 'vuex'
 import LoginModal from '@/components/LoginModal.vue'
 import { BooksysBrowser } from '@/libs/browser'
 import { Login as ApiLogin} from '@/api/login'
 
-export default {
+export default Vue.extend({
   name: 'Login',
   data: function() {
     return {
@@ -26,6 +28,9 @@ export default {
     }
   },
   methods: {
+    ...mapActions('login', [
+      'setUserInfo'
+    ]),
     handleLogin: function (username, password) {
       console.log(username, password)
       this.loginStatusMessage = "Cannot login"
@@ -33,14 +38,17 @@ export default {
         console.log("Login Successful")
         this.loginStatusMessage = null
         // send login state to store
-        let loadDashboard = () => {
+        let loadDashboard = (userInfo) => {
           // store in store
+          console.log("userinfo", userInfo)
+
+          this.setUserInfo(userInfo)
 
           // route to /dashboard
-          window.location.href = "/dashboard.html";
+          this.$router.push('/dashboard')
         }
         let errorCase = (error) => {
-          console.log(error)
+          console.log("Error", error)
         }
         ApiLogin.getMyUser(loadDashboard, errorCase) 
       }
@@ -62,5 +70,5 @@ export default {
     LoginModal
   },
   beforeCreate () {}
-}
+})
 </script>

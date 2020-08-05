@@ -8,7 +8,7 @@ export class BooksysLoginCheck {
 
     // checks whether we are logged in and redirects to the url in case we are not
     check = (loggedInCb, loggedOutCb) => {
-        axios.get('backend/api/login.php?action=isLoggedIn')
+        axios.get('/api/login.php?action=isLoggedIn')
             .then(response => {
                 if(response.data.loggedIn == false){
                     if(loggedOutCb != null){

@@ -3,7 +3,7 @@ import axios from 'axios'
 export class BooksysBackend {
 
     static getStatus(cb) {
-        axios.get('backend/api/backend.php?action=get_status')
+        axios.get('/api/backend.php?action=get_status')
             .then(response => {
                 cb(response.data)
             })
