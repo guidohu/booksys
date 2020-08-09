@@ -23,8 +23,9 @@ import { BooksysBrowser } from './libs/browser'
 import { BooksysBackend } from './libs/backend'
 import { BooksysLoginCheck} from './libs/logincheck'
 import AlertMessage from './components/AlertMessage.vue'
+import Vue from 'vue'
 
-export default {
+export default Vue.extend({
   name: 'App',
   data: function() {
     return {
@@ -54,20 +55,22 @@ export default {
 
     // check if already logged in -> redirect if logged in
     let login = new BooksysLoginCheck();
+    let that  = this
     login.check(function(){
-      window.location.href = "/dashboard.html"
+      console.log("already logged in, forward to dashboard")
+      that.$router.push("/dashboard")
     })
   },
   mounted() {
     const resF = (x) => {
       this.backendStatus = x
       if(BooksysBackend.needsSetup(this.backendStatus)){
-        this.$router.push('/dashboard');
+        this.$router.push('/setup');
       }
     }
     BooksysBackend.getStatus(resF)
   }
-}
+})
 </script>
 
 <style>

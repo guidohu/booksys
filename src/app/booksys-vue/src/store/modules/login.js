@@ -10,6 +10,10 @@ const state = () => ({
 const getters = {
   username: (state) => {
     return state.username
+  },
+  userInfo: (state) => {
+    console.log("Getting userInfo:", state.userInfo)
+    return state.userInfo
   }
 }
 
