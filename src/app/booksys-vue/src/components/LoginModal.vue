@@ -12,13 +12,13 @@
             <b-card-text>
               <b-form-group>
                 <b-col cols="12">
-                    <label class="d-none d-sm-block" for="username">e-mail</label>
+                    <label class="d-none d-sm-block font-weight-bold" for="username">e-mail</label>
                     <input ref="username" type="text" v-model="username" class="form-control form-control-white" placeholder="e-mail" autocomplete="username"/>
                 </b-col>
               </b-form-group>
               <b-form-group>
                 <b-col cols="12">
-                    <label class="d-none d-sm-block" for="password">password</label>
+                    <label class="d-none d-sm-block font-weight-bold" for="password">password</label>
                     <input type="password" v-model="password" class="form-control form-control-white" placeholder="password" autocomplete="current-password"/>
                 </b-col>
               </b-form-group>

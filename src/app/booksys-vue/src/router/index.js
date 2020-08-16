@@ -4,6 +4,7 @@ import Login from '../views/Login.vue'
 import Logout from '../views/Logout.vue'
 import SignUp from '../views/SignUp.vue'
 import Dashboard from '../views/Dashboard.vue'
+import Info from '../views/Info.vue'
 
 Vue.use(VueRouter)
 
@@ -32,6 +33,11 @@ const routes = [
     path: '/dashboard',
     name: 'Dashboard',
     component: Dashboard
+  },
+  {
+    path: '/info',
+    name: 'Info',
+    component: Info
   }
   // {
     // path: '/about',
