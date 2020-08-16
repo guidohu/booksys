@@ -24,8 +24,40 @@ export class Login {
             if(response.login_successful){
                 cbSuccess()
             }else{
-                cbFailed(response)
+                console.log("logout.php response:", response)
+                let errorMessage = "login failed"
+                if(response.login_status_code == -1){
+                    errorMessage = "incorrect username or password"
+                }else if(response.login_status_code == -2){
+                    errorMessage = "please be patient until we activate your account"
+                }else{
+                    errorMessage = response
+                }
+                cbFailed(errorMessage)
             }
+        })
+    }
+
+    static logout(cbSuccess, cbFailed){
+        fetch('/api/logout.php', {
+            method: 'GET',
+            cache: 'no-cache'
+        })
+        .then(response => {
+            return response.json()})
+        .then(data => {
+            if(data.ok){
+              cbSuccess(data)
+            }else{
+              cbFailed("Error while logging out")
+            }
+        })
+        .catch(error => {
+            console.log('action: login/logout', error)
+            cbFailed({
+                ok: false,
+                message: error
+            })
         })
     }
 
@@ -34,6 +66,21 @@ export class Login {
             .then(response => {
                 console.log(response)
                 cbSuccess(response)
+            }).catch(error => {
+                cbFailed(error)
+            })
+    }
+
+    static isLoggedIn(cbSuccess, cbFailed){
+        Login.getData('/api/login.php?action=isLoggedIn')
+            .then(response => {
+                if(response.loggedIn == false){
+                    cbFailed()
+                }else{
+                    cbSuccess()
+                }
+            }).catch(error => {
+                console.error("login.js: cannot get isLoggedIn:", error)
                 cbFailed()
             })
     }

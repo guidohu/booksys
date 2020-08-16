@@ -264,10 +264,34 @@ class Login{
 		$db->prepare($query);
 		$db->bind_param('ss', date("Y-m-d H:i:s", time()), $_COOKIE['SESSION']);
 		if($db->execute()){
-			setcookie('SESSION', '', -1, '/');
+			setcookie(
+				'SESSION', 
+				'',  
+				[   
+					'expires' => time()-3600, 
+					'path'    => '/', 
+					'domain'  => '', 
+					'secure'  => FALSE,
+					'httponly' => TRUE,
+					'samesite'=> "lax"
+				]
+			);
 			$db->disconnect();
 			return TRUE;
 		}else{
+			echo $db->dbh->error;
+			setcookie(
+				'SESSION', 
+				'',  
+				[   
+					'expires' => time()-3600, 
+					'path'    => '/', 
+					'domain'  => '', 
+					'secure'  => FALSE,
+					'httponly' => TRUE,
+					'samesite'=> "lax"
+				]
+			);
 			$db->disconnect();
 			return FALSE;
 		}

@@ -1,6 +1,11 @@
 <template>
   <div v-if="isDesktop" class="display">
-    <header class="welcome">Welcome, <router-link to="/account">{{ userInfo.first_name }} {{ userInfo.last_name}}</router-link></header>
+    <header class="welcome">
+      Welcome, 
+      <router-link to="/account">
+        {{ userInfo.first_name }} {{ userInfo.last_name}}
+      </router-link>
+    </header>
     <!-- <div class="login-view">
       <div class="row">
         <div class="col-sm-3"></div>
@@ -69,10 +74,10 @@
         <div class="col-sm-3"></div>
       </div>
     </div> -->
-    <DashboardAdmin v-bind:isMobile="isMobile"/>
+    <DashboardAdmin/>
   </div>
   <div v-else>
-    <DashboardAdmin v-bind:isMobile="isMobile"/>
+    <DashboardAdminMobile/>
   </div>
 </template>
 
@@ -81,12 +86,14 @@ import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import { BooksysBrowser } from '@/libs/browser'
 import DashboardAdmin from '../components/DashboardAdmin'
+import DashboardAdminMobile from '../components/DashboardAdminMobile'
 
 
 export default Vue.extend({
   name: 'Dashboard',
   components: {
-    DashboardAdmin
+    DashboardAdmin,
+    DashboardAdminMobile
   },
   //props: ['isMobile'],
   // data: function () {

@@ -1,69 +1,63 @@
 <template>
-  <form class="form-horizontal" v-on:submit.prevent="login" role="form">
-    <div class="row">
-      <div class="col-sm-3 hidden-xs">
-      </div>
-      <div class="col-sm-6 col-xs-12">
-        <div class="panel panel-default">
-          <div class="panel-heading">
+  <b-form v-on:submit.prevent="login" role="form">
+    <b-row class="text-left">
+      <b-col cols="3" class="d-none d-sm-block">
+      </b-col>
+      <b-col cols="12" sm="6">
+        <b-card no-body>
+          <b-card-header>
             Please Login
-          </div>
-          <div class="panel-body text-left">
-            <div class="form-group">
-                <div class="col-sm-3 hidden-xs"></div>
-                <div class="col-sm-8 col-xs-12">
-                    <label class="hidden-xs" for="username">e-mail</label>
+          </b-card-header>
+          <b-card-body>
+            <b-card-text>
+              <b-form-group>
+                <b-col cols="12">
+                    <label class="d-none d-sm-block" for="username">e-mail</label>
                     <input ref="username" type="text" v-model="username" class="form-control form-control-white" placeholder="e-mail" autocomplete="username"/>
-                </div>
-                <div class="col-sm-1 hidden-xs"></div>
-            </div>
-            <div class="form-group">
-                <div class="col-sm-3 hidden-xs"></div>
-                <div class="col-sm-8 col-xs-12">
-                    <label class="hidden-xs" for="password">password</label>
+                </b-col>
+              </b-form-group>
+              <b-form-group>
+                <b-col cols="12">
+                    <label class="d-none d-sm-block" for="password">password</label>
                     <input type="password" v-model="password" class="form-control form-control-white" placeholder="password" autocomplete="current-password"/>
-                </div>
-                <div class="col-sm-1 hidden-xs"></div>
-            </div>
-            <div v-if="statusMessage" class="form-group text-center">
-                <div class="col-sm-3 hidden-xs"></div>
-                <div class="col-sm-8 col-xs-12">
-                  <div class="label label-danger">
+                </b-col>
+              </b-form-group>
+              <b-form-group v-if="statusMessage" class="text-center">
+                <b-col cols="12">
+                  <b-alert show variant="danger">
                     {{ statusMessage }}
-                  </div>
-                </div>
-                <div class="col-sm-1 hidden-xs"></div>
-            </div>
-            <div class="form-group text-right">
-                <div class="col-sm-3 hidden-xs"></div>
-                <div class="col-sm-8 col-xs-12">
-                    <button type="submit" id="loginBtn" class="btn btn-default inline">
-                        <span class="glyphicon glyphicon-log-in"></span>
-                        Login
-                    </button>
-                </div>
-                <div class="col-sm-1 hidden-xs"></div>
-            </div>
-          </div>
-          <div class="panel-footer">
-            <div class="form-group text-left">
-                <div class="col-sm-3 hidden-xs"></div>
-                <div class="col-sm-8 col-xs-12">
-                    <a href="forgot_password.html" type="button" class="btn btn-default btn-xs inline">
+                  </b-alert>
+                </b-col>
+              </b-form-group>
+              <b-form-group class="text-right">
+                <b-col cols="12">
+                  <b-button variant="outline-dark" type="submit">
+                    <b-icon-caret-right-fill></b-icon-caret-right-fill>
+                    Login
+                  </b-button>
+                </b-col>
+              </b-form-group>
+            </b-card-text>
+          </b-card-body>
+          <b-card-footer>
+            <b-form-group class="text-left">
+                <b-col cols="3" class="d-xs-none"></b-col>
+                <b-col cols="12" xs="8">
+                    <b-button to="/forgot-password" variant="light">
                         Forgot password
-                    </a>
-                    <a href="sign_up.html" type="button" class="btn btn-default btn-xs inline">
+                    </b-button>
+                    <b-button to="/sign-up" variant="light">
                         Sign-Up
-                    </a>
-                </div>
-                <div class="col-sm-1 hidden-xs"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-3 hidden-xs"></div>
-    </div>
-  </form>
+                    </b-button>
+                </b-col>
+                <b-col cols="1" class="d-xs-none"></b-col>
+            </b-form-group>
+          </b-card-footer>
+        </b-card>
+      </b-col>
+      <b-col cols="3" class="d-none d-sm-block"></b-col>
+    </b-row>
+  </b-form>
 </template>
 
 <script>
@@ -108,7 +102,6 @@ export default Vue.extend({
       this.$emit("login", this.username, this.password)
     },
     ...mapActions('login', [
-      'doLogin',
       'setUsername'
     ]),
     goSignUp: function() {

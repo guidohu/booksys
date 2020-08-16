@@ -21,9 +21,9 @@
 <script>
 import { BooksysBrowser } from './libs/browser'
 import { BooksysBackend } from './libs/backend'
-import { BooksysLoginCheck} from './libs/logincheck'
 import AlertMessage from './components/AlertMessage.vue'
 import Vue from 'vue'
+import { mapGetters, mapState } from 'vuex'
 
 export default Vue.extend({
   name: 'App',
@@ -42,7 +42,15 @@ export default Vue.extend({
     },
     isDesktop: function() {
       return !BooksysBrowser.isMobile()
-    }
+    },
+    ...mapGetters('login', [
+      'userInfo'
+    ]),
+    ...mapState('login', [
+      'isLoggedIn'
+    ])
+  },
+  methods: {
   },
   beforeCreate() {
     // set mobile view and style
@@ -52,14 +60,13 @@ export default Vue.extend({
       BooksysBrowser.setMetaMobile()
       BooksysBrowser.addMobileCSS()
     }
-
-    // check if already logged in -> redirect if logged in
-    let login = new BooksysLoginCheck();
-    let that  = this
-    login.check(function(){
-      console.log("already logged in, forward to dashboard")
-      that.$router.push("/dashboard")
-    })
+  },
+  created() {
+    if(this.isLoggedIn && this.userInfo != null){
+      this.$router.push("/dashboard")
+    }else{
+      this.$router.push("/login")
+    }
   },
   mounted() {
     const resF = (x) => {
