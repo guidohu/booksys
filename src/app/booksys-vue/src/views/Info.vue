@@ -1,34 +1,33 @@
 <template>
+
 <div v-if="isDesktop" class="display">
-  <b-card no-body>
-    <b-card-header>
-      <h3>Location</h3>
-    </b-card-header>
-    <b-card-body>
-      <b-card-text>
-        <b-row class="text-center">
-          <b-col cols="12" class="text-center">
-            <div cols="12" v-if="this.getLocationAddress != null" v-html="this.getLocationAddress"/>
-            <div v-else>no address is configured</div>
-          </b-col>
-        </b-row>
-        <b-row>
-          <b-col cols="12" class="text-center mt-3">
-            <iframe v-if="this.getLocationMap != null" :src="this.getLocationMap" frameborder="0" style="{border:0;}" :width="mapWidth" :height="this.mapHeight"/>
-            <div v-else>no map is configured</div>
-          </b-col>
-        </b-row>
-      </b-card-text>
-    </b-card-body>
-    <b-card-footer class="text-right">
-      <!-- <div class="bottom"> -->
-        <b-button variant="outline-dark" to="/dashboard">
-          <b-icon-house></b-icon-house>
-          HOME
-        </b-button>
-      <!-- </div> -->
-    </b-card-footer>
-  </b-card>
+  <b-row>
+    <b-col>
+      <div class="main-title">
+        <h3>
+          Location
+        </h3>
+      </div>
+    </b-col>
+  </b-row>
+  <b-row>
+    <b-col cols="12" class="mt-5 text-center">
+      <div cols="12" v-if="this.getLocationAddress != null" v-html="this.getLocationAddress" class="main-color"/>
+      <div v-else>no address set by the site-owner</div>
+    </b-col>
+  </b-row>
+  <b-row>
+    <b-col cols="12" class="text-center mt-3">
+      <iframe v-if="this.getLocationMap != null" :src="this.getLocationMap" frameborder="0" style="{border:0;}" :width="mapWidth" :height="this.mapHeight"/>
+      <div v-else>no map to display for this adress</div>
+    </b-col>
+  </b-row>
+  <div class="bottom">
+    <b-button variant="outline-light" to="/dashboard">
+      <b-icon-house></b-icon-house>
+      HOME
+    </b-button>
+  </div>
 </div>
 <div v-else>
   <NavbarMobile title="Location"/>
@@ -101,3 +100,19 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style>
+  div.main-title {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #a1a1a1;
+    border-bottom: 1px solid #eee;
+    margin: 0px 0px 10px;
+    padding-top: 10px;
+    padding-bottom: 0px;
+    padding-left: 15px;
+  }
+
+  div.main-color {
+    color: #a1a1a1;
+  }
+</style>

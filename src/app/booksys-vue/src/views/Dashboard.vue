@@ -1,6 +1,6 @@
 <template>
   <div v-if="isDesktop" class="display">
-    <header class="welcome">
+    <header v-if="userInfo!=null" class="welcome">
       Welcome, 
       <router-link to="/account">
         {{ userInfo.first_name }} {{ userInfo.last_name}}

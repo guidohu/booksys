@@ -6,7 +6,7 @@ const state = () => ({
   role: '',
   userInfo: null,
   loginStatus: null,
-  isLoggedIn: false,
+  isLoggedIn: null,
 })
 
 // getters

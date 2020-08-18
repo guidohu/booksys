@@ -23,7 +23,7 @@ import { BooksysBrowser } from './libs/browser'
 import { BooksysBackend } from './libs/backend'
 import AlertMessage from './components/AlertMessage.vue'
 import Vue from 'vue'
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters, mapState, mapActions } from 'vuex'
 
 export default Vue.extend({
   name: 'App',
@@ -50,7 +50,18 @@ export default Vue.extend({
       'isLoggedIn'
     ])
   },
+  watch: {
+    isLoggedIn(newValue){
+      if(newValue == false){
+        console.log("App.vue: detected not logged in -> forward to /login")
+        this.$router.push("/login")
+      }
+    }
+  },
   methods: {
+    ...mapActions('login', [
+      'getIsLoggedIn'
+    ])
   },
   beforeCreate() {
     // set mobile view and style
@@ -62,11 +73,11 @@ export default Vue.extend({
     }
   },
   created() {
-    if(this.isLoggedIn && this.userInfo != null){
-      this.$router.push("/dashboard")
-    }else{
+    if(this.isLoggedIn == false){
       this.$router.push("/login")
     }
+    console.log("App.vue: try authentication and user info")
+    this.getIsLoggedIn()
   },
   mounted() {
     const resF = (x) => {
@@ -88,5 +99,6 @@ export default Vue.extend({
   .fill {
     height: 100vh;
     width: 100vw;
+    background-color: transparent;
   }
 </style>
