@@ -23,7 +23,7 @@
       </b-collapse>
     </b-navbar>
 
-    <b-row> 
+    <b-row class="mt-3"> 
       <b-col cols="1"></b-col>
       <b-col cols="10">
         <b-row>

@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import login from './modules/login'
 import configuration from './modules/configuration'
+import sessions from './modules/sessions'
 
 Vue.use(Vuex)
 
@@ -19,7 +20,8 @@ const store = new Vuex.Store({
   // },
   modules: {
     login,
-    configuration
+    configuration,
+    sessions
   }
 })
 

@@ -6,75 +6,8 @@
         {{ userInfo.first_name }} {{ userInfo.last_name}}
       </router-link>
     </header>
-    <!-- <div class="login-view">
-      <div class="row">
-        <div class="col-sm-3"></div>
-        <div class="col-sm-6 text-center">
-          <div class="row row-dashboard">
-            <div class="col-sm-4">
-              <a href="today.html" type="button" class="btn btn-default btn-dashboard">
-                <div class="bc_dashboard" id="today"></div>
-                TODAY
-              </a>
-            </div>
-            <div class="col-sm-4">
-              <a href="boat.html" type="button" class="btn btn-default btn-dashboard">
-                <div class="bc_icon bc_icon_dashboard bc_icon_boat" id="boat"></div>
-                BOAT
-              </a>
-            </div>
-            <div class="col-sm-4">
-              <a href="ride.html" type="button" class="btn btn-default btn-dashboard">
-                <div class="bc_icon bc_icon_dashboard bc_icon_wakeboard"></div>
-                RIDE
-              </a>
-            </div>
-          </div>		
-          <div class="row row-dashboard">
-            <div class="col-sm-4">
-              <a href="calendar.html" type="button" class="btn btn-default btn-dashboard">
-                <div class="bc_icon bc_icon_dashboard bc_icon_calendar_add"></div>
-                BOOK
-              </a>
-            </div>
-            <div class="col-sm-4">
-              <a href="schedule.html" type="button" class="btn btn-default btn-dashboard">
-                <div class="bc_icon bc_icon_dashboard bc_icon_calendar"></div>
-                MY CAL
-              </a>
-            </div>
-            <div class="col-sm-4">
-              <a href="admin.html" type="button" class="btn btn-default btn-dashboard">
-                <div class="bc_icon bc_icon_dashboard bc_icon_setting"></div>
-                ADMIN
-              </a>
-            </div>
-          </div>
-          <div class="row row-dashboard">
-            <div class="col-sm-4">
-              <a href="account.html" type="button" class="btn btn-default btn-dashboard">
-                <div class="bc_icon bc_icon_dashboard bc_icon_user"></div>
-                ACCOUNT
-              </a>
-            </div>
-            <div class="col-sm-4">
-              <a href="info.html" type="button" class="btn btn-default btn-dashboard">
-                <div class="bc_icon bc_icon_dashboard bc_icon_info"></div>
-                INFO
-              </a>
-            </div>
-            <div class="col-sm-4">
-              <a href="logout.php" type="button" class="btn btn-default btn-dashboard">
-                <div class="bc_icon bc_icon_dashboard bc_icon_logout"></div>
-                LOGOUT
-              </a>
-            </div>
-          </div>
-        </div>
-        <div class="col-sm-3"></div>
-      </div>
-    </div> -->
-    <DashboardAdmin/>
+    {{getSessions}}
+    <DashboardAdmin v-if="getSessions!=null" v-bind:sessionData="getSessions"/>
   </div>
   <div v-else>
     <DashboardAdminMobile/>
@@ -83,10 +16,11 @@
 
 <script>
 import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import { BooksysBrowser } from '@/libs/browser'
 import DashboardAdmin from '../components/DashboardAdmin'
 import DashboardAdminMobile from '../components/DashboardAdminMobile'
+import moment from 'moment-timezone'
 
 
 export default Vue.extend({
@@ -108,6 +42,9 @@ export default Vue.extend({
     ...mapGetters('login', [
       'userInfo'
     ]),
+    ...mapGetters('sessions', [
+      'getSessions'
+    ]),
     isMobile: function () {
       return BooksysBrowser.isMobile()
     },
@@ -116,7 +53,18 @@ export default Vue.extend({
     }
   },
   methods: {
-
+    ...mapActions('sessions', [
+      'querySessions'
+    ]),
+    getTimeZone: function() {
+      return "Europe/Berlin";
+    }
+  },
+  created() {
+    var dateStart = moment().tz(this.getTimeZone()).startOf('day');
+    var dateEnd   = moment().tz(this.getTimeZone()).endOf('day');
+    console.log("Query sessions from", dateStart, "to", dateEnd);
+    this.querySessions({start: dateStart, end: dateEnd});
   }
 })
 </script>
