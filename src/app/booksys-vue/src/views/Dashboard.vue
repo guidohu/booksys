@@ -6,11 +6,10 @@
         {{ userInfo.first_name }} {{ userInfo.last_name}}
       </router-link>
     </header>
-    {{getSessions}}
     <DashboardAdmin v-if="getSessions!=null" v-bind:sessionData="getSessions"/>
   </div>
   <div v-else>
-    <DashboardAdminMobile/>
+    <DashboardAdminMobile v-if="getSessions!=null" v-bind:sessionData="getSessions"/>
   </div>
 </template>
 

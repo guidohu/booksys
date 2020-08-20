@@ -5,7 +5,7 @@
       <b-row class="mt-4">
         <b-col cols="4">
           <b-button to="/today" variant="light" class="btn btn-default btn-dashboard">
-            <div class="bc_dashboard" id="today"></div>
+            <!-- <div class="bc_dashboard" id="today"></div> -->
             <Pie v-bind:sessionData="sessionData" v-bind:properties="properties"/>
             TODAY
           </b-button>

@@ -44,6 +44,7 @@
           <b-col cols="6">
             <b-button to="/today" variant="light" class="btn btn-default btn-dashboard">
               <!-- <div class="bc_icon bc_icon_dashboard bc_icon_boat" id="boat"></div> -->
+              <Pie v-bind:sessionData="sessionData" v-bind:properties="properties"/>
               TODAY
             </b-button>
           </b-col>
@@ -91,8 +92,22 @@
 import Vue from 'vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import Pie from "./Pie.vue"
 
 export default Vue.extend({
-  name: "DashboardAdminMobile"
+  name: "DashboardAdminMobile",
+  data() {
+    return {
+      properties: {
+        containerWidth: 80,
+        containerHeight: 85,
+        animate: false
+      }
+    }
+  },
+  components: {
+    Pie
+  },
+  props: ['sessionData']
 })
 </script>
