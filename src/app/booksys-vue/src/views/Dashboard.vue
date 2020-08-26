@@ -1,15 +1,20 @@
 <template>
-  <div v-if="isDesktop" class="display">
-    <header v-if="userInfo!=null" class="welcome">
-      Welcome, 
-      <router-link to="/account">
-        {{ userInfo.first_name }} {{ userInfo.last_name}}
-      </router-link>
-    </header>
-    <DashboardAdmin v-if="getSessions!=null" v-bind:sessionData="getSessions"/>
+  <div v-if="getDbUpdateStatus != null && getDbUpdateStatus.updateAvailable == true">
+    <DatabaseUpdateModal/>
   </div>
   <div v-else>
-    <DashboardAdminMobile v-if="getSessions!=null" v-bind:sessionData="getSessions"/>
+    <div v-if="isDesktop" class="display">
+      <header v-if="userInfo!=null" class="welcome">
+        Welcome, 
+        <b-link to="/account" class="header-desktop">
+          {{ userInfo.first_name }} {{ userInfo.last_name}}
+        </b-link>
+      </header>
+      <DashboardAdmin v-if="getSessions!=null" v-bind:sessionData="getSessions"/>
+    </div>
+    <div v-else>
+      <DashboardAdminMobile v-if="getSessions!=null" v-bind:sessionData="getSessions"/>
+    </div>
   </div>
 </template>
 
@@ -19,6 +24,7 @@ import { mapGetters, mapActions } from 'vuex'
 import { BooksysBrowser } from '@/libs/browser'
 import DashboardAdmin from '../components/DashboardAdmin'
 import DashboardAdminMobile from '../components/DashboardAdminMobile'
+import DatabaseUpdateModal from '../components/DatabaseUpdate'
 import moment from 'moment-timezone'
 
 
@@ -26,23 +32,18 @@ export default Vue.extend({
   name: 'Dashboard',
   components: {
     DashboardAdmin,
-    DashboardAdminMobile
+    DashboardAdminMobile,
+    DatabaseUpdateModal,
   },
-  //props: ['isMobile'],
-  // data: function () {
-
-  // },
   computed: {
-    // userInfo: {
-    //   get () {
-    //     return this.$store.getters.login.userInfo
-    //   }
-    // }
     ...mapGetters('login', [
       'userInfo'
     ]),
     ...mapGetters('sessions', [
       'getSessions'
+    ]),
+    ...mapGetters('configuration', [
+      'getDbUpdateStatus'
     ]),
     isMobile: function () {
       return BooksysBrowser.isMobile()
@@ -55,6 +56,9 @@ export default Vue.extend({
     ...mapActions('sessions', [
       'querySessions'
     ]),
+    ...mapActions('configuration', [
+      'queryDbUpdateStatus'
+    ]),
     getTimeZone: function() {
       return "Europe/Berlin";
     }
@@ -64,6 +68,8 @@ export default Vue.extend({
     var dateEnd   = moment().tz(this.getTimeZone()).endOf('day');
     console.log("Query sessions from", dateStart, "to", dateEnd);
     this.querySessions({start: dateStart, end: dateEnd});
+
+    this.queryDbUpdateStatus()
   }
 })
 </script>

@@ -4,6 +4,8 @@ const state = () => ({
   configuration: null,
   locationAddress: null,
   locationMap: null,
+  dbUpdateStatus: null,
+  dbVersionInfo: null,
 })
 
 const getters = {
@@ -15,6 +17,12 @@ const getters = {
   },
   getLocationMap: (state) => {
     return state.locationMap
+  },
+  getDbUpdateStatus: (state) => {
+    return state.dbUpdateStatus
+  },
+  getDbVersionInfo: (state) => {
+    return state.dbVersionInfo
   }
 }
 
@@ -27,6 +35,26 @@ const actions = {
       commit('setConfiguration', null)
     }
     Configuration.getCustomizationParameters(successCb, failureCb)
+  },
+  queryDbUpdateStatus({ commit }) {
+    let successCb = (response) => {
+      commit('setDbUpdateStatus', response)
+    }
+    let failureCb = (error) => {
+      console.error("store/configuration: Cannot get needsDbUpdate:", error)
+      commit('setDbUpdateStatus', null)
+    }
+    Configuration.needsDbUpdate(successCb, failureCb)
+  },
+  queryDbVersionInfo({ commit }) {
+    let successCb = (response) => {
+      commit('setDbVersionInfo', response)
+    }
+    let failureCb = (error) => {
+      console.error("store/configuration: Cannot get getDbVersion:", error)
+      commit('setDbVersionInfo', null)
+    }
+    Configuration.getDbVersion(successCb, failureCb)
   }
 }
 
@@ -36,6 +64,13 @@ const mutations = {
     state.locationAddress = (value.location_address != null) ? value.location_address.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g, '<br>') : null;
     state.locationMap = value.location_map_iframe
     console.log('configuration set to', value)
+  },
+  setDbUpdateStatus (state, value){
+    console.log(value)
+    state.dbUpdateStatus = value
+  },
+  setDbVersionInfo (state, value){
+    state.dbVersionInfo = value
   }
 }
 

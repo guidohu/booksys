@@ -43,7 +43,6 @@
         <b-row class="mt-3">
           <b-col cols="6">
             <b-button to="/today" variant="light" class="btn btn-default btn-dashboard">
-              <!-- <div class="bc_icon bc_icon_dashboard bc_icon_boat" id="boat"></div> -->
               <Pie v-bind:sessionData="sessionData" v-bind:properties="properties"/>
               TODAY
             </b-button>

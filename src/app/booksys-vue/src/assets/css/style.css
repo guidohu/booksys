@@ -17,6 +17,10 @@ body {
 	color: #a1a1a1;
 }
 
+a.header-desktop {
+	color: #dddddd !important;
+}
+
 .card-main-desktop {
 	background-color: rgba(32, 32, 32, 0.5);
 }
