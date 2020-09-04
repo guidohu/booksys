@@ -12,7 +12,7 @@
       <AlertMessage v-if="backendStatus && backendStatus.ok == false" alertMessage="The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible."/>
       <router-view v-else/>
     </div>
-    <footer v-if="isDesktop">
+    <footer class="legal-footer" v-if="isDesktop">
       <a href="https://github.com/guidohu/booksys">Find me on Github</a>
     </footer>
   </b-container>

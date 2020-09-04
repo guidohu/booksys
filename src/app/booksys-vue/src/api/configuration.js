@@ -50,4 +50,20 @@ export class Configuration {
       cbFailure(error)
     })
   }
+
+  static updateDb(cbSuccess, cbFailure){
+    fetch('/api/backend.php?action=update_database', {
+      method: 'GET',
+      cache: 'no-cache'
+    })
+    .then(response => {
+      return response.json()
+    })
+    .then(data => {
+      cbSuccess(data)
+    })
+    .catch(error => {
+      cbFailure(error)
+    })
+  }
 }

@@ -132,7 +132,7 @@ div.inline{
 }
 
 /* Copyright note on the bottom of the page */
-footer{
+.legal-footer{
     position: fixed;
     font-size: 10px;
     color: #bbbbbb;
