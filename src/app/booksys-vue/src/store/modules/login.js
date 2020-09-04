@@ -3,7 +3,7 @@ import { Login as ApiLogin } from "../../api/login";
 // initial state
 const state = () => ({
   username: '',
-  role: '',
+  role: null,
   userInfo: null,
   loginStatus: null,
   isLoggedIn: null,
@@ -17,6 +17,9 @@ const getters = {
   userInfo: (state) => {
     console.log("Getting userInfo:", state.userInfo)
     return state.userInfo
+  },
+  role: (state) => {
+    return state.role;
   },
   loginStatus: (state) => {
     console.log("Getting loginStatus:", state.loginStatus)
@@ -94,8 +97,9 @@ const mutations = {
     console.log('username: ', state.username)
   },
   setUserInfo (state, value) {
-    state.userInfo = value
-    console.log('userInfo set to', value)
+    state.userInfo = value;
+    state.role = value.user_role_name;
+    console.log('userInfo set to', value);
   },
   setLoginStatus (state, value) {
     state.loginStatus = value

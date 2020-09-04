@@ -10,10 +10,14 @@
           {{ userInfo.first_name }} {{ userInfo.last_name}}
         </b-link>
       </header>
-      <DashboardAdmin v-if="getSessions!=null" v-bind:sessionData="getSessions"/>
+      <DashboardAdmin v-if="role && role == 'admin' && getSessions!=null" v-bind:sessionData="getSessions"/>
+      <DashboardAdmin v-if="role && role == 'member' && getSessions!=null" v-bind:sessionData="getSessions"/>
+      <DashboardAdmin v-if="role && role == 'guest' && getSessions!=null" v-bind:sessionData="getSessions"/>
     </div>
     <div v-else>
-      <DashboardAdminMobile v-if="getSessions!=null" v-bind:sessionData="getSessions"/>
+      <DashboardAdminMobile v-if="role && role == 'admin' &&getSessions!=null" v-bind:sessionData="getSessions"/>
+      <DashboardAdminMobile v-if="role && role == 'member' &&getSessions!=null" v-bind:sessionData="getSessions"/>
+      <DashboardAdminMobile v-if="role && role == 'guest' &&getSessions!=null" v-bind:sessionData="getSessions"/>
     </div>
   </div>
 </template>
@@ -37,7 +41,8 @@ export default Vue.extend({
   },
   computed: {
     ...mapGetters('login', [
-      'userInfo'
+      'userInfo',
+      'role'
     ]),
     ...mapGetters('sessions', [
       'getSessions'
@@ -69,7 +74,9 @@ export default Vue.extend({
     console.log("Query sessions from", dateStart, "to", dateEnd);
     this.querySessions({start: dateStart, end: dateEnd});
 
-    this.queryDbUpdateStatus()
+    if(this.role == "admin"){
+      this.queryDbUpdateStatus()
+    }
   }
 })
 </script>
