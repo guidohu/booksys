@@ -92,13 +92,10 @@ export default Vue.extend({
 </script>
 
 <style>
-  /* @import "./assets/bootstrap/css/bootstrap.min.css"; */
-  @import "./assets/bootstrap/css/bootstrap-theme-bc.css";
-  @import "./assets/css/style.css";
-
   .fill {
     height: 100vh;
     width: 100vw;
     background-color: transparent;
   }
+
 </style>

@@ -1,10 +1,11 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Login from '../views/Login.vue'
-import Logout from '../views/Logout.vue'
-import SignUp from '../views/SignUp.vue'
-import Dashboard from '../views/Dashboard.vue'
-import Info from '../views/Info.vue'
+import Login from '../views/Login'
+import Logout from '../views/Logout'
+import SignUp from '../views/SignUp'
+import Dashboard from '../views/Dashboard'
+import Account from '../views/Account'
+import Info from '../views/Info'
 
 Vue.use(VueRouter)
 
@@ -32,6 +33,11 @@ const routes = [
     path: '/dashboard',
     name: 'Dashboard',
     component: Dashboard
+  },
+  {
+    path: '/account',
+    name: 'Account',
+    component: Account
   },
   {
     path: '/info',

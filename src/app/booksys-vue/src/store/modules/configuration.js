@@ -2,6 +2,7 @@ import { Configuration } from "../../api/configuration";
 
 const state = () => ({
   configuration: null,
+  currency: null,
   locationAddress: null,
   locationMap: null,
   dbUpdateStatus: null,
@@ -13,6 +14,9 @@ const state = () => ({
 const getters = {
   getConfiguration: (state) => {
     return state.configuration;
+  },
+  getCurrency: (state) => {
+    return state.currency;
   },
   getLocationAddress: (state) => {
     return state.locationAddress;
@@ -86,8 +90,9 @@ const mutations = {
   setConfiguration (state, value){
     state.configuration = value
     state.locationAddress = (value.location_address != null) ? value.location_address.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g, '<br>') : null;
-    state.locationMap = value.location_map_iframe
-    console.log('configuration set to', value)
+    state.locationMap = value.location_map_iframe;
+    state.currency = value.currency;
+    console.log('configuration set to', value);
   },
   setDbUpdateStatus (state, value){
     console.log(value)
