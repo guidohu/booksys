@@ -11,13 +11,13 @@
         </b-link>
       </header>
       <DashboardAdmin v-if="role && role == 'admin' && getSessions!=null" v-bind:sessionData="getSessions"/>
-      <DashboardAdmin v-if="role && role == 'member' && getSessions!=null" v-bind:sessionData="getSessions"/>
-      <DashboardAdmin v-if="role && role == 'guest' && getSessions!=null" v-bind:sessionData="getSessions"/>
+      <DashboardMember v-if="role && role == 'member' && getSessions!=null" v-bind:sessionData="getSessions"/>
+      <DashboardGuest v-if="role && role == 'guest' && getSessions!=null" v-bind:sessionData="getSessions"/>
     </div>
     <div v-else>
       <DashboardAdminMobile v-if="role && role == 'admin' &&getSessions!=null" v-bind:sessionData="getSessions"/>
-      <DashboardAdminMobile v-if="role && role == 'member' &&getSessions!=null" v-bind:sessionData="getSessions"/>
-      <DashboardAdminMobile v-if="role && role == 'guest' &&getSessions!=null" v-bind:sessionData="getSessions"/>
+      <DashboardMemberMobile v-if="role && role == 'member' &&getSessions!=null" v-bind:sessionData="getSessions"/>
+      <DashboardGuestMobile v-if="role && role == 'guest' &&getSessions!=null" v-bind:sessionData="getSessions"/>
     </div>
   </div>
 </template>
@@ -27,7 +27,11 @@ import Vue from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import { BooksysBrowser } from '@/libs/browser'
 import DashboardAdmin from '../components/DashboardAdmin'
+import DashboardMember from '../components/DashboardMember'
+import DashboardGuest from '../components/DashboardGuest'
 import DashboardAdminMobile from '../components/DashboardAdminMobile'
+import DashboardMemberMobile from '../components/DashboardMemberMobile'
+import DashboardGuestMobile from '../components/DashboardGuestMobile'
 import DatabaseUpdateModal from '../components/DatabaseUpdate'
 import moment from 'moment-timezone'
 
@@ -36,7 +40,11 @@ export default Vue.extend({
   name: 'Dashboard',
   components: {
     DashboardAdmin,
+    DashboardMember,
+    DashboardGuest,
     DashboardAdminMobile,
+    DashboardMemberMobile,
+    DashboardGuestMobile,
     DatabaseUpdateModal,
   },
   computed: {

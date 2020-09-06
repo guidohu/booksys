@@ -13,7 +13,7 @@
       <router-view v-else/>
     </div>
     <footer class="legal-footer" v-if="isDesktop">
-      <a href="https://github.com/guidohu/booksys">Find me on Github</a>
+      Copyright 2013-2020 by Guido Hungerbuehler <a href="https://github.com/guidohu/booksys">Find me on Github</a>
     </footer>
   </b-container>
 </template>
