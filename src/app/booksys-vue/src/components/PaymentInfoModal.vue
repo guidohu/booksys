@@ -49,7 +49,7 @@
       </b-col>
     </b-row>    
     <div slot="modal-footer">
-      <b-button type="button" variant="outline-success" v-on:click="close">
+      <b-button type="button" variant="outline-info" v-on:click="close">
         <b-icon-check></b-icon-check>
         Done
       </b-button>
