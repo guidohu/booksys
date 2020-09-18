@@ -32,6 +32,7 @@
           </b-col>
           <b-col cols="6">
             v{{ getDbVersionInfo.dbVersion}}
+            {{dbVersionText}}
           </b-col>
         </b-row>
         <b-row class="mt-3">
@@ -110,7 +111,18 @@ export default Vue.extend({
       'getDbVersionInfo',
       'getDbIsUpdating',
       'getDbUpdateResult'
-    ])
+    ]),
+    dbVersionText: function() {
+      if(this.dbVersionInfo == null){
+        return "loading";
+      }
+      else if(this.dbVersionInfo.dbVersion == this.dbVersionInfo.dbVersionRequired){
+        return "v" + this.dbVersionInfo.dbVersion;
+      }
+      else{
+        return "v" + this.dbVersionInfo.dbVersion + " (update available to: v" + this.dbVersionInfo.dbVersionRequired + ")";
+      }
+    }
   },
   created() {
     this.queryDbVersionInfo()
