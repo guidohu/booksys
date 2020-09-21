@@ -44,7 +44,8 @@
         get_my_user_sessions($configuration);
         exit;
     case 'change_my_user_data':
-        change_my_user_data($configuration);
+        $response = change_my_user_data($configuration);
+        echo json_encode($response);
         exit;
     case 'lock_user':
         lock_user($configuration, $lc);
@@ -980,44 +981,28 @@
     // input validation
     $sanitizer = new Sanitizer();
     if(! isset($data->first_name)){
-        HttpHeader::setResponseCode(400);
-        echo "No first name provided.";
-        return;
+        return Status::errorStatus("No first name provided.");
     }
     if(! isset($data->last_name)){
-        HttpHeader::setResponseCode(400);
-        echo "No last name provided";
-        return;
+        return Status::errorStatus("No last name provided.");
     }
     if(! isset($data->address)){
-        HttpHeader::setResponseCode(400);
-        echo "No address given";
-        return;
+        return Status::errorStatus("No address provided.");
     }
     if(!isset($data->mobile) or !$sanitizer->isMobileNumber($data->mobile)){
-        HttpHeader::setResponseCode(400);
-        echo "The mobile number is not correct.";
-        return;
+        return Status::errorStatus("The mobile number is not correct.");
     }
     if(! isset($data->plz) or !$sanitizer->isInt($data->plz)){
-        HttpHeader::setResponseCode(400);
-        echo "Your Zip Code is wrong";
-        return;
+        return Status::errorStatus("The zip code is not of a valid format.");
     }
     if(! isset($data->city)){
-        HttpHeader::setResponseCode(400);
-        echo "No city provided";
-        return;
+        return Status::errorStatus("No city provided.");
     }
     if(! isset($data->email) or !$sanitizer->isEmail($data->email)){
-        HttpHeader::setResponseCode(400);
-        echo "Please check your Email again.";
-        return;
+        return Status::errorStatus("The mobile number is not correct.");
     }
     if(! isset($data->license) or !$sanitizer->isBoolean($data->license)){
-        HttpHeader::setResponseCode(400);
-        echo "The License input is wrong.";
-        return;
+        return Status::errorStatus("Invalid input for the license information.");
     }
     
     // get the user info
@@ -1027,8 +1012,7 @@
     // update the user in the database
     $db = new DBAccess($configuration);
     if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
-        return;
+        return Status::errorStatus("Backend error: Cannot connect to the database");
     }
     $query = "UPDATE user SET
                       first_name = ?, 
@@ -1053,15 +1037,11 @@
                     $user_data['id']);
     if(!$db->execute()){
         $db->disconnect();
-        HttpHeader::setResponseCode(500);
-        echo "Internal Server Error, cannot update user data";
-        return;
+        return Status::errorStatus("Backend error: Cannot update user data");
     }    
     $db->disconnect();
     
-    error_log("Changed user information for user_id: " . $user_data['id']);
-    HttpHeader::setResponseCode(200);
-    return;
+    return Status::successStatus("Successfully updated.");
   }
   
   function get_my_user_sessions($configuration){

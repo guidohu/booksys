@@ -9,7 +9,7 @@
         <b-row>
           <b-col cols="12">
             Please transfer the desired amount to the bank account below and let us know
-            as soon as you did so to activate the amount (Email, Phone, on the boat).
+            as soon as you did so to activate the amount.
           </b-col>
         </b-row>
         <b-row class="mt-3">
