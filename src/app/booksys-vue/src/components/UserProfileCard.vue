@@ -22,6 +22,7 @@
     </b-card-header>
     <b-card-body>
       <UserEditModal/>
+      <UserPasswordEditModal/>
       <b-row>
         <b-col cols="6">
           {{userInfo.first_name}} {{userInfo.last_name}}
@@ -54,11 +55,13 @@
 import Vue from 'vue'
 import { mapGetters } from 'vuex'
 import UserEditModal from './UserEditModal'
+import UserPasswordEditModal from './UserPasswordEditModal'
 
 export default Vue.extend({
   name: 'UserProfileCard',
   components: {
-    UserEditModal
+    UserEditModal,
+    UserPasswordEditModal
   },
   computed: {
     ...mapGetters('login', [
@@ -70,7 +73,7 @@ export default Vue.extend({
       this.$bvModal.show('userEditModal')
     },
     showPasswordEdit: function() {
-      this.$bvModal.show('userEditModal')
+      this.$bvModal.show('userPasswordEditModal')
     }
   }
 })

@@ -7,6 +7,16 @@
       <b-col cols="1" class="d-none d-sm-block"></b-col>
       <b-col cols="12" sm="10">
         <b-form @submit="save">
+          <b-row v-if="errors.length">
+            <b-col cols="12">
+              <b-alert variant="warning" show>
+                <b>Please correct the following error(s):</b>
+                <ul>
+                  <li v-for="err in errors" :key="err">{{ err }}</li>
+                </ul>
+              </b-alert>
+            </b-col>
+          </b-row>
           <b-form-group
             id="first-name"
             label="First Name"
@@ -124,7 +134,7 @@
       </b-col>
     </b-row>    
     <div slot="modal-footer">
-      <b-button type="button" variant="outline-info" v-on:click="save">
+      <b-button type="button" variant="outline-info" :disabled="isLoading" v-on:click="save">
         <b-icon-person-check></b-icon-person-check>
         Save
       </b-button>
@@ -138,27 +148,20 @@
 
 <script>
 import Vue from 'vue'
-import { mapGetters, mapActions, mapState } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 
 export default Vue.extend({
   name: 'UserEditModal',
   data() {
     return {
-      form: {
-        firstName: ''
-      }
+      form: {},
+      errors: [],
+      isLoading: false
     }
   },
   computed: {
-    ...mapGetters('configuration', [
-      'getConfiguration',
-    ]),
     ...mapGetters('login', [
       'userInfo'
-    ]),
-    ...mapState('user', [
-      'userApiStatus',
-      'userApiErrors'
     ]),
     boatLicenseText: function(){
       if(this.form.license != null && this.form.license == true){
@@ -168,21 +171,14 @@ export default Vue.extend({
       }
     }
   },
-  watch: {
-    userApiStatus: function(newValue){
-      console.log("watch: new value:", newValue);
-      if(newValue != null && newValue == "DONE"){
-        this.$bvModal.hide('userEditModal');
-      }
-    }
-  },
   methods: {
     close: function(){
       this.$bvModal.hide('userEditModal');
     },
     save: function(event){
-      event.preventDefault()
-      console.log(JSON.stringify(this.form))
+      event.preventDefault();
+
+      this.isLoading = true;
 
       this.changeUserProfile({
         first_name: this.form.firstName,
@@ -193,6 +189,15 @@ export default Vue.extend({
         email: this.form.email,
         mobile: this.form.phone,
         license: (this.form.license == true) ? 1 : 0
+      })
+      .then(() => {
+        this.isLoading = false;
+        this.errors = [];
+        this.close();
+      })
+      .catch(errors => {
+        this.isLoading = false;
+        this.errors = errors;
       })
     },
     ...mapActions('user', [

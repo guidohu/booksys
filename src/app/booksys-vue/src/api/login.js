@@ -1,4 +1,3 @@
-// import axios from 'axios'
 import sha256 from 'crypto-js/sha256';
 import hex from 'crypto-js/enc-hex';
 

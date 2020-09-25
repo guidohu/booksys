@@ -349,8 +349,7 @@ _END;
 		exit;
 	}
 	$query = "UPDATE user 
-		SET password = NULL,
-		password_salt = ?,
+		SET password_salt = ?,
 		password_hash = ?
 	    WHERE id = ?";
 	$db->prepare($query);

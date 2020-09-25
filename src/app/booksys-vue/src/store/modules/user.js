@@ -7,9 +7,7 @@ const state = () => ({
   heatTimeMinutes: 0,
   heatTimeMinutesYTD: 0,
   heatCost: 0,
-  heatCostYTD: 0,
-  userApiStatus: "INACTIVE",
-  userApiErrors: []
+  heatCostYTD: 0
 })
 
 const getters = {
@@ -33,12 +31,6 @@ const getters = {
   },
   heatCostYTD: (state) => {
     return state.heatCostYTD;
-  },
-  changeUserProfileStatus: (state) => {
-    return state.changeUserProfileStatus
-  },
-  changeUserProfileError: (state) => {
-    return state.changeUserProfileErrors
   }
 }
 
@@ -51,28 +43,34 @@ const actions = {
     let failCb = (error) => {
       console.log(error)
     };
-
     User.getHeats(successCb, failCb);
   },
-  changeUserProfile ( {dispatch, commit}, profileData ) {
-    let successCb = (response) => {
-      console.log(response);
-      if(response.ok == true){
-        dispatch('login/getUserInfo', {}, { root: true});
-        commit('setUserApiStatus', "DONE");
-      }else{
-        console.error("Error reported from backend:",response);
-        commit('setUserApiStatus', "ERROR");
-        commit('setUserApiErrors', [ response.msg]);
-      }
-    };
-    let failCb = (error) => {
-      console.log(error)
-      commit('setUserApiStatus', "ERROR");
-      commit('setUserApiErrors', [ error ]);
-    };
-
-    User.changeUserProfile(profileData, successCb, failCb);
+  changeUserProfile ( {dispatch}, profileData ) {
+    return new Promise((resolve, reject) => {
+      User.changeUserProfile(profileData)
+        .then(() => {
+          // load the new user data
+          dispatch('login/getUserInfo', {}, { root: true });
+          resolve();
+        })
+        .catch(error => {
+          reject(error);
+        })
+    });
+  },
+  changeUserPassword ( {dispatch}, passwordData ) {
+    return new Promise((resolve, reject) => {
+      console.log(passwordData);
+      User.changeUserPassword(passwordData)
+        .then(() => {
+          // load latest user data
+          dispatch('login/getUserInfo', {}, { root: true });
+          resolve();
+        })
+        .catch(error => {
+          reject(error);
+        })
+    })
   }
 }
 
@@ -85,12 +83,6 @@ const mutations = {
     state.heatTimeMinutesYTD = value.heat_time_min_ytd;
     state.heatCost = value.heat_cost;
     state.heatCostYTD = value.heat_cost_ytd;
-  },
-  setUserApiStatus (state, value) {
-    state.userApiStatus = value;
-  },
-  setUserApiErrors (state, errors) {
-    state.userApiErrors = errors;
   }
 }
 

@@ -999,7 +999,7 @@
         return Status::errorStatus("No city provided.");
     }
     if(! isset($data->email) or !$sanitizer->isEmail($data->email)){
-        return Status::errorStatus("The mobile number is not correct.");
+        return Status::errorStatus("The email address is not correct.");
     }
     if(! isset($data->license) or !$sanitizer->isBoolean($data->license)){
         return Status::errorStatus("Invalid input for the license information.");

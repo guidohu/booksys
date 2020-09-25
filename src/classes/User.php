@@ -163,8 +163,12 @@ class User{
 			return FALSE;
 		}
 		
-		$query = 'SELECT u.id, u.password, u.password_salt, u.password_hash
-			FROM user u, browser_session bs 
+		// get the password from the DB
+		$query = 'SELECT 
+			u.id,
+			u.password_salt, 
+			u.password_hash
+			FROM user u 
 			WHERE u.id = ? AND u.deleted = 0';
 		$db->prepare($query);
 		$db->bind_param('i', $this->user['id']);
@@ -175,21 +179,13 @@ class User{
 			return FALSE;
 		}
 
-		// get the password from the DB
-		$password_db = '';
-		$password_provided = '';
-		if(!is_null($res[$this->user['id']]['password_hash'])){
-			$password_db = $res[$this->user['id']]['password_hash'];
-			$password_provided = $this->get_password_hash(
-				$password,
-				$res[$this->user['id']]['password_salt']
-			);
-		}else{
-			$password_db       = $res[$this->user['id']]['password'];
-			$password_provided = $password;
-		}
+		$password_hash_provided = $this->get_password_hash(
+			$password,
+			$res[0]['password_salt']
+		);
+		$password_hash_db = $res[0]['password_hash'];
 
-		if($password_db == $password_provided){
+		if($password_hash_db == $password_hash_provided){
 			return TRUE;
 		}else{
 			return FALSE;
