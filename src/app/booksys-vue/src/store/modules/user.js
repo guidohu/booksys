@@ -7,7 +7,8 @@ const state = () => ({
   heatTimeMinutes: 0,
   heatTimeMinutesYTD: 0,
   heatCost: 0,
-  heatCostYTD: 0
+  heatCostYTD: 0,
+  schedule: [],
 })
 
 const getters = {
@@ -31,6 +32,9 @@ const getters = {
   },
   heatCostYTD: (state) => {
     return state.heatCostYTD;
+  },
+  userSchedule: (state) => {
+    return state.schedule;
   }
 }
 
@@ -71,6 +75,29 @@ const actions = {
           reject(error);
         })
     })
+  },
+  queryUserSchedule ( {commit} ) {
+    return new Promise((resolve, reject) => {
+      User.getUserSchedule()
+        .then((data) => {
+          commit('setUserSchedule', data);
+          resolve();
+        })
+        .catch(error => {
+          reject(error);
+        })
+    })
+  },
+  cancelSession ( { dispatch }, sessionId ) {
+    return new Promise((resolve, reject) => {
+      User.cancelSession(sessionId)
+        .then( () => {
+          dispatch('queryUserSchedule')
+        })
+        .catch( (error) => {
+          reject(error);
+        })
+    })
   }
 }
 
@@ -83,6 +110,12 @@ const mutations = {
     state.heatTimeMinutesYTD = value.heat_time_min_ytd;
     state.heatCost = value.heat_cost;
     state.heatCostYTD = value.heat_cost_ytd;
+  },
+  setUserSchedule (state, schedule) {
+    // store:
+    // sessions: [ {...}, {...}]
+    // old_sessions: [ {...}, {...}]
+    state.schedule = schedule;
   }
 }
 

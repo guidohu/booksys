@@ -93,4 +93,61 @@ export default class User {
       })
     })
   }
+
+  static getUserSchedule(){
+    return new Promise((resolve, reject) => {
+      fetch('/api/user.php?action=get_my_user_sessions', {
+        method: "GET",
+        cache: 'no-cache'
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            if(data == null){
+              console.error("User/getUserSchedule: Cannot parse server response", data);
+              reject(["Cannot parse server response"]);
+            }else if(data.sessions == null || data.sessions_old == null){
+              console.log("Cannot get user's sessions:", response);
+              reject(["Cannot get user's sessions"]);
+            }else{
+              console.log("User's sessions retrieved");
+              resolve(data);
+            }
+          })
+          .catch( error => {
+            console.error("User/getUserSchedule: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error('User/getUserSchedule', error)
+        reject([error]);
+      })
+    })
+  }
+
+  static cancelSession(sessionId){
+    return new Promise((resolve, reject) => {
+      const queryData = {
+        session_id: sessionId
+      };
+
+      fetch('/api/booking.php?action=delete_user', {
+        method: "POST",
+        cache: 'no-cache',
+        body: JSON.stringify(queryData)
+      })
+      .then(response => {
+        if(!response.ok){
+          throw Error(response.statusText);
+        }else{
+          resolve();
+        }
+      })
+      .catch(error => {
+        console.error("Cannot remove user from session");
+        reject([error])
+      })
+    })
+  }
 }

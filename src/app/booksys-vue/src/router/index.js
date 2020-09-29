@@ -6,6 +6,7 @@ import SignUp from '../views/SignUp'
 import Dashboard from '../views/Dashboard'
 import Account from '../views/Account'
 import Info from '../views/Info'
+import Schedule from '../views/Schedule'
 
 Vue.use(VueRouter)
 
@@ -43,6 +44,11 @@ const routes = [
     path: '/info',
     name: 'Info',
     component: Info
+  },
+  {
+    path: '/schedule',
+    name: 'Schedule',
+    component: Schedule
   }
 ]
 

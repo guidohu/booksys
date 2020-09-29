@@ -9,6 +9,7 @@ const state = () => ({
   dbVersionInfo: null,
   dbIsUpdating: false,
   dbUpdateResult: null,
+  timezone: "Europe/Zurich"
 })
 
 const getters = {
@@ -36,6 +37,9 @@ const getters = {
   },
   getDbUpdateResult: (state) => {
     return state.dbUpdateResult;
+  },
+  getTimezone: (state) => {
+    return state.timezone;
   }
 }
 
