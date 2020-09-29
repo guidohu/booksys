@@ -9,9 +9,11 @@
       :fields="fields"
     >
       <template v-slot:cell(riders)="data">
-        <ul>
-          <li v-for="rider in data.item.riders" :key="rider.id">{{ rider.first_name}} {{ rider.last_name}}</li>
-        </ul>
+          <b-row v-for="rider in data.item.riders" :key="rider.id">
+            <b-col>
+              {{ rider.first_name}} {{ rider.last_name}}
+            </b-col>
+          </b-row>
       </template>
       <template v-slot:cell(action)="data">
         <b-button type="button" size="sm" variant="outline-danger" v-on:click="cancelSession(data.item.id)"><b-icon-x/>Cancel Session</b-button>

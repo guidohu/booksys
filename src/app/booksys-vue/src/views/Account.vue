@@ -25,7 +25,7 @@
       <UserBalanceCard/>
     </b-col>
   </b-row>
-  <div class="bottom">
+  <div class="bottom mr-2">
     <b-button variant="outline-light" to="/dashboard">
       <b-icon-house></b-icon-house>
       HOME
