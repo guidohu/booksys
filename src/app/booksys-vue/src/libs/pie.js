@@ -8,10 +8,6 @@ const Raphael = require("raphael");
 
 export default class BooksysPie {
 
-    static getTimeZone = () => {
-        return 'UTC'
-    }
-
     static addPiePlugin = () => {
         Raphael.fn.pieChart = function (cx, cy, r, values, labels, colors, stroke, animate, clickCallBack) {
             var paper = this,
@@ -42,31 +38,18 @@ export default class BooksysPie {
                     x2 = cx + r * Math.cos(-endAngle * rad),
                     y1 = cy + r * Math.sin(-startAngle * rad),
                     y2 = cy + r * Math.sin(-endAngle * rad);
-                // draw a patch starting at (cx, cy), line to (x1, y1), ellipse with (rx ry x-axis-rotation large-arc-flag sweep-flag (x2, y2))+
-                // and close the path
-                //alert("End-Angle: " + endAngle + "\n" +
-                //	  "startAngle: " + startAngle + "\n" +
-                //	  "diff: " + (endAngle-startAngle) + "\n" + 
-                //	  "Raw: 1: (" + x1 + ", " + y1 + ")\t2: ( " + x2 + ", " + y2 + ")");
                 
                 // we have to round values because the sector does not get drawn if start and endpoint are identical
                 x1 = Math.round(x1*10000)/10000;
                 x2 = Math.round(x2*10000)/10000;
                 y1 = Math.round(y1*10000)/10000;
                 y2 = Math.round(y2*10000)/10000;
-                
-                //alert("Rounded: 1: (" + x1 + ", " + y1 + ")\t2: ( " + x2 + ", " + y2 + ")");
-                
+                                
                 if(x1==x2 && y1==y2){
                     x2=x2-0.001;	
-                    //alert("Corrected: 1: (" + x1 + ", " + y1 + ")\t2: ( " + x2 + ", " + y2 + ")");
                 }
                 
-                //alert(+(endAngle - startAngle > 180));
-                //return paper.path(["M", 50, 50, "L", 50, 10, "A", r, r, 0, 1, 1, 49.999, 10, "z"]).attr(params);
-                //return paper.path(["M", cx, cy, "L", x1, y1, "A", r, r, 0, 0, 0, x2, y2, "z"]).attr(params);
                 return paper.path(["M", cx, cy, "L", x1, y1, "A", r, r, 0, +(endAngle - startAngle < -180), 1, x2, y2, "z"]).attr(params);
-                //return paper.path(["M", cx, cy, "L", x1, y1, "A", r, r, 0, 50, 1, x2, y2, "z"]).attr(params);
             }
             
             function resetAllSectors(){
@@ -86,10 +69,6 @@ export default class BooksysPie {
                         popangle = angle - (angleplus / 2),
                         ms = 700,
                         delta = 25;
-                        // center (cx, cy), radius, startAngle, endAngle, design-parameters
-                    //alert("Value: " + value + "\n" +
-                    //	  "Angleplus: " + angleplus + "\n" +
-                    //	  "cx, cy, r, angle, angle-angleplus:" + cx + ", " + cy + ", " + r + ", " + angle + ", " + (angle-angleplus));
                     var p = sector(cx, cy, r, angle, angle - angleplus, {fill: colors[j], stroke: stroke, "stroke-width": 1});
                     sectors[j]=p;
                     sectors_active[j]=0;
@@ -133,8 +112,6 @@ export default class BooksysPie {
                     }
                     angle -= angleplus;
                     chart.push(p);
-                    //chart.push(txt);
-                    //start += .1;
                 };
             
             // get the total hours that are available
@@ -145,7 +122,6 @@ export default class BooksysPie {
             for (i = 0; i < ii; i++) {
                 process(i);
             }
-            //return chart;
             return this;
         };
     }
@@ -156,14 +132,20 @@ export default class BooksysPie {
     //
     // Returns an object containing all the data of the pie.
     static drawPie(location, data, callback, properties){
-        BooksysPie.addPiePlugin()
+        BooksysPie.addPiePlugin();
+
+        // get timezone
+        let timezone = 'UTC';
+        if(properties.timezone != null){
+            timezone = properties.timezone;
+        }
 
         // define colors (hardcode for now)
-        let colorNoSlot = "#424242";
-        let colorCourse = "#d9534e"; //"#3AAFA9"; // "#FC4445";
-        let colorSlot   = "#5cb85b";
-        let colorSlotFull = "#d9534e";
-        let colorOffHour = "#212121";
+        const colorNoSlot = "#424242";
+        const colorCourse = "#d9534e"; //"#3AAFA9"; // "#FC4445";
+        const colorSlot   = "#5cb85b";
+        const colorSlotFull = "#d9534e";
+        const colorOffHour = "#212121";
 
         // reset current content
         location.html = "";
@@ -174,13 +156,14 @@ export default class BooksysPie {
         var labels = [];
         var colors = [];
         var pieSessions = [];
+        console.log("data", data);
 
         // specific times required for proper display
         var sunrise = moment.utc(data.sunrise, "X");
         var sunset  = moment.utc(data.sunset, "X");
-        var business_day_start = moment(Number(data.window_start), "X").tz(this.getTimeZone());
-        var business_day_end   = moment(Number(data.window_end), "X").tz(this.getTimeZone());
-        // console.log(business_day_start.format() + " " + business_day_end.format());
+        var business_day_start = moment(Number(data.window_start), "X").tz(timezone);
+        var business_day_end   = moment(Number(data.window_end), "X").tz(timezone);
+        console.log(business_day_start.format() + " " + business_day_end.format());
         business_day_start.set('hour', data.business_day_start.substring(0,2));
         business_day_start.set('minute', data.business_day_start.substring(3,5));
         business_day_start.set('second', 0);
@@ -188,10 +171,10 @@ export default class BooksysPie {
         business_day_end.set('minute', data.business_day_end.substring(3,5));
         business_day_end.set('second', 0);
         // get the start/end of the day (e.g. either sunrise or first allowed time)
-        // console.log("sunrise: " + sunrise.format());
-        // console.log("sunset: " + sunset.format());
-        // console.log("business_day_start: " + business_day_start.format());
-        // console.log("business_day_end: " + business_day_end.format());
+        console.log("sunrise: " + sunrise.format());
+        console.log("sunset: " + sunset.format());
+        console.log("business_day_start: " + business_day_start.format());
+        console.log("business_day_end: " + business_day_end.format());
         var dayStart = moment.utc(Math.max(sunrise.format("X"), business_day_start.format("X")), "X");
         var dayEnd   = moment.utc(Math.min(sunset.format("X"), business_day_end.format("X")), "X");
 
@@ -205,9 +188,9 @@ export default class BooksysPie {
                 // console.log("Add gap session before first session");
                 // console.log(sessions[i].start - lastEnd.format("X"));
                 values.push(sessions[i].start - lastEnd.format("X"));
-                labels.push(lastEnd.tz(this.getTimeZone()).format("HH:mm") 
+                labels.push(lastEnd.tz(timezone).format("HH:mm") 
                     + " - " 
-                    + moment(sessions[i].start, "X").tz(this.getTimeZone()).format("HH:mm"));
+                    + moment(sessions[i].start, "X").tz(timezone).format("HH:mm"));
                 colors.push(colorNoSlot);
                 pieSessions.push({
                     id:    null,
@@ -242,9 +225,9 @@ export default class BooksysPie {
             // console.log("Add regular session");
             // console.log(sessions[i].duration - duration_offset);
             values.push(sessions[i].duration - duration_offset);
-            labels.push(moment.utc(sessions[i].start, "X").tz(this.getTimeZone()).format("HH:mm")
+            labels.push(moment.utc(sessions[i].start, "X").tz(timezone).format("HH:mm")
                 + " - " 
-                + moment.utc(sessions[i].end, "X").tz(this.getTimeZone()).format("HH:mm"));
+                + moment.utc(sessions[i].end, "X").tz(timezone).format("HH:mm"));
             colors.push(color);
 
             pieSessions.push({
@@ -266,9 +249,9 @@ export default class BooksysPie {
             // console.log(dayStart.format());
             // console.log(dayEnd.format());
             values.push(dayEnd.diff(dayStart, 'seconds'));
-            labels.push(dayStart.tz(this.getTimeZone()).format("HH:mm")
+            labels.push(dayStart.tz(timezone).format("HH:mm")
                 + " - "
-                + dayEnd.tz(this.getTimeZone()).format("HH:mm"));
+                + dayEnd.tz(timezone).format("HH:mm"));
             colors.push(colorNoSlot);
 
             pieSessions.push({
@@ -288,9 +271,9 @@ export default class BooksysPie {
             duration = duration / 6;
             values.unshift(duration);
             labels.unshift(
-                moment(data.window_start, "X").tz(this.getTimeZone()).format("HH:mm")
+                moment(data.window_start, "X").tz(timezone).format("HH:mm")
                 + " - "
-                + session.start.tz(this.getTimeZone()).format("HH:mm")
+                + session.start.tz(timezone).format("HH:mm")
             );
             colors.unshift(colorOffHour);
 
@@ -309,9 +292,9 @@ export default class BooksysPie {
             // console.log(duration);
             values.push(duration);
             labels.push(
-                session.end.tz(this.getTimeZone()).format("HH:mm") 
+                session.end.tz(timezone).format("HH:mm") 
                 + " - " 
-                + dayEnd.tz(this.getTimeZone()).format("HH:mm"));
+                + dayEnd.tz(timezone).format("HH:mm"));
             colors.push(colorNoSlot);
 
             pieSessions.push({
@@ -330,9 +313,9 @@ export default class BooksysPie {
             duration = duration / 6;
             values.push(duration);
             labels.push(
-                session.end.tz(this.getTimeZone()).format("HH:mm") 
+                session.end.tz(timezone).format("HH:mm") 
                 + " - " 
-                + moment(data.window_end, "X").tz(this.getTimeZone()).format("HH:mm"));
+                + moment(data.window_end, "X").tz(timezone).format("HH:mm"));
             colors.push(colorOffHour);
 
             pieSessions.push({

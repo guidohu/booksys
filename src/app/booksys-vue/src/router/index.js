@@ -7,6 +7,7 @@ import Dashboard from '../views/Dashboard'
 import Account from '../views/Account'
 import Info from '../views/Info'
 import Schedule from '../views/Schedule'
+import Today from '../views/Today'
 
 Vue.use(VueRouter)
 
@@ -29,6 +30,11 @@ const routes = [
     path: '/signup',
     name: 'SignUp',
     component: SignUp
+  },
+  {
+    path: '/today',
+    name: 'Today',
+    component: Today
   },
   {
     path: '/dashboard',

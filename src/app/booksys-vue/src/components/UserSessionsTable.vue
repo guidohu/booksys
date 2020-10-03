@@ -73,7 +73,6 @@ export default Vue.extend({
     this.queryConfiguration();
   },
   beforeMount() {
-    console.log(this.$props);
     if(this.$props.showCancel == true){
       this.fields.push({
         key: "action",

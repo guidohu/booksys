@@ -1,5 +1,5 @@
 <template>
-  <div id="test">
+  <div id="pie">
   </div>
 </template>
 
@@ -12,17 +12,18 @@ export default Vue.extend({
   components: {
   },
   mounted() {
-    console.log("props", this.$props)
-    console.log("props2", this.sessionData)
-    let el = document.getElementById("test")
-    console.log("pass data", this.$props.sessionData)
-    BooksysPie.drawPie(el, this.sessionData, null, this.properties)
+    let el = document.getElementById("pie")
+    this.pieSessions = BooksysPie.drawPie(el, this.sessionData, this.selectHandler, this.properties);
+  },
+  methods: {
+    selectHandler: function(selectedId) {
+      this.$emit("selectHandler", this.pieSessions[selectedId]);
+    }
   },
   props: ['sessionData', 'properties']
 })
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   .small-pie {
     height: 7em;
