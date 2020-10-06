@@ -1,18 +1,142 @@
 <template>
   <b-card no-body class="text-left">
     <b-card-header>
-      Session Details
+      <b-row>
+        <b-col cols="8">
+          Session Details
+        </b-col>
+        <b-col cols="4" class="text-right">
+          <b-dropdown v-if="showAddRiders || showDeleteSession" id="dropdown-1" size="sm" variant="light" text="Dropdown Button" class="btn-xs" right no-caret>
+            <template v-slot:button-content>
+              <b-icon icon="list"></b-icon>
+            </template>
+            <b-dropdown-item v-if="showAddRiders">
+              <b-icon icon="person-plus"></b-icon>
+              {{"  "}} Add Rider
+            </b-dropdown-item>
+            <b-dropdown-item v-if="showDeleteSession">
+              <b-icon icon="trash"></b-icon>
+              {{"  "}} Delete Session
+            </b-dropdown-item>
+          </b-dropdown>
+        </b-col>
+      </b-row>
     </b-card-header>
     <b-card-body>
-      Test
+      <b-row>
+        <b-col cols="4">
+          Date
+        </b-col>
+        <b-col cols="8">
+          {{dateString}}
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col cols="4">
+          Session
+        </b-col>
+        <b-col cols="8">
+          {{timeString}}
+        </b-col>
+      </b-row>
+      <b-row v-if="showRiders">
+        <b-col cols="4">
+          Riders
+        </b-col>
+        <b-col cols="8">
+          <ul>
+            <li v-for="rider in riders" :key="rider.id">
+              {{ rider.first_name }} {{ rider.last_name}}
+            </li>
+          </ul>
+        </b-col>
+      </b-row>
+      <b-row v-if="showCreateSession">
+        <b-col offset="4" cols="8">
+          <b-button v-on:click="createSession" size="sm" variant="success" block>Create Session</b-button>
+        </b-col>
+      </b-row>
+      <b-row v-if="showAddRiders">
+        <b-col offset="4" cols="8">
+          <b-button v-on:click="addRiders" size="sm" variant="success" block>Add Riders</b-button>
+        </b-col>
+      </b-row>
     </b-card-body>
   </b-card>
 </template>
 
 <script>
 import Vue from 'vue';
+import moment from 'moment';
+import 'moment-timezone';
 
 export default Vue.extend({
-  name: 'SessionDetailsCard'
+  name: 'SessionDetailsCard',
+  props: [
+    "date",
+    "sessionTime",
+    "riders"
+  ],
+  data() {
+    return {
+      sessionSelected: false
+    };
+  },
+  computed: {
+    dateString: function(){
+      const newDate = this.date;
+      return moment(newDate).format('DD.MM.YYYY');
+    },
+    timeString: function(){
+      if(this.sessionTime == null){
+        return "no session selected";
+      }
+
+      const start = this.sessionTime.start;
+      const end   = this.sessionTime.end;
+      return moment(start).format('HH:mm') + " - " + moment(end).format('HH:mm');
+    },
+    showCreateSession: function(){
+      if(this.sessionTime != null && this.sessionTime.id == null){
+        return true;
+      }
+      return false;
+    },
+    showDeleteSession: function(){
+      if(this.sessionTime != null && this.sessionTime.id != null){
+        return true;
+      }
+      return false;
+    },
+    showAddRiders: function(){
+      if(this.sessionTime != null && this.sessionTime.id != null){
+        return true;
+      }
+      return false;
+    },
+    showRiders: function(){
+      if(this.riders != null && this.riders.length > 0){
+        return true;
+      }
+      return false;
+    }
+  },
+  watch: {
+    timeString: function(){
+      if(this.sessionTime == null){
+        this.sessionSelected = false;
+      }else{
+        this.sessionSelected = true;
+      }
+    }
+  },
+  methods: {
+    createSession: function(){
+      this.$emit('createSessionHandler');
+    },
+    addRiders: function(){
+      this.$emit('addRidersHandler');
+    }
+  }
 })
 </script>

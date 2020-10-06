@@ -23,7 +23,12 @@
       <b-col cols="4">
         <b-row>
           <b-col cols="12">
-            <SessionDetailsCard/>
+            <SessionDetailsCard            
+              :date="date"
+              :sessionTime="slot"
+              @createSessionHandler="createSession"
+              @addRidersHandler="addRiders"
+            />
           </b-col>
         </b-row>
         <b-row class="mt-1">
@@ -56,10 +61,14 @@
       :timezone="getTimezone"
       @prevDay="prevDay"
       @nextDay="nextDay"
-      @selectSession="selectSlot"
+      @selectSessionHandler="selectSlot"
     />
     <SessionDetailsCard
       class="mb-1"
+      :date="date"
+      :sessionTime="slot"
+      @createSessionHandler="createSession"
+      @addRidersHandler="addRiders"
     />
     <ConditionInfoCard
       :sunrise="getSessions.sunrise"
@@ -110,15 +119,22 @@ export default Vue.extend({
     ]),
     prevDay: function(){
       this.date.add(-1, 'days');
+      this.slot = null;
       this.querySessionsForDate();
     },
     nextDay: function(){
       this.date.add(1, 'days');
+      this.slot = null;
       this.querySessionsForDate();
     },
     querySessionsForDate: function() {
+      console.log("the time", this.date);
       const dateStart = this.date.tz(this.getTimezone).startOf('day');
       const dateEnd = this.date.tz(this.getTimezone).endOf('day');
+      console.log("dateStart:",dateStart);
+      console.log("dateEnd:",dateEnd);
+      console.log("startWindow", dateStart.format("X"));
+      console.log("endWindow", dateEnd.format("X"));
 
       // query get_booking_day
       this.querySessions({
@@ -127,12 +143,20 @@ export default Vue.extend({
       });
     },
     selectSlot: function(slot) {
-      console.log("selectedSlot", slot)
+      console.log("selectedSlot", slot);
+      this.slot = slot;
+    },
+    createSession: function(){
+      console.log("createSession clicked");
+    },
+    addRiders: function(){
+      console.log("addRiders");
     }
   },
   data() {
     return {
-      date: moment()
+      date: moment(),
+      slot: null
     }
   },
   created() {
