@@ -21,6 +21,19 @@ const actions = {
       commit('setSessions', null)
     }
     Sessions.getSessions(time.start, time.end, successCb, failureCb)
+  },
+  createSession({ dispatch }, sessionObj) {
+    console.log("Trigger createSession action with", sessionObj);
+    return new Promise((resolve, reject) => {
+      Sessions.createSession(sessionObj)
+        .then(() => {
+          dispatch('sessions/querySessions', sessionObj);
+          resolve();
+        })
+        .catch(error => {
+          reject(error);
+        })
+    });
   }
 }
 

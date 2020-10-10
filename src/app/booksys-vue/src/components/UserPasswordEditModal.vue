@@ -9,12 +9,7 @@
         <b-form @submit="save">
           <b-row v-if="errors.length">
             <b-col cols="12">
-              <b-alert variant="warning" show>
-                <b>Please correct the following issue:</b>
-                <ul>
-                  <li v-for="err in errors" :key="err">{{ err }}</li>
-                </ul>
-              </b-alert>
+              <WarningBox :error="errors"/>
             </b-col>
           </b-row>
           <b-form-group
@@ -78,11 +73,15 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import { mapActions } from 'vuex'
+import Vue from 'vue';
+import { mapActions } from 'vuex';
+import WarningBox from '@/components/WarningBox';
 
 export default Vue.extend({
   name: 'UserPasswordEditModal',
+  components: {
+    WarningBox
+  },
   data() {
     return {
       form: {

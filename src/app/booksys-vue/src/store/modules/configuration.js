@@ -9,7 +9,8 @@ const state = () => ({
   dbVersionInfo: null,
   dbIsUpdating: false,
   dbUpdateResult: null,
-  timezone: "Europe/Zurich"
+  timezone: "Europe/Zurich",
+  maxRiders: 12
 })
 
 const getters = {
@@ -40,6 +41,9 @@ const getters = {
   },
   getTimezone: (state) => {
     return state.timezone;
+  },
+  getMaximumNumberOfRiders: (state) => {
+    return state.maxRiders;
   }
 }
 

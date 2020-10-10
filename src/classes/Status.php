@@ -20,10 +20,19 @@ class Status{
 		return Status::status(TRUE, $msg);
 	}
 
-	public static function status($flag, $msg){
+	public static function successDataResponse($msg, $data){
+		return Status::status(TRUE, $msg, $data);
+	}
+
+	public static function status($flag, $msg, $data=NULL){
 		$status = array();
 		$status['ok'] = $flag;
 		$status['msg'] = $msg;
+
+		if(isset($data)){
+			$status['data'] = $data;
+		}
+
 		return $status;
 	}
 }

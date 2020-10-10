@@ -46,8 +46,9 @@
 			$db->disconnect();
 			exit;
 		case 'add_session':
-			add_session($configuration, $db);
+			$response = add_session($configuration, $db);
 			$db->disconnect();
+			echo json_encode($response);
 			exit;
 		case 'delete_session':
 			delete_session($configuration, $db);
@@ -229,49 +230,31 @@
 		$sanitizer = new Sanitizer();
 		if(!isset($data->start) or !$sanitizer->isInt($data->start)){
 			error_log('api/booking.php: Illegal start provided: ' . $data->start);
-			HttpHeader::setResponseCode(400);
-			$error["error"] = 'No valid start provided';
-			echo json_encode($error);
-			return;
+			return Status::errorStatus('No valid start provided');
 		}
 		if(!isset($data->end) or !$sanitizer->isInt($data->end)){
 			error_log('api/booking.php: Illegal end provided: ' . $data->end);
-			HttpHeader::setResponseCode(400);
-			$error["error"] = 'No valid end provided';
-			echo json_encode($error);
-			return;
+			return Status::errorStatus('No valid end provided');
 		}
 		if(!isset($data->max_riders) or !$sanitizer->isInt($data->max_riders)){
 			error_log('api/booking.php: Illegal max_riders provided: ' . $data->max_riders);
-			HttpHeader::setResponseCode(400);
-			$error["error"] = 'No valid number of maximum riders provided';
-			echo json_encode($error);
-			return;
+			return Status::errorStatus('No valid number of maximum riders provided');
 		}
 		if(!isset($data->type) or !$sanitizer->isInt($data->type)){
 			error_log('api/booking.php: Illegal session type provided: ' . $data->type);
-			HttpHeader::setResponseCode(400);
-			$error["error"] = 'No valid session type provided';
-			echo json_encode($error);
-			return;
+			return Status::errorStatus('No valid session type provided');
 		}
 		if($data->start >= $data->end){
 			error_log('api/booking.php: Session start cannot be after end: ' . $data->start . ' to ' . $data->end);
-			HttpHeader::setResponseCode(400);
-			$error["error"] = 'Session start is after the end and that does not make sense.';
-			echo json_encode($error);
-			return;
+			return Status::errorStatus('Session start is after the end and that does not make sense.');
 		}
 
 		// check validity of data
 		// check type of session
 		$query = sprintf('SELECT id FROM session_type WHERE id = %d', $data->type);
 		if(!$db->exists($query)){
-			HttpHeader::setResponseCode(400);
 			error_log('api/booking.php: Session type does not exist ' . $data->type);
-			$error["error"] = 'No valid session type provided';
-			echo json_encode($error);
-			return;
+			return Status::errorStatus('No valid session type provided');
 		}
 		// check if the new session collides with an existing one
 		$query = 'SELECT id
@@ -307,12 +290,9 @@
 		$db->execute();
 		$res = $db->fetch_stmt_hash();
 		if(count($res) > 0){
-			HttpHeader::setResponseCode(400);
 			error_log('api/booking.php: The session is overlapping with an existing one');
 			error_log('api/booking.php: Oberlapping with: ' . $res[0]['id']);
-			$error["error"] = 'Session overlaps with an existing one';
-			echo json_encode($error);
-			return;
+			return Status::errorStatus('Session overlaps with an existing one');
 		}
 
 		// Everything is fine and we will add the session
@@ -331,27 +311,19 @@
 						$session['user_id'],
 						$data->type);
 		if(!$db->execute()){
-			HttpHeader::setResponseCode(500);
 			error_log('Cannot add new session with: ' . $query);
-			$error["error"] = 'Cannot add new session. An error appeared.';
-			echo json_encode($error);
-			return;
+			return Status::errorStatus('Cannot add new session. An error appeared.');
 		}
 
 		$query = 'SELECT LAST_INSERT_ID() as session_id;';
 		$db->prepare($query);
 		if(!$db->execute()){
-			HttpHeader::setResponseCode(500);
 			error_log('Cannot get last inserted session id: ' . $query);
-			$error["error"] = 'Cannot add new session. An error appeared.';
-			echo json_encode($error);
-			return;
+			return Status::errorStatus('Cannot add new session. An error appeared.');
 		}
 		$res = $db->fetch_stmt_hash();
 
-		HttpHeader::setResponseCode(200);
-		echo json_encode($res[0]);
-		return;
+		return Status::successDataResponse("Session has been created", $res[0]);
 	}
 
 	function _get_sunrise_and_sunset($start, $end, $configuration){

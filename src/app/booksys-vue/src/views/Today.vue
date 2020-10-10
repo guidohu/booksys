@@ -1,79 +1,82 @@
 <template>
-  <div v-if="isDesktop" class="display">
-    <b-row>
-      <b-col>
-        <div class="main-title">
-          <h3>
-            Book Your Session
-          </h3>
-        </div>
-      </b-col>
-    </b-row>
-    <b-row class="ml-1 mr-1">
-      <b-col cols="8">
-        <SessionDayCard
-          :sessionData="getSessions"
-          :isMobile="isMobile"
-          :timezone="getTimezone"
-          @prevDay="prevDay"
-          @nextDay="nextDay"
-          @selectSessionHandler="selectSlot"
-        />
-      </b-col>
-      <b-col cols="4">
-        <b-row>
-          <b-col cols="12">
-            <SessionDetailsCard            
-              :date="date"
-              :sessionTime="slot"
-              @createSessionHandler="createSession"
-              @addRidersHandler="addRiders"
-            />
-          </b-col>
-        </b-row>
-        <b-row class="mt-1">
-          <b-col cols="12">
-            <ConditionInfoCard
-              :sunrise="getSessions.sunrise"
-              :sunset="getSessions.sunset"
-            />
-          </b-col>
-        </b-row>
-      </b-col>
-    </b-row>
-    <div class="bottom mr-2">
-      <b-button class="mr-1" variant="outline-light" to="/calendar">
-        <b-icon-calendar3></b-icon-calendar3>
-        CALENDAR
-      </b-button>
-      <b-button variant="outline-light" to="/dashboard">
-        <b-icon-house></b-icon-house>
-        HOME
-      </b-button>
+  <div>
+    <SessionEditorModal/>
+    <div v-if="isDesktop" class="display">
+      <b-row>
+        <b-col>
+          <div class="main-title">
+            <h3>
+              Book Your Session
+            </h3>
+          </div>
+        </b-col>
+      </b-row>
+      <b-row class="ml-1 mr-1">
+        <b-col cols="8">
+          <SessionDayCard
+            :sessionData="getSessions"
+            :isMobile="isMobile"
+            :timezone="getTimezone"
+            @prevDay="prevDay"
+            @nextDay="nextDay"
+            @selectSessionHandler="selectSlot"
+          />
+        </b-col>
+        <b-col cols="4">
+          <b-row>
+            <b-col cols="12">
+              <SessionDetailsCard            
+                :date="date"
+                :sessionTime="slot"
+                @createSessionHandler="showCreateSession"
+                @addRidersHandler="addRiders"
+              />
+            </b-col>
+          </b-row>
+          <b-row class="mt-1">
+            <b-col cols="12">
+              <ConditionInfoCard
+                :sunrise="getSessions.sunrise"
+                :sunset="getSessions.sunset"
+              />
+            </b-col>
+          </b-row>
+        </b-col>
+      </b-row>
+      <div class="bottom mr-2">
+        <b-button class="mr-1" variant="outline-light" to="/calendar">
+          <b-icon-calendar3></b-icon-calendar3>
+          CALENDAR
+        </b-button>
+        <b-button variant="outline-light" to="/dashboard">
+          <b-icon-house></b-icon-house>
+          HOME
+        </b-button>
+      </div>
     </div>
-  </div>
-  <div v-else>
-    <NavbarMobile title="Book Your Session"/>
-    <SessionDayCard
-      class="mb-1"
-      :sessionData="getSessions"
-      :isMobile="isMobile"
-      :timezone="getTimezone"
-      @prevDay="prevDay"
-      @nextDay="nextDay"
-      @selectSessionHandler="selectSlot"
-    />
-    <SessionDetailsCard
-      class="mb-1"
-      :date="date"
-      :sessionTime="slot"
-      @createSessionHandler="createSession"
-      @addRidersHandler="addRiders"
-    />
-    <ConditionInfoCard
-      :sunrise="getSessions.sunrise"
-      :sunset="getSessions.sunset"
-    />
+    <div v-else>
+      <NavbarMobile title="Book Your Session"/>
+      <SessionDayCard
+        class="mb-1"
+        :sessionData="getSessions"
+        :isMobile="isMobile"
+        :timezone="getTimezone"
+        @prevDay="prevDay"
+        @nextDay="nextDay"
+        @selectSessionHandler="selectSlot"
+      />
+      <SessionDetailsCard
+        class="mb-1"
+        :date="date"
+        :sessionTime="slot"
+        @createSessionHandler="createSession"
+        @addRidersHandler="addRiders"
+      />
+      <ConditionInfoCard
+        :sunrise="getSessions.sunrise"
+        :sunset="getSessions.sunset"
+      />
+    </div>
   </div>
 </template>
 
@@ -85,6 +88,7 @@ import NavbarMobile from '@/components/NavbarMobile';
 import ConditionInfoCard from '@/components/ConditionInfoCard';
 import SessionDayCard from '@/components/SessionDayCard';
 import SessionDetailsCard from '@/components/SessionDetailsCard';
+import SessionEditorModal from '@/components/SessionEditorModal';
 import moment from 'moment';
 import 'moment-timezone';
 
@@ -94,7 +98,8 @@ export default Vue.extend({
     NavbarMobile,
     ConditionInfoCard,
     SessionDayCard,
-    SessionDetailsCard
+    SessionDetailsCard,
+    SessionEditorModal
   },
   computed: {
     isMobile: function () {
@@ -115,7 +120,8 @@ export default Vue.extend({
       'queryConfiguration'
     ]),
     ...mapActions('sessions', [
-      'querySessions'
+      'querySessions',
+      'createSession'
     ]),
     prevDay: function(){
       this.date.add(-1, 'days');
@@ -146,8 +152,9 @@ export default Vue.extend({
       console.log("selectedSlot", slot);
       this.slot = slot;
     },
-    createSession: function(){
+    showCreateSession: function(){
       console.log("createSession clicked");
+      console.log("for slot:", this.slot);
     },
     addRiders: function(){
       console.log("addRiders");
