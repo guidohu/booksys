@@ -1,10 +1,11 @@
+import moment from 'moment';
 
 export default class Sessions {
 
   static getSessions(dateStart, dateEnd, cbSuccess, cbFailure){
     let query = {
-      start: dateStart.format("X"),
-      end: dateEnd.format("X")
+      start: moment(dateStart).format("X"),
+      end: moment(dateEnd).format("X")
     }
     fetch('/api/booking.php?action=get_booking_day', {
       method: 'POST',
@@ -32,8 +33,8 @@ export default class Sessions {
         title: sessionData.title,
         comment: sessionData.description,
         max_riders: sessionData.maximumRiders,
-        start: sessionData.start.format('X'),
-        end: sessionData.end.format('X'),
+        start: moment(sessionData.start).format('X'),
+        end: moment(sessionData.end).format('X'),
         type: sessionData.type
       };
 
@@ -60,6 +61,42 @@ export default class Sessions {
       })
       .catch(error => {
         console.error("Sessions/createSession", error);
+        reject([error]);
+      })
+    })
+  }
+
+  static deleteSession(sessionData){
+    console.log("api/deleteSession called for session:", sessionData);
+    return new Promise((resolve, reject) => {
+      // build request body
+      const session = {
+        session_id: sessionData.id
+      };
+
+      fetch('/api/booking.php?action=delete_session', {
+        method: "POST",
+        cache: "no-cache",
+        body: JSON.stringify(session)
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("Sessions/deleteSession response data:", data);
+            if(data.ok){
+              resolve(data);
+            }else{
+              console.log("Sessions/deleteSession: Cannot create session, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("Sessions/deleteSession: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("Sessions/deleteSession", error);
         reject([error]);
       })
     })

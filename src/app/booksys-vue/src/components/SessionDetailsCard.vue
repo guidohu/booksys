@@ -14,7 +14,12 @@
               <b-icon icon="person-plus"></b-icon>
               {{"  "}} Add Rider
             </b-dropdown-item>
-            <b-dropdown-item v-if="showDeleteSession">
+            <b-dropdown-item v-if="showAddRiders" v-on:click="editSession">
+              <b-icon icon="pencil-square"></b-icon>
+              {{"  "}} Edit Session
+            </b-dropdown-item>
+            <b-dropdown-divider></b-dropdown-divider>
+            <b-dropdown-item v-if="showDeleteSession" v-on:click="deleteSession">
               <b-icon icon="trash"></b-icon>
               {{"  "}} Delete Session
             </b-dropdown-item>
@@ -133,6 +138,12 @@ export default Vue.extend({
   methods: {
     createSession: function(){
       this.$emit('createSessionHandler');
+    },
+    editSession: function(){
+      this.$emit('editSessionHandler');
+    },
+    deleteSession: function(){
+      this.$emit('deleteSessionHandler', { id: this.sessionTime.id });
     },
     addRiders: function(){
       this.$emit('addRidersHandler');

@@ -1,0 +1,77 @@
+<template>
+  <b-modal
+    id="sessionDeleteModal"
+    title="Delete Session"
+  >
+    <b-row v-if="errors.length">
+      <b-col cols="1" class="d-none d-sm-block"></b-col>
+      <b-col cols="12" sm="10">
+        <WarningBox :errors="errors"/>
+      </b-col>
+      <b-col cols="1" class="d-none d-sm-block"></b-col>
+    </b-row>
+    <b-form @submit="confirm">
+      <b-row>
+        <b-col cols="1" class="d-none d-sm-block"></b-col>
+        <b-col cols="12" sm="10">
+          Do you really want to delete this session?
+        </b-col>
+        <b-col cols="1" class="d-none d-sm-block"></b-col>
+      </b-row>
+    </b-form>
+    <div slot="modal-footer">
+      <b-button type="button" variant="outline-info" v-on:click="confirm">
+        <b-icon-check></b-icon-check>
+        Delete
+      </b-button>
+      <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
+        <b-icon-x></b-icon-x>
+        Cancel
+      </b-button>
+    </div>
+  </b-modal>
+</template>
+
+<script>
+import Vue from 'vue';
+import { mapActions } from 'vuex';
+import WarningBox from '@/components/WarningBox';
+
+export default Vue.extend({
+  name: 'SessionDeleteModal',
+  components: {
+    WarningBox
+  },
+  props: [
+    'session'
+  ],
+  data(){
+    return {
+      errors: []
+    }
+  },
+  methods: {
+    ...mapActions('sessions', [
+      'deleteSession'
+    ]),
+    confirm: function(event){
+      if(event != null){
+        event.preventDefault();
+      }
+
+      this.deleteSession(this.session)
+        .then( () => {
+          this.$emit('sessionDeletedHandler');
+          this.close()
+        })
+        .catch( err => {
+          this.errors = err;
+        })
+    },
+    close: function(){
+      this.errors = [];
+      this.$bvModal.hide('sessionDeleteModal', this.session);
+    }
+  }
+})
+</script>

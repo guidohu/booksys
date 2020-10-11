@@ -51,8 +51,9 @@
 			echo json_encode($response);
 			exit;
 		case 'delete_session':
-			delete_session($configuration, $db);
+			$response = delete_session($configuration, $db);
 			$db->disconnect();
+			echo json_encode($response);
 			exit;
 		case 'delete_user':
 			delete_rider_from_session($configuration, $db);
@@ -460,18 +461,14 @@
 		$sanitizer = new Sanitizer();
 		if(!isset($data->session_id) or !$sanitizer->isInt($data->session_id)){
 			error_log('api/booking.php: Illegal session id provided: ' . $data->session_id);
-			HttpHeader::setResponseCode(400);
-			echo 'No valid session id provided';
-			return;
+			return Status::errorStatus('No valid session id provided');
 		}
 
 		// only an admin is allowed to do so
 		$session_data = Login::getSessionData($configuration, $db);
 		if($session_data['user_role_id'] != $configuration->admin_user_status_id){
 			error_log('api/booking.php: Attempt to delete a session as non-admin ' . $session_data[username]);
-			HttpHeader::setResponseCode(400);
-			echo "Only an administrator can delete sessions.";
-			return;
+			return Status::errorStatus('Only an administrator can delete sessions.');
 		}
 
 		// check if there exist heats to this session
@@ -483,13 +480,10 @@
 		if(!isset($res)){
 			error_log('api/booking.php: Cannot check for heats for this session.');
 			HttpHeader::setResponseCode(500);
-			return;
 		}
 		if(count($res) > 0){
 			error_log('api/booking.php: Attempt to delete session with heats.');
-			HttpHeader::setResponseCode(400);
-			echo("A session with finished heats cannot be deleted.");
-			return;
+			return Status::errorStatus('This session already has heats. Only sessions without heats can be deleted.');
 		}
 
 		// inform invitees
@@ -521,12 +515,10 @@
 		$db->bind_param('i', $data->session_id);
 		if(!$db->execute()){
 			error_log('api/booking.php: Cannot delete session: ' . $data->session_id);
-			HttpHeader::setResponseCode(500);
-			echo "Cannot remove session.";
-			return;
+			return Status::errorStatus('Session cannot be removed due to unknown reasons.');
 		}
 
-		return;
+		return Status::successStatus("session deleted");
 	}
 
 	function _inform_invitees($session_id, $session_data, $db, $configuration){

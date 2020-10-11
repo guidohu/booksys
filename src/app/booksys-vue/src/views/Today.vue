@@ -1,6 +1,13 @@
 <template>
   <div>
-    <SessionEditorModal/>
+    <SessionEditorModal 
+      :defaultValues="slot"
+      @sessionCreatedHandler="sessionCreatedHandler"
+    />
+    <SessionDeleteModal
+      :session="slot"
+      @sessionDeletedHandler="sessionDeletedHandler"
+    />
     <div v-if="isDesktop" class="display">
       <b-row>
         <b-col>
@@ -29,6 +36,8 @@
                 :date="date"
                 :sessionTime="slot"
                 @createSessionHandler="showCreateSession"
+                @editSessionHandler="showCreateSession"
+                @deleteSessionHandler="showDeleteSession"
                 @addRidersHandler="addRiders"
               />
             </b-col>
@@ -70,6 +79,8 @@
         :date="date"
         :sessionTime="slot"
         @createSessionHandler="createSession"
+        @editSessionHandler="showCreateSession"
+        @deleteSessionHandler="showDeleteSession"
         @addRidersHandler="addRiders"
       />
       <ConditionInfoCard
@@ -89,6 +100,7 @@ import ConditionInfoCard from '@/components/ConditionInfoCard';
 import SessionDayCard from '@/components/SessionDayCard';
 import SessionDetailsCard from '@/components/SessionDetailsCard';
 import SessionEditorModal from '@/components/SessionEditorModal';
+import SessionDeleteModal from '@/components/SessionDeleteModal';
 import moment from 'moment';
 import 'moment-timezone';
 
@@ -99,7 +111,8 @@ export default Vue.extend({
     ConditionInfoCard,
     SessionDayCard,
     SessionDetailsCard,
-    SessionEditorModal
+    SessionEditorModal,
+    SessionDeleteModal
   },
   computed: {
     isMobile: function () {
@@ -124,23 +137,21 @@ export default Vue.extend({
       'createSession'
     ]),
     prevDay: function(){
-      this.date.add(-1, 'days');
+      this.date = moment(this.date).add(-1, 'days');
       this.slot = null;
       this.querySessionsForDate();
     },
     nextDay: function(){
-      this.date.add(1, 'days');
+      this.date = moment(this.date).add(1, 'days');
       this.slot = null;
       this.querySessionsForDate();
     },
     querySessionsForDate: function() {
       console.log("the time", this.date);
-      const dateStart = this.date.tz(this.getTimezone).startOf('day');
-      const dateEnd = this.date.tz(this.getTimezone).endOf('day');
+      const dateStart = moment(this.date).startOf('day').format();
+      const dateEnd = moment(this.date).endOf('day').format();
       console.log("dateStart:",dateStart);
       console.log("dateEnd:",dateEnd);
-      console.log("startWindow", dateStart.format("X"));
-      console.log("endWindow", dateEnd.format("X"));
 
       // query get_booking_day
       this.querySessions({
@@ -150,11 +161,26 @@ export default Vue.extend({
     },
     selectSlot: function(slot) {
       console.log("selectedSlot", slot);
+      console.log(slot.start.format(), slot.end.format());
       this.slot = slot;
+    },
+    sessionCreatedHandler: function(sessionId) {
+      console.log("sessionCreatedHandler: sessionId", sessionId);
+      this.slot = null;
+    },
+    sessionDeletedHandler: function() {
+      console.log("sessionDeletedHandler");
+      this.slot = null;
     },
     showCreateSession: function(){
       console.log("createSession clicked");
       console.log("for slot:", this.slot);
+      console.log("show session editor");
+      console.log(this.$bvModal.show('sessionEditorModal'));
+    },
+    showDeleteSession: function(){
+      console.log("showDeleteSession");
+      this.$bvModal.show('sessionDeleteModal');
     },
     addRiders: function(){
       console.log("addRiders");
@@ -162,12 +188,17 @@ export default Vue.extend({
   },
   data() {
     return {
-      date: moment(),
+      date: null,
       slot: null
     }
   },
   created() {
     // get day from URL
+    const now = moment().format();
+    console.log(moment());
+    console.log("now:", now);
+    this.date = now;
+    console.log(this.date);
     // TODO
 
     // needed to know the timezone

@@ -1,4 +1,5 @@
-import Sessions from "../../api/sessions"
+import Sessions from "../../api/sessions";
+import moment from 'moment';
 
 const state = () => ({
   sessions: null
@@ -11,11 +12,25 @@ const getters = {
 }
 
 const actions = {
-  querySessions({ commit }, time) {
-    console.log("Trigger action with", time.start, time.end)
+  querySessions({ commit, state }, time) {
+    console.log("Trigger querySessions with timespan", time);
+
+    if(time == null && state.sessions == null){
+      console.log("vuex/querySessions: no time window provided, do nothing");
+      return;
+    }
+
+    // do a reload in case we already have sessions loaded
+    if(time == null && state.sessions != null){
+      time = {
+        start: moment(state.sessions.window_start, 'X').format(),
+        end: moment(state.sessions.window_end, 'X').format()
+      }
+    }
+
     let successCb = (sessions) => {
       console.log("got sessions:", sessions)
-      commit('setSessions', sessions)
+      commit('setSessions', { sessions: sessions, timeWindow: time });
     }
     let failureCb = () => {
       commit('setSessions', null)
@@ -26,8 +41,22 @@ const actions = {
     console.log("Trigger createSession action with", sessionObj);
     return new Promise((resolve, reject) => {
       Sessions.createSession(sessionObj)
+        .then((response) => {
+          console.log("action response: ", response);
+          dispatch('querySessions');
+          resolve(response.data);
+        })
+        .catch(error => {
+          reject(error);
+        })
+    });
+  },
+  deleteSession({ dispatch }, sessionObj) {
+    console.log("Trigger deleteSession action with", sessionObj);
+    return new Promise((resolve ,reject) => {
+      Sessions.deleteSession(sessionObj)
         .then(() => {
-          dispatch('sessions/querySessions', sessionObj);
+          dispatch('querySessions');
           resolve();
         })
         .catch(error => {
@@ -38,8 +67,14 @@ const actions = {
 }
 
 const mutations = {
+  setLoadedTime (state, value){
+    state.loadedTime = {
+      start: value.start,
+      end: value.end
+    };
+  },
   setSessions (state, value){
-    state.sessions = value
+    state.sessions = value.sessions;
     console.log('sessions set to', value)
   }
 }
