@@ -42,7 +42,6 @@ const actions = {
     return new Promise((resolve, reject) => {
       Sessions.createSession(sessionObj)
         .then((response) => {
-          console.log("action response: ", response);
           dispatch('querySessions');
           resolve(response.data);
         })

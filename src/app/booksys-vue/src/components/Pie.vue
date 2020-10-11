@@ -1,5 +1,5 @@
 <template>
-  <div id="pie">
+  <div id="pie" class="text-center">
   </div>
 </template>
 
@@ -19,14 +19,22 @@ export default Vue.extend({
   methods: {
     selectHandler: function(selectedId) {
       this.$emit("selectHandler", this.pieSessions[selectedId]);
-    }
-  },
-  watch: {
-    sessionData: function() {
+    },
+    repaint: function(){
       // we have to re-draw the pie upon any change
       let el = document.getElementById("pie");
       el.innerHTML = '';      
       this.pieSessions = BooksysPie.drawPie(el, this.sessionData, this.selectHandler, this.properties);
+    }
+  },
+  watch: {
+    sessionData: function() {
+      console.log("Change in sessionData, repaint");
+      this.repaint();
+    },
+    properties: function() {
+      console.log("Change in properties, repaint");
+      this.repaint();
     }
   },
   props: ['sessionData', 'properties']

@@ -11,7 +11,7 @@
       <b-col cols="1" class="d-none d-sm-block"></b-col>
     </b-row>
     <b-form @submit="save">
-      <b-row>
+      <b-row class="text-left">
         <b-col cols="1" class="d-none d-sm-block"></b-col>
         <b-col cols="12" sm="10">
           <b-form-group
@@ -153,7 +153,17 @@ export default Vue.extend({
     return {
       title: "",
       errors: [],
-      form: {}
+      form: {
+        id: null,
+        title: null,
+        description: null,
+        startDate: null,
+        startTime: null,
+        endDate: null,
+        endTime: null,
+        maximumRiders: null,
+        type: null
+      }
     }
   },
   computed: {

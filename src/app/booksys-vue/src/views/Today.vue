@@ -78,7 +78,7 @@
         class="mb-1"
         :date="date"
         :sessionTime="slot"
-        @createSessionHandler="createSession"
+        @createSessionHandler="showCreateSession"
         @editSessionHandler="showCreateSession"
         @deleteSessionHandler="showDeleteSession"
         @addRidersHandler="addRiders"
