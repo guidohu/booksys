@@ -74,8 +74,10 @@
 
 <script>
 import Vue from 'vue';
+import { mapActions} from 'vuex';
 import moment from 'moment';
 import 'moment-timezone';
+import { UserPointer } from '@/dataTypes/user';
 import RiderSelectionModal from '@/components/RiderSelectionModal.vue';
 
 export default Vue.extend({
@@ -153,8 +155,15 @@ export default Vue.extend({
     addRiders: function(){
       this.$bvModal.show('riderSelectionModal');
     },
+    ...mapActions('sessions', [
+      "deleteUserFromSession"
+    ]),
     removeRider: function(id){
       console.log("TODO remove rider with id", id);
+      this.deleteUserFromSession({
+        sessionId: this.session.id,
+        user: new UserPointer(id)
+      })
     }
   }
 })

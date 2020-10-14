@@ -138,4 +138,41 @@ export default class Sessions {
       })
     })
   }
+
+  static deleteUserFromSession(sessionId, user){
+    console.log("api/deleteUserFromSession called for session:", sessionId, "and user", user);
+    return new Promise((resolve, reject) => {
+      // build request body
+      const requestBody = {
+        user_id: user.id,
+        session_id: sessionId
+      };
+
+      fetch('/api/booking.php?action=delete_user', {
+        method: "POST",
+        cache: "no-cache",
+        body: JSON.stringify(requestBody)
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("Sessions/deleteUserFromSession response data:", data);
+            if(data.ok){
+              resolve(data);
+            }else{
+              console.log("Sessions/deleteUserFromSession: Cannot delete user from session, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("Sessions/deleteUserFromSession: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("Sessions/deleteUserFromSession", error);
+        reject([error]);
+      })
+    })
+  }
 }

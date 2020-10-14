@@ -56,8 +56,9 @@
 			echo json_encode($response);
 			exit;
 		case 'delete_user':
-			delete_rider_from_session($configuration, $db);
+			$response = delete_rider_from_session($configuration, $db);
 			$db->disconnect();
+			echo json_encode($response);
 			exit;
 		case 'add_users':
 			$response = add_rider_to_session($configuration, $db);
@@ -603,18 +604,14 @@
 		$sanitizer = new Sanitizer();
 		if(isset($data->user_id) and !$sanitizer->isInt($data->user_id)){
 			error_log('api/booking.php: Illegal user_id provided: ' . $data->user_id);
-			HttpHeader::setResponseCode(400);
-			echo 'No valid user_id provided';
-			return;
+			return Status::errorStatus("No valid user_id provided");
 		}
 		if(!isset($data->user_id)){
 			$data->user_id = $session_data['user_id'];
 		}
 		if(!isset($data->session_id) or !$sanitizer->isInt($data->session_id)){
 			error_log('api/booking.php: Illegal session id provided: ' . $data->session_id);
-			HttpHeader::setResponseCode(400);
-			echo 'No valid session id provided';
-			return;
+			return Status::errorStatus("No valid session id provided");
 		}
 
 		// check if there is such a session
@@ -629,9 +626,7 @@
 		$res = $db->fetch_stmt_hash();
 		if(!isset($res) or count($res) != 1){
 			error_log('api/booking.php: No session found for user/session: ' . $data->user_id . '/' . $data->session_id);
-			HttpHeader::setResponseCode(400);
-			echo "User and session do not exist in this combination";
-			return;
+			return Status::errorStatus("User and session do not exist in this combination");
 		}
 
 		// check if the user is still allowed to cancel the session
@@ -640,16 +635,13 @@
 		   && $session_data['user_id'] != $data->user_id){
 		    error_log('api/booking.php: Attempt to delete another user from a session (logged_in_user/session): '
 			          . $session_data['user_id'] . ' / ' . $data->session_id);
-			HttpHeader::setResponseCode(403);
-			echo "You can only cancel your own session";
-			return;
+			return Status::errorStatus("You can only cancel your own session");
+
 		}
 		if(time() > $time - $configuration->session_cancel_graceperiod
 		   && $session_data['user_role_id'] != $configuration->admin_user_status_id){
 			error_log('api/booking.php: Attempt to delete a user from a session too late (user/session) ' . $data->user_id . '/' . $data->session_id );
-			HttpHeader::setResponseCode(400);
-			echo "The session cannot be cancelled anymore at the time being.";
-			return;
+			return Status::errorStatus("The session cannot be cancelled anymore at the time being.");
 		}
 
 		// check if the user already had a heat in that session
@@ -664,14 +656,11 @@
 		);
 		if(!$db->execute()){
 			error_log('api/booking.php: Attempt to check whether user already had a heat did not work.');
-			HttpHeater::setResponseCode(500);
-			echo "Cannot check whether user already had sessions";
-			return;
+			return Status::errorStatus("Cannot check whether user already had sessions");
 		}
 		$res = $db->fetch_stmt_hash();
 		if($res[0]["nbr_of_heats"] > 0){
-			echo "This user cannot be removed because there are heats from this user in the selected session.";
-			return;
+			return Status::errorStatus("This user cannot be removed because there are heats from this user in the selected session.");
 		}		
 
 		// Delete the user from the session
@@ -682,9 +671,7 @@
 		$db->bind_param('ii', $data->session_id, $data->user_id);
 		if(!$db->execute()){
 			error_log("api/booking.php: Cannot delete user from session");
-			HttpHeader::setResponseCode(500);
-			echo "The session cannot be cancelled due to a technical issue. Please try again and let us know about this error.";
-			return;
+			return Status::errorStatus("The session cannot be cancelled due to a technical issue. Please try again and let us know about this error.");
 		}
 
 		// Also delete the invitations regarding this session
@@ -706,7 +693,7 @@
 			error_log("api/booking.php: Cannot add free space to session: " . $data->session_id);
 		}
 
-		return;
+		return Status::successStatus("user has been removed");
 	}
 
 	// Adds all given riders to the session

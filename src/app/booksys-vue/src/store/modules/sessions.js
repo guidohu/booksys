@@ -75,7 +75,20 @@ const actions = {
           reject(error);
         })
     });
-  }
+  },
+  deleteUserFromSession({ dispatch }, data) {
+    console.log("Trigger deleteUserFromSession action with", data);
+    return new Promise((resolve, reject) => {
+      Sessions.deleteUserFromSession(data.sessionId, data.user)
+        .then(() => {
+          dispatch('querySessions');
+          resolve();
+        })
+        .catch(error => {
+          reject(error);
+        })
+    });
+  },
 }
 
 const mutations = {
