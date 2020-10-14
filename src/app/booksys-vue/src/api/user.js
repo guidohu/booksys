@@ -1,4 +1,5 @@
-import { Login } from './login'
+import { Login } from './login';
+import { UserPointer } from '@/dataTypes/user';
 
 export default class User {
 
@@ -147,6 +148,47 @@ export default class User {
       .catch(error => {
         console.error("Cannot remove user from session");
         reject([error])
+      })
+    })
+  }
+
+  static getUserList(){
+    return new Promise((resolve, reject) => {
+      fetch('/api/user.php?action=get_all_users', {
+        method: "GET",
+        cache: 'no-cache',
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            if(data == null){
+              console.error("User/getAllUsers: Cannot parse server response", data);
+              reject(["Cannot parse server response"]);
+            }else if(data.data == null){
+              console.log("User/getAllUsers: Cannot get user list:", response);
+              reject(["Cannot get user list"]);
+            }else{
+              console.log("User/getAllUsers: User's sessions retrieved");
+              const usersResponse = data.data
+              let users = [];
+              usersResponse.forEach(u => {
+                users.push(new UserPointer(
+                  u.id,
+                  u.first_name,
+                  u.last_name
+                ))
+              })
+              resolve(users);
+            }
+          })
+          .catch( error => {
+            console.error("User/getAllUsers: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error('User/getAllUsers:', error)
+        reject([error]);
       })
     })
   }

@@ -10,7 +10,7 @@
             <template v-slot:button-content>
               <b-icon icon="list"></b-icon>
             </template>
-            <b-dropdown-item v-if="showAddRiders">
+            <b-dropdown-item v-if="showAddRiders" v-on:click="addRiders">
               <b-icon icon="person-plus"></b-icon>
               {{"  "}} Add Rider
             </b-dropdown-item>
@@ -28,6 +28,7 @@
       </b-row>
     </b-card-header>
     <b-card-body>
+      <RiderSelectionModal :session="session"/>
       <b-row>
         <b-col cols="4">
           Date
@@ -48,13 +49,14 @@
         <b-col cols="4">
           Riders
         </b-col>
-        <b-col cols="8">
-          <ul>
-            <li v-for="rider in riders" :key="rider.id">
-              {{ rider.first_name }} {{ rider.last_name}}
-            </li>
-          </ul>
-        </b-col>
+      </b-row>
+      <b-row>
+        <ul v-if="showRiders">
+          <li v-for="rider in session.riders" :key="rider.id">
+            {{ rider.name }} {{ " "}}
+            <a href="#" v-on:click="removeRider(rider.id)"><b-icon icon="person-dash"></b-icon></a>
+          </li>
+        </ul>
       </b-row>
       <b-row v-if="showCreateSession">
         <b-col offset="4" cols="8">
@@ -74,13 +76,16 @@
 import Vue from 'vue';
 import moment from 'moment';
 import 'moment-timezone';
+import RiderSelectionModal from '@/components/RiderSelectionModal.vue';
 
 export default Vue.extend({
   name: 'SessionDetailsCard',
+  components: {
+    RiderSelectionModal
+  },
   props: [
     "date",
-    "sessionTime",
-    "riders"
+    "session"
   ],
   data() {
     return {
@@ -93,34 +98,34 @@ export default Vue.extend({
       return moment(newDate).format('DD.MM.YYYY');
     },
     timeString: function(){
-      if(this.sessionTime == null){
+      if(this.session == null){
         return "no session selected";
       }
 
-      const start = this.sessionTime.start;
-      const end   = this.sessionTime.end;
+      const start = this.session.start;
+      const end   = this.session.end;
       return moment(start).format('HH:mm') + " - " + moment(end).format('HH:mm');
     },
     showCreateSession: function(){
-      if(this.sessionTime != null && this.sessionTime.id == null){
+      if(this.session != null && this.session.id == null){
         return true;
       }
       return false;
     },
     showDeleteSession: function(){
-      if(this.sessionTime != null && this.sessionTime.id != null){
+      if(this.session != null && this.session.id != null){
         return true;
       }
       return false;
     },
     showAddRiders: function(){
-      if(this.sessionTime != null && this.sessionTime.id != null){
+      if(this.session != null && this.session.id != null){
         return true;
       }
       return false;
     },
     showRiders: function(){
-      if(this.riders != null && this.riders.length > 0){
+      if(this.session != null && this.session.riders != null && this.session.riders.length > 0){
         return true;
       }
       return false;
@@ -128,7 +133,7 @@ export default Vue.extend({
   },
   watch: {
     timeString: function(){
-      if(this.sessionTime == null){
+      if(this.session == null){
         this.sessionSelected = false;
       }else{
         this.sessionSelected = true;
@@ -143,10 +148,13 @@ export default Vue.extend({
       this.$emit('editSessionHandler');
     },
     deleteSession: function(){
-      this.$emit('deleteSessionHandler', { id: this.sessionTime.id });
+      this.$emit('deleteSessionHandler', { id: this.session.id });
     },
     addRiders: function(){
-      this.$emit('addRidersHandler');
+      this.$bvModal.show('riderSelectionModal');
+    },
+    removeRider: function(id){
+      console.log("TODO remove rider with id", id);
     }
   }
 })

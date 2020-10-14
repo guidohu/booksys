@@ -62,6 +62,19 @@ const actions = {
           reject(error);
         })
     });
+  },
+  addUsersToSession({ dispatch }, data) {
+    console.log("Trigger addUsersToSession action with", data);
+    return new Promise((resolve, reject) => {
+      Sessions.addUsersToSession(data.sessionId, data.users)
+        .then(() => {
+          dispatch('querySessions');
+          resolve();
+        })
+        .catch(error => {
+          reject(error);
+        })
+    });
   }
 }
 

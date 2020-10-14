@@ -20,7 +20,7 @@
       </b-row>
       <b-row class="ml-1 mr-1">
         <b-col cols="8">
-          <SessionDayCard
+          <SessionDayCard v-if="getSessions != null"
             :sessionData="getSessions"
             :isMobile="isMobile"
             :timezone="getTimezone"
@@ -34,7 +34,7 @@
             <b-col cols="12">
               <SessionDetailsCard            
                 :date="date"
-                :sessionTime="slot"
+                :session="slot"
                 @createSessionHandler="showCreateSession"
                 @editSessionHandler="showCreateSession"
                 @deleteSessionHandler="showDeleteSession"
@@ -44,9 +44,9 @@
           </b-row>
           <b-row class="mt-1">
             <b-col cols="12">
-              <ConditionInfoCard
-                :sunrise="getSessions.sunrise"
-                :sunset="getSessions.sunset"
+              <ConditionInfoCard v-if="sunrise!=null"
+                :sunrise="sunrise"
+                :sunset="sunset"
               />
             </b-col>
           </b-row>
@@ -65,7 +65,7 @@
     </div>
     <div v-else>
       <NavbarMobile title="Book Your Session"/>
-      <SessionDayCard
+      <SessionDayCard v-if="getSessions != null"
         class="mb-1"
         :sessionData="getSessions"
         :isMobile="isMobile"
@@ -77,15 +77,15 @@
       <SessionDetailsCard
         class="mb-1"
         :date="date"
-        :sessionTime="slot"
+        :session="slot"
         @createSessionHandler="showCreateSession"
         @editSessionHandler="showCreateSession"
         @deleteSessionHandler="showDeleteSession"
         @addRidersHandler="addRiders"
       />
-      <ConditionInfoCard
-        :sunrise="getSessions.sunrise"
-        :sunset="getSessions.sunset"
+      <ConditionInfoCard v-if="sunrise!=null"
+        :sunrise="sunrise"
+        :sunset="sunset"
       />
     </div>
   </div>
@@ -126,7 +126,23 @@ export default Vue.extend({
     ]),
     ...mapGetters('sessions', [
       'getSessions'
-    ])
+    ]),
+    sunrise: function(){
+      const sessions = this.getSessions;
+      if(sessions == null){
+        return null;
+      }else{
+        return sessions.sunrise;
+      }
+    },
+    sunset: function(){
+      const sessions = this.getSessions;
+      if(sessions == null){
+        return null;
+      }else{
+        return sessions.sunset;
+      }
+    }
   },
   methods: {
     ...mapActions('configuration', [

@@ -32,7 +32,8 @@
         get_session_users($configuration, $lc);
         exit;
     case 'get_all_users':
-        get_all_users($configuration, $lc);
+        $response = get_all_users($configuration, $lc);
+        echo json_encode($response); 
         exit;
     case 'get_my_user':
         get_my_user($configuration);
@@ -844,15 +845,13 @@
   function get_all_users($configuration, $lc){
     // only admins are allowed to call this function
     if(!$lc->isAdmin()){
-        HttpHeader::setResponseCode(403);
-        exit;
+        return Status::errorStatus("No authorization");
     }
     
     // connect to the database
     $db = new DBAccess($configuration);
     if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
-        exit;
+        return Status::errorStatus("Cannot connect to database");
     }
     
     $query = 'SELECT 
@@ -865,9 +864,9 @@
     $res = $db->fetch_data_hash($query);
     $db->disconnect();
     if(!$res){
-        HttpHeader::setResponseCode(500);
+        return Status::errorStatus("Cannot get users from database");
     }
-    echo json_encode($res);
+    return Status::successDataResponse("Users retrieved", $res);
   }
   
   /* Returns the admin users*/

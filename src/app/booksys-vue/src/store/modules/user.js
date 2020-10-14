@@ -9,6 +9,7 @@ const state = () => ({
   heatCost: 0,
   heatCostYTD: 0,
   schedule: [],
+  userList: []
 })
 
 const getters = {
@@ -35,6 +36,9 @@ const getters = {
   },
   userSchedule: (state) => {
     return state.schedule;
+  },
+  userList: (state) => {
+    return state.userList;
   }
 }
 
@@ -98,6 +102,19 @@ const actions = {
           reject(error);
         })
     })
+  },
+  queryUserList ( { commit }) {
+    console.log("Trigger action queryUserList")
+    return new Promise((resolve, reject) => {
+      User.getUserList()
+        .then( (users) => {
+          commit('setUserList', users);
+          resolve();
+        })
+        .catch( (error) => {
+          reject(error);
+        })
+    })
   }
 }
 
@@ -116,6 +133,10 @@ const mutations = {
     // sessions: [ {...}, {...}]
     // old_sessions: [ {...}, {...}]
     state.schedule = schedule;
+  },
+  setUserList (state, users) {
+    console.log("Store: setUserList to", users);
+    state.userList = users;
   }
 }
 

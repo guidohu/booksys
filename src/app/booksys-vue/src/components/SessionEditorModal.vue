@@ -240,12 +240,9 @@ export default Vue.extend({
       }
 
       // set title
-      console.log(this.defaultValues.title);
       this.form.title = (this.defaultValues != null && this.defaultValues.title != null) 
         ? this.defaultValues.title
         : null;
-      console.log(this.form.title);
-      console.log(this.form);
 
       // set description
       this.form.description = (this.defaultValues != null && this.defaultValues.description != null) 

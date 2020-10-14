@@ -60,8 +60,9 @@
 			$db->disconnect();
 			exit;
 		case 'add_users':
-			add_rider_to_session($configuration, $db);
+			$response = add_rider_to_session($configuration, $db);
 			$db->disconnect();
+			echo json_encode($response);
 			exit;
 		case 'add_self':
 			add_myself_to_session($configuration, $db);
@@ -719,22 +720,16 @@
 		$sanitizer = new Sanitizer();
 		if(!isset($data->session_id) or !$sanitizer->isInt($data->session_id)){
 			error_log('api/booking.php: Illegal session_id provided: ' . $data->session_id);
-			HttpHeader::setResponseCode(400);
-			echo 'No valid session_id provided';
-			return;
+			return Status::errorStatus("No valid session ID provided");
 		}
 		if(!isset($data->user_ids) or count($data->user_ids) < 1){
 			error_log('api/booking.php: Illegal user_ids provided.');
-			HttpHeader::setResponseCode(400);
-			echo 'No valid user_ids provided';
-			return;
+			return Status::errorStatus('No user ID provided');
 		}
 		for($i=0; $i<count($data->user_ids); $i++){
 			if(! $sanitizer->isInt($data->user_ids[$i])){
 				error_log('api/booking.php: Illegal user_id provided: ' . $data->user_ids[$i]);
-				HttpHeader::setResponseCode(400);
-				echo 'No valid user_id provided';
-				return;
+				return Status::errorStatus('Invalid user ID provided');
 			}
 		}
 
@@ -782,6 +777,8 @@
 				Email::sendMail($res[0]['email'], 'Session Confirmation', $message, $configuration);
 			}
 		}
+
+		return Status::successStatus("users have been added to session");
 	}
 
 	// Adds the current user to the session
