@@ -18,16 +18,25 @@
       </b-row>
     </b-card-header>
     <b-card-body>
-      <Pie 
-        :sessionData="sessionData" 
-        :properties="properties"
-        @selectHandler="selectSession"/>
+      <b-row>
+        <Pie 
+          :sessionData="sessionData" 
+          :selectedSession="selectedSession"
+          :properties="properties"
+          @selectHandler="selectSession"/>
+      </b-row>
+      <b-row v-if="isToday && selectedSession != null && selectedSession.id != null" class="text-center">
+        <b-col cols="12" class="text-center">
+          <b-button type="button" variant="outline-success">Start Session</b-button>
+        </b-col>
+      </b-row>
     </b-card-body>
   </b-card>
 </template>
 
 <script>
 import Vue from 'vue';
+import { mapGetters } from 'vuex';
 import Pie from "./Pie.vue";
 import moment from 'moment-timezone';
 
@@ -47,18 +56,28 @@ export default Vue.extend({
     }
   },
   computed: {
+    ...mapGetters('configuration', [
+      'getTimezone'
+    ]),
     dateString: function() {
       console.log("sessionData", this.sessionData);
       return moment(this.sessionData.window_start, "X").format("dddd DD.MM.YYYY");
+    },
+    isToday: function() {
+      console.log(this.getTimezone);
+      const today = moment().tz(this.getTimezone).startOf('day').format();
+      const sessionDay = moment(this.sessionData.window_start, "X").tz(this.getTimezone).startOf('day').format();
+      if(today == sessionDay){
+        return true;
+      }
+      return false;
     }
   },
   methods: {
     prevDay: function(){
-      console.log('prevDay');
       this.$emit('prevDay');
     },
     nextDay: function(){
-      console.log('nextDay');
       this.$emit('nextDay');
     },
     selectSession: function(slot) {
@@ -68,7 +87,7 @@ export default Vue.extend({
   components: {
     Pie
   },
-  props: ['isMobile', 'sessionData', 'timezone'],
+  props: ['isMobile', 'sessionData', 'selectedSession', 'timezone'],
   created() {
     if(this.isMobile != null && this.isMobile == true){
       this.properties = {

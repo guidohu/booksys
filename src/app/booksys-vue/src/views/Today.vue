@@ -1,17 +1,15 @@
 // TODO
 // - add users for mobile
-// - refresh after adding/removal of users
-// - keep pie selected after changes, unselect if deletion
-// - select the pie on session create
 // - edit session (also backend)
+// - fix timezone consistency in pie
 <template>
   <div>
     <SessionEditorModal 
-      :defaultValues="slot"
+      :defaultValues="selectedSession"
       @sessionCreatedHandler="sessionCreatedHandler"
     />
     <SessionDeleteModal
-      :session="slot"
+      :session="selectedSession"
       @sessionDeletedHandler="sessionDeletedHandler"
     />
     <div v-if="isDesktop" class="display">
@@ -28,6 +26,7 @@
         <b-col cols="8">
           <SessionDayCard v-if="getSessions != null"
             :sessionData="getSessions"
+            :selectedSession="selectedSession"
             :isMobile="isMobile"
             :timezone="getTimezone"
             @prevDay="prevDay"
@@ -40,7 +39,7 @@
             <b-col cols="12">
               <SessionDetailsCard            
                 :date="date"
-                :session="slot"
+                :session="selectedSession"
                 @createSessionHandler="showCreateSession"
                 @editSessionHandler="showCreateSession"
                 @deleteSessionHandler="showDeleteSession"
@@ -74,6 +73,7 @@
       <SessionDayCard v-if="getSessions != null"
         class="mb-1"
         :sessionData="getSessions"
+        :selectedSession="selectedSession"
         :isMobile="isMobile"
         :timezone="getTimezone"
         @prevDay="prevDay"
@@ -83,7 +83,7 @@
       <SessionDetailsCard
         class="mb-1"
         :date="date"
-        :session="slot"
+        :session="selectedSession"
         @createSessionHandler="showCreateSession"
         @editSessionHandler="showCreateSession"
         @deleteSessionHandler="showDeleteSession"
@@ -109,6 +109,7 @@ import SessionEditorModal from '@/components/SessionEditorModal';
 import SessionDeleteModal from '@/components/SessionDeleteModal';
 import moment from 'moment';
 import 'moment-timezone';
+import _ from 'lodash';
 
 export default Vue.extend({
   name: 'Today',
@@ -160,12 +161,12 @@ export default Vue.extend({
     ]),
     prevDay: function(){
       this.date = moment(this.date).add(-1, 'days');
-      this.slot = null;
+      this.selectedSession = null;
       this.querySessionsForDate();
     },
     nextDay: function(){
       this.date = moment(this.date).add(1, 'days');
-      this.slot = null;
+      this.selectedSession = null;
       this.querySessionsForDate();
     },
     querySessionsForDate: function() {
@@ -181,22 +182,22 @@ export default Vue.extend({
         end: dateEnd
       });
     },
-    selectSlot: function(slot) {
-      console.log("selectedSlot", slot);
-      console.log(slot.start.format(), slot.end.format());
-      this.slot = slot;
+    selectSlot: function(selectedSession) {
+      console.log("selectedSlot", selectedSession);
+      console.log(selectedSession.start.format(), selectedSession.end.format());
+      this.selectedSession = selectedSession;
     },
     sessionCreatedHandler: function(sessionId) {
       console.log("sessionCreatedHandler: sessionId", sessionId);
-      this.slot = null;
+      this.sessionCreated = null;
     },
     sessionDeletedHandler: function() {
       console.log("sessionDeletedHandler");
-      this.slot = null;
+      this.selectedSession = null;
     },
     showCreateSession: function(){
       console.log("createSession clicked");
-      console.log("for slot:", this.slot);
+      console.log("for selectedSession:", this.selectedSession);
       console.log("show session editor");
       console.log(this.$bvModal.show('sessionEditorModal'));
     },
@@ -208,10 +209,43 @@ export default Vue.extend({
       console.log("addRiders");
     }
   },
+  watch: {
+    getSessions: function(newInfo, oldInfo){
+      // in case we get an update affecting the sessions
+      // we will update our selected session too
+      if(this.selectedSession != null 
+        && this.selectedSession.id != null
+        && newInfo.sessions.map(s => s.id).includes(this.selectedSession.id)
+      ){
+        this.selectedSession = newInfo.sessions.filter(s => s.id == this.selectedSession.id)[0];
+      }
+
+      // in case a new session has been created, we select it
+      if(newInfo.sessions != null
+        && (oldInfo.sessions == null || newInfo.sessions.length > oldInfo.sessions.length)
+      ){
+        // find the session that is new
+        const newIds = newInfo.sessions.map(s => s.id);
+        const oldIds = oldInfo.sessions.map(s => s.id);
+        const difference = _.difference(newIds, oldIds);
+        if(difference.length == 1){
+          this.selectedSession = newInfo.sessions.find(s => s.id == difference[0])
+        }else{
+          console.error("old and new session info differs by more than one session");
+        }
+      }else if(newInfo.sessions.length < oldInfo.sessions.length){
+        // a session has been deleted -> reset selected session
+        this.selectedSession = null;
+      }
+
+
+      
+    }
+  },
   data() {
     return {
       date: null,
-      slot: null
+      selectedSession: null
     }
   },
   created() {

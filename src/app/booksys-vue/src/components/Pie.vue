@@ -32,12 +32,32 @@ export default Vue.extend({
       console.log("Change in sessionData, repaint");
       this.repaint();
     },
+    selectedSession: function(newSelectedSession) {
+      if(newSelectedSession == null){
+        BooksysPie.resetSelection();
+        return;
+      }
+
+      console.log(this.pieSessions);
+      if(newSelectedSession.id != null){
+        for(let i=0; i<this.pieSessions.length; i++){
+          if(this.pieSessions[i].id == newSelectedSession.id){
+            BooksysPie.selectSector(i)
+          }
+        }
+      }
+    },
     properties: function() {
       console.log("Change in properties, repaint");
       this.repaint();
     }
   },
-  props: ['sessionData', 'properties']
+  props: ['sessionData', 'selectedSession', 'properties'],
+  data() {
+    return {
+      pieSessions: []
+    }
+  }
 })
 </script>
 
