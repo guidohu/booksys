@@ -2,7 +2,6 @@
 <b-modal
     id="riderSelectionModal"
     title="Add Riders"
-    visible
   >
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>

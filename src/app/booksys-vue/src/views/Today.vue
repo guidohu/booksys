@@ -1,3 +1,9 @@
+// TODO
+// - add users for mobile
+// - refresh after adding/removal of users
+// - keep pie selected after changes, unselect if deletion
+// - select the pie on session create
+// - edit session (also backend)
 <template>
   <div>
     <SessionEditorModal 
@@ -209,16 +215,21 @@ export default Vue.extend({
     }
   },
   created() {
-    // get day from URL
-    const now = moment().format();
-    console.log(moment());
-    console.log("now:", now);
-    this.date = now;
-    console.log(this.date);
-    // TODO
-
     // needed to know the timezone
     this.queryConfiguration();
+    // TODO block till we have the config
+    // then when promise resolved, call
+    // a function that sets the date
+
+    // get day from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlDate = urlParams.get('date');
+    if(urlDate != null){
+      const urlDateParsed =  moment(urlDate, 'YYYY-MM-DD').tz(this.getTimezone).startOf('day').format();
+      this.date = urlDateParsed;
+    }else{
+      this.date = moment().tz(this.getTimezone).startOf('day').format();
+    }    
 
     this.querySessionsForDate();
   }
