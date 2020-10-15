@@ -27,7 +27,7 @@
       </b-row>
       <b-row v-if="isToday && selectedSession != null && selectedSession.id != null" class="text-center">
         <b-col cols="12" class="text-center">
-          <b-button type="button" variant="outline-success">Start Session</b-button>
+          <b-button v-on:click="navigateSessionStart" type="button" variant="outline-success">Start Session</b-button>
         </b-col>
       </b-row>
     </b-card-body>
@@ -82,6 +82,11 @@ export default Vue.extend({
     },
     selectSession: function(slot) {
       this.$emit('selectSessionHandler', slot);
+    },
+    navigateSessionStart: function() {
+      // TODO adjust correct link
+      console.log("TODO adjust correct link");
+      window.location.href = '/watch.html?sessionId='+this.selectedSession.id;
     }
   },
   components: {
