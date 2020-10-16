@@ -196,7 +196,6 @@ export default class BooksysPie {
                     end   = moment(session.start).add(-1, "minute").format();
                     label = moment(start).format("HH:mm") + " - " + moment(end).format("HH:mm");
                 }
-                console.log("Pie: first filler duration", duration);
                 values.push(duration);
                 labels.push(label);
                 colors.push(colorNoSlot);
