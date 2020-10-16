@@ -281,8 +281,8 @@ export default Vue.extend({
         : moment().tz(this.getTimezone).add(1, 'hour').format("HH:mm");
 
       // set maximum riders
-      this.form.maximumRiders = (this.defaultValues != null && this.defaultValues.free != null) 
-        ? this.defaultValues.free
+      this.form.maximumRiders = (this.defaultValues != null && this.defaultValues.maximumRiders != null) 
+        ? this.defaultValues.maximumRiders
         : this.getMaximumNumberOfRiders;
 
       // set session type

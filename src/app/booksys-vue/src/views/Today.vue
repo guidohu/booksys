@@ -105,6 +105,7 @@ import SessionDayCard from '@/components/SessionDayCard';
 import SessionDetailsCard from '@/components/SessionDetailsCard';
 import SessionEditorModal from '@/components/SessionEditorModal';
 import SessionDeleteModal from '@/components/SessionDeleteModal';
+import Session from '@/dataTypes/session';
 import moment from 'moment';
 import 'moment-timezone';
 import _ from 'lodash';
@@ -182,8 +183,19 @@ export default Vue.extend({
     },
     selectSlot: function(selectedSession) {
       console.log("selectedSlot", selectedSession);
-      console.log(selectedSession.start.format(), selectedSession.end.format());
-      this.selectedSession = selectedSession;
+      console.log(moment(selectedSession.start).format(), moment(selectedSession.end).format());
+      const sessionWithSelectedId = this.getSessions.sessions.find(s => selectedSession.id == s.id);
+      if(sessionWithSelectedId == null){
+        this.selectedSession = new Session(
+          selectedSession.id,
+          null,
+          null,
+          selectedSession.start,
+          selectedSession.end
+        )
+      }else{
+        this.selectedSession = sessionWithSelectedId;
+      }
     },
     sessionDeletedHandler: function() {
       console.log("sessionDeletedHandler");
@@ -231,9 +243,6 @@ export default Vue.extend({
         // a session has been deleted -> reset selected session
         this.selectedSession = null;
       }
-
-
-      
     }
   },
   data() {

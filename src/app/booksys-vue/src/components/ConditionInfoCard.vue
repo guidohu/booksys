@@ -37,10 +37,10 @@ export default Vue.extend({
     'sunset' ],
   computed: {
     sunriseString: function(){
-      return moment(this.sunrise, "X").format("HH:mm");
+      return moment(this.sunrise).format("HH:mm");
     },
     sunsetString: function(){
-      return moment(this.sunset, "X").format("HH:mm");
+      return moment(this.sunset).format("HH:mm");
     }
   }
 })

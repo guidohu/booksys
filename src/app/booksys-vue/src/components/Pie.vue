@@ -13,15 +13,11 @@ export default Vue.extend({
     let el = document.getElementById("pie")
     this.pieSessions = BooksysPie.drawPie(el, this.sessionData, this.selectHandler, this.properties);
   },
-  beforeUpdate() {
-    console.log("Pie would update");
-  },
   methods: {
     selectHandler: function(selectedId) {
       this.$emit("selectHandler", this.pieSessions[selectedId]);
     },
     repaint: function(){
-      // we have to re-draw the pie upon any change
       let el = document.getElementById("pie");
       el.innerHTML = '';      
       this.pieSessions = BooksysPie.drawPie(el, this.sessionData, this.selectHandler, this.properties);
@@ -29,7 +25,7 @@ export default Vue.extend({
   },
   watch: {
     sessionData: function() {
-      console.log("Change in sessionData, repaint");
+      // repaint the pie upon any change
       this.repaint();
     },
     selectedSession: function(newSelectedSession) {
@@ -38,17 +34,16 @@ export default Vue.extend({
         return;
       }
 
-      console.log(this.pieSessions);
       if(newSelectedSession.id != null){
         for(let i=0; i<this.pieSessions.length; i++){
           if(this.pieSessions[i].id == newSelectedSession.id){
-            BooksysPie.selectSector(i)
+            BooksysPie.selectSector(i);
+            break;
           }
         }
       }
     },
     properties: function() {
-      console.log("Change in properties, repaint");
       this.repaint();
     }
   },

@@ -132,6 +132,7 @@ export default class BooksysPie {
     //
     // Returns an object containing all the data of the pie.
     static drawPie(location, data, callback, properties){
+        console.log("Pie:", data);
         BooksysPie.addPiePlugin();
 
         // get timezone
@@ -156,64 +157,73 @@ export default class BooksysPie {
         var labels = [];
         var colors = [];
         var pieSessions = [];
-        console.log("data", data);
 
         // specific times required for proper display
-        var sunrise = moment.utc(data.sunrise, "X");
-        var sunset  = moment.utc(data.sunset, "X");
-        var business_day_start = moment(Number(data.window_start), "X").tz(timezone);
-        var business_day_end   = moment(Number(data.window_end), "X").tz(timezone);
-        console.log(business_day_start.format() + " " + business_day_end.format());
-        business_day_start.set('hour', data.business_day_start.substring(0,2));
-        business_day_start.set('minute', data.business_day_start.substring(3,5));
-        business_day_start.set('second', 0);
-        business_day_end.set('hour', data.business_day_end.substring(0,2));
-        business_day_end.set('minute', data.business_day_end.substring(3,5));
-        business_day_end.set('second', 0);
+        const sunrise = moment(data.sunrise);
+        const sunset  = moment(data.sunset);
+        const business_day_start = moment(data.business_day_start);
+        const business_day_end   = moment(data.business_day_end);
         // get the start/end of the day (e.g. either sunrise or first allowed time)
-        console.log("sunrise: " + sunrise.format());
-        console.log("sunset: " + sunset.format());
-        console.log("business_day_start: " + business_day_start.format());
-        console.log("business_day_end: " + business_day_end.format());
-        var dayStart = moment.utc(Math.max(sunrise.format("X"), business_day_start.format("X")), "X");
-        var dayEnd   = moment.utc(Math.min(sunset.format("X"), business_day_end.format("X")), "X");
+        console.log("Pie sunrise: " + sunrise.format());
+        console.log("Pie sunset: " + sunset.format());
+        console.log("Pie business_day_start: " + business_day_start.format());
+        console.log("Pie business_day_end: " + business_day_end.format());
+        const dayStart = moment(Math.max(sunrise.format("X"), business_day_start.format("X")), "X").format();
+        const dayEnd   = moment(Math.min(sunset.format("X"), business_day_end.format("X")), "X").format();
+        console.log("Pie dayStart", dayStart);
+        console.log("Pie dayEnd", dayEnd);
 
         // reminder variables to fill the gaps between sessions
-        var lastEnd = dayStart;
+        let lastEnd = dayStart;
         
         // add all sessions to the pie (including gaps)
         for(var i=0; i<sessions.length; i++){
             // add a gap-session before this session if needed
-            if(lastEnd.format("X") < sessions[i].start){
+            if(moment(lastEnd).format("X") < moment(sessions[i].start).format("X")){
                 // console.log("Add gap session before first session");
                 // console.log(sessions[i].start - lastEnd.format("X"));
-                values.push(sessions[i].start - lastEnd.format("X"));
-                labels.push(lastEnd.tz(timezone).format("HH:mm") 
-                    + " - " 
-                    + moment(sessions[i].start, "X").tz(timezone).format("HH:mm"));
+                const session = sessions[i];
+                const duration = moment(session.start).format("X") - 1 - moment(lastEnd).format("X");
+                let label = "";
+                let start = "";
+                let end = "";
+                if(lastEnd == dayStart){
+                    start = moment(lastEnd).format();
+                    end   = moment(session.start).add(-1, "minute").format();
+                    label = moment(start).format("HH:mm") + " - " + moment(end).format("HH:mm");
+                }else{
+                    start = moment(lastEnd).add(1, 'minute').format();
+                    end   = moment(session.start).add(-1, "minute").format();
+                    label = moment(start).format("HH:mm") + " - " + moment(end).format("HH:mm");
+                }
+                console.log("Pie: first filler duration", duration);
+                values.push(duration);
+                labels.push(label);
                 colors.push(colorNoSlot);
                 pieSessions.push({
                     id:    null,
-                    start: lastEnd,
-                    end:   moment(sessions[i].start, "X")
+                    start: start,
+                    end:   end
                 });
             }
 
             // calculate duration offsets for sessions longer than a day
             // as we only display a single day
             var duration_offset = 0;
-            if(sessions[i].start < data.window_start){
-                duration_offset = data.window_start - sessions[i].start;
+            if(moment(sessions[i].start).format("X") < moment(data.window_start).format("X")){
+                duration_offset = moment(data.window_start).format("X") - moment(sessions[i].start).format("X");
             }
-            if(sessions[i].end > data.window_end){
-                duration_offset = sessions[i].end - data.window_end;
+            if(moment(sessions[i].end).format("X") > moment(data.window_end).format("X")){
+                duration_offset = moment(sessions[i].end).format("X") - moment(data.window_end).format("X");
             }
+
+            const sessionDurationSeconds = moment(sessions[i].end).format("X") - moment(sessions[i].start).format("X");
 
             // get color for this slot
             var color = "";
             console.log(sessions[i]);
             // check if free and is not course
-            if(sessions[i].free > 0 && sessions[i].type != 1){
+            if(sessions[i].maximumRiders > 0 && sessions[i].type != 1){
                 color = colorSlot;
             } else if(sessions[i].type == 1) {
                 color = colorCourse;
@@ -224,22 +234,22 @@ export default class BooksysPie {
 
             // console.log("Add regular session");
             // console.log(sessions[i].duration - duration_offset);
-            values.push(sessions[i].duration - duration_offset);
-            labels.push(moment.utc(sessions[i].start, "X").tz(timezone).format("HH:mm")
+            values.push(sessionDurationSeconds - duration_offset);
+            labels.push(moment(sessions[i].start).format("HH:mm")
                 + " - " 
-                + moment.utc(sessions[i].end, "X").tz(timezone).format("HH:mm"));
+                + moment(sessions[i].end).format("HH:mm"));
             colors.push(color);
 
             pieSessions.push({
                 id:     sessions[i].id,
-                start:  moment.utc(sessions[i].start, "X"),
-                end:    moment.utc(sessions[i].end, "X"),
+                start:  sessions[i].start,
+                end:    sessions[i].end,
                 title:  sessions[i].title,
                 comment: sessions[i].comment,
                 free:   sessions[i].free,
                 riders: sessions[i].riders
             });
-            lastEnd = moment.utc(sessions[i].end, "X");
+            lastEnd = moment(sessions[i].end).format();
         }
 
         // in case there are no sessions yet
@@ -248,10 +258,10 @@ export default class BooksysPie {
             // console.log(dayEnd.diff(dayStart, 'seconds'));
             // console.log(dayStart.format());
             // console.log(dayEnd.format());
-            values.push(dayEnd.diff(dayStart, 'seconds'));
-            labels.push(dayStart.tz(timezone).format("HH:mm")
+            values.push(moment(dayEnd).diff(moment(dayStart), 'seconds'));
+            labels.push(moment(dayStart).tz(timezone).format("HH:mm")
                 + " - "
-                + dayEnd.tz(timezone).format("HH:mm"));
+                + moment(dayEnd).tz(timezone).format("HH:mm"));
             colors.push(colorNoSlot);
 
             pieSessions.push({
@@ -262,66 +272,66 @@ export default class BooksysPie {
         }
 
         // add first pie(s) of the day (if needed)
-        if(pieSessions[0].start.format("X") > data.window_start){
+        if(moment(pieSessions[0].start).format("X") > moment(data.window_start).format("X")){
             let session = pieSessions[0];
-            let duration = session.start.format("X") - data.window_start;
+            let duration = moment(session.start).format("X") - 1 - moment(data.window_start).format("X");
 
-            // console.log("Add pre day session");
+            console.log("Pie: Add pre day session");
             // console.log(duration);
             duration = duration / 6;
             values.unshift(duration);
             labels.unshift(
-                moment(data.window_start, "X").tz(timezone).format("HH:mm")
+                moment(data.window_start).format("HH:mm")
                 + " - "
-                + session.start.tz(timezone).format("HH:mm")
+                + moment(session.start).add(-1, 'minute').format("HH:mm")
             );
             colors.unshift(colorOffHour);
 
             pieSessions.unshift({
                 id:     null,
-                start:  moment(data.window_start, "X"),
-                end:    pieSessions[0].start
+                start:  data.window_start,
+                end:    moment(session.start).add(-1, 'minute').format()
             });
         }
 
         // add gap filler session until end of day
-        if(pieSessions[pieSessions.length-1].end.format("X") < dayEnd.format("X")){
+        if(moment(pieSessions[pieSessions.length-1].end).format("X") < moment(dayEnd).format("X")){
             let session = pieSessions[pieSessions.length-1]
-            var duration = dayEnd.format("X") - session.end.format("X");
+            var duration = moment(dayEnd).format("X") - moment(session.end).format("X");
             // console.log("Add end of day gap filler");
             // console.log(duration);
             values.push(duration);
             labels.push(
-                session.end.tz(timezone).format("HH:mm") 
+                moment(session.end).add(1,'minute').format("HH:mm") 
                 + " - " 
-                + dayEnd.tz(timezone).format("HH:mm"));
+                + moment(dayEnd).format("HH:mm"));
             colors.push(colorNoSlot);
 
             pieSessions.push({
                 id:     null,
-                start:  session.end,
+                start:  moment(session.end).add(1, 'minute').format(),
                 end:    dayEnd
             });
         }
 
         // add last pie(s) of the day (if needed)
-        if(pieSessions[pieSessions.length-1].end.format("X") < data.window_end){
+        if(moment(pieSessions[pieSessions.length-1].end).format("X") < moment(data.window_end).format("X")){
             let session = pieSessions[pieSessions.length-1];
-            let duration = data.window_end - session.end.format("X");
+            let duration = moment(data.window_end).format("X") - moment(session.end).add(1, "minute").format("X");
             // console.log("Add after-day");
             // console.log(duration);
             duration = duration / 6;
             values.push(duration);
             labels.push(
-                session.end.tz(timezone).format("HH:mm") 
+                moment(session.end).add(1, "minute").format("HH:mm") 
                 + " - " 
-                + moment(data.window_end, "X").tz(timezone).format("HH:mm"));
+                + moment(data.window_end).format("HH:mm"));
             colors.push(colorOffHour);
 
             pieSessions.push({
                 id:     null,
-                start:  session.end,
-                end:    moment(data.window_end, "X")
+                start:  moment(session.end).add(1, "minute").format(),
+                end:    data.window_end
             });
         }
         
@@ -369,6 +379,8 @@ export default class BooksysPie {
             }
         }
         
+        console.log("Pie values:", values);
+        console.log("Pie labels:", labels);
         
         // create the pie-chart
         // console.log(values);

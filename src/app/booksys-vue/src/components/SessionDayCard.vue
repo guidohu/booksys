@@ -61,7 +61,7 @@ export default Vue.extend({
     ]),
     dateString: function() {
       console.log("sessionData", this.sessionData);
-      return moment(this.sessionData.window_start, "X").format("dddd DD.MM.YYYY");
+      return moment(this.sessionData.window_start).format("dddd DD.MM.YYYY");
     },
     isToday: function() {
       console.log(this.getTimezone);

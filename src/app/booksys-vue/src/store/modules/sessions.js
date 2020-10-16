@@ -12,9 +12,8 @@ const getters = {
 }
 
 const actions = {
-  querySessions({ commit, state }, time) {
+  querySessions({ commit, state, rootState }, time) {
     console.log("Trigger querySessions with timespan", time);
-
     if(time == null && state.sessions == null){
       console.log("vuex/querySessions: no time window provided, do nothing");
       return;
@@ -23,19 +22,22 @@ const actions = {
     // do a reload in case we already have sessions loaded
     if(time == null && state.sessions != null){
       time = {
-        start: moment(state.sessions.window_start, 'X').format(),
-        end: moment(state.sessions.window_end, 'X').format()
+        start: moment(state.sessions.window_start).format(),
+        end: moment(state.sessions.window_end).format()
       }
     }
 
-    let successCb = (sessions) => {
-      console.log("got sessions:", sessions)
-      commit('setSessions', { sessions: sessions, timeWindow: time });
-    }
-    let failureCb = () => {
-      commit('setSessions', null)
-    }
-    Sessions.getSessions(time.start, time.end, successCb, failureCb)
+    return new Promise((resolve, reject) => {
+      Sessions.getSessions(time.start, time.end, rootState.configuration.timezone)
+      .then((sessions) => {
+        commit('setSessions', { sessions: sessions, timeWindow: time });
+        resolve();
+      })
+      .catch(error => {
+        commit('setSessions', null);
+        reject(error);
+      })
+    })
   },
   createSession({ dispatch }, sessionObj) {
     console.log("Trigger createSession action with", sessionObj);

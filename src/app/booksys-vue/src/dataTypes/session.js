@@ -20,4 +20,8 @@ export default class Session {
     this.maximumRiders = maxRiders;
     this.type = type;
   }
+
+  addRiders = (riders) => {
+    this.riders = riders;
+  }
 }

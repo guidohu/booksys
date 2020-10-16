@@ -34,8 +34,9 @@
 
 	switch($_GET['action']){
 		case 'get_booking_day':
-			get_booking_day($configuration, $db);
+			$response = get_booking_day($configuration, $db);
 			$db->disconnect();
+			echo json_encode($response);
 			exit;
 		case 'get_booking_month':
 			get_booking_month($configuration, $db);
@@ -87,34 +88,20 @@
 		$error = array();
 		$sanitizer = new Sanitizer();
 		if(! isset($data->start)){
-			HttpHeader::setResponseCode(400);
-			$error["error"] = 'No date start parameter given';
-			echo json_encode($error);
-			return;
+			return Status::errorStatus('No date start parameter given');
 		}
 		if(! isset($data->end)){
-			HttpHeader::setResponseCode(400);
-			$error["error"] = 'No date end parameter given';
-			echo json_encode($error);
-			return;
+			return Status::errorStatus('No date end parameter given');
 		}
 		if(!$sanitizer->isInt($data->start)){
-			HttpHeader::setResponseCode(400);
-			$error["error"] = 'No valid date start parameter given';
-			echo json_encode($error);
-			return;
+			return Status::errorStatus('No valid date start parameter given');
 		}
 		if(!$sanitizer->isInt($data->end)){
-			HttpHeader::setResponseCode(400);
-			$error["error"] = 'No valid date end parameter given';
-			echo json_encode($error);
-			return;
+			return Status::errorStatus('No valid date end parameter given');
 		}
 
 		$res = get_booking($data->start, $data->end, $configuration, $db);
-
-		echo json_encode($res);
-		return;
+		return $res;
 	}
 
 	function get_booking_month($configuration, $db){
@@ -476,8 +463,8 @@
 	function get_booking($start, $end, $configuration, $db){
 		// get sunrise and sunset for given position
 		// position can be configured in the configuration script
-		$res['window_start'] = $start;
-		$res['window_end']   = $end;
+		$res['window_start'] = intval($start);
+		$res['window_end']   = intval($end);
 
 		// get my offset to UTC (Timezone configured in configuration)
 		$dateTimeZoneLocation = new DateTimeZone($configuration->location_time_zone);
@@ -487,6 +474,8 @@
 		$dateTimeUTC          = new DateTime("@".$end, $dateTimeZoneUTC);
 		$dateTimeLocation->setTimestamp($end);
 		$timezoneOffset       = $dateTimeZoneLocation->getOffset($dateTimeUTC);
+
+		$res['timezone']      = $configuration->location_time_zone;
 
 		// calculate sunrise/sunset for that day
 		// Location is configurable
@@ -529,10 +518,7 @@
 		$result = $db->fetch_stmt_hash();
 		if(!isset($result) or  $result === FALSE){
 			error_log('Cannot get bookings for time window: ' . $start . ' - ' . $end);
-			HttpHeader::setResponseCode(500);
-			$res['error'] = "Cannot get bookings for time window: " . $start . " - " . $end;
-			echo json_encode($res);
-			return;
+			return Status::errorStatus("Cannot get bookings for time window: " . $start . " - " . $end);
 		}
 
 		// go through all the sessions in the database
@@ -567,8 +553,8 @@
 			$riders = $db->fetch_stmt_hash();
 			if(!isset($result) or  $result === FALSE){
 				error_log('Cannot get riders for: ' . $id . ' - ' . $query);
-				HttpHeader::setResponseCode(500);
-				return;
+				return Status::errorStatus("Cannot get riders for the session");
+
 			}
 			for($j=0; $j<count($riders); $j++){
 				$res['sessions'][$i]['riders'][$j]['id']   = $riders[$j]['uid'];
@@ -576,7 +562,7 @@
 			}
 		}
 
-		return $res;
+		return Status::successDataResponse("sessions retrieved", $res);
 
 	}
 
