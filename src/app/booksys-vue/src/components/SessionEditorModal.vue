@@ -93,7 +93,7 @@
           </b-form-group>
           <b-form-group
             id="capacity"
-            label="Maximum Riders"
+            v-bind:label="getMaximumRidersLabel"
             label-for="capacity-input"
             description=""
           >
@@ -174,6 +174,13 @@ export default Vue.extend({
         return "Open Session"
       }
     },
+    getMaximumRidersLabel: function() {
+      if(this.form.id == null){
+        return "Maximum Riders"
+      }else{
+        return "Additional Slots for Riders"
+      }
+    },
     ...mapGetters('configuration', [
       'getTimezone',
       'getMaximumNumberOfRiders'
@@ -181,7 +188,8 @@ export default Vue.extend({
   },
   methods: {
     ...mapActions('sessions', [
-      'createSession'
+      'createSession',
+      'editSession'
     ]),
     save: function(event){
       event.preventDefault();
@@ -209,17 +217,26 @@ export default Vue.extend({
       );
 
       console.log("SessionEditorModal, save session dataType:", session);
-      this.createSession(session)
+      if(session.id == null){
+        this.createSession(session)
         .then( response => {
-          console.log("yesyes, created Id:", response.session_id);
           this.$emit("sessionCreatedHandler", response.session_id);
           this.close();
         })
         .catch( err => {
-          console.log("returned error:", err);
-          console.log(this.errors);
+          this.errors = err;
+        });
+      }else{
+        this.editSession(session)
+        .then( () => {
+          this.$emit("sessionEditedHandler", session.id);
+          this.close();
+        })
+        .catch( err => {
           this.errors = err;
         })
+      }
+      
     },
     close: function(){
       this.errors = [];
@@ -264,8 +281,8 @@ export default Vue.extend({
         : moment().tz(this.getTimezone).add(1, 'hour').format("HH:mm");
 
       // set maximum riders
-      this.form.maximumRiders = (this.defaultValues != null && this.defaultValues.maximumRiders != null) 
-        ? this.defaultValues.maximumRiders
+      this.form.maximumRiders = (this.defaultValues != null && this.defaultValues.free != null) 
+        ? this.defaultValues.free
         : this.getMaximumNumberOfRiders;
 
       // set session type

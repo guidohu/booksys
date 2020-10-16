@@ -66,6 +66,47 @@ export default class Sessions {
     })
   }
 
+  static editSession(sessionData){
+    return new Promise((resolve, reject) => {
+      // build request body
+      const session = {
+        id: sessionData.id,
+        title: sessionData.title,
+        comment: sessionData.description,
+        max_riders: sessionData.maximumRiders,
+        start: moment(sessionData.start).format('X'),
+        end: moment(sessionData.end).format('X'),
+        type: sessionData.type
+      };
+
+      fetch('/api/booking.php?action=edit_session', {
+        method: "POST",
+        cache: "no-cache",
+        body: JSON.stringify(session)
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("edit session response data:", data);
+            if(data.ok){
+              resolve(data);
+            }else{
+              console.log("Sessions/editSession: Cannot create session, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("Sessions/editSession: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("Sessions/editSession", error);
+        reject([error]);
+      })
+    })
+  }
+
   static deleteSession(sessionData){
     console.log("api/deleteSession called for session:", sessionData);
     return new Promise((resolve, reject) => {

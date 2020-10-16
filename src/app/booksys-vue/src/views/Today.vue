@@ -1,12 +1,10 @@
 // TODO
 // - add users for mobile
-// - edit session (also backend)
-// - fix timezone consistency in pie
+// - fix timezone consistency in pie, edit, create, ...
 <template>
   <div>
     <SessionEditorModal 
       :defaultValues="selectedSession"
-      @sessionCreatedHandler="sessionCreatedHandler"
     />
     <SessionDeleteModal
       :session="selectedSession"
@@ -186,10 +184,6 @@ export default Vue.extend({
       console.log("selectedSlot", selectedSession);
       console.log(selectedSession.start.format(), selectedSession.end.format());
       this.selectedSession = selectedSession;
-    },
-    sessionCreatedHandler: function(sessionId) {
-      console.log("sessionCreatedHandler: sessionId", sessionId);
-      this.sessionCreated = null;
     },
     sessionDeletedHandler: function() {
       console.log("sessionDeletedHandler");

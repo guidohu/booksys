@@ -50,6 +50,19 @@ const actions = {
         })
     });
   },
+  editSession({ dispatch }, sessionObj) {
+    console.log("Trigger editSession action with", sessionObj);
+    return new Promise((resolve, reject) => {
+      Sessions.editSession(sessionObj)
+        .then((response) => {
+          dispatch('querySessions');
+          resolve(response.data);
+        })
+        .catch(error => {
+          reject(error);
+        })
+    });
+  },
   deleteSession({ dispatch }, sessionObj) {
     console.log("Trigger deleteSession action with", sessionObj);
     return new Promise((resolve ,reject) => {

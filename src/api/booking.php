@@ -50,6 +50,11 @@
 			$db->disconnect();
 			echo json_encode($response);
 			exit;
+		case 'edit_session':
+			$response = edit_session($configuration, $db);
+			$db->disconnect();
+			echo json_encode($response);
+			exit;
 		case 'delete_session':
 			$response = delete_session($configuration, $db);
 			$db->disconnect();
@@ -327,6 +332,127 @@
 		$res = $db->fetch_stmt_hash();
 
 		return Status::successDataResponse("Session has been created", $res[0]);
+	}
+
+	function edit_session($configuration, $db){
+		$data = json_decode(file_get_contents('php://input'));
+
+		// sanitize input
+		$error = array();
+		$sanitizer = new Sanitizer();
+		if(!isset($data->id) or !$sanitizer->isInt($data->id)){
+			error_log('api/booking.php: Illegal id provided: ' . $data->id);
+			return Status::errorStatus('No valid id provided');
+		}
+		if(!isset($data->start) or !$sanitizer->isInt($data->start)){
+			error_log('api/booking.php: Illegal start provided: ' . $data->start);
+			return Status::errorStatus('No valid start provided');
+		}
+		if(!isset($data->end) or !$sanitizer->isInt($data->end)){
+			error_log('api/booking.php: Illegal end provided: ' . $data->end);
+			return Status::errorStatus('No valid end provided');
+		}
+		if(!isset($data->max_riders) or !$sanitizer->isInt($data->max_riders)){
+			error_log('api/booking.php: Illegal max_riders provided: ' . $data->max_riders);
+			return Status::errorStatus('No valid number of maximum riders provided');
+		}
+		if(!isset($data->type) or !$sanitizer->isInt($data->type)){
+			error_log('api/booking.php: Illegal session type provided: ' . $data->type);
+			return Status::errorStatus('No valid session type provided');
+		}
+		if($data->start >= $data->end){
+			error_log('api/booking.php: Session start cannot be after end: ' . $data->start . ' to ' . $data->end);
+			return Status::errorStatus('Session start is after the end and that does not make sense.');
+		}
+
+		// check validity of data
+		// check type of session
+		$query = sprintf('SELECT id FROM session_type WHERE id = %d', $data->type);
+		if(!$db->exists($query)){
+			error_log('api/booking.php: Session type does not exist ' . $data->type);
+			return Status::errorStatus('No valid session type provided');
+		}
+
+		// check that a session with this ID exists indeed
+		$query = 'SELECT id
+			FROM session
+			WHERE id = ?';
+		$db->prepare($query);
+		$db->bind_param('i', $data->id);
+		$db->execute();
+		$res = $db->fetch_stmt_hash();
+		if(count($res) != 1){
+			error_log('api/booking.php: A session with this ID does not exist.');
+			return Status::errorStatus('This session was not found and can thus not be changed.');
+		}
+
+		// check if the new session collides with an existing one
+		$query = 'SELECT id
+			FROM session
+			WHERE
+			(
+				( start_time <= FROM_UNIXTIME(?)
+					AND end_time >= FROM_UNIXTIME(?)
+				)
+				OR
+				( start_time <= FROM_UNIXTIME(?)
+					AND end_time >= FROM_UNIXTIME(?)
+				)
+				OR
+				( start_time <= FROM_UNIXTIME(?)
+					AND end_time >= FROM_UNIXTIME(?)
+				)
+				OR
+				( start_time >= FROM_UNIXTIME(?)
+					AND end_time <= FROM_UNIXTIME(?)
+				)
+			) AND id <> ?
+		;';
+		$db->prepare($query);
+		$db->bind_param('ssssssssi',
+			$data->start,
+			$data->end,
+			$data->end,
+			$data->end,
+			$data->start,
+			$data->start,
+			$data->start,
+			$data->end,
+			$data->id
+		);
+		$db->execute();
+		$res = $db->fetch_stmt_hash();
+		if(count($res) > 0){
+			error_log('api/booking.php: The session is overlapping with an existing one.');
+			error_log('api/booking.php: Oberlapping with: ' . $res[0]['id']);
+			return Status::errorStatus('Session would overlap with an existing one. Please change start and/or end time.');
+		}
+
+		// Everything is fine and we will update the session
+		$session = Login::getSessionData($configuration, $db);
+		$query = 'UPDATE session SET
+			title = ?,
+			start_time = FROM_UNIXTIME(?),
+			end_time = FROM_UNIXTIME(?),
+			comment = ?,
+			free = ?,
+			type = ?
+			WHERE id = ?;';
+		$db->prepare($query);
+		$db->bind_param('siisiii',
+			$data->title,
+			$data->start,
+			$data->end,
+			$data->comment,
+			$data->max_riders,
+			$data->type,
+			$data->id);
+		if(!$db->execute()){
+			error_log('Cannot edit session with: ' . $query);
+			return Status::errorStatus('Cannot edit session. An error occured.');
+		}
+
+		return Status::successStatus("Session has been edited");
 	}
 
 	function _get_sunrise_and_sunset($start, $end, $configuration){
