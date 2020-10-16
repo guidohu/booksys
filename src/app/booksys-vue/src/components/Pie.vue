@@ -1,5 +1,5 @@
 <template>
-  <div id="pie" class="text-center">
+  <div id="pie" class="text-center full-width">
   </div>
 </template>
 
@@ -60,5 +60,9 @@ export default Vue.extend({
   .small-pie {
     height: 7em;
     width: 7em;
+  }
+
+  .full-width {
+    width: 100%;
   }
 </style>

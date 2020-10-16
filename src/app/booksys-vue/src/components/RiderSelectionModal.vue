@@ -46,6 +46,7 @@
           </b-button>
           <hr/>
           <b-form-group
+            v-if="isMobile != true"
             id="selected"
             label="Selected Riders"
             label-for="riders-selected"
@@ -66,7 +67,11 @@
       </b-row>
     </b-form>
     <div slot="modal-footer">
-      <b-button type="button" variant="outline-info" v-on:click="save">
+      <b-button v-if="isMobile != true" type="button" variant="outline-info" v-on:click="save">
+        <b-icon-check></b-icon-check>
+        Add
+      </b-button>
+      <b-button v-if="isMobile == true" type="button" variant="outline-info" v-on:click="saveMobile">
         <b-icon-check></b-icon-check>
         Add
       </b-button>
@@ -83,12 +88,17 @@ import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import _ from 'lodash';
+import WarningBox from '@/components/WarningBox';
+import { UserPointer } from '@/dataTypes/user';
 
 export default Vue.extend({
   name: 'RiderSelectionModal',
   props: [
     'session'
   ],
+  components: {
+    WarningBox
+  },
   data() {
     return {
       errors: [],
@@ -171,6 +181,15 @@ export default Vue.extend({
       })
       .then(() => this.close())
       .catch((errs) => this.errors = errs);
+    },
+    saveMobile: function() {
+      console.log(this.selected);
+      this.addUsersToSession({
+        sessionId: this.session.id,
+        users: this.selected.map(i => new UserPointer(Number(i)))
+      })
+      .then(() => this.close())
+      .catch((errors) => this.errors = errors);
     },
     close: function() {
       this.usersToAdd = [];

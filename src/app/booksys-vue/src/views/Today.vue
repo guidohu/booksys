@@ -1,6 +1,3 @@
-// TODO
-// - add users for mobile
-// - fix timezone consistency in pie, edit, create, ...
 <template>
   <div>
     <SessionEditorModal 

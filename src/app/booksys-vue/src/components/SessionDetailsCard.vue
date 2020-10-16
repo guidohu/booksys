@@ -29,6 +29,14 @@
     </b-card-header>
     <b-card-body>
       <RiderSelectionModal :session="session"/>
+      <b-row v-if="session != null && session.title != null" class="font-weight-bold">
+        <b-col cols="4">
+          Title
+        </b-col>
+        <b-col cols="8">
+          {{session.title}}
+        </b-col>
+      </b-row>
       <b-row>
         <b-col cols="4">
           Date
@@ -45,25 +53,27 @@
           {{timeString}}
         </b-col>
       </b-row>
-      <b-row v-if="showRiders">
+      <b-row v-if="showRiders" class="mt-2">
         <b-col cols="4">
           Riders
         </b-col>
+        <b-col cols="8">
+          <b-row v-for="rider in session.riders" :key="rider.id">
+            <b-col cols="10" class="text-truncate">
+              {{ rider.name }}
+            </b-col>
+            <b-col cols="2">
+              <a href="#" v-on:click="removeRider(rider.id)"><b-icon icon="person-dash"></b-icon></a>
+            </b-col>
+          </b-row>
+        </b-col>
       </b-row>
-      <b-row>
-        <ul v-if="showRiders">
-          <li v-for="rider in session.riders" :key="rider.id">
-            {{ rider.name }} {{ " "}}
-            <a href="#" v-on:click="removeRider(rider.id)"><b-icon icon="person-dash"></b-icon></a>
-          </li>
-        </ul>
-      </b-row>
-      <b-row v-if="showCreateSession">
+      <b-row v-if="showCreateSession" class="mt-3">
         <b-col offset="4" cols="8">
           <b-button v-on:click="createSession" size="sm" variant="success" block>Create Session</b-button>
         </b-col>
       </b-row>
-      <b-row v-if="showAddRiders">
+      <b-row v-if="showAddRiders" class="mt-3">
         <b-col offset="4" cols="8">
           <b-button v-on:click="addRiders" size="sm" variant="success" block>Add Riders</b-button>
         </b-col>
@@ -77,6 +87,7 @@ import Vue from 'vue';
 import { mapActions} from 'vuex';
 import moment from 'moment';
 import 'moment-timezone';
+import { BooksysBrowser } from '@/libs/browser';
 import { UserPointer } from '@/dataTypes/user';
 import RiderSelectionModal from '@/components/RiderSelectionModal.vue';
 
@@ -131,6 +142,9 @@ export default Vue.extend({
         return true;
       }
       return false;
+    },
+    isMobile: function () {
+      return BooksysBrowser.isMobile();
     }
   },
   watch: {

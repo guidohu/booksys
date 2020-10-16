@@ -66,7 +66,7 @@ export default Vue.extend({
     isToday: function() {
       console.log(this.getTimezone);
       const today = moment().tz(this.getTimezone).startOf('day').format();
-      const sessionDay = moment(this.sessionData.window_start, "X").tz(this.getTimezone).startOf('day').format();
+      const sessionDay = moment(this.sessionData.window_start).tz(this.getTimezone).startOf('day').format();
       if(today == sessionDay){
         return true;
       }
@@ -100,7 +100,7 @@ export default Vue.extend({
         containerWidth:  350,
         circleX:         175,
         circleY:         150,
-        circleRadius:    100,
+        circleRadius:    90,
         animation:       false,
         labels:          true,
       }

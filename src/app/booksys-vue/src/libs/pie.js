@@ -1,7 +1,3 @@
-// import {Raphael} from "raphael"
-//  from "./raphael.pie"
-// import moment from "moment"
-// import from "timezone"
 import moment from 'moment-timezone/moment-timezone';
 
 const Raphael = require("raphael");
