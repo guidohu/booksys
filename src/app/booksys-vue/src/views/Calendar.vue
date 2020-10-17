@@ -12,15 +12,12 @@
       </b-row>
       <b-row class="ml-1 mr-1">
         <b-col cols="8">
-          <!-- <SessionMonthCard v-if="getSessions != null"
-            :sessionData="getSessions"
-            :selectedSession="selectedSession"
-            :isMobile="isMobile"
-            :timezone="getTimezone"
-            @prevDay="prevDay"
-            @nextDay="nextDay"
-            @selectSessionHandler="selectSlot"
-          /> -->
+          <SessionMonthCard v-if="getSessionsCalendar != null"
+            :sessionData="getSessionsCalendar"
+            :month="month"
+            @prevMonth="prevMonth"
+            @nextMonth="nextMonth"
+          />
         </b-col>
         <b-col cols="4">
           <b-row>
@@ -62,7 +59,7 @@ import { mapActions, mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
 // import ConditionInfoCard from '@/components/ConditionInfoCard';
-// import SessionDayCard from '@/components/SessionDayCard';
+import SessionMonthCard from '@/components/SessionMonthCard';
 // import SessionDetailsCard from '@/components/SessionDetailsCard';
 // import SessionEditorModal from '@/components/SessionEditorModal';
 // import SessionDeleteModal from '@/components/SessionDeleteModal';
@@ -76,7 +73,7 @@ export default Vue.extend({
   components: {
     NavbarMobile,
     // ConditionInfoCard,
-    // SessionDayCard,
+    SessionMonthCard,
     // SessionDetailsCard,
     // SessionEditorModal,
     // SessionDeleteModal
@@ -119,14 +116,12 @@ export default Vue.extend({
       'querySessionsCalendar'
     ]),
     prevMonth: function(){
-      this.date = moment(this.date).add(-1, 'month');
-      // this.selectedSession = null;
-      // this.querySessionsForDate();
+      this.month = moment(this.month).add(-1, 'month').format();
+      this.querySessionsForMonth();
     },
     nextMonth: function(){
-      this.date = moment(this.date).add(1, 'month');
-      // this.selectedSession = null;
-      // this.querySessionsForDate();
+      this.month = moment(this.month).add(1, 'month').format();
+      this.querySessionsForMonth();
     },
     querySessionsForMonth: function() {
       console.log("the time", this.month);
