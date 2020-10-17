@@ -2,16 +2,35 @@ import Sessions from "../../api/sessions";
 import moment from 'moment';
 
 const state = () => ({
-  sessions: null
+  sessions: null,
+  sessionsCalendar: null
 })
 
 const getters = {
   getSessions: (state) => {
     return state.sessions
+  },
+  getSessionsCalendar: (state) => {
+    return state.sessionsCalendar
   }
 }
 
 const actions = {
+  querySessionsCalendar({ commit }, month) {
+    console.log("Trigger querySessionsCalendar for month", month);
+
+    return new Promise((resolve, reject) => {
+      Sessions.getSessionsCalendar(month)
+      .then((sessions) => {
+        commit('setSessionsCalendar', { sessions: sessions });
+        resolve();
+      })
+      .catch(error => {
+        commit('setSessionsCalendar', null);
+        reject(error);
+      })
+    })    
+  },
   querySessions({ commit, state, rootState }, time) {
     console.log("Trigger querySessions with timespan", time);
     if(time == null && state.sessions == null){
@@ -113,9 +132,13 @@ const mutations = {
       end: value.end
     };
   },
+  setSessionsCalendar (state, value){
+    state.sessionsCalendar = value.sessions;
+    console.log('sessionsCalendar set to', value.sessions);
+  },
   setSessions (state, value){
     state.sessions = value.sessions;
-    console.log('sessions set to', value)
+    console.log('sessions set to', value);
   }
 }
 

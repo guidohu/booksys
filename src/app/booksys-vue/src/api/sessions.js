@@ -3,6 +3,107 @@ import Session from '@/dataTypes/session';
 
 export default class Sessions {
 
+  /**
+   * Returns 6 weeks of sessions
+   * @param {ISO date} month a day within the month
+   */
+  static getSessionsCalendar(month){
+    let dateIterator = moment(month).startOf('month');
+    
+    // start with a monday
+    while(dateIterator.day() != 1){
+      dateIterator.add(-1, 'day');
+    }
+
+    // build 42 time windows (7 days for 6 weeks)
+    let query = {
+      timeWindows: []
+    };
+
+    for(let i=0; i<42; i++){
+      // create new time window
+      const window = {
+        start: dateIterator.startOf('day').format("X"),
+        end: dateIterator.endOf('day').format("X")
+      };
+      query.timeWindows.push(window);
+    }
+
+    console.log("getSessionsCalendar:", query);
+    return new Promise((resolve, reject) => {
+      fetch('/api/booking.php?action=get_booking_month', {
+        method: 'POST',
+        cache: 'no-cache',
+        body: JSON.stringify(query)
+      })
+      .then(response => {
+        response.json()
+        .then(data => {
+          console.log("getSessionsCalendar response data:", data);
+          if(data.ok){
+            console.log("getSessionsCalendar, ok response");
+            let days = data.data;
+            let monthSessions = [];
+            for(let i=0; i< days.length; i++){
+              let res = days[i];
+              let timezone     = res.timezone;
+              const winStart   = res.window_start;
+              // const winEnd     = res.window_end;
+              res.window_start = moment(res.window_start, "X").tz(timezone).format();
+              res.window_end   = moment(res.window_end, "X").tz(timezone).format();
+              res.sunrise      = moment(res.sunrise, "X").tz(timezone).format();
+              res.sunset       = moment(res.sunset, "X").tz(timezone).format();
+              const busDayStart = res.business_day_start.split(":");
+              const busDayEnd   = res.business_day_end.split(":");
+              res.business_day_start = moment(winStart, "X")
+                .tz(timezone)
+                .set('hour', busDayStart[0])
+                .set('minutes', busDayStart[1])
+                .set('seconds', busDayStart[2])
+                .format();
+              res.business_day_end = moment(winStart, "X")
+                .tz(timezone)
+                .set('hour', busDayEnd[0])
+                .set('minutes', busDayEnd[1])
+                .set('seconds', busDayEnd[2])
+                .format();
+
+              // convert session times to ISO time
+              for(let i=0; i<res.sessions.length; i++){
+                const s = res.sessions[i];
+                const session = new Session(
+                  s.id,
+                  s.title,
+                  s.comment,
+                  moment(s.start, "X").tz(timezone).format(),
+                  moment(s.end, "X").tz(timezone).format(),
+                  s.free,
+                  s.type
+                );
+                session.addRiders(s.riders);
+                res.sessions[i] = session;
+              }
+              monthSessions.push(res);
+            }
+
+            resolve(monthSessions);
+          }else{
+            console.log("Sessions/getSessionsCalendar: Cannot get sessions, due to:", data.msg);
+            reject([data.msg]);
+          }
+        })
+        .catch(error => {
+          console.error("Sessions/getSessionsCalendar: Cannot parse server response", error);
+          reject([error]);
+        })
+      })
+      .catch(error => {
+        console.error("Sessions/getSessionsCalendar", error);
+        reject([error]);
+      })
+    })
+  }
+
   static getSessions(dateStart, dateEnd){
     console.log("getSessions:", dateStart);
     return new Promise((resolve, reject) => {

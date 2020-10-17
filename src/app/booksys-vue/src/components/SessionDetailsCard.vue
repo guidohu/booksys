@@ -2,11 +2,11 @@
   <b-card no-body class="text-left">
     <b-card-header>
       <b-row>
-        <b-col cols="8">
+        <b-col cols="8" class="align-middle">
           Session Details
         </b-col>
         <b-col cols="4" class="text-right">
-          <b-dropdown v-if="showAddRiders || showDeleteSession" id="dropdown-1" size="sm" variant="light" text="Dropdown Button" class="btn-xs" right no-caret>
+          <b-dropdown v-if="showAddRiders || showDeleteSession" id="dropdown-1" variant="light" text="Dropdown Button" toggle-class="btn-xs" right no-caret>
             <template v-slot:button-content>
               <b-icon icon="list"></b-icon>
             </template>
@@ -182,3 +182,12 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style scoped>
+  .btn-xs {
+    padding: .2rem .4rem;
+    font-size: .6rem;
+    line-height: 1;
+    border-radius: .2rem;
+  }
+</style>

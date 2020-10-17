@@ -39,8 +39,9 @@
 			echo json_encode($response);
 			exit;
 		case 'get_booking_month':
-			get_booking_month($configuration, $db);
+			$response = get_booking_month($configuration, $db);
 			$db->disconnect();
+			echo json_encode($response); 
 			exit;
 		case 'get_session':
 			get_session($configuration, $db);
@@ -112,9 +113,7 @@
 		$year = 0;
 		$month = 0;
 		if(!isset($data->timeWindows)){
-			HttpHeader::setResponseCode(400);
-			echo 'No time windows provided';
-			return;
+			return Status::errorStatus("No time windows provided");
 		}
 		
 		// validate all time windows
@@ -123,14 +122,10 @@
 			$end   = $data->timeWindows[$i]->end;
 
 			if(!isset($start) or !$sanitizer->isInt($start)){
-				HttpHeader::setResponseCode(400);
-				echo 'Invalid start time provided for timeWindow ' . $i;
-				return;
+				return Status::errorStatus('Invalid start time provided for timeWindow ' . $i);
 			}
 			if(!isset($end) or !$sanitizer->isInt($end)){
-				HttpHeader::setResponseCode(400);
-				echo 'Invalid end time provided for timeWindow ' . $i;
-				return;
+				return Status::errorStatus('Invalid end time provided for timeWindow ' . $i);
 			}
 		}
 
@@ -138,11 +133,14 @@
 		for($i=0; $i<count($data->timeWindows); $i++){
 			$start = $data->timeWindows[$i]->start;
 			$end   = $data->timeWindows[$i]->end;
-			$res[$i] = get_booking($start, $end, $configuration, $db);
+			$bookings = get_booking($start, $end, $configuration, $db);
+			if($bookings['ok'] == TRUE){
+				$res[$i] = $bookings['data'];
+			}else{
+				return Status::errorStatus($bookins['msg']);
+			}
 		}
-
-		echo json_encode($res);
-		return;
+		return Status::successDataResponse("sessions retrieved", $res);
 	}
 
 	function get_session($configuration, $db){

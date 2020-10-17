@@ -1,13 +1,14 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import Login from '../views/Login'
-import Logout from '../views/Logout'
-import SignUp from '../views/SignUp'
-import Dashboard from '../views/Dashboard'
-import Account from '../views/Account'
-import Info from '../views/Info'
-import Schedule from '../views/Schedule'
-import Today from '../views/Today'
+import Vue from 'vue';
+import VueRouter from 'vue-router';
+import Login from '../views/Login';
+import Logout from '../views/Logout';
+import SignUp from '../views/SignUp';
+import Dashboard from '../views/Dashboard';
+import Account from '../views/Account';
+import Info from '../views/Info';
+import Schedule from '../views/Schedule';
+import Today from '../views/Today';
+import Calendar from '../views/Calendar';
 
 Vue.use(VueRouter)
 
@@ -55,6 +56,11 @@ const routes = [
     path: '/schedule',
     name: 'Schedule',
     component: Schedule
+  },
+  {
+    path: '/calendar',
+    name: 'Calendar',
+    component: Calendar
   }
 ]
 
