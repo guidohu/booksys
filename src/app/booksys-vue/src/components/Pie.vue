@@ -1,5 +1,5 @@
 <template>
-  <div :id="date" class="text-center full-width">
+  <div :id="pieElementId" class="text-center full-width">
   </div>
 </template>
 
@@ -11,7 +11,7 @@ import moment from 'moment-timezone';
 export default Vue.extend({
   name: 'Pie',
   mounted() {
-    let el = document.getElementById(this.date);
+    let el = document.getElementById(this.pieElementId);
     const pie = new BooksysPie();
     this.pie = pie;
     this.pieSessions = pie.drawPie(el, this.sessionData, this.selectHandler, this.properties);
@@ -21,8 +21,8 @@ export default Vue.extend({
       this.$emit("selectHandler", this.pieSessions[selectedId]);
     },
     repaint: function(){
-      let el = document.getElementById(this.date);
-      el.innerHTML = '';      
+      let el = document.getElementById(this.pieElementId);
+      el.innerHTML = '';
       this.pieSessions = this.pie.drawPie(el, this.sessionData, this.selectHandler, this.properties);
     }
   },
@@ -50,10 +50,11 @@ export default Vue.extend({
       this.repaint();
     }
   },
-  props: ['sessionData', 'selectedSession', 'properties'],
+  props: ['sessionData', 'selectedSession', 'properties', 'pieId'],
   data() {
     return {
-      pieSessions: []
+      pieSessions: [],
+      pieElementId: "someId"
     }
   },
   computed: {
@@ -64,15 +65,20 @@ export default Vue.extend({
         return "unknown";
       }
     }
+  },
+  created() {
+    if(this.pieId != null){
+      this.pieElementId = "pie" + this.pieId;
+    }
   }
 })
 </script>
 
 <style scoped>
-  .small-pie {
+  /* .small-pie {
     height: 7em;
     width: 7em;
-  }
+  } */
 
   .full-width {
     width: 100%;

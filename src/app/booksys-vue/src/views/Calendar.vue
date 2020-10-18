@@ -17,15 +17,16 @@
             :month="month"
             @prevMonth="prevMonth"
             @nextMonth="nextMonth"
+            @mouseOverHandler="mouseOverDayHandler"
           />
         </b-col>
         <b-col cols="4">
           <b-row>
             <b-col cols="12">
-              <!-- <ConditionInfoCard v-if="sunrise!=null"
+              <ConditionInfoCard
                 :sunrise="sunrise"
                 :sunset="sunset"
-              /> -->
+              />
             </b-col>
           </b-row>
         </b-col>
@@ -54,7 +55,7 @@ import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
-// import ConditionInfoCard from '@/components/ConditionInfoCard';
+import ConditionInfoCard from '@/components/ConditionInfoCard';
 import SessionMonthCard from '@/components/SessionMonthCard';
 // import SessionDetailsCard from '@/components/SessionDetailsCard';
 // import SessionEditorModal from '@/components/SessionEditorModal';
@@ -68,7 +69,7 @@ export default Vue.extend({
   name: 'Calendar',
   components: {
     NavbarMobile,
-    // ConditionInfoCard,
+    ConditionInfoCard,
     SessionMonthCard,
     // SessionDetailsCard,
     // SessionEditorModal,
@@ -131,6 +132,10 @@ export default Vue.extend({
       .then(() => { console.log("Calendar ready")})
       .catch((errors) => this.errors = errors);
     },
+    mouseOverDayHandler: function(day) {
+      this.sunrise = day.sunrise;
+      this.sunset = day.sunset;
+    }
     // selectSlot: function(selectedSession) {
     //   console.log("selectedSlot", selectedSession);
     //   console.log(moment(selectedSession.start).format(), moment(selectedSession.end).format());
@@ -198,7 +203,9 @@ export default Vue.extend({
   data() {
     return {
       month: null,
-      errors: []
+      errors: [],
+      sunrise: null,
+      sunset: null
       // selectedSession: null
     }
   },

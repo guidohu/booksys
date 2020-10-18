@@ -128,7 +128,8 @@ export default class BooksysPie {
     //
     // Returns an object containing all the data of the pie.
     drawPie(location, data, callback, properties){
-        console.log("Pie:", data);
+        console.log("Pie data:", data);
+        console.log("Pie properties:", properties);
         BooksysPie.addPiePlugin();
 
         // get timezone
@@ -331,12 +332,12 @@ export default class BooksysPie {
         }
         
         // accept sizing properties
-        var containerHeight;
-        var containerWidth;
-        var circleX;
-        var circleY;
-        var circleRadius;
-        var animate;
+        let containerHeight;
+        let containerWidth;
+        let circleX;
+        let circleY;
+        let circleRadius;
+        let animate;
 
         if(properties != null && properties.containerHeight != null){
             containerHeight = properties.containerHeight;
@@ -376,6 +377,7 @@ export default class BooksysPie {
         
         console.log("Pie values:", values);
         console.log("Pie labels:", labels);
+        console.log("Pie animation:", animate);
         
         // create the pie-chart
         // console.log(values);
