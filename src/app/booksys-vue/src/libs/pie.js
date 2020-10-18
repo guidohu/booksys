@@ -128,8 +128,6 @@ export default class BooksysPie {
     //
     // Returns an object containing all the data of the pie.
     drawPie(location, data, callback, properties){
-        console.log("Pie data:", data);
-        console.log("Pie properties:", properties);
         BooksysPie.addPiePlugin();
 
         // get timezone
@@ -161,14 +159,8 @@ export default class BooksysPie {
         const business_day_start = moment(data.business_day_start);
         const business_day_end   = moment(data.business_day_end);
         // get the start/end of the day (e.g. either sunrise or first allowed time)
-        console.log("Pie sunrise: " + sunrise.format());
-        console.log("Pie sunset: " + sunset.format());
-        console.log("Pie business_day_start: " + business_day_start.format());
-        console.log("Pie business_day_end: " + business_day_end.format());
         const dayStart = moment(Math.max(sunrise.format("X"), business_day_start.format("X")), "X").format();
         const dayEnd   = moment(Math.min(sunset.format("X"), business_day_end.format("X")), "X").format();
-        console.log("Pie dayStart", dayStart);
-        console.log("Pie dayEnd", dayEnd);
 
         // reminder variables to fill the gaps between sessions
         let lastEnd = dayStart;
@@ -177,8 +169,6 @@ export default class BooksysPie {
         for(var i=0; i<sessions.length; i++){
             // add a gap-session before this session if needed
             if(moment(lastEnd).format("X") < moment(sessions[i].start).format("X")){
-                // console.log("Add gap session before first session");
-                // console.log(sessions[i].start - lastEnd.format("X"));
                 const session = sessions[i];
                 const duration = moment(session.start).format("X") - 1 - moment(lastEnd).format("X");
                 let label = "";
@@ -217,7 +207,6 @@ export default class BooksysPie {
 
             // get color for this slot
             var color = "";
-            console.log(sessions[i]);
             // check if free and is not course
             if(sessions[i].maximumRiders > 0 && sessions[i].type != 1){
                 color = colorSlot;
@@ -227,9 +216,6 @@ export default class BooksysPie {
                 color = colorSlotFull;
             }
 
-
-            // console.log("Add regular session");
-            // console.log(sessions[i].duration - duration_offset);
             values.push(sessionDurationSeconds - duration_offset);
             labels.push(moment(sessions[i].start).format("HH:mm")
                 + " - " 
@@ -250,10 +236,6 @@ export default class BooksysPie {
 
         // in case there are no sessions yet
         if(pieSessions.length == 0){
-            // console.log("Add empty day session");
-            // console.log(dayEnd.diff(dayStart, 'seconds'));
-            // console.log(dayStart.format());
-            // console.log(dayEnd.format());
             values.push(moment(dayEnd).diff(moment(dayStart), 'seconds'));
             labels.push(moment(dayStart).tz(timezone).format("HH:mm")
                 + " - "
@@ -272,8 +254,6 @@ export default class BooksysPie {
             let session = pieSessions[0];
             let duration = moment(session.start).format("X") - 1 - moment(data.window_start).format("X");
 
-            console.log("Pie: Add pre day session");
-            // console.log(duration);
             duration = duration / 6;
             values.unshift(duration);
             labels.unshift(
@@ -294,8 +274,6 @@ export default class BooksysPie {
         if(moment(pieSessions[pieSessions.length-1].end).format("X") < moment(dayEnd).format("X")){
             let session = pieSessions[pieSessions.length-1]
             var duration = moment(dayEnd).format("X") - moment(session.end).format("X");
-            // console.log("Add end of day gap filler");
-            // console.log(duration);
             values.push(duration);
             labels.push(
                 moment(session.end).add(1,'minute').format("HH:mm") 
@@ -314,8 +292,6 @@ export default class BooksysPie {
         if(moment(pieSessions[pieSessions.length-1].end).format("X") < moment(data.window_end).format("X")){
             let session = pieSessions[pieSessions.length-1];
             let duration = moment(data.window_end).format("X") - moment(session.end).add(1, "minute").format("X");
-            // console.log("Add after-day");
-            // console.log(duration);
             duration = duration / 6;
             values.push(duration);
             labels.push(
@@ -375,12 +351,7 @@ export default class BooksysPie {
             }
         }
         
-        console.log("Pie values:", values);
-        console.log("Pie labels:", labels);
-        console.log("Pie animation:", animate);
-        
         // create the pie-chart
-        // console.log(values);
         this.pie = Raphael(location, containerWidth, containerHeight).pieChart(  
             circleX, 
             circleY, 
