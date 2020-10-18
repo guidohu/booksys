@@ -127,7 +127,7 @@ export default class BooksysPie {
     // - callback       function that gets called upon selection of a pie element
     //
     // Returns an object containing all the data of the pie.
-    static drawPie(location, data, callback, properties){
+    drawPie(location, data, callback, properties){
         console.log("Pie:", data);
         BooksysPie.addPiePlugin();
 
@@ -379,7 +379,7 @@ export default class BooksysPie {
         
         // create the pie-chart
         // console.log(values);
-        BooksysPie.pie = Raphael(location, containerWidth, containerHeight).pieChart(  
+        this.pie = Raphael(location, containerWidth, containerHeight).pieChart(  
             circleX, 
             circleY, 
             circleRadius, 
@@ -395,12 +395,12 @@ export default class BooksysPie {
     }
 
     // selects a specific sector of the pie
-    static selectSector(id){
-        BooksysPie.pie.selectSector(id);
+    selectSector(id){
+        this.pie.selectSector(id);
     }
 
-    static resetSelection(){
-        BooksysPie.pie.reset();
+    resetSelection(){
+        this.pie.reset();
     }
 }
 

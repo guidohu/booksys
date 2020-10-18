@@ -39,16 +39,12 @@
     </div>
     <div v-else>
       <NavbarMobile title="Book Your Session"/>
-      <!-- <SessionMonthCard v-if="getSessions != null"
-        class="mb-1"
-        :sessionData="getSessions"
-        :selectedSession="selectedSession"
-        :isMobile="isMobile"
-        :timezone="getTimezone"
-        @prevDay="prevDay"
-        @nextDay="nextDay"
-        @selectSessionHandler="selectSlot"
-      /> -->
+      <SessionMonthCard v-if="getSessionsCalendar != null"
+        :sessionData="getSessionsCalendar"
+        :month="month"
+        @prevMonth="prevMonth"
+        @nextMonth="nextMonth"
+      />
     </div>
   </div>
 </template>

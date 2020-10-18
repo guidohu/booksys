@@ -27,6 +27,7 @@ export default class Sessions {
         end: dateIterator.endOf('day').format("X")
       };
       query.timeWindows.push(window);
+      dateIterator.add(1, 'day');
     }
 
     console.log("getSessionsCalendar:", query);

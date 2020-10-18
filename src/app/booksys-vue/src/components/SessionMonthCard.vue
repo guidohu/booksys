@@ -17,22 +17,32 @@
         </b-col>
       </b-row>
     </b-card-header>
-    <b-card-body>
-      <b-row v-for="k in Array.from(Array(6).keys())" :key="k">
-        <span v-for="j in Array.from(Array(7).keys())" :key="j">
-          <Pie
-            :sessionData="sessionData[k*7+j]"
-            :properties="properties"
-            />
-        </span>
-      </b-row>
-      <!-- <b-row>
-        <Pie 
-          :sessionData="sessionData" 
-          :selectedSession="selectedSession"
-          :properties="properties"
-          @selectHandler="selectSession"/>
-      </b-row> -->
+    <b-card-body ref="calendarBody">
+      <table>
+        <tr>
+          <th class="table-title-text">Monday</th>
+          <th class="table-title-text">Tuesday</th>
+          <th class="table-title-text">Wednesday</th>
+          <th class="table-title-text">Thursday</th>
+          <th class="table-title-text">Friday</th>
+          <th class="table-title-text">Saturday</th>
+          <th class="table-title-text">Sunday</th>
+        </tr>
+        <tr v-for="i in Array.from(Array(6).keys())" :key="i">
+          <td v-for="j in Array.from(Array(7).keys())" :key="j">
+            <div class="calendar-day-box">
+              <Pie
+                :sessionData="sessionData[i*7+j]"
+                :properties="properties"
+                :key="i*7+j"
+              />
+              <div class="day-number">
+                {{ getDay(sessionData[i*7+j].window_start) }}
+              </div>
+            </div>
+          </td>
+        </tr> 
+      </table>
     </b-card-body>
   </b-card>
 </template>
@@ -42,13 +52,14 @@ import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import Pie from "./Pie.vue";
 import moment from 'moment-timezone';
+import { BooksysBrowser } from '@/libs/browser';
 
 export default Vue.extend({
-  name: 'SessionDayCard',
+  name: 'SessionMonthCard',
   data() {
     return {
       properties: {
-        containerWidth: 90,
+        containerWidth: 84,
         containerHeight: 64,
         circleX: 45,
         circleY: 34,
@@ -77,34 +88,66 @@ export default Vue.extend({
       // TODO adjust correct link
       console.log("TODO adjust correct link");
       window.location.href = '/watch.html?sessionId='+this.selectedSession.id;
+    },
+    getDay: function(isoTime) {
+      return moment(isoTime).format("DD");
+    },
+    isMobile: function() {
+      return BooksysBrowser.isMobile();
     }
   },
   components: {
     Pie
   },
   props: ['sessionData', 'month'],
-  created() {
-    if(this.isMobile != null && this.isMobile == true){
+  mounted() {
+    // if(this.isMobile()){
+      console.log("set mobile properties, mounted:",this.$refs.calendarBody.clientWidth);
+      const totalWidth = this.$refs.calendarBody.clientWidth - 61;
+      const cardWidth = (totalWidth / 7);
+      const cardHeight = (cardWidth * .75);
+      const radius     = Math.min(cardWidth, cardHeight) / 2 *.7
       this.properties = {
-        containerHeight: 300,
-        containerWidth:  350,
-        circleX:         175,
-        circleY:         150,
-        circleRadius:    90,
-        animation:       false,
-        labels:          true,
+          containerHeight: cardHeight,
+          containerWidth:  cardWidth,
+          circleX:         (cardWidth - 3) / 2,
+          circleY:         cardHeight / 2,
+          circleRadius:    radius,
+          animation:       false,
+          labels:          false,
       }
-    }
-    if(this.timezone != null){
-      this.properties.timezone = this.timezone;
-    }else{
-      this.properties.timezone = "UTC";
-    }
+    // }
   }
 })
 </script>
 
 <style scoped>
+  .calendar-day-box {
+    border-radius: .1em;
+    border: 0.01em;
+    border-color: black;
+    background: #eceaea;
+    margin-right: 0.01em;
+    margin-left: 0.01em;
+    margin-top: 0.01em;
+    margin-bottom: 0.01em;
+    position: relative;
+  }
+
+  .calendar-day-box:hover {
+    background: #c9c9c9;
+  } 
+
+  .day-number { 
+    position: absolute;
+    bottom: 0;
+    left: 0.1rem;
+    font-size: 0.5rem;
+  }
+
+  .table-title-text {
+    font-size: 0.3rem;
+  }
 
   .btn-xs {
     padding: .2rem .4rem;
