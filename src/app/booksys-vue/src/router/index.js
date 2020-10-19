@@ -9,6 +9,7 @@ import Info from '../views/Info';
 import Schedule from '../views/Schedule';
 import Today from '../views/Today';
 import Calendar from '../views/Calendar';
+import Boat from '../views/Boat';
 
 Vue.use(VueRouter)
 
@@ -61,6 +62,11 @@ const routes = [
     path: '/calendar',
     name: 'Calendar',
     component: Calendar
+  },
+  {
+    path: '/boat',
+    name: 'Boat',
+    component: Boat
   }
 ]
 
