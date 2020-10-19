@@ -23,6 +23,13 @@
         <b-col cols="4">
           <b-row>
             <b-col cols="12">
+              <SessionsOverview
+                :sessions="sessionsOverview"
+              />
+            </b-col>
+          </b-row>
+          <b-row class="mt-2">
+            <b-col cols="12">
               <ConditionInfoCard
                 :sunrise="sunrise"
                 :sunset="sunset"
@@ -57,10 +64,7 @@ import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
 import ConditionInfoCard from '@/components/ConditionInfoCard';
 import SessionMonthCard from '@/components/SessionMonthCard';
-// import SessionDetailsCard from '@/components/SessionDetailsCard';
-// import SessionEditorModal from '@/components/SessionEditorModal';
-// import SessionDeleteModal from '@/components/SessionDeleteModal';
-// import Session from '@/dataTypes/session';
+import SessionsOverview from '@/components/SessionsOverview';
 import moment from 'moment';
 import 'moment-timezone';
 // import _ from 'lodash';
@@ -71,9 +75,7 @@ export default Vue.extend({
     NavbarMobile,
     ConditionInfoCard,
     SessionMonthCard,
-    // SessionDetailsCard,
-    // SessionEditorModal,
-    // SessionDeleteModal
+    SessionsOverview
   },
   computed: {
     isMobile: function () {
@@ -135,6 +137,8 @@ export default Vue.extend({
     mouseOverDayHandler: function(day) {
       this.sunrise = day.sunrise;
       this.sunset = day.sunset;
+
+      this.sessionsOverview = day;
     }
     // selectSlot: function(selectedSession) {
     //   console.log("selectedSlot", selectedSession);
@@ -205,7 +209,8 @@ export default Vue.extend({
       month: null,
       errors: [],
       sunrise: null,
-      sunset: null
+      sunset: null,
+      sessionsOverview: null
       // selectedSession: null
     }
   },

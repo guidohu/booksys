@@ -33,14 +33,14 @@ export default Vue.extend({
     },
     selectedSession: function(newSelectedSession) {
       if(newSelectedSession == null){
-        BooksysPie.resetSelection();
+        this.pie.resetSelection();
         return;
       }
 
       if(newSelectedSession.id != null){
         for(let i=0; i<this.pieSessions.length; i++){
           if(this.pieSessions[i].id == newSelectedSession.id){
-            BooksysPie.selectSector(i);
+            this.pie.selectSector(i);
             break;
           }
         }
