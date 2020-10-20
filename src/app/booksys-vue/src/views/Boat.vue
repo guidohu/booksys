@@ -27,8 +27,8 @@
     <div v-else>
       <NavbarMobile title="Boat"/>
       <b-card no-body>
-        <BoatTabs/>  
-      </b-card> 
+        <BoatTabs/>
+      </b-card>
     </div>
   </div>
 </template>

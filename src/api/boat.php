@@ -25,10 +25,12 @@
 
     switch($_GET['action']){
         case 'get_engine_hours_log':
-            get_engine_hours_log($configuration);
+            $response = get_engine_hours_log($configuration);
+            echo json_encode($response);
             exit;
         case 'get_engine_hours_latest':
-            get_engine_hours_latest($configuration);
+            $response = get_engine_hours_latest($configuration);
+            echo json_encode($response);
             exit;
         case 'get_engine_hours_entry':
             get_engine_hours_entry($configuration);
@@ -37,7 +39,8 @@
             update_engine_hours_entry($configuration);
             exit;
         case 'update_engine_hours':
-            update_engine_hours($configuration);
+            $response = update_engine_hours($configuration);
+            echo json_encode($response);
             exit;
         case 'update_fuel':
             update_fuel($configuration);
@@ -67,8 +70,7 @@
         $db = new DBAccess($configuration);
         if(!$db->connect()){
             error_log('api/boat: Cannot connect to the database');
-            HttpHeader::setResponseCode(500);
-            exit;
+            return Status::errorStatus("Cannot connect to the database");
         }
 
         $query = 'SELECT blb.id as id, UNIX_TIMESTAMP(DATE_FORMAT(blb.timestamp, "%Y-%m-%dT%T+02:00")) as time, blb.before_hours as before_hours,
@@ -88,10 +90,9 @@
         $res = $db->fetch_data_hash($query);
         $db->disconnect();
         if(!isset($res)){
-            HttpHeader::setResponseCode(500);
-            exit;
+            return Status::errorStatus("Cannot retrieve engine hour logs from database.");
         }
-        echo json_encode($res);
+        return Status::successDataResponse("Engine hour log retrieved.", $res);
     }
 
     /* Returns the fuel log data */
@@ -147,8 +148,7 @@
         $db = new DBAccess($configuration);
         if(!$db->connect()){
             error_log('api/boat: Cannot connect to the database');
-            HttpHeader::setResponseCode(500);
-            exit;
+            return Status::errorStatus("Cannot connect to the database");
         }
 
         $query = 'SELECT blb.id as id, blb.timestamp as time_stamp, blb.before_hours as before_hours,
@@ -162,9 +162,9 @@
         $res = $db->fetch_data_hash($query);
         $db->disconnect();
         if(!isset($res)){
-            HttpHeader::setResponseCode(500);
+            return Status::errorStatus("Cannot get the latest engine hours entry");
         }
-        echo json_encode($res);
+        return Status::successDataResponse("success", $res);
     }
 
     function get_engine_hours_entry($configuration){
@@ -265,34 +265,28 @@
         // general input validation
         $sanitizer = new Sanitizer();
         if(!$post_data->user_id or !$sanitizer->isInt($post_data->user_id)){
-            HttpHeader::setResponseCode(400);
-            echo "No valid user selected, please select a user";
-            return;
+            return Status::errorStatus("No valid user selected, please select a user");
         }
         if(!$post_data->engine_hours_before or ! $sanitizer->isFloat($post_data->engine_hours_before)){
-            HttpHeader::setResponseCode(400);
-            echo "No valid value for engine hours 'before' given.";
-            return;
+            return Status::errorStatus("No valid value for engine hours 'before' given.");
         }
-        if($post_data->engine_hours_after and !$sanitizer->isFloat($post_data->engine_hours_after)){
-            HttpHeader::setResponseCode(400);
-            echo "No valid value for engine hours 'after' given.";
-            return;
+        if(isset($post_data->engine_hours_after) and !$sanitizer->isFloat($post_data->engine_hours_after)){
+            return Status::errorStatus("No valid value for engine hours 'after' given.");
+        }
+        if(isset($post_data->type) and !$sanitizer->isInt($post_data->type)){
+            return Status::errorStatus("No valid type for the boat usage has been selected.");
         }
         // logical input validation
-        if($post_data->engine_hours_after){
+        if(isset($post_data->engine_hours_after)){
             if($post_data->engine_hours_after < $post_data->engine_hours_before){
-                HttpHeader::setResponseCode(400);
-                echo "Engine hours afterwards cannot be smaller than before.";
-                return;
+                return Status::errorStatus("Engine hours afterwards cannot be smaller than before.");
             }
         }
 
         // check if there exists an empty log entry which needs an update
         $db = new DBAccess($configuration);
         if(!$db->connect()){
-            HttpHeader::setResponseCode(500);
-            exit;
+            return Status::errorStatus("Cannot connect to database");
         }
         $query = 'SELECT count(*) as numberof FROM (SELECT blb.id as id, blb.before_hours as before_hours
                     FROM boat_engine_hours blb
@@ -301,9 +295,7 @@
         $res = $db->fetch_data_hash($query);
         if($res == FALSE){
             $db->disconnect();
-            HttpHeader::setResponseCode(500);
-            echo "Cannot determine if it is a updatable engine hour entry";
-            return;
+            return Status::errorStatus("Cannot determine whether this is a new entry or one that can be updated.");
         }
 
         if($res[0]['numberof'] > 0 and $post_data->engine_hours_after){
@@ -318,24 +310,19 @@
                             $post_data->engine_hours_after - $post_data->engine_hours_before);
             if(!$db->execute()){
                 $db->disconnect();
-                HttpHeader::setResponseCode(500);
-                return;
+                return Status::errorStatus("Cannot update existing entry. An error occurred.");
             }
         }elseif($res[0]['numberof'] > 0){
             $db->disconnect();
-            HttpHeader::setResponseCode(400);
-            echo "You have to provide the engine hours after the session";
-            return;
+            return Status::errorStatus("To update the engine hour entry, please provide the engine hours after the trip.");
         }
         else{
             // check that type is valid
             $usage_type = 0;
             if(! isset($post_data->type)){
-                HttpHeader::setResponseCode(400);
-                echo "No valid boat usage type selected.";
-                return;
-            }elseif($post_data->type){
-                $usage_type = 1;
+                return Status::errorStatus("No valid boat usage type selected.");
+            }else{
+                $usage_type = $post_data->type;
             }
 
             // create a new entry
@@ -352,13 +339,11 @@
                             $post_data->user_id);
             if(!$db->execute()){
                 $db->disconnect();
-                HttpHeader::setResponseCode(500);
-                echo "Internal Server Error, cannot add new engine hours entry";
-                return;
+                return Status::errorStatus("Internal Server Error, cannot add new engine hours entry.");
             }
         }
         $db->disconnect();
-        HttpHeader::setResponseCode(200);
+        return Status::successStatus("new engine hour entry added or existing one updated");
     }
 
     function update_fuel($configuration){

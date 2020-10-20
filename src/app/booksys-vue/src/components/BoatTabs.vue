@@ -1,11 +1,13 @@
 <template>
-  <b-tabs content-class="mt-3" card>
+  <b-tabs content-class="mt-3">
     <b-tab active>
       <div slot="title">
         <div :class="titleClassEngineHours"></div>
         Engine Hours
       </div>
-      <p>I'm the first tab</p>
+      <div :class="tabClass">
+        <EngineHourLogContainer/>
+      </div>
     </b-tab>
     <b-tab>
       <div slot="title">
@@ -25,9 +27,13 @@
 <script>
 import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
+import EngineHourLogContainer from '@/components/EngineHourLogContainer';
 
 export default Vue.extend({
   name: 'BoatTabs',
+  components: {
+    EngineHourLogContainer
+  },
   computed: {
     isDesktop: function () {
       return !BooksysBrowser.isMobile()
@@ -49,7 +55,21 @@ export default Vue.extend({
         return "bc_icon bc_icon_tab bc_icon_wrench align-middle";
       }
       return "bc_icon bc_icon_tab bc_icon_wrench inline align-middle";
+    },
+    tabClass: function (){
+      if(!BooksysBrowser.isMobile()){
+        return "boat-tab-limited-height";
+      }else{
+        return "";
+      }
     }
   }
 })
 </script>
+
+<style scoped>
+  .boat-tab-limited-height {
+    max-height: 400px;
+    overflow: scroll;
+  }
+</style>

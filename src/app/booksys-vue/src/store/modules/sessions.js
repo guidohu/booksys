@@ -8,10 +8,10 @@ const state = () => ({
 
 const getters = {
   getSessions: (state) => {
-    return state.sessions
+    return state.sessions;
   },
   getSessionsCalendar: (state) => {
-    return state.sessionsCalendar
+    return state.sessionsCalendar;
   }
 }
 

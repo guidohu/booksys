@@ -1,21 +1,25 @@
 <template>
-  <b-container id="app" class="fill">
-    <b-row v-if="isDesktop" class="display noborder nobackground">
-      <div class="vcenter_placeholder">
-        <div class="vcenter_content">
-          <AlertMessage v-if="backendStatus && backendStatus.ok == false" alertMessage="The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible."/>
-          <router-view v-else/>
+  <div id="app">
+    <b-container v-if="isDesktop" class="fill">
+      <b-row v-if="isDesktop" class="display noborder nobackground">
+        <div class="vcenter_placeholder">
+          <div class="vcenter_content">
+            <AlertMessage v-if="backendStatus && backendStatus.ok == false" alertMessage="The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible."/>
+            <router-view v-else/>
+          </div>
         </div>
+      </b-row>
+    </b-container>
+    <b-container v-if="isMobile" fluid="true">
+      <div v-if="isMobile">
+        <AlertMessage v-if="backendStatus && backendStatus.ok == false" alertMessage="The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible."/>
+        <router-view v-else/>
       </div>
-    </b-row>
-    <div v-if="isMobile">
-      <AlertMessage v-if="backendStatus && backendStatus.ok == false" alertMessage="The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible."/>
-      <router-view v-else/>
-    </div>
-    <footer class="legal-footer" v-if="isDesktop">
-      Copyright 2013-2020 by Guido Hungerbuehler <a href="https://github.com/guidohu/booksys">Find me on Github</a>
-    </footer>
-  </b-container>
+      <footer class="legal-footer" v-if="isDesktop">
+        Copyright 2013-2020 by Guido Hungerbuehler <a href="https://github.com/guidohu/booksys">Find me on Github</a>
+      </footer>
+    </b-container>
+  </div>
 </template>
 
 <script>
@@ -97,5 +101,4 @@ export default Vue.extend({
     width: 100vw;
     background-color: transparent;
   }
-
 </style>
