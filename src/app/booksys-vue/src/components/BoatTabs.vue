@@ -14,6 +14,9 @@
         <div :class="titleClassFuel"></div>
         Fuel
       </div>
+      <div :class="tabClass">
+        <FuelLogContainer/>
+      </div>
     </b-tab>
     <b-tab>
       <div slot="title">
@@ -28,11 +31,13 @@
 import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import EngineHourLogContainer from '@/components/EngineHourLogContainer';
+import FuelLogContainer from '@/components/FuelLogContainer';
 
 export default Vue.extend({
   name: 'BoatTabs',
   components: {
-    EngineHourLogContainer
+    EngineHourLogContainer,
+    FuelLogContainer
   },
   computed: {
     isDesktop: function () {

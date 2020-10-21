@@ -2,7 +2,8 @@ import Boat from "@/api/boat";
 
 const state = () => ({
   engineHourLog: [],
-  engineHourLogLatest: null
+  engineHourLogLatest: null,
+  fuelLog: []
 });
 
 const getters = {
@@ -11,6 +12,9 @@ const getters = {
   },
   getEngineHourLogLatest: (state) => {
     return state.engineHourLogLatest;
+  },
+  getFuelLog: (state) => {
+    return state.fuelLog;
   }
 };
 
@@ -41,6 +45,19 @@ const actions = {
       })
     });
   },
+  queryFuelLog ({ commit }) {
+    console.log("Trigger queryFuelLog");
+    return new Promise((resolve, reject) => {
+      Boat.getFuelLog()
+      .then((response) => {
+        commit('setFuelLog', response);
+        resolve();
+      })
+      .catch(error => {
+        reject(error);
+      })
+    })
+  },
   addEngineHours ({ dispatch }, engineHourEntry) {
     console.log("Trigger addEngineHourLogEntry");
     return new Promise((resolve, reject) => {
@@ -63,6 +80,9 @@ const mutations = {
   },
   setEngineHourLogLatest (state, value){
     state.engineHourLogLatest = value;
+  },
+  setFuelLog (state, value){
+    state.fuelLog = value;
   }
 };
 

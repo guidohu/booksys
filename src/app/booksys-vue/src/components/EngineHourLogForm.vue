@@ -2,6 +2,7 @@
   <b-container float class="text-left">
     <b-row>
       <b-col cols="12">
+        <WarningBox v-if="errors.length > 0" :errors="errors"/>
         <b-form @submit="add">
           <b-form-group
             id="input-group-driver"
@@ -84,12 +85,14 @@
 import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
+import WarningBox from '@/components/WarningBox';
 
 
 export default Vue.extend({
   name: "EngineHourLogForm",
   components: {
-    ToggleButton
+    ToggleButton,
+    WarningBox
   },
   data() {
     return {
@@ -102,6 +105,7 @@ export default Vue.extend({
       },
       disableBefore: false,
       showAfter: false,
+      errors: []
     }
   },
   computed: {
@@ -178,7 +182,9 @@ export default Vue.extend({
         engine_hours_after: this.form.afterHours,
         type: type
       };
-      this.addEngineHours(data);
+      this.addEngineHours(data)
+      .then(() => this.errors = [])
+      .catch((errors) => this.errors = errors);
     }
   },
   created() {

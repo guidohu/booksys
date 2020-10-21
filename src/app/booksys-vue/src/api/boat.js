@@ -100,4 +100,35 @@ export default class Boat {
       })
     })
   }
+
+  static getFuelLog(){
+    console.log("api/getFuelLog called");
+    return new Promise((resolve, reject) => {
+      fetch('/api/boat.php?action=get_fuel_log', {
+        method: "GET",
+        cache: "no-cache",
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("Boat/getFuelLog response data:", data);
+            if(data.ok){
+              resolve(data.data);
+            }else{
+              console.log("Boat/getFuelLog: Cannot retrieve engine hour logs, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("Boat/getFuelLog: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("Boat/getFuelLog", error);
+        reject([error]);
+      })
+    })
+  }
+
 }

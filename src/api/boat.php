@@ -52,7 +52,8 @@
             update_fuel_entry($configuration);
             exit;
         case 'get_fuel_log':
-            get_fuel_log($configuration);
+            $response = get_fuel_log($configuration);
+            echo json_encode($response);
             exit;
         case 'get_maintenance_log':
             get_maintenance_log($configuration);
@@ -100,8 +101,7 @@
         $db = new DBAccess($configuration);
         if(!$db->connect()){
             error_log('api/boat: Cannot connect to the database');
-            HttpHeader::setResponseCode(500);
-            exit;
+            return Status::errorStatus("Cannot connect to the database");
         }
 
         $query = 'SELECT bf.id as id, UNIX_TIMESTAMP(DATE_FORMAT(bf.timestamp, "%Y-%m-%dT%TZ")) as timestamp, bf.engine_hours as engine_hours,
@@ -116,8 +116,9 @@
         $db->disconnect();
         if(!isset($res)){
             HttpHeader::setResponseCode(500);
+            return Status::errorStatus("Cannot get the fuel logs from the database.");
         }
-        echo json_encode($res);
+        return Status::successDataResponse("success", $res);
     }
 
     /* Returns the maintenance log data */
