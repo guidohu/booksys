@@ -6,7 +6,7 @@
         <b-form @submit="add">
           <b-form-group
             id="input-group-engine-hours"
-            label="Before"
+            label="Engine Hrs"
             label-for="input-engine-hours"
             label-cols="3"
           >
@@ -68,6 +68,7 @@
 
 <script>
 import Vue from 'vue';
+import { mapActions, mapGetters } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 
 export default Vue.extend({
@@ -85,10 +86,37 @@ export default Vue.extend({
       }
     }
   },
+  computed: {
+    ...mapGetters('login', [
+      'userInfo'
+    ]),
+  },
   methods: {
     add: function() {
       console.log("add has been clicked");
-    }
+      const entry = {
+        user_id: this.userInfo.id,
+        engine_hours: this.form.engineHours,
+        liters: this.form.liters,
+        cost: this.form.cost
+      };
+      this.addFuelEntry(entry)
+      .then(() => {
+        this.resetForm();
+      })
+      .catch((errors) => this.errors = errors);
+    },
+    resetForm: function() {
+      this.form = {
+        engineHours: null,
+        cost: null,
+        liters: null
+      };
+      this.errors = [];
+    },
+    ...mapActions('boat', [
+      'addFuelEntry'
+    ])
   }
 })
 </script>

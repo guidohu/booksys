@@ -43,7 +43,8 @@
             echo json_encode($response);
             exit;
         case 'update_fuel':
-            update_fuel($configuration);
+            $response = update_fuel($configuration);
+            echo json_encode($response);
             exit;
         case 'get_fuel_entry':
             get_fuel_entry($configuration);
@@ -353,32 +354,23 @@
         // general input validation
         $sanitizer = new Sanitizer();
         if(!$post_data->user_id or !$sanitizer->isInt($post_data->user_id)){
-            HttpHeader::setResponseCode(400);
-            echo "No valid user selected, please select a user";
-            return;
+            return Status::errorStatus("No valid user selected, please select a user");
         }
         if(!$post_data->engine_hours or ! $sanitizer->isFloat($post_data->engine_hours)){
-            HttpHeader::setResponseCode(400);
-            echo "No valid value for engine hours given.";
-            return;
+            return Status::errorStatus("No valid value for engine hours given.");
         }
         if($post_data->liters and !$sanitizer->isFloat($post_data->liters)){
-            HttpHeader::setResponseCode(400);
-            echo "No valid value for the litres of fuel given.";
-            return;
+            return Status::errorStatus("No valid value for the litres of fuel given.");
         }
         if($post_data->cost and !$sanitizer->isFloat($post_data->cost)){
-            HttpHeader::setResponseCode(400);
-            echo "No valid value for the cost of fuel given.";
-            return;
+            return Status::errorStatus("No valid value for the cost of fuel given.");
         }
 
         // get the maximum engine hour log
         $query = 'SELECT max(blb.after_hours) as max_hours FROM boat_engine_hours blb;';
         $db = new DBAccess($configuration);
         if(!$db->connect()){
-            HttpHeader::setResponseCode(500);
-            exit;
+            return Status::errorStatus("Cannot retrieve maximum engine hours.");
         }
         $res = $db->fetch_data_hash($query);
         $max_hours = 0;
@@ -402,11 +394,9 @@
         );
         if(!$db->execute()){
             $db->disconnect();
-            HttpHeader::setResponseCode(500);
-            echo "Internal Server Error, cannot add new fuel entry";
-            return;
+            return Status::errorStatus("Internal Server Error, cannot add new fuel entry.");
         }
-        HttpHeader::setResponseCode(200);
+        return Status::successStatus("successfully added new fuel entry");
     }
 
     function get_fuel_entry($configuration){

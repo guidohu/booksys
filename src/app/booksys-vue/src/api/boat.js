@@ -131,4 +131,45 @@ export default class Boat {
     })
   }
 
+  /**
+   * Adds a new fuel entry.
+   * @param {} fuelEntry consisting of:
+   * {
+   *   user_id: ...
+   *   engine_hours: ...
+   *   liters: ...
+   *   cost: ...
+   * }
+   */
+  static addFuelEntry(fuelEntry){
+    console.log("api/addFuelEntry called");
+    return new Promise((resolve, reject) => {
+      fetch('/api/boat.php?action=update_fuel', {
+        method: "POST",
+        cache: "no-cache",
+        body: JSON.stringify(fuelEntry)
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("Boat/addFuelEntry response data:", data);
+            if(data.ok){
+              resolve();
+            }else{
+              console.log("Boat/addFuelEntry: Cannot add engine hour entry, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("Boat/addFuelEntry: Cannot parse server response", error, response);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("Boat/addFuelEntry", error);
+        reject([error]);
+      })
+    })
+  }
+
 }
