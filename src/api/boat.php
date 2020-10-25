@@ -57,7 +57,8 @@
             echo json_encode($response);
             exit;
         case 'get_maintenance_log':
-            get_maintenance_log($configuration);
+            $response = get_maintenance_log($configuration);
+            echo json_encode($response);
             exit;
         case 'update_maintenance_log':
             update_maintenance_log($configuration);
@@ -126,9 +127,7 @@
     function get_maintenance_log($configuration){
         $db = new DBAccess($configuration);
         if(!$db->connect()){
-            error_log('api/boat: Cannot connect to the database');
-            HttpHeader::setResponseCode(500);
-            exit;
+            return Status::errorStatus("Cannot connect to the database");
         }
 
         $query = 'SELECT bm.id as id, UNIX_TIMESTAMP(DATE_FORMAT(bm.timestamp, "%Y-%m-%dT%TZ")) as timestamp, bm.engine_hours,
@@ -140,9 +139,9 @@
         $res = $db->fetch_data_hash($query, -1);
         $db->disconnect();
         if(!isset($res)){
-            HttpHeader::setResponseCode(500);
+            return Status::errorStatus("Cannot retrieve maintenance log entries from the database");
         }
-        echo json_encode($res);
+        return Status::successDataResponse("success", $res);
     }
 
     /* Returns the latest log_book entry, even if not complete yet */

@@ -172,4 +172,34 @@ export default class Boat {
     })
   }
 
+  static getMaintenanceLog(){
+    console.log("api/getMaintenanceLog called");
+    return new Promise((resolve, reject) => {
+      fetch('/api/boat.php?action=get_maintenance_log', {
+        method: "GET",
+        cache: "no-cache",
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("Boat/getMaintenanceLog response data:", data);
+            if(data.ok){
+              resolve(data.data);
+            }else{
+              console.error("Boat/getMaintenanceLog: Cannot retrieve maintenance logs, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("Boat/getMaintenanceLog: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("Boat/getMaintenanceLog", error);
+        reject([error]);
+      })
+    })
+  }
+
 }
