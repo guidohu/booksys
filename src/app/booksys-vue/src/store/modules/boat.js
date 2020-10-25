@@ -114,6 +114,19 @@ const actions = {
         reject(error)
       })
     });
+  },
+  updateEngineHours ({ dispatch }, engineHourUpdate) {
+    console.log("Trigger updateEngineHours, with", engineHourUpdate);
+    return new Promise((resolve, reject) => {
+      Boat.updateEngineHours(engineHourUpdate)
+      .then(() => {
+        dispatch('queryEngineHourLog');
+        resolve();
+      })
+      .catch(error => {
+        reject(error)
+      })
+    });
   }
 };
 

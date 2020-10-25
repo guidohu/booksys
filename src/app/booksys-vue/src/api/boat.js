@@ -101,6 +101,45 @@ export default class Boat {
     })
   }
 
+  /**
+   * Updates the type of an existing engineHourEntry.
+   * @param {} engineHourEntry consisting of:
+   * {
+   *   type: ...   (0: private, 1: course)
+   *   id: ...
+   * }
+   */
+  static updateEngineHours(engineHourEntryUpdate){
+    console.log("api/updateEngineHours called, with", engineHourEntryUpdate);
+    return new Promise((resolve, reject) => {
+      fetch('/api/boat.php?action=update_engine_hours_entry', {
+        method: "POST",
+        cache: "no-cache",
+        body: JSON.stringify(engineHourEntryUpdate)
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("Boat/updateEngineHours response data:", data);
+            if(data.ok){
+              resolve();
+            }else{
+              console.log("Boat/updateEngineHours: Cannot update engine hour entry, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("Boat/updateEngineHours: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("Boat/updateEngineHours", error);
+        reject([error]);
+      })
+    })
+  }
+
   static getFuelLog(){
     console.log("api/getFuelLog called");
     return new Promise((resolve, reject) => {

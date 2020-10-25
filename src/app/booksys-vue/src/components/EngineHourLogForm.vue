@@ -55,7 +55,7 @@
             </b-input-group>
           </b-form-group>
           <b-form-group
-            id="input-group-ty[e"
+            id="input-group-type"
             label="Type"
             label-for="input-type"
             label-cols="3"

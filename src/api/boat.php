@@ -36,7 +36,8 @@
             get_engine_hours_entry($configuration);
             exit;
         case 'update_engine_hours_entry':
-            update_engine_hours_entry($configuration);
+            $response = update_engine_hours_entry($configuration);
+            echo json_encode($response);
             exit;
         case 'update_engine_hours':
             $response = update_engine_hours($configuration);
@@ -224,22 +225,17 @@
         if(! isset($post_data->type) or !$sanitizer->isInt($post_data->type)){
             // currently we only allow 0 (private) or 1 (course)
             if($post_data->type != 0 and $post_data->type != 1){
-                HttpHeader::setResponseCode(400);
-                echo "No valid engine hours entry type selected";
-                return;
+                return Status::errorStatus("No valid engine hours entry type selected");
             }
         }
         if(!$post_data->id or !$sanitizer->isInt($post_data->id)){
-            HttpHeader::setResponseCode(400);
-            echo "No valid engine hours entry ID selected";
-            return;
+            return Status::errorStatus("No valid engine hours entry ID selected");
         }
 
         // setup database access
         $db = new DBAccess($configuration);
         if(!$db->connect()){
-            HttpHeader::setResponseCode(500);
-            exit;
+            return Status::errorStatus("Cannot connect to the database");
         }
 
         // check that the entry does indeed exist
@@ -253,12 +249,10 @@
         );
         if(!$db->execute()){
             $db->disconnect();
-            HttpHeader::setResponseCode(500);
-            return;
+            return Status::errorStatus("Cannot update engine hours log entry due to an unknown errror.");
         }
 
-        HttpHeader::setResponseCode(200);
-        return;
+        return Status::successStatus("successfully updated");
     }
 
     function update_engine_hours($configuration){
