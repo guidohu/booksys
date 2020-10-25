@@ -101,6 +101,19 @@ const actions = {
         reject(error)
       })
     });
+  },
+  addMaintenanceEntry ({ dispatch }, maintenanceEntry) {
+    console.log("Trigger addMaintenanceEntry");
+    return new Promise((resolve, reject) => {
+      Boat.addMaintenanceEntry(maintenanceEntry)
+      .then(() => {
+        dispatch('queryMaintenanceLog');
+        resolve();
+      })
+      .catch(error => {
+        reject(error)
+      })
+    });
   }
 };
 

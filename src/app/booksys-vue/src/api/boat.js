@@ -202,4 +202,44 @@ export default class Boat {
     })
   }
 
+  /**
+   * Adds a new maintenance entry.
+   * @param {} maintenanceEntry consisting of:
+   * {
+   *   user_id: ...
+   *   engine_hours: ...
+   *   description: ...
+   * }
+   */
+  static addMaintenanceEntry(maintenanceEntry){
+    console.log("api/addMaintenanceEntry called, with", maintenanceEntry);
+    return new Promise((resolve, reject) => {
+      fetch('/api/boat.php?action=update_maintenance_log', {
+        method: "POST",
+        cache: "no-cache",
+        body: JSON.stringify(maintenanceEntry)
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("Boat/addMaintenanceEntry response data:", data);
+            if(data.ok){
+              resolve();
+            }else{
+              console.log("Boat/addMaintenanceEntry: Cannot add maintenance entry, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("Boat/addMaintenanceEntry: Cannot parse server response", error, response);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("Boat/addMaintenanceEntry", error);
+        reject([error]);
+      })
+    })
+  }
+
 }

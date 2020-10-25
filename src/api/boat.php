@@ -61,7 +61,8 @@
             echo json_encode($response);
             exit;
         case 'update_maintenance_log':
-            update_maintenance_log($configuration);
+            $response = update_maintenance_log($configuration);
+            echo json_encode($response);
             exit;
     }
 
@@ -514,27 +515,20 @@
         // general input validation
         $sanitizer = new Sanitizer();
         if(!$post_data->user_id or !$sanitizer->isInt($post_data->user_id)){
-            HttpHeader::setResponseCode(400);
-            echo "No valid user selected, please select a user";
-            return;
+            return Status::errorStatus("No valid user selected, please select a user");
         }
         if(!$post_data->engine_hours or ! $sanitizer->isFloat($post_data->engine_hours)){
-            HttpHeader::setResponseCode(400);
-            echo "No valid value for engine hours given.";
-            return;
+            return Status::errorStatus("No valid value for engine hours given.");
         }
         if(!$post_data->description){
-            HttpHeader::setResponseCode(400);
-            echo "No valid value for the litres of fuel given.";
-            return;
+            return Status::errorStatus("No valid value for the litres of fuel given.");
         }
 
         // create a new entry
         $date = new DateTime();
         $db = new DBAccess($configuration);
         if(!$db->connect()){
-            HttpHeader::setResponseCode(500);
-            exit;
+            return Status::errorStatus("Cannot connect to database.");
         }
         $query = "INSERT INTO boat_maintenance
                 (timestamp, engine_hours, description, user_id)
@@ -548,11 +542,10 @@
                         $post_data->user_id);
         if(!$db->execute()){
             $db->disconnect();
-            HttpHeader::setResponseCode(500);
-            echo "Internal Server Error, cannot add new fuel entry";
-            return;
+            return Status::errorStatus("Cannot add the new maintenance entry to the database due to an error.");
         }
-        HttpHeader::setResponseCode(200);
+
+        return Status::successStatus("maintenance entry added successfully");
     }
 
 ?>
