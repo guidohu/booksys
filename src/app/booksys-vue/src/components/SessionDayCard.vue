@@ -3,7 +3,7 @@
     <b-card-header>
       <b-row>
         <b-col cols="4" class="text-right">
-          <b-button variant="outline-info" class="btn-xs" v-on:click="prevDay">
+          <b-button v-if="!disableDayBrowsing" variant="outline-info" class="btn-xs" v-on:click="prevDay">
             <b-icon icon="arrow-left-short"></b-icon>
           </b-button>
         </b-col>
@@ -11,7 +11,7 @@
           {{dateString}}
         </b-col>
         <b-col cols="4" class="text-left">
-          <b-button variant="outline-info" class="btn-xs" v-on:click="nextDay">
+          <b-button v-if="!disableDayBrowsing" variant="outline-info" class="btn-xs" v-on:click="nextDay">
             <b-icon icon="arrow-right-short"></b-icon>
           </b-button>
         </b-col>
@@ -25,7 +25,7 @@
           :properties="properties"
           @selectHandler="selectSession"/>
       </b-row>
-      <b-row v-if="isToday && selectedSession != null && selectedSession.id != null" class="text-center">
+      <b-row v-if="isToday && selectedSession != null && selectedSession.id != null && selectedSession.riders.length > 0" class="text-center">
         <b-col cols="12" class="text-center">
           <b-button v-on:click="navigateSessionStart" type="button" variant="outline-success">Start Session</b-button>
         </b-col>
@@ -84,15 +84,13 @@ export default Vue.extend({
       this.$emit('selectSessionHandler', slot);
     },
     navigateSessionStart: function() {
-      // TODO adjust correct link
-      console.log("TODO adjust correct link");
-      window.location.href = '/watch.html?sessionId='+this.selectedSession.id;
+      window.location.href = '/watch?sessionId='+this.selectedSession.id;
     }
   },
   components: {
     Pie
   },
-  props: ['isMobile', 'sessionData', 'selectedSession', 'timezone'],
+  props: ['isMobile', 'sessionData', 'selectedSession', 'timezone', 'disableDayBrowsing'],
   created() {
     if(this.isMobile != null && this.isMobile == true){
       this.properties = {
