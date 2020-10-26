@@ -240,6 +240,8 @@ export default Vue.extend({
     }    
 
     this.querySessionsForDate();
+
+    // TODO check if the watch is running -> then go to watch
   }
 })
 </script>
