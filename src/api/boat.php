@@ -51,7 +51,8 @@
             get_fuel_entry($configuration);
             exit;
         case 'update_fuel_entry':
-            update_fuel_entry($configuration);
+            $response = update_fuel_entry($configuration);
+            echo json_encode($response);
             exit;
         case 'get_fuel_log':
             $response = get_fuel_log($configuration);
@@ -445,37 +446,26 @@
 
         // general input validation
         $sanitizer = new Sanitizer();
-        if(!$post_data->id or !$sanitizer->isInt($post_data->id)){
-            HttpHeader::setResponseCode(400);
-            echo "No valid fuel entry ID given";
-            return;
+        if(!isset($post_data->id) or !$sanitizer->isInt($post_data->id)){
+            return Status::errorStatus("No valid fuel entry ID given");
         }
-        if(!$post_data->engine_hours or ! $sanitizer->isFloat($post_data->engine_hours)){
-            HttpHeader::setResponseCode(400);
-            echo "No valid value for engine hours given.";
-            return;
+        if(!isset($post_data->engine_hours) or ! $sanitizer->isFloat($post_data->engine_hours)){
+            return Status::errorStatus("No valid value for engine hours given.");
         }
-        if($post_data->liters and !$sanitizer->isFloat($post_data->liters)){
-            HttpHeader::setResponseCode(400);
-            echo "No valid value for the litres of fuel given.";
-            return;
+        if(!isset($post_data->liters) or !$sanitizer->isFloat($post_data->liters)){
+            return Status::errorStatus("No valid value for the litres of fuel given.");
         }
-        if($post_data->cost and !$sanitizer->isFloat($post_data->cost)){
-            HttpHeader::setResponseCode(400);
-            echo "No valid value for the cost (net) of fuel given.";
-            return;
+        if(!isset($post_data->cost) or !$sanitizer->isFloat($post_data->cost)){
+            return Status::errorStatus("No valid value for the cost (net) of fuel given.");
         }
-        if($post_data->cost_brutto and !$sanitizer->isFloat($post_data->cost_brutto)){
-            HttpHeader::setResponseCode(400);
-            echo "No valid value for the cost (gros) of fuel given.";
-            return;
+        if(isset($post_data->cost_brutto) and !$sanitizer->isFloat($post_data->cost_brutto)){
+            return Status::errorStatus("No valid value for the cost (gros) of fuel given.");
         }
 
         // setup database access
         $db = new DBAccess($configuration);
         if(!$db->connect()){
-            HttpHeader::setResponseCode(500);
-            exit;
+            return Status::errorStatus("Cannot connect to the database.");
         }
 
         // check that the entry does indeed exist
@@ -495,12 +485,10 @@
         );
         if(!$db->execute()){
             $db->disconnect();
-            HttpHeader::setResponseCode(500);
-            return;
+            return Status::errorStatus("Cannot update fuel entry due to unknown reasons. Please try again.");
         }
 
-        HttpHeader::setResponseCode(200);
-        return;
+        return Status::successStatus("successfully updated");
     }
 
     function update_maintenance_log($configuration){

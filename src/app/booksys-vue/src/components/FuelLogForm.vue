@@ -16,9 +16,9 @@
                 v-model="form.engineHours"
                 type="text"
               />
-              <b-input-group-prepend is-text>
+              <b-input-group-append is-text>
                 hrs
-              </b-input-group-prepend>
+              </b-input-group-append>
             </b-input-group>
           </b-form-group>
           <b-form-group
@@ -33,9 +33,9 @@
                 v-model="form.cost"
                 type="text"
               />
-              <b-input-group-prepend is-text>
-                CURRENCY
-              </b-input-group-prepend>
+              <b-input-group-append is-text>
+                {{getCurrency}}
+              </b-input-group-append>
             </b-input-group>
           </b-form-group>
           <b-form-group
@@ -50,9 +50,9 @@
                 v-model="form.liters"
                 type="text"
               />
-              <b-input-group-prepend is-text>
+              <b-input-group-append is-text>
                 ltrs
-              </b-input-group-prepend>
+              </b-input-group-append>
             </b-input-group>
           </b-form-group>
           <b-row class="text-right">
@@ -90,6 +90,9 @@ export default Vue.extend({
     ...mapGetters('login', [
       'userInfo'
     ]),
+    ...mapGetters('configuration',[
+      'getCurrency'
+    ])
   },
   methods: {
     add: function() {
@@ -116,7 +119,13 @@ export default Vue.extend({
     },
     ...mapActions('boat', [
       'addFuelEntry'
+    ]),
+    ...mapActions('configuration', [
+      'queryConfiguration'
     ])
+  },
+  created() {
+    this.queryConfiguration();
   }
 })
 </script>

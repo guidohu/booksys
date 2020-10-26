@@ -127,6 +127,19 @@ const actions = {
         reject(error)
       })
     });
+  },
+  updateFuelEntry ({ dispatch }, fuelEntry) {
+    console.log("Trigger updateFuelEntry, with", fuelEntry);
+    return new Promise((resolve, reject) => {
+      Boat.updateFuelEntry(fuelEntry)
+      .then(() => {
+        dispatch('queryFuelLog');
+        resolve();
+      })
+      .catch(error => {
+        reject(error)
+      })
+    });
   }
 };
 

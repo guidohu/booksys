@@ -35,7 +35,6 @@ export default Vue.extend({
       columns: [],
       errors: [],
       selectedEngineHourLogEntry: null,
-      showSelectedEngineHourLogEntry: false
     };
   },
   computed: {
@@ -90,9 +89,7 @@ export default Vue.extend({
         }
       ]
     },
-    rowClick: function(item, index, event){
-      console.log("rowClick item", item, "index", index, "event", event);
-      this.showSelectedEngineHourLogEntry = true;
+    rowClick: function(item){
       this.selectedEngineHourLogEntry = item;
       this.$bvModal.show('engineHourEntryModal');
     },

@@ -211,6 +211,48 @@ export default class Boat {
     })
   }
 
+  /**
+   * Updates an existing fuel entry.
+   * @param {} fuelEntry consisting of:
+   * {
+   *   id: ...            id of the entry
+   *   engine_hours: ...  
+   *   liters: ...
+   *   cost: ...          net costs
+   *   cost_brutto: ...   gross costs
+   * }
+   */
+  static updateFuelEntry(fuelEntry){
+    console.log("api/updateFuelEntry called, with", fuelEntry);
+    return new Promise((resolve, reject) => {
+      fetch('/api/boat.php?action=update_fuel_entry', {
+        method: "POST",
+        cache: "no-cache",
+        body: JSON.stringify(fuelEntry)
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("Boat/updateFuelEntry response data:", data);
+            if(data.ok){
+              resolve();
+            }else{
+              console.log("Boat/updateFuelEntry: Cannot update fuel entry, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("Boat/updateFuelEntry: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("Boat/updateFuelEntry", error);
+        reject([error]);
+      })
+    })
+  }
+
   static getMaintenanceLog(){
     console.log("api/getMaintenanceLog called");
     return new Promise((resolve, reject) => {

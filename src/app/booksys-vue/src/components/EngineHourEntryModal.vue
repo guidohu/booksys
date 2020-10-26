@@ -134,8 +134,7 @@ export default Vue.extend({
       errors: [],
       form: {
         date: null
-      },
-      showModal: false
+      }
     }
   },
   computed: {
