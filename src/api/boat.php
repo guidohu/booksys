@@ -28,22 +28,34 @@
     switch($_GET['action']){
         case 'get_engine_hours_log':
             $response = get_engine_hours_log($configuration);
+            break;
         case 'get_engine_hours_latest':
             $response = get_engine_hours_latest($configuration);
+            break;
         case 'update_engine_hours_entry':
             $response = update_engine_hours_entry($configuration);
+            break;
         case 'update_engine_hours':
             $response = update_engine_hours($configuration);
+            break;
         case 'update_fuel':
             $response = update_fuel($configuration);
+            break;
         case 'update_fuel_entry':
             $response = update_fuel_entry($configuration);
+            break;
         case 'get_fuel_log':
             $response = get_fuel_log($configuration);
+            break;
         case 'get_maintenance_log':
             $response = get_maintenance_log($configuration);
+            break;
         case 'update_maintenance_log':
             $response = update_maintenance_log($configuration);
+            break;
+        default:
+            $response = Status::errorStatus("Action not supported");
+            break;
     }
 
     echo json_encode($response);
