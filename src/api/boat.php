@@ -23,52 +23,30 @@
         exit;
     }
 
+    $response = null;
+
     switch($_GET['action']){
         case 'get_engine_hours_log':
             $response = get_engine_hours_log($configuration);
-            echo json_encode($response);
-            exit;
         case 'get_engine_hours_latest':
             $response = get_engine_hours_latest($configuration);
-            echo json_encode($response);
-            exit;
-        case 'get_engine_hours_entry':
-            get_engine_hours_entry($configuration);
-            exit;
         case 'update_engine_hours_entry':
             $response = update_engine_hours_entry($configuration);
-            echo json_encode($response);
-            exit;
         case 'update_engine_hours':
             $response = update_engine_hours($configuration);
-            echo json_encode($response);
-            exit;
         case 'update_fuel':
             $response = update_fuel($configuration);
-            echo json_encode($response);
-            exit;
-        case 'get_fuel_entry':
-            get_fuel_entry($configuration);
-            exit;
         case 'update_fuel_entry':
             $response = update_fuel_entry($configuration);
-            echo json_encode($response);
-            exit;
         case 'get_fuel_log':
             $response = get_fuel_log($configuration);
-            echo json_encode($response);
-            exit;
         case 'get_maintenance_log':
             $response = get_maintenance_log($configuration);
-            echo json_encode($response);
-            exit;
         case 'update_maintenance_log':
             $response = update_maintenance_log($configuration);
-            echo json_encode($response);
-            exit;
     }
 
-    HttpHeader::setResponseCode(400);
+    echo json_encode($response);
     return;
 
     /* Returns the log_book data */
@@ -169,52 +147,6 @@
             return Status::errorStatus("Cannot get the latest engine hours entry");
         }
         return Status::successDataResponse("success", $res);
-    }
-
-    function get_engine_hours_entry($configuration){
-        $post_data = json_decode(file_get_contents('php://input'));
-
-        // input validation
-        $sanitizer = new Sanitizer();
-        if(!$post_data->id or !$sanitizer->isInt($post_data->id)){
-            HttpHeader::setResponseCode(400);
-            $res = array();
-            $res["error"] = "Invalid engine hours log ID format";
-            error_log('api/boat: Cannot connect to the database');
-            echo json_encode($res);
-            exit;
-        }
-
-        $db = new DBAccess($configuration);
-        if(!$db->connect()){
-            $res = array();
-            $res["error"] = "Cannot connect to backend database";
-            error_log('api/boat: Cannot connect to the database');
-            echo json_encode($res);
-            HttpHeader::setResponseCode(500);
-            exit;
-        }
-
-        $query = 'SELECT blb.id as id, UNIX_TIMESTAMP(DATE_FORMAT(blb.timestamp, "%Y-%m-%dT%T+02:00")) as time, blb.before_hours as before_hours,
-                blb.after_hours as after_hours, blb.delta_hours as delta_hours,
-                blb.type as type, st.name as type_name, u.id as user_id,
-                u.first_name as user_first_name, u.last_name as user_last_name
-            FROM boat_engine_hours blb, user u, session_type st
-            WHERE blb.user_id = u.id
-            AND blb.type    = st.id
-            AND blb.id = ';
-        $query = $query . $post_data->id;
-
-        $res = $db->fetch_data_hash($query);
-        $db->disconnect();
-        if(!isset($res[0])){
-            HttpHeader::setResponseCode(500);
-            return;
-        }
-
-        HttpHeader::setResponseCode(200);
-        echo json_encode($res[0]);
-        return;
     }
 
     // Note: currently we only allow to switch the type
@@ -392,53 +324,6 @@
             return Status::errorStatus("Internal Server Error, cannot add new fuel entry.");
         }
         return Status::successStatus("successfully added new fuel entry");
-    }
-
-    function get_fuel_entry($configuration){
-        $post_data = json_decode(file_get_contents('php://input'));
-
-        // general input validation
-        $sanitizer = new Sanitizer();
-        if(!$post_data->id or !$sanitizer->isInt($post_data->id)){
-            HttpHeader::setResponseCode(400);
-            echo "No valid fuel entry ID given";
-            exit;
-        }
-
-        // setup database access
-        $db = new DBAccess($configuration);
-        if(!$db->connect()){
-            HttpHeader::setResponseCode(500);
-            exit;
-        }
-
-        // get the entry
-        $query = 'SELECT bf.id as id, UNIX_TIMESTAMP(DATE_FORMAT(bf.timestamp, "%Y-%m-%dT%TZ")) as timestamp, 
-                bf.engine_hours as engine_hours,
-                bf.liters as liters, bf.cost_chf as cost, 
-                bf.cost_chf_brutto as cost_brutto,
-                u.id as user_id,
-                u.first_name as user_first_name, u.last_name as user_last_name
-            FROM boat_fuel bf, user u
-            WHERE bf.user_id = u.id 
-                AND bf.id = ';
-        $query = $query . $post_data->id;
-
-        $res = $db->fetch_data_hash($query);
-        $db->disconnect();
-        if(!isset($res[0])){
-            HttpHeader::setResponseCode(500);
-            echo "No entry found";
-            error_log("api/boat: cannot find a fuel entry for ID: $post_data->id");
-            return;
-        }
-
-        $response = array();
-        $response['fuel_entry'] = $res[0];
-        $response['currency']   = $configuration->currency;
-
-        echo json_encode($response);
-        return;
     }
 
     function update_fuel_entry($configuration){
