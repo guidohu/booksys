@@ -11,6 +11,7 @@ import Today from '../views/Today';
 import Calendar from '../views/Calendar';
 import Boat from '../views/Boat';
 import Ride from '../views/Ride';
+import Watch from '../views/Watch';
 
 Vue.use(VueRouter)
 
@@ -73,6 +74,11 @@ const routes = [
     path: '/ride',
     name: 'Ride',
     component: Ride
+  },
+  {
+    path: '/watch',
+    name: 'Watch',
+    component: Watch
   }
 ]
 
