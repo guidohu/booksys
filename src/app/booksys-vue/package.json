@@ -22,6 +22,7 @@
     "moment-timezone": "^0.5.31",
     "raphael": "^2.3.0",
     "register-service-worker": "^1.7.1",
+    "sprintf-js": "^1.1.2",
     "vue": "^2.6.11",
     "vue-chartjs": "^3.5.1",
     "vue-class-component": "^7.2.5",

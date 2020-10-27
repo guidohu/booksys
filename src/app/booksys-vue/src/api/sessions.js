@@ -179,6 +179,41 @@ export default class Sessions {
     })
   }
 
+  static getSession(sessionId){
+    console.log("sessions/getSession called, with", sessionId)
+    return new Promise((resolve, reject) => {
+      const requestData = {
+        id: sessionId
+      };
+
+      fetch('/api/booking.php?action=get_session', {
+        method: "POST",
+        cache: "no-cache",
+        body: JSON.stringify(requestData)
+      })
+      .then(response => {
+        response.json()
+        .then(data => {
+          console.log("sessions/getSession response data:", data);
+          if(data.ok){
+            resolve();
+          }else{
+            console.log("sessions/getSession: Cannot update fuel entry, due to:", data.msg);
+            reject([data.msg]);
+          }
+        })
+        .catch(error => {
+          console.error("sessions/getSession: Cannot parse server response", error);
+          reject([error]);
+        })
+      })
+      .catch(error => {
+        console.error("sessions/getSession", error);
+        reject([error]);
+      })
+    })
+  }
+
   static createSession(sessionData){
     return new Promise((resolve, reject) => {
       // build request body
