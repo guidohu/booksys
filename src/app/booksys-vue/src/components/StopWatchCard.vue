@@ -58,7 +58,7 @@
             <b-icon icon="eject" rotate="90"/>
             Resume
           </b-button>
-          <b-button size="lg" variant="outline-info" v-if="getIsRunning" v-on:click="finishTakingTime">
+          <b-button size="lg" variant="outline-info" v-if="getIsRunning" v-on:click="finish">
             <b-icon icon="check-square"/>
             Finish
           </b-button>
@@ -149,6 +149,10 @@ export default Vue.extend({
     },
     changeComment: function(newComment){
       this.comment = newComment;
+    },
+    finish: function(){
+      this.finishTakingTime()
+      .catch(errors => this.errors = errors);
     },
     ...mapActions('stopwatch', [
       'startTakingTime',

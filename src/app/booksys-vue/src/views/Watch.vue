@@ -15,7 +15,13 @@
         <StopWatchCard :sessionId="sessionId"/>
       </b-col>
       <b-col cols="4">
-        <SessionHeatListCard :sessionId="sessionId"/>
+        <SessionHeatListCard :sessionId="sessionId" class="side-bar-heats-component"/>
+        <ConditionInfoCard 
+          class="mt-2"
+          v-if="getSessionConditionInfo != null"
+          :sunrise="getSessionConditionInfo.sunrise"
+          :sunset="getSessionConditionInfo.sunset"
+        />
       </b-col>
     </b-row>
     <div class="bottom mr-2">
@@ -30,16 +36,24 @@
     <WarningBox v-if="errors.length > 0" :errors="errors"/>
     <StopWatchCard :sessionId="sessionId"/>
     <SessionHeatListCard :sessionId="sessionId" class="mt-2"/>
+    <ConditionInfoCard
+      class="mt-2"
+      v-if="getSessionConditionInfo != null"
+      :sunrise="getSessionConditionInfo.sunrise"
+      :sunset="getSessionConditionInfo.sunset"
+    />
   </div>
 </template>
 
 <script>
 import Vue from 'vue';
+import { mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
 import WarningBox from '@/components/WarningBox';
 import StopWatchCard from '@/components/StopWatchCard';
 import SessionHeatListCard from '@/components/SessionHeatListCard';
+import ConditionInfoCard from '@/components/ConditionInfoCard';
 
 export default Vue.extend({
   name: "Watch",
@@ -47,7 +61,8 @@ export default Vue.extend({
     NavbarMobile,
     WarningBox,
     StopWatchCard,
-    SessionHeatListCard
+    SessionHeatListCard,
+    ConditionInfoCard
   },
   data() {
     return {
@@ -58,7 +73,10 @@ export default Vue.extend({
   computed: {
     isDesktop: function() {
       return !BooksysBrowser.isMobile();
-    }
+    },
+    ...mapGetters('sessions', [
+      'getSessionConditionInfo'
+    ])
   },
   created() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -71,3 +89,10 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style>
+  .side-bar-heats-component  {
+    max-height: 300px;
+    overflow-y: scroll;
+  }
+</style>

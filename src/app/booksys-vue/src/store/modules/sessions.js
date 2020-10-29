@@ -4,7 +4,8 @@ import moment from 'moment';
 const state = () => ({
   sessions: null,
   sessionsCalendar: null,
-  session: null
+  session: null,
+  sessionConditionInfo: null
 })
 
 const getters = {
@@ -12,6 +13,9 @@ const getters = {
     // check if we have the session in the sessions
     // otherwise check the session
     return state.session;
+  },
+  getSessionConditionInfo: (state) => {
+    return state.sessionConditionInfo;
   },
   getSessions: (state) => {
     return state.sessions;
@@ -68,8 +72,9 @@ const actions = {
     console.log("Trigger querySession with:", sessionId);
     return new Promise((resolve, reject) => {
       Sessions.getSession(sessionId)
-        .then((session) => {
-          commit('setSession', session);
+        .then((s) => {
+          commit('setSession', s.session);
+          commit('setSessionConditionInfo', s.metaInfo)
           resolve();
         })
         .catch(error => {
@@ -162,6 +167,10 @@ const mutations = {
   setSession (state, session){
     state.session = session;
     console.log('session set to', session);
+  },
+  setSessionConditionInfo (state, info){
+    state.sessionConditionInfo = info;
+    console.log('sessionConditionInfo set to', info);
   }
 }
 

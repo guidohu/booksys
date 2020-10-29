@@ -28,6 +28,30 @@ const actions = {
         reject(errors);
       })
     })
+  },
+  removeHeat({ dispatch, state }, heatId) {
+    return new Promise((resolve, reject) => {
+      Heat.deleteHeat(heatId)
+      .then(() => {
+        dispatch('queryHeatsForSession', state.sessionId);
+        resolve();
+      })
+      .catch((errors) => {
+        reject(errors);
+      })
+    })
+  },
+  updateHeat({ dispatch, state }, heatUpdate) {
+    return new Promise((resolve, reject) => {
+      Heat.updateHeat(heatUpdate)
+      .then(() => {
+        dispatch('queryHeatsForSession', state.sessionId);
+        resolve();
+      })
+      .catch((errors) => {
+        reject(errors);
+      })
+    })
   }
 };
 

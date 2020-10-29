@@ -98,10 +98,13 @@
 				h.session_id as session_id,
 				UNIX_TIMESTAMP(h.timestamp) as timestamp,
 				h.duration_s as duration_s,
-				FORMAT(h.cost_chf, 2) as cost,
+				FORMAT(h.cost_chf, 2) as cost, 
+				p.price_chf_min as price_per_min,
 				h.comment as comment
 			FROM user u
 			JOIN heat h ON h.user_id = u.id
+			JOIN user_status us ON u.status = us.id 
+			JOIN pricing p ON u.status = p.user_status_id 
 			WHERE h.session_id = ? 
 			ORDER BY h.timestamp DESC';
 		$db->prepare($query);
@@ -212,9 +215,6 @@
 	function update_heat($configuration, $db){
 		$data = json_decode(file_get_contents('php://input'));
 
-		$response = array();
-		$response['ok'] = TRUE;
-
 		// sanitize input
 		$sanitizer = new Sanitizer();
 		$error = validate_heat_id($data->heat_id, $sanitizer);
@@ -228,6 +228,11 @@
 		$error = validate_duration($data->duration_s, $sanitizer);
 		if($error != NULL){
 			return Status::errorStatus($error);
+		}
+
+		$comment = NULL;
+		if(isset($data->comment)){
+			$comment = $data->comment;
 		}
 
 		// check for existing user
@@ -250,12 +255,13 @@
 		}
 
 		// update heat in database
-		$query = 'UPDATE heat SET duration_s = ?, cost_chf = ?
+		$query = 'UPDATE heat SET duration_s = ?, cost_chf = ?, comment = ?
 			WHERE id = ?;';
 		$db->prepare($query);
-		$db->bind_param('idi',
+		$db->bind_param('idsi',
 			$data->duration_s,
 			$cost,
+			$comment,
 			$data->heat_id);
 		if($db->execute()){
 			return Status::successStatus("heat updated");
@@ -268,9 +274,6 @@
 	// delete a specific heat
 	function delete_heat($configuration, $db){
 		$data = json_decode(file_get_contents('php://input'));
-
-		$response = array();
-		$response['ok'] = TRUE;
 
 		// sanitize input
 		$sanitizer = new Sanitizer();

@@ -206,8 +206,15 @@ export default class Sessions {
               sR.riders_max,
               sR.type
             );
+            const sessionMetaInfo = {
+              sunrise: moment(sR.sunrise, "X").format(),
+              sunset: moment(sR.sunset, "X").format()
+            };
             session.addRiders(sR.riders);
-            resolve(session);
+            resolve({
+              session: session,
+              metaInfo: sessionMetaInfo
+            });
           }else{
             console.log("sessions/getSession: Cannot update fuel entry, due to:", data.msg);
             reject([data.msg]);

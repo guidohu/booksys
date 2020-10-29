@@ -1,6 +1,7 @@
 <template>
   <b-card no-body class="text-left">
     <b-card-body>
+      <HeatEntryModal :heat="selectedHeat"/>
       <b-table 
         v-if="errors.length==0" 
         striped 
@@ -21,18 +22,21 @@ import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { sprintf } from 'sprintf-js';
 import WarningBox from '@/components/WarningBox';
+import HeatEntryModal from '@/components/HeatEntryModal';
 
 export default Vue.extend({
   name: 'SessionHeatListCard',
   components: {
-    WarningBox
+    WarningBox,
+    HeatEntryModal
   },
   props: [ 'sessionId' ],
   data() {
     return {
       errors: [],
       columns: [],
-      rows: [ { time: "12" }]
+      rows: [ { time: "12" }],
+      selectedHeat: null
     }
   },
   computed: {
@@ -46,13 +50,13 @@ export default Vue.extend({
   watch: {
     getHeatsForSession: function(newHeats){
       // depending whether we have comments or not, we display the column or not
-      console.log(newHeats);
-      // TODO
+      console.log('SessionHeatListCard, heats changed to', newHeats);
+      this.setColumns();
     },
     getCurrency: function(newCurrency){
       // if currency changed -> new formatter
+      this.setColumns();
       console.log(newCurrency);
-      // TODO
     }
   },
   methods: {
@@ -63,9 +67,10 @@ export default Vue.extend({
       'queryConfiguration'
     ]),
     formatDuration: function(durationS) {
+      console.log("Format duration for", durationS);
       const seconds = durationS % 60;
       const minutes = Math.floor(((durationS - seconds) % 3600) / 60);
-      const hours   = Math.floor((durationS - (seconds*60) - (hours*3600)) / 3600);
+      const hours   = Math.floor((durationS - (seconds*60) - (minutes*3600)) / 3600);
 
       if(hours > 0){
         return sprintf('%02d:%02d:%02d', hours, minutes, seconds);
@@ -103,6 +108,8 @@ export default Vue.extend({
     },
     rowClick: function(item) {
       console.log("clicked on item", item);
+      this.selectedHeat = item;
+      this.$bvModal.show("heatEntryModal");
     }
   },
   created() {
