@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { sprintf } from 'sprintf-js';
+import Heat from '@/api/heat';
 
 const state = () => ({
   sessionId: null,
@@ -11,6 +12,7 @@ const state = () => ({
   _timeOffset: 0,
   _isDisplayUpdaterActive: false,
   _pausedAt: null,
+  _bufferedHeats: []
 });
 
 const getters = {
@@ -22,6 +24,9 @@ const getters = {
   },
   getDisplayTime: (state) => {
     return state.displayTime;
+  },
+  getUserId: (state) => {
+    return state.userId;
   }
 };
 
@@ -48,18 +53,57 @@ const actions = {
       dispatch('displayTimeUpdate', { resume: true });
     }
   },
-  finishTakingTime: ({ commit, state }) => {
+  finishTakingTime: ({ commit, state, dispatch }) => {
     console.log('finishTakingTime called');
-    if(state.isRunning == true){
-      // TODO collect the data to submit
-      commit('setIsDisplayUpdaterActive', false);
-      commit('setFinish', moment().format());
-    }
+    return new Promise((resolve, reject) => {
+      if(state.isRunning == true){
+        const userId = state.userId;
+        const sessionId = state.sessionId;
+        const comment = state.comment; // TODO comment is not given yet
+        const stoppedTime = moment().format();
+        const duration = moment(stoppedTime).format("X") - state._startTime - state._timeOffset;
+
+        const newHeat = {
+          user_id: userId,
+          session_id: sessionId,
+          comment: comment,
+          duration_s: duration
+        };
+
+        // TODO collect the data to submit
+        commit('setIsDisplayUpdaterActive', false);
+        commit('setFinish', stoppedTime);
+
+        Heat.addHeats([ newHeat ])
+        .then((response) => {
+          // TODO check if all have been added
+          console.log(response)
+
+          // trigger an update for the heats
+          dispatch('heats/queryHeatsForSession', state.sessionId, { root: true});
+
+          resolve() // or reject()
+        })
+        .catch((errors) => {
+          // TODO auto retry?
+
+          // trigger an update for the heats
+          dispatch('heats/queryHeatsForSession', state.sessionId, { root: true});
+
+          reject(errors);
+        })
+      }else{
+        reject(['currently we are not taking time']);
+      }
+      
+    })
+    
   },
   setSessionId: ({ commit }, sessionId) => {
     commit('setSessionId', sessionId);
   },
   setUserId: ({ commit }, userId) => {
+    console.log("triggered setUserId with", userId);
     commit('setUserId', userId);
   },
   displayTimeUpdate: ({ dispatch, commit, state }, options) => {

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="errors != null && errors.length > 0">
+  <div v-if="errors != null && errors.length > 0" class="text-left">
     <b-alert variant="warning" show>
       <b>Please correct the following error(s):</b>
       <ul>

@@ -3,10 +3,16 @@ import moment from 'moment';
 
 const state = () => ({
   sessions: null,
-  sessionsCalendar: null
+  sessionsCalendar: null,
+  session: null
 })
 
 const getters = {
+  getSession: (state) => {
+    // check if we have the session in the sessions
+    // otherwise check the session
+    return state.session;
+  },
   getSessions: (state) => {
     return state.sessions;
   },
@@ -57,6 +63,19 @@ const actions = {
         reject(error);
       })
     })
+  },
+  querySession({ commit }, sessionId) {
+    console.log("Trigger querySession with:", sessionId);
+    return new Promise((resolve, reject) => {
+      Sessions.getSession(sessionId)
+        .then((session) => {
+          commit('setSession', session);
+          resolve();
+        })
+        .catch(error => {
+          reject(error);
+        })
+    });
   },
   createSession({ dispatch }, sessionObj) {
     console.log("Trigger createSession action with", sessionObj);
@@ -139,6 +158,10 @@ const mutations = {
   setSessions (state, value){
     state.sessions = value.sessions;
     console.log('sessions set to', value);
+  },
+  setSession (state, session){
+    state.session = session;
+    console.log('session set to', session);
   }
 }
 

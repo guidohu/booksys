@@ -196,7 +196,18 @@ export default class Sessions {
         .then(data => {
           console.log("sessions/getSession response data:", data);
           if(data.ok){
-            resolve();
+            const sR = data.data;
+            const session = new Session(
+              sR.id,
+              sR.title,
+              sR.comment,
+              moment(sR.start_time, "X").format(),
+              moment(sR.end_time, "X").format(),
+              sR.riders_max,
+              sR.type
+            );
+            session.addRiders(sR.riders);
+            resolve(session);
           }else{
             console.log("sessions/getSession: Cannot update fuel entry, due to:", data.msg);
             reject([data.msg]);

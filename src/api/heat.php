@@ -82,13 +82,10 @@
 	function get_session_heats($configuration, $db){
 		$data = json_decode(file_get_contents('php://input'));
 
-		$response = array();
-		$response['ok'] = TRUE;
-
 		// sanitize input
 		$sanitizer = new Sanitizer();
 		if(!isset($data->session_id) or !$sanitizer->isInt($data->session_id)){
-			error_log('api/heat.php: No "session_id" provided: ' . $data->from);
+			error_log('api/heat.php: No or invalid "session_id" provided');
 			return Status::errorStatus('No "session_id" provided');
 		}
 
@@ -114,10 +111,7 @@
 		$db->execute();
 		$res = $db->fetch_stmt_hash();
 		
-		$response = array();
-		$response['heats'] = $res;
-		$response['currency'] = $configuration->currency;
-		return $response;
+		return Status::successDataResponse("success", $res);
 	}
 
 	// get all heats in between from and to
@@ -334,6 +328,12 @@
 		}catch (Exception $e){
 			return Status::errorStatus($e->getMessage());
 		}
+
+		// get the comment
+		$comment = NULL;
+		if(isset($data->comment)){
+			$comment = $data->comment;
+		}
 				
 		// enter the heat to the database
 		$entry = array();
@@ -341,7 +341,7 @@
 		$entry['session_id'] = $data->session_id;
 		$entry['duration_s'] = $data->duration_s;
 		$entry['cost']       = $cost;
-		$entry['comment']    = $data->comment;
+		$entry['comment']    = $comment;
 
 		if(db_add_heat($db, $entry)){
 			return Status::successStatus("Added heat for user $data->user_id");

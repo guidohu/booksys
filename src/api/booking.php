@@ -44,8 +44,9 @@
 			echo json_encode($response); 
 			exit;
 		case 'get_session':
-			get_session($configuration, $db);
+			$response = get_session($configuration, $db);
 			$db->disconnect();
+			echo json_encode($response);
 			exit;
 		case 'add_session':
 			$response = add_session($configuration, $db);
@@ -144,15 +145,13 @@
 	}
 
 	function get_session($configuration, $db){
-		$id = $_GET['id'];
+		$data = json_decode(file_get_contents('php://input'));
 
 		// sanitize input
 		$sanitizer = new Sanitizer();
-		if(!isset($id) or !$sanitizer->isInt($id)){
-			error_log('api/booking.php: Illegal session ID provided: ' . $id);
-			HttpHeader::setResponseCode(400);
-			echo 'No valid session ID provided';
-			return;
+		if(!isset($data->id) or !$sanitizer->isInt($data->id)){
+			error_log('api/booking.php: Illegal session ID provided: ' . $data->id);
+			return Status::errorStatus("No valid session ID provided");
 		}
 
 		// build the query to get session details
@@ -176,16 +175,15 @@
 			WHERE s.id = ?';
 		$db->prepare($query);
 		$db->bind_param('d',
-			$id
+			$data->id
 		);
 		$db->execute();
 		$res = $db->fetch_stmt_hash();
 
 		// In case there is no session, return already now
 		if(!isset($res) or  $res === FALSE or count($res) != 1){
-			error_log('api/booking.php: No session found for id: ' . $id);
-			echo json_encode(new stdClass);
-			return;
+			error_log('api/booking.php: No session found for id: ' . $data->id);
+			return Status::errorStatus("No session found with this the provided ID");
 		}
 
 		$res = $res[0];
@@ -205,14 +203,13 @@
 			WHERE u2s.session_id = ?';
 		$db->prepare($query);
 		$db->bind_param('d',
-			$id
+			$data->id
 		);
 		$db->execute();
 		$res["riders"] = $db->fetch_stmt_hash();
 		$res["riders_max"] = count($res["riders"]) + $res["free"];
 
-		echo json_encode($res);
-		return;
+		return Status::successDataResponse("success", $res);
 	}
 
 	function add_session($configuration, $db){
