@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { sprintf } from 'sprintf-js';
+import _ from 'lodash';
 import Heat from '@/api/heat';
 
 const state = () => ({
@@ -60,29 +61,44 @@ const actions = {
         const userId = state.userId;
         const sessionId = state.sessionId;
         const comment = state.comment; // TODO comment is not given yet
-        const stoppedTime = moment().format();
-        const duration = moment(stoppedTime).format("X") - state._startTime - state._timeOffset;
+        const stoppedTime = moment().format("X");
+        const startTime = state._startTime;
+        console.log("state at time of finish:", state);
+        const offset = state._timeOffset;
+        console.log("stoppedTime", moment(stoppedTime, "X").format(), stoppedTime);
+        console.log("startTime", moment(state._startTime, "X").format(), state._startTime);
+        console.log("offset", moment(state._timeOffset, "X").format(), state._timeOffset);
+        const duration = stoppedTime - startTime - offset;
+
+        // create a unique ID
+        const uid = "u"+ userId + "s" + sessionId + "r" + Math.floor(Math.random() * 2**16);
 
         const newHeat = {
+          uid: uid,
           user_id: userId,
           session_id: sessionId,
           comment: comment,
           duration_s: duration
         };
 
-        // TODO collect the data to submit
         commit('setIsDisplayUpdaterActive', false);
-        commit('setFinish', stoppedTime);
 
         Heat.addHeats([ newHeat ])
         .then((response) => {
           // TODO check if all have been added
-          console.log(response)
+          console.log(response);
 
-          // trigger an update for the heats
-          dispatch('heats/queryHeatsForSession', state.sessionId, { root: true});
-
-          resolve() // or reject()
+          // check if the heat that was just added, was added successfully
+          const allUids = _.keys(response);
+          const failedHeatUids = allUids.filter(id => response[id].ok != true);
+          if(failedHeatUids.length != 0){
+            dispatch('heats/queryHeatsForSession', state.sessionId, { root: true});
+            reject(['Heat could not be added to the backend.']);
+          }else{
+            commit('setFinish', stoppedTime);
+            dispatch('heats/queryHeatsForSession', state.sessionId, { root: true});
+            resolve();
+          }
         })
         .catch((errors) => {
           // TODO auto retry?
@@ -135,9 +151,11 @@ const actions = {
 
 const mutations = {
   setSessionId (state, id){
+    console.log("setSessionId with", id);
     state.sessionId = id;
   },
   setUserId (state, userId){
+    console.log("setUserId with", userId);
     state.userId = userId;
   },
   setStartTime (state, value){
@@ -163,6 +181,7 @@ const mutations = {
     console.log("updated display to:", state.displayTime);
   },
   setIsRunning (state, value){
+    console.log("setIsRunning with", value);
     state.isRunning = value;
   },
   setIsDisplayUpdaterActive (state, value){
@@ -170,11 +189,13 @@ const mutations = {
     state._isDisplayUpdaterActive = value;
   },
   setPause (state, value) {
+    console.log("setPause with", value);
     // set the time we paused at in ISO format
     state.isPaused = true;
     state._pausedAt = value;
   },
   setResume (state, value) {
+    console.log("setResume with", value);
     // set the time we resumed in ISO format to calculate additional offset
     const pausedAt = moment(state._pausedAt).format("X");
     const resumedAt = moment(value).format("X");
@@ -184,12 +205,14 @@ const mutations = {
     state.isPaused = false;
   },
   setFinish (state) {
+    console.log("setFinish with state before", state);
     state.isPaused = false;
     state.isRunning = false;
     state._timeOffset = 0;
     state._pausedAt = null;
     state._startTime = null;
     state.displayTime = "00:00";
+    console.log("setFinish with state after", state);
   }
 };
 

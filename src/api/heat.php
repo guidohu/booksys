@@ -73,9 +73,13 @@
 
 		$response = array();
 		foreach($data as $time => $entry){
-			$response[$time] = check_and_add_heat($configuration, $db, $entry);
+			$id = $time;
+			if(isset($entry->uid)){
+				$id = $entry->uid;
+			}
+			$response[$id] = check_and_add_heat($configuration, $db, $entry);
 		}
-		return $response;
+		return Status::successDataResponse("check individual responses per heat", $response);
 	}
 
 	// get the sessions of a specific heat

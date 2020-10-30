@@ -5,6 +5,7 @@ export default class Heat {
    * @param {*} heats an array of heats
    * [
    *    {
+   *      uid: ...
    *      user_id: ...
    *      session_id: ...
    *      duration_s: ...
@@ -25,7 +26,7 @@ export default class Heat {
           .then(data => {
             console.log("add heats response data:", data);
             if(data.ok){
-              resolve(data);
+              resolve(data.data);
             }else{
               console.log("heat/addHeats: Cannot create heats, due to:", data.msg);
               reject([data.msg]);

@@ -67,7 +67,6 @@ export default Vue.extend({
       'queryConfiguration'
     ]),
     formatDuration: function(durationS) {
-      console.log("Format duration for", durationS);
       const seconds = durationS % 60;
       const minutes = Math.floor(((durationS - seconds) % 3600) / 60);
       const hours   = Math.floor((durationS - (seconds*60) - (minutes*3600)) / 3600);
