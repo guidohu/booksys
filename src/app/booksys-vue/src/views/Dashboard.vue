@@ -23,18 +23,17 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import { mapGetters, mapActions } from 'vuex'
-import { BooksysBrowser } from '@/libs/browser'
-import DashboardAdmin from '../components/DashboardAdmin'
-import DashboardMember from '../components/DashboardMember'
-import DashboardGuest from '../components/DashboardGuest'
-import DashboardAdminMobile from '../components/DashboardAdminMobile'
-import DashboardMemberMobile from '../components/DashboardMemberMobile'
-import DashboardGuestMobile from '../components/DashboardGuestMobile'
-import DatabaseUpdateModal from '../components/DatabaseUpdate'
-import moment from 'moment-timezone'
-
+import Vue from 'vue';
+import { mapGetters, mapActions } from 'vuex';
+import { BooksysBrowser } from '@/libs/browser';
+import DashboardAdmin from '../components/DashboardAdmin';
+import DashboardMember from '../components/DashboardMember';
+import DashboardGuest from '../components/DashboardGuest';
+import DashboardAdminMobile from '../components/DashboardAdminMobile';
+import DashboardMemberMobile from '../components/DashboardMemberMobile';
+import DashboardGuestMobile from '../components/DashboardGuestMobile';
+import DatabaseUpdateModal from '../components/DatabaseUpdate';
+import moment from 'moment-timezone';
 
 export default Vue.extend({
   name: 'Dashboard',

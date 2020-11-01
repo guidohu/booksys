@@ -88,10 +88,10 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
-import Pie from "./Pie.vue"
+import Vue from 'vue';
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap-vue/dist/bootstrap-vue.css';
+import Pie from "./Pie.vue";
 
 export default Vue.extend({
   name: "DashboardAdminMobile",

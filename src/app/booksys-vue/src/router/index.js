@@ -12,6 +12,10 @@ import Calendar from '../views/Calendar';
 import Boat from '../views/Boat';
 import Ride from '../views/Ride';
 import Watch from '../views/Watch';
+import Admin from '../views/Admin';
+import Users from '../views/admin/Users';
+import Accounting from '../views/admin/Accounting';
+import Logs from '../views/admin/Logs';
 
 Vue.use(VueRouter)
 
@@ -79,6 +83,26 @@ const routes = [
     path: '/watch',
     name: 'Watch',
     component: Watch
+  },
+  {
+    path: '/admin',
+    name: 'Admin',
+    component: Admin
+  },
+  {
+    path: '/users',
+    name: 'Users',
+    component: Users
+  },
+  {
+    path: '/accounting',
+    name: 'Accounting',
+    component: Accounting
+  },
+  {
+    path: '/logs',
+    name: 'Logs',
+    component: Logs
   }
 ]
 
