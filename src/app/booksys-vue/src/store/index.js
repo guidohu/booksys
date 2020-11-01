@@ -7,6 +7,7 @@ import user from './modules/user';
 import boat from './modules/boat';
 import stopwatch from './modules/stopwatch';
 import heats from './modules/heats';
+import log from './modules/log';
 
 Vue.use(Vuex)
 
@@ -18,7 +19,8 @@ const store = new Vuex.Store({
     user: user,
     boat: boat,
     stopwatch: stopwatch,
-    heats: heats
+    heats: heats,
+    log: log
   }
 })
 

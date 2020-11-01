@@ -23,7 +23,7 @@
             <b-col cols="4">
               <b-button to="/accounting" variant="light" class="btn btn-default btn-dashboard">
                 <div class="bc_icon bc_icon_dashboard bc_icon_money"></div>
-                ACCOUNTING
+                FINANCE
               </b-button>
             </b-col>
           </b-row>		
@@ -86,7 +86,7 @@
             <b-col cols="6">
               <b-button to="/accounting" variant="light" class="btn btn-default btn-dashboard">
                 <div class="bc_icon bc_icon_dashboard bc_icon_money"></div>
-                ACCOUNTING
+                FINANCE
               </b-button>
             </b-col>
           </b-row>

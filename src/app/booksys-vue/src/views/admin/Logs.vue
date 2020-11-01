@@ -12,9 +12,7 @@
       </b-row>
       <b-row class="ml-1 mr-1">
         <b-col cols="12">
-          <b-card no-body>
-            Content
-          </b-card>
+          <LogCard class="content-max-height"/>
         </b-col>
       </b-row>
       <div class="bottom mr-2">
@@ -26,9 +24,7 @@
     </div>
     <div v-else>
       <NavbarAdminMobile title="Logs"/>
-      <b-card no-body>
-        Content
-      </b-card>
+      <LogCard/>
     </div>
   </div>
 </template>
@@ -37,11 +33,13 @@
 import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarAdminMobile from '@/components/NavbarAdminMobile';
+import LogCard from '@/components/LogCard';
 
 export default Vue.extend({
   name: 'Logs',
   components: {
-    NavbarAdminMobile
+    NavbarAdminMobile,
+    LogCard
   },
   computed: {
     isDesktop: function () {
@@ -50,3 +48,10 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style>
+  .content-max-height {
+    max-height: 480px;
+    overflow-y: scroll;
+  }
+</style>

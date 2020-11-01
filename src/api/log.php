@@ -20,13 +20,17 @@
 		exit;
 	}
 	
+	$response = NULL;
 	switch($_GET['action']){
 		case 'get_logs':
-			get_logs($configuration);
-			exit;
+			$response = get_logs($configuration);
+			break;
+		default:
+			$response = Status::errorStatus('action not supported');
+			break;
 	}
 	
-	http_response_code(400);
+	echo json_encode($response);
 	return;
 	
 	// FUNCTIONS
@@ -36,8 +40,7 @@
 	function get_logs($configuration){
 		$db = new DBAccess($configuration);
 		if(!$db->connect()){
-			http_response_code(500);
-			exit;
+			return Status::errorStatus("Cannot connect to database");
 		}
 		
 		$query = "SELECT c_log.id as id, c_log.type as type, c_log.time as time, c_log.log as log FROM (
@@ -76,8 +79,7 @@
 		$res = $db->fetch_data_hash($query, -1);
 		$db->disconnect();
 		if(!$res){
-			http_response_code(500);
-			exit;
+			return Status::errorStatus("Cannot get logs from database");
 		}
-		echo json_encode($res);
+		return Status::successDataResponse("success", $res);
 	}
