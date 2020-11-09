@@ -55,7 +55,7 @@ const actions = {
     let failureCb = () => {
       commit('setConfiguration', null)
     }
-    Configuration.getCustomizationParameters(successCb, failureCb)
+    Configuration.getConfiguration(successCb, failureCb)
   },
   queryDbUpdateStatus({ commit }) {
     let successCb = (response) => {
@@ -91,6 +91,19 @@ const actions = {
       commit('setUpdateResult ', { ok: false, msg: error});
     };
     Configuration.updateDb(successCb, failureCb);
+  },
+  setConfiguration({ dispatch }, configurationValues){
+    return new Promise((resolve, reject) => {
+      Configuration.setConfiguration(configurationValues)
+      .then(() => {
+        // load latest configuration
+        dispatch('queryConfiguration', {});
+        resolve();
+      })
+      .catch((errors) => {
+        reject(errors);
+      })
+    });
   }
 }
 

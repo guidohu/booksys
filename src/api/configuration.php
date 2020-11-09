@@ -102,9 +102,6 @@
     }
 
     function get_configuration($configuration){
-        $response = [
-            "ok" => TRUE,
-        ];
         // either there is no config yet
         // or the user is admin user
         if(!_is_db_configured($configuration)){
@@ -116,7 +113,6 @@
         _is_admin_or_return($configuration);
 
         $response = [
-            "ok"                        => TRUE,
             "location_time_zone"        => $configuration->location_time_zone,
             "location_longitude"        => $configuration->location_longitude,
             "location_latitude"         => $configuration->location_latitude,
@@ -135,16 +131,10 @@
             "recaptcha_privatekey"      => $configuration->recaptcha_privatekey
         ];
 
-        return $response;
+        return Status::successDataResponse('success', $response);
     }
 
     function set_configuration($configuration){
-        $response = [
-            "ok" => TRUE,
-            "msg" => "configuration updated",
-            "errors" => [],
-        ];
-
         $data = json_decode(file_get_contents('php://input'));
 
         // sanitize input
@@ -216,13 +206,11 @@
 
             if(! $configuration->set_configuration_property($key, $data->$key)){
                 error_log("Cannot update property $key with value " . $data->$key);
-                $response["ok"] = FALSE;
-                $response["msg"] = "Errors with some of the properties";
-                array_push($response["errors"], "Cannot update property $key with value " . $data->$key);
+                return Status::errorStatus("Cannot save property $key with value " . $data->$key);
             }
         }
 
-        return $response;
+        return Status::successStatus("successfully updated");
     }
 
     function setup_db_config($configuration){

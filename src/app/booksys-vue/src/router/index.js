@@ -15,6 +15,7 @@ import Watch from '../views/Watch';
 import Admin from '../views/Admin';
 import Users from '../views/admin/Users';
 import Accounting from '../views/admin/Accounting';
+import Settings from '../views/admin/Settings';
 import Logs from '../views/admin/Logs';
 
 Vue.use(VueRouter)
@@ -98,6 +99,11 @@ const routes = [
     path: '/accounting',
     name: 'Accounting',
     component: Accounting
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: Settings
   },
   {
     path: '/logs',
