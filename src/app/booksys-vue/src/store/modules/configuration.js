@@ -111,7 +111,7 @@ const mutations = {
   setConfiguration (state, value){
     state.configuration = value
     state.locationAddress = (value.location_address != null) ? value.location_address.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g, '<br>') : null;
-    state.locationMap = value.location_map_iframe;
+    state.locationMap = value.location_map;
     state.currency = value.currency;
     console.log('configuration set to', value);
   },
