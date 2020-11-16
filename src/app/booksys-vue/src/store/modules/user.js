@@ -9,7 +9,9 @@ const state = () => ({
   heatCost: 0,
   heatCostYTD: 0,
   schedule: [],
-  userList: []
+  userList: [],
+  userListDetailed: [],
+  userGroups: []
 })
 
 const getters = {
@@ -39,6 +41,12 @@ const getters = {
   },
   userList: (state) => {
     return state.userList;
+  },
+  userListDetailed: (state) => {
+    return state.userListDetailed;
+  },
+  userGroups: (state) => {
+    return state.userGroups;
   }
 }
 
@@ -115,6 +123,32 @@ const actions = {
           reject(error);
         })
     })
+  },
+  queryUserListDetailed ( { commit }) {
+    console.log("Trigger action queryUserListDetailed");
+    return new Promise((resolve, reject) => {
+      User.getDetailedUserList()
+      .then((users) => {
+        commit('setUserListDetailed', users);
+        resolve();
+      })
+      .catch((error) => {
+        reject(error);
+      })
+    })
+  },
+  queryUserGroups ( { commit }) {
+    console.log("Trigger action queryUserGroups");
+    return new Promise((resolve, reject) => {
+      User.getUserGroups()
+      .then((users) => {
+        commit('setUserGroups', users);
+        resolve();
+      })
+      .catch((error) => {
+        reject(error);
+      })
+    })
   }
 }
 
@@ -137,6 +171,14 @@ const mutations = {
   setUserList (state, users) {
     console.log("Store: setUserList to", users);
     state.userList = users;
+  },
+  setUserListDetailed (state, users) {
+    console.log("Store: setUserListDetailed to", users);
+    state.userListDetailed = users;
+  },
+  setUserGroups (state, groups) {
+    console.log("Store: setUserGroups to", groups);
+    state.userGroups = groups;
   }
 }
 

@@ -57,11 +57,13 @@
     case 'change_user_group_membership':
         change_user_group_membership($configuration, $lc);
         exit;
-	case 'get_all_user_detailed':
-		get_all_user_detailed($configuration, $lc);
+	case 'get_all_users_detailed':
+        $response = get_all_users_detailed($configuration, $lc);
+        echo json_encode($response);
         exit;
     case 'get_user_groups':
-        get_user_groups($configuration, $lc);
+        $response = get_user_groups($configuration, $lc);
+        echo json_encode($response);
         exit; 
     case 'get_user_roles':
         get_user_roles($configuration, $lc);
@@ -467,15 +469,13 @@
   function get_user_groups($configuration, $lc){
     // only admins are allowed to call this function
     if(!$lc->isAdmin()){
-        HttpHeader::setResponseCode(403);
-        exit;
+        return Status::errorStatus("API call not allowed");
     }
 
     $db = new DBAccess($configuration);
     if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
         error_log("get_user_types: not able to connect to database");
-        exit;
+        return Status::errorStatus("Cannot connect to database");
     }
 
     $ret = Array();
@@ -511,26 +511,21 @@
         $ret[$i]['price_description'] = $row['price_description'];
     }
 
-    $response = array();
-    $response["user_groups"] = $ret;
-    $response["currency"]    = $configuration->currency;
-
-    echo json_encode($response);
+    return Status::successDataResponse("success", $ret);
   }
   
   /* Returns all the details of all users (admin view) */
-  function get_all_user_detailed($configuration, $lc){
+  function get_all_users_detailed($configuration, $lc){
 	// only admins are allowed to call this function
     if(!$lc->isAdmin()){
         HttpHeader::setResponseCode(403);
-        exit;
+        return Status::errorStatus("not authorized for this API call");
     }
 	
 	$db = new DBAccess($configuration);
 	if(!$db->connect()){
-		HttpHeader::setResponseCode(500);
         error_log("get_all_user_detailed: not able to connect to database");
-        exit;
+        return Status::errorStatus("not able to connect to database");
 	}
 	
 	$ret = Array();
@@ -632,7 +627,7 @@
     $response['users'] = $ret;
     $response['currency'] = $configuration->currency;
     
-    echo json_encode($response);
+    return Status::successDataResponse("success", $response);
   }
   
   /* Returns all heats of a user */
