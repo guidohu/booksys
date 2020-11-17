@@ -323,4 +323,39 @@ export default class User {
     })
   }
 
+  static setUserGroup(userId, userGroupId){
+    console.log("User/setUserGroup: called with userId", userId, "userGroupId", userGroupId);
+    return new Promise((resolve, reject) => {
+      const queryData = {
+        user_id: userId,
+        status_id: userGroupId
+      };
+
+      fetch('/api/user.php?action=change_user_group_membership', {
+        method: "POST",
+        cache: 'no-cache',
+        body: JSON.stringify(queryData)
+      })
+      .then(response => {
+        response.json()
+        .then(data => {
+          if(!data.ok){
+            console.error("User/setUserGroup: Cannot set user group, got error", data.msg);
+            reject([data.msg]);
+          }else{
+            resolve();
+          }
+        })
+        .catch(error => {
+          console.error("User/setUserGroup: Cannot parse server response", error);
+          reject([error]);
+        })
+      })
+      .catch(error => {
+        console.error("User/setUserGroup: Cannot unlock user with ID", error);
+        reject([error])
+      })
+    })
+  }
+
 }

@@ -57,7 +57,8 @@
         echo json_encode($response);
         exit;
     case 'change_user_group_membership':
-        change_user_group_membership($configuration, $lc);
+        $response = change_user_group_membership($configuration, $lc);
+        echo json_encode($response);
         exit;
 	case 'get_all_users_detailed':
         $response = get_all_users_detailed($configuration, $lc);
@@ -787,8 +788,7 @@
   function change_user_group_membership($configuration, $lc){
       // only admins are allowed to call this function
       if(!$lc->isAdmin()){
-          HttpHeader::setResponseCode(403);
-          exit;
+          return Status::errorStatus("Not sufficient permissions");
       }
       
       $post_data = json_decode(file_get_contents('php://input'));
@@ -796,21 +796,16 @@
       // sanitize input
       $sanitizer = new Sanitizer();
       if(!$post_data->user_id or !$sanitizer->isInt($post_data->user_id)){
-          HttpHeader::setResponseCode(400);
-          echo "No valid user selected, please select a user";
-          return;
+          return Status::errorStatus("No valid user selected, please select a user");
       }
       if(!$post_data->status_id or !$sanitizer->isInt($post_data->status_id)){
-          HttpHeader::setResponseCode(400);
-          echo "No valid status selected, please select a status";
-          return;
+          return Status::errorStatus("No valid status selected, please select a status");
       }
       
       // connect to the database
       $db = new DBAccess($configuration);
       if(!$db->connect()){
-          HttpHeader::setResponseCode(500);
-          exit;
+        return Status::errorStatus("Cannot connect to database");
       }
     
       $query = 'UPDATE user SET status = ? WHERE id = ?;';
@@ -821,11 +816,10 @@
       );
       if(!$db->execute()){
           $db->disconnect();
-          HttpHeader::setResponseCode(500);
-          return;
+          return Status::errorStatus("Attempt to update a user's group has failed");
       }
       $db->disconnect();
-      HttpHeader::setResponseCode(200);
+      return Status::successStatus("success");
   }
   
   /* Returns all users */

@@ -175,6 +175,19 @@ const actions = {
         reject(error);
       })
     })
+  },
+  setUserGroup ( { dispatch }, data) {
+    console.log("Trigger action setUserGroup with", data);
+    return new Promise((resolve, reject) => {
+      User.setUserGroup(data.userId, data.userGroupId)
+      .then(() => {
+        dispatch('queryUserListDetailed');
+        resolve();
+      })
+      .catch((error) => {
+        reject(error);
+      })
+    })
   }
 }
 

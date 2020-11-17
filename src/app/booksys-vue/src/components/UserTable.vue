@@ -2,7 +2,6 @@
   <div class="text-left">
     <WarningBox v-if="errors.length > 0" :errors="errors"/>
     <div v-else>
-      {{ userGroupList }}
       <b-button :disabled="selectedItems.length==0" size="sm" variant="outline-info" class="mr-1 mb-2">View</b-button>
       <b-button :disabled="selectedItems.length==0" size="sm" variant="outline-danger" class="mb-2">Delete</b-button>
       <b-table 
@@ -132,7 +131,8 @@ export default Vue.extend({
       'queryUserListDetailed',
       'queryUserGroups',
       'lockUser',
-      'unlockUser'
+      'unlockUser',
+      'setUserGroup'
     ]),
     setRows: function() {
       this.items = this.userListDetailed;
@@ -154,8 +154,14 @@ export default Vue.extend({
       this.unlockUser(user.id)
       .catch((errors) => this.errors = errors);
     },
-    groupChangeHandler: function(selectedValue, row){
-      console.log("TODO: groupChangeHandler", selectedValue, row);
+    groupChangeHandler: function(userGroupId, user){
+      const userGroupUpdate = {
+        userId: user.id,
+        userGroupId: userGroupId
+      };
+      this.setUserGroup(userGroupUpdate)
+      .then(() => this.errors = [])
+      .catch((errors) => this.errors = errors);
     },
     userGroupToList: function(userGroups){
       this.userGroupList = userGroups.map(ug => {
