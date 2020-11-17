@@ -122,12 +122,17 @@ export default Vue.extend({
     userGroups: function(newUserGroups) {
       console.log("userGroups changed to", newUserGroups)
       this.userGroupToList(newUserGroups)
+    },
+    userListDetailed: function(newUserListDetailed) {
+      this.items = newUserListDetailed;
     }
   },
   methods: {
     ...mapActions("user", [
       'queryUserListDetailed',
-      'queryUserGroups'
+      'queryUserGroups',
+      'lockUser',
+      'unlockUser'
     ]),
     setRows: function() {
       this.items = this.userListDetailed;
@@ -141,11 +146,13 @@ export default Vue.extend({
     isSelected: function() {
       return this.selectedItems.length > 0;
     },
-    lock: function(row){
-      console.log("TODO: lock", row);
+    lock: function(user){
+      this.lockUser(user.id)
+      .catch((errors) => this.errors = errors);
     },
-    unlock: function(row){
-      console.log("TODO: unlock", row);
+    unlock: function(user){
+      this.unlockUser(user.id)
+      .catch((errors) => this.errors = errors);
     },
     groupChangeHandler: function(selectedValue, row){
       console.log("TODO: groupChangeHandler", selectedValue, row);

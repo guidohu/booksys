@@ -49,10 +49,12 @@
         echo json_encode($response);
         exit;
     case 'lock_user':
-        lock_user($configuration, $lc);
+        $response = lock_user($configuration, $lc);
+        echo json_encode($response);
         exit;
     case 'unlock_user':
-        unlock_user($configuration, $lc);
+        $response = unlock_user($configuration, $lc);
+        echo json_encode($response);
         exit;
     case 'change_user_group_membership':
         change_user_group_membership($configuration, $lc);
@@ -720,8 +722,7 @@
   function lock_user($configuration, $lc){
     // only admins are allowed to call this function
     if(!$lc->isAdmin()){
-        HttpHeader::setResponseCode(403);
-        exit;
+        return Status::errorStatus("permission denied");
     }
     
     $post_data = json_decode(file_get_contents('php://input'));
@@ -729,16 +730,13 @@
     // sanitize input
     $sanitizer = new Sanitizer();
     if(!$post_data->user_id or !$sanitizer->isInt($post_data->user_id)){
-        HttpHeader::setResponseCode(400);
-        echo "No valid user selected, please select a user";
-        return;
+        return Status::errorStatus("No valid user_id provided, please select a user");
     }
     
     // connect to the database
     $db = new DBAccess($configuration);
     if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
-        exit;
+        return Status::errorStatus("Cannot connect to the database");
     }
     
     $query = 'UPDATE user SET locked = 1 WHERE id = ?;';
@@ -746,19 +744,17 @@
     $db->bind_param('d', $post_data->user_id);
     if(!$db->execute()){
         $db->disconnect();
-        HttpHeader::setResponseCode(500);
-        return;
+        return Status::errorStatus("Attempt to lock user failed.");
     }
     $db->disconnect();
-    HttpHeader::setResponseCode(200);
+    return Status::successStatus("success");
   }
   
   # unlock a user
   function unlock_user($configuration, $lc){
     // only admins are allowed to call this function
     if(!$lc->isAdmin()){
-        HttpHeader::setResponseCode(403);
-        exit;
+        return Status::errorStatus("not sufficient permissions");
     }
     
     $post_data = json_decode(file_get_contents('php://input'));
@@ -766,16 +762,13 @@
     // sanitize input
     $sanitizer = new Sanitizer();
     if(!$post_data->user_id or !$sanitizer->isInt($post_data->user_id)){
-        HttpHeader::setResponseCode(400);
-        echo "No valid user selected, please select a user";
-        return;
+        return Status::errorStatus("No valid user_id selected, please select a user");
     }
     
     // connect to the database
     $db = new DBAccess($configuration);
     if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
-        exit;
+        return Status::errorStatus("Cannot connect to database");
     }
     
     $query = 'UPDATE user SET locked = 0 WHERE id = ?;';
@@ -783,11 +776,10 @@
     $db->bind_param('d', $post_data->user_id);
     if(!$db->execute()){
         $db->disconnect();
-        HttpHeader::setResponseCode(500);
-        return;
+        return Status::errorStatus("Attempt to unlock user failed");
     }
     $db->disconnect();
-    HttpHeader::setResponseCode(200);
+    return Status::successStatus("success");
   }
   
   # change the status of a user

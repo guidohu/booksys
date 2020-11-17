@@ -149,6 +149,32 @@ const actions = {
         reject(error);
       })
     })
+  },
+  lockUser ( { dispatch }, userId) {
+    console.log("Trigger action lockUser");
+    return new Promise((resolve, reject) => {
+      User.lockUser(userId)
+      .then(() => {
+        dispatch('queryUserListDetailed');
+        resolve();
+      })
+      .catch((error) => {
+        reject(error);
+      })
+    })
+  },
+  unlockUser ( { dispatch }, userId) {
+    console.log("Trigger action unlockUser");
+    return new Promise((resolve, reject) => {
+      User.unlockUser(userId)
+      .then(() => {
+        dispatch('queryUserListDetailed');
+        resolve();
+      })
+      .catch((error) => {
+        reject(error);
+      })
+    })
   }
 }
 

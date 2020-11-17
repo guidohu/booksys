@@ -256,4 +256,71 @@ export default class User {
       })
     })
   }
+
+  static lockUser(userId){
+    return new Promise((resolve, reject) => {
+      const queryData = {
+        user_id: userId
+      };
+
+      fetch('/api/user.php?action=lock_user', {
+        method: "POST",
+        cache: 'no-cache',
+        body: JSON.stringify(queryData)
+      })
+      .then(response => {
+        response.json()
+        .then(data => {
+          if(!data.ok){
+            console.error("User/lockUser: Cannot lock user, got error", data.msg);
+            reject([data.msg]);
+          }else{
+            resolve();
+          }
+        })
+        .catch(error => {
+          console.error("User/lockUser: Cannot parse server response", error);
+          reject([error]);
+        })
+      })
+      .catch(error => {
+        console.error("User/lockUser: Cannot lock user with ID", error);
+        reject([error])
+      })
+    })
+  }
+
+  static unlockUser(userId){
+    return new Promise((resolve, reject) => {
+      const queryData = {
+        user_id: userId
+      };
+
+      fetch('/api/user.php?action=unlock_user', {
+        method: "POST",
+        cache: 'no-cache',
+        body: JSON.stringify(queryData)
+      })
+      .then(response => {
+        response.json()
+        .then(data => {
+          if(!data.ok){
+            console.error("User/unlockUser: Cannot unlock user, got error", data.msg);
+            reject([data.msg]);
+          }else{
+            resolve();
+          }
+        })
+        .catch(error => {
+          console.error("User/unlockUser: Cannot parse server response", error);
+          reject([error]);
+        })
+      })
+      .catch(error => {
+        console.error("User/unlockUser: Cannot unlock user with ID", error);
+        reject([error])
+      })
+    })
+  }
+
 }
