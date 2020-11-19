@@ -323,6 +323,39 @@ export default class User {
     })
   }
 
+  static deleteUser(userId){
+    return new Promise((resolve, reject) => {
+      const queryData = {
+        id: userId
+      };
+
+      fetch('/api/user.php?action=delete_user', {
+        method: "POST",
+        cache: 'no-cache',
+        body: JSON.stringify(queryData)
+      })
+      .then(response => {
+        response.json()
+        .then(data => {
+          if(!data.ok){
+            console.error("User/deleteUser: Cannot delete user, got error", data.msg);
+            reject([data.msg]);
+          }else{
+            resolve();
+          }
+        })
+        .catch(error => {
+          console.error("User/deleteUser: Cannot parse server response", error);
+          reject([error]);
+        })
+      })
+      .catch(error => {
+        console.error("User/deleteUser: Cannot delete user with ID", error);
+        reject([error])
+      })
+    })
+  }
+
   static setUserGroup(userId, userGroupId){
     console.log("User/setUserGroup: called with userId", userId, "userGroupId", userGroupId);
     return new Promise((resolve, reject) => {

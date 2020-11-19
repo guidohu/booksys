@@ -1,6 +1,6 @@
 <template>
   <div v-if="errors != null && errors.length > 0" class="text-left">
-    <b-alert variant="warning" show>
+    <b-alert variant="warning" show :dismissible="isDismissible" @dismissed="dismissedHandler">
       <b>Please correct the following error(s):</b>
       <ul>
         <li v-for="err in errors" :key="err">{{ err }}</li>
@@ -19,10 +19,20 @@ import Vue from 'vue'
 
 export default Vue.extend({
   name: "WarningBox",
-  props: [ 'errors' ],
+  props: [ 'errors', 'dismissible' ],
   mounted() {
     console.log("WarningBox just mounted");
     console.log("warningbox:", this.errors);
+  },
+  computed: {
+    isDismissible: function(){
+      return this.dismissible != null && this.dismissible == "true";
+    }
+  },
+  methods: {
+    dismissedHandler: function(){
+      this.$emit('dismissed');
+    }
   }
 })
 </script>

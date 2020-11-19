@@ -176,6 +176,19 @@ const actions = {
       })
     })
   },
+  deleteUser ( { dispatch }, userId){
+    console.log("Trigger action deleteUser");
+    return new Promise((resolve, reject) => {
+      User.deleteUser(userId)
+      .then(() => {
+        dispatch('queryUserListDetailed');
+        resolve();
+      })
+      .catch((error) => {
+        reject(error);
+      })
+    })
+  },
   setUserGroup ( { dispatch }, data) {
     console.log("Trigger action setUserGroup with", data);
     return new Promise((resolve, reject) => {

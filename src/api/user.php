@@ -89,56 +89,41 @@
   function delete_user($configuration, $lc){
     // user needs to be admin
     if(!$lc->isAdmin()){
-        HttpHeader::setResponseCode(403);
-        exit;
+        return Status::errorStatus("permission denied");
     }
 
     $data = json_decode(file_get_contents('php://input'));
 
-    $r = [
-        "ok" => TRUE,
-        "msg" => "user deleted"
-    ];
-
     // sanitize
     $sanitizer = new Sanitizer();
     if(! isset($data->id) or !$sanitizer->isInt($data->id)){
-        $r['ok']  = FALSE;
-        $r['msg'] = "No valid user id given";
-        return $r;
+        return Status::errorStatus("No valid user id given.");
     }
 
     // do not delete yourself
     $current_user = $lc->getSessionData($configuration);
     if($data->id == $current_user['user_id']){
-        $r['ok']  = FALSE;
-        $r['msg'] = "You cannot delete yourself";
-        return $r;
+        return Status::errorStatus("Deleting your own user is not possible.");
     }
 
     // the user that should be deleted cannot be admin
     $userAPI = new User($configuration);
     $user    = $userAPI->getUserById($data->id);
     if($user['user_role_name'] == 'admin'){
-        $r['ok']  = FALSE;
-        $r['msg'] = "You cannot delete administrator users";
-        return $r;
+        return Status::errorStatus("Administrator users cannot be deleted.");
     }
 
     // the user that should be deleted has to have a zero balance
     $balance = $userAPI->getUserBalance($user['id']);
     if($balance != 0){
-        $r['ok']  = FALSE;
-        $r['msg'] = "A user can only be deleted if its balance is 0, current balance is: " . $balance;
-        return $r;
+        return Status::errorStatus('User can only be delete if they have a balance of 0.');
     }
 
     // delete user
     $db = new DBAccess($configuration);
     if(!$db->connect()){
         error_log('api/user: Cannot connect to the database');
-        HttpHeader::setResponseCode(500);
-        exit;
+        return Status::errorStatus('Cannot connect to the database.');
     }
     $query = "UPDATE user
         SET deleted = 1,
@@ -159,12 +144,10 @@
     $db->prepare($query);
     $db->bind_param('i', $user['id']);
     if(!$db->execute()){
-        $r['ok']  = FALSE;
-        $r['msg'] = "User could not be deleted.";
-        return $r;
+        return Status::errorStatus("User could not be deleted.");
     }
 
-    return $r;
+    return Status::successStatus("success");
   }
 
   function delete_user_group($configuration, $lc){
