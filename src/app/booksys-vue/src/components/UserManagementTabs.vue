@@ -15,7 +15,7 @@
       <div :class="tabClass">
         <UserGroupTable/>
       </div>
-    </b-tab>           
+    </b-tab>
   </b-tabs>
 </template>
 

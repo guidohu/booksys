@@ -2,49 +2,59 @@
   <div class="text-left">
     <WarningBox v-if="errors.length > 0" :errors="errors" dismissible="true" @dismissed="dismissedHandler"/>
     <div v-else>
-      <b-button :disabled="selectedItems.length==0" v-on:click="showDetails" size="sm" variant="outline-info" class="mr-1 mb-2">View</b-button>
-      <b-button :disabled="selectedItems.length==0" v-on:click="showDeleteUserDialog" size="sm" variant="outline-danger" class="mb-2">Delete</b-button>
-      <b-table 
-        striped
-        responsive
-        hover
-        small
-        sort-by="first_name"
-        :items="items"
-        :fields="fields"
-        :selectable="true"
-        select-mode="single"
-        @row-selected="rowSelected"
-      >
-        <template #cell(license)="data">
-          <div class="text-center">
-            <b-icon v-if="data.item.license==1" icon="patch-check" variant="success"/>        
-          </div>
-        </template>
-        <template #cell(balance)="data">
-          <div class="text-right"> 
-            {{ getBalance(data.item) }}       
-          </div>
-        </template>
-        <template #cell(status)="data">
-          <b-form-select v-if="userGroupList.length>1" v-model="data.item.status" @change="groupChangeHandler($event, data.item)" :options="userGroupList" size="sm" :data-index="data.item"></b-form-select>
-          <div v-if="userGroupList.length==1">
-            {{ userGroupList[0].text }}
-          </div>
-          <div v-if="userGroupList.length==0">
-            -
-          </div>
-        </template>
-        <template #cell(locked)="data">
-          <div class="text-center">
-            <b-button size="sm" style="font-size: 0.8em;" variant="light">
-              <b-icon v-if="data.item.locked==1" v-on:click="unlock(data.item)" icon="lock-fill" variant="danger"/>
-              <b-icon v-if="data.item.locked==0" v-on:click="lock(data.item)" icon="unlock-fill" variant="success"/>
-            </b-button>
-          </div>
-        </template>
-      </b-table>
-      </div>
+      <b-row>
+        <b-col cols="12">
+          <b-button :disabled="selectedItems.length==0" v-on:click="showDetails" size="sm" variant="outline-info" class="mr-1 mb-2">View</b-button>
+          <b-button :disabled="selectedItems.length==0" v-on:click="showDeleteUserDialog" size="sm" variant="outline-danger" class="mb-2">Delete</b-button>
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col cols="12">
+          <b-table 
+            striped
+            hover
+            response
+            small
+            sticky-header
+            borderless
+            sort-by="first_name"
+            :items="items"
+            :fields="fields"
+            :selectable="true"
+            select-mode="single"
+            @row-selected="rowSelected"
+          >
+            <template #cell(license)="data">
+              <div class="text-center">
+                <b-icon v-if="data.item.license==1" icon="patch-check" variant="success"/>        
+              </div>
+            </template>
+            <template #cell(balance)="data">
+              <div class="text-right"> 
+                {{ getBalance(data.item) }}       
+              </div>
+            </template>
+            <template #cell(status)="data">
+              <b-form-select v-if="userGroupList.length>1" v-model="data.item.status" @change="groupChangeHandler($event, data.item)" :options="userGroupList" size="sm" :data-index="data.item"></b-form-select>
+              <div v-if="userGroupList.length==1">
+                {{ userGroupList[0].text }}
+              </div>
+              <div v-if="userGroupList.length==0">
+                -
+              </div>
+            </template>
+            <template #cell(locked)="data">
+              <div class="text-center">
+                <b-button size="sm" style="font-size: 0.8em;" variant="light">
+                  <b-icon v-if="data.item.locked==1" v-on:click="unlock(data.item)" icon="lock-fill" variant="danger"/>
+                  <b-icon v-if="data.item.locked==0" v-on:click="lock(data.item)" icon="unlock-fill" variant="success"/>
+                </b-button>
+              </div>
+            </template>
+          </b-table>
+        </b-col>
+      </b-row>
+    </div>
   </div>
 </template>
 
@@ -52,6 +62,7 @@
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { sprintf } from 'sprintf-js';
+// import { BooksysBrowser } from '@/libs/browser';
 import WarningBox from '@/components/WarningBox';
 
 export default Vue.extend({
@@ -245,3 +256,9 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style scoped>
+  .b-table-sticky-header {
+    max-height: 340px;
+  }
+</style>
