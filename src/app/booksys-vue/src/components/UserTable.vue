@@ -62,7 +62,6 @@
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { sprintf } from 'sprintf-js';
-// import { BooksysBrowser } from '@/libs/browser';
 import WarningBox from '@/components/WarningBox';
 
 export default Vue.extend({
@@ -233,6 +232,9 @@ export default Vue.extend({
       })
     },
     userGroupToList: function(userGroups){
+      if(userGroups == null){
+        userGroups = this.userGroups;
+      }
       this.userGroupList = userGroups.map(ug => {
         return {
           value: ug.user_group_id,
@@ -248,11 +250,17 @@ export default Vue.extend({
     // TODO get user groups
     this.queryUserGroups()
     .then(() => this.userGroupToList())
-    .catch((errors) => this.errors.push(...errors));
+    .catch((errors) => {
+      console.log("UserTable (queryUserGroups) got errors:", this.errors);
+      this.errors.push(...errors)
+    });
 
     this.queryUserListDetailed()
     .then(() => this.setRows())
-    .catch((errors) => this.errors.push(...errors));
+    .catch((errors) => {
+      console.log("UserTable (queryUserListDetailed) got errors:", this.errors);
+      this.errors.push(...errors)
+    });
   }
 })
 </script>

@@ -240,7 +240,7 @@ export default class User {
               console.error("User/getUserGroups: Cannot parse server response", data);
               reject(["Cannot parse server response"]);
             }else{
-              console.log("User/getUserGroups: User list retrieved");
+              console.log("User/getUserGroups: User group list retrieved");
               const usersResponse = _.values(data.data);
               resolve(usersResponse);
             }
