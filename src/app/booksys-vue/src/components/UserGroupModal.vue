@@ -3,14 +3,14 @@
     id="userGroupModal"
     :title="title"
   >
-    <b-row v-if="errors.length">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
-        <WarningBox :errors="errors"/>
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-    </b-row>
     <b-form @submit="save">
+      <b-row v-if="errors.length > 0">
+        <b-col cols="1" class="d-none d-sm-block"></b-col>
+        <b-col cols="12" sm="10">
+          <WarningBox :errors="errors"/>
+        </b-col>
+        <b-col cols="1" class="d-none d-sm-block"></b-col>
+      </b-row>
       <b-row class="text-left">
         <b-col cols="1" class="d-none d-sm-block"></b-col>
         <b-col cols="12" sm="10">
@@ -28,7 +28,7 @@
               v-model="form.user_group_name"
               type="text"
               placeholder=""
-              disabled
+              :disabled="!isEditMode"
             ></b-form-input>
           </b-form-group>
           <b-form-group
@@ -43,7 +43,7 @@
               v-model="form.user_group_description"
               type="text"
               placeholder=""
-              disabled
+              :disabled="!isEditMode"
             ></b-form-input>
           </b-form-group>
           <!-- User Role -->
@@ -51,27 +51,27 @@
           <b-form-group
             id="user-role-name"
             label="Role"
-            label-for="user-role-name"
+            label-for="user-role-name-select"
             description=""
             label-cols="3"
           >
-            <b-form-input
-              id="user-role-name"
-              v-model="form.user_role_name"
-              type="text"
-              placeholder=""
-              disabled
-            ></b-form-input>
+            <b-form-select
+              id="user-role-name-select"
+              v-model="form.user_role_id"
+              @change="roleChangeHandler($event)"
+              :options="userRoleList"
+              :disabled="!isEditMode"
+            ></b-form-select>
           </b-form-group>
           <b-form-group
             id="user-role-description"
             label="Description"
-            label-for="user-role-description"
+            label-for="user-role-description-input"
             description=""
             label-cols="3"
           >
             <b-form-input
-              id="user-role-description"
+              id="user-role-description-input"
               v-model="form.user_role_description"
               type="text"
               placeholder=""
@@ -93,7 +93,7 @@
                 v-model="form.price_min"
                 type="text"
                 placeholder=""
-                disabled
+                :disabled="!isEditMode"
               ></b-form-input>
               <b-input-group-append is-text>
                 {{getCurrency}}/min
@@ -112,7 +112,7 @@
               v-model="form.price_description"
               type="text"
               placeholder=""
-              disabled
+              :disabled="!isEditMode"
             ></b-form-input>
           </b-form-group>
         </b-col>
@@ -147,14 +147,20 @@
 <script>
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
+import { sprintf } from 'sprintf-js';
+import WarningBox from '@/components/WarningBox';
 
 export default Vue.extend({
   name: 'UserGroupModal',
   props: [ 'userGroup', 'editMode' ],
+  components: { WarningBox },
   data() {
     return {
       errors: [],
-      form: {},
+      userRoleList: [],
+      form: {
+        user_role_description: ""
+      },
       isEditMode: false,
       title: "User Group"
     }
@@ -162,35 +168,77 @@ export default Vue.extend({
   computed: {
     ...mapGetters('configuration', [
       'getCurrency'
+    ]),
+    ...mapGetters('user', [
+      'userRoles'
     ])
   },
   watch: {
     userGroup: function(newValue) {
       if(newValue != null){
-        this.form = newValue;
+        this.form = { ...newValue }; 
+        this.form.price_min = sprintf("%.2f", newValue.price_min);
+        console.log("price_min", this.form);
       }else{
         this.form = {};
       }
     },
     editMode: function(newValue) {
+      console.log("editMode changed to:", newValue);
       this.isEditMode = newValue;
       this.setTitle();
+    },
+    userRoles: function(newValue) {
+      this.userRolesToList(newValue);
     }
   },
   methods: {
     save: function() {
       console.log("TODO implement save");
+      this.saveUserGroup(this.form)
+      .then(() => {
+        this.errors = [];
+        this.close()
+      })
+      .catch((errors) => this.errors = errors);
     },
     close: function() {
-      this.isEditMode = false;
       this.setTitle();
       this.$bvModal.hide('userGroupModal');
     },
     remove: function() {
-      console.log("TODO implement remove");
+      const name = this.form.user_group_name;
+      const id   = this.form.user_group_id;
+      this.$bvModal.msgBoxConfirm('Do you really want to delete user group '+name+'?', {
+        title: 'Delete User Group',
+        size: 'sm',
+        buttonSize: 'sm',
+        okVariant: 'danger',
+        okTitle: 'Delete',
+        cancelTitle: 'Cancel',
+        footerClass: 'p-2',
+        hideHeaderClose: false,
+        centered: true
+      })
+      .then(value => {
+        // delete user group
+        if(value == true){
+          this.deleteUserGroup(id)
+          .then(() => this.close())
+          .catch((errors) => this.errors = errors);
+        }
+      })
+      .catch(err => {
+        this.errors = [ err ]
+      })
     },
     ...mapActions('configuration', [
       'queryConfiguration'
+    ]),
+    ...mapActions('user', [
+      'queryUserRoles',
+      'saveUserGroup',
+      'deleteUserGroup'
     ]),
     enableEditMode: function() {
       console.log("Enable edit mode");
@@ -199,22 +247,50 @@ export default Vue.extend({
     },
     setTitle: function() {
       console.log("Set title with:", this.isEditMode);
-      if(this.isEditMode == true){
+      if(this.isEditMode == true && this.form.user_group_id == null){
+        this.title = "New User Group";
+      }else if(this.isEditMode == true){
         this.title = "Edit User Group";
       }else{
         this.title = "User Group";
       }
+    },
+    userRolesToList: function(userRoles){
+      if(userRoles == null){
+        userRoles = this.userRoles
+      }
+      this.userRoleList = userRoles.map(ur => {
+        return {
+          value: ur.user_role_id,
+          text: ur.user_role_name
+        }
+      })
+    },
+    roleChangeHandler: function(user_role_id){
+      const role = this.userRoles.find(ur => ur.user_role_id == user_role_id);
+      this.form.user_role_name = role.user_role_name;
+      this.form.user_role_description = role.user_role_description;
     }
   },
   created() {
     this.queryConfiguration();
 
+    this.queryUserRoles()
+    .then(() => this.userRolesToList())
+    .catch( (errors) => this.errors.append(...errors));
+
     if(this.userGroup != null){
-      this.form = this.userGroup;
+      this.form = { ...this.userGroup };
     }
 
     this.isEditMode = this.editMode;
     this.setTitle();
+  },
+  mounted() {
+    this.$root.$on('bv::modal::show', () => {
+      this.isEditMode = this.editMode;
+      this.setTitle();
+    })
   }
 })
 </script>

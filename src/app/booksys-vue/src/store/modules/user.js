@@ -11,7 +11,8 @@ const state = () => ({
   schedule: [],
   userList: [],
   userListDetailed: [],
-  userGroups: []
+  userGroups: [],
+  userRoles: []
 })
 
 const getters = {
@@ -47,6 +48,9 @@ const getters = {
   },
   userGroups: (state) => {
     return state.userGroups;
+  },
+  userRoles: (state) => {
+    return state.userRoles;
   }
 }
 
@@ -150,6 +154,45 @@ const actions = {
       })
     })
   },
+  queryUserRoles ( { commit }) {
+    console.log("Trigger action queryUserRoles");
+    return new Promise((resolve, reject) => {
+      User.getUserRoles()
+      .then((roles) => {
+        commit('setUserRoles', roles);
+        resolve();
+      })
+      .catch((error) => {
+        reject(error);
+      })
+    })
+  },
+  saveUserGroup ( { dispatch }, userGroup) {
+    console.log("Trigger action saveUserGroup");
+    return new Promise((resolve, reject) => {
+      User.saveUserGroup(userGroup)
+      .then(() => {
+        dispatch('queryUserGroups');
+        resolve();
+      })
+      .catch((error) => {
+        reject(error);
+      })
+    })
+  },
+  deleteUserGroup ( { dispatch }, userGroupId) {
+    console.log("Trigger action deleteUserGroup");
+    return new Promise((resolve, reject) => {
+      User.deleteUserGroup(userGroupId)
+      .then(() => {
+        dispatch('queryUserGroups');
+        resolve();
+      })
+      .catch((error) => {
+        reject(error);
+      })
+    })
+  },
   lockUser ( { dispatch }, userId) {
     console.log("Trigger action lockUser");
     return new Promise((resolve, reject) => {
@@ -231,6 +274,10 @@ const mutations = {
   setUserGroups (state, groups) {
     console.log("Store: setUserGroups to", groups);
     state.userGroups = groups;
+  },
+  setUserRoles (state, roles) {
+    console.log("Store: setUserRoles to", roles);
+    state.userRoles = roles;
   }
 }
 

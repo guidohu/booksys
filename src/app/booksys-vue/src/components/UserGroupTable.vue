@@ -20,7 +20,7 @@
             <b-icon icon="pencil"/>
             Edit
           </b-button>
-          <b-button v-if="selectedItems.length>0" v-on:click="showDeleteGroupDialog" size="sm" variant="outline-danger" class="mb-2">
+          <b-button v-if="selectedItems.length>0" v-on:click="showDeleteUserGroupDialog" size="sm" variant="outline-danger" class="mb-2">
             <b-icon icon="trash"/>
             Delete
           </b-button>
@@ -114,7 +114,7 @@ export default Vue.extend({
       'queryUserGroups',
       'lockUser',
       'unlockUser',
-      'deleteUser',
+      'deleteUserGroup',
       'setUserGroup'
     ]),
     ...mapActions("configuration", [
@@ -152,11 +152,12 @@ export default Vue.extend({
       .then(() => this.errors = [])
       .catch((errors) => this.errors = errors);
     },
-    showDeleteUserDialog: function(){
-      const name = this.selectedItems[0].first_name + " " + this.selectedItems[0].last_name;
+    showDeleteUserGroupDialog: function(){
+      const name = this.selectedItems[0].user_group_name;
+      const id   = this.selectedItems[0].user_group_id;
       this.boxTwo = ''
-        this.$bvModal.msgBoxConfirm('Do you really want to delete user '+name+'?', {
-          title: 'Delete User',
+        this.$bvModal.msgBoxConfirm('Do you really want to delete user group '+name+'?', {
+          title: 'Delete User Group',
           size: 'sm',
           buttonSize: 'sm',
           okVariant: 'danger',
@@ -167,9 +168,9 @@ export default Vue.extend({
           centered: true
         })
         .then(value => {
-          // delete user
+          // delete user group
           if(value == true){
-            this.deleteUser(this.selectedItems[0].id)
+            this.deleteUserGroup(id)
             .catch((errors) => this.errors = errors);
           }
         })
@@ -178,23 +179,6 @@ export default Vue.extend({
         })
     },
     showDetails: function() {
-      console.log("TODO show details of user");
-      // this.$bvModal.msgBoxOk('This functionality is still missing.', {
-      //   title: 'Not implemented',
-      //   size: 'sm',
-      //   buttonSize: 'sm',
-      //   okVariant: 'success',
-      //   headerClass: 'p-2 border-bottom-0',
-      //   footerClass: 'p-2 border-top-0',
-      //   centered: true
-      // })
-      // .then(value => {
-      //   this.errors = value
-      // })
-      // .catch(err => {
-      //   // An error occurred
-      //   this.errors = [ err ]
-      // })
       this.userGroupEditMode = false;
       this.$bvModal.show('userGroupModal');
     },
@@ -203,13 +187,10 @@ export default Vue.extend({
       this.userGroupEditMode = true;
       this.$bvModal.show('userGroupModal');
     },
-    showDeleteGroupDialog: function() {
-      console.log("TODO implement showDeleteGroupDialog");
-      this.$bvModal.show('userGroupModal');
-    },
     newGroup: function() {
       console.log("TODO implement newGroup");
       this.userGroupEditMode = true;
+      this.selectedItems = [];
       this.$bvModal.show('userGroupModal');
     }
   },

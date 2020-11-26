@@ -227,36 +227,6 @@ export default class User {
     })
   }
 
-  static getUserGroups(){
-    return new Promise((resolve, reject) => {
-      fetch('/api/user.php?action=get_user_groups', {
-        method: "GET",
-        cache: 'no-cache',
-      })
-      .then(response => {
-        response.json()
-          .then(data => {
-            if(data == null){
-              console.error("User/getUserGroups: Cannot parse server response", data);
-              reject(["Cannot parse server response"]);
-            }else{
-              console.log("User/getUserGroups: User group list retrieved");
-              const usersResponse = _.values(data.data);
-              resolve(usersResponse);
-            }
-          })
-          .catch( error => {
-            console.error("User/getUserGroups: Cannot parse server response", error);
-            reject([error]);
-          })
-      })
-      .catch(error => {
-        console.error('User/getUserGroups:', error)
-        reject([error]);
-      })
-    })
-  }
-
   static lockUser(userId){
     return new Promise((resolve, reject) => {
       const queryData = {
@@ -386,6 +356,132 @@ export default class User {
       })
       .catch(error => {
         console.error("User/setUserGroup: Cannot unlock user with ID", error);
+        reject([error])
+      })
+    })
+  }
+
+  static getUserGroups(){
+    return new Promise((resolve, reject) => {
+      fetch('/api/user.php?action=get_user_groups', {
+        method: "GET",
+        cache: 'no-cache',
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            if(data == null){
+              console.error("User/getUserGroups: Cannot parse server response", data);
+              reject(["Cannot parse server response"]);
+            }else{
+              console.log("User/getUserGroups: User group list retrieved");
+              const usersResponse = _.values(data.data);
+              resolve(usersResponse);
+            }
+          })
+          .catch( error => {
+            console.error("User/getUserGroups: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error('User/getUserGroups:', error)
+        reject([error]);
+      })
+    })
+  }
+
+  static getUserRoles(){
+    return new Promise((resolve, reject) => {
+      fetch('/api/user.php?action=get_user_roles', {
+        method: "GET",
+        cache: 'no-cache',
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            if(data == null){
+              console.error("User/getUserRoles: Cannot parse server response", data);
+              reject(["Cannot parse server response"]);
+            }else{
+              console.log("User/getUserRoles: User role list retrieved");
+              const usersResponse = _.values(data.data);
+              resolve(usersResponse);
+            }
+          })
+          .catch( error => {
+            console.error("User/getUserRoles: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error('User/getUserRoles:', error)
+        reject([error]);
+      })
+    })
+  }
+
+  static saveUserGroup(userGroup){
+    console.log("User/saveUserGroup: called with userGroup", userGroup);
+    return new Promise((resolve, reject) => {
+      const queryData = userGroup;
+
+      fetch('/api/user.php?action=save_user_group', {
+        method: "POST",
+        cache: 'no-cache',
+        body: JSON.stringify(queryData)
+      })
+      .then(response => {
+        response.json()
+        .then(data => {
+          if(!data.ok){
+            console.error("User/saveUserGroup: Cannot save user group, got error", data.msg);
+            reject([data.msg]);
+          }else{
+            resolve();
+          }
+        })
+        .catch(error => {
+          console.error("User/saveUserGroup: Cannot parse server response", error);
+          reject([error]);
+        })
+      })
+      .catch(error => {
+        console.error("User/saveUserGroup: Cannot unlock user with ID", error);
+        reject([error])
+      })
+    })
+  }
+
+  static deleteUserGroup(userGroupId){
+    console.log("User/deleteUserGroup: called with userGroupId", userGroupId);
+    return new Promise((resolve, reject) => {
+      const queryData = {
+        user_group_id: userGroupId
+      };
+
+      fetch('/api/user.php?action=delete_user_group', {
+        method: "POST",
+        cache: 'no-cache',
+        body: JSON.stringify(queryData)
+      })
+      .then(response => {
+        response.json()
+        .then(data => {
+          if(!data.ok){
+            console.error("User/deleteUserGroup: Cannot delete user group, got error", data.msg);
+            reject([data.msg]);
+          }else{
+            resolve();
+          }
+        })
+        .catch(error => {
+          console.error("User/deleteUserGroup: Cannot parse server response", error);
+          reject([error]);
+        })
+      })
+      .catch(error => {
+        console.error("User/deleteUserGroup: Cannot unlock user with ID", error);
         reject([error])
       })
     })

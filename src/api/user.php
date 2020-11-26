@@ -69,13 +69,16 @@
         echo json_encode($response);
         exit; 
     case 'get_user_roles':
-        get_user_roles($configuration, $lc);
+        $response = get_user_roles($configuration, $lc);
+        echo json_encode($response);
         exit;
     case 'save_user_group':
-        save_user_group($configuration, $lc);
+        $response = save_user_group($configuration, $lc);
+        echo json_encode($response);
         exit;
     case 'delete_user_group':
-        delete_user_group($configuration, $lc);
+        $response = delete_user_group($configuration, $lc);
+        echo json_encode($response);
         exit;
     case 'delete_user':
         $response = delete_user($configuration, $lc);
@@ -153,8 +156,7 @@
   function delete_user_group($configuration, $lc){
     // only admins are allowed to call this function
     if(!$lc->isAdmin()){
-        HttpHeader::setResponseCode(403);
-        exit;
+        return Status::errorStatus("insufficient permissions");
     }
 
     // get all the values from the query
@@ -163,17 +165,14 @@
     // sanitize
     $sanitizer = new Sanitizer();
     if(! $user_group->user_group_id or !$sanitizer->isInt($user_group->user_group_id)){
-        HttpHeader::setResponseCode(400);
-        echo "No valid user_group_id given";
-        return FALSE;
+        return Status::errorStatus("No valid user_group_id given");
     }
 
     // Delete the user group
     $db = new DBAccess($configuration);
     if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
         error_log("delete_user_group: not able to connect to database");
-        return FALSE;
+        return Status::errorStatus("Cannot connect to the database");
     }
 
     // Check that no user is assigned to the user group
@@ -184,14 +183,11 @@
     );
     if(! $db->execute()){
         $db->disconnect();
-        HttpHeader::setResponseCode(500);
-        return FALSE;
+        return Status::errorStatus("Cannot check whether users are still assigned to this user group.");
     }
     $res = $db->fetch_stmt_hash();
     if($res[0]['count'] > 0){
-        HttpHeader::setResponseCode(400);
-        echo "Cannot delete group, still in use";
-        return FALSE;
+        return Status::errorStatus("Cannot delete group, still in use");
     }
 
     // Delete the price of this group
@@ -202,8 +198,7 @@
     );
     if(! $db->execute()){
         $db->disconnect();
-        HttpHeader::setResponseCode(500);
-        return FALSE;
+        return Status::errorStatus("Cannot delete pricing entry related to the user group that should be deleted.");
     }
 
     // Delete the user group
@@ -214,21 +209,18 @@
     );
     if(! $db->execute()){
         $db->disconnect();
-        HttpHeader::setResponseCode(500);
-        return FALSE;
+        return Status::errorStatus("Cannot delete user group");
     }
 
     $db->disconnect();
-    HttpHeader::setResponseCode(200);
-    return true;
+    return Status::successStatus("User group deleted");
 
   }
 
   function save_user_group($configuration, $lc){
     // only admins are allowed to call this function
     if(!$lc->isAdmin()){
-        HttpHeader::setResponseCode(403);
-        exit;
+        return Status::errorStatus("Insufficient permissions");
     }
 
     // get all the values from the query
@@ -238,17 +230,10 @@
     // 1. new user group
     // 2. update to an existing user group
     if(! isset($user_group->user_group_id)){
-        if(! create_user_group($configuration, $user_group)){
-            return FALSE;
-        }
+        return create_user_group($configuration, $user_group);
     }else{
-        if(! update_user_group($configuration, $user_group)){
-            return FALSE;
-        }
+        return update_user_group($configuration, $user_group);
     }
-
-    HttpHeader::setResponseCode(200);
-    return TRUE;
   }
 
   function create_user_group($configuration, $data){
@@ -256,37 +241,26 @@
     // sanitize data
     $sanitizer = new Sanitizer();
     if(!$data->user_group_name or !$sanitizer->isAsciiText($data->user_group_name)){
-        HttpHeader::setResponseCode(400);
-        echo "No valid user_group_name selected";
-        return;
+        return Status::errorStatus("No valid user_group_name provided");
     }
     if(!$data->user_group_description){
-        HttpHeader::setResponseCode(400);
-        echo "No valid user_group_description";
-        return;
+        return Status::errorStatus("No valid user_group_description");
     }
     if(!$data->user_role_id or !$sanitizer->isUserRoleId($data->user_role_id)){
-        HttpHeader::setResponseCode(400);
-        echo "No valid user_role_id selected";
-        return;
+        return Status::errorStatus("No valid user_role_id selected");
     }
     if(!$data->price_min or !$sanitizer->isFloat($data->price_min)){
-        HttpHeader::setResponseCode(400);
-        echo "No valid user_role_id selected";
-        return;
+        return Status::errorStatus("No valid user_role_id selected");
     }
     if(! isset($data->price_description)){
-        HttpHeader::setResponseCode(400);
-        echo "No valid price_description";
-        return;
+        return Status::errorStatus("No valid price_description");
     }
     
     // Add the user group
     $db = new DBAccess($configuration);
     if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
         error_log("create_user_group: not able to connect to database");
-        return FALSE;
+        return Status::errorStatus("Cannot connect to database");
     }
 
     // Create the user group
@@ -302,8 +276,7 @@
     );
     if(! $db->execute()){
         $db->disconnect();
-        HttpHeader::setResponseCode(500);
-        return FALSE;
+        return Status::errorStatus("Cannot add new group due an an unkown error.");
     }
 
     $id = $db->last_id();
@@ -322,37 +295,32 @@
     );
     if(! $db->execute()){
         $db->disconnect();
-        HttpHeader::setResponseCode(500);
-        return FALSE;
+        return Status::errorStatus("Cannot add new user group due to an unknown error");
     }
 
-    return TRUE;
+    return Status::successStatus("User group created");
   }
 
   function update_user_group($configuration, $data){
-    if(! update_user_group_price($configuration, $data)){
-        return FALSE;
+    $user_group_price_update_status = update_user_group_price($configuration, $data);
+    if($user_group_price_update_status['ok'] != TRUE){
+        return $user_group_price_update_status;
     }
     
     // sanitize data
     $sanitizer = new Sanitizer();
     if(! $data->user_group_id or !$sanitizer->isInt($data->user_group_id)){
-        HttpHeader::setResponseCode(400);
-        echo "No valid user_group_id given";
-        return FALSE;
+        return Status::errorStatus("No valid user_group_id given");
     }
     if(! $data->user_role_id or !$sanitizer->isUserRoleId($data->user_role_id)){
-        HttpHeader::setResponseCode(400);
-        echo "No valid user_role_id given";
-        return FALSE;
+        return Status::errorStatus("No valid user_role_id given");
     }
 
     // update the user group
     $db = new DBAccess($configuration);
     if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
         error_log("update_user_group_role: not able to connect to database");
-        return FALSE;
+        return Status::errorStatus("Cannot connect to the database");
     }
 
     $query = "UPDATE user_status
@@ -369,33 +337,27 @@
     );
     if($db->execute()){
         $db->disconnect();
-        return TRUE;
+        return Status::successStatus("user group updated");
     }
     $db->disconnect();
-    HttpHeader::setResponseCode(500);
-    return FALSE;
+    return Status::errorStatus("could not update user group");
   }
 
   function update_user_group_price($configuration, $data){
     // sanitize data
     $sanitizer = new Sanitizer();
     if(! $data->price_id or !$sanitizer->isInt($data->price_id)){
-        HttpHeader::setResponseCode(400);
-        echo "No valid price_id given";
-        return FALSE;
+        return Status::errorStatus("No valid price_id given");
     }
     if(! $data->price_min or !$sanitizer->isFloat($data->price_min)){
-        HttpHeader::setResponseCode(400);
-        echo "No valid price_min given";
-        return FALSE;
+        return Status::errorStatus("No valid price_min given");
     }
 
     // update the price
     $db = new DBAccess($configuration);
     if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
         error_log("update_user_group_price: not able to connect to database");
-        return FALSE;
+        return Status::errorStatus("Cannot connect to database");
     }
 
     $query = "UPDATE pricing 
@@ -410,25 +372,23 @@
     );
     if($db->execute()){
         $db->disconnect();
-        return TRUE;
+        return Status::successStatus("updated user group price");
     }
     $db->disconnect();
-    HttpHeader::setResponseCode(500);
-    return FALSE;
+    return Status::errorStatus("could not update user group price");
   }
 
   function get_user_roles($configuration, $lc){
     // only admins are allowed to call this function
     if(!$lc->isAdmin()){
-        HttpHeader::setResponseCode(403);
-        exit;
+        return Status::errorStatus("Not sufficient permissions");
     }
 
     $db = new DBAccess($configuration);
     if(!$db->connect()){
         HttpHeader::setResponseCode(500);
         error_log("get_user_roles: not able to connect to database");
-        exit;
+        return Status::errorStatus("Cannot connect to the database");
     }
 
     $ret = Array();
@@ -448,7 +408,7 @@
         $ret[$i] = $row;
     }
 
-    echo json_encode($ret);
+    return Status::successDataResponse("success", $ret);
   }
 
   // Returns all user types from the database
