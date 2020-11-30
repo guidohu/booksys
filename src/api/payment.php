@@ -11,21 +11,24 @@
 	// Check if the user is already logged in and is of type admin
 	$lc = new Login($configuration);
 	if(!$lc->isLoggedInAndRoleRedirect($configuration->admin_user_status_id, $configuration->login_page)){
+		echo json_encode(Status::errorStatus("Insufficient permissions"));
 		exit;
 	}
 	
 	// check if we have an action
 	if(!isset($_GET['action'])){
-		HttpHeader::setResponseCode(200);
+		echo json_encode(Status::errorStatus("API action not known"));
 		exit;
 	}
 	
 	switch($_GET['action']){
 		case 'get_transactions':
-			get_transactions($configuration);
+			$response = get_transactions($configuration);
+			echo json_encode($response);
 			exit;
 		case 'get_statistics':
-		    get_statistics($configuration);
+			$response = get_statistics($configuration);
+			echo json_encode($response);
 			exit;
 		case 'get_payment_types':
 		    get_payment_types($configuration);
@@ -40,7 +43,8 @@
 			add_payment($configuration);
 			exit;
 		case 'get_years':
-			get_years($configuration);
+			$response = get_years($configuration);
+			echo json_encode($response);
 			exit;
 		case 'delete_payment':
 			delete_transaction($configuration);
@@ -69,8 +73,7 @@
 		
 		$db = new DBAccess($configuration);
 		if(!$db->connect()){
-			HttpHeader::setResponseCode(500);
-			exit;
+			return Status::errorStatus("Cannot connect to the database");
 		}
 		
 		$query = "SELECT acc.tbl as tbl, acc.id as id, acc.user_id as user_id, u.first_name as fn, u.last_name as ln, 
@@ -96,17 +99,12 @@
 		$res = $db->fetch_data_hash($query);
 		if(!isset($res)){
 		    error_log("api/payment: Cannot retrieve payment information");
-			HttpHeader::setResponseCode(500);
 			$db->disconnect();
-			exit;
+			return Status::errorStatus("Cannot retrieve payment information from the database");
 		}
 		$db->disconnect();
 
-		$response = array();
-		$response['transactions'] = $res;
-		$response['currency']     = $configuration->currency;
-
-		echo json_encode($response);
+		return Status::successDataResponse("success", $res);
 	}
 	
 	/* Delete a payment entry from the database
@@ -184,8 +182,7 @@
 		
 		$db = new DBAccess($configuration);
 		if(!$db->connect()){
-			HttpHeader::setResponseCode(500);
-			exit;
+			return Status::errorStatus("Cannot connect to database");
 		}
 		
 		// get total of all payments
@@ -336,7 +333,7 @@
 
 		$statistic['currency'] = $configuration->currency;
 		
-		echo json_encode($statistic);		
+		return Status::successDataResponse("success", $statistic);		
 	}
 	
 	/* Returns the different expenditure types and their name */
@@ -381,14 +378,13 @@
 		echo json_encode($payment_types);		
 	}
 	
-	/* Returns the years for which we have payment data */
+	/* Returns the years as an array for which we have payment data */
 	function get_years($configuration){
 		$years = Array();
 		
 		$db = new DBAccess($configuration);
 		if(!$db->connect()){
-			HttpHeader::setResponseCode(500);
-			exit;
+			return Status::errorStatus("Cannot connect to database");
 		}
 		
 		// get years for payments
@@ -400,12 +396,14 @@
 				  UNION
 				  SELECT 'any' AS year
 				  ORDER BY year ASC";
-		$res = $db->fetch_data_hash($query);		
-		$years = $res;
+		$res = $db->fetch_data_hash($query);
+		
+		foreach ($res as $row){
+			array_push($years, $row['year']);
+		}
 		
 		$db->disconnect();
-		
-		echo json_encode($years);		
+		return Status::successDataResponse('success', $years);		
 	}
 	
 	function add_payment($configuration){

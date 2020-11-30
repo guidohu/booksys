@@ -8,6 +8,7 @@ import boat from './modules/boat';
 import stopwatch from './modules/stopwatch';
 import heats from './modules/heats';
 import log from './modules/log';
+import accounting from './modules/accounting';
 
 Vue.use(Vuex)
 
@@ -20,7 +21,8 @@ const store = new Vuex.Store({
     boat: boat,
     stopwatch: stopwatch,
     heats: heats,
-    log: log
+    log: log,
+    accounting: accounting
   }
 })
 

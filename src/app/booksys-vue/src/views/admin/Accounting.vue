@@ -13,7 +13,7 @@
       <b-row class="ml-1 mr-1">
         <b-col cols="12">
           <b-card no-body>
-            Accounting here
+            <AccountingTabs class="content-max-height"/>
           </b-card>
         </b-col>
       </b-row>
@@ -27,7 +27,7 @@
     <div v-else>
       <NavbarAdminMobile title="Accounting"/>
       <b-card no-body>
-        Accounting here
+        <AccountingTabs/>
       </b-card>
     </div>
   </div>
@@ -37,11 +37,13 @@
 import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarAdminMobile from '@/components/NavbarAdminMobile';
+import AccountingTabs from '@/components/AccountingTabs';
 
 export default Vue.extend({
-  name: 'Users',
+  name: 'Accounting',
   components: {
-    NavbarAdminMobile
+    NavbarAdminMobile,
+    AccountingTabs
   },
   computed: {
     isDesktop: function () {
@@ -50,3 +52,11 @@ export default Vue.extend({
   }
 })
 </script>
+
+<style>
+  .content-max-height {
+    min-height: 480px;
+    max-height: 480px;
+    overflow-y: scroll;
+  }
+</style>
