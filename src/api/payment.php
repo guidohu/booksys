@@ -46,12 +46,13 @@
 			$response = get_years($configuration);
 			echo json_encode($response);
 			exit;
-		case 'delete_payment':
-			delete_transaction($configuration);
+		case 'delete_transaction':
+			$response = delete_transaction($configuration);
+			echo json_encode($response);
 			exit;
 	}
-	
-	HttpHeader::setResponseCode(400);
+
+	echo json_encode(Status::errorStatus("action unknown for this API call"));
 	return;
 	
 	// FUNCTIONS
@@ -120,15 +121,15 @@
 		// general input validation
 		if(! isset($post_data->table_id) or !$sanitizer->isInt($post_data->table_id)){
 			error_log("api/payment: request without table_id");
-			HttpHeader::setResponseCode(400);
-			exit;
+			return Status::errorStatus("No table_id provided");
 		}
 		if(! isset($post_data->row_id) or !$sanitizer->isInt($post_data->row_id)){
 			error_log("api/payment: request without row_id");
-			HttpHeader::setResponseCode(400);
-			exit;
+			return Status::errorStatus("No row_id provided");
 		}
 		
+		// get translate the table_id to the actual
+		// database table that is affected
 		$row_id = intval($post_data->row_id);
 		if($post_data->table_id == 0){
 			$table_name = "expenditure";
@@ -138,14 +139,12 @@
 			$table_name = "boat_fuel";
 		}else{
 			error_log("api/payment: illegal table_id");
-			HttpHeader::setResponseCode(400);
-			exit;
+			return Status::errorStatus("The provided table_id is not a valid one.");
 		}
 		
 		$db = new DBAccess($configuration);
 		if(!$db->connect()){
-			HttpHeader::setResponseCode(500);
-			exit;
+			return Status::errorStatus("Cannot connect to database.");
 		}
 		
 		// build the query
@@ -154,15 +153,12 @@
 		$db->bind_param('i', $row_id);
 		if(!$db->execute()){
 			$db->disconnect();
-			HttpHeader::setResponseCode(500);
-			echo "Internal Server Error, delete: $query";
 			error_log('api/payment: Cannot delete entry');
-			return;
+			return Status::errorStatus("Cannot delete transaction.");
 		}
 		$db->disconnect();
 		
-		HttpHeader::setResponseCode(200);
-		return;
+		return Status::successStatus("deleted transaction successfully");
 		
 	}
 	

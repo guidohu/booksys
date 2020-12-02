@@ -1,7 +1,8 @@
 import Accounting from "@/api/accounting";
 
 const state = () => ({
-  years: [],        // available years
+  selectedYear: 'any',
+  years: [],                      // available years
   transactions: [],
   totalPayments: 0,
   totalPaymentsAllTime: 0,
@@ -80,6 +81,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       Accounting.getStatistics(year)
       .then((statistics) => {
+        commit('setSelectedYear', year);
         commit('setStatistics', statistics);
         resolve();
       })
@@ -93,7 +95,21 @@ const actions = {
     return new Promise((resolve, reject) => {
       Accounting.getTransactions(year)
       .then((statistics) => {
+        commit('setSelectedYear', year);
         commit('setTransactions', statistics);
+        resolve();
+      })
+      .catch((errors) => {
+        reject(errors);
+      })
+    })
+  },
+  deleteTransaction ({ dispatch, state }, transaction) {
+    console.log("Action triggered: deleteTransaction");
+    return new Promise((resolve, reject) => {
+      Accounting.deleteTransaction(transaction)
+      .then(() => {
+        dispatch('queryTransactions', state.selectedYear);
         resolve();
       })
       .catch((errors) => {
@@ -145,6 +161,9 @@ const mutations = {
   },
   setTransactions (state, transactions){
     state.transactions = transactions;
+  },
+  setSelectedYear (state, year){
+    state.selectedYear = year;
   }
 };
 

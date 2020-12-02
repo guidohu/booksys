@@ -155,28 +155,27 @@ export default Vue.extend({
     showDeleteUserGroupDialog: function(){
       const name = this.selectedItems[0].user_group_name;
       const id   = this.selectedItems[0].user_group_id;
-      this.boxTwo = ''
-        this.$bvModal.msgBoxConfirm('Do you really want to delete user group '+name+'?', {
-          title: 'Delete User Group',
-          size: 'sm',
-          buttonSize: 'sm',
-          okVariant: 'danger',
-          okTitle: 'Delete',
-          cancelTitle: 'Cancel',
-          footerClass: 'p-2',
-          hideHeaderClose: false,
-          centered: true
-        })
-        .then(value => {
-          // delete user group
-          if(value == true){
-            this.deleteUserGroup(id)
-            .catch((errors) => this.errors = errors);
-          }
-        })
-        .catch(err => {
-          this.errors = [ err ]
-        })
+      this.$bvModal.msgBoxConfirm('Do you really want to delete user group '+name+'?', {
+        title: 'Delete User Group',
+        size: 'sm',
+        buttonSize: 'sm',
+        okVariant: 'danger',
+        okTitle: 'Delete',
+        cancelTitle: 'Cancel',
+        footerClass: 'p-2',
+        hideHeaderClose: false,
+        centered: true
+      })
+      .then(value => {
+        // delete user group
+        if(value == true){
+          this.deleteUserGroup(id)
+          .catch((errors) => this.errors = errors);
+        }
+      })
+      .catch(err => {
+        this.errors = [ err ]
+      })
     },
     showDetails: function() {
       this.userGroupEditMode = false;

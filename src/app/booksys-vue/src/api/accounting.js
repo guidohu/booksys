@@ -119,4 +119,44 @@ export default class Accounting {
       })
     })
   }
+
+  /**
+   * Delete a specific transaction.
+   * @param {*} transaction 
+   */
+  static deleteTransaction(transaction) {
+    console.log("accounting/deleteTransaction called with:", transaction);
+    return new Promise((resolve, reject) => {
+      const requestData = {
+        table_id: transaction.tbl,
+        row_id:   transaction.id
+      };
+
+      fetch('/api/payment.php?action=delete_transaction', {
+        method: "POST",
+        cache: "no-cache",
+        body: JSON.stringify(requestData)
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("accounting/deleteTransaction response data:", data);
+            if(data.ok){
+              resolve();
+            }else{
+              console.log("accounting/deleteTransaction: Cannot delete transactions, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("accounting/deleteTransaction: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("accounting/deleteTransaction", error);
+        reject([error]);
+      })
+    })
+  }
 }

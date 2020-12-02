@@ -61,7 +61,7 @@
             <template #cell(action)="data">
               <div class="text-center">
                 <b-button size="sm" style="font-size: 0.8em;" variant="light">
-                  <b-icon v-on:click="deleteTransaction(data.item)" icon="trash" variant="danger"/>
+                  <b-icon v-on:click="deleteEntry(data.item)" icon="trash" variant="danger"/>
                 </b-button>
               </div>
             </template>
@@ -155,7 +155,8 @@ export default Vue.extend({
   methods: {
     ...mapActions('accounting', [
       'queryTransactions',
-      'queryYears'
+      'queryYears',
+      'deleteTransaction'
     ]),
     ...mapActions('configuration', [
       'queryConfiguration'
@@ -170,8 +171,33 @@ export default Vue.extend({
       this.queryTransactions(selection)
       .catch((errors) => this.errors = errors);
     },
-    deleteTransaction: function(transaction){
-      console.log("TODO delete transaction:", transaction);
+    deleteEntry: function(transaction){
+      const message = 'Do you really want to delete this transaction?';
+      this.$bvModal.msgBoxConfirm(message, {
+        title: 'Delete Transaction',
+        size: 'sm',
+        buttonSize: 'sm',
+        okVariant: 'danger',
+        okTitle: 'Delete',
+        cancelTitle: 'Cancel',
+        footerClass: 'p-2',
+        hideHeaderClose: false,
+        centered: true
+      })
+      .then(value => {
+        // delete transaction
+        if(value == true){
+          this.deleteTransaction(transaction)
+          .then(() => this.errors = [])
+          .catch((errors) => this.errors = errors);
+        }
+      })
+      .catch(err => {
+        this.errors = [ err ]
+      })
+    },
+    dismissedHandler: function() {
+      this.errors = [];
     }
   },
   created(){
