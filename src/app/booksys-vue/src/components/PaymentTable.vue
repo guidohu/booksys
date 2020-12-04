@@ -44,28 +44,37 @@
       </b-row>
       <b-row>
         <b-col cols="12">
-          <b-table 
-            striped
-            hover
-            response
-            small
-            sticky-header
-            borderless
-            sort-by="date"
-            :items="getTransactions"
-            :fields="fields"
-            :selectable="false"
-            show-empty
-            empty-text="No records to show"
+          <b-overlay
+            id="overlay-background"
+            :show="isLoading"
+            spinner-type="border"
+            spinner-variant="info"
+            rounded="sm"
           >
-            <template #cell(action)="data">
-              <div class="text-center">
-                <b-button size="sm" style="font-size: 0.8em;" variant="light">
-                  <b-icon v-on:click="deleteEntry(data.item)" icon="trash" variant="danger"/>
-                </b-button>
-              </div>
-            </template>
-          </b-table>
+            <b-table 
+              striped
+              hover
+              small
+              sticky-header
+              borderless
+              sort-by="date"
+              :items="getTransactions"
+              :fields="fields"
+              :selectable="false"
+              table-class="payment-table"
+              tbody-class="payment-table"
+              show-empty
+              empty-text="No records to show"
+            >
+              <template #cell(action)="data">
+                <div class="text-center">
+                  <b-button size="sm" style="font-size: 0.8em;" variant="light">
+                    <b-icon v-on:click="deleteEntry(data.item)" icon="trash" variant="danger"/>
+                  </b-button>
+                </div>
+              </template>
+            </b-table>
+          </b-overlay>
         </b-col>
       </b-row>
     </div>
@@ -87,6 +96,7 @@ export default Vue.extend({
   data() {
     return {
       errors: [],
+      isLoading: false,
       form: {
         years: [],
         selectedYear: "any"
@@ -168,8 +178,12 @@ export default Vue.extend({
       console.log("TODO showAddExpenditure");
     },
     yearSelectionChangeHandler: function(selection){
+      this.isLoading = true;
+
       this.queryTransactions(selection)
-      .catch((errors) => this.errors = errors);
+      .then(() => this.errors = [])
+      .catch((errors) => this.errors = errors)
+      .then(() => this.isLoading = false);
     },
     deleteEntry: function(transaction){
       const message = 'Do you really want to delete this transaction?';
@@ -187,20 +201,25 @@ export default Vue.extend({
       .then(value => {
         // delete transaction
         if(value == true){
+          this.isLoading = true;
           this.deleteTransaction(transaction)
-          .then(() => this.errors = [])
+          .then(() => {
+            this.errors = [];
+          })
           .catch((errors) => this.errors = errors);
         }
       })
       .catch(err => {
         this.errors = [ err ]
       })
+      .then(() => this.isLoading = false);
     },
     dismissedHandler: function() {
       this.errors = [];
     }
   },
   created(){
+    this.isLoading = true;
     this.queryConfiguration()
     .catch((errors) => this.errors = errors);
 
@@ -211,7 +230,29 @@ export default Vue.extend({
     this.form.selectedYear = currentYear;
 
     this.queryTransactions(currentYear)
+    .then(() => this.isLoading = false)
     .catch((errors) => this.errors = errors);
   }
 })
 </script>
+
+<style scoped>
+  @media (min-width: 450px) {
+    .b-table-sticky-header {
+      min-height: 330px;
+      max-height: 330px;
+      height: 330px;
+    }
+  }
+
+  @media (max-width: 450px) {
+    .b-table-sticky-header {
+      min-height: 540px;
+      max-height: 540px;
+      height: 540px;
+    }
+  }
+
+  
+
+</style>
