@@ -3,6 +3,8 @@ import Accounting from "@/api/accounting";
 const state = () => ({
   selectedYear: 'any',
   years: [],                      // available years
+  expenseTypes: [],               // types of different expenses
+  incomeTypes: [],                // types of different incomes
   transactions: [],
   totalPayments: 0,
   totalPaymentsAllTime: 0,
@@ -20,6 +22,12 @@ const state = () => ({
 const getters = {
   getYears: (state) => {
     return state.years;
+  },
+  getExpenseTypes: (state) => {
+    return state.expenseTypes;
+  },
+  getIncomeTypes: (state) => {
+    return state.incomeTypes;
   },
   getTotalPayments: (state) => {
     return Math.round(Number(state.totalPayments)*100)/100;
@@ -76,6 +84,32 @@ const actions = {
       })
     })
   },
+  queryExpenseTypes ({ commit }) {
+    console.log("Action triggered: queryExpenseTypes");
+    return new Promise((resolve, reject) => {
+      Accounting.getExpenseTypes()
+      .then((types) => {
+        commit('setExpenseTypes', types);
+        resolve();
+      })
+      .catch((errors) => {
+        reject(errors);
+      })
+    })
+  },
+  queryIncomeTypes ({ commit }) {
+    console.log("Action triggered: queryIncomeTypes");
+    return new Promise((resolve, reject) => {
+      Accounting.getIncomeTypes()
+      .then((types) => {
+        commit('setIncomeTypes', types);
+        resolve();
+      })
+      .catch((errors) => {
+        reject(errors);
+      })
+    })
+  },
   queryStatistics ({ commit }, year) {
     console.log("Action triggered: queryStatistics");
     return new Promise((resolve, reject) => {
@@ -116,12 +150,31 @@ const actions = {
         reject(errors);
       })
     })
+  },
+  addIncome ({ dispatch, state }, income) {
+    console.log("Action triggered: addIncome");
+    return new Promise((resolve, reject) => {
+      Accounting.addIncome(income)
+      .then(() => {
+        dispatch('queryTransactions', state.selectedYear);
+        resolve();
+      })
+      .catch((errors) => {
+        reject(errors);
+      })
+    })
   }
 };
 
 const mutations = {
   setYears (state, years){
     state.years = years;
+  },
+  setExpenseTypes (state, types){
+    state.expenseTypes = types;
+  },
+  setIncomeTypes (state, types){
+    state.incomeTypes = types
   },
   setStatistics (state, statistics){
     console.log('TODO', statistics);

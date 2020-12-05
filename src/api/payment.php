@@ -31,16 +31,19 @@
 			echo json_encode($response);
 			exit;
 		case 'get_payment_types':
-		    get_payment_types($configuration);
+			$response = get_payment_types($configuration);
+			echo json_encode($response);
 			exit;
 		case 'get_expenditure_types':
-			get_expenditure_types($configuration);
+			$response = get_expenditure_types($configuration);
+			echo json_encode($response);
 			exit;
 		case 'add_expenditure':
 		    add_expenditure($configuration);
 			exit;
 		case 'add_payment':
-			add_payment($configuration);
+			$response = add_payment($configuration);
+			echo json_encode($response);
 			exit;
 		case 'get_years':
 			$response = get_years($configuration);
@@ -334,44 +337,36 @@
 	
 	/* Returns the different expenditure types and their name */
 	function get_expenditure_types($configuration){
-		$payment_types = Array();
-		
 		$db = new DBAccess($configuration);
 		if(!$db->connect()){
-			HttpHeader::setResponseCode(500);
-			exit;
+			return Status::errorStatus("Cannot connect to database");
 		}
 		
 		// get types for expenditures
 		$query = "SELECT id, name FROM expenditure_type ORDER BY name";
-		$res = $db->fetch_data_hash($query);		
-		$payment_types = $res;
+		$res = $db->fetch_data_hash($query);
 		
 		$db->disconnect();
 		
-		echo json_encode($payment_types);		
+		echo json_encode($res);		
 	}
 	
 	/* Returns the different payment types and their name */
-	function get_payment_types($configuration){
-		$payment_types = Array();
-		
+	function get_payment_types($configuration){		
 		$db = new DBAccess($configuration);
 		if(!$db->connect()){
-			HttpHeader::setResponseCode(500);
-			exit;
+			return Status::errorStatus("Cannot connect to database");
 		}
 		
 		// get types for payments
 		$query = "SELECT id, name FROM expenditure_type 
 		            WHERE id NOT IN (0, 1, 2) 
 					ORDER BY name";
-		$res = $db->fetch_data_hash($query);		
-		$payment_types = $res;
+		$res = $db->fetch_data_hash($query);
 		
 		$db->disconnect();
 		
-		echo json_encode($payment_types);		
+		return Status::successDataResponse("success", $res);
 	}
 	
 	/* Returns the years as an array for which we have payment data */
@@ -409,30 +404,20 @@
 		
 		// general input validation
 		if(!isset($post_data->user_id) or !$sanitizer->isInt($post_data->user_id)){
-			HttpHeader::setResponseCode(400);
-			echo "No valid user selected, please select a user";
-			return;
+			return Status::errorStatus("No valid user selected, please select a user");
 		}
 		if(!isset($post_data->type_id) or !$sanitizer->isInt($post_data->type_id)){
-			HttpHeader::setResponseCode(400);
-			echo "No valid expenditure type";
-			return;
+			return Status::errorStatus("No valid income type");
 		}
 		if(!isset($post_data->date) or !$sanitizer->isDate($post_data->date)){
-			HttpHeader::setResponseCode(400);
-			echo "No valid date";
-			return;
+			return Status::errorStatus("No valid date");
 		}
 		if(!isset($post_data->amount) or !$sanitizer->isFloat($post_data->amount)){
-			HttpHeader::setResponseCode(400);
-			echo "No valid amount";
-			return;
+			return Status::errorStatus("No valid amount");
 		}
 		if($post_data->type_id != 4 and $post_data->type_id != 6
 		   and (!isset($post_data->comment) or $post_data->comment == '')){
-			HttpHeader::setResponseCode(400);
-			echo "No comment provided";
-			return;
+			return Status::errorStatus("No comment provided");
 		}else if((!isset($post_data->comment) or $post_data->comment == '') and $post_data->type_id == 4){
 			$post_data->comment = 'Session Payment';
 		}else if((!isset($post_data->comment) or $post_data->comment == '') and $post_data->type_id == 6){
@@ -445,8 +430,7 @@
 		
 		$db = new DBAccess($configuration);
 		if(!$db->connect()){
-			HttpHeader::setResponseCode(500);
-			exit;
+			return Status::errorStatus("Cannot connect to the database");
 		}
 		
 		$db->prepare($query);
@@ -458,10 +442,8 @@
 						$post_data->comment);
 		if(!$db->execute()){
 			$db->disconnect();
-			HttpHeader::setResponseCode(500);
-			echo "Internal Server Error, cannot add the payment.";
 			error_log('api/payment: Cannot add payment');
-			return;
+			return Status::errorStatus("Income transaction cannot be added, due to an unknown error.");
 		}
 		$db->disconnect();
 		
@@ -478,8 +460,7 @@
 			Email::sendMail($user_data['email'], 'Payment received', $msg, $configuration);
 		}
 		
-		HttpHeader::setResponseCode(200);
-		return;
+		return Status::successStatus("Income added");
 	}
 	
 	function add_expenditure($configuration){

@@ -194,7 +194,6 @@ export default Vue.extend({
   },
   methods: {
     save: function() {
-      console.log("TODO implement save");
       this.saveUserGroup(this.form)
       .then(() => {
         this.errors = [];

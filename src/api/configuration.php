@@ -137,6 +137,14 @@
     function set_configuration($configuration){
         $data = json_decode(file_get_contents('php://input'));
 
+        // default value replacement
+        if(isset($data->smtp_sender) && $data->smtp_sender == ""){
+            $data->smtp_sender = NULL;
+        }
+        if(isset($data->smtp_server) && $data->smtp_server == ""){
+            $data->smtp_server = NULL;
+        }
+
         // sanitize input
         $sanitizer = new Sanitizer();
         if(!isset($data->location_time_zone) || !$sanitizer->isTimeZone($data->location_time_zone)){
@@ -201,6 +209,7 @@
         foreach ($keys as $key) {
             // if the key is not defined, we do not store anything
             if(!isset($data->$key)){
+                $configuration->set_configuration_property($key, NULL);
                 continue;
             }
 

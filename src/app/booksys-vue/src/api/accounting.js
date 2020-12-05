@@ -34,6 +34,72 @@ export default class Accounting {
   }
 
   /**
+   * Returns all the expense types that there are.
+   */
+  static getExpenseTypes() {
+    console.log("accounting/getExpenseTypes called");
+    return new Promise((resolve, reject) => {
+      fetch('/api/payment.php?action=get_expenditure_types', {
+        method: "GET",
+        cache: "no-cache",
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("accounting/getExpenseTypes response data:", data);
+            if(data.ok){
+              resolve(data.data);
+            }else{
+              console.log("accounting/getExpenseTypes: Cannot retrieve expense types, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("accounting/getExpenseTypes: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("accounting/getExpenseTypes", error);
+        reject([error]);
+      })
+    })
+  }
+
+  /**
+   * Returns all the income types that there are.
+   */
+  static getIncomeTypes() {
+    console.log("accounting/getIncomeTypes called");
+    return new Promise((resolve, reject) => {
+      fetch('/api/payment.php?action=get_payment_types', {
+        method: "GET",
+        cache: "no-cache",
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("accounting/getIncomeTypes response data:", data);
+            if(data.ok){
+              resolve(data.data);
+            }else{
+              console.log("accounting/getIncomeTypes: Cannot retrieve income types, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("accounting/getIncomeTypes: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("accounting/getIncomeTypes", error);
+        reject([error]);
+      })
+    })
+  }
+
+  /**
    * Returns the statistics for a given year. Year can be 'any' or
    * a specific number
    */
@@ -158,5 +224,55 @@ export default class Accounting {
         reject([error]);
       })
     })
+  }
+
+  /**
+   * Adds an income transaction
+   * @param {*} incomeTransaction containing the following fields:
+   * {
+   *  amount:  ...
+   *  typeId:  ...         income type ID
+   *  date:    ...         
+   *  userId:  ...         ID of the user associated with this transaction
+   *  comment: ...
+   * }
+   */
+  static addIncome(incomeTransaction){
+    console.log("accounting/addIncome called with:", incomeTransaction);
+    return new Promise((resolve, reject) => {
+      const requestData = {
+        amount:   incomeTransaction.amount,
+        type_id:  incomeTransaction.typeId,
+        date:     incomeTransaction.date,
+        user_id:  incomeTransaction.userId,
+        comment:  incomeTransaction.comment
+      };
+
+      fetch('/api/payment.php?action=add_payment', {
+        method: "POST",
+        cache: "no-cache",
+        body: JSON.stringify(requestData)
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("accounting/addIncome response data:", data);
+            if(data.ok){
+              resolve();
+            }else{
+              console.log("accounting/addIncome: Cannot add income transactions, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("accounting/addIncome: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("accounting/addIncome", error);
+        reject([error]);
+      })
+    })    
   }
 }

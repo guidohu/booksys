@@ -2,6 +2,7 @@
   <div class="text-left">
     <WarningBox v-if="errors.length > 0" :errors="errors" dismissible="true" @dismissed="dismissedHandler"/>
     <div v-else>
+      <IncomeModal/>
       <b-row v-if="form.years.length>0" class="text-right">
         <b-col offset="6" cols="6" class="d-sm-none mr-1">
           <b-form-group
@@ -23,7 +24,7 @@
       <b-row>
         <b-col cols="8">
           <b-button v-on:click="showAddIncome" size="sm" variant="outline-info" class="mr-1 mb-2"><b-icon icon="plus"/>Income</b-button>
-          <b-button v-on:click="showAddExpenditure" size="sm" variant="outline-info" class="mb-2"><b-icon icon="minus"/>Expenditure</b-button>
+          <b-button v-on:click="showAddExpense" size="sm" variant="outline-info" class="mb-2"><b-icon icon="dash"/>Expense</b-button>
         </b-col>
         <b-col cols="4" class="d-none d-sm-block">
           <b-form-group
@@ -87,11 +88,13 @@ import { mapGetters, mapActions } from 'vuex';
 import _ from 'lodash';
 import moment from 'moment';
 import WarningBox from '@/components/WarningBox';
+import IncomeModal from '@/components/IncomeModal';
 
 export default Vue.extend({
   name: "PaymentTable",
   components: {
-    WarningBox
+    WarningBox,
+    IncomeModal
   },
   data() {
     return {
@@ -172,9 +175,9 @@ export default Vue.extend({
       'queryConfiguration'
     ]),
     showAddIncome: function() {
-      console.log("TODO showAddIncome");
+      this.$bvModal.show('incomeModal');
     },
-    showAddExpenditure: function() {
+    showAddExpense: function() {
       console.log("TODO showAddExpenditure");
     },
     yearSelectionChangeHandler: function(selection){
