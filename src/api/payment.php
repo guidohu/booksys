@@ -21,41 +21,38 @@
 		exit;
 	}
 	
+	$response = '';
 	switch($_GET['action']){
 		case 'get_transactions':
 			$response = get_transactions($configuration);
-			echo json_encode($response);
-			exit;
+			break;
 		case 'get_statistics':
 			$response = get_statistics($configuration);
-			echo json_encode($response);
-			exit;
+			break;
 		case 'get_payment_types':
 			$response = get_payment_types($configuration);
-			echo json_encode($response);
-			exit;
+			break;
 		case 'get_expenditure_types':
 			$response = get_expenditure_types($configuration);
-			echo json_encode($response);
-			exit;
+			break;
 		case 'add_expenditure':
-		    add_expenditure($configuration);
-			exit;
+		    $response = add_expenditure($configuration);
+			break;
 		case 'add_payment':
 			$response = add_payment($configuration);
-			echo json_encode($response);
-			exit;
+			break;
 		case 'get_years':
 			$response = get_years($configuration);
-			echo json_encode($response);
-			exit;
+			break;
 		case 'delete_transaction':
 			$response = delete_transaction($configuration);
-			echo json_encode($response);
-			exit;
+			break;
+		default:
+			$respone = Status::errorStatus("action unknown for this API call");
+			break;
 	}
 
-	echo json_encode(Status::errorStatus("action unknown for this API call"));
+	echo json_encode($response);
 	return;
 	
 	// FUNCTIONS
@@ -348,7 +345,7 @@
 		
 		$db->disconnect();
 		
-		echo json_encode($res);		
+		return Status::successDataResponse("success", $res);	
 	}
 	
 	/* Returns the different payment types and their name */
@@ -470,29 +467,22 @@
 		
 		// general input validation
 		if(!isset($post_data->user_id) or !$sanitizer->isInt($post_data->user_id)){
-			HttpHeader::setResponseCode(400);
-			echo "No valid user selected, please select a user";
-			return;
+			return Status::errorStatus("No valid user selected, please select a user");
 		}
 		if(!isset($post_data->type_id) or !$sanitizer->isInt($post_data->type_id)){
-			HttpHeader::setResponseCode(400);
-			echo "No valid expenditure type";
-			return;
+			return Status::errorStatus("No valid expenditure type");
 		}
 		if(!isset($post_data->date) or !$sanitizer->isDate($post_data->date)){
-			HttpHeader::setResponseCode(400);
-			echo "No valid date";
-			return;
+			return Status::errorStatus("No valid date");
 		}
 		if(!isset($post_data->amount) or !$sanitizer->isFloat($post_data->amount)){
-			HttpHeader::setResponseCode(400);
-			echo "No valid amount";
-			return;
+			return Status::errorStatus("No valid amount");
 		}
 		if(!isset($post_data->comment) or $post_data->comment == ''){
-			HttpHeader::setResponseCode(400);
-			echo "No comment provided";
-			return;
+			return Status::errorStatus("No comment provided");
+		}
+		if($post_data->type_id == 0){
+			return Status::errorStatus("Use the boat API for fuel expenses");
 		}
 		
 		# add a new expenditure to the database
@@ -501,8 +491,7 @@
 		
 		$db = new DBAccess($configuration);
 		if(!$db->connect()){
-			HttpHeader::setResponseCode(500);
-			exit;
+			return Status::errorStatus("Cannot connect to database");
 		}
 		
 		$db->prepare($query);
@@ -514,13 +503,10 @@
 						$post_data->comment);
 		if(!$db->execute()){
 			$db->disconnect();
-			HttpHeader::setResponseCode(500);
 			error_log('api/payment: Cannot add expenditure');
-			echo "Internal Server Error, cannot add the expenditure.";
-			return;
+			return Status::errorStatus("Internal Server Error, cannot add the expenditure.");
 		}
 		
 		$db->disconnect();
-		HttpHeader::setResponseCode(200);
-		return;
+		return Status::successStatus("Expense added");
 	}

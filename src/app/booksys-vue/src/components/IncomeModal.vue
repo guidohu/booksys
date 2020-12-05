@@ -51,7 +51,6 @@
             <b-form-select
               id="user-select"
               v-model="form.user"
-              @change="userChangeHandler($event)"
               :options="users"
             />
           </b-form-group>
@@ -148,7 +147,7 @@ export default Vue.extend({
   },
   watch: {
     getIncomeTypes: function(newValues){
-      console.log("TODO, add new income Types:", newValues);
+      this.buildTypeSelect(newValues);
     },
     userList: function(newValues){
       // console.log("TODO, add userList:", newValues);
@@ -213,6 +212,15 @@ export default Vue.extend({
       this.users = _.orderBy(this.users, ['text'], ['asc']);
       this.users.unshift({ value: null, text: "Please select"});
     },
+    clearForm: function() {
+      this.form = {
+        amount: null,
+        type: null,
+        date: moment().format('YYYY-MM-DD'),
+        user: null,
+        comment: null
+      };
+    },
     add: function() {
       const income = {
         amount:   Number(this.form.amount),
@@ -233,6 +241,7 @@ export default Vue.extend({
       this.add();
     },
     close: function() {
+      this.clearForm();
       this.$bvModal.hide('incomeModal');
     }
   },

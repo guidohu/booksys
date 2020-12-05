@@ -275,4 +275,54 @@ export default class Accounting {
       })
     })    
   }
+
+  /**
+   * Adds an expense transaction
+   * @param {*} expenseTransaction containing the following fields:
+   * {
+   *  amount:  ...
+   *  typeId:  ...         expense type ID
+   *  date:    ...         
+   *  userId:  ...         ID of the user associated with this transaction
+   *  comment: ...
+   * }
+   */
+  static addExpense(expenseTransaction){
+    console.log("accounting/addExpense called with:", expenseTransaction);
+    return new Promise((resolve, reject) => {
+      const requestData = {
+        amount:   expenseTransaction.amount,
+        type_id:  expenseTransaction.typeId,
+        date:     expenseTransaction.date,
+        user_id:  expenseTransaction.userId,
+        comment:  expenseTransaction.comment
+      };
+
+      fetch('/api/payment.php?action=add_expenditure', {
+        method: "POST",
+        cache: "no-cache",
+        body: JSON.stringify(requestData)
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("accounting/addExpense response data:", data);
+            if(data.ok){
+              resolve();
+            }else{
+              console.log("accounting/addExpense: Cannot add income transactions, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("accounting/addExpense: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("accounting/addExpense", error);
+        reject([error]);
+      })
+    })    
+  }
 }

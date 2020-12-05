@@ -3,6 +3,7 @@
     <WarningBox v-if="errors.length > 0" :errors="errors" dismissible="true" @dismissed="dismissedHandler"/>
     <div v-else>
       <IncomeModal/>
+      <ExpenseModal/>
       <b-row v-if="form.years.length>0" class="text-right">
         <b-col offset="6" cols="6" class="d-sm-none mr-1">
           <b-form-group
@@ -89,12 +90,14 @@ import _ from 'lodash';
 import moment from 'moment';
 import WarningBox from '@/components/WarningBox';
 import IncomeModal from '@/components/IncomeModal';
+import ExpenseModal from '@/components/ExpenseModal';
 
 export default Vue.extend({
   name: "PaymentTable",
   components: {
     WarningBox,
-    IncomeModal
+    IncomeModal,
+    ExpenseModal
   },
   data() {
     return {
@@ -178,7 +181,7 @@ export default Vue.extend({
       this.$bvModal.show('incomeModal');
     },
     showAddExpense: function() {
-      console.log("TODO showAddExpenditure");
+      this.$bvModal.show('expenseModal');
     },
     yearSelectionChangeHandler: function(selection){
       this.isLoading = true;

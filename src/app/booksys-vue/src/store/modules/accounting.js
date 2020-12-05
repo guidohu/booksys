@@ -163,6 +163,19 @@ const actions = {
         reject(errors);
       })
     })
+  },
+  addExpense ({ dispatch, state }, expense) {
+    console.log("Action triggered: addExpense");
+    return new Promise((resolve, reject) => {
+      Accounting.addExpense(expense)
+      .then(() => {
+        dispatch('queryTransactions', state.selectedYear);
+        resolve();
+      })
+      .catch((errors) => {
+        reject(errors);
+      })
+    })
   }
 };
 
