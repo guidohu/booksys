@@ -5,7 +5,7 @@
 	// automatically load all classes
 	spl_autoload_register('sign_up_autoloader');
 	function sign_up_autoloader($class){
-			include '../classes/'.$class.'.php';
+		include '../classes/'.$class.'.php';
 	}
 	
 	// User does not need to be logged in. This is basically an open API
@@ -13,73 +13,56 @@
 	
 	// check if we have an action
 	if(!isset($_GET['action'])){
-			HttpHeader::setResponseCode(200);
-			exit;
+		echo json_encode(Status::errorStatus("no API action provided"));
+		exit;
 	}
 	
+	$response = "";
 	switch($_GET['action']){
 		case 'sign_up':
-			sign_up();
-			exit;
+			$response = sign_up();
+			break;
+		default:
+			$response = Status::errorStatus("action not known to this API");
+			break;
 	}
 	
-	HttpHeader::setResponseCode(400);
+	echo json_encode($response);
 	return;
   
 	// registers a user in the database
 	// the user will have 'guest' status and will be locked
 	function sign_up(){
 		$data = json_decode(file_get_contents('php://input'));
-
-		$status = array();
-		$status['ok'] = TRUE;
 		
 		// input validation
 		$sanitizer = new Sanitizer();
 		if(! isset($data->username) or !$sanitizer->isAlphaNumEmail($data->username)){
-			$status = Status::errorStatus("Username is not valid, no special characters are allowed.");
-			echo json_encode($status);
-			return;
+			return Status::errorStatus("Your email address seems to have a typo in it.");
 		}
 		if(! isset($data->password) or !$sanitizer->isAsciiText($data->password)){
-			$status = Status::errorStatus("Password is somehow corrupt.");
-			echo json_encode($status);
-			return;
+			return Status::errorStatus("Password is somehow corrupt.");
 		}
 		if(! isset($data->first_name)){
-			$status = Status::errorStatus("No first name provided.");
-			echo json_encode($status);
-			return;
+			return Status::errorStatus("No first name provided.");
 		}
 		if(! isset($data->last_name)){
-			$status = Status::errorStatus("No last name provided.");
-			echo json_encode($status);
-			return;
+			return Status::errorStatus("No last name provided.");
 		}
 		if(! isset($data->address)){
-			$status = Status::errorStatus("No address given.");
-			echo json_encode($status);
-			return;
+			return Status::errorStatus("No address given.");
 		}
 		if(! isset($data->mobile) or !$sanitizer->isMobileNumber($data->mobile)){
-			$status = Status::errorStatus("The mobile number is not correct.");
-			echo json_encode($status);
-			return;
+			return Status::errorStatus("The mobile number is not correct.");
 		}
 		if(! isset($data->plz) or !$sanitizer->isInt($data->plz)){
-			$status = Status::errorStatus("Your Zip Code is wrong");
-			echo json_encode($status);
-			return;
+			return Status::errorStatus("Your Zip Code is wrong");
 		}
 		if(! isset($data->city)){
-			$status = Status::errorStatus("No city provided");
-			echo json_encode($status);
-			return;
+			return Status::errorStatus("No city provided");
 		}
 		if(! isset($data->email) or !$sanitizer->isEmail($data->email)){
-			$status = Status::errorStatus("Please check your Email again.");
-			echo json_encode($status);
-			return;
+			return Status::errorStatus("Please check your Email again.");
 		}
 		if(!isset($data->license) or $data->license != 1){
 			$data->license = 0;
@@ -93,9 +76,7 @@
 
 		if(isset($configuration->recaptcha_privatekey)){
 			if(!isset($data->recaptcha_token)){
-				$status = Status::errorStatus("reCAPTCHA token missing, are you a robot? Pleaes click I'm not a robot.");
-				echo json_encode($status);
-				return;
+				return Status::errorStatus("reCAPTCHA token missing, are you a robot? Pleaes click I'm not a robot.");
 			}
 			// check recaptcha
 			$recaptcha_url      = 'https://www.google.com/recaptcha/api/siteverify';
@@ -108,9 +89,7 @@
 
 			// Take action based on the result returned
 			if($recaptcha->success != 1){
-				$status = Status::errorStatus("reCAPTCHA token not valid.");
-				echo json_encode($status);
-				return;
+				return Status::errorStatus("reCAPTCHA token not valid.");
 			} 
 		}
 		
@@ -119,19 +98,15 @@
 		$query = 'SELECT username FROM user WHERE username = ?';
 		$db = new DBAccess($configuration);
 		if(!$db->connect()){
-			$status = Status::errorStatus("The backend cannot connect to the database.");
-			echo json_encode($status);
-			return;
+			return Status::errorStatus("The backend cannot connect to the database.");
 		}
 		$db->prepare($query);
 		$db->bind_param('s', $data->username);
 		$db->execute();
 		$res = $db->fetch_stmt_hash();
 		if(!isset($res) or count($res)>0){
-			$status = Status::errorStatus("Username/Email already taken.");
-			echo json_encode($status);
 			$db->disconnect();
-			return;
+			return Status::errorStatus("Username/Email already taken.");
 		}
 
 		// calculate the password hash
@@ -164,9 +139,7 @@
 		if(!$db->execute()){
 			$db->disconnect();
 			error_log('api/sign_up: Cannot add user to database');
-			$status = Status::errorStatus("User cannot be added due to unknown reason. Please contact the administrator.");
-			echo json_encode($status);
-			return;
+			return Status::errorStatus("User cannot be added due to unknown reason. Please contact the administrator.");
 		}
 
 		// get the user-id of the created user
@@ -176,24 +149,20 @@
 		if(!$db->execute()){
 			$db->disconnect();
 			error_log('api/sign_up: Cannot get ID of newly created user');
-			$status = Status::errorStatus("User was not created and cannot be found in the database. Please contact the administrator.");
-			echo json_encode($status);
-			return;
+			return Status::errorStatus("User was not created and cannot be found in the database. Please contact the administrator.");
 		}
 		$result = $db->fetch_stmt_hash();
 		if(count($result) != 1){
 			$db->disconnect();
 			error_log('api/sign_up: Cannot get ID of newly created user (non-unique)');
-			$status = Status::errorStatus("User was not created and cannot be found in the database. Please contact the administrator.");
-			echo json_encode($status);
-			return;
+			return Status::errorStatus("User was not created and cannot be found in the database. Please contact the administrator.");
 		}
 		$db->disconnect();
 
 		// return response
-		$status['user_id'] = $result[0]['id'];
-		echo json_encode($status);
+		$resp = array();
+		$resp['user_id'] = $result[0]['id'];
 
-		return;
+		return Status::successDataResponse('success', $resp);
 	}  
 ?>

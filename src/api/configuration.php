@@ -21,7 +21,8 @@
             get_db_config($configuration);
             exit;
         case 'get_recaptcha_key':
-            get_recaptcha_key($configuration);
+            $response = get_recaptcha_key($configuration);
+            echo json_encode($response);
             exit;
         case 'get_customization_parameters':
             get_customization_parameters($configuration);
@@ -80,8 +81,7 @@
     function get_recaptcha_key($configuration){
         $response = array();
         $response['key'] = $configuration->recaptcha_publickey;
-        echo json_encode($response);
-        return;
+        return Status::successDataResponse("success", $response);
     }
 
     function get_customization_parameters($configuration){

@@ -487,4 +487,50 @@ export default class User {
     })
   }
 
+  static signUp(userData){
+    console.log("User/signUp: called with userGroupId", userData);
+    return new Promise((resolve, reject) => {
+      const password = Login.calcHash(userData.password);
+
+      const queryData = {
+        username:          userData.email,
+        password:          password,
+        first_name:        userData.firstName,
+        last_name:         userData.lastName,
+        address:           userData.street,
+        mobile:            userData.phone,
+        plz:               userData.zip,
+        city:              userData.city,
+        email:             userData.email,
+        license:           userData.license,
+        recaptcha_token:   userData.recaptchaResponse
+      };
+
+      fetch('/api/sign_up.php?action=sign_up', {
+        method: "POST",
+        cache: 'no-cache',
+        body: JSON.stringify(queryData)
+      })
+      .then(response => {
+        response.json()
+        .then(data => {
+          if(!data.ok){
+            console.error("User/signUp: Cannot sign up user, got error", data.msg);
+            reject([data.msg]);
+          }else{
+            resolve();
+          }
+        })
+        .catch(error => {
+          console.error("User/signUp: Cannot parse server response", error);
+          reject([error]);
+        })
+      })
+      .catch(error => {
+        console.error("User/signUp: Cannot unlock user with ID", error);
+        reject([error])
+      })
+    })
+  }
+
 }

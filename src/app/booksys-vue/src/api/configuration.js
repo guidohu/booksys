@@ -1,5 +1,38 @@
 export class Configuration {
 
+  /**
+   * Returns the recaptcha key.
+   */
+  static getRecaptchaKey() {
+    console.log("configuration/getRecaptchaKey called");
+    return new Promise((resolve, reject) => {
+      fetch('/api/configuration.php?action=get_recaptcha_key', {
+        method: "GET",
+        cache: "no-cache",
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("configuration/getRecaptchaKey response data:", data);
+            if(data.ok && data.data != null){
+              resolve(data.data.key);
+            }else{
+              console.log("configuration/getRecaptchaKey: Cannot retrieve recaptcha key, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("configuration/getRecaptchaKey: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("configuration/getRecaptchaKey", error);
+        reject([error]);
+      })
+    })
+  }
+
   static getConfiguration(cbSuccess, cbFailure){
     fetch('/api/configuration.php?action=get_configuration', {
       method: 'GET',

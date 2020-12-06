@@ -46,7 +46,7 @@
                     <b-button to="/forgot-password" variant="light">
                         Forgot password
                     </b-button>
-                    <b-button to="/sign-up" variant="light">
+                    <b-button to="/signup" variant="light">
                         Sign-Up
                     </b-button>
                 </b-col>

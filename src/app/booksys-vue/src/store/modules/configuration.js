@@ -2,6 +2,7 @@ import { Configuration } from "../../api/configuration";
 
 const state = () => ({
   configuration: null,
+  recaptchaKey: null,
   currency: null,
   locationAddress: null,
   locationMap: null,
@@ -14,6 +15,9 @@ const state = () => ({
 })
 
 const getters = {
+  getRecaptchaKey: (state) => {
+    return state.recaptchaKey;
+  },
   getConfiguration: (state) => {
     return state.configuration;
   },
@@ -77,6 +81,19 @@ const actions = {
     }
     Configuration.getDbVersion(successCb, failureCb)
   },
+  queryRecaptchaKey({ commit }){
+    return new Promise((resolve, reject) => {
+      Configuration.getRecaptchaKey()
+      .then((key) => {
+        // load latest configuration
+        commit('setRecaptchaKey', key);
+        resolve();
+      })
+      .catch((errors) => {
+        reject(errors);
+      })
+    });
+  },
   updateDb({ commit, dispatch }) {
     commit('setIsUpdating', true)
     let successCb = (response) => {
@@ -114,6 +131,9 @@ const mutations = {
     state.locationMap = value.location_map;
     state.currency = value.currency;
     console.log('configuration set to', value);
+  },
+  setRecaptchaKey (state, value){
+    state.recaptchaKey = value;
   },
   setDbUpdateStatus (state, value){
     console.log(value)
