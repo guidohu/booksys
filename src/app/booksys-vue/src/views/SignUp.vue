@@ -192,7 +192,7 @@
         <b-col cols="1" class="d-none d-sm-block"></b-col>
       </b-row>
     </b-form>
-    <b-row class="text-center">
+    <b-row v-if="isSignedUp==true" class="text-center">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
       <b-col cols="12" sm="10">
         <p class="h4 mb-2">

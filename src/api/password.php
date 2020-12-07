@@ -13,16 +13,13 @@
   
   // check if we have an action
   if(!isset($_GET['action'])){
-	HttpHeader::setResponseCode(200);
-	exit;
+	echo json_encode(Status::errorStatus('no action provided'));
+	return;
   }
 
   $configuration = new Configuration();
   $lc = new Login($configuration);
-  $response = array(
-	  'ok'	=> FALSE,
-	  'msg' => 'unknown API call'
-  );
+  $response = '';
   
   // check which action to perform
   switch($_GET['action']){
@@ -42,6 +39,8 @@
 	    }
 		$response = change_password_by_password($configuration);
 		break;
+	default:
+		$response = Status::errorStatus("unknown action for this API");
   }
 
   echo json_encode($response);
@@ -65,22 +64,14 @@
   
     // input validation
 	$sanitizer = new Sanitizer();
-	$response  = array(
-		'ok' 		=> TRUE,
-		'message' 	=> 'token requested'
-	);
 
 	if(!isset($data->email) or !$sanitizer->isEmail($data->email)){
-		$response['ok'] = FALSE;
-		$response['message'] = "Your provided Email is not a valid email address";
-		return $response;
+		return Status::errorStatus("Your provided Email is not a valid email address");
 	}
 
 	if(isset($configuration->recaptcha_privatekey)){
 		if(!isset($data->recaptcha_token)){
-			$response['ok'] = FALSE;
-			$response['message'] = "reCAPTCHA token missing, are you a robot? Pleaes click I'm not a robot.";
-			return $response;
+			return Status::errorStatus("reCAPTCHA token missing, are you a robot? Pleaes click I'm not a robot.");
 		}
 		// check recaptcha
 		$recaptcha_url      = 'https://www.google.com/recaptcha/api/siteverify';
@@ -93,25 +84,19 @@
 
 		// Take action based on the result returned
 		if($recaptcha->success != 1){
-			$response['ok'] = FALSE;
-			$response['message'] = "reCAPTCHA token not valid";
-			return $response;
+			return Status::errorStatus("reCAPTCHA token not valid");
 		} 
 	}
 
 	// check that sending emails is even configured
 	if(!isset($configuration->smtp_server) || !isset($configuration->smtp_sender)){
-		$response['ok'] = FALSE;
-		$response['message'] = "The password reset mechanism is not configured properly. Please get in contact with the site owner to get this fixed.";
-		return $response;
+		return Status::errorStatus("The password reset mechanism is not configured properly. Please get in contact with the site owner to get this fixed.");
 	}
 	
 	// get user by email
 	$db = new DBAccess($configuration);
 	if(!$db->connect()){
-		HttpHeader::setResponseCode(500);
-		echo "Internal server error.";
-		exit;
+		return Status::errorStatus("Internal server error.");
 	}
 	
 	$query = 'SELECT id as id, username as username, 
@@ -124,18 +109,14 @@
 	$res = $db->fetch_stmt_hash();
 	if(!isset($res) or count($res)<1){
 		// do not give any information
-		$response['ok'] = TRUE;
-		$response['message'] = "token requested, please check your email inbox";
 		error_log("api/password: The provided email is not known: $data->email");
 		$db->disconnect();
-		return $response;
+		return Status::successStatus("token requested, please check your email inbox");
 	}elseif(count($res)>1){
 		// do not give any information
-		$response['ok'] = TRUE;
-		$response['message'] = "token requested, please check your email inbox";
 		error_log("api/password: The provided email is not unique: $data->email");
 		$db->disconnect();
-		return $response;
+		return Status::successStatus("token requested, please check your email inbox");
 	}
 	
 	$user_id    = $res[0]['id'];
@@ -156,10 +137,8 @@
 	);
 	$res = $db->query($query);
 	if($res == FALSE){
-		HttpHeader::setResponseCode(500);
-		echo "Internal server error";
 		$db->disconnect();
-		exit;
+		return Status::errorStatus("Cannot connect with the database to store token.");
 	}
 	$db->disconnect();
 	
@@ -177,13 +156,10 @@ See you on the lake soon
 _END;
  
 	if(!$mail->sendMail($data->email, 'Password Reset Token', $message, $configuration)){
-		$response['ok'] = FALSE;
-		$response['message'] = "Password reset token could not be sent, please verify your input or contact the site owner in case you are sure that the provided email is correct.";
-		return $response;
+		return Status::errorStatus("Password reset token could not be sent, please verify your input or contact the site owner in case you are sure that the provided email is correct.");
 	}
 	
-	$response['message'] = "Token requested, please check your email inbox.";
-	return $response;
+	return Status::successStatus("token requested, please check your email inbox");
   }
   
   /**

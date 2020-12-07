@@ -144,6 +144,12 @@
         if(isset($data->smtp_server) && $data->smtp_server == ""){
             $data->smtp_server = NULL;
         }
+        if(isset($data->recaptcha_privatekey) && $data->recaptcha_privatekey == ""){
+            $data->recaptcha_privatekey = NULL;
+        }
+        if(isset($data->recaptcha_publickey) && $data->recaptcha_publickey == ""){
+            $data->recaptcha_publickey = NULL;
+        }
 
         // sanitize input
         $sanitizer = new Sanitizer();

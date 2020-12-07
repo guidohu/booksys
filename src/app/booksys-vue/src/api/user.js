@@ -533,4 +533,39 @@ export default class User {
     })
   }
 
+  static requestPasswordResetToken(userData){
+    console.log("User/requestToken: called with userData", userData);
+    return new Promise((resolve, reject) => {
+      const queryData = {
+        email:             userData.email,
+        recaptcha_token:   userData.recaptchaResponse
+      };
+
+      fetch('/api/password.php?action=token_request', {
+        method: "POST",
+        cache: 'no-cache',
+        body: JSON.stringify(queryData)
+      })
+      .then(response => {
+        response.json()
+        .then(data => {
+          if(!data.ok){
+            console.error("User/requestToken: Cannot request token, got error", data.msg);
+            reject([data.msg]);
+          }else{
+            resolve();
+          }
+        })
+        .catch(error => {
+          console.error("User/requestToken: Cannot parse server response", error);
+          reject([error]);
+        })
+      })
+      .catch(error => {
+        console.error("User/requestToken: Cannot request token", error);
+        reject([error])
+      })
+    })
+  }
+
 }

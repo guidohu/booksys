@@ -43,7 +43,7 @@
             <b-form-group class="text-left">
                 <b-col cols="3" class="d-xs-none"></b-col>
                 <b-col cols="12" xs="8">
-                    <b-button to="/forgot-password" variant="light">
+                    <b-button to="/password/reset" variant="light">
                         Forgot password
                     </b-button>
                     <b-button to="/signup" variant="light">

@@ -17,6 +17,7 @@ import Users from '../views/admin/Users';
 import Accounting from '../views/admin/Accounting';
 import Settings from '../views/admin/Settings';
 import Logs from '../views/admin/Logs';
+import PasswordReset from '../views/PasswordReset';
 
 Vue.use(VueRouter)
 
@@ -39,6 +40,11 @@ const routes = [
     path: '/signup',
     name: 'SignUp',
     component: SignUp
+  },
+  {
+    path: '/password/reset',
+    name: 'PasswordReset',
+    component: PasswordReset
   },
   {
     path: '/today',
