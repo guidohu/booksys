@@ -96,6 +96,46 @@ export default class User {
     })
   }
 
+  static changeUserPasswordByToken(tokenAndPassword){
+    return new Promise((resolve, reject) => {
+      const password = Login.calcHash(tokenAndPassword.password)
+      const postData = {
+        email:        tokenAndPassword.email,
+        password:     password,
+        token:        tokenAndPassword.token
+      }
+
+      fetch('/api/password.php?action=change_password_by_token', {
+        method: "POST",
+        cache: 'no-cache',
+        body: JSON.stringify(postData)
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            if(data == null){
+              console.error("User/changeUserPasswordByToken: Cannot parse server response", data);
+              reject(["Cannot parse server response"]);
+            }else if(data.ok == false){
+              console.log("User/changeUserPasswordByToken: Cannot change user password:", data.message);
+              reject([data.message]);
+            }else{
+              console.log("User/changeUserPasswordByToken: User password successfully changed");
+              resolve(data.message);
+            }
+          })
+          .catch( error => {
+            console.error("User/changeUserPasswordByToken: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error('User/changeUserPasswordByToken', error)
+        reject([error]);
+      })
+    })
+  }
+
   static getUserSchedule(){
     return new Promise((resolve, reject) => {
       fetch('/api/user.php?action=get_my_user_sessions', {

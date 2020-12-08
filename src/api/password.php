@@ -179,24 +179,14 @@ _END;
 	
 	// validate input
 	$sanitizer = new Sanitizer();
-	$response  = array(
-		'ok' 		=> TRUE,
-		'message' 	=> 'token requested'
-	);
 	if(!isset($data->token) or !$sanitizer->isCookie($data->token)){
-	    $response['ok'] = FALSE;
-		$response['message'] = "Your provided token is not in a valid format";
-		return $response;
+	    return Status::errorStatus("Your provided token is not in a valid format");
 	}	
 	if(!isset($data->email) or !$sanitizer->isEmail($data->email)){
-		$response['ok'] = FALSE;
-		$response['message'] = "Your provided email is not in a valid format";
-		return $response;
+		return Status::errorStatus("Your provided email is not in a valid format");
 	}
 	if(!isset($data->password) or !$sanitizer->isCookie($data->password)){
-	    $response['ok'] = FALSE;
-		$response['message'] = "Your provided password is not in a valid format";
-		return $response;
+	    return Status::errorStatus("Your provided password is not in a valid format");
 	}
 	
 	// calculate hash of token
@@ -205,9 +195,7 @@ _END;
 	// check if we have a user_id with this hashed token
 	$db = new DBAccess($configuration);
 	if(!$db->connect()){
-		HttpHeader::setResponseCode(500);
-		echo "Internal server error. Please let us know and try later.";
-		exit;
+		return Status::errorStats("Internal server error. Please let us know and try later.");
 	}	
 	$query = 'SELECT pr.id FROM password_reset pr JOIN user u ON pr.user_id = u.id
 	          WHERE u.email = ?
@@ -223,8 +211,7 @@ _END;
 	$res = $db->fetch_stmt_hash();
 	if(!isset($res) or count($res)<1){
 		// we do not know this token code
-		$response['ok'] = FALSE;
-		$response['message'] = "Your provided token code is not correct, please request a new one";
+		Status::errorStatus("Your provided token code is not correct, please request a new one");
 	}else{
 		// calculate the password hash
 		$new_salt          = rand(0, 65635);
@@ -241,13 +228,11 @@ _END;
 		);
 		if(!$db->execute()){
 			error_log('Change password did not work: ' . $query);
-			HttpHeader::setResponseCode(500);
-			echo "Internal error, password could not be changed.<br>Please try again or contact us";
 			$db->disconnect();
+			return Status::errorStatus("Internal error, password could not be changed.<br>Please try again or contact us");
 		}
 
-		$response['ok'] = TRUE;
-		$response['message'] = "Password has been reset";
+		return Status::successStatus("Password has been reset");
 	}
 	
 	// set all tokens of this user to invalid

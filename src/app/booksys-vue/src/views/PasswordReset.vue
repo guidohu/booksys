@@ -15,7 +15,7 @@
         </b-col>
         <b-col cols="1" class="d-none d-sm-block"></b-col>
       </b-row>
-      <b-form @submit="showToken">
+      <b-form @submit="requestToken">
         <b-row class="text-left">
           <b-col cols="1" class="d-none d-sm-block"></b-col>
           <b-col cols="12" sm="10">
@@ -52,7 +52,7 @@
         </b-col>
         <b-col cols="1" class="d-none d-sm-block"></b-col>
       </b-row>
-      <b-form @submit="showToken">
+      <b-form @submit="setPassword">
         <b-row class="text-left">
           <b-col cols="1" class="d-none d-sm-block"></b-col>
           <b-col cols="12" sm="10">
@@ -144,7 +144,7 @@
         <b-icon-x></b-icon-x>
         Cancel
       </b-button>
-      <b-button v-if="showEmailDialog" type="button" variant="outline-info" v-on:click="showToken">
+      <b-button v-if="showEmailDialog" type="button" variant="outline-info" v-on:click="requestToken">
         <b-icon icon="arrow-right"/>
         Next
       </b-button>   
@@ -156,7 +156,7 @@
         <b-icon icon="check"/>
         Set Password
       </b-button>
-      <b-button v-if="showTokenDialog" type="button" variant="outline-info" v-on:click="close">
+      <b-button v-if="showSuccessInfo" type="button" variant="outline-info" v-on:click="close">
         <b-icon icon="check"/>
         Done
       </b-button>
@@ -181,6 +181,7 @@ export default Vue.extend({
     return {
       showEmailDialog: true,
       showTokenDialog: true,
+      showSuccessInfo: true,
       errors: [],
       form: {
         email: null,
@@ -200,7 +201,7 @@ export default Vue.extend({
     verifiedHandler: function(response){
       this.form.recaptchaResponse = response;
     },
-    showToken: function(event){
+    requestToken: function(event){
       if(event != null){
         event.preventDefault();
       }
@@ -212,22 +213,32 @@ export default Vue.extend({
     
       User.requestPasswordResetToken(request)
       .then(() => {
+        this.errors = [];
+        this.showSuccessInfo = false;
         this.showEmailDialog = false;
         this.showTokenDialog = true;
       })
       .catch((errors) => this.errors = errors);
     },
-    showEmail: function(){
-      this.showEmailDialog = true;
-      this.showTokenDialog = false;
-    },
-    save: function(event) {
-      // prevent default submit event
+    setPassword: function(event){
       if(event != null){
         event.preventDefault();
       }
 
-      console.log("TODO");
+      const request = {
+        email:             this.form.email,
+        password:          this.form.password,
+        token:             this.form.token
+      };
+
+      User.changeUserPasswordByToken(request)
+      .then(() => {
+        this.errors = [];
+        this.showEmailDialog = false;
+        this.showTokenDialog = false;
+        this.showSuccessInfo = true;
+      })
+      .catch((errors) => this.errors = errors);
     },
     close: function() {
       this.$router.push("/");
