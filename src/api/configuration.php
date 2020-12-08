@@ -215,8 +215,14 @@
         foreach ($keys as $key) {
             // if the key is not defined, we do not store anything
             if(!isset($data->$key)){
-                $configuration->set_configuration_property($key, NULL);
-                continue;
+                // do not delete password, it is only submitted
+                // upon change
+                if($key != 'smtp_password'){
+                    $configuration->set_configuration_property($key, NULL);
+                    continue;
+                }else{
+                    continue;
+                }
             }
 
             if(! $configuration->set_configuration_property($key, $data->$key)){

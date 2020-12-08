@@ -236,7 +236,7 @@
           <b-form-input
             id="input-smtp-password"
             v-model="form.smtpPassword"
-            type="text"
+            type="password"
           />
         </b-input-group>
       </b-form-group>
