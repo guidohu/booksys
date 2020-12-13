@@ -27,7 +27,7 @@ services:
         expose:
             - '3306'
     backend:
-        image: booksys_ui:latest
+        image: booksys_api:latest
         environment:
             DB_SERVER: 'db:3306'
             DB_NAME: 'booksys'
@@ -45,7 +45,8 @@ services:
             # - "traefik.http.middlewares.remove-backend.stripprefix.prefixes="
             # - "traefik.http.routers.backend.middlewares=remove-backend@docker"
         volumes:
-            - ${PWD}/../../src/:/var/www/html
+            - ${PWD}/../../backend/api:/var/www/html/api
+            - ${PWD}/../../backend/classes:/var/www/html/classes
             - ${PWD}/config.php:/var/www/html/config/config.php
     frontend:
         build: "./frontend"
@@ -54,7 +55,7 @@ services:
         environment:
             - NODE_ENV=development
         volumes:
-            - ../../src/app/booksys-vue:/home/node/app
+            - ../../frontend:/home/node/app
         # ports:
         #     - "8082:8080"
         labels:

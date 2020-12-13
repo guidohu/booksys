@@ -42,9 +42,11 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
+    "html-webpack-plugin": "^4.5.0",
     "node-sass": "^4.14.1",
     "sass-loader": "^10.0.2",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.11",
+    "webpack-chain": "^6.5.1"
   },
   "eslintConfig": {
     "root": true,
