@@ -29,7 +29,7 @@
 
     // check if we have an action
     if(!isset($_GET['action'])){
-        HttpHeader::setResponseCode(200);
+        echo json_encode(Status::errorStatus('no API action selected'));
         exit;
     }
 
