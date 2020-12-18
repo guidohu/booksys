@@ -24,6 +24,16 @@ class Status{
 		return Status::status(TRUE, $msg, $data);
 	}
 
+	public static function redirectStatus($msg, $redirect){
+		$status = array();
+		$status['ok'] = TRUE;
+		$status['type'] = 'redirect';
+		$status['msg'] = $msg;
+		$status['target'] = $redirect;
+
+		return $status;
+	}
+
 	public static function status($flag, $msg, $data=NULL){
 		$status = array();
 		$status['ok'] = $flag;

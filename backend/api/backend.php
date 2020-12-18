@@ -15,22 +15,26 @@
         }
     }
 
-    // test whether the config-file exists
-    if (!file_exists('../config/config.php') && is_readable('../config/config.php')) {
-        error_log("No config file yet");
-        $status = array(
-            'ok' => FALSE,
-            'message' => 'no config',
-            'redirect' => '/setup.html',
-        );
-        echo json_encode($status);
-        exit;
-    }
+    $statusResponse = array(
+        "configFile"  => FALSE,
+        "configDb"    => FALSE,
+        "dbReachable" => FALSE,
+        "adminExists" => FALSE
+    );
 
     // check if we have an action
     if(!isset($_GET['action'])){
         echo json_encode(Status::errorStatus('no API action selected'));
         exit;
+    }
+
+    // test whether the config-file exists
+    if (!file_exists('../config/config.php') || !is_readable('../config/config.php')) {
+        error_log("No config file yet");
+        echo json_encode(Status::successDataResponse("no config", $statusResponse));
+        exit;
+    }else{
+        $statusResponse['configFile'] = TRUE;
     }
 
     // get configuration
@@ -68,40 +72,43 @@
      * - "no database configured"
      * - "database connection is not working"
      * - "no user configured"
-     *
-     * @param $configuration    configuration object
-     * @return status which contains the following structure:
-     * {
-     *      ok      => TRUE|FALSE,
-     *      message => "text description"
-     * }
      */
     function get_status($configuration){
-        $status = array();
-        $status['ok'] = TRUE;
-        $status['message'] = 'all backend components are good';
-
         // check if db is configured
         if(! _is_db_configured($configuration)){
             error_log('api/backend: No database configured');
-            return Status::errorStatus('no database configured');
+            return Status::successDataResponse('no database configured', $statusResponse);
+        }else{
+            $statusResponse['configDb'] = TRUE;
         }
         
         // check if db access works
         $db = new DBAccess($configuration);
         if(!$db->connect()){
             error_log('api/backend: Cannot connect to the database');
-            return Status::errorStatus('database connection is not working');
+            return Status::successDataResponse('database connection is not working', $statusResponse);
+        }else{
+            $statusResponse['dbReachable'] = TRUE;
         }
 
         $res = $db->fetch_data_hash("SELECT count(*) AS users FROM user;");
+        $db->disconnect();
+
+        $statusResponse = array(
+            "configFile"  => FALSE,
+            "configDb"    => FALSE,
+            "dbReachable" => FALSE,
+            "adminExists" => FALSE
+        );
+
         if($res == NULL || $res[0] == NULL || $res[0]['users'] == NULL || $res[0]['users'] < 1){
             error_log('api/backend: No user configured');
-            $status = Status::errorStatus('no user configured');
+            return Status::successDataResponse('no user configured', $statusResponse);
+        }else{
+            $statusResponse['adminExists'] = TRUE;
         }
 
-        $db->disconnect();
-        return $status;
+        return Status::successDataResponse("all backend components are good", $statusResponse);
     }
 
     /**

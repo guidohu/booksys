@@ -23,18 +23,21 @@
 </template>
 
 <script>
-import { BooksysBrowser } from './libs/browser'
-import { BooksysBackend } from './libs/backend'
-import AlertMessage from './components/AlertMessage.vue'
-import Vue from 'vue'
-import { mapGetters, mapState, mapActions } from 'vuex'
+import { BooksysBrowser } from '@/libs/browser';
+import { BooksysBackend } from '@/libs/backend';
+import Backend from '@/api/backend';
+import AlertMessage from './components/AlertMessage.vue';
+import Vue from 'vue';
+import { mapGetters, mapState, mapActions } from 'vuex';
 
 export default Vue.extend({
   name: 'App',
   data: function() {
     return {
       backendAvailable: false, // if the backend is not available
-      backendStatus: null
+      backendStatus: null,
+      backendReachable: true,
+      setupDone: false
     }
   },
   components: {
@@ -56,9 +59,20 @@ export default Vue.extend({
   },
   watch: {
     isLoggedIn(newValue){
-      if(newValue == false){
+      if(newValue == false && this.setupDone == true){
         console.log("App.vue: detected not logged in -> forward to /login")
-        this.$router.push("/login")
+        this.$router.push("/login");
+      }else if(newValue == true && this.setupDone == true){
+        this.$router.push("/dashboard");
+      }
+    },
+    setupDone(newValue){
+      if(newValue == false){
+        this.$router.push("/setup");
+      }else if(this.isLoggedIn == true){
+        this.$router.push("/dashboard");
+      }else{
+        this.$router.push("/login");
       }
     }
   },
@@ -77,6 +91,21 @@ export default Vue.extend({
     }
   },
   created() {
+    // short pulse check on the
+    // backend to verify whether
+    // it is up and configured
+    Backend.getStatus()
+    .then((status) => {
+      console.log(status);
+      if(!status.configFile){
+        this.setupDone = false;
+        this.$router.push("/setup");
+      }
+    })
+    .catch((error) => {
+      this.errors = [error];
+    })
+
     if(this.isLoggedIn == false){
       this.$router.push("/login")
     }

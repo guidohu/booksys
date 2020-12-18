@@ -18,6 +18,7 @@ import Accounting from '../views/admin/Accounting';
 import Settings from '../views/admin/Settings';
 import Logs from '../views/admin/Logs';
 import PasswordReset from '../views/PasswordReset';
+import Setup from '../views/Setup';
 
 Vue.use(VueRouter)
 
@@ -25,6 +26,11 @@ const routes = [
   {
     path: '/',
     redirect: '/login'
+  },
+  {
+    path: '/setup',
+    name: 'Setup',
+    component: Setup
   },
   {
     path: '/login',

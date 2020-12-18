@@ -33,6 +33,74 @@ export class Configuration {
     })
   }
 
+  static getDbConfig(){
+    console.log("configuration/getDbConfig called");
+    return new Promise((resolve, reject) => {
+      fetch('/api/configuration.php?action=get_db_config', {
+        method: "GET",
+        cache: "no-cache",
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("configuration/getDbConfig response data:", data);
+            if(data.ok){
+              resolve(data.data);
+            }else{
+              console.log("configuration/getDbConfig: Cannot retrieve db config, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("configuration/getDbConfig: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("configuration/getDbConfig", error);
+        reject([error]);
+      })
+    })
+  }
+
+  static setDbConfig(config){
+    console.log("configuration/setDbConfig called with:", config);
+    return new Promise((resolve, reject) => {
+      const requestData = {
+        db_server: config.host,
+        db_name:   config.name,
+        db_user:   config.user,
+        db_password: config.password
+      };
+
+      fetch('/api/configuration.php?action=setup_db_config', {
+        method: "POST",
+        cache: "no-cache",
+        body: JSON.stringify(requestData)
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("configuration/setDbConfig response data:", data);
+            if(data.ok){
+              resolve();
+            }else{
+              console.log("configuration/setDbConfig: Cannot set db config, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("configuration/setDbConfig: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("configuration/setDbConfig", error);
+        reject([error]);
+      })
+    })
+  }
+
   static getConfiguration(cbSuccess, cbFailure){
     fetch('/api/configuration.php?action=get_configuration', {
       method: 'GET',

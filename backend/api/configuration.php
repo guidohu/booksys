@@ -18,7 +18,8 @@
 
     switch($_GET['action']){
         case 'get_db_config':
-            get_db_config($configuration);
+            $response = get_db_config($configuration);
+            echo json_encode($response);
             exit;
         case 'get_recaptcha_key':
             $response = get_recaptcha_key($configuration);
@@ -36,7 +37,8 @@
             echo json_encode($response);
             exit;
         case 'setup_db_config':
-            setup_db_config($configuration);
+            $response = setup_db_config($configuration);
+            echo json_encode($response);
             exit;
         case 'is_admin_user_configured':
             is_admin_user_configured($configuration);
@@ -55,26 +57,28 @@
 
     // returns the current database configuration
     function get_db_config($configuration){
+        $db_config = array();
+        $db_config['is_configured'] = false;
+        $db_config['db_server']     = null;
+        $db_config['db_name']       = null;
+        $db_config['db_user']       = null;
+        $db_config['db_password']   = null; // we do not reveal the password via API
+
         if(!_is_db_configured($configuration)){
-            $db_config = array();
-            $db_config['is_configured'] = FALSE;
-            echo json_encode($db_config);
-            return;
+            return Status::successDataResponse("not configured", $db_config);
         }else{
             // to reveal already configured info
             // the user needs to be admin
             _is_admin_or_return($configuration);
 
             // return db configuration
-            $db_config = array();
             $db_config['is_configured'] = TRUE;
             $db_config['db_server']     = $config['db_server'];
             $db_config['db_name']       = $config['db_name'];
             $db_config['db_user']       = $config['db_user'];
             $db_config['db_password']   = null; // we do not reveal the password via API
 
-            echo json_encode($db_config);
-            return;
+            return Status::successDataResponse("success", $db_config);
         }
     }
 
@@ -246,35 +250,23 @@
         
         $host = parse_url($data->db_server, PHP_URL_HOST);
         if(!isset($host)){
-            $status = Status::errorStatus('no proper hostname specified');
-            echo json_encode($status);
-            return;
+            return Status::errorStatus('no proper hostname specified');
         }
         $port = parse_url($data->db_server, PHP_URL_PORT);
         if(!isset($port)){
-            $status = Status::errorStatus('no port specified');
-            echo json_encode($status);
-            return;
+            return Status::errorStatus('no port specified');
         }
         if(!preg_match('/^[a-zA-Z0-9-_]+:[0-9]+$/', $data->db_server)){
-            $status = Status::errorStatus('only [ip|hostname]:[port] format supported for database host');
-            echo json_encode($status);
-            return;
+            return Status::errorStatus('only [ip|hostname]:[port] format supported for database host');
         }
         if(!isset($data->db_name) || !preg_match('/^[a-zA-Z0-9-_]+$/', $data->db_name)){
-            $status = Status::errorStatus('invalid database name');
-            echo json_encode($status);
-            return;
+            return Status::errorStatus('invalid database name');
         }
         if(!isset($data->db_user) || !preg_match('/^[a-zA-Z0-9-_]+$/', $data->db_user)){
-            $status = Status::errorStatus('invalid database user');
-            echo json_encode($status);
-            return;
+            return Status::errorStatus('invalid database user');
         }
         if(!isset($data->db_password) || preg_match('/\s+/', $data->db_password)){
-            $status = Status::errorStatus('invalid database password (containing spaces)');
-            echo json_encode($status);
-            return;
+            return Status::errorStatus('invalid database password (containing spaces)');
         }
 
         // verify that connection works
@@ -285,16 +277,12 @@
         $new_config->db_password = $data->db_password;
         $db = new DBAccess($new_config);
         if(!$db->connect()){
-            $status = Status::errorStatus('DB access not working with the provided settings. Please check for typos, make sure that the database is reachable and that your username and password are correct.');
-            echo json_encode($status);
-            return;
+            return Status::errorStatus('DB access not working with the provided settings. Please check for typos, make sure that the database is reachable and that your username and password are correct.');
         }
 
         // setup a new database
         if(!file_exists("../config/db/schema.sql") || !$db->apply_sql_file("../config/db/schema.sql")){
-            $status = Status::errorStatus("DB scheme could not be applied to database, please check error logs");
-            echo json_encode($status);
-            return;
+            return Status::errorStatus("DB scheme could not be applied to database, please check server error logs");
         }
 
         // write configuration file (only after schema is applied)// build the configuration for the configuration file
@@ -313,9 +301,7 @@
         file_put_contents ("../config/config.php", $config_string);
 
         // return status
-        $status = Status::successStatus("configuration applied and database setup");
-        echo json_encode($status);
-        return;
+        return Status::successStatus("configuration applied and database setup");
     }
 
     // Tests whether there is at least one admin present in the database
@@ -433,7 +419,7 @@
     function _is_admin_or_return($configuration){
         $lc = new Login($configuration);
         if(!$lc->isLoggedIn($configuration->admin_user_status_id)){
-            HttpHeader::setResponseCode(403);
+            echo json_encode(Status::errorStatus("not sufficient permissions"));
             exit;
         }
     }

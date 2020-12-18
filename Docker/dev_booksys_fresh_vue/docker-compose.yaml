@@ -3,7 +3,6 @@ version: '3.3'
 services:
     traefik:
         image: "traefik:latest"
-        container_name: "traefik"
         command:
           #- "--log.level=DEBUG"
           - "--api.insecure=true"
@@ -16,7 +15,8 @@ services:
         volumes:
           - "/var/run/docker.sock:/var/run/docker.sock:ro"
     db:
-        image: booksys_dummy_db:latest
+        build: "./database"
+        user: "mysql"
         environment:
             MYSQL_DATABASE: 'booksys'
             MYSQL_USER: 'user'
@@ -43,7 +43,6 @@ services:
         volumes:
             - ${PWD}/../../backend/api:/var/www/html/api
             - ${PWD}/../../backend/classes:/var/www/html/classes
-            - ${PWD}/config.php:/var/www/html/config/config.php
     frontend:
         build: "./frontend"
         user: "node"
