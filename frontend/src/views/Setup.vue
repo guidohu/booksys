@@ -7,44 +7,52 @@
     hide-header-close
     visible
   >
-    <b-row v-if="errors.length > 0" class="mt-4">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
-        <warning-box :errors="errors"/>
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-    </b-row>
-    <!-- Database setup -->
-    <database-configuration v-if="showDbSetup" :dbConfig="dbConfig" @save="setDbSettings"/>
-    <!-- Administrator setup -->
-    <div v-if="showUserSetup">
-      <b-row class="mb-4">
+    <b-overlay
+      id="overlay-background"
+      :show="isLoading"
+      spinner-type="border"
+      spinner-variant="info"
+      rounded="sm"
+    >
+      <b-row v-if="errors.length > 0" class="mt-4">
         <b-col cols="1" class="d-none d-sm-block"></b-col>
         <b-col cols="12" sm="10">
-          Setup the Administrator Account
+          <warning-box :errors="errors"/>
         </b-col>
         <b-col cols="1" class="d-none d-sm-block"></b-col>
       </b-row>
-      <user-sign-up
-        :userData="adminUserConfig"
-        :showDisclaimer="false"
-        @save="addAdminUser"
-      />
-    </div>
-    <!-- Setup Done -->
-    <b-row v-if="showSetupDone" class="text-center">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
-        <p class="h4 mb-2">
-          <b-icon icon="check-circle" variant="success"/>
-          Setup Done.
-        </p>
-        <p>
-          Please go back to the login page and login.
-        </p>
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-    </b-row>
+      <!-- Database setup -->
+      <database-configuration v-if="showDbSetup" :dbConfig="dbConfig" @save="setDbSettings"/>
+      <!-- Administrator setup -->
+      <div v-if="showUserSetup">
+        <b-row class="mb-4">
+          <b-col cols="1" class="d-none d-sm-block"></b-col>
+          <b-col cols="12" sm="10">
+            Setup the Administrator Account
+          </b-col>
+          <b-col cols="1" class="d-none d-sm-block"></b-col>
+        </b-row>
+        <user-sign-up
+          :userData="adminUserConfig"
+          :showDisclaimer="false"
+          @save="addAdminUser"
+        />
+      </div>
+      <!-- Setup Done -->
+      <b-row v-if="showSetupDone" class="text-center">
+        <b-col cols="1" class="d-none d-sm-block"></b-col>
+        <b-col cols="12" sm="10">
+          <p class="h4 mb-2">
+            <b-icon icon="check-circle" variant="success"/>
+            Setup Done.
+          </p>
+          <p>
+            Please go back to the login page and login.
+          </p>
+        </b-col>
+        <b-col cols="1" class="d-none d-sm-block"></b-col>
+      </b-row>
+    </b-overlay>
     <!-- Footer -->
     <div slot="modal-footer">
       <b-button v-if="showDbSetup || showUserSetup" class="mr-1" type="button" variant="outline-danger" v-on:click="close">
@@ -86,7 +94,7 @@ export default Vue.extend({
   data(){
     return {
       errors: [],
-      title: "Setup 1/2",
+      title: "Setup",
       showDbSetup: false,
       showUserSetup: false,
       showSetupDone: false,
@@ -100,14 +108,20 @@ export default Vue.extend({
   },
   methods: {
     setDbSettings: function(){
+      this.isLoading = true;
+
       Configuration.setDbConfig(this.dbConfig)
       .then(() => {
         this.showDbSetup = false;
         this.showUserSetup = true;
-        this.title = this.dbSetupTitle;
+        this.title = this.userSetupTitle;
         this.errors = [];
+        this.isLoading = false;
       })
-      .catch((errors) => this.errors = errors);
+      .catch((errors) => {
+        this.errors = errors;
+        this.isLoading = false;
+      });
     },
     addAdminUser: function(){
       console.log("addAdminUser called");
@@ -119,13 +133,18 @@ export default Vue.extend({
         return;
       }
 
+      this.isLoading = true;
+
       User.signUp(this.adminUserConfig)
       .then((user) => {
         this.errors = [];
         console.log("userCreated:", user);
         this.makeUserAdmin(user.user_id)
       })
-      .catch((errors) => this.errors = errors);
+      .catch((errors) => {
+        this.errors = errors;
+        this.isLoading = false;
+      });
     },
     makeUserAdmin: function(userId){
       User.makeAdmin(userId)
@@ -134,8 +153,13 @@ export default Vue.extend({
         this.showDbSetup = false;
         this.showUserSetup = false;
         this.showSetupDone = true;
+        this.title = this.setupDoneTitle;
+        this.isLoading = false;
       })
-      .catch((errors) => this.errors = errors);
+      .catch((errors) => {
+        this.errors = errors;
+        this.isLoading = false;
+      });
     },
     close: function() {
       this.$bvModal.hide("setupModal");
@@ -172,6 +196,8 @@ export default Vue.extend({
     }
   },
   mounted(){
+    this.isLoading = true;
+
     Backend.getStatus()
     .then(status => {
       if(status.configFile == false){
@@ -199,8 +225,12 @@ export default Vue.extend({
         this.showSetupDone = true;
         this.title = this.setupDoneTitle;
       }
+      this.isLoading = false;
     })
-    .catch(errors => this.errors = errors);
+    .catch(errors => {
+      this.errors = errors;
+      this.isLoading = false;
+    });
   }
 
 })

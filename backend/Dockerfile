@@ -17,7 +17,9 @@ RUN a2enmod headers
 COPY api/     /var/www/html/api
 COPY classes/ /var/www/html/classes
 COPY config/  /var/www/html/config
-RUN chown -R www-data:www-data /var/www/html
+RUN  chown -R www-data:www-data /var/www/html
+RUN  rm -rf /var/www/html/config/config.php
+
 # use a custom apache configuration
 COPY etc/apache2/000-default.conf /etc/apache2/sites-available/000-default.conf
 
