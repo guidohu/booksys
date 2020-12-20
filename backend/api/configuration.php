@@ -44,7 +44,8 @@
             is_admin_user_configured($configuration);
             exit;
         case 'make_user_admin':
-            make_user_admin($configuration);
+            $response = make_user_admin($configuration);
+            echo json_encode($response);
             exit;
     }
 
@@ -338,31 +339,22 @@
     function make_user_admin($configuration){
         $data = json_decode(file_get_contents('php://input'));
 
-        $status = array();
-        $status['ok'] = TRUE;
-
         // if there is already one admin user
         // we do not allow this operation
         if(_is_admin_user_configured($configuration)){
-            $status = Status::errorStatus("one admin user already exists, this operation is not permitted");
-            echo json_encode($status);
-            return;
+            return Status::errorStatus("one admin user already exists, this operation is not permitted");
         }
 
         // input validation
         $sanitizer = new Sanitizer();
         if(! isset($data->user_id) or !$sanitizer->isInt($data->user_id)){
-			$status = Status::errorStatus("No valid user_id specified.");
-            echo json_encode($status);
-			return;
+			return Status::errorStatus("No valid user_id specified.");
         }
 
         // unlock user and make admin
         $db = new DBAccess($configuration);
         if(!$db->connect()){
-            $status = Status::errorStatus("Cannot connect to database.");
-            echo json_encode($status);
-			return;
+            return Status::errorStatus("Cannot connect to database.");
         }
         $query = 'UPDATE user 
             SET status = ?, 
@@ -376,13 +368,10 @@
         );
         if(!$db->execute()){
             $db->disconnect();
-            $status = Status::errorStatus("Cannot make user admin");
-            echo json_encode($status);
-            return;
+            return Status::errorStatus("Cannot make user admin");
         }
 
-        echo json_encode($status);
-        return;
+        return Status::successStatus("user promoted to admin user");
     }
 
     function _is_admin_user_configured($configuration){

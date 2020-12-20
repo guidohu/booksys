@@ -23,6 +23,43 @@ export default class User {
     })
   }
 
+  static makeAdmin(userId){
+    return new Promise((resolve, reject) => {
+      const requestData = {
+        user_id: userId,
+      };
+
+      fetch('/api/configuration.php?action=make_user_admin', {
+        method: 'POST',
+        cache: 'no-cache',
+        body: JSON.stringify(requestData)
+      })
+      .then(response => {
+        response.json()
+          .then( data => {
+            if(data == null){
+              console.error("User/makeAdmin: Cannot parse server response", data);
+              reject(["Cannot parse server response"]);
+            }else if(data.ok == false){
+              console.log("Cannot change user to admin:", data.msg);
+              reject([data.msg]);
+            }else{
+              console.log("User profile successfully changed");
+              resolve();
+            }
+          })
+          .catch( error => {
+            console.error("User/makeAdmin: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error('User/changeUserProfile', error)
+        reject([error]);
+      })
+    })
+  }
+
   static changeUserProfile(profileData){
     return new Promise((resolve, reject) => {
       fetch('/api/user.php?action=change_my_user_data', {
@@ -558,7 +595,7 @@ export default class User {
             console.error("User/signUp: Cannot sign up user, got error", data.msg);
             reject([data.msg]);
           }else{
-            resolve();
+            resolve(data.data);
           }
         })
         .catch(error => {

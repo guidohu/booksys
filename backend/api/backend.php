@@ -74,6 +74,14 @@
      * - "no user configured"
      */
     function get_status($configuration){
+        
+        $statusResponse = array(
+            "configFile"  => TRUE,
+            "configDb"    => FALSE,
+            "dbReachable" => FALSE,
+            "adminExists" => FALSE
+        );
+
         // check if db is configured
         if(! _is_db_configured($configuration)){
             error_log('api/backend: No database configured');
@@ -93,13 +101,6 @@
 
         $res = $db->fetch_data_hash("SELECT count(*) AS users FROM user;");
         $db->disconnect();
-
-        $statusResponse = array(
-            "configFile"  => FALSE,
-            "configDb"    => FALSE,
-            "dbReachable" => FALSE,
-            "adminExists" => FALSE
-        );
 
         if($res == NULL || $res[0] == NULL || $res[0]['users'] == NULL || $res[0]['users'] < 1){
             error_log('api/backend: No user configured');

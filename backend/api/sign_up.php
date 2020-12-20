@@ -93,7 +93,6 @@
 			} 
 		}
 		
-		
 		// check if user already exists in the database
 		$query = 'SELECT username FROM user WHERE username = ?';
 		$db = new DBAccess($configuration);
