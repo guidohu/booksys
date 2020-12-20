@@ -198,39 +198,6 @@ a{
 	padding-right: 16px;
 }
 
-.no-ui-slider .slider-labels {
-	list-style: none;
-	padding:0;
-    margin-top: 5px;
-	margin-left: -3px;
-	width: 100%;
-	text-align: left;
-	font-size: 13px;
-    color: rgb(0,0,0);
-	text-align: left;
-}
-
-.no-ui-slider .slider-labels li {
-	color: #d3d3d3;
-	display: inline;
-	/* float: left; */
-	cursor: pointer;
-    color: rgb(0,0,0);
-}
-
-.no-ui-slider .slider-labels li:nth-last-child(1) {
-	position: absolute;
-	margin-left: -3px;
-}
-
-.no-ui-slider .slider-labels li:hover {
-   color: #333333;
-}
-
-.no-ui-slider .slider-labels li.active {
-   color: #333333;
-}
-
 .padding-top-4px {
 	padding-top: 4px;
 }
