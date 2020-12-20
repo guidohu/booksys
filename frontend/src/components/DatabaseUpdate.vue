@@ -94,7 +94,7 @@ export default Vue.extend({
   name: 'DatabaseUpdateModal',
   data() {
     return {
-      "errors": [ ],
+      "errors": [],
     }
   },
   methods: {
