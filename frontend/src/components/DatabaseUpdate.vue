@@ -31,7 +31,6 @@
             DB Version
           </b-col>
           <b-col cols="6">
-            v{{ getDbVersionInfo.dbVersion}}
             {{dbVersionText}}
           </b-col>
         </b-row>
@@ -95,6 +94,13 @@ export default Vue.extend({
   data() {
     return {
       "errors": [],
+      dbVersionText: "n/a",
+    }
+  },
+  watch: {
+    getDbVersionInfo: function(newValue) {
+      console.log("getDbVersionInfo value changed to", newValue);
+      this.dbVersionText = this.getVersionText(newValue);
     }
   },
   methods: {
@@ -104,6 +110,22 @@ export default Vue.extend({
     ]),
     cancel: function(){
       this.$bvModal.hide('view_database_update_modal')
+    },
+    getVersionText: function(versionInfo) {
+      if(versionInfo == null && this.getDbVersionInfo == null){
+        return "loading";
+      }
+
+      if(versionInfo == null){
+        versionInfo = this.getDbVersionInfo;
+      }
+      
+      if(versionInfo.dbVersion == versionInfo.dbVersionRequired){
+        return "v" + versionInfo.dbVersion;
+      }
+      else{
+        return "v" + versionInfo.dbVersion + " (update available to: v" + versionInfo.dbVersionRequired + ")";
+      }
     }
   },
   computed: {
@@ -111,21 +133,14 @@ export default Vue.extend({
       'getDbVersionInfo',
       'getDbIsUpdating',
       'getDbUpdateResult'
-    ]),
-    dbVersionText: function() {
-      if(this.dbVersionInfo == null){
-        return "loading";
-      }
-      else if(this.dbVersionInfo.dbVersion == this.dbVersionInfo.dbVersionRequired){
-        return "v" + this.dbVersionInfo.dbVersion;
-      }
-      else{
-        return "v" + this.dbVersionInfo.dbVersion + " (update available to: v" + this.dbVersionInfo.dbVersionRequired + ")";
-      }
-    }
+    ])
   },
   created() {
     this.queryDbVersionInfo()
+    .then(() => {
+      this.dbVersionText = this.getVersionText();
+    })
+    .catch((errors) => this.errors = errors);
   },
   mounted() {
     this.$bvModal.show('view_database_update_modal')
