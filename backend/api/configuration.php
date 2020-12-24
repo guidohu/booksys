@@ -281,9 +281,15 @@
             return Status::errorStatus('DB access not working with the provided settings. Please check for typos, make sure that the database is reachable and that your username and password are correct.');
         }
 
-        // setup a new database
-        if(!file_exists("../config/db/schema.sql") || !$db->apply_sql_file("../config/db/schema.sql")){
-            return Status::errorStatus("DB scheme could not be applied to database, please check server error logs");
+        // check whether tables already exist
+        $query = 'SHOW TABLES LIKE "configuration"';
+        $res = $db->fetch_data_hash($query, 0);
+        if(!$res){
+            // if the table does not exist, we setup the database
+            // setup a new database
+            if(!file_exists("../config/db/schema.sql") || !$db->apply_sql_file("../config/db/schema.sql")){
+                return Status::errorStatus("DB scheme could not be applied to database, please check server error logs");
+            }
         }
 
         // write configuration file (only after schema is applied)// build the configuration for the configuration file
