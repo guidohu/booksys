@@ -112,11 +112,12 @@ export default Vue.extend({
 
       Configuration.setDbConfig(this.dbConfig)
       .then(() => {
-        this.showDbSetup = false;
-        this.showUserSetup = true;
-        this.title = this.userSetupTitle;
-        this.errors = [];
+        // this.showDbSetup = false;
+        // this.showUserSetup = true;
+        // this.title = this.userSetupTitle;
+        // this.errors = [];
         this.isLoading = false;
+        this.getBackendStatus();
       })
       .catch((errors) => {
         this.errors = errors;
@@ -193,44 +194,52 @@ export default Vue.extend({
       }
 
       return errors;      
+    },
+    getBackendStatus: function() {
+      // reset errors
+      this.errors = [];
+
+      Backend.getStatus()
+      .then(status => {
+        if(status.configFile == false){
+          // no configuration at all yet
+          this.showDbSetup = true;
+          this.showUserSetup = false;
+          this.title = this.dbSetupTitle;
+        }else if(status.configDb == false){
+          // no database configuration
+          this.showDbSetup = true;
+          this.showUserSetup = false;
+          this.title = this.dbSetupTitle;
+        }else if(status.dbReachable == false){
+          // cannot reach database, thus allow to change settings
+          this.showDbSetup = true;
+          this.showUserSetup = false;
+          this.title = this.dbSetupTitle;
+        }else if(status.adminExists == false){
+          // database is up, but there is no admin user yet
+          this.showDbSetup = false;
+          this.showUserSetup = false;
+          this.showUserSetup = true;
+          this.title = this.userSetupTitle;
+        }else{
+          // setup is done
+
+          this.showDbSetup = false;
+          this.showSetupDone = true;
+          this.title = this.setupDoneTitle;
+        }
+        this.isLoading = false;
+      })
+      .catch(errors => {
+        this.errors = errors;
+        this.isLoading = false;
+      });
     }
   },
   mounted(){
     this.isLoading = true;
-
-    Backend.getStatus()
-    .then(status => {
-      if(status.configFile == false){
-        // no configuration at all yet
-        this.showDbSetup = true;
-        this.showUserSetup = false;
-        this.title = this.dbSetupTitle;
-      }else if(status.configDb == false){
-        // no database configuration
-        this.showDbSetup = true;
-        this.showUserSetup = false;
-        this.title = this.dbSetupTitle;
-      }else if(status.dbReachable == false){
-        // cannot reach database, thus allow to change settings
-        this.showDbSetup = true;
-        this.showUserSetup = false;
-        this.title = this.dbSetupTitle;
-      }else if(status.adminExists == false){
-        // database is up, but there is no admin user yet
-        this.showDbSetup = false;
-        this.showUserSetup = true;
-        this.title = this.userSetupTitle;
-      }else{
-        // setup is done
-        this.showSetupDone = true;
-        this.title = this.setupDoneTitle;
-      }
-      this.isLoading = false;
-    })
-    .catch(errors => {
-      this.errors = errors;
-      this.isLoading = false;
-    });
+    this.getBackendStatus();
   }
 
 })
