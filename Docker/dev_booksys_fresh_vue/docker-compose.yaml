@@ -43,6 +43,7 @@ services:
         volumes:
             - ${PWD}/../../backend/api:/var/www/html/api
             - ${PWD}/../../backend/classes:/var/www/html/classes
+            - ${PWD}/../../backend/config/db:/var/www/html/config/db
     frontend:
         build: "./frontend"
         user: "node"
