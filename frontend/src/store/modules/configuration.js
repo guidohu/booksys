@@ -72,14 +72,17 @@ const actions = {
     Configuration.needsDbUpdate(successCb, failureCb)
   },
   queryDbVersionInfo({ commit }) {
-    let successCb = (response) => {
-      commit('setDbVersionInfo', response)
-    }
-    let failureCb = (error) => {
-      console.error("store/configuration: Cannot get getDbVersion:", error)
-      commit('setDbVersionInfo', null)
-    }
-    Configuration.getDbVersion(successCb, failureCb)
+    return new Promise((resolve, reject) => {
+      Configuration.getDbVersion()
+      .then((info) => {
+        commit('setDbVersionInfo', info);
+        resolve();
+      })
+      .catch((errors) => {
+        commit('setDbVersionInfo', null);
+        reject(errors);
+      })
+    })
   },
   queryRecaptchaKey({ commit }){
     return new Promise((resolve, reject) => {
