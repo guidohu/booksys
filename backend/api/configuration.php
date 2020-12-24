@@ -257,7 +257,7 @@
         if(!isset($port)){
             return Status::errorStatus('no port specified');
         }
-        if(!preg_match('/^[a-zA-Z0-9-_]+:[0-9]+$/', $data->db_server)){
+        if(!preg_match('/^[a-zA-Z0-9-_\.\:\]\[]+:[0-9]+$/', $data->db_server)){
             return Status::errorStatus('only [ip|hostname]:[port] format supported for database host');
         }
         if(!isset($data->db_name) || !preg_match('/^[a-zA-Z0-9-_]+$/', $data->db_name)){
