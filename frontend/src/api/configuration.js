@@ -193,19 +193,21 @@ export class Configuration {
     })
   }
 
-  static getDbVersion(cbSuccess, cbFailure){
-    fetch('/api/backend.php?action=get_version', {
-      method: 'GET',
-      cache: 'no-cache'
-    })
-    .then(response => {
-      return response.json()
-    })
-    .then(data => {
-      cbSuccess(data)
-    })
-    .catch(error => {
-      cbFailure(error)
+  static getDbVersion(){
+    return new Promise((resolve, reject) => {
+      fetch('/api/backend.php?action=get_version', {
+        method: 'GET',
+        cache: 'no-cache'
+      })
+      .then(response => {
+        return response.json()
+      })
+      .then(data => {
+        resolve(data)
+      })
+      .catch(error => {
+        reject([error])
+      })
     })
   }
 
