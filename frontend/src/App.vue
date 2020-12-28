@@ -1,7 +1,7 @@
 <template>
   <div id="app">
-    <b-container v-if="isDesktop" class="fill">
-      <b-row v-if="isDesktop" class="display noborder nobackground">
+    <b-container v-if="isDesktop">
+      <b-row class="display noborder nobackground">
         <div class="vcenter_placeholder">
           <div class="vcenter_content">
             <AlertMessage v-if="backendStatus && backendStatus.ok == false" alertMessage="The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible."/>
@@ -9,15 +9,15 @@
           </div>
         </div>
       </b-row>
+      <footer class="legal-footer">
+        Copyright 2013-2020 by Guido Hungerbuehler <a href="https://github.com/guidohu/booksys">Find me on Github</a>
+      </footer>
     </b-container>
     <b-container v-if="isMobile" fluid="true">
       <div v-if="isMobile">
         <AlertMessage v-if="backendStatus && backendStatus.ok == false" alertMessage="The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible."/>
         <router-view v-else/>
       </div>
-      <footer class="legal-footer" v-if="isDesktop">
-        Copyright 2013-2020 by Guido Hungerbuehler <a href="https://github.com/guidohu/booksys">Find me on Github</a>
-      </footer>
     </b-container>
   </div>
 </template>
@@ -123,11 +123,3 @@ export default Vue.extend({
   }
 })
 </script>
-
-<style>
-  .fill {
-    height: 100vh;
-    width: 100vw;
-    background-color: transparent;
-  }
-</style>
