@@ -1,0 +1,54 @@
+version: '3.3'
+
+services:
+    traefik:
+        image: "traefik:latest"
+        command:
+          - "--api.insecure=true"
+          - "--providers.docker=true"
+          - "--providers.docker.exposedbydefault=true"
+          - "--entrypoints.web.address=:80"
+        ports:
+          - "80:80"
+          - "8080:8080"
+        volumes:
+          - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    db:
+        build: "./database"
+        user: "mysql"
+        environment:
+            MYSQL_DATABASE: 'booksys'
+            MYSQL_USER: 'user'
+            MYSQL_PASSWORD: 'userpassword'
+            MYSQL_ROOT_PASSWORD: 'rootpassword'
+        ports:
+            - '3306:3306'
+        expose:
+            - '3306'
+    backend:
+        image: booksys_api:latest
+        environment:
+            DB_SERVER: 'db:3306'
+            DB_NAME: 'booksys'
+            DB_USER: 'user'
+            DB_PASSWORD: 'userpassword'
+        labels:
+            - "traefik.http.routers.backend.rule=PathPrefix(`/api/`) || PathPrefix(`/api`)"
+            - "traefik.http.services.backend.loadbalancer.server.port=80"
+        volumes:
+            - ${PWD}/../../backend/api:/var/www/html/api
+            - ${PWD}/../../backend/classes:/var/www/html/classes
+            - ${PWD}/../../backend/config/db:/var/www/html/config/db
+    frontend:
+        build: "./frontend"
+        user: "node"
+        working_dir: /home/node/app
+        environment:
+            - NODE_ENV=development
+        volumes:
+            - ../../frontend:/home/node/app
+        labels:
+            - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+            - "traefik.http.services.frontend.loadbalancer.server.port=8080"
+        command: "npm run serve"
+    

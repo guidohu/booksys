@@ -2,7 +2,7 @@
 
 A booking and management tool small boat communities to schedule boat usage and simplify maintenance as well as accounting.
 
-![dashboard view](https://raw.githubusercontent.com/guidohu/booksys/master/img/dashboard.png)
+![dashboard view](https://raw.githubusercontent.com/guidohu/booksys/master/docs/img/dashboard.png)
 
 It comes with the following features:
 - **Boat Management** Track engine hours, fuel consumption and maintenance logs.
