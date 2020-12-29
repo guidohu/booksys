@@ -4,7 +4,6 @@ services:
     traefik:
         image: "traefik:latest"
         command:
-          #- "--log.level=DEBUG"
           - "--api.insecure=true"
           - "--providers.docker=true"
           - "--providers.docker.exposedbydefault=true"
@@ -36,10 +35,6 @@ services:
         labels:
             - "traefik.http.routers.backend.rule=PathPrefix(`/api/`) || PathPrefix(`/api`)"
             - "traefik.http.services.backend.loadbalancer.server.port=80"
-            # - traefik.http.middlewares.backend.stripprefix.prefixes=/backend
-            # - traefik.http.middlewares.backend.stripprefix.forceslash=false
-            # - "traefik.http.middlewares.remove-backend.stripprefix.prefixes="
-            # - "traefik.http.routers.backend.middlewares=remove-backend@docker"
         volumes:
             - ${PWD}/../../backend/api:/var/www/html/api
             - ${PWD}/../../backend/classes:/var/www/html/classes
@@ -52,11 +47,8 @@ services:
             - NODE_ENV=development
         volumes:
             - ../../frontend:/home/node/app
-        # ports:
-        #     - "8082:8080"
         labels:
             - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
             - "traefik.http.services.frontend.loadbalancer.server.port=8080"
-        #command: "npm start"
         command: "npm run serve"
     
