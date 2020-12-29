@@ -2,7 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  // assetsDir: './src/assets',
+  assetsDir: './src/assets',
   outputDir: 'dist',
   publicPath: '/',
   // indexPath: 'index.html',
