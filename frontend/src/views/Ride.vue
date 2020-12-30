@@ -126,6 +126,10 @@ export default Vue.extend({
     ...mapGetters('sessions', [
       'getSessions'
     ]),
+    ...mapGetters('stopwatch', [
+      'getIsRunning',
+      'getSessionId'
+    ]),
     sunrise: function(){
       const sessions = this.getSessions;
       if(sessions == null){
@@ -241,7 +245,10 @@ export default Vue.extend({
 
     this.querySessionsForDate();
 
-    // TODO check if the watch is running -> then go to watch
+    // check if the watch is running currently -> then go to watch
+    if(this.getIsRunning == true){
+      this.$router.push("/watch?sessionId="+this.getSessionId);
+    }
   }
 })
 </script>

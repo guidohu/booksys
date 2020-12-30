@@ -113,10 +113,7 @@ export default Vue.extend({
       }
     },
     selectedRiderId: function(newRiderId) {
-      if(newRiderId != null){
-        console.log("setUserId to", newRiderId);
-        this.setUserId(newRiderId);
-      }
+      this.setUserId(newRiderId);
     },
     getSession: function(newSession) {
       console.log("session data changed to", newSession);
@@ -174,6 +171,13 @@ export default Vue.extend({
       this.querySession(this.sessionId)
       .then(() => console.log("queried session"))
       .catch((errors) => this.errors = errors);
+    }
+
+    // select rider (if one is stored)
+    const storedUserId = this.getUserId;
+    console.log("Stored UserId is:", storedUserId);
+    if(storedUserId != null){
+      this.selectedRiderId = storedUserId;
     }
   }
 })

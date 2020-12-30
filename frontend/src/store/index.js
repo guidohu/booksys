@@ -23,6 +23,13 @@ const store = new Vuex.Store({
     heats: heats,
     log: log,
     accounting: accounting
+  },
+  actions: {
+    initialize (context) {
+      // add all init functions for the different modules
+      // if initialization is needed
+      context.dispatch('stopwatch/init', null, { root: true });
+    }
   }
 })
 

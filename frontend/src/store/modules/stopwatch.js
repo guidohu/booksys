@@ -28,10 +28,24 @@ const getters = {
   },
   getUserId: (state) => {
     return state.userId;
+  },
+  getSessionId: (state) => {
+    return state.sessionId;
   }
 };
 
 const actions = {
+  init: ({ commit, state, dispatch }) => {
+    console.log("Before initState");
+    commit('initState');
+
+    // Start watch again
+    if(state._isDisplayUpdaterActive){
+      console.log("Display updater was active:", state._isDisplayUpdaterActive, dispatch);
+      dispatch('displayTimeUpdate');
+    }
+    console.log("After initState");
+  },
   startTakingTime: ({ dispatch, commit, state }) => {
     console.log('startTakingTime called');
     if(state.isRunning == false){
@@ -61,7 +75,12 @@ const actions = {
         const userId = state.userId;
         const sessionId = state.sessionId;
         const comment = state.comment; // TODO comment is not given yet
-        const stoppedTime = moment().format("X");
+
+        // Use current time, or the time when we paused
+        const stoppedTime = (state.isPaused) 
+          ? moment(state._pausedAt).format("X")
+          : moment().format("X");
+        
         const startTime = state._startTime;
         console.log("state at time of finish:", state);
         const offset = state._timeOffset;
@@ -113,7 +132,6 @@ const actions = {
       }
       
     })
-    
   },
   setSessionId: ({ commit }, sessionId) => {
     commit('setSessionId', sessionId);
@@ -152,16 +170,21 @@ const actions = {
 const mutations = {
   setSessionId (state, id){
     console.log("setSessionId with", id);
+    console.log("current state is", state);
     state.sessionId = id;
+    storeState(state);
   },
   setUserId (state, userId){
     console.log("setUserId with", userId);
+    console.log("current state is", state);
     state.userId = userId;
+    storeState(state);
   },
   setStartTime (state, value){
     const startTime = moment(value).format("X");
     console.log("set startTime to:", startTime);
     state._startTime = startTime;
+    storeState(state);
   },
   updateDisplayTime (state){
     const currentTime = moment().format("X");
@@ -179,20 +202,25 @@ const mutations = {
       state.displayTime = sprintf('%02d:%02d', minutes, seconds);
     }
     console.log("updated display to:", state.displayTime);
+    storeState(state);
   },
   setIsRunning (state, value){
     console.log("setIsRunning with", value);
     state.isRunning = value;
+    storeState(state);
   },
   setIsDisplayUpdaterActive (state, value){
     console.log("set display upater active to", value);
     state._isDisplayUpdaterActive = value;
+    storeState(state);
   },
   setPause (state, value) {
     console.log("setPause with", value);
     // set the time we paused at in ISO format
     state.isPaused = true;
     state._pausedAt = value;
+    state._isDisplayUpdaterActive = false;
+    storeState(state);
   },
   setResume (state, value) {
     console.log("setResume with", value);
@@ -203,6 +231,7 @@ const mutations = {
     state._timeOffset += additionalOffset;
     state._pausedAt = null;
     state.isPaused = false;
+    storeState(state);
   },
   setFinish (state) {
     console.log("setFinish with state before", state);
@@ -213,6 +242,23 @@ const mutations = {
     state._startTime = null;
     state.displayTime = "00:00";
     console.log("setFinish with state after", state);
+    storeState(state);
+  },
+  initState (state) {
+    const storedState = loadState();
+    if(storedState != null){
+      // Load state from localStorage
+      state.displayTime = storedState.displayTime;
+      state.isPaused = storedState.isPaused;
+      state.isRunning = storedState.isRunning;
+      state.sessionId = storedState.sessionId;
+      state.userId = storedState.userId;
+      state._bufferedHeats = storedState._bufferedHeats;
+      state._isDisplayUpdaterActive = storedState._isDisplayUpdaterActive;
+      state._startTime = storedState._startTime;
+      state._pausedAt = storedState._pausedAt;
+      state._timeOffset = storedState._timeOffset;
+    }
   }
 };
 
@@ -222,5 +268,25 @@ export default {
     getters,
     actions,
     mutations
+}
+
+function storeState(state){
+  if(typeof(Storage) !== "undefined"){
+    localStorage.setItem("stopwatchState", JSON.stringify(state));
+  }else{
+    // No permanent session functionality supported
+    console.warn("Cannot use permanent store for heats.");
+  }
+}
+
+function loadState(){
+  if(typeof(Storage) !== "undefined"){
+    const localState = localStorage.getItem("stopwatchState");
+    return JSON.parse(localState);
+  }else{
+    // No permanent session functionality supported
+    console.warn("Cannot use permanent store for heats.");
+    return null;
+  }
 }
 

@@ -20,5 +20,8 @@ import "./assets/css/style.css";
 new Vue({
   router,
   store,
-  render: h => h(App)
+  render: h => h(App),
+  beforeCreate() {
+    this.$store.dispatch('initialize');
+  }
 }).$mount("#app");
