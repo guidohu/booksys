@@ -8,7 +8,8 @@
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import Chart from 'chart.js';
-import 'chartjs-plugin-colorschemes';
+import 'chartjs-plugin-colorschemes/src/plugins/plugin.colorschemes';
+import { ClassicBlue7 } from 'chartjs-plugin-colorschemes/src/colorschemes/colorschemes.tableau';
 import { groupBy, max, sum } from 'lodash';
 import moment from 'moment';
 
@@ -64,7 +65,12 @@ export default Vue.extend({
             }
           }]
         },
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        plugins: {
+          colorschemes: {
+            scheme: ClassicBlue7
+          }
+        }
       }
     }
   },
@@ -171,7 +177,7 @@ export default Vue.extend({
   },
   mounted () {
     this.setDatasets(this.getFuelLog);
-    this.drawChart(); 
+    this.drawChart();
   }
 })
 </script>
