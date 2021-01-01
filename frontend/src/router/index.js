@@ -1,24 +1,26 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import Login from '../views/Login';
-import Logout from '../views/Logout';
-import SignUp from '../views/SignUp';
-import Dashboard from '../views/Dashboard';
-import Account from '../views/Account';
-import Info from '../views/Info';
-import Schedule from '../views/Schedule';
-import Today from '../views/Today';
-import Calendar from '../views/Calendar';
-import Boat from '../views/Boat';
-import Ride from '../views/Ride';
-import Watch from '../views/Watch';
-import Admin from '../views/Admin';
-import Users from '../views/admin/Users';
-import Accounting from '../views/admin/Accounting';
-import Settings from '../views/admin/Settings';
-import Logs from '../views/admin/Logs';
-import PasswordReset from '../views/PasswordReset';
-import Setup from '../views/Setup';
+
+// Lazy import of all the Views used by the router
+const Login     = () => import('../views/Login');
+const Logout    = () => import('../views/Logout');
+const SignUp    = () => import('../views/SignUp');
+const Dashboard = () => import('../views/Dashboard');
+const Account   = () => import('../views/Account');
+const Info      = () => import('../views/Info');
+const Schedule  = () => import('../views/Schedule');
+const Today     = () => import('../views/Today');
+const Calendar  = () => import('../views/Calendar');
+const Boat      = () => import('../views/Boat');
+const Ride      = () => import('../views/Ride');
+const Watch     = () => import('../views/Watch');
+const Admin     = () => import('../views/Admin');
+const Users     = () => import('../views/admin/Users');
+const Accounting = () => import('../views/admin/Accounting');
+const Settings  = () => import('../views/admin/Settings');
+const Logs      = () => import('../views/admin/Logs');
+const PasswordReset = () => import('../views/PasswordReset');
+const Setup     = () => import('../views/Setup');
 
 Vue.use(VueRouter)
 
