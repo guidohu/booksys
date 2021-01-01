@@ -42,7 +42,7 @@
     <b-row class="ml-1 mr-1 mb-2 text-center">
       <b-col cols="12">
         <b-button-group v-if="selectedRiderId != null">
-          <b-button size="lg" variant="outline-info" v-if="!getIsRunning">
+          <b-button size="lg" variant="outline-info" v-if="!getIsRunning" v-on:click="navigateBack">
             <b-icon icon="arrow-left"/>
             Back
           </b-button>
@@ -161,7 +161,10 @@ export default Vue.extend({
     ]),
     ...mapActions('sessions', [
       'querySession'
-    ])
+    ]),
+    navigateBack: function(){
+      this.$router.push('/today');
+    }
   },
   created() {
     if(this.sessionId == null){

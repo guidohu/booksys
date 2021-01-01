@@ -86,7 +86,7 @@
 <script>
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
-import _ from 'lodash';
+import { reverse } from 'lodash';
 import moment from 'moment';
 import WarningBox from '@/components/WarningBox';
 import IncomeModal from '@/components/IncomeModal';
@@ -158,7 +158,7 @@ export default Vue.extend({
   },
   watch: {
     getYears: function(newValue){
-      const availableYears = _.reverse(newValue);
+      const availableYears = reverse(newValue);
       console.log(availableYears);
       this.form.years = availableYears.map(v => {
         return {

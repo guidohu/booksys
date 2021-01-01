@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { sprintf } from 'sprintf-js';
-import _ from 'lodash';
+import { keys } from 'lodash';
 import Heat from '@/api/heat';
 
 const state = () => ({
@@ -105,7 +105,7 @@ const actions = {
           console.log(response);
 
           // check if the heat that was just added, was added successfully
-          const allUids = _.keys(response);
+          const allUids = keys(response);
           const failedHeatUids = allUids.filter(id => response[id].ok != true);
           if(failedHeatUids.length != 0){
             dispatch('heats/queryHeatsForSession', state.sessionId, { root: true});

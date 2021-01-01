@@ -113,7 +113,7 @@ import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import moment from 'moment';
-import _ from 'lodash';
+import { orderBy } from 'lodash';
 
 export default Vue.extend({
   name: 'IncomeModal',
@@ -197,7 +197,7 @@ export default Vue.extend({
           text:  t.name
         }
       });
-      this.incomeTypes = _.orderBy(this.incomeTypes, ['text'], ['asc']);
+      this.incomeTypes = orderBy(this.incomeTypes, ['text'], ['asc']);
       this.incomeTypes.unshift({ value: null, text: "Please select"});
     },
     buildUserSelect: function(users){
@@ -209,7 +209,7 @@ export default Vue.extend({
           firstName: u.firstName
         }
       });
-      this.users = _.orderBy(this.users, ['text'], ['asc']);
+      this.users = orderBy(this.users, ['text'], ['asc']);
       this.users.unshift({ value: null, text: "Please select"});
     },
     clearForm: function() {

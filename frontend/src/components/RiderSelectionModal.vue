@@ -87,7 +87,7 @@
 import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
-import _ from 'lodash';
+import { uniq } from 'lodash';
 import WarningBox from '@/components/WarningBox';
 import { UserPointer } from '@/dataTypes/user';
 
@@ -167,7 +167,7 @@ export default Vue.extend({
       }
 
       // de-duplicate selection
-      this.usersToAdd = _.uniq(this.usersToAdd);
+      this.usersToAdd = uniq(this.usersToAdd);
     },
     remove: function(id){
       console.log(id);

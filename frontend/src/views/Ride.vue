@@ -101,7 +101,7 @@ import SessionDeleteModal from '@/components/SessionDeleteModal';
 import Session from '@/dataTypes/session';
 import moment from 'moment';
 import 'moment-timezone';
-import _ from 'lodash';
+import { difference } from 'lodash';
 
 export default Vue.extend({
   name: 'Ride',
@@ -208,9 +208,9 @@ export default Vue.extend({
         // find the session that is new
         const newIds = newInfo.sessions.map(s => s.id);
         const oldIds = oldInfo.sessions.map(s => s.id);
-        const difference = _.difference(newIds, oldIds);
-        if(difference.length == 1){
-          this.selectedSession = newInfo.sessions.find(s => s.id == difference[0])
+        const diff   = difference(newIds, oldIds);
+        if(diff.length == 1){
+          this.selectedSession = newInfo.sessions.find(s => s.id == diff[0])
         }else{
           console.error("old and new session info differs by more than one session");
         }

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { values } from 'lodash';
 import { Login } from './login';
 import { UserPointer } from '@/dataTypes/user';
 
@@ -288,7 +288,7 @@ export default class User {
               reject(["Cannot get user list"]);
             }else{
               console.log("User/getDetailedUserList: User list retrieved");
-              const usersResponse = _.values(data.data.users);
+              const usersResponse = values(data.data.users);
               resolve(usersResponse);
             }
           })
@@ -452,7 +452,7 @@ export default class User {
               reject(["Cannot parse server response"]);
             }else{
               console.log("User/getUserGroups: User group list retrieved");
-              const usersResponse = _.values(data.data);
+              const usersResponse = values(data.data);
               resolve(usersResponse);
             }
           })
@@ -482,7 +482,7 @@ export default class User {
               reject(["Cannot parse server response"]);
             }else{
               console.log("User/getUserRoles: User role list retrieved");
-              const usersResponse = _.values(data.data);
+              const usersResponse = values(data.data);
               resolve(usersResponse);
             }
           })
