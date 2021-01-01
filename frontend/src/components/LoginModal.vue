@@ -10,46 +10,50 @@
           </b-card-header>
           <b-card-body>
             <b-card-text>
-              <b-form-group>
-                <b-col cols="12">
-                    <label class="d-none d-sm-block font-weight-bold" for="username">e-mail</label>
-                    <input 
-                      ref="username" 
-                      type="text" 
-                      v-model="username" 
-                      class="form-control form-control-white" 
-                      placeholder="e-mail" 
-                      autocomplete="username"
-                    />
-                </b-col>
+              <b-form-group
+                id="input-group-username"
+                label="Email"
+                label-for="input-username"
+                label-cols="3"
+              >
+                <b-form-input
+                  id="input-username"
+                  v-model="username"
+                  type="text"
+                  ref="username"
+                  placeholder="e-mail"
+                  autocomplete="username"
+                />
               </b-form-group>
-              <b-form-group>
-                <b-col cols="12">
-                    <label class="d-none d-sm-block font-weight-bold" for="password">password</label>
-                    <input 
-                      type="password" 
-                      v-model="password" 
-                      class="form-control form-control-white" 
-                      placeholder="password" 
-                      autocomplete="current-password"
-                    />
-                </b-col>
+              <b-form-group
+                id="input-group-password"
+                label="Password"
+                label-for="input-password"
+                label-cols="3"
+              >
+                <b-form-input
+                  id="input-password"
+                  v-model="password"
+                  type="password"
+                  placeholder="password"
+                  autocomplete="current-password"
+                />
               </b-form-group>
-              <b-form-group v-if="statusMessage" class="text-center">
+              <b-row v-if="statusMessage" class="text-center">
                 <b-col cols="12">
                   <b-alert show variant="danger">
                     {{ statusMessage }}
                   </b-alert>
                 </b-col>
-              </b-form-group>
-              <b-form-group class="text-right">
+              </b-row>
+              <b-row class="text-right">
                 <b-col cols="12">
                   <b-button variant="outline-dark" type="submit">
                     <b-icon-caret-right-fill/>
                     Login
                   </b-button>
                 </b-col>
-              </b-form-group>
+              </b-row>
             </b-card-text>
           </b-card-body>
           <b-card-footer>
@@ -76,28 +80,38 @@
 <script>
 import Vue from 'vue'
 import {
-  AlertPlugin,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BAlert,
+  BButton,
   BIconCaretRightFill,
-  ButtonPlugin,
-  CardPlugin,
-  FormGroupPlugin,
-  FormPlugin,
-  LayoutPlugin
+  BRow,
+  BCol,
+  BCard,
+  BCardHeader,
+  BCardBody,
+  BCardFooter,
+  BCardText,
 } from 'bootstrap-vue';
 import { mapActions } from 'vuex'
-
-Vue.use(AlertPlugin);
-Vue.use(ButtonPlugin);
-Vue.use(CardPlugin);
-Vue.use(FormGroupPlugin);
-Vue.use(FormPlugin);
-Vue.use(LayoutPlugin);
-
-Vue.component('b-icon-caret-right-fill', BIconCaretRightFill);
 
 export default Vue.extend({
   name: 'LoginModal',
   components: {
+    BForm,
+    BFormGroup,
+    BFormInput,
+    BAlert,
+    BButton,
+    BIconCaretRightFill,
+    BRow,
+    BCol,
+    BCard,
+    BCardHeader,
+    BCardBody,
+    BCardFooter,
+    BCardText,
   },
   props: ['isMobile', 'statusMessage'],
   data: function () {
