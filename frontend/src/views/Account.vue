@@ -1,15 +1,7 @@
 <template>
 
 <div v-if="isDesktop" class="display">
-  <b-row>
-    <b-col>
-      <div class="main-title">
-        <h3>
-          Account
-        </h3>
-      </div>
-    </b-col>
-  </b-row>
+  <main-title title-name="Account"/>
   <b-row class="ml-1 mr-1">
     <b-col cols="12">
       <UserProfileCard/>
@@ -48,6 +40,7 @@ import NavbarMobile from '@/components/NavbarMobile';
 import UserProfileCard from '@/components/UserProfileCard';
 import UserStatisticsCard from '@/components/UserStatisticsCard';
 import UserBalanceCard from '@/components/UserBalanceCard';
+import MainTitle from '@/components/MainTitle';
 import {
   BRow,
   BCol,
@@ -59,6 +52,7 @@ export default Vue.extend({
   name: 'Account',
   components: {
     NavbarMobile,
+    MainTitle,
     UserProfileCard,
     UserStatisticsCard,
     UserBalanceCard,

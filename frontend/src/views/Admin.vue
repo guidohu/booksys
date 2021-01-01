@@ -1,15 +1,7 @@
 <template>
   <div>
     <div v-if="isDesktop" class="display">
-      <b-row>
-        <b-col>
-          <div class="main-title">
-            <h3>
-              Administrator Menu
-            </h3>
-          </div>
-        </b-col>
-      </b-row>
+      <main-title title-name="Administrator Menu"/>
       <b-row class="mt-5 ml-1 mr-1">
         <b-col cols="3"></b-col>
         <b-col cols="6" class="text-center">
@@ -113,8 +105,7 @@
 
 <script>
 import Vue from 'vue';
-import 'bootstrap/dist/css/bootstrap.css';
-import 'bootstrap-vue/dist/bootstrap-vue.css';
+import MainTitle from '@/components/MainTitle';
 import { BooksysBrowser } from '@/libs/browser';
 import {
   BRow,
@@ -133,6 +124,7 @@ import {
 export default Vue.extend({
   name: "Admin",
   components: {
+    MainTitle,
     BRow,
     BCol,
     BButton,

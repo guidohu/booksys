@@ -8,15 +8,7 @@
       @sessionDeletedHandler="sessionDeletedHandler"
     />
     <div v-if="isDesktop" class="display">
-      <b-row>
-        <b-col>
-          <div class="main-title">
-            <h3>
-              Select Session
-            </h3>
-          </div>
-        </b-col>
-      </b-row>
+      <main-title title-name="Select Session"/>
       <b-row class="ml-1 mr-1">
         <b-col cols="8">
           <SessionDayCard v-if="getSessions != null"
@@ -98,6 +90,7 @@ import SessionDayCard from '@/components/SessionDayCard';
 import SessionDetailsCard from '@/components/SessionDetailsCard';
 import SessionEditorModal from '@/components/SessionEditorModal';
 import SessionDeleteModal from '@/components/SessionDeleteModal';
+import MainTitle from '@/components/MainTitle';
 import Session from '@/dataTypes/session';
 import moment from 'moment';
 import 'moment-timezone';
@@ -114,6 +107,7 @@ export default Vue.extend({
   name: 'Ride',
   components: {
     NavbarMobile,
+    MainTitle,
     ConditionInfoCard,
     SessionDayCard,
     SessionDetailsCard,

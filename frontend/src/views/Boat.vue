@@ -1,15 +1,7 @@
 <template>
   <div>
     <div v-if="isDesktop" class="display">
-      <b-row>
-        <b-col>
-          <div class="main-title">
-            <h3>
-              Boat
-            </h3>
-          </div>
-        </b-col>
-      </b-row>
+      <main-title title-name="Boat"/>
       <b-row class="ml-1 mr-1">
         <b-col cols="12">
           <b-card no-body>
@@ -38,6 +30,7 @@ import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
 import BoatTabs from '@/components/BoatTabs';
+import MainTitle from '@/components/MainTitle';
 import {
   BRow,
   BCol,
@@ -50,6 +43,7 @@ export default Vue.extend({
   name: 'Boat',
   components: {
     NavbarMobile,
+    MainTitle,
     BoatTabs,
     BRow,
     BCol,

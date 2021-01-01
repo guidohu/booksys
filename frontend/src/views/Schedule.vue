@@ -1,14 +1,6 @@
 <template>
 <div v-if="isDesktop" class="display">
-  <b-row>
-    <b-col>
-      <div class="main-title">
-        <h3>
-          Schedule
-        </h3>
-      </div>
-    </b-col>
-  </b-row>
+  <main-title title-name="Schedule"/>
   <b-row class="ml-1 mr-1">
     <b-col>
       <div class="accordion" role="tablist">
@@ -74,6 +66,7 @@ import { mapActions, mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
 import UserSessionsTable from '@/components/UserSessionsTable';
+import MainTitle from '@/components/MainTitle';
 import {
   BRow,
   BCol,
@@ -93,6 +86,7 @@ export default Vue.extend({
   name: 'Schedule',
   components: {
     NavbarMobile,
+    MainTitle,
     UserSessionsTable,
     BRow,
     BCol,

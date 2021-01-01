@@ -1,15 +1,7 @@
 <template>
   <div>
     <div v-if="isDesktop" class="display">
-      <b-row>
-        <b-col>
-          <div class="main-title">
-            <h3>
-              Book Your Session
-            </h3>
-          </div>
-        </b-col>
-      </b-row>
+      <main-title title-name="Calendar"/>
       <b-row class="ml-1 mr-1">
         <b-col cols="8">
           <SessionMonthCard v-if="getSessionsCalendar != null"
@@ -46,7 +38,7 @@
       </div>
     </div>
     <div v-else>
-      <NavbarMobile title="Book Your Session"/>
+      <NavbarMobile title="Calendar"/>
       <SessionMonthCard v-if="getSessionsCalendar != null"
         :sessionData="getSessionsCalendar"
         :month="month"
@@ -65,6 +57,7 @@ import NavbarMobile from '@/components/NavbarMobile';
 import ConditionInfoCard from '@/components/ConditionInfoCard';
 import SessionMonthCard from '@/components/SessionMonthCard';
 import SessionsOverview from '@/components/SessionsOverview';
+import MainTitle from '@/components/MainTitle';
 import moment from 'moment';
 import 'moment-timezone';
 import {
@@ -78,6 +71,7 @@ export default Vue.extend({
   name: 'Calendar',
   components: {
     NavbarMobile,
+    MainTitle,
     ConditionInfoCard,
     SessionMonthCard,
     SessionsOverview,

@@ -1,14 +1,6 @@
 <template>
   <div v-if="isDesktop" class="display">
-    <b-row>
-      <b-col>
-        <div class="main-title">
-          <h3>
-            Stop Watch
-          </h3>
-        </div>
-      </b-col>
-    </b-row>
+    <main-title title-name="Stop Watch"/>
     <b-row class="ml-1 mr-1">
       <b-col cols="8">
         <WarningBox v-if="errors.length > 0" :errors="errors"/>
@@ -54,6 +46,7 @@ import WarningBox from '@/components/WarningBox';
 import StopWatchCard from '@/components/StopWatchCard';
 import SessionHeatListCard from '@/components/SessionHeatListCard';
 import ConditionInfoCard from '@/components/ConditionInfoCard';
+import MainTitle from '@/components/MainTitle';
 import {
   BRow,
   BCol,
@@ -65,6 +58,7 @@ export default Vue.extend({
   name: "Watch",
   components: {
     NavbarMobile,
+    MainTitle,
     WarningBox,
     StopWatchCard,
     SessionHeatListCard,
