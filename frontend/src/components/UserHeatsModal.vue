@@ -13,7 +13,7 @@
     </b-row>    
     <div slot="modal-footer">
       <b-button type="button" variant="outline-info" v-on:click="close">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         OK
       </b-button>
     </div>
@@ -21,11 +21,27 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import Vue from 'vue';
+import { mapGetters } from 'vuex';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BTable,
+  BButton,
+  BIconCheck
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'UserHeatsModal',
+  components: {
+    BModal,
+    BRow,
+    BCol,
+    BTable,
+    BButton,
+    BIconCheck
+  },
   data: function(){
     return {
       fields: [

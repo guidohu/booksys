@@ -40,7 +40,7 @@
       </b-row>
       <div class="bottom mr-2">
         <b-button variant="outline-light" to="/dashboard">
-          <b-icon-house></b-icon-house>
+          <b-icon-house/>
           HOME
         </b-button>
       </div>
@@ -67,7 +67,12 @@ import SessionMonthCard from '@/components/SessionMonthCard';
 import SessionsOverview from '@/components/SessionsOverview';
 import moment from 'moment';
 import 'moment-timezone';
-// import _ from 'lodash';
+import {
+  BRow,
+  BCol,
+  BButton,
+  BIconHouse
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'Calendar',
@@ -75,7 +80,11 @@ export default Vue.extend({
     NavbarMobile,
     ConditionInfoCard,
     SessionMonthCard,
-    SessionsOverview
+    SessionsOverview,
+    BRow,
+    BCol,
+    BButton,
+    BIconHouse
   },
   computed: {
     isMobile: function () {

@@ -18,11 +18,19 @@
 import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import WarningBox from '@/components/WarningBox';
+import {
+  BCard,
+  BCardBody,
+  BTable
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: "LogCard",
   components: {
-    WarningBox
+    WarningBox,
+    BCard,
+    BCardBody,
+    BTable
   },
   data() {
     return {

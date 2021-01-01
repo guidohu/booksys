@@ -26,9 +26,23 @@
 import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import moment from 'moment-timezone/moment-timezone';
+import {
+  BTable,
+  BRow,
+  BCol,
+  BButton,
+  BIconX
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'UserSessionsTable',
+  components: {
+    BTable,
+    BRow,
+    BCol,
+    BButton,
+    BIconX
+  },
   props: [
     'userSessions',
     'showCancel'

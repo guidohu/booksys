@@ -50,7 +50,7 @@
     </b-row>    
     <div slot="modal-footer">
       <b-button type="button" variant="outline-info" v-on:click="close">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Done
       </b-button>
     </div>
@@ -58,11 +58,25 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import { mapGetters } from 'vuex'
+import Vue from 'vue';
+import { mapGetters } from 'vuex';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BButton,
+  BIconCheck
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'PaymentInfoModal',
+  components: {
+    BModal,
+    BRow,
+    BCol,
+    BButton,
+    BIconCheck
+  },
   computed: {
     ...mapGetters('configuration', [
       'getConfiguration'

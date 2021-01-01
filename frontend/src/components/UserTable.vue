@@ -26,7 +26,7 @@
           >
             <template #cell(license)="data">
               <div class="text-center">
-                <b-icon v-if="data.item.license==1" icon="patch-check" variant="success"/>        
+                <b-icon-patch-check v-if="data.item.license==1" variant="success"/>        
               </div>
             </template>
             <template #cell(balance)="data">
@@ -46,8 +46,8 @@
             <template #cell(locked)="data">
               <div class="text-center">
                 <b-button size="sm" style="font-size: 0.8em;" variant="light">
-                  <b-icon v-if="data.item.locked==1" v-on:click="unlock(data.item)" icon="lock-fill" variant="danger"/>
-                  <b-icon v-if="data.item.locked==0" v-on:click="lock(data.item)" icon="unlock-fill" variant="success"/>
+                  <b-icon-lock-fill v-if="data.item.locked==1" v-on:click="unlock(data.item)" variant="danger"/>
+                  <b-icon-unlock-fill v-if="data.item.locked==0" v-on:click="lock(data.item)" variant="success"/>
                 </b-button>
               </div>
             </template>
@@ -63,11 +63,29 @@ import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { sprintf } from 'sprintf-js';
 import WarningBox from '@/components/WarningBox';
+import {
+  BRow,
+  BCol,
+  BButton,
+  BTable,
+  BIconPatchCheck,
+  BIconLockFill,
+  BIconUnlockFill,
+  BFormSelect
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'UserTable',
   components: {
-    WarningBox
+    WarningBox,
+    BRow,
+    BCol,
+    BButton,
+    BTable,
+    BIconPatchCheck,
+    BIconLockFill,
+    BIconUnlockFill,
+    BFormSelect
   },
   data() {
     return {

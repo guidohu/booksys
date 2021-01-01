@@ -59,13 +59,13 @@
           <b-navbar-nav>
             <b-nav-item href="#">
               <router-link to="/dashboard">
-                <b-icon icon="house"></b-icon>
+                <b-icon-house/>
                 Home
                 </router-link>
               </b-nav-item>
             <b-nav-item href="#">
               <router-link to="/logout">
-                <b-icon icon="box-arrow-right"></b-icon>
+                <b-icon-box-arrow-right/>
                 Logout
               </router-link>
             </b-nav-item>
@@ -116,9 +116,35 @@ import Vue from 'vue';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 import { BooksysBrowser } from '@/libs/browser';
+import {
+  BRow,
+  BCol,
+  BButton,
+  BIconHouse,
+  BIconBoxArrowRight,
+  BNavbar,
+  BNavbarBrand,
+  BNavbarToggle,
+  BCollapse,
+  BNavbarNav,
+  BNavItem
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: "Admin",
+  components: {
+    BRow,
+    BCol,
+    BButton,
+    BIconHouse,
+    BIconBoxArrowRight,
+    BNavbar,
+    BNavbarBrand,
+    BNavbarToggle,
+    BCollapse,
+    BNavbarNav,
+    BNavItem
+  },
   computed: {
     isDesktop: function () {
       return !BooksysBrowser.isMobile()

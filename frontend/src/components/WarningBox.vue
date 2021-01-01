@@ -15,10 +15,14 @@
 </template>
 
 <script>
-import Vue from 'vue'
+import Vue from 'vue';
+import { BAlert } from 'bootstrap-vue';
 
 export default Vue.extend({
   name: "WarningBox",
+  components: {
+    BAlert
+  },
   props: [ 'errors', 'dismissible' ],
   mounted() {
     console.log("WarningBox just mounted");

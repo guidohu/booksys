@@ -36,13 +36,19 @@ import { BooksysBrowser } from '@/libs/browser';
 import EngineHourLogContainer from '@/components/EngineHourLogContainer';
 import FuelLogContainer from '@/components/FuelLogContainer';
 import MaintenanceLogContainer from '@/components/MaintenanceLogContainer';
+import {
+  BTabs,
+  BTab
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'BoatTabs',
   components: {
     EngineHourLogContainer,
     FuelLogContainer,
-    MaintenanceLogContainer
+    MaintenanceLogContainer,
+    BTabs,
+    BTab
   },
   computed: {
     isDesktop: function () {

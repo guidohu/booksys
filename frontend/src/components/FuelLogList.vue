@@ -26,12 +26,16 @@ import { mapActions, mapGetters } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import FuelEntryModal from '@/components/FuelEntryModal';
 import moment from "moment-timezone";
+import {
+  BTable
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: "FuelLogList",
   components: {
     WarningBox,
-    FuelEntryModal
+    FuelEntryModal,
+    BTable
   },
   data() {
     return {

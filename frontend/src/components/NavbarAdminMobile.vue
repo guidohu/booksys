@@ -8,19 +8,19 @@
       <b-navbar-nav>
         <b-nav-item href="#">
           <router-link to="/dashboard">
-            <b-icon icon="house"></b-icon>
+            <b-icon-house/>
             Home
           </router-link>
         </b-nav-item>
         <b-nav-item href="#">
           <router-link to="/admin">
-            <b-icon icon="gear"></b-icon>
+            <b-icon-gear/>
             Administrator Menu
           </router-link>
         </b-nav-item>
         <b-nav-item href="#">
           <router-link to="/logout">
-            <b-icon icon="box-arrow-right"></b-icon>
+            <b-icon-box-arrow-right/>
             Logout
           </router-link>
         </b-nav-item>
@@ -30,10 +30,32 @@
 </template>
 
 <script>
-import Vue from 'vue'
+import Vue from 'vue';
+import {
+  BNavbar,
+  BNavbarBrand,
+  BNavbarToggle,
+  BCollapse,
+  BNavbarNav,
+  BNavItem,
+  BIconHouse,
+  BIconGear,
+  BIconBoxArrowRight
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'NavbarAdminMobile',
+  components: {
+    BNavbar,
+    BNavbarBrand,
+    BNavbarToggle,
+    BCollapse,
+    BNavbarNav,
+    BNavItem,
+    BIconHouse,
+    BIconGear,
+    BIconBoxArrowRight
+  },
   props: ['title']
 })
 </script>

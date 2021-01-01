@@ -104,11 +104,11 @@
     </b-form>
     <div slot="modal-footer">
       <b-button type="button" variant="outline-info" v-on:click="save">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Save
       </b-button>
       <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
     </div>
@@ -121,13 +121,33 @@ import { mapActions } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
 import WarningBox from '@/components/WarningBox';
 import moment from 'moment';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BButton,
+  BIconCheck,
+  BIconX
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'EngineHourEntryModal',
   props: [ 'engineHourEntry' ],
   components: {
     WarningBox,
-    ToggleButton
+    ToggleButton,
+    BModal,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BFormInput,
+    BButton,
+    BIconCheck,
+    BIconX
   },
   data() {
     return {

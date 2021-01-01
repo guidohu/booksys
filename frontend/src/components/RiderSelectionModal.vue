@@ -42,7 +42,7 @@
             ></b-form-select>
           </b-form-group>
           <b-button v-if="isMobile != true" type="button" variant="outline-success" v-on:click="add" block>
-            <b-icon icon="person-plus"/>{{" "}}Select
+            <b-icon-person-plus/>{{" "}}Select
           </b-button>
           <hr/>
           <b-form-group
@@ -68,15 +68,15 @@
     </b-form>
     <div slot="modal-footer">
       <b-button v-if="isMobile != true" type="button" variant="outline-info" v-on:click="save">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Add
       </b-button>
       <b-button v-if="isMobile == true" type="button" variant="outline-info" v-on:click="saveMobile">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Add
       </b-button>
       <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
     </div>
@@ -90,6 +90,19 @@ import { BooksysBrowser } from '@/libs/browser';
 import { uniq } from 'lodash';
 import WarningBox from '@/components/WarningBox';
 import { UserPointer } from '@/dataTypes/user';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BFormSelect,
+  BButton,
+  BIconPersonPlus,
+  BIconCheck,
+  BIconX
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'RiderSelectionModal',
@@ -97,7 +110,18 @@ export default Vue.extend({
     'session'
   ],
   components: {
-    WarningBox
+    WarningBox,
+      BModal,
+      BRow,
+      BCol,
+      BForm,
+      BFormGroup,
+      BFormInput,
+      BFormSelect,
+      BButton,
+      BIconPersonPlus,
+      BIconCheck,
+      BIconX
   },
   data() {
     return {

@@ -66,19 +66,19 @@
     </div>
     <div v-if="getDbVersionInfo != null" slot="modal-footer">
       <b-button type="button" variant="outline-info" v-on:click="updateDb" v-if="getDbVersionInfo.isUpdated == false && getDbIsUpdating == false">
-        <b-icon-arrow-repeat></b-icon-arrow-repeat>
+        <b-icon-arrow-repeat/>
         Update
       </b-button>
       <b-button type="button" variant="outline-secondary" disabled v-if="getDbVersionInfo.isUpdated == false && getDbIsUpdating == true">
-        <b-icon-hourglass-split></b-icon-hourglass-split>
+        <b-icon-hourglass-split/>
         Updating
       </b-button>
       <b-button type="button" variant="outline-success" v-on:click="cancel" v-if="getDbVersionInfo.isUpdated == true && getDbIsUpdating == false">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Done
       </b-button>
       <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="cancel" v-if="getDbVersionInfo.isUpdated == false && getDbIsUpdating == false">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
     </div>
@@ -88,9 +88,33 @@
 <script>
 import Vue from 'vue'
 import { mapActions, mapGetters } from 'vuex'
+import {
+  BModal,
+  BSpinner,
+  BRow,
+  BCol,
+  BAlert,
+  BButton,
+  BIconArrowRepeat,
+  BIconHourglassSplit,
+  BIconCheck,
+  BIconX
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'DatabaseUpdateModal',
+  components: {
+    BModal,
+    BSpinner,
+    BRow,
+    BCol,
+    BAlert,
+    BButton,
+    BIconArrowRepeat,
+    BIconHourglassSplit,
+    BIconCheck,
+    BIconX
+  },
   data() {
     return {
       "errors": [],

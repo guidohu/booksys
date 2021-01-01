@@ -29,9 +29,23 @@
 <script>
 import Vue from 'vue';
 import moment from 'moment-timezone';
+import {
+  BCard,
+  BCardHeader,
+  BCardBody,
+  BRow,
+  BCol
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'ConditionInfoCard',
+  components: {
+    BCard,
+    BCardHeader,
+    BCardBody,
+    BRow,
+    BCol
+  },
   props: [ 
     'sunrise',
     'sunset' ],

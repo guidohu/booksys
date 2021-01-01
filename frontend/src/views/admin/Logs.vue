@@ -17,7 +17,7 @@
       </b-row>
       <div class="bottom mr-2">
         <b-button variant="outline-light" to="/admin">
-          <b-icon icon="gear"></b-icon>
+          <b-icon-gear/>
           ADMIN
         </b-button>
       </div>
@@ -34,12 +34,22 @@ import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarAdminMobile from '@/components/NavbarAdminMobile';
 import LogCard from '@/components/LogCard';
+import {
+  BRow,
+  BCol,
+  BButton,
+  BIconGear
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'Logs',
   components: {
     NavbarAdminMobile,
-    LogCard
+    LogCard,
+    BRow,
+    BCol,
+    BButton,
+    BIconGear
   },
   computed: {
     isDesktop: function () {

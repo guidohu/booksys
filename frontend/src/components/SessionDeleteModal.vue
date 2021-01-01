@@ -21,11 +21,11 @@
     </b-form>
     <div slot="modal-footer">
       <b-button type="button" variant="outline-info" v-on:click="confirm">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Delete
       </b-button>
       <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
     </div>
@@ -36,11 +36,27 @@
 import Vue from 'vue';
 import { mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BForm,
+  BButton,
+  BIconCheck,
+  BIconX
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'SessionDeleteModal',
   components: {
-    WarningBox
+    WarningBox,
+    BModal,
+    BRow,
+    BCol,
+    BForm,
+    BButton,
+    BIconCheck,
+    BIconX
   },
   props: [
     'session'

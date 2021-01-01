@@ -22,13 +22,25 @@ import Vue from 'vue';
 import FuelLogForm from '@/components/FuelLogForm';
 import FuelLogChart from '@/components/FuelLogChart';
 import FuelLogList from '@/components/FuelLogList';
+import {
+  BCard,
+  BCardHeader,
+  BButton,
+  BCollapse,
+  BCardBody
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: "FuelLogContainer",
   components: {
     FuelLogForm,
     FuelLogChart,
-    FuelLogList
+    FuelLogList,
+    BCard,
+    BCardHeader,
+    BButton,
+    BCollapse,
+    BCardBody
   },
   data() {
     return {

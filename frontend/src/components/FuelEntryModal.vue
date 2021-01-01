@@ -157,11 +157,11 @@
     </b-form>
     <div slot="modal-footer">
       <b-button type="button" variant="outline-info" v-on:click="save">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Save
       </b-button>
       <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
     </div>
@@ -174,13 +174,35 @@ import { mapActions, mapGetters } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
 import WarningBox from '@/components/WarningBox';
 import moment from 'moment';
+import {
+  BModal,
+  BCol,
+  BRow,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BInputGroup,
+  BInputGroupAppend,
+  BIconCheck,
+  BIconX
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'fuelEntryModal',
   props: [ 'fuelEntry' ],
   components: {
     WarningBox,
-    ToggleButton
+    ToggleButton,
+    BModal,
+    BCol,
+    BRow,
+    BForm,
+    BFormGroup,
+    BFormInput,
+    BInputGroup,
+    BInputGroupAppend,
+    BIconCheck,
+    BIconX
   },
   data() {
     return {

@@ -34,9 +34,6 @@ import {
   BRow
 } from 'bootstrap-vue';
 
-Vue.component('b-container', BContainer);
-Vue.component('b-row', BRow);
-
 export default Vue.extend({
   name: 'App',
   data: function() {
@@ -48,7 +45,9 @@ export default Vue.extend({
     }
   },
   components: {
-    AlertMessage
+    AlertMessage,
+    BContainer,
+    BRow
   },
   computed: {
     isMobile: function() {

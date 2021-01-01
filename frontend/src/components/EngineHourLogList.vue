@@ -22,12 +22,16 @@ import { mapActions, mapGetters } from 'vuex';
 import moment from "moment-timezone";
 import WarningBox from '@/components/WarningBox';
 import EngineHourEntryModal from '@/components/EngineHourEntryModal';
+import {
+  BTable
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: "EngineHourLogList",
   components: {
     WarningBox,
-    EngineHourEntryModal
+    EngineHourEntryModal,
+    BTable
   },
   data() {
     return {

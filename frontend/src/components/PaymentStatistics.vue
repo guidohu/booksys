@@ -72,11 +72,23 @@ import { mapGetters, mapActions } from 'vuex';
 import { reverse } from 'lodash';
 import moment from 'moment';
 import WarningBox from '@/components/WarningBox';
+import {
+  BRow,
+  BCol,
+  BFormGroup,
+  BFormSelect,
+  BCard
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: "PaymentDetails",
   components: {
-    WarningBox
+    WarningBox,
+    BRow,
+    BCol,
+    BFormGroup,
+    BFormSelect,
+    BCard
   },
   data() {
     return {

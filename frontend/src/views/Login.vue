@@ -5,10 +5,10 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import { mapActions, mapGetters, mapState } from 'vuex'
-import LoginModal from '@/components/LoginModal.vue'
-import { BooksysBrowser } from '@/libs/browser'
+import Vue from 'vue';
+import { mapActions, mapGetters, mapState } from 'vuex';
+import LoginModal from '@/components/LoginModal.vue';
+import { BooksysBrowser } from '@/libs/browser';
 
 export default Vue.extend({
   name: 'Login',

@@ -122,21 +122,21 @@
     <div slot="modal-footer">
       <div class="text-left d-inline">
         <b-button v-if="isEditMode==true" class="mr-1" type="button" variant="outline-danger" v-on:click="remove">
-          <b-icon-trash></b-icon-trash>
+          <b-icon-trash/>
           Delete
         </b-button>
       </div>
       <div class="text-right d-inline">
         <b-button v-if="isEditMode==true" class="ml-4" type="button" variant="outline-info" v-on:click="save">
-          <b-icon-check></b-icon-check>
+          <b-icon-check/>
           Save
         </b-button>
         <b-button v-if="isEditMode==false" class="ml-1" type="button" variant="outline-info" v-on:click="enableEditMode">
-          <b-icon icon="pencil"/>
+          <b-icon-pencil/>
           Edit
         </b-button>
         <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-          <b-icon-x></b-icon-x>
+          <b-icon-x/>
           Cancel
         </b-button>
       </div>
@@ -149,11 +149,43 @@ import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { sprintf } from 'sprintf-js';
 import WarningBox from '@/components/WarningBox';
+import {
+  BModal,
+  BForm,
+  BRow,
+  BCol,
+  BFormGroup,
+  BFormInput,
+  BFormSelect,
+  BInputGroup,
+  BInputGroupAppend,
+  BButton,
+  BIconTrash,
+  BIconCheck,
+  BIconPencil,
+  BIconX
+} from "bootstrap-vue";
 
 export default Vue.extend({
   name: 'UserGroupModal',
   props: [ 'userGroup', 'editMode' ],
-  components: { WarningBox },
+  components: { 
+    WarningBox,
+    BModal,
+    BForm,
+    BRow,
+    BCol,
+    BFormGroup,
+    BFormInput,
+    BFormSelect,
+    BInputGroup,
+    BInputGroupAppend,
+    BButton,
+    BIconTrash,
+    BIconCheck,
+    BIconPencil,
+    BIconX 
+  },
   data() {
     return {
       errors: [],

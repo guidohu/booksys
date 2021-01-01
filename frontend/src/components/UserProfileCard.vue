@@ -8,7 +8,7 @@
         <b-col cols="6" class="text-right">
           <b-dropdown variant="outline-info" size="sm" no-caret dropleft>
             <template v-slot:button-content>
-              <b-icon-pencil-square></b-icon-pencil-square><span class="sr-only">Search</span>
+              <b-icon-pencil-square/><span class="sr-only">Search</span>
             </template>
             <b-dropdown-item href="#" v-on:click="showUserEdit">
               Edit Profile
@@ -52,16 +52,34 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import { mapGetters } from 'vuex'
-import UserEditModal from './UserEditModal'
-import UserPasswordEditModal from './UserPasswordEditModal'
+import Vue from 'vue';
+import { mapGetters } from 'vuex';
+import UserEditModal from './UserEditModal';
+import UserPasswordEditModal from './UserPasswordEditModal';
+import {
+  BCard,
+  BCardHeader,
+  BCardBody,
+  BRow,
+  BCol,
+  BDropdown,
+  BDropdownItem,
+  BIconPencilSquare
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'UserProfileCard',
   components: {
     UserEditModal,
-    UserPasswordEditModal
+    UserPasswordEditModal,
+    BCard,
+    BCardHeader,
+    BCardBody,
+    BRow,
+    BCol,
+    BDropdown,
+    BDropdownItem,
+    BIconPencilSquare
   },
   computed: {
     ...mapGetters('login', [

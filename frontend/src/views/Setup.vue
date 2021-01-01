@@ -43,7 +43,7 @@
         <b-col cols="1" class="d-none d-sm-block"></b-col>
         <b-col cols="12" sm="10">
           <p class="h4 mb-2">
-            <b-icon icon="check-circle" variant="success"/>
+            <b-icon-check-circle variant="success"/>
             Setup Done.
           </p>
           <p>
@@ -56,19 +56,19 @@
     <!-- Footer -->
     <div slot="modal-footer">
       <b-button v-if="showDbSetup || showUserSetup" class="mr-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
       <b-button v-if="showDbSetup" type="button" variant="outline-info" v-on:click="setDbSettings" :disabled="isLoading">
-        <b-icon icon="arrow-right"/>
+        <b-icon-arrow-right/>
         Next
       </b-button>
       <b-button v-if="showUserSetup" type="button" variant="outline-info" v-on:click="addAdminUser" :disabled="isLoading">
-        <b-icon icon="arrow-right"/>
+        <b-icon-arrow-right/>
         Next
       </b-button>
       <b-button v-if="showSetupDone" class="mr-1" type="button" variant="outline-info" v-on:click="close">
-        <b-icon icon="check"/>
+        <b-icon-check/>
         Done
       </b-button>
     </div>
@@ -83,13 +83,33 @@ import DatabaseConfiguration from '@/components/DatabaseConfiguration';
 import User from '@/api/user';
 import WarningBox from '@/components/WarningBox';
 import UserSignUp from '@/components/forms/UserSignUp';
+import {
+  BModal,
+  BOverlay,
+  BRow,
+  BCol,
+  BIconCheckCircle,
+  BIconX,
+  BIconArrowRight,
+  BIconCheck,
+  BButton
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: "Setup",
   components: {
     DatabaseConfiguration,
     WarningBox,
-    UserSignUp
+    UserSignUp,
+    BModal,
+    BOverlay,
+    BRow,
+    BCol,
+    BIconCheckCircle,
+    BIconX,
+    BIconArrowRight,
+    BIconCheck,
+    BButton
   },
   data(){
     return {

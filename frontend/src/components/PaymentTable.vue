@@ -24,8 +24,8 @@
       </b-row>
       <b-row>
         <b-col cols="8">
-          <b-button v-on:click="showAddIncome" size="sm" variant="outline-info" class="mr-1 mb-2"><b-icon icon="plus"/>Income</b-button>
-          <b-button v-on:click="showAddExpense" size="sm" variant="outline-info" class="mb-2"><b-icon icon="dash"/>Expense</b-button>
+          <b-button v-on:click="showAddIncome" size="sm" variant="outline-info" class="mr-1 mb-2"><b-icon-plus/>Income</b-button>
+          <b-button v-on:click="showAddExpense" size="sm" variant="outline-info" class="mb-2"><b-icon-dash/>Expense</b-button>
         </b-col>
         <b-col cols="4" class="d-none d-sm-block">
           <b-form-group
@@ -71,7 +71,7 @@
               <template #cell(action)="data">
                 <div class="text-center">
                   <b-button size="sm" style="font-size: 0.8em;" variant="light">
-                    <b-icon v-on:click="deleteEntry(data.item)" icon="trash" variant="danger"/>
+                    <b-icon-trash v-on:click="deleteEntry(data.item)" variant="danger"/>
                   </b-button>
                 </div>
               </template>
@@ -91,13 +91,35 @@ import moment from 'moment';
 import WarningBox from '@/components/WarningBox';
 import IncomeModal from '@/components/IncomeModal';
 import ExpenseModal from '@/components/ExpenseModal';
+import {
+  BRow,
+  BCol,
+  BFormGroup,
+  BFormSelect,
+  BButton,
+  BIconPlus,
+  BIconDash,
+  BIconTrash,
+  BOverlay,
+  BTable
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: "PaymentTable",
   components: {
     WarningBox,
     IncomeModal,
-    ExpenseModal
+    ExpenseModal,
+    BRow,
+    BCol,
+    BFormGroup,
+    BFormSelect,
+    BButton,
+    BIconPlus,
+    BIconDash,
+    BIconTrash,
+    BOverlay,
+    BTable
   },
   data() {
     return {

@@ -27,7 +27,7 @@
   </b-row>
   <div class="bottom mr-2">
     <b-button variant="outline-light" to="/dashboard">
-      <b-icon-house></b-icon-house>
+      <b-icon-house/>
       HOME
     </b-button>
   </div>
@@ -41,13 +41,19 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import { mapActions, mapGetters } from 'vuex'
-import { BooksysBrowser } from '@/libs/browser'
-import NavbarMobile from '@/components/NavbarMobile'
-import UserProfileCard from '@/components/UserProfileCard'
-import UserStatisticsCard from '@/components/UserStatisticsCard'
-import UserBalanceCard from '@/components/UserBalanceCard'
+import Vue from 'vue';
+import { mapActions, mapGetters } from 'vuex';
+import { BooksysBrowser } from '@/libs/browser';
+import NavbarMobile from '@/components/NavbarMobile';
+import UserProfileCard from '@/components/UserProfileCard';
+import UserStatisticsCard from '@/components/UserStatisticsCard';
+import UserBalanceCard from '@/components/UserBalanceCard';
+import {
+  BRow,
+  BCol,
+  BButton,
+  BIconHouse
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'Account',
@@ -55,7 +61,11 @@ export default Vue.extend({
     NavbarMobile,
     UserProfileCard,
     UserStatisticsCard,
-    UserBalanceCard
+    UserBalanceCard,
+    BRow,
+    BCol,
+    BButton,
+    BIconHouse
   },
   computed: {
     ...mapGetters('configuration', [

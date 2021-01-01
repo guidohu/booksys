@@ -74,13 +74,37 @@ import { mapActions, mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
 import UserSessionsTable from '@/components/UserSessionsTable';
+import {
+  BRow,
+  BCol,
+  BCard,
+  BCardHeader,
+  BCollapse,
+  BCardBody,
+  BCardText,
+  BButton,
+  BIconHouse,
+  BTabs,
+  BTab
+} from 'bootstrap-vue';
 
 
 export default Vue.extend({
   name: 'Schedule',
   components: {
     NavbarMobile,
-    UserSessionsTable
+    UserSessionsTable,
+    BRow,
+    BCol,
+    BCard,
+    BCardHeader,
+    BCollapse,
+    BCardBody,
+    BCardText,
+    BButton,
+    BIconHouse,
+    BTabs,
+    BTab
   },
   computed: {
     isDesktop: function() {

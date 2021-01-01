@@ -24,12 +24,18 @@ import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import UserTable from '@/components/UserTable';
 import UserGroupTable from '@/components/UserGroupTable';
+import {
+  BTabs,
+  BTab
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'UserManagementTabs',
   components: {
     UserTable,
     UserGroupTable,
+    BTabs,
+    BTab
   },
   computed: {
     isDesktop: function () {

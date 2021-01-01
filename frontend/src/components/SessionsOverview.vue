@@ -22,7 +22,7 @@
           <b-col cols="12">
             <b-row>
               <b-col cols="5">
-                <b-icon icon="book"></b-icon>
+                <b-icon-book/>
                 Title
               </b-col>
               <b-col cols="7">
@@ -31,7 +31,7 @@
             </b-row>
             <b-row>
               <b-col cols="5">
-                <b-icon icon="clock"></b-icon>
+                <b-icon-clock/>
                 Time
               </b-col>
               <b-col cols="7">
@@ -40,7 +40,7 @@
             </b-row>
             <b-row>
               <b-col cols="5">
-                <b-icon icon="person"></b-icon>
+                <b-icon-person/>
                 Riders
               </b-col>
               <b-col cols="7" v-if="session.riders!=null && session.riders.length>0">
@@ -84,9 +84,29 @@
 <script>
 import Vue from 'vue';
 import moment from 'moment';
+import {
+  BCard,
+  BCardHeader,
+  BCardBody,
+  BRow,
+  BCol,
+  BIconBook,
+  BIconClock,
+  BIconPerson
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'SessionsOverview',
+  components: {
+    BCard,
+    BCardHeader,
+    BCardBody,
+    BRow,
+    BCol,
+    BIconBook,
+    BIconClock,
+    BIconPerson
+  },
   props: [
     'sessions'
   ],

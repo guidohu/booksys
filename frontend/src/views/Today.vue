@@ -106,6 +106,13 @@ import Session from '@/dataTypes/session';
 import moment from 'moment';
 import 'moment-timezone';
 import { difference } from 'lodash';
+import {
+  BRow,
+  BCol,
+  BButton,
+  BIconCalendar3,
+  BIconHouse
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'Today',
@@ -115,7 +122,12 @@ export default Vue.extend({
     SessionDayCard,
     SessionDetailsCard,
     SessionEditorModal,
-    SessionDeleteModal
+    SessionDeleteModal,
+    BRow,
+    BCol,
+    BButton,
+    BIconCalendar3,
+    BIconHouse
   },
   computed: {
     isMobile: function () {

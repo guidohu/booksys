@@ -130,11 +130,11 @@
     </b-row>    
     <div slot="modal-footer">
       <b-button type="button" variant="outline-info" :disabled="isLoading" v-on:click="save">
-        <b-icon-person-check></b-icon-person-check>
+        <b-icon-person-check/>
         Save
       </b-button>
       <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
     </div>
@@ -145,11 +145,33 @@
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BFormCheckbox,
+  BButton,
+  BIconPersonCheck,
+  BIconX
+} from "bootstrap-vue";
 
 export default Vue.extend({
   name: 'UserEditModal',
   components: {
-    WarningBox
+    WarningBox,
+    BModal,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BFormInput,
+    BFormCheckbox,
+    BButton,
+    BIconPersonCheck,
+    BIconX
   },
   data() {
     return {

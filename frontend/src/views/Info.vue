@@ -24,7 +24,7 @@
   </b-row>
   <div class="bottom">
     <b-button variant="outline-light" to="/dashboard">
-      <b-icon-house></b-icon-house>
+      <b-icon-house/>
       HOME
     </b-button>
   </div>
@@ -53,15 +53,31 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import { mapActions, mapGetters } from 'vuex'
-import { BooksysBrowser } from '@/libs/browser'
-import NavbarMobile from '@/components/NavbarMobile.vue'
+import Vue from 'vue';
+import { mapActions, mapGetters } from 'vuex';
+import { BooksysBrowser } from '@/libs/browser';
+import NavbarMobile from '@/components/NavbarMobile.vue';
+import {
+  BRow,
+  BCol,
+  BButton,
+  BIconHouse,
+  BCard,
+  BCardBody,
+  BCardText
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'Info',
   components: {
-    NavbarMobile
+    NavbarMobile,
+    BRow,
+    BCol,
+    BButton,
+    BIconHouse,
+    BCard,
+    BCardBody,
+    BCardText
   },
   computed: {
     ...mapGetters('configuration', [

@@ -24,12 +24,18 @@ import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import PaymentTable from '@/components/PaymentTable';
 import PaymentStatistics from '@/components/PaymentStatistics';
+import {
+  BTabs,
+  BTab
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'AccountingTabs',
   components: {
     PaymentStatistics,
-    PaymentTable
+    PaymentTable,
+    BTabs,
+    BTab
   },
   computed: {
     isDesktop: function () {

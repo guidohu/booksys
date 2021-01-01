@@ -86,13 +86,33 @@ import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
 import WarningBox from '@/components/WarningBox';
+import {
+  BContainer,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BInputGroup,
+  BInputGroupPrepend,
+  BButton
+} from 'bootstrap-vue';
 
 
 export default Vue.extend({
   name: "EngineHourLogForm",
   components: {
     ToggleButton,
-    WarningBox
+    WarningBox,
+    BContainer,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BFormInput,
+    BInputGroup,
+    BInputGroupPrepend,
+    BButton
   },
   data() {
     return {

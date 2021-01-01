@@ -12,11 +12,21 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import { mapActions, mapGetters } from 'vuex'
+import Vue from 'vue';
+import { mapActions, mapGetters } from 'vuex';
+import {
+  BCard,
+  BCardText,
+  BLink
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'Logout',
+  components: {
+    BCard,
+    BCardText,
+    BLink
+  },
   created () {
     this.logout()
   },

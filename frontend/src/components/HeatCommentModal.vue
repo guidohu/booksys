@@ -32,11 +32,11 @@
     </b-form>
     <div slot="modal-footer">
       <b-button type="button" variant="outline-danger" v-on:click="removeComment" class="mr-1">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Delete
       </b-button>
       <b-button type="button" variant="outline-info" v-on:click="saveComment">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Save
       </b-button>
     </div>
@@ -46,11 +46,31 @@
 <script>
 import Vue from 'vue';
 import WarningBox from '@/components/WarningBox';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BButton,
+  BIconX,
+  BIconCheck
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: "HeatCommentModal",
   components: {
-    WarningBox
+    WarningBox,
+    BModal,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BFormInput,
+    BButton,
+    BIconX,
+    BIconCheck
   },
   props: [
     'defaultComment'

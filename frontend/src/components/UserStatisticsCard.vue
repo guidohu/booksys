@@ -29,7 +29,7 @@
         </b-col>
         <b-col cols="6">
           <b-button size="sm" type="button" variant="outline-info" v-on:click="showLatestHeats">
-            <b-icon-list-ul></b-icon-list-ul>
+            <b-icon-list-ul/>
             Latest Heats
           </b-button>
         </b-col>
@@ -40,14 +40,30 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import { mapGetters } from 'vuex'
-import UserHeatsModal from './UserHeatsModal'
+import Vue from 'vue';
+import { mapGetters } from 'vuex';
+import UserHeatsModal from './UserHeatsModal';
+import {
+  BCard,
+  BCardHeader,
+  BCardBody,
+  BRow,
+  BCol,
+  BButton,
+  BIconListUl
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'UserStatisticsCard',
   components: {
-    UserHeatsModal
+    UserHeatsModal,
+    BCard,
+    BCardHeader,
+    BCardBody,
+    BRow,
+    BCol,
+    BButton,
+    BIconListUl
   },
   computed: {
     ...mapGetters('login', [

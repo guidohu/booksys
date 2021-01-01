@@ -23,12 +23,20 @@ import { mapActions, mapGetters } from 'vuex';
 import { sprintf } from 'sprintf-js';
 import WarningBox from '@/components/WarningBox';
 import HeatEntryModal from '@/components/HeatEntryModal';
+import {
+  BCard,
+  BCardBody,
+  BTable
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'SessionHeatListCard',
   components: {
     WarningBox,
-    HeatEntryModal
+    HeatEntryModal,
+    BCard,
+    BCardBody,
+    BTable
   },
   props: [ 'sessionId' ],
   data() {

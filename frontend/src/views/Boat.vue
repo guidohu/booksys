@@ -38,12 +38,24 @@ import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
 import BoatTabs from '@/components/BoatTabs';
+import {
+  BRow,
+  BCol,
+  BCard,
+  BButton,
+  BIconHouse
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'Boat',
   components: {
     NavbarMobile,
-    BoatTabs
+    BoatTabs,
+    BRow,
+    BCol,
+    BCard,
+    BButton,
+    BIconHouse
   },
   computed: {
     isDesktop: function () {

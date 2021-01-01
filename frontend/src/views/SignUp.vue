@@ -32,7 +32,7 @@
       <b-col cols="1" class="d-none d-sm-block"></b-col>
       <b-col cols="12" sm="10">
         <p class="h4 mb-2">
-        <b-icon icon="check-circle" variant="success"/>
+        <b-icon-check-circle variant="success"/>
         <br/>
         You have been signed up successfully.
         </p>
@@ -51,15 +51,15 @@
     </b-row>
     <div slot="modal-footer">
       <b-button v-if="isSignedUp==true" type="button" variant="outline-info" v-on:click="close">
-        <b-icon-person-check></b-icon-person-check>
+        <b-icon-person-check/>
         Done
       </b-button>
       <b-button v-if="isSignedUp==false" type="button" variant="outline-info" v-on:click="save">
-        <b-icon-person-check></b-icon-person-check>
+        <b-icon-person-check/>
         Sign-Up
       </b-button>
       <b-button v-if="isSignedUp==false" class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
     </div>
@@ -73,13 +73,29 @@ import WarningBox from '@/components/WarningBox';
 import UserSignUp from '@/components/forms/UserSignUp';
 import VueRecaptcha from 'vue-recaptcha';
 import User from '@/api/user';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BIconCheckCircle,
+  BIconPersonCheck,
+  BIconX,
+  BButton
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: "SignUp",
   components: {
     WarningBox,
     UserSignUp,
-    VueRecaptcha
+    VueRecaptcha,
+    BModal,
+    BRow,
+    BCol,
+    BIconCheckCircle,
+    BIconPersonCheck,
+    BIconX,
+    BButton
   },
   data() {
     return {

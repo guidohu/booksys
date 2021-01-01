@@ -28,12 +28,18 @@ import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarAdminMobile from '@/components/NavbarAdminMobile';
 import SettingsCard from '@/components/SettingsCard';
+import {
+  BRow,
+  BCol
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'Settings',
   components: {
     NavbarAdminMobile,
-    SettingsCard
+    SettingsCard,
+    BRow,
+    BCol
   },
   computed: {
     isDesktop: function () {

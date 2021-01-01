@@ -54,6 +54,12 @@ import WarningBox from '@/components/WarningBox';
 import StopWatchCard from '@/components/StopWatchCard';
 import SessionHeatListCard from '@/components/SessionHeatListCard';
 import ConditionInfoCard from '@/components/ConditionInfoCard';
+import {
+  BRow,
+  BCol,
+  BButton,
+  BIconHouse
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: "Watch",
@@ -62,7 +68,11 @@ export default Vue.extend({
     WarningBox,
     StopWatchCard,
     SessionHeatListCard,
-    ConditionInfoCard
+    ConditionInfoCard,
+    BRow,
+    BCol,
+    BButton,
+    BIconHouse
   },
   data() {
     return {

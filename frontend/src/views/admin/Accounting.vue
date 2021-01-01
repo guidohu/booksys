@@ -19,7 +19,7 @@
       </b-row>
       <div class="bottom mr-2">
         <b-button variant="outline-light" to="/admin">
-          <b-icon icon="gear"></b-icon>
+          <b-icon-gear/>
           ADMIN
         </b-button>
       </div>
@@ -38,12 +38,24 @@ import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarAdminMobile from '@/components/NavbarAdminMobile';
 import AccountingTabs from '@/components/AccountingTabs';
+import {
+  BRow,
+  BCol,
+  BCard,
+  BButton,
+  BIconGear
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'Accounting',
   components: {
     NavbarAdminMobile,
-    AccountingTabs
+    AccountingTabs,
+    BRow,
+    BCol,
+    BCard,
+    BButton,
+    BIconGear
   },
   computed: {
     isDesktop: function () {

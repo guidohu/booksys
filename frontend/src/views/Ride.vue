@@ -52,11 +52,11 @@
       </b-row>
       <div class="bottom mr-2">
         <b-button class="mr-1" variant="outline-light" to="/calendar">
-          <b-icon-calendar3></b-icon-calendar3>
+          <b-icon-calendar3/>
           CALENDAR
         </b-button>
         <b-button variant="outline-light" to="/dashboard">
-          <b-icon-house></b-icon-house>
+          <b-icon-house/>
           HOME
         </b-button>
       </div>
@@ -102,6 +102,13 @@ import Session from '@/dataTypes/session';
 import moment from 'moment';
 import 'moment-timezone';
 import { difference } from 'lodash';
+import {
+  BRow,
+  BCol,
+  BButton,
+  BIconCalendar3,
+  BIconHouse
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'Ride',
@@ -111,7 +118,12 @@ export default Vue.extend({
     SessionDayCard,
     SessionDetailsCard,
     SessionEditorModal,
-    SessionDeleteModal
+    SessionDeleteModal,
+    BRow,
+    BCol,
+    BButton,
+    BIconCalendar3,
+    BIconHouse
   },
   computed: {
     isMobile: function () {

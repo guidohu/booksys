@@ -118,15 +118,15 @@
     </b-form>
     <div slot="modal-footer">
       <b-button v-if="form.id==null" type="button" variant="outline-info" v-on:click="save">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Create
       </b-button>
       <b-button v-if="form.id!=null" type="button" variant="outline-info" v-on:click="save">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Save
       </b-button>
       <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
     </div>
@@ -140,11 +140,35 @@ import WarningBox from '@/components/WarningBox';
 import Session, { SESSION_TYPE_OPEN, SESSION_TYPE_PRIVATE } from '@/dataTypes/session';
 import moment from 'moment';
 import 'moment-timezone';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BFormTextarea,
+  BFormCheckbox,
+  BButton,
+  BIconCheck,
+  BIconX
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'SessionEditorModal',
   components: {
-    WarningBox
+    WarningBox,
+    BModal,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BFormInput,
+    BFormTextarea,
+    BFormCheckbox,
+    BButton,
+    BIconCheck,
+    BIconX
   },
   props: [
     'defaultValues'

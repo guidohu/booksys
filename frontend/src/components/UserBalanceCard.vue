@@ -14,7 +14,7 @@
         </b-col>
         <b-col cols="6">
           <b-button size="sm" type="button" variant="outline-info" v-on:click="showPaymentInfo">
-            <b-icon-cash></b-icon-cash>
+            <b-icon-cash/>
             Buy Sessions
           </b-button>
         </b-col>
@@ -25,14 +25,30 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import { mapGetters } from 'vuex'
-import PaymentInfoModal from './PaymentInfoModal'
+import Vue from 'vue';
+import { mapGetters } from 'vuex';
+import PaymentInfoModal from './PaymentInfoModal';
+import {
+  BCard,
+  BCardHeader,
+  BCardBody,
+  BRow,
+  BCol,
+  BButton,
+  BIconCash
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'UserBalanceCard',
   components: {
-    PaymentInfoModal
+    PaymentInfoModal,
+    BCard,
+    BCardHeader,
+    BCardBody,
+    BRow,
+    BCol,
+    BButton,
+    BIconCash
   },
   computed: {
     ...mapGetters('login', [

@@ -13,13 +13,26 @@
               <b-form-group>
                 <b-col cols="12">
                     <label class="d-none d-sm-block font-weight-bold" for="username">e-mail</label>
-                    <input ref="username" type="text" v-model="username" class="form-control form-control-white" placeholder="e-mail" autocomplete="username"/>
+                    <input 
+                      ref="username" 
+                      type="text" 
+                      v-model="username" 
+                      class="form-control form-control-white" 
+                      placeholder="e-mail" 
+                      autocomplete="username"
+                    />
                 </b-col>
               </b-form-group>
               <b-form-group>
                 <b-col cols="12">
                     <label class="d-none d-sm-block font-weight-bold" for="password">password</label>
-                    <input type="password" v-model="password" class="form-control form-control-white" placeholder="password" autocomplete="current-password"/>
+                    <input 
+                      type="password" 
+                      v-model="password" 
+                      class="form-control form-control-white" 
+                      placeholder="password" 
+                      autocomplete="current-password"
+                    />
                 </b-col>
               </b-form-group>
               <b-form-group v-if="statusMessage" class="text-center">
@@ -131,8 +144,3 @@ export default Vue.extend({
   }
 })
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-
-</style>

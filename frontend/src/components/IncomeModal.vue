@@ -96,11 +96,11 @@
     <div slot="modal-footer">
       <div class="text-right d-inline">
         <b-button class="ml-4" type="button" variant="outline-info" v-on:click="add">
-          <b-icon-check></b-icon-check>
+          <b-icon-check/>
           Add
         </b-button>
         <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-          <b-icon-x></b-icon-x>
+          <b-icon-x/>
           Cancel
         </b-button>
       </div>
@@ -114,11 +114,39 @@ import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import moment from 'moment';
 import { orderBy } from 'lodash';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormSelect,
+  BFormInput,
+  BInputGroup,
+  BInputGroupAppend,
+  BFormTextarea,
+  BButton,
+  BIconCheck,
+  BIconX
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'IncomeModal',
   components: {
-    WarningBox
+    WarningBox,
+    BModal,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BFormSelect,
+    BFormInput,
+    BInputGroup,
+    BInputGroupAppend,
+    BFormTextarea,
+    BButton,
+    BIconCheck,
+    BIconX
   },
   data() {
     return {

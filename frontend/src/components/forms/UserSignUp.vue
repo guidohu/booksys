@@ -15,6 +15,7 @@
             id="email-input"
             v-model="userData.email"
             type="text"
+            autocomplete="username"
           />
         </b-form-group>
         <!-- Password -->
@@ -29,6 +30,7 @@
             id="password-input"
             v-model="userData.password"
             type="password"
+            autocomplete="new-password"
           />
         </b-form-group>
         <!-- Password Confirm -->
@@ -43,6 +45,7 @@
             id="password-confirm-input"
             v-model="userData.passwordConfirm"
             type="password"
+            autocomplete="new-password"
           />
         </b-form-group>
         <hr/>
@@ -176,11 +179,23 @@
 <script>
 import Vue from 'vue';
 import { ToggleButton } from 'vue-js-toggle-button';
+import {
+  BForm,
+  BRow,
+  BCol,
+  BFormGroup,
+  BFormInput
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: "UserSignUp",
   components: {
-    ToggleButton
+    ToggleButton,
+    BForm,
+    BRow,
+    BCol,
+    BFormGroup,
+    BFormInput
   },
   props: [ 'userData', 'showDisclaimer' ],
   data() {

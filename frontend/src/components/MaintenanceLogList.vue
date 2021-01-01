@@ -16,11 +16,13 @@ import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import moment from "moment-timezone";
 import WarningBox from '@/components/WarningBox';
+import { BTable } from 'bootstrap-vue';
 
 export default Vue.extend({
   name: "MaintenanceLogList",
   components: {
-    WarningBox
+    WarningBox,
+    BTable
   },
   data() {
     return {

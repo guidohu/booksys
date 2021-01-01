@@ -70,11 +70,31 @@
 import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import WarningBox from '@/components/WarningBox';
+import {
+  BContainer,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BInputGroup,
+  BInputGroupAppend,
+  BFormInput,
+  BButton
+} from 'bootstrap-vue';
 
 export default Vue.extend({
   name: "FuelLogForm",
   components: {
-    WarningBox
+    WarningBox,
+    BContainer,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BInputGroup,
+    BInputGroupAppend,
+    BFormInput,
+    BButton
   },
   data() {
     return {

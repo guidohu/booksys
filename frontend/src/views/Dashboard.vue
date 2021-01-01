@@ -34,6 +34,7 @@ import DashboardMemberMobile from '../components/DashboardMemberMobile';
 import DashboardGuestMobile from '../components/DashboardGuestMobile';
 import DatabaseUpdateModal from '../components/DatabaseUpdate';
 import moment from 'moment-timezone';
+import { BLink } from 'bootstrap-vue';
 
 export default Vue.extend({
   name: 'Dashboard',
@@ -45,6 +46,7 @@ export default Vue.extend({
     DashboardMemberMobile,
     DashboardGuestMobile,
     DatabaseUpdateModal,
+    BLink
   },
   computed: {
     ...mapGetters('login', [
