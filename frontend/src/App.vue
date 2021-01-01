@@ -29,6 +29,13 @@ import Backend from '@/api/backend';
 import AlertMessage from './components/AlertMessage.vue';
 import Vue from 'vue';
 import { mapGetters, mapState, mapActions } from 'vuex';
+import {
+  BContainer,
+  BRow
+} from 'bootstrap-vue';
+
+Vue.component('b-container', BContainer);
+Vue.component('b-row', BRow);
 
 export default Vue.extend({
   name: 'App',

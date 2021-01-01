@@ -1,5 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+
+// import all modules for the store
 import login from './modules/login';
 import configuration from './modules/configuration';
 import sessions from './modules/sessions';

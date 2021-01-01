@@ -32,7 +32,7 @@
               <b-form-group class="text-right">
                 <b-col cols="12">
                   <b-button variant="outline-dark" type="submit">
-                    <b-icon-caret-right-fill></b-icon-caret-right-fill>
+                    <b-icon-caret-right-fill/>
                     Login
                   </b-button>
                 </b-col>
@@ -62,7 +62,25 @@
 
 <script>
 import Vue from 'vue'
+import {
+  AlertPlugin,
+  BIconCaretRightFill,
+  ButtonPlugin,
+  CardPlugin,
+  FormGroupPlugin,
+  FormPlugin,
+  LayoutPlugin
+} from 'bootstrap-vue';
 import { mapActions } from 'vuex'
+
+Vue.use(AlertPlugin);
+Vue.use(ButtonPlugin);
+Vue.use(CardPlugin);
+Vue.use(FormGroupPlugin);
+Vue.use(FormPlugin);
+Vue.use(LayoutPlugin);
+
+Vue.component('b-icon-caret-right-fill', BIconCaretRightFill);
 
 export default Vue.extend({
   name: 'LoginModal',

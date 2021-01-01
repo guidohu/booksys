@@ -36,15 +36,12 @@ const getters = {
 
 const actions = {
   init: ({ commit, state, dispatch }) => {
-    console.log("Before initState");
     commit('initState');
 
     // Start watch again
     if(state._isDisplayUpdaterActive){
-      console.log("Display updater was active:", state._isDisplayUpdaterActive, dispatch);
       dispatch('displayTimeUpdate');
     }
-    console.log("After initState");
   },
   startTakingTime: ({ dispatch, commit, state }) => {
     console.log('startTakingTime called');
