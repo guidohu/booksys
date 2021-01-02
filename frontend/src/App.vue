@@ -26,15 +26,16 @@
 import { BooksysBrowser } from '@/libs/browser';
 import { BooksysBackend } from '@/libs/backend';
 import Backend from '@/api/backend';
-import AlertMessage from '@/components/AlertMessage.vue';
-import Vue from 'vue';
 import { mapGetters, mapState, mapActions } from 'vuex';
 import {
   BContainer,
   BRow
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+// Lazy imports
+const AlertMessage = () => import('@/components/AlertMessage');
+
+export default{
   name: 'App',
   data: function() {
     return {
@@ -127,5 +128,5 @@ export default Vue.extend({
     }
     BooksysBackend.getStatus(resF)
   }
-})
+}
 </script>

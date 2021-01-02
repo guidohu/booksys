@@ -20,7 +20,7 @@ module.exports = {
   //   // Extracted general chunks and vendor chunk s.
   //   chunks: ['chunk-vendos', 'chunk-common', 'index'],
   // },
-  // configureWebpack: {
+  configureWebpack: {
   //   entry: "./src/main.js",
   //   output: {
   //     filename: 'bundle.js'
@@ -29,7 +29,14 @@ module.exports = {
   //     template: './public/index.html',
   //     title: "Booking System"
   //   })]
-  // }
+    optimization: {
+  //   splitChunks: {
+  //     minSize: 10000,
+  //     maxSize: 250000
+  //   }
+      minimize: true,
+    }
+  },
   chainWebpack: config => {
     config
       .plugin('html')

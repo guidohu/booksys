@@ -1,16 +1,15 @@
 <template>
   <div class="login-view">
-      <LoginModal :isMobile="isMobile" :statusMessage="loginStatus" @login="handleLogin"/>
+    <LoginModal :isMobile="isMobile" :statusMessage="loginStatus" @login="handleLogin"/>
   </div>
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters, mapState } from 'vuex';
 import LoginModal from '@/components/LoginModal.vue';
 import { BooksysBrowser } from '@/libs/browser';
 
-export default Vue.extend({
+export default {
   name: 'Login',
   computed: {
     isMobile: function () {
@@ -64,5 +63,5 @@ export default Vue.extend({
     console.log("Try to get all information if logged in already")
     this.getIsLoggedIn()
   }
-})
+}
 </script>

@@ -3,10 +3,13 @@ import App from "./App.vue";
 import "./registerServiceWorker";
 import router from "./router";
 import store from "./store";
+
+// Bootstrap
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
 
-Vue.config.productionTip = false;
+Vue.config.productionTip = true;
+Vue.config.performance = true;
 
 // Override bootstrap styling
 import "./assets/bootstrap/css/bootstrap-theme-bc.css";

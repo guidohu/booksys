@@ -78,7 +78,6 @@
 </template>
 
 <script>
-import Vue from 'vue'
 import {
   BForm,
   BFormGroup,
@@ -96,7 +95,7 @@ import {
 } from 'bootstrap-vue';
 import { mapActions } from 'vuex'
 
-export default Vue.extend({
+export default {
   name: 'LoginModal',
   components: {
     BForm,
@@ -156,5 +155,5 @@ export default Vue.extend({
       this.$refs.username.focus();
     }
   }
-})
+}
 </script>
