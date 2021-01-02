@@ -77,7 +77,7 @@
 
 <script>
 import Backend from '@/api/backend';
-import { Configuration } from '@/api/configuration';
+import Configuration from '@/api/configuration';
 import DatabaseConfiguration from '@/components/DatabaseConfiguration';
 import User from '@/api/user';
 import WarningBox from '@/components/WarningBox';

@@ -1,4 +1,4 @@
-const Accounting = () => import("@/api/accounting");
+import Accounting from "@/api/accounting";
 
 const state = () => ({
   selectedYear: 'any',

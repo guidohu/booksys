@@ -1,4 +1,4 @@
-const Log = () => import('@/api/log');
+import Log  from '@/api/log';
 
 const state = () => ({
   logLines: []

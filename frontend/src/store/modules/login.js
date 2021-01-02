@@ -1,4 +1,4 @@
-const ApiLogin = () => import("@/api/login");
+import ApiLogin from "@/api/login";
 
 // initial state
 const state = () => ({

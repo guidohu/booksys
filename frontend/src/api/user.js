@@ -1,5 +1,5 @@
 import { values } from 'lodash';
-import { Login } from './login';
+import Login from './login';
 import { UserPointer } from '@/dataTypes/user';
 
 export default class User {
