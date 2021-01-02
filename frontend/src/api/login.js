@@ -1,7 +1,7 @@
 import sha256 from 'crypto-js/sha256';
 import hex from 'crypto-js/enc-hex';
 
-export class Login {
+export default class Login {
 
     // perform backend login
     static login(username, password, cbSuccess, cbFailed){

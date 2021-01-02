@@ -1,4 +1,4 @@
-import Heat from '@/api/heat';
+const Heat = () => import('@/api/heat');
 
 const state = () => ({
   sessionId: null,

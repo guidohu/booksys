@@ -1,5 +1,5 @@
-import Sessions from "../../api/sessions";
-import moment from 'moment';
+const Sessions = () => import("@/api/sessions");
+const moment = () => import('moment');
 
 const state = () => ({
   sessions: null,

@@ -1,4 +1,4 @@
-import { Login as ApiLogin } from "../../api/login";
+const ApiLogin = () => import("@/api/login");
 
 // initial state
 const state = () => ({

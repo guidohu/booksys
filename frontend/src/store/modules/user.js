@@ -1,4 +1,4 @@
-import User from "../../api/user";
+const User = () => import("@/api/user");
 
 const state = () => ({
   heatHistory: [],

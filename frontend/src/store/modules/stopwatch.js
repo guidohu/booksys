@@ -1,7 +1,9 @@
-import moment from 'moment';
 import { sprintf } from 'sprintf-js';
 import { keys } from 'lodash';
-import Heat from '@/api/heat';
+
+// Lazy load
+const Heat = () => import('@/api/heat');
+const moment = () => import('moment');
 
 const state = () => ({
   sessionId: null,
