@@ -26,7 +26,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
 import BoatTabs from '@/components/BoatTabs';
@@ -39,7 +38,7 @@ import {
   BIconHouse
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'Boat',
   components: {
     NavbarMobile,
@@ -56,5 +55,5 @@ export default Vue.extend({
       return !BooksysBrowser.isMobile()
     }
   }
-})
+}
 </script>

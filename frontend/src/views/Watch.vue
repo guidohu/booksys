@@ -38,7 +38,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
@@ -54,7 +53,7 @@ import {
   BIconHouse
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "Watch",
   components: {
     NavbarMobile,
@@ -91,7 +90,7 @@ export default Vue.extend({
       this.sessionId = sessionId;
     }
   }
-})
+}
 </script>
 
 <style>

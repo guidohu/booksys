@@ -116,7 +116,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
 import WarningBox from '@/components/WarningBox';
@@ -133,7 +132,7 @@ import {
   BIconX
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'EngineHourEntryModal',
   props: [ 'engineHourEntry' ],
   components: {
@@ -203,5 +202,5 @@ export default Vue.extend({
   created() {
     this.setFormContent(this.engineHourEntry);
   }
-})
+}
 </script>

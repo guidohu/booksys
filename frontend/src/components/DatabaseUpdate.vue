@@ -86,7 +86,6 @@
 </template>
 
 <script>
-import Vue from 'vue'
 import { mapActions, mapGetters } from 'vuex'
 import {
   BModal,
@@ -101,7 +100,7 @@ import {
   BIconX
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'DatabaseUpdateModal',
   components: {
     BModal,
@@ -169,5 +168,5 @@ export default Vue.extend({
   mounted() {
     this.$bvModal.show('view_database_update_modal')
   }
-})
+}
 </script>

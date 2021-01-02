@@ -296,7 +296,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import {
@@ -315,7 +314,7 @@ import {
   BIconCheck  
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "SettingsCard",
   components: {
     WarningBox,
@@ -426,7 +425,7 @@ export default Vue.extend({
   mounted() {
     this.setFormDefaults(this.getConfiguration)
   }
-})
+}
 </script>
 
 <style>

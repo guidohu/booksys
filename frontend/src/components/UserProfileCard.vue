@@ -52,7 +52,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import UserEditModal from './UserEditModal';
 import UserPasswordEditModal from './UserPasswordEditModal';
@@ -67,7 +66,7 @@ import {
   BIconPencilSquare
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'UserProfileCard',
   components: {
     UserEditModal,
@@ -94,5 +93,5 @@ export default Vue.extend({
       this.$bvModal.show('userPasswordEditModal')
     }
   }
-})
+}
 </script>

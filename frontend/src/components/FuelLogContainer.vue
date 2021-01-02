@@ -18,7 +18,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import FuelLogForm from '@/components/FuelLogForm';
 import FuelLogChart from '@/components/FuelLogChart';
 import FuelLogList from '@/components/FuelLogList';
@@ -30,7 +29,7 @@ import {
   BCardBody
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "FuelLogContainer",
   components: {
     FuelLogForm,
@@ -63,5 +62,5 @@ export default Vue.extend({
       this.showChart = !this.showChart;
     }
   }
-})
+}
 </script>

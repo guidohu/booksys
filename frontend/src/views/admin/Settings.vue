@@ -16,7 +16,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarAdminMobile from '@/components/NavbarAdminMobile';
 import SettingsCard from '@/components/SettingsCard';
@@ -26,7 +25,7 @@ import {
   BCol
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'Settings',
   components: {
     NavbarAdminMobile,
@@ -40,7 +39,7 @@ export default Vue.extend({
       return !BooksysBrowser.isMobile()
     }
   }
-})
+}
 </script>
 
 <style>

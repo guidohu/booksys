@@ -12,7 +12,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import {
   BCard,
@@ -20,7 +19,7 @@ import {
   BLink
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'Logout',
   components: {
     BCard,
@@ -40,5 +39,5 @@ export default Vue.extend({
       'logout'
     ])
   }
-})
+}
 </script>

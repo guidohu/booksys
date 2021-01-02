@@ -61,7 +61,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
@@ -82,7 +81,7 @@ import {
 } from 'bootstrap-vue';
 
 
-export default Vue.extend({
+export default {
   name: 'Schedule',
   components: {
     NavbarMobile,
@@ -134,7 +133,7 @@ export default Vue.extend({
         console.error(error)
       })
   }
-})
+}
 </script>
 
 <style scoped>

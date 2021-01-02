@@ -21,7 +21,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import FuelEntryModal from '@/components/FuelEntryModal';
@@ -30,7 +29,7 @@ import {
   BTable
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "FuelLogList",
   components: {
     WarningBox,
@@ -132,7 +131,7 @@ export default Vue.extend({
 
     this.setColumns();
   }
-})
+}
 </script>
 
 <style>

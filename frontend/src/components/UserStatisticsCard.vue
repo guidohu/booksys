@@ -40,7 +40,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import UserHeatsModal from './UserHeatsModal';
 import {
@@ -53,7 +52,7 @@ import {
   BIconListUl
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'UserStatisticsCard',
   components: {
     UserHeatsModal,
@@ -85,5 +84,5 @@ export default Vue.extend({
       this.$bvModal.show('userHeatsModal');
     }
   }
-})
+}
 </script>

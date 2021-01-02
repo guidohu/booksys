@@ -67,7 +67,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import {
@@ -82,7 +81,7 @@ import {
   BButton
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "FuelLogForm",
   components: {
     WarningBox,
@@ -147,5 +146,5 @@ export default Vue.extend({
   created() {
     this.queryConfiguration();
   }
-})
+}
 </script>

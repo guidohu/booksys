@@ -22,19 +22,18 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import {
   BRow,
   BCol,
   BButton
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "DashboardGuest",
   components: {
     BRow,
     BCol,
     BButton
   },
-})
+}
 </script>

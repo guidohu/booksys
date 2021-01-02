@@ -15,10 +15,9 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { BAlert } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "WarningBox",
   components: {
     BAlert
@@ -38,5 +37,5 @@ export default Vue.extend({
       this.$emit('dismissed');
     }
   }
-})
+}
 </script>

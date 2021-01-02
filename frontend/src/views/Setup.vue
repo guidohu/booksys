@@ -76,7 +76,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import Backend from '@/api/backend';
 import { Configuration } from '@/api/configuration';
 import DatabaseConfiguration from '@/components/DatabaseConfiguration';
@@ -95,7 +94,7 @@ import {
   BButton
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "Setup",
   components: {
     DatabaseConfiguration,
@@ -262,5 +261,5 @@ export default Vue.extend({
     this.getBackendStatus();
   }
 
-})
+}
 </script>

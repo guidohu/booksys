@@ -134,7 +134,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import Session, { SESSION_TYPE_OPEN, SESSION_TYPE_PRIVATE } from '@/dataTypes/session';
@@ -154,7 +153,7 @@ import {
   BIconX
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'SessionEditorModal',
   components: {
     WarningBox,
@@ -327,7 +326,7 @@ export default Vue.extend({
       this.setFormContent();
     }
   }
-})
+}
 </script>
 
 <style scoped>

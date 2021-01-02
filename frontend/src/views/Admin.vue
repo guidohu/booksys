@@ -104,7 +104,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import MainTitle from '@/components/MainTitle';
 import { BooksysBrowser } from '@/libs/browser';
 import {
@@ -121,7 +120,7 @@ import {
   BNavItem
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "Admin",
   components: {
     MainTitle,
@@ -142,5 +141,5 @@ export default Vue.extend({
       return !BooksysBrowser.isMobile()
     }
   }
-})
+}
 </script>

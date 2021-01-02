@@ -5,7 +5,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import Chart from 'chart.js';
 import 'chartjs-plugin-colorschemes/src/plugins/plugin.colorschemes';
@@ -13,7 +12,7 @@ import { ClassicBlue7 } from 'chartjs-plugin-colorschemes/src/colorschemes/color
 import { groupBy, max, sum } from 'lodash';
 import moment from 'moment';
 
-export default Vue.extend({
+export default {
   name: "FuelLogChart",
   data() {
     return {
@@ -179,5 +178,5 @@ export default Vue.extend({
     this.setDatasets(this.getFuelLog);
     this.drawChart();
   }
-})
+}
 </script>

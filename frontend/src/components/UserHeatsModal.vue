@@ -21,7 +21,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import {
   BModal,
@@ -32,7 +31,7 @@ import {
   BIconCheck
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'UserHeatsModal',
   components: {
     BModal,
@@ -81,7 +80,7 @@ export default Vue.extend({
       return value + " " + this.getCurrency;
     }
   },
-})
+}
 </script>
 
 <style>

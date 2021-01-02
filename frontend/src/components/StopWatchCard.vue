@@ -74,7 +74,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import HeatCommentModal from '@/components/HeatCommentModal';
@@ -99,7 +98,7 @@ import {
   BDropdownDivider
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'StopWatchCard',
   components: {
     WarningBox,
@@ -221,7 +220,7 @@ export default Vue.extend({
       this.selectedRiderId = storedUserId;
     }
   }
-})
+}
 </script>
 
 <style scoped>

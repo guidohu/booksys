@@ -82,7 +82,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import moment from 'moment';
 import {
   BCard,
@@ -95,7 +94,7 @@ import {
   BIconPerson
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'SessionsOverview',
   components: {
     BCard,
@@ -132,7 +131,7 @@ export default Vue.extend({
       return startStr + " - " + endStr;
     }
   }
-})
+}
 </script>
 
 <style scoped>

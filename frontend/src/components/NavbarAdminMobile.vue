@@ -30,7 +30,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import {
   BNavbar,
   BNavbarBrand,
@@ -43,7 +42,7 @@ import {
   BIconBoxArrowRight
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'NavbarAdminMobile',
   components: {
     BNavbar,
@@ -57,5 +56,5 @@ export default Vue.extend({
     BIconBoxArrowRight
   },
   props: ['title']
-})
+}
 </script>

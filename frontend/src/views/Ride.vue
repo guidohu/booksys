@@ -81,7 +81,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
@@ -103,7 +102,7 @@ import {
   BIconHouse
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'Ride',
   components: {
     NavbarMobile,
@@ -256,5 +255,5 @@ export default Vue.extend({
       this.$router.push("/watch?sessionId="+this.getSessionId);
     }
   }
-})
+}
 </script>

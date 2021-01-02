@@ -31,7 +31,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import EngineHourLogContainer from '@/components/EngineHourLogContainer';
 import FuelLogContainer from '@/components/FuelLogContainer';
@@ -41,7 +40,7 @@ import {
   BTab
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'BoatTabs',
   components: {
     EngineHourLogContainer,
@@ -80,7 +79,7 @@ export default Vue.extend({
       }
     }
   }
-})
+}
 </script>
 
 <style scoped>

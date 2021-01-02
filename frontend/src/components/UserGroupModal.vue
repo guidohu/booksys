@@ -145,7 +145,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { sprintf } from 'sprintf-js';
 import WarningBox from '@/components/WarningBox';
@@ -166,7 +165,7 @@ import {
   BIconX
 } from "bootstrap-vue";
 
-export default Vue.extend({
+export default {
   name: 'UserGroupModal',
   props: [ 'userGroup', 'editMode' ],
   components: { 
@@ -323,5 +322,5 @@ export default Vue.extend({
       this.setTitle();
     })
   }
-})
+}
 </script>

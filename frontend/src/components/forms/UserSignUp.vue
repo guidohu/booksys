@@ -177,7 +177,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { ToggleButton } from 'vue-js-toggle-button';
 import {
   BForm,
@@ -187,7 +186,7 @@ import {
   BFormInput
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "UserSignUp",
   components: {
     ToggleButton,
@@ -228,5 +227,5 @@ export default Vue.extend({
       this.ownRiskToggleState = true;
     }
   }
-})
+}
 </script>

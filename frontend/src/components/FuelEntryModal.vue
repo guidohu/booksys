@@ -169,7 +169,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
 import WarningBox from '@/components/WarningBox';
@@ -187,7 +186,7 @@ import {
   BIconX
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'fuelEntryModal',
   props: [ 'fuelEntry' ],
   components: {
@@ -298,5 +297,5 @@ export default Vue.extend({
     this.setFormContent(this.fuelEntry);
     this.queryConfiguration();
   }
-})
+}
 </script>

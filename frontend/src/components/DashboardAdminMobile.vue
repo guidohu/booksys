@@ -88,7 +88,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import Pie from "./Pie.vue";
 import {
   BNavbar,
@@ -104,7 +103,7 @@ import {
   BButton
 } from "bootstrap-vue";
 
-export default Vue.extend({
+export default {
   name: "DashboardAdminMobile",
   data() {
     return {
@@ -130,5 +129,5 @@ export default Vue.extend({
     BButton
   },
   props: ['sessionData']
-})
+}
 </script>

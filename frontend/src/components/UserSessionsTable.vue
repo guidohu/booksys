@@ -23,7 +23,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import moment from 'moment-timezone/moment-timezone';
 import {
@@ -34,7 +33,7 @@ import {
   BIconX
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'UserSessionsTable',
   components: {
     BTable,
@@ -94,5 +93,5 @@ export default Vue.extend({
       });
     }
   }
-})
+}
 </script>

@@ -83,7 +83,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions} from 'vuex';
 import moment from 'moment';
 import 'moment-timezone';
@@ -106,7 +105,7 @@ import {
   BButton
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'SessionDetailsCard',
   components: {
     RiderSelectionModal,
@@ -208,7 +207,7 @@ export default Vue.extend({
       })
     }
   }
-})
+}
 </script>
 
 <style scoped>

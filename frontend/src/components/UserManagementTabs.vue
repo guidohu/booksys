@@ -20,7 +20,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import UserTable from '@/components/UserTable';
 import UserGroupTable from '@/components/UserGroupTable';
@@ -29,7 +28,7 @@ import {
   BTab
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'UserManagementTabs',
   components: {
     UserTable,
@@ -49,7 +48,7 @@ export default Vue.extend({
       }
     }
   }
-})
+}
 </script>
 
 <style scoped>

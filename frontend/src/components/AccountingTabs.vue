@@ -20,7 +20,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import PaymentTable from '@/components/PaymentTable';
 import PaymentStatistics from '@/components/PaymentStatistics';
@@ -29,7 +28,7 @@ import {
   BTab
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'AccountingTabs',
   components: {
     PaymentStatistics,
@@ -49,7 +48,7 @@ export default Vue.extend({
       }
     }
   }
-})
+}
 </script>
 
 <style scoped>

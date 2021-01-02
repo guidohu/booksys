@@ -17,7 +17,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import moment from "moment-timezone";
 import WarningBox from '@/components/WarningBox';
@@ -26,7 +25,7 @@ import {
   BTable
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "EngineHourLogList",
   components: {
     WarningBox,
@@ -118,7 +117,7 @@ export default Vue.extend({
       this.errors = errors;
     });
   }
-})
+}
 </script>
 
 <style>

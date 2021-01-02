@@ -48,7 +48,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import Pie from "./Pie.vue";
 import moment from 'moment-timezone';
 import { BooksysBrowser } from '@/libs/browser';
@@ -63,7 +62,7 @@ import {
   BIconArrowRightShort
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'SessionMonthCard',
   data() {
     return {
@@ -140,7 +139,7 @@ export default Vue.extend({
         labels:          false,
     }
   }
-})
+}
 </script>
 
 <style scoped>

@@ -84,7 +84,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { reverse } from 'lodash';
 import moment from 'moment';
@@ -104,7 +103,7 @@ import {
   BTable
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "PaymentTable",
   components: {
     WarningBox,
@@ -261,7 +260,7 @@ export default Vue.extend({
     .then(() => this.isLoading = false)
     .catch((errors) => this.errors = errors);
   }
-})
+}
 </script>
 
 <style scoped>

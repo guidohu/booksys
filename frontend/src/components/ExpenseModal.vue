@@ -157,7 +157,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import moment from 'moment';
@@ -179,7 +178,7 @@ import {
   BIconX
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'ExpenseModal',
   components: {
     WarningBox,
@@ -420,5 +419,5 @@ export default Vue.extend({
 
     this.form.date = moment().format('YYYY-MM-DD');
   }
-})
+}
 </script>

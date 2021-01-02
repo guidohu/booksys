@@ -18,7 +18,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { sprintf } from 'sprintf-js';
 import WarningBox from '@/components/WarningBox';
@@ -29,7 +28,7 @@ import {
   BTable
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'SessionHeatListCard',
   components: {
     WarningBox,
@@ -130,7 +129,7 @@ export default Vue.extend({
       console.error("Cannot query heats for session, as no sessionId is provided");
     }
   }
-})
+}
 </script>
 
 <style>

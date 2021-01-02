@@ -67,7 +67,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { reverse } from 'lodash';
 import moment from 'moment';
@@ -80,7 +79,7 @@ import {
   BCard
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "PaymentDetails",
   components: {
     WarningBox,
@@ -151,5 +150,5 @@ export default Vue.extend({
     this.queryStatistics(currentYear)
     .catch((errors) => this.errors = errors);
   }
-})
+}
 </script>

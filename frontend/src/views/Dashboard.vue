@@ -23,7 +23,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import DashboardAdmin from '../components/DashboardAdmin';
@@ -36,7 +35,7 @@ import DatabaseUpdateModal from '../components/DatabaseUpdate';
 import moment from 'moment-timezone';
 import { BLink } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'Dashboard',
   components: {
     DashboardAdmin,
@@ -87,5 +86,5 @@ export default Vue.extend({
       this.queryDbUpdateStatus()
     }
   }
-})
+}
 </script>

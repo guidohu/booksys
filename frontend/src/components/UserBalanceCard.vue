@@ -25,7 +25,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import PaymentInfoModal from './PaymentInfoModal';
 import {
@@ -38,7 +37,7 @@ import {
   BIconCash
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'UserBalanceCard',
   components: {
     PaymentInfoModal,
@@ -66,5 +65,5 @@ export default Vue.extend({
       this.$bvModal.show('paymentInfoModal')
     }
   } 
-})
+}
 </script>

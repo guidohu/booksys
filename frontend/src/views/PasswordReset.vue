@@ -174,7 +174,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import VueRecaptcha from 'vue-recaptcha';
 import User from '@/api/user';
@@ -196,7 +195,7 @@ import {
 
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "PasswordReset",
   components: {
     VueRecaptcha,
@@ -331,5 +330,5 @@ export default Vue.extend({
   created() {
     this.queryRecaptchaKey();
   }
-})
+}
 </script>

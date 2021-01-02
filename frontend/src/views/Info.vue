@@ -45,7 +45,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
@@ -60,7 +59,7 @@ import {
   BCardText
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'Info',
   components: {
     MainTitle,
@@ -108,7 +107,7 @@ export default Vue.extend({
     console.log("Info.vue: Try to get all information required")
     this.queryConfiguration()
   }
-})
+}
 </script>
 
 <style>

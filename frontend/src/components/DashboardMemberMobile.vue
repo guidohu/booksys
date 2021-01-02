@@ -56,7 +56,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import {
   BNavbar,
   BNavbarBrand,
@@ -71,7 +70,7 @@ import {
   BButton
 } from "bootstrap-vue";
 
-export default Vue.extend({
+export default {
   name: "DashboardMemberMobile",
   components: {
     BNavbar,
@@ -86,5 +85,5 @@ export default Vue.extend({
     BCol,
     BButton
   },
-})
+}
 </script>

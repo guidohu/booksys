@@ -144,7 +144,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 import { sprintf } from 'sprintf-js';
@@ -165,7 +164,7 @@ import {
   BIconX
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'HeatEntryModal',
   components: {
     WarningBox,
@@ -283,5 +282,5 @@ export default Vue.extend({
       this.setFormDefaults(this.heat);
     }
   }
-})
+}
 </script>

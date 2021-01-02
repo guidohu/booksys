@@ -71,7 +71,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import {
   BContainer,
   BRow,
@@ -81,7 +80,7 @@ import {
   BFormInput
 } from "bootstrap-vue";
 
-export default Vue.extend({
+export default {
   name: "DatabaseConfiguration",
   components: {
     BContainer,
@@ -97,5 +96,5 @@ export default Vue.extend({
       this.$emit('save', this.dbConfig);
     }
   }
-})
+}
 </script>

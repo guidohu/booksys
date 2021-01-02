@@ -44,7 +44,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import WarningBox from '@/components/WarningBox';
 import {
   BModal,
@@ -58,7 +57,7 @@ import {
   BIconCheck
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "HeatCommentModal",
   components: {
     WarningBox,
@@ -103,5 +102,5 @@ export default Vue.extend({
   mounted() {
     this.comment = this.defaultComment;
   }
-})
+}
 </script>

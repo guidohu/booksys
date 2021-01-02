@@ -84,7 +84,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import { uniq } from 'lodash';
@@ -104,7 +103,7 @@ import {
   BIconX
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'RiderSelectionModal',
   props: [
     'session'
@@ -230,5 +229,5 @@ export default Vue.extend({
       this.errors = error;
     });
   }
-})
+}
 </script>

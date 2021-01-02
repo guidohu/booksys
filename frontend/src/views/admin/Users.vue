@@ -26,7 +26,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarAdminMobile from '@/components/NavbarAdminMobile';
 import UserManagementTabs from '@/components/UserManagementTabs';
@@ -39,7 +38,7 @@ import {
   BIconGear
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'Users',
   components: {
     NavbarAdminMobile,
@@ -56,7 +55,7 @@ export default Vue.extend({
       return !BooksysBrowser.isMobile()
     }
   }
-})
+}
 </script>
 
 <style>

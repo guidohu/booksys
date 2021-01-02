@@ -82,7 +82,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
 import WarningBox from '@/components/WarningBox';
@@ -99,7 +98,7 @@ import {
 } from 'bootstrap-vue';
 
 
-export default Vue.extend({
+export default {
   name: "EngineHourLogForm",
   components: {
     ToggleButton,
@@ -212,5 +211,5 @@ export default Vue.extend({
     this.setDisableBefore();
     this.setShowAfter();
   }
-})
+}
 </script>

@@ -4,11 +4,10 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import BooksysPie from "../libs/pie";
 import moment from 'moment-timezone';
 
-export default Vue.extend({
+export default {
   name: 'Pie',
   mounted() {
     let el = document.getElementById(this.pieElementId);
@@ -71,7 +70,7 @@ export default Vue.extend({
       this.pieElementId = "pie" + this.pieId;
     }
   }
-})
+}
 </script>
 
 <style scoped>

@@ -35,7 +35,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import Pie from "./Pie.vue";
 import moment from 'moment-timezone';
@@ -50,7 +49,7 @@ import {
   BCardBody
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'SessionDayCard',
   data() {
     return {
@@ -127,7 +126,7 @@ export default Vue.extend({
       this.properties.timezone = "UTC";
     }
   }
-})
+}
 </script>
 
 <style scoped>

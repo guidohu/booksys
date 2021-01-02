@@ -69,7 +69,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import Pie from "./Pie.vue";
 import {
   BRow,
@@ -78,7 +77,7 @@ import {
 } from 'bootstrap-vue';
  
 
-export default Vue.extend({
+export default {
   name: "DashboardAdmin",
   data() {
     return {
@@ -96,5 +95,5 @@ export default Vue.extend({
     BButton
   },
   props: ['isMobile', 'sessionData']
-})
+}
 </script>

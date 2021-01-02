@@ -58,7 +58,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import {
   BModal,
@@ -68,7 +67,7 @@ import {
   BIconCheck
 } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'PaymentInfoModal',
   components: {
     BModal,
@@ -87,5 +86,5 @@ export default Vue.extend({
       this.$bvModal.hide('paymentInfoModal');
     }
   }
-})
+}
 </script>

@@ -50,7 +50,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { sprintf } from 'sprintf-js';
 import WarningBox from '@/components/WarningBox';
@@ -66,7 +65,7 @@ import {
   BTable
 } from "bootstrap-vue";
 
-export default Vue.extend({
+export default {
   name: 'UserGroupTable',
   components: {
     WarningBox,
@@ -219,7 +218,7 @@ export default Vue.extend({
     .then(() => this.setRows())
     .catch((errors) => this.errors.push(...errors));
   }
-})
+}
 </script>
 
 <style scoped>
