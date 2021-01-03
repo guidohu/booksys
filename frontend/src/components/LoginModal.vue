@@ -95,6 +95,8 @@ import {
 } from 'bootstrap-vue';
 import { mapActions } from 'vuex'
 
+console.log("Loading LoginModal.vue");
+
 export default {
   name: 'LoginModal',
   components: {

@@ -9,6 +9,8 @@ import { mapActions, mapGetters, mapState } from 'vuex';
 import LoginModal from '@/components/LoginModal.vue';
 import { BooksysBrowser } from '@/libs/browser';
 
+console.log("Loaded Login.vue");
+
 export default {
   name: 'Login',
   computed: {

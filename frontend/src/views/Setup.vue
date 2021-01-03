@@ -1,6 +1,7 @@
 <template>
   <b-modal
     id="setupModal"
+    ref="setupModal"
     :title="title"
     no-close-on-backdrop
     no-close-on-esc
@@ -78,10 +79,13 @@
 <script>
 import Backend from '@/api/backend';
 import Configuration from '@/api/configuration';
-import DatabaseConfiguration from '@/components/DatabaseConfiguration';
 import User from '@/api/user';
-import WarningBox from '@/components/WarningBox';
-import UserSignUp from '@/components/forms/UserSignUp';
+
+// Lazy loaded components
+const DatabaseConfiguration = () => import('@/components/DatabaseConfiguration');
+const UserSignUp = () => import('@/components/forms/UserSignUp');
+const WarningBox = () => import('@/components/WarningBox');
+
 import {
   BModal,
   BOverlay,
@@ -131,10 +135,6 @@ export default {
 
       Configuration.setDbConfig(this.dbConfig)
       .then(() => {
-        // this.showDbSetup = false;
-        // this.showUserSetup = true;
-        // this.title = this.userSetupTitle;
-        // this.errors = [];
         this.isLoading = false;
         this.getBackendStatus();
       })
@@ -144,8 +144,6 @@ export default {
       });
     },
     addAdminUser: function(){
-      console.log("addAdminUser called");
-      
       // check for obvious validation errors
       const errors = this.validateAdminUser();
       if(errors.length > 0){
@@ -158,7 +156,6 @@ export default {
       User.signUp(this.adminUserConfig)
       .then((user) => {
         this.errors = [];
-        console.log("userCreated:", user);
         this.makeUserAdmin(user.user_id)
       })
       .catch((errors) => {
@@ -182,7 +179,7 @@ export default {
       });
     },
     close: function() {
-      this.$bvModal.hide("setupModal");
+      this.$refs['setupModal'].hide();
       this.$router.push("/login");
     },
     validateAdminUser: function() {

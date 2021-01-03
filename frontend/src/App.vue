@@ -24,9 +24,9 @@
 
 <script>
 import { BooksysBrowser } from '@/libs/browser';
-import { BooksysBackend } from '@/libs/backend';
+// import { BooksysBackend } from '@/libs/backend';
 import Backend from '@/api/backend';
-import { mapGetters, mapState, mapActions } from 'vuex';
+// import { mapGetters, mapState, mapActions } from 'vuex';
 import {
   BContainer,
   BRow
@@ -57,37 +57,35 @@ export default{
     isDesktop: function() {
       return !BooksysBrowser.isMobile()
     },
-    ...mapGetters('login', [
-      'userInfo'
-    ]),
-    ...mapState('login', [
-      'isLoggedIn'
-    ])
+    // ...mapGetters('login', [
+    //   'userInfo'
+    // ]),
+    // ...mapState('login', [
+    //   'isLoggedIn'
+    // ])
   },
   watch: {
-    isLoggedIn(newValue){
-      if(newValue == false && this.setupDone == true){
-        console.log("App.vue: detected not logged in -> forward to /login")
-        this.$router.push("/login");
-      }else if(newValue == true && this.setupDone == true){
-        this.$router.push("/dashboard");
-      }
-    },
+    // isLoggedIn(newValue){
+    //   if(newValue == false && this.setupDone == true){
+    //     console.log("App.vue: detected not logged in -> forward to /login")
+    //     this.$router.push("/login");
+    //   }else if(newValue == true && this.setupDone == true){
+    //     this.$router.push("/dashboard");
+    //   }
+    // },
     setupDone(newValue){
       if(newValue == false){
         this.$router.push("/setup");
-      }else if(this.isLoggedIn == true){
-        this.$router.push("/dashboard");
       }else{
         this.$router.push("/login");
       }
     }
   },
-  methods: {
-    ...mapActions('login', [
-      'getIsLoggedIn'
-    ])
-  },
+  // methods: {
+  //   ...mapActions('login', [
+  //     'getIsLoggedIn'
+  //   ])
+  // },
   beforeCreate() {
     // set mobile view and style
     if (BooksysBrowser.isMobile()) {
@@ -98,35 +96,25 @@ export default{
     }
   },
   created() {
+
+  },
+  mounted() {
     // short pulse check on the
     // backend to verify whether
     // it is up and configured
     Backend.getStatus()
     .then((status) => {
-      console.log(status);
-      if(!status.configFile){
+      // if we do not have a configFile for the app -> go to setup
+      if(!status.configFile || !status.configDb){
+        console.log("App Setup Done: failed");
         this.setupDone = false;
         this.$router.push("/setup");
       }
+      console.log("App Setup Done: ok (no automated forward to setup)");
     })
     .catch((error) => {
       this.errors = [error];
     })
-
-    if(this.isLoggedIn == false){
-      this.$router.push("/login")
-    }
-    console.log("App.vue: try authentication and user info")
-    this.getIsLoggedIn()
-  },
-  mounted() {
-    const resF = (x) => {
-      this.backendStatus = x
-      if(BooksysBackend.needsSetup(this.backendStatus)){
-        this.$router.push('/setup');
-      }
-    }
-    BooksysBackend.getStatus(resF)
   }
 }
 </script>
