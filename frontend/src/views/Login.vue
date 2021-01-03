@@ -8,7 +8,7 @@
     rounded="sm"
   >
     <LoginModal 
-      v-if="isLoading != true"
+      v-if="showLogin"
       :statusMessage="loginStatus" 
       :initialUsername="username" 
       @login="handleLogin"
@@ -33,7 +33,8 @@ export default {
   },
   data() {
     return {
-      isLoading: true
+      isLoading: true,
+      showLogin: false,
     }
   },
   computed: {
@@ -73,11 +74,14 @@ export default {
         }else{
           this.$router.push('/dashboard');
         }
-        this.isLoading = false;
+      }else{
+        this.showLogin = true;
       }
+      this.isLoading = false;
     })
     .catch(errors => {
       this.isLoading = false;
+      this.showLogin = true;
       console.error("Errors while getIsLoggedIn was called:", errors);
     })
   }
