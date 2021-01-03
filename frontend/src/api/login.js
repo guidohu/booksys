@@ -4,37 +4,44 @@ import hex from 'crypto-js/enc-hex';
 export default class Login {
 
   // perform backend login
-  static login(username, password, cbSuccess, cbFailed){
-      if(username == null || username == "") {
-          cbFailed("No username given")
-          return
+  static login(username, password){
+    console.log('Login/login called');
+    return new Promise((resolve, reject) => {
+      if(username == null || username == ""){
+        reject(["no username provided"]);
       }
-      if(password == null || password == "") { 
-          cbFailed("No password provided")
-          return
+      if(password == null || password == ""){
+        reject(["no password provided"]);
       }
 
-      // calculate the hash of the password (historic reason)
-      let pwHash = Login.calcHash(password)
-      Login.postData({
-          username: username,
-          password: pwHash
-      }).then(response => {
-          if(response.login_successful){
-              cbSuccess()
-          }else{
-              console.log("logout.php response:", response)
-              let errorMessage = "login failed"
-              if(response.login_status_code == -1){
-                  errorMessage = "incorrect username or password"
-              }else if(response.login_status_code == -2){
-                  errorMessage = "please be patient until we activate your account"
-              }else{
-                  errorMessage = response
-              }
-              cbFailed(errorMessage)
-          }
+      const pwHash = Login.calcHash(password);
+      const request = {
+        username: username,
+        password: pwHash
+      };
+
+      fetch('/api/login.php?action=login', {
+        method: 'POST',
+        cache: 'no-cache',
+        body: JSON.stringify(request)
       })
+      .then(response => {
+        response.json()
+        .then(data => {
+          if(data.ok){
+            resolve();
+          }else{
+            reject([data.msg]);
+          }
+        })
+        .catch(error => {
+          reject([error]);
+        })
+      })
+      .catch(error => {
+        reject([error]);
+      })
+    })
   }
 
   static logout(cbSuccess, cbFailed){

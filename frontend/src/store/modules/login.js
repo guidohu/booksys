@@ -33,23 +33,22 @@ const getters = {
 // actions
 const actions = {
   login ({ commit, dispatch }, value) {
-    // store the username
-    dispatch('setUsername', value.username)
+    dispatch('setUsername', value.username);
 
-    console.log('do login')
-    let successCb = () => {
-      console.log("Login successful")
-      commit('setLoginStatus', null);
-      dispatch('getUserInfo');
-      commit('setIsLoggedIn', true);
-      dispatch('loginStatus/setIsLoggedIn', true, { root: true });
-    }
-    let failCb = (errorMsg) => {
-      console.log("Login failed")
-      commit('setLoginStatus', errorMsg)
-    }
-    console.log("try login with:", value)
-    ApiLogin.login(value.username, value.password, successCb, failCb)
+    return new Promise((resolve, reject) => {
+      ApiLogin.login(value.username, value.password)
+      .then(() => {
+        commit('setLoginStatus', null);
+        dispatch('getUserInfo');
+        commit('setIsLoggedIn', true);
+        dispatch('loginStatus/setIsLoggedIn', true, { root: true });
+        resolve();
+      })
+      .catch((errors) => {
+        commit('setLoginStatus', errors);
+        reject(errors);
+      })
+    })
   },
   logout ({ commit, dispatch }) {
     let successCb = () => {

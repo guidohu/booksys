@@ -9,7 +9,7 @@
   >
     <LoginModal 
       v-if="showLogin"
-      :statusMessage="loginStatus" 
+      :statusMessage="status" 
       :initialUsername="username" 
       @login="handleLogin"
     />
@@ -35,6 +35,7 @@ export default {
     return {
       isLoading: true,
       showLogin: false,
+      status: null
     }
   },
   computed: {
@@ -59,6 +60,19 @@ export default {
       this.login({ 
         username: username, 
         password: password
+      })
+      .then(() => {
+        if(this.$route.query != null && this.$route.query.target != null){
+          this.$router.push(this.$route.query.target);
+        }else{
+          this.$router.push('/dashboard');
+        }
+      })
+      .catch((errors) => {
+        if(errors.length > 0){
+          this.status = errors[0];
+        }
+        
       })
     }
   },
