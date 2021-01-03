@@ -1,38 +1,39 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-// import all modules for the store
-// import login from './modules/login';
-// import configuration from './modules/configuration';
-import sessions from './modules/sessions';
-import user from './modules/user';
-import boat from './modules/boat';
-import stopwatch from './modules/stopwatch';
-import heats from './modules/heats';
-import log from './modules/log';
-import accounting from './modules/accounting';
-
 Vue.use(Vuex)
 
-const store = new Vuex.Store({
+export const store = new Vuex.Store({
   modules: {
-    // login: login,
-    // configuration: configuration,
-    sessions: sessions,
-    user: user,
-    boat: boat,
-    stopwatch: stopwatch,
-    heats: heats,
-    log: log,
-    accounting: accounting
-  },
-  actions: {
-    initialize (context) {
-      // add all init functions for the different modules
-      // if initialization is needed
-      context.dispatch('stopwatch/init', null, { root: true });
-    }
+    // will be added dynamically in depending on the route in router
   }
-})
+});
+
+export const loadStoreModules = (moduleNames, callback) => {
+  const loaded = [];
+  moduleNames.forEach(function (moduleName) {
+    const importPromise = import('@/store/modules/' + moduleName).then(module => {
+      // register the imported module
+      store.registerModule(moduleName, module.default);
+
+      // initialize the modules that need initialization
+      if(moduleName == "stopwatch"){
+        store.dispatch('stopwatch/init');
+      }
+
+      console.log("Store module registered: " + moduleName);
+    })
+
+    loaded.push(importPromise);
+  })
+
+  if(moduleNames.length > 0){
+    Promise.all(loaded).then(() => {
+      callback();
+    })
+  }else{
+    callback();
+  }
+}
 
 export default store

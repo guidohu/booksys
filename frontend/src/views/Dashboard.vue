@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="userInfo != null && userInfo.user_role_name == 'admin' && getDbUpdateStatus != null && getDbUpdateStatus.updateAvailable == true">
-      <DatabaseUpdateModal/>
+      <database-update-modal/>
     </div>
     <div v-if="isDesktop" class="display">
       <header v-if="userInfo!=null" class="welcome">
