@@ -20,7 +20,8 @@
 		login($configuration);
 		exit;
 	case 'isLoggedIn':
-		isLoggedIn($configuration);
+		$response = isLoggedIn($configuration);
+		echo json_encode($response);
 		exit;
 	default:
 		exit;
@@ -37,11 +38,10 @@
 
 	$login = new Login($configuration);
 	if($login->isLoggedIn()){
-		$res['loggedIn'] = TRUE;
+		return Status::successDataResponse("logged in", [ "loggedIn" => TRUE ]);
 	}
 
-	echo json_encode($res);
-	return;
+	return Status::successDataResponse("not logged in", [ "loggedIn" => FALSE ]);
   }
   
   // performs a user login

@@ -18,7 +18,7 @@
               >
                 <b-form-input
                   id="input-username"
-                  v-model="username"
+                  v-model="form.username"
                   type="text"
                   ref="username"
                   placeholder="e-mail"
@@ -33,7 +33,7 @@
               >
                 <b-form-input
                   id="input-password"
-                  v-model="password"
+                  v-model="form.password"
                   type="password"
                   placeholder="password"
                   autocomplete="current-password"
@@ -93,7 +93,6 @@ import {
   BCardFooter,
   BCardText,
 } from 'bootstrap-vue';
-import { mapActions } from 'vuex'
 
 export default {
   name: 'LoginModal',
@@ -112,48 +111,27 @@ export default {
     BCardFooter,
     BCardText,
   },
-  props: ['isMobile', 'statusMessage'],
+  props: ['statusMessage', 'initialUsername'],
   data: function () {
     return {
-      hasNotifications: true,
       notifications: [],
-      password: ''
-    }
-  },
-  computed: {
-    // ...mapGetters('login', [
-    //   'username'
-    // ]),
-    // ...mapState('login', {
-    //   username: state => state.login.username
-    // }),
-    username: {
-      get () {
-        return this.$store.state.login.username
+      form: {
+        username: null,
+        password: null
       },
-      set (value) {
-        // this.$store.commit('setUsername', value)
-        this.setUsername(value)
-      }
     }
-  },
-  mounted() {
-    this.focusUsername()
   },
   methods: {
     login: function () {
-      console.log("emit login")
-      this.$emit("login", this.username, this.password)
-    },
-    ...mapActions('login', [
-      'setUsername'
-    ]),
-    goSignUp: function() {
-      this.$router.push('SignUp')
+      this.$emit("login", this.form.username, this.form.password)
     },
     focusUsername() {
       this.$refs.username.focus();
     }
+  },
+  mounted() {
+    this.focusUsername();
+    this.form.username = this.initialUsername;
   }
 }
 </script>

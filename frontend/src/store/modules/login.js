@@ -39,9 +39,10 @@ const actions = {
     console.log('do login')
     let successCb = () => {
       console.log("Login successful")
-      commit('setLoginStatus', null)
-      dispatch('getUserInfo')
-      commit('setIsLoggedIn', true)
+      commit('setLoginStatus', null);
+      dispatch('getUserInfo');
+      commit('setIsLoggedIn', true);
+      dispatch('loginStatus/setIsLoggedIn', true, { root: true });
     }
     let failCb = (errorMsg) => {
       console.log("Login failed")
@@ -50,10 +51,11 @@ const actions = {
     console.log("try login with:", value)
     ApiLogin.login(value.username, value.password, successCb, failCb)
   },
-  logout ({ commit }) {
+  logout ({ commit, dispatch }) {
     let successCb = () => {
-      commit('setUserInfo', null)
-      commit('setIsLoggedIn', false)
+      commit('setUserInfo', null);
+      commit('setIsLoggedIn', false);
+      dispatch('loginStatus/setIsLoggedIn', false, { root: true });
     }
     let failCb = (data) => {
       console.error("Logout failed:", data)
@@ -61,26 +63,36 @@ const actions = {
     ApiLogin.logout(successCb, failCb)
   },
   getIsLoggedIn({ commit, dispatch }) {
-    let successCb = () => {
-      commit('setIsLoggedIn', true)
-      dispatch('getUserInfo')
-    }
-    let failCb = () => {
-      commit('setIsLoggedIn', false)
-    }
-    ApiLogin.isLoggedIn(successCb, failCb)
+    return new Promise((resolve, reject) => {
+      ApiLogin.isLoggedIn()
+      .then((status) => {
+        commit('setIsLoggedIn', status);
+        dispatch('loginStatus/setIsLoggedIn', status, { root: true });
+        if(status == true){
+          dispatch('getUserInfo');
+        }
+        resolve(status);
+      })
+      .catch((errors) => {
+        reject(errors);
+      })
+    })
   },
-  getUserInfo ({ commit }) {
-    let successCb = (data) => {
-      console.log("logged in userInfo:", data)
-      commit('setUserInfo', data)
-    }
-    let failCb = (errorData) => {
-      console.log("issue to get user", errorData)
-      commit('setUserInfo', null)
-      commit('setIsLoggedIn', false)
-    }
-    ApiLogin.getMyUser(successCb, failCb)
+  getUserInfo ({ commit, dispatch }) {
+    return new Promise((resolve, reject) => {
+      ApiLogin.getMyUser()
+      .then((userInfo) => {
+        commit('setUserInfo', userInfo);
+        resolve();
+      })
+      .catch((errors) => {
+        console.log("Cannot get user info, will reject with errors", errors);
+        commit('setUserInfo', null);
+        commit('setIsLoggedIn', false);
+        dispatch('loginStatus/setIsLoggedIn', false, { root: true });
+        reject(errors);
+      })
+    })
   },
   setUsername ({ commit }, value) {
     commit('setUsername', value)
@@ -93,12 +105,15 @@ const actions = {
 // mutations
 const mutations = {
   setUsername (state, message) {
-    state.username = message
-    console.log('username: ', state.username)
+    state.username = message;
   },
   setUserInfo (state, value) {
     state.userInfo = value;
-    state.role = value.user_role_name;
+    if(value != null){
+      state.role = value.user_role_name;
+    }else{
+      state.role = null;
+    }
     console.log('userInfo set to', value);
   },
   setLoginStatus (state, value) {

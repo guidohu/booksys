@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import { loadStoreModules } from '@/store';
+import { loadStoreModules, store } from '@/store';
 
 // Lazy import of all the Views used by the router
 const Login     = () => import('@/views/Login');
@@ -23,7 +23,18 @@ const Logs      = () => import('@/views/admin/Logs');
 const PasswordReset = () => import('@/views/PasswordReset');
 const Setup     = () => import('@/views/Setup');
 
-Vue.use(VueRouter)
+Vue.use(VueRouter);
+
+const loginEnforced = (to, from, next) => {
+  if(!store.state.loginStatus.isLoggedIn){
+    console.log("Login required to access this route");
+    console.log("Navigate from:", from, "To:", to);
+    next({ name: "Login", query: { target: to.path }});
+    return false;
+  }else{
+    return true;
+  }
+}
 
 const routes = [
   {
@@ -71,7 +82,9 @@ const routes = [
     path: '/today',
     name: 'Today',
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['configuration', 'sessions', 'user'], next);
+      if(loginEnforced(to, from, next)){
+        loadStoreModules(['configuration', 'sessions', 'user'], next);
+      }
     },
     component: Today
   },
@@ -79,7 +92,9 @@ const routes = [
     path: '/dashboard',
     name: 'Dashboard',
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['sessions', 'configuration', 'login'], next);
+      if(loginEnforced(to, from, next)){
+        loadStoreModules(['sessions', 'configuration', 'login'], next);
+      }
     },
     component: Dashboard
   },
@@ -87,7 +102,9 @@ const routes = [
     path: '/account',
     name: 'Account',
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['user', 'configuration', 'login'], next);
+      if(loginEnforced(to, from, next)){
+        loadStoreModules(['user', 'configuration', 'login'], next);
+      }
     },
     component: Account
   },
@@ -95,7 +112,9 @@ const routes = [
     path: '/info',
     name: 'Info',
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['configuration'], next);
+      if(loginEnforced(to, from, next)){
+        loadStoreModules(['configuration'], next);
+      }
     },
     component: Info
   },
@@ -103,7 +122,9 @@ const routes = [
     path: '/schedule',
     name: 'Schedule',
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['configuration', 'user'], next);
+      if(loginEnforced(to, from, next)){
+        loadStoreModules(['configuration', 'user'], next);
+      }
     },
     component: Schedule
   },
@@ -111,7 +132,9 @@ const routes = [
     path: '/calendar',
     name: 'Calendar',
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['sessions', 'configuration'], next);
+      if(loginEnforced(to, from, next)){
+       loadStoreModules(['sessions', 'configuration'], next);
+      }
     },
     component: Calendar
   },
@@ -119,7 +142,9 @@ const routes = [
     path: '/boat',
     name: 'Boat',
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['boat', 'configuration', 'login'], next);
+      if(loginEnforced(to, from, next)){
+        loadStoreModules(['boat', 'configuration', 'login'], next);
+      }
     },
     component: Boat
   },
@@ -127,7 +152,9 @@ const routes = [
     path: '/ride',
     name: 'Ride',
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['sessions', 'configuration', 'stopwatch'], next);
+      if(loginEnforced(to, from, next)){
+        loadStoreModules(['sessions', 'configuration', 'stopwatch'], next);
+      }
     },
     component: Ride
   },
@@ -135,20 +162,29 @@ const routes = [
     path: '/watch',
     name: 'Watch',
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['sessions', 'configuration', 'stopwatch', 'heats'], next);
+      if(loginEnforced(to, from, next)){
+        loadStoreModules(['sessions', 'configuration', 'stopwatch', 'heats'], next);
+      }
     },
     component: Watch
   },
   {
     path: '/admin',
     name: 'Admin',
-    component: Admin
+    component: Admin,
+    beforeEnter: (to, from, next) => {
+      if(loginEnforced(to, from, next)){
+        next();
+      }
+    }
   },
   {
     path: '/users',
     name: 'Users',
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['user', 'configuration'], next);
+      if(loginEnforced(to, from, next)){
+        loadStoreModules(['user', 'configuration'], next);
+      }
     },
     component: Users
   },
@@ -156,7 +192,9 @@ const routes = [
     path: '/accounting',
     name: 'Accounting',
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['configuration', 'accounting'], next);
+      if(loginEnforced(to, from, next)){
+        loadStoreModules(['configuration', 'accounting'], next);
+      }
     },
     component: Accounting
   },
@@ -164,7 +202,9 @@ const routes = [
     path: '/settings',
     name: 'Settings',
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['configuration'], next);
+      if(loginEnforced(to, from, next)){
+        loadStoreModules(['configuration'], next);
+      }
     },
     component: Settings
   },
@@ -172,7 +212,9 @@ const routes = [
     path: '/logs',
     name: 'Logs',
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['log'], next);
+      if(loginEnforced(to, from, next)){
+        loadStoreModules(['log'], next);
+      }
     },
     component: Logs
   }

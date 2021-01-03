@@ -4,18 +4,24 @@
       <b-row class="display noborder nobackground">
         <div class="vcenter_placeholder">
           <div class="vcenter_content">
-            <AlertMessage v-if="backendStatus && backendStatus.ok == false" alertMessage="The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible."/>
+            <alert-message 
+              v-if="backendReachable == false" 
+              :alertMessage="backendNotReachableAlertMsg"
+            />
             <router-view v-else/>
           </div>
         </div>
       </b-row>
       <footer class="legal-footer">
-        Copyright 2013-2020 by Guido Hungerbuehler <a href="https://github.com/guidohu/booksys">Find me on Github</a>
+        Copyright 2013-2021 by Guido Hungerbuehler <a href="https://github.com/guidohu/booksys">Find me on Github</a>
       </footer>
     </b-container>
     <b-container v-if="isMobile" fluid="true">
       <div v-if="isMobile">
-        <AlertMessage v-if="backendStatus && backendStatus.ok == false" alertMessage="The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible."/>
+        <alert-message 
+          v-if="backendReachable == false" 
+          :alertMessage="backendNotReachableAlertMsg"
+        />
         <router-view v-else/>
       </div>
     </b-container>
@@ -24,9 +30,8 @@
 
 <script>
 import { BooksysBrowser } from '@/libs/browser';
-// import { BooksysBackend } from '@/libs/backend';
 import Backend from '@/api/backend';
-// import { mapGetters, mapState, mapActions } from 'vuex';
+import { mapGetters } from 'vuex';
 import {
   BContainer,
   BRow
@@ -40,8 +45,8 @@ export default{
   data: function() {
     return {
       backendAvailable: false, // if the backend is not available
-      backendStatus: null,
       backendReachable: true,
+      backendNotReachableAlertMsg: "The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible. You might try to simply refresh the page if you feel lucky.",
       setupDone: false
     }
   },
@@ -57,35 +62,31 @@ export default{
     isDesktop: function() {
       return !BooksysBrowser.isMobile()
     },
-    // ...mapGetters('login', [
-    //   'userInfo'
-    // ]),
-    // ...mapState('login', [
-    //   'isLoggedIn'
-    // ])
+    ...mapGetters('loginStatus', [
+      'isLoggedIn'
+    ])
   },
   watch: {
-    // isLoggedIn(newValue){
-    //   if(newValue == false && this.setupDone == true){
-    //     console.log("App.vue: detected not logged in -> forward to /login")
-    //     this.$router.push("/login");
-    //   }else if(newValue == true && this.setupDone == true){
-    //     this.$router.push("/dashboard");
-    //   }
-    // },
     setupDone(newValue){
       if(newValue == false){
         this.$router.push("/setup");
       }else{
         this.$router.push("/login");
       }
+    },
+    isLoggedIn: function(newStatus, oldStatus){
+      if(newStatus == false && oldStatus == true){
+        console.log("Logout detected by App.");
+        if(this.$route.path != '/logout'
+          && this.$route.path != '/setup'
+          && this.$route.path != '/signup'
+        ){
+          console.log("Redirect to login page.");
+          this.$router.push("/login");
+        }
+      }
     }
   },
-  // methods: {
-  //   ...mapActions('login', [
-  //     'getIsLoggedIn'
-  //   ])
-  // },
   beforeCreate() {
     // set mobile view and style
     if (BooksysBrowser.isMobile()) {
@@ -95,9 +96,6 @@ export default{
       BooksysBrowser.addMobileCSS()
     }
   },
-  created() {
-
-  },
   mounted() {
     // short pulse check on the
     // backend to verify whether
@@ -106,11 +104,19 @@ export default{
     .then((status) => {
       // if we do not have a configFile for the app -> go to setup
       if(!status.configFile || !status.configDb){
-        console.log("App Setup Done: failed");
+        console.log("App Setup Done: no");
         this.setupDone = false;
-        this.$router.push("/setup");
+        if(this.$route.path !== '/setup'){
+          this.$router.push("/setup");
+        }
+      }else if(!status.dbReachable){
+        this.backendReachable = false;
+      }else{
+        console.log("App Setup Done: yes (no automated forward to setup)");
+
+        // TODO check if user is logged in, if not -> redirect to login page
+
       }
-      console.log("App Setup Done: ok (no automated forward to setup)");
     })
     .catch((error) => {
       this.errors = [error];

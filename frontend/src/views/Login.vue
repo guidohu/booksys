@@ -1,18 +1,41 @@
 <template>
-  <div class="login-view">
-    <LoginModal :isMobile="isMobile" :statusMessage="loginStatus" @login="handleLogin"/>
-  </div>
+  <!-- <div class="login-view"> -->
+  <b-overlay
+    id="overlay-background"
+    :show="isLoading"
+    spinner-type="border"
+    spinner-variant="info"
+    rounded="sm"
+  >
+    <LoginModal 
+      v-if="isLoading != true"
+      :statusMessage="loginStatus" 
+      :initialUsername="username" 
+      @login="handleLogin"
+    />
+  </b-overlay>
+  <!-- </div> -->
 </template>
 
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import LoginModal from '@/components/LoginModal.vue';
 import { BooksysBrowser } from '@/libs/browser';
-
-console.log("Loaded Login.vue");
+import {
+  BOverlay
+} from 'bootstrap-vue';
 
 export default {
   name: 'Login',
+  components: {
+    LoginModal,
+    BOverlay
+  },
+  data() {
+    return {
+      isLoading: true
+    }
+  },
   computed: {
     isMobile: function () {
       return BooksysBrowser.isMobile()
@@ -21,33 +44,13 @@ export default {
       return !BooksysBrowser.isMobile()
     },
     ...mapGetters('login', [
-      'userInfo',
-      'loginStatus'
-    ]),
-    ...mapState('login', [
-      'isLoggedIn'
+      'loginStatus',
+      'username'
     ])
-  },
-  watch: {
-    isLoggedIn(newValue){
-      // we are only properly logged in if we know both,
-      // that we are logged in and when we know some basic user info
-      if(newValue == true && this.userInfo != null){
-        this.$router.push("/dashboard")
-      }
-    },
-    userInfo(newValue){
-      // we are only properly logged in if we know both,
-      // that we are logged in and when we know some basic user info
-      if(newValue != null && this.isLoggedIn == true){
-        this.$router.push("/dashboard")
-      }
-    }
   },
   methods: {
     ...mapActions('login', [
       'getIsLoggedIn',
-      'setUserInfo',
       'login'
     ]),
     handleLogin: function (username, password) {
@@ -58,12 +61,25 @@ export default {
       })
     }
   },
-  components: {
-    LoginModal
-  },
   created () {
-    console.log("Try to get all information if logged in already")
+    this.isLoading = true;
+
     this.getIsLoggedIn()
+    .then((loggedIn) => {
+      if(loggedIn == true){
+        console.log('User is logged in: redirect to content');
+        if(this.$route.query != null && this.$route.query.target != null){
+          this.$router.push(this.$route.query.target);
+        }else{
+          this.$router.push('/dashboard');
+        }
+        this.isLoading = false;
+      }
+    })
+    .catch(errors => {
+      this.isLoading = false;
+      console.error("Errors while getIsLoggedIn was called:", errors);
+    })
   }
 }
 </script>

@@ -11,9 +11,9 @@
   
   // Check if the user is already logged in and is of type admin
   $lc = new Login($configuration);
-  if(!$lc->isLoggedInRedirect($configuration->login_page)){
-      HttpHeader::setResponseCode(403);
-      exit;
+  if(!$lc->isLoggedIn()){
+      echo json_encode(Status::errorStatus("login required"));
+      return;
   }
   
   // check if we have an action
@@ -36,7 +36,8 @@
         echo json_encode($response); 
         exit;
     case 'get_my_user':
-        get_my_user($configuration);
+        $response = get_my_user($configuration);
+        echo json_encode($response);
         exit;
     case 'get_my_user_heats':
         get_my_user_heats($configuration);
@@ -867,15 +868,13 @@
     // sanitize cookie
     $sanitize = new Sanitizer();
     if(!$sanitize->isCookie($_COOKIE['SESSION'])){
-        HttpHeader::setResponseCode(403);
-        exit;
+        return Status::errorStatus("invalid session cookie format");
     }
   
     // connect to the database
     $db = new DBAccess($configuration);
     if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
-        exit;
+        return Status::errorStatus("Cannot connect to database");
     }
     
     $query = 'SELECT u.id, u.username, u.first_name, u.last_name,
@@ -892,9 +891,10 @@
     $res = $db->fetch_stmt_hash();
     $db->disconnect();
     if(!$res){
-        HttpHeader::setResponseCode(500);
+        return Status::errorStatus("Cannot get user information");
     }
-    echo json_encode($res[0]);
+
+    return Status::successDataResponse("success", $res[0]);
   }
   
   // Change a user's personal data

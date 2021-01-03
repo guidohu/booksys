@@ -52,6 +52,9 @@ export default {
       'userInfo',
       'role'
     ]),
+    ...mapGetters('loginStatus', [
+      'isLoggedIn'
+    ]),
     ...mapGetters('sessions', [
       'getSessions'
     ]),
@@ -65,7 +68,15 @@ export default {
       return !BooksysBrowser.isMobile()
     }
   },
+  watch: {
+    role: function(){
+      this.dbUpdateCheck();
+    }
+  },
   methods: {
+    ...mapActions('login', [
+      'getUserInfo',
+    ]),
     ...mapActions('sessions', [
       'querySessions'
     ]),
@@ -74,17 +85,33 @@ export default {
     ]),
     getTimeZone: function() {
       return "Europe/Berlin";
+    },
+    dbUpdateCheck() {
+      if(this.role == "admin"){
+        this.queryDbUpdateStatus()
+      }
+    },
+    getSessionInfo() {
+      const dateStart = moment().tz(this.getTimeZone()).startOf('day');
+      const dateEnd   = moment().tz(this.getTimeZone()).endOf('day');
+      console.log("Query sessions from", dateStart, "to", dateEnd);
+      this.querySessions({start: dateStart, end: dateEnd});
     }
   },
   created() {
-    var dateStart = moment().tz(this.getTimeZone()).startOf('day');
-    var dateEnd   = moment().tz(this.getTimeZone()).endOf('day');
-    console.log("Query sessions from", dateStart, "to", dateEnd);
-    this.querySessions({start: dateStart, end: dateEnd});
-
-    if(this.role == "admin"){
-      this.queryDbUpdateStatus()
-    }
+    // load user info into store
+    this.getUserInfo()
+    .then(() => {
+      console.log("got user info");
+      this.dbUpdateCheck();
+      this.getSessionInfo();
+    })
+    .catch((errors) => {
+      console.log("Cannot get user info (probably not logged in)");
+      if(errors[0] == "login required"){
+        this.$router.push("/login");
+      }
+    })
   }
 }
 </script>

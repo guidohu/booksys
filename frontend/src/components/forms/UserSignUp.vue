@@ -209,12 +209,10 @@ export default {
       this.$emit('save')
     },
     licenseToggleHandler: function(){
-      console.log("licenseToggleHandler called");
       this.userData.license = !this.userData.license;
       this.licenseToggleState = this.userData.license;
     },
     ownRiskToggleHandler: function(){
-      console.log("ownRiskToggleHandler called");
       this.userData.ownRisk = !this.userData.ownRisk;
       this.ownRiskToggleState = this.userData.ownRisk;
     },
