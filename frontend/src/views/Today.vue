@@ -2,10 +2,12 @@
   <div>
     <SessionEditorModal 
       :defaultValues="selectedSession"
+      :visible.sync="showSessionEditorModal"
     />
     <SessionDeleteModal
       :session="selectedSession"
       @sessionDeletedHandler="sessionDeletedHandler"
+      :visible.sync="showSessionDeleteModal"
     />
     <div v-if="isDesktop" class="display">
       <main-title title-name="Book Your Session"/>
@@ -207,11 +209,11 @@ export default {
       console.log("createSession clicked");
       console.log("for selectedSession:", this.selectedSession);
       console.log("show session editor");
-      console.log(this.$bvModal.show('sessionEditorModal'));
+      this.showSessionEditorModal = true;
     },
     showDeleteSession: function(){
       console.log("showDeleteSession");
-      this.$bvModal.show('sessionDeleteModal');
+      this.showSessionDeleteModal = true;
     },
     addRiders: function(){
       console.log("addRiders");
@@ -219,6 +221,11 @@ export default {
   },
   watch: {
     getSessions: function(newInfo, oldInfo){
+      if(newInfo == null){
+        this.selectedSession = null;
+        return;
+      }
+
       // in case we get an update affecting the sessions
       // we will update our selected session too
       if(this.selectedSession != null 
@@ -230,7 +237,7 @@ export default {
 
       // in case a new session has been created, we select it
       if(newInfo.sessions != null
-        && (oldInfo.sessions == null || newInfo.sessions.length > oldInfo.sessions.length)
+        && (oldInfo == null || oldInfo.sessions == null || newInfo.sessions.length > oldInfo.sessions.length)
       ){
         // find the session that is new
         const newIds = newInfo.sessions.map(s => s.id);
@@ -250,7 +257,9 @@ export default {
   data() {
     return {
       date: null,
-      selectedSession: null
+      selectedSession: null,
+      showSessionEditorModal: false,
+      showSessionDeleteModal: false
     }
   },
   created() {

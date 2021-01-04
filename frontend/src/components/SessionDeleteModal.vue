@@ -1,7 +1,11 @@
 <template>
   <b-modal
     id="sessionDeleteModal"
+    ref="sessionDeleteModal"
     title="Delete Session"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -58,7 +62,8 @@ export default {
     BIconX
   },
   props: [
-    'session'
+    'session',
+    'visible'
   ],
   data(){
     return {
@@ -85,7 +90,7 @@ export default {
     },
     close: function(){
       this.errors = [];
-      this.$bvModal.hide('sessionDeleteModal', this.session);
+      this.$emit('update:visible', false);
     }
   }
 }

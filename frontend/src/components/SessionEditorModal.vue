@@ -1,7 +1,11 @@
 <template>
   <b-modal
     id="sessionEditorModal"
+    ref="sessionEditorModal"
     :title="title"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -170,7 +174,7 @@ export default {
     BIconX
   },
   props: [
-    'defaultValues'
+    'defaultValues', 'visible'
   ],
   data(){
     return {
@@ -263,7 +267,7 @@ export default {
     },
     close: function(){
       this.errors = [];
-      this.$bvModal.hide('sessionEditorModal');
+      this.$emit('update:visible', false);
     },
     setFormContent: function(){
       console.log("SessionEditorModal: Set defaults to:", this.defaultValues);
