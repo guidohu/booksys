@@ -33,6 +33,8 @@ import {
   BCardHeader,
   BCardBody,
   BRow,
+  BIconBrightnessAltLowFill,
+  BIconBrightnessAltHigh,
   BCol
 } from 'bootstrap-vue';
 
@@ -43,7 +45,9 @@ export default {
     BCardHeader,
     BCardBody,
     BRow,
-    BCol
+    BCol,
+    BIconBrightnessAltLowFill,
+    BIconBrightnessAltHigh
   },
   props: [ 
     'sunrise',
