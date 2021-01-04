@@ -221,7 +221,7 @@ export default {
   },
   watch: {
     getSessions: function(newInfo, oldInfo){
-      if(newInfo == null){
+      if(newInfo == null || newInfo.sessions == null){
         this.selectedSession = null;
         return;
       }
@@ -241,12 +241,18 @@ export default {
       ){
         // find the session that is new
         const newIds = newInfo.sessions.map(s => s.id);
-        const oldIds = oldInfo.sessions.map(s => s.id);
+        const oldIds = (oldInfo != null && oldInfo.sessions != null) ? oldInfo.sessions.map(s => s.id) : [];
         const diff   = difference(newIds, oldIds);
         if(diff.length == 1){
           this.selectedSession = newInfo.sessions.find(s => s.id == diff[0])
+        }else if(diff.length == 0){
+          // nothing changed, happens during the initial phase when
+          // both have no sessions 
+          this.selectedSession = null;
         }else{
           console.error("old and new session info differs by more than one session");
+          console.error(oldInfo, newInfo);
+          console.error("difference:", diff);
         }
       }else if(newInfo.sessions.length < oldInfo.sessions.length){
         // a session has been deleted -> reset selected session
