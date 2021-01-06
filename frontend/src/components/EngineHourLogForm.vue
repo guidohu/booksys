@@ -145,8 +145,10 @@ export default {
     },
     getEngineHourLogLatest: function(newData){
       console.log('engineHourLatest just changed', newData);
-
-      if(newData.before_hours != null && newData.after_hours != null){
+      if(newData == null){
+        this.form.beforeHours = null;
+      }
+      else if(newData.before_hours != null && newData.after_hours != null){
         this.form.beforeHours = null;
       }else{
         this.form.beforeHours = newData.before_hours;
@@ -165,6 +167,9 @@ export default {
     ]),
     setDisableBefore: function() {
       if(this.getEngineHourLogLatest != null && this.getEngineHourLogLatest.after_hours != null){
+        this.disableBefore = false;
+        return;
+      }else if(this.getEngineHourLogLatest == null){
         this.disableBefore = false;
         return;
       }
@@ -207,6 +212,7 @@ export default {
     }
   },
   created() {
+    this.setDriver();
     this.queryEngineHourLogLatest();
     this.setDisableBefore();
     this.setShowAfter();

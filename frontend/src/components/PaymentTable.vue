@@ -2,8 +2,12 @@
   <div class="text-left">
     <WarningBox v-if="errors.length > 0" :errors="errors" dismissible="true" @dismissed="dismissedHandler"/>
     <div v-else>
-      <IncomeModal/>
-      <ExpenseModal/>
+      <IncomeModal
+        :visible.sync="showIncomeModal"
+      />
+      <ExpenseModal
+        :visible.sync="showExpenseModal"
+      />
       <b-row v-if="form.years.length>0" class="text-right">
         <b-col offset="6" cols="6" class="d-sm-none mr-1">
           <b-form-group
@@ -122,6 +126,8 @@ export default {
   },
   data() {
     return {
+      showExpenseModal: false,
+      showIncomeModal: false,
       errors: [],
       isLoading: false,
       form: {
@@ -199,10 +205,10 @@ export default {
       'queryConfiguration'
     ]),
     showAddIncome: function() {
-      this.$bvModal.show('incomeModal');
+      this.showIncomeModal = true;
     },
     showAddExpense: function() {
-      this.$bvModal.show('expenseModal');
+      this.showExpenseModal = true;
     },
     yearSelectionChangeHandler: function(selection){
       this.isLoading = true;

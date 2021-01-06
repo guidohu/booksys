@@ -3,6 +3,7 @@
     <WarningBox v-if="errors.length > 0" :errors="errors"/>
     <EngineHourEntryModal
       :engineHourEntry="selectedEngineHourLogEntry"
+      :visible.sync="showEntryHourModal"
     />
     <b-table v-if="errors.length == 0" 
       hover 
@@ -38,6 +39,7 @@ export default {
       columns: [],
       errors: [],
       selectedEngineHourLogEntry: null,
+      showEntryHourModal: false
     };
   },
   computed: {
@@ -94,7 +96,7 @@ export default {
     },
     rowClick: function(item){
       this.selectedEngineHourLogEntry = item;
-      this.$bvModal.show('engineHourEntryModal');
+      this.showEntryHourModal = true;
     },
     rowClass: function(item) {
       if(item.type == 0){

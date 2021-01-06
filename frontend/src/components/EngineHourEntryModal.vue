@@ -2,6 +2,9 @@
   <b-modal
     id="engineHourEntryModal"
     title="Engine Hour Entry"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -134,7 +137,7 @@ import {
 
 export default {
   name: 'EngineHourEntryModal',
-  props: [ 'engineHourEntry' ],
+  props: [ 'engineHourEntry', 'visible' ],
   components: {
     WarningBox,
     ToggleButton,
@@ -184,7 +187,7 @@ export default {
       this.form.type = !this.form.type;
     },
     close: function(){
-      this.$bvModal.hide('engineHourEntryModal');
+      this.$emit('update:visible', false);
     },
     save: function(){
       const update = {

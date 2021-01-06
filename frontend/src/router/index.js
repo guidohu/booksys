@@ -26,10 +26,12 @@ const Setup     = () => import('@/views/Setup');
 Vue.use(VueRouter);
 
 const loginEnforced = (to, from, next) => {
+  console.log("store",store);
+  console.log("store.state.loginStatus.isLoggedIn", store.state.loginStatus.isLoggedIn);
   if(!store.state.loginStatus.isLoggedIn){
     console.log("Login required to access this route");
     console.log("Navigate from:", from, "To:", to);
-    next({ name: "Login", query: { target: to.path }});
+    next({ name: "Login", query: { target: to.fullPath }});
     return false;
   }else{
     return true;
@@ -153,7 +155,7 @@ const routes = [
     name: 'Ride',
     beforeEnter: (to, from, next) => {
       if(loginEnforced(to, from, next)){
-        loadStoreModules(['sessions', 'configuration', 'stopwatch'], next);
+        loadStoreModules(['sessions', 'configuration', 'stopwatch', 'user'], next);
       }
     },
     component: Ride
@@ -193,7 +195,7 @@ const routes = [
     name: 'Accounting',
     beforeEnter: (to, from, next) => {
       if(loginEnforced(to, from, next)){
-        loadStoreModules(['configuration', 'accounting'], next);
+        loadStoreModules(['configuration', 'accounting', 'user' ], next);
       }
     },
     component: Accounting

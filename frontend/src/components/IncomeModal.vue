@@ -2,6 +2,9 @@
   <b-modal
     id="incomeModal"
     title="Add New Income"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length > 0">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -147,6 +150,7 @@ export default {
     BIconCheck,
     BIconX
   },
+  props: [ 'visible' ],
   data() {
     return {
       errors: [],
@@ -269,7 +273,7 @@ export default {
     },
     close: function() {
       this.clearForm();
-      this.$bvModal.hide('incomeModal');
+      this.$emit('update:visible', false);
     }
   },
   created() {

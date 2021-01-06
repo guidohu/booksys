@@ -1,6 +1,10 @@
 <template>
   <b-card no-body>
-    <HeatCommentModal :defaultComment="comment" @commentChangeHandler="changeComment"/>
+    <HeatCommentModal 
+      :defaultComment="comment" 
+      @commentChangeHandler="changeComment"
+      :visible.sync="isVisibleHeatCommentModal"
+    />
     <b-row v-if="errors.length > 0">
       <b-col cols="12">
         <WarningBox :errors="errors"/>
@@ -122,9 +126,10 @@ export default {
     BDropdownItem,
     BDropdownDivider
   },
-  props: [ 'sessionId' ],
+  props: [ 'sessionId', 'visible' ],
   data() {
     return {
+      isVisibleHeatCommentModal: false,
       selectedRiderId: null,
       selectableRiders: [],
       comment: null,
@@ -179,7 +184,7 @@ export default {
       }
     },
     showHeatCommentModal: function(){
-      this.$bvModal.show('heatCommentModal');
+      this.isVisibleHeatCommentModal = true;
     },
     changeComment: function(newComment){
       this.comment = newComment;

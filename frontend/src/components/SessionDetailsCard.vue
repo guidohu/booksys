@@ -28,7 +28,10 @@
       </b-row>
     </b-card-header>
     <b-card-body>
-      <RiderSelectionModal :session="session"/>
+      <RiderSelectionModal 
+        :session="session"
+        :visible.sync="showRiderSelectionModal"
+      />
       <b-row v-if="session != null && session.title != null" class="font-weight-bold">
         <b-col cols="4">
           Title
@@ -63,7 +66,9 @@
               {{ rider.name }}
             </b-col>
             <b-col cols="2">
-              <a href="#" v-on:click="removeRider(rider.id)"><b-icon icon="person-dash"></b-icon></a>
+              <a href="#" v-on:click="removeRider(rider.id)">
+                <b-icon-person-dash/>
+              </a>
             </b-col>
           </b-row>
         </b-col>
@@ -100,6 +105,7 @@ import {
   BDropdownDivider,
   BIconList,
   BIconPersonPlus,
+  BIconPersonDash,
   BIconPencilSquare,
   BIconTrash,
   BButton
@@ -119,6 +125,7 @@ export default {
     BDropdownDivider,
     BIconList,
     BIconPersonPlus,
+    BIconPersonDash,
     BIconPencilSquare,
     BIconTrash,
     BButton
@@ -129,6 +136,7 @@ export default {
   ],
   data() {
     return {
+      showRiderSelectionModal: false,
       sessionSelected: false
     };
   },
@@ -194,7 +202,7 @@ export default {
       this.$emit('deleteSessionHandler', { id: this.session.id });
     },
     addRiders: function(){
-      this.$bvModal.show('riderSelectionModal');
+      this.showRiderSelectionModal = true;
     },
     ...mapActions('sessions', [
       "deleteUserFromSession"

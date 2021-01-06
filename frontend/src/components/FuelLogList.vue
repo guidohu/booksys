@@ -6,6 +6,7 @@
     <div v-else>
       <FuelEntryModal
         :fuelEntry="selectedFuelEntry"
+        :visible.sync="showFuelEntryModal"
       />
       <b-table
         hover
@@ -41,7 +42,8 @@ export default {
       errors: [],
       items: [],
       columns: [],
-      selectedFuelEntry: null
+      selectedFuelEntry: null,
+      showFuelEntryModal: false
     }
   },
   computed: {
@@ -108,7 +110,7 @@ export default {
     rowClick: function(item, index, event){
       console.log("rowClick item", item, "index", index, "event", event);
       this.selectedFuelEntry = item;
-      this.$bvModal.show('fuelEntryModal');
+      this.showFuelEntryModal = true;
     },
     rowClass: function(item) {
       // we highlight entries that have a deduction

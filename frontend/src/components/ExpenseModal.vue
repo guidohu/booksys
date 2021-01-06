@@ -2,6 +2,9 @@
   <b-modal
     id="expenseModal"
     title="Add New Expense"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length > 0">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -197,6 +200,7 @@ export default {
     BIconCheck,
     BIconX
   },
+  props: [ 'visible' ],
   data() {
     return {
       isLoading: false,
@@ -403,7 +407,7 @@ export default {
     },
     close: function() {
       this.clearForm();
-      this.$bvModal.hide('expenseModal');
+      this.$emit('update:visible', false);
     }
   },
   created() {

@@ -2,6 +2,9 @@
   <b-modal
     id="heatCommentModal"
     title="Heat Comment"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -72,7 +75,7 @@ export default {
     BIconCheck
   },
   props: [
-    'defaultComment'
+    'defaultComment', 'visible'
   ],
   data() {
     return {
@@ -91,7 +94,7 @@ export default {
     },
     close: function() {
       this.comment = null;
-      this.$bvModal.hide('heatCommentModal');
+      this.$emit('update:visible', false);
     }
   },
   watch: {

@@ -2,6 +2,9 @@
   <b-modal
     id="heatEntryModal"
     title="Heat Entry"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -182,7 +185,7 @@ export default {
     BIconCheck,
     BIconX
   },
-  props: [ 'heat' ],
+  props: [ 'heat', 'visible' ],
   data() {
     return {
       errors: [],
@@ -234,7 +237,7 @@ export default {
       }
     },
     close: function() {
-      this.$bvModal.hide("heatEntryModal");
+      this.$emit('update:visible', false);
     },
     remove: function() {
       this.removeHeat(this.form.id)

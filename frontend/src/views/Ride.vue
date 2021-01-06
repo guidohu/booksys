@@ -2,10 +2,12 @@
   <div>
     <SessionEditorModal 
       :defaultValues="selectedSession"
+      :visible.sync="showSessionEditorModal"
     />
     <SessionDeleteModal
       :session="selectedSession"
       @sessionDeletedHandler="sessionDeletedHandler"
+      :visible.sync="showSessionDeleteModal"
     />
     <div v-if="isDesktop" class="display">
       <main-title title-name="Select Session"/>
@@ -188,11 +190,10 @@ export default {
       this.selectedSession = null;
     },
     showCreateSession: function(){
-      this.$bvModal.show('sessionEditorModal');
+      this.showSessionEditorModal = true;
     },
     showDeleteSession: function(){
-      console.log("showDeleteSession");
-      this.$bvModal.show('sessionDeleteModal');
+      this.showSessionDeleteModal = true;
     }
   },
   watch: {
@@ -208,11 +209,11 @@ export default {
 
       // in case a new session has been created, we select it
       if(newInfo.sessions != null
-        && (oldInfo.sessions == null || newInfo.sessions.length > oldInfo.sessions.length)
+        && (oldInfo == null || oldInfo.sessions == null || newInfo.sessions.length > oldInfo.sessions.length)
       ){
         // find the session that is new
         const newIds = newInfo.sessions.map(s => s.id);
-        const oldIds = oldInfo.sessions.map(s => s.id);
+        const oldIds = (oldInfo == null || oldInfo.session == null) ? [] : oldInfo.sessions.map(s => s.id);
         const diff   = difference(newIds, oldIds);
         if(diff.length == 1){
           this.selectedSession = newInfo.sessions.find(s => s.id == diff[0])
@@ -228,7 +229,9 @@ export default {
   data() {
     return {
       date: null,
-      selectedSession: null
+      selectedSession: null,
+      showSessionEditorModal: false,
+      showSessionDeleteModal: false
     }
   },
   created() {

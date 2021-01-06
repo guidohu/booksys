@@ -1,7 +1,10 @@
 <template>
   <b-card no-body class="text-left">
     <b-card-body>
-      <HeatEntryModal :heat="selectedHeat"/>
+      <HeatEntryModal 
+        :heat="selectedHeat"
+        :visible.sync="showHeatEntryModal"
+      />
       <b-table 
         v-if="errors.length==0" 
         striped 
@@ -40,6 +43,7 @@ export default {
   props: [ 'sessionId' ],
   data() {
     return {
+      showHeatEntryModal: false,
       errors: [],
       columns: [],
       rows: [ { time: "12" }],
@@ -115,7 +119,7 @@ export default {
     rowClick: function(item) {
       console.log("clicked on item", item);
       this.selectedHeat = item;
-      this.$bvModal.show("heatEntryModal");
+      this.showHeatEntryModal = true;
     }
   },
   created() {

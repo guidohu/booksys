@@ -2,6 +2,7 @@
   <b-modal 
     id="view_database_update_modal"
     title='Database Update'
+    :visible="visible"
   >
     <div v-if="getDbVersionInfo == null" class="text-center">
       <b-spinner variant="primary" label="Spinning"></b-spinner>
@@ -118,6 +119,7 @@ export default {
     return {
       "errors": [],
       dbVersionText: "n/a",
+      visible: false
     }
   },
   watch: {
@@ -132,7 +134,7 @@ export default {
       'updateDb'
     ]),
     cancel: function(){
-      this.$bvModal.hide('view_database_update_modal')
+      this.visible = false;
     },
     getVersionText: function(versionInfo) {
       if(versionInfo == null && this.getDbVersionInfo == null){
@@ -166,7 +168,7 @@ export default {
     .catch((errors) => this.errors = errors);
   },
   mounted() {
-    this.$bvModal.show('view_database_update_modal')
+    this.visible = true;
   }
 }
 </script>

@@ -26,7 +26,8 @@ import {
   BCardHeader,
   BButton,
   BCollapse,
-  BCardBody
+  BCardBody,
+  VBToggle
 } from 'bootstrap-vue';
 
 export default {
@@ -40,6 +41,9 @@ export default {
     BButton,
     BCollapse,
     BCardBody
+  },
+  directives: {
+    'b-toggle': VBToggle
   },
   data() {
     return {

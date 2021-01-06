@@ -2,6 +2,9 @@
 <b-modal
     id="riderSelectionModal"
     title="Add Riders"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -106,7 +109,8 @@ import {
 export default {
   name: 'RiderSelectionModal',
   props: [
-    'session'
+    'session',
+    'visible'
   ],
   components: {
     WarningBox,
@@ -216,7 +220,7 @@ export default {
     },
     close: function() {
       this.usersToAdd = [];
-      this.$bvModal.hide('riderSelectionModal');
+      this.$emit('update:visible', false);
     }
   },
   created() {

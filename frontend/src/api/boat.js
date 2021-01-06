@@ -42,7 +42,11 @@ export default class Boat {
           .then(data => {
             console.log("Boat/getEngineHourLogLatest response data:", data);
             if(data.ok){
-              resolve(data.data[0]);
+              if(data.data.length > 0){
+                resolve(data.data[0]);
+              }else{
+                resolve(null);
+              }
             }else{
               console.log("Boat/getEngineHourLogLatest: Cannot retrieve engine hour logs, due to:", data.msg);
               reject([data.msg]);
