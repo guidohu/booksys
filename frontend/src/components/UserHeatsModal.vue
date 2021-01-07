@@ -2,6 +2,9 @@
   <b-modal
     id="userHeatsModal"
     title="Heat History"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row class="text-left">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -41,6 +44,7 @@ export default {
     BButton,
     BIconCheck
   },
+  props: [ 'visible' ],
   data: function(){
     return {
       fields: [
@@ -72,7 +76,7 @@ export default {
   },
   methods: {
     close: function(){
-      this.$bvModal.hide('userHeatsModal');
+      this.$emit('update:visible', false);
     },
     formatCost: function(value){
       console.log(value);

@@ -5,6 +5,7 @@
       <UserGroupModal
         :userGroup="selectedItems[0]"
         :editMode="userGroupEditMode"
+        :visible.sync="showUserGroupModal"
       />
       <b-row>
         <b-col cols="12">
@@ -50,6 +51,7 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { sprintf } from 'sprintf-js';
 import WarningBox from '@/components/WarningBox';
@@ -62,8 +64,11 @@ import {
   BIconPencil,
   BIconTrash,
   BCol,
-  BTable
+  BTable,
+  ModalPlugin
 } from "bootstrap-vue";
+
+Vue.use(ModalPlugin);
 
 export default {
   name: 'UserGroupTable',
@@ -105,7 +110,8 @@ export default {
           formatter: (value) => { return sprintf("%.2f", value) }
         }
       ],
-      userGroupEditMode: false
+      userGroupEditMode: false,
+      showUserGroupModal: false
     };
   },
   computed: {
@@ -196,18 +202,16 @@ export default {
     },
     showDetails: function() {
       this.userGroupEditMode = false;
-      this.$bvModal.show('userGroupModal');
+      this.showUserGroupModal = true;
     },
     editGroup: function() {
-      console.log("TODO implement editGroup");
       this.userGroupEditMode = true;
-      this.$bvModal.show('userGroupModal');
+      this.showUserGroupModal = true;
     },
     newGroup: function() {
-      console.log("TODO implement newGroup");
       this.userGroupEditMode = true;
       this.selectedItems = [];
-      this.$bvModal.show('userGroupModal');
+      this.showUserGroupModal = true;
     }
   },
   created() {

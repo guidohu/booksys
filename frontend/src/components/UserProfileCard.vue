@@ -21,8 +21,12 @@
       </b-row>
     </b-card-header>
     <b-card-body>
-      <UserEditModal/>
-      <UserPasswordEditModal/>
+      <UserEditModal
+        :visible.sync="showUserEditModal"
+      />
+      <UserPasswordEditModal
+        :visible.sync="showPasswordEditModal"
+      />
       <b-row>
         <b-col cols="6">
           {{userInfo.first_name}} {{userInfo.last_name}}
@@ -80,6 +84,12 @@ export default {
     BDropdownItem,
     BIconPencilSquare
   },
+  data() {
+    return {
+      showPasswordEditModal: false,
+      showUserEditModal: false
+    }
+  },
   computed: {
     ...mapGetters('login', [
       'userInfo'
@@ -87,10 +97,10 @@ export default {
   },
   methods: {
     showUserEdit: function() {
-      this.$bvModal.show('userEditModal')
+      this.showUserEditModal = true;
     },
     showPasswordEdit: function() {
-      this.$bvModal.show('userPasswordEditModal')
+      this.showPasswordEditModal = true;
     }
   }
 }

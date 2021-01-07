@@ -2,6 +2,9 @@
   <b-modal
     id="paymentInfoModal"
     title="Payment Information"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row class="text-left">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -69,6 +72,7 @@ import {
 
 export default {
   name: 'PaymentInfoModal',
+  props: [ 'visible' ],
   components: {
     BModal,
     BRow,
@@ -83,7 +87,7 @@ export default {
   },
   methods: {
     close: function(){
-      this.$bvModal.hide('paymentInfoModal');
+      this.$emit('update:visible', false);
     }
   }
 }

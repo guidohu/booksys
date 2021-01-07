@@ -2,7 +2,10 @@
   <b-tabs content-class="mt-3">
     <b-tab active>
       <div slot="title">
-        <p class="h6 mt-2 mb-2"><b-icon icon="person"></b-icon>Users</p>
+        <p class="h6 mt-2 mb-2">
+          <b-icon-person/>
+          Users
+        </p>
       </div>
       <div :class="tabClass">
         <UserTable/>
@@ -10,13 +13,17 @@
     </b-tab>
     <b-tab>
       <div slot="title">
-        <p class="h6 mt-2 mb-2"><b-icon icon="people"></b-icon>User Groups</p>
+        <p class="h6 mt-2 mb-2">
+          <b-icon-people/>
+          User Groups
+        </p>
       </div>
-      <div :class="tabClass">
+      <div :class="tabClass">        
         <UserGroupTable/>
       </div>
     </b-tab>
   </b-tabs>
+
 </template>
 
 <script>
@@ -25,7 +32,9 @@ import UserTable from '@/components/UserTable';
 import UserGroupTable from '@/components/UserGroupTable';
 import {
   BTabs,
-  BTab
+  BTab,
+  BIconPerson,
+  BIconPeople
 } from 'bootstrap-vue';
 
 export default {
@@ -34,7 +43,9 @@ export default {
     UserTable,
     UserGroupTable,
     BTabs,
-    BTab
+    BTab,
+    BIconPerson,
+    BIconPeople
   },
   computed: {
     isDesktop: function () {

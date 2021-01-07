@@ -18,12 +18,12 @@
           </b-row>
           <b-row>
             <b-col cols="12">
-              Cost: {{heatCostYTD}} {{currency}}
+              Cost: {{heatCostYTD}} {{getCurrency}}
             </b-col>
           </b-row>
           <b-row>
             <b-col cols="12">
-              Cost (all-time): {{heatCost}} {{currency}}
+              Cost (all-time): {{heatCost}} {{getCurrency}}
             </b-col>
           </b-row>
         </b-col>
@@ -35,7 +35,9 @@
         </b-col>
       </b-row>
     </b-card-body>
-    <UserHeatsModal/>
+    <UserHeatsModal
+      :visible.sync="showUserHeatsModal"
+    />
   </b-card>
 </template>
 
@@ -54,6 +56,11 @@ import {
 
 export default {
   name: 'UserStatisticsCard',
+  data() {
+    return {
+      showUserHeatsModal: false
+    }
+  },
   components: {
     UserHeatsModal,
     BCard,
@@ -69,7 +76,7 @@ export default {
       'userInfo'
     ]),
     ...mapGetters('configuration', [
-      'currency'
+      'getCurrency'
     ]),
     ...mapGetters('user', [
       'heatHistory',
@@ -81,7 +88,7 @@ export default {
   },
   methods: {
     showLatestHeats: function(){
-      this.$bvModal.show('userHeatsModal');
+      this.showUserHeatsModal = true;
     }
   }
 }

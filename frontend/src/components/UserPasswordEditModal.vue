@@ -2,6 +2,9 @@
   <b-modal
     id="userPasswordEditModal"
     title="Change Password"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row class="text-left">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -24,6 +27,7 @@
               type="password"
               required
               placeholder=""
+              autocomplete="current-password"
             ></b-form-input>
           </b-form-group>
           <b-form-group
@@ -38,6 +42,7 @@
               type="password"
               required
               placeholder=""
+              autocomplete="new-password"
             ></b-form-input>
           </b-form-group>
           <b-form-group
@@ -52,6 +57,7 @@
               type="password"
               required
               placeholder=""
+              autocomplete="new-password"
             ></b-form-input>
           </b-form-group>
         </b-form>
@@ -101,6 +107,7 @@ export default {
     BIconPersonCheck,
     BIconX
   },
+  props: [ 'visible' ],
   data() {
     return {
       form: {
@@ -114,7 +121,7 @@ export default {
   },
   methods: {
     close: function(){
-      this.$bvModal.hide('userPasswordEditModal');
+      this.$emit('update:visible', false);
     },
     save: function(event){
       event.preventDefault();

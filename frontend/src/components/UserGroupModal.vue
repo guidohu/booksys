@@ -2,6 +2,9 @@
   <b-modal
     id="userGroupModal"
     :title="title"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-form @submit="save">
       <b-row v-if="errors.length > 0">
@@ -145,11 +148,11 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { sprintf } from 'sprintf-js';
 import WarningBox from '@/components/WarningBox';
 import {
-  BModal,
   BForm,
   BRow,
   BCol,
@@ -162,15 +165,17 @@ import {
   BIconTrash,
   BIconCheck,
   BIconPencil,
-  BIconX
+  BIconX,
+  ModalPlugin
 } from "bootstrap-vue";
+
+Vue.use(ModalPlugin);
 
 export default {
   name: 'UserGroupModal',
-  props: [ 'userGroup', 'editMode' ],
+  props: [ 'userGroup', 'editMode', 'visible' ],
   components: { 
     WarningBox,
-    BModal,
     BForm,
     BRow,
     BCol,
@@ -193,7 +198,7 @@ export default {
         user_role_description: ""
       },
       isEditMode: false,
-      title: "User Group"
+      title: "User Group",
     }
   },
   computed: {
@@ -234,7 +239,7 @@ export default {
     },
     close: function() {
       this.setTitle();
-      this.$bvModal.hide('userGroupModal');
+      this.$emit('update:visible', false);
     },
     remove: function() {
       const name = this.form.user_group_name;

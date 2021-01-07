@@ -19,7 +19,9 @@
           </b-button>
         </b-col>
       </b-row>
-      <PaymentInfoModal/>
+      <PaymentInfoModal
+        :visible.sync="showPaymentInfoModal"
+      />
     </b-card-body>
   </b-card>
 </template>
@@ -49,6 +51,11 @@ export default {
     BButton,
     BIconCash
   },
+  data() {
+    return {
+      showPaymentInfoModal: false
+    }
+  },
   computed: {
     ...mapGetters('login', [
       'userInfo'
@@ -62,7 +69,7 @@ export default {
   },
   methods: {
     showPaymentInfo: function() {
-      this.$bvModal.show('paymentInfoModal')
+      this.showPaymentInfoModal = true;
     }
   } 
 }

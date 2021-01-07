@@ -2,6 +2,9 @@
   <b-modal
     id="userEditModal"
     title="Profile"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row class="text-left">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -172,6 +175,7 @@ export default {
     BIconPersonCheck,
     BIconX
   },
+  props: [ 'visible' ],
   data() {
     return {
       form: {},
@@ -193,7 +197,7 @@ export default {
   },
   methods: {
     close: function(){
-      this.$bvModal.hide('userEditModal');
+      this.$emit('update:visible', false);
     },
     save: function(event){
       event.preventDefault();

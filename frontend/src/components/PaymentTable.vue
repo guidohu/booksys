@@ -88,6 +88,7 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { reverse } from 'lodash';
 import moment from 'moment';
@@ -104,8 +105,11 @@ import {
   BIconDash,
   BIconTrash,
   BOverlay,
-  BTable
+  BTable,
+  ModalPlugin
 } from 'bootstrap-vue';
+
+Vue.use(ModalPlugin);
 
 export default {
   name: "PaymentTable",
@@ -124,6 +128,9 @@ export default {
     BOverlay,
     BTable
   },
+  // directives: {
+  //   "b-modal": VBModal
+  // },
   data() {
     return {
       showExpenseModal: false,
