@@ -5,7 +5,6 @@ const state = () => ({
   username: '',
   role: null,
   userInfo: null,
-  loginStatus: null,
   isLoggedIn: null,
 })
 
@@ -21,10 +20,6 @@ const getters = {
   role: (state) => {
     return state.role;
   },
-  loginStatus: (state) => {
-    console.log("Getting loginStatus:", state.loginStatus)
-    return state.loginStatus
-  },
   isLoggedIn: (state) => {
     return state.isLoggedIn
   }
@@ -38,14 +33,12 @@ const actions = {
     return new Promise((resolve, reject) => {
       ApiLogin.login(value.username, value.password)
       .then(() => {
-        commit('setLoginStatus', null);
         dispatch('getUserInfo');
         commit('setIsLoggedIn', true);
         dispatch('loginStatus/setIsLoggedIn', true, { root: true });
         resolve();
       })
       .catch((errors) => {
-        commit('setLoginStatus', errors);
         reject(errors);
       })
     })
@@ -114,10 +107,6 @@ const mutations = {
       state.role = null;
     }
     console.log('userInfo set to', value);
-  },
-  setLoginStatus (state, value) {
-    state.loginStatus = value
-    console.log('loginStatus set to', value)
   },
   setIsLoggedIn (state, value) {
     state.isLoggedIn = value

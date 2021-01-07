@@ -92,22 +92,6 @@ export default {
     ...mapGetters('sessions', [
       'getSessionsCalendar'
     ]),
-    // sunrise: function(){
-    //   const sessions = this.getSessions;
-    //   if(sessions == null){
-    //     return null;
-    //   }else{
-    //     return sessions.sunrise;
-    //   }
-    // },
-    // sunset: function(){
-    //   const sessions = this.getSessions;
-    //   if(sessions == null){
-    //     return null;
-    //   }else{
-    //     return sessions.sunset;
-    //   }
-    // }
   },
   methods: {
     ...mapActions('configuration', [
@@ -125,11 +109,6 @@ export default {
       this.querySessionsForMonth();
     },
     querySessionsForMonth: function() {
-      console.log("the time", this.month);
-      // const dateStart = moment(this.date).startOf('day').format();
-      // const dateEnd = moment(this.date).endOf('day').format();
-      // console.log("dateStart:",dateStart);
-      // console.log("dateEnd:",dateEnd);
 
       // query get_booking_day
       this.querySessionsCalendar(this.month)
@@ -142,70 +121,7 @@ export default {
 
       this.sessionsOverview = day;
     }
-    // selectSlot: function(selectedSession) {
-    //   console.log("selectedSlot", selectedSession);
-    //   console.log(moment(selectedSession.start).format(), moment(selectedSession.end).format());
-    //   const sessionWithSelectedId = this.getSessions.sessions.find(s => selectedSession.id == s.id);
-    //   if(sessionWithSelectedId == null){
-    //     this.selectedSession = new Session(
-    //       selectedSession.id,
-    //       null,
-    //       null,
-    //       selectedSession.start,
-    //       selectedSession.end
-    //     )
-    //   }else{
-    //     this.selectedSession = sessionWithSelectedId;
-    //   }
-    // },
-    // sessionDeletedHandler: function() {
-    //   console.log("sessionDeletedHandler");
-    //   this.selectedSession = null;
-    // },
-    // showCreateSession: function(){
-    //   console.log("createSession clicked");
-    //   console.log("for selectedSession:", this.selectedSession);
-    //   console.log("show session editor");
-    //   console.log(this.$bvModal.show('sessionEditorModal'));
-    // },
-    // showDeleteSession: function(){
-    //   console.log("showDeleteSession");
-    //   this.$bvModal.show('sessionDeleteModal');
-    // },
-    // addRiders: function(){
-    //   console.log("addRiders");
-    // }
   },
-  // watch: {
-  //   getSessions: function(newInfo, oldInfo){
-  //     // in case we get an update affecting the sessions
-  //     // we will update our selected session too
-  //     if(this.selectedSession != null 
-  //       && this.selectedSession.id != null
-  //       && newInfo.sessions.map(s => s.id).includes(this.selectedSession.id)
-  //     ){
-  //       this.selectedSession = newInfo.sessions.filter(s => s.id == this.selectedSession.id)[0];
-  //     }
-
-  //     // in case a new session has been created, we select it
-  //     if(newInfo.sessions != null
-  //       && (oldInfo.sessions == null || newInfo.sessions.length > oldInfo.sessions.length)
-  //     ){
-  //       // find the session that is new
-  //       const newIds = newInfo.sessions.map(s => s.id);
-  //       const oldIds = oldInfo.sessions.map(s => s.id);
-  //       const difference = _.difference(newIds, oldIds);
-  //       if(difference.length == 1){
-  //         this.selectedSession = newInfo.sessions.find(s => s.id == difference[0])
-  //       }else{
-  //         console.error("old and new session info differs by more than one session");
-  //       }
-  //     }else if(newInfo.sessions.length < oldInfo.sessions.length){
-  //       // a session has been deleted -> reset selected session
-  //       this.selectedSession = null;
-  //     }
-  //   }
-  // },
   data() {
     return {
       month: null,

@@ -7,7 +7,7 @@
     spinner-variant="info"
     rounded="sm"
   >
-    <LoginModal 
+    <login-modal 
       v-if="showLogin"
       :statusMessage="status" 
       :initialUsername="username" 
@@ -46,7 +46,6 @@ export default {
       return !BooksysBrowser.isMobile()
     },
     ...mapGetters('login', [
-      'loginStatus',
       'username'
     ])
   },
@@ -56,7 +55,6 @@ export default {
       'login'
     ]),
     handleLogin: function (username, password) {
-      console.log("handleLogin", username, password)
       this.login({ 
         username: username, 
         password: password
@@ -72,7 +70,6 @@ export default {
         if(errors.length > 0){
           this.status = errors[0];
         }
-        
       })
     }
   },
