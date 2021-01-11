@@ -26,8 +26,6 @@ const Setup     = () => import('@/views/Setup');
 Vue.use(VueRouter);
 
 const loginEnforced = (to, from, next) => {
-  console.log("store",store);
-  console.log("store.state.loginStatus.isLoggedIn", store.state.loginStatus.isLoggedIn);
   if(!store.state.loginStatus.isLoggedIn){
     console.log("Login required to access this route");
     console.log("Navigate from:", from, "To:", to);

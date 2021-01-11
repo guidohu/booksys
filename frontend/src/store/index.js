@@ -27,7 +27,7 @@ export const loadStoreModules = (moduleNames, callback) => {
           store.dispatch('stopwatch/init');
         }
 
-        console.log("Store module registered: " + moduleName);
+        // console.log("Store module registered: " + moduleName);
       })
 
       loaded.push(importPromise);
