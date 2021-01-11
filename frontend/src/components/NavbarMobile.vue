@@ -58,3 +58,9 @@ export default {
   props: ['title']
 }
 </script>
+
+<style scoped>
+.navbar-nav>li>a {
+    height: 50px;
+}
+</style>
