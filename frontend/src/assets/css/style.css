@@ -22,10 +22,6 @@ a.header-desktop {
 	color: #dddddd !important;
 }
 
-.card-main-desktop {
-	background-color: rgba(32, 32, 32, 0.5);
-}
-
 /* The round-corner central screen */
 div.display {
 	border-radius: 15px;
@@ -44,64 +40,12 @@ div.display {
 	border:1px solid #646464;
 }
 
-div.page-header {
-	margin: 0px 0px 10px;
-    padding-bottom: 0px;
-	padding-left: 15px;
-    border-bottom: 1px solid #eee;
-}
-
 div.noborder {
     border:0px solid #646464;
 }
 
 div.nobackground {
 	background-color: transparent;
-}
-
-.pie-session-container {
-	min-height: 428px;
-}
-
-/* The small frame for the pies in the calendar overview */
-.pie-small {
-	margin: 0.5px;
-    border-radius: 5px;
-	height: 70px;
-	background-color: rgba(255, 255, 255, 0.95);
-	color: rgba(30, 30, 30, 0.95);
-}
-
-.pie-small:hover {
-	background-color: rgba(235, 235, 235, 0.95);
-	cursor: pointer;
-	cursor: hand;
-}
-
-.pie-small-inactive{
-	background-color: rgba(220, 220, 220, 0.75);
-	color: rgba(20, 20, 20, 0.9);
-}
-
-.cursor-pointer{
-	cursor: pointer;
-}
-
-/* The calendar number for the date in the calendar overview */
-.calendar-day {
-	top: -20px;
-	position: relative;
-	margin-left: 10px;
-}
-
-.session-details {
-	max-height: 350px;
-	overflow-y: auto;
-
-}
-
-.inline-block {
-	display: inline-block;
 }
 
 /* Allows to center vertically */
@@ -115,16 +59,6 @@ div.vcenter_placeholder{
 div.vcenter_content{
 	display: table-cell;
 	vertical-align: middle;
-}
-/* Shift the dashboard icons 40px to the top because the header is 40px */
-div.vcenter-dashboard{
-	top: -40px;
-	position: relative;
-}
-
-div.vcenter_with_title{
-	top: -70px;
-	position: relative;
 }
 
 /* Keep things inline */
@@ -150,22 +84,6 @@ header.welcome{
 	z-index: 2;
 }
 
-/* Set validations messages color */
-validate_msg.error{
-	color: #ee0000;
-	background-color: rgba(255,255,255,0.5);
-}
-
-/* Set validations messages color */
-validate_msg.success{
-	color: #00dd00;
-}
-
-/* The for warnings should not be displayed */
-#panel-warning{
-	display: none;
-	color: #ee0000;
-}
 
 /* Bottom line for back buttons and home buttons */
 .bottom{
@@ -191,66 +109,4 @@ a:hover, a:focus{
 
 a{
 	color: #bdbdbd;
-}
-
-/* sets a default padding to the right side */
-.padding-right-16px {
-	padding-right: 16px;
-}
-
-.padding-top-4px {
-	padding-top: 4px;
-}
-
-.padding-top-8px {
-	padding-top: 8px;
-}
-
-.padding-top-16px {
-	padding-top: 16px;
-}
-
-.margin-top-8px {
-	margin-top: 8px;
-}
-
-.margin-top-16px {
-	margin-top: 16px;
-}
-
-.margin-bottom-16px {
-	margin-bottom: 16px;
-}
-
-.no-padding {
-	padding: 0px;
-}
-
-.overflow-hidden {
-	overflow: hidden;
-}
-
-.stop-watch-button {
-	height: 60px;
-}
-
-.fuel-chart {
-	height: 250px;
-}
-
-div .text-bigger{
-    font-size: 50px;
-}
-
-.tab-content-desktop-height {
-	height: 420px;
-	max-height: 420px;
-	overflow-y: scroll;
-	overflow-x: hidden;
-}
-
-.heatlist-desktop-height {
-	max-height: 300px;
-	overflow-y: scroll;
-	overflow-x: hidden;
 }

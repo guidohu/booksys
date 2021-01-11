@@ -10,6 +10,10 @@ body {
     background-size: 100% auto;
 }
 
+.navbar-nav>li>a {
+    height: 50px;
+}
+
 /* Definition of Link colors */
 a:active{
 	font-weight: bold;
