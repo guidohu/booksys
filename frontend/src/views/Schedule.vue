@@ -10,7 +10,7 @@
           </b-card-header>
           <b-collapse id="accordion-1" accordion="my-accordion" role="tabpanel">
             <b-card-body>
-              <UserSessionsTable v-if="pastSessions.length > 0" :userSessions="pastSessions"/>
+              <UserSessionsTable v-if="pastSessions != null && pastSessions.length > 0" :userSessions="pastSessions"/>
               <b-card-text v-else class="text-center">No sessions to display</b-card-text>
             </b-card-body>
           </b-collapse>
@@ -22,7 +22,7 @@
           </b-card-header>
           <b-collapse id="accordion-2" visible accordion="my-accordion" role="tabpanel">
             <b-card-body>
-              <UserSessionsTable v-if="upcomingSessions.length > 0" :userSessions="upcomingSessions" :showCancel="true" @cancel="cancelSessionHandler"/>
+              <UserSessionsTable v-if="upcomingSessions != null && upcomingSessions.length > 0" :userSessions="upcomingSessions" :showCancel="true" @cancel="cancelSessionHandler"/>
               <b-card-text v-else class="text-center">No sessions to display</b-card-text>
             </b-card-body>
           </b-collapse>
@@ -45,11 +45,11 @@
         <b-col>
           <b-tabs content-class="mt-3 text-left">
             <b-tab title="Upcoming Sessions" active>
-              <UserSessionsTable v-if="upcomingSessions.length > 0" :userSessions="upcomingSessions" :showCancel="true" @cancel="cancelSessionHandler"/>
+              <UserSessionsTable v-if="upcomingSessions != null && upcomingSessions.length > 0" :userSessions="upcomingSessions" :showCancel="true" @cancel="cancelSessionHandler"/>
               <div v-else class="text-center">No sessions to display</div>
             </b-tab>
             <b-tab title="Past Sessions">
-              <UserSessionsTable v-if="pastSessions.length > 0" :userSessions="pastSessions"/>
+              <UserSessionsTable v-if="pastSessions != null && pastSessions.length > 0" :userSessions="pastSessions"/>
               <div v-else class="text-center">No sessions to display</div>
             </b-tab>
           </b-tabs>
@@ -77,7 +77,8 @@ import {
   BButton,
   BIconHouse,
   BTabs,
-  BTab
+  BTab,
+  VBToggle
 } from 'bootstrap-vue';
 
 
@@ -98,6 +99,9 @@ export default {
     BIconHouse,
     BTabs,
     BTab
+  },
+  directives: {
+    'b-toggle': VBToggle
   },
   computed: {
     isDesktop: function() {
