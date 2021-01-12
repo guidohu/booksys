@@ -57,8 +57,8 @@
           >
             <ul v-if="usersToAdd.length > 0">
               <li v-for="u in usersToAdd" :key="u.id">
-                {{ u.firstName + " " + u.lastName + " " }}
-                <a href="#" v-on:click="remove(u.id)"><b-icon icon="person-dash"></b-icon></a>
+                {{ u.firstName + " " + u.lastName + "  " }}
+                <a href="#" v-on:click.prevent="remove(u.id)"><b-icon-person-dash/></a>
               </li>
             </ul>
             <ul v-else>
@@ -102,6 +102,7 @@ import {
   BFormSelect,
   BButton,
   BIconPersonPlus,
+  BIconPersonDash,
   BIconCheck,
   BIconX
 } from 'bootstrap-vue';
@@ -123,6 +124,7 @@ export default {
       BFormSelect,
       BButton,
       BIconPersonPlus,
+      BIconPersonDash,
       BIconCheck,
       BIconX
   },
@@ -197,8 +199,8 @@ export default {
       this.usersToAdd = uniq(this.usersToAdd);
     },
     remove: function(id){
-      console.log(id);
       this.usersToAdd = this.usersToAdd.filter(u => u.id != id);
+      console.log("Removed user from the selection:", id);
     },
     save: function() {
       console.log(this.session);
