@@ -4,9 +4,9 @@
     <div class="accordion" role="tablist">
       <b-card no-body class="mb-4">
         <b-card-header header-tag="header" class="p-1" role="tab">
-          <b-button size="sm" block v-b-toggle.accordion-1 variant="outline-info" v-on:click="toggleVisualization">{{visualizationLabel}}</b-button>
+          <b-button size="sm" block v-b-toggle.accordion-1 variant="outline-info">{{visualizationLabel}}</b-button>
         </b-card-header>
-        <b-collapse id="accordion-1" :visible="showChart" accordion="my-accordion" role="tabpanel">
+        <b-collapse id="accordion-1" accordion="my-accordion" role="tabpanel" @shown="displayChart" @hidden="hideChart">
           <b-card-body>
             <FuelLogChart v-if="showChart"/>
           </b-card-body>
@@ -62,8 +62,11 @@ export default {
     }
   },
   methods: {
-    toggleVisualization: function(){
-      this.showChart = !this.showChart;
+    displayChart: function(){
+      this.showChart = true;
+    },
+    hideChart: function(){
+      this.showChart = false;
     }
   }
 }

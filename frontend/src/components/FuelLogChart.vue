@@ -16,6 +16,7 @@ export default {
   name: "FuelLogChart",
   data() {
     return {
+      fuelChartObject: null,
       datasets: [],
       options: {
         title: {
@@ -65,6 +66,7 @@ export default {
           }]
         },
         maintainAspectRatio: false,
+        responsive: true,
         plugins: {
           colorschemes: {
             scheme: ClassicBlue7
@@ -159,7 +161,7 @@ export default {
       var ctx = document.getElementById('fuelChart').getContext('2d');
       const options = this.options;
       const datasets = this.datasets;
-      this.fuelChart = new Chart(ctx, {
+      this.fuelChartObject = new Chart(ctx, {
         type: 'scatter',
         data: {
           datasets: datasets
