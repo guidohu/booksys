@@ -6,6 +6,7 @@
     <div v-else>
       <FuelEntryModal
         :fuelEntry="selectedFuelEntry"
+        :visible.sync="showFuelEntryModal"
       />
       <b-table
         hover
@@ -21,24 +22,28 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import FuelEntryModal from '@/components/FuelEntryModal';
 import moment from "moment-timezone";
+import {
+  BTable
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "FuelLogList",
   components: {
     WarningBox,
-    FuelEntryModal
+    FuelEntryModal,
+    BTable
   },
   data() {
     return {
       errors: [],
       items: [],
       columns: [],
-      selectedFuelEntry: null
+      selectedFuelEntry: null,
+      showFuelEntryModal: false
     }
   },
   computed: {
@@ -105,7 +110,7 @@ export default Vue.extend({
     rowClick: function(item, index, event){
       console.log("rowClick item", item, "index", index, "event", event);
       this.selectedFuelEntry = item;
-      this.$bvModal.show('fuelEntryModal');
+      this.showFuelEntryModal = true;
     },
     rowClass: function(item) {
       // we highlight entries that have a deduction
@@ -128,7 +133,7 @@ export default Vue.extend({
 
     this.setColumns();
   }
-})
+}
 </script>
 
 <style>

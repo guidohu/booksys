@@ -1,4 +1,4 @@
-import Boat from "@/api/boat";
+import Boat  from "@/api/boat";
 
 const state = () => ({
   engineHourLog: [],

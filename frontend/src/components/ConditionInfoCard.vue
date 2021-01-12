@@ -27,11 +27,28 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import moment from 'moment-timezone';
+import {
+  BCard,
+  BCardHeader,
+  BCardBody,
+  BRow,
+  BIconBrightnessAltLowFill,
+  BIconBrightnessAltHigh,
+  BCol
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'ConditionInfoCard',
+  components: {
+    BCard,
+    BCardHeader,
+    BCardBody,
+    BRow,
+    BCol,
+    BIconBrightnessAltLowFill,
+    BIconBrightnessAltHigh
+  },
   props: [ 
     'sunrise',
     'sunset' ],
@@ -49,5 +66,5 @@ export default Vue.extend({
       return moment(this.sunset).format("HH:mm");
     }
   }
-})
+}
 </script>

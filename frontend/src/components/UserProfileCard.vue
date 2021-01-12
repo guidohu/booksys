@@ -8,7 +8,7 @@
         <b-col cols="6" class="text-right">
           <b-dropdown variant="outline-info" size="sm" no-caret dropleft>
             <template v-slot:button-content>
-              <b-icon-pencil-square></b-icon-pencil-square><span class="sr-only">Search</span>
+              <b-icon-pencil-square/><span class="sr-only">Search</span>
             </template>
             <b-dropdown-item href="#" v-on:click="showUserEdit">
               Edit Profile
@@ -21,8 +21,12 @@
       </b-row>
     </b-card-header>
     <b-card-body>
-      <UserEditModal/>
-      <UserPasswordEditModal/>
+      <UserEditModal
+        :visible.sync="showUserEditModal"
+      />
+      <UserPasswordEditModal
+        :visible.sync="showPasswordEditModal"
+      />
       <b-row>
         <b-col cols="6">
           {{userInfo.first_name}} {{userInfo.last_name}}
@@ -52,16 +56,39 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import { mapGetters } from 'vuex'
-import UserEditModal from './UserEditModal'
-import UserPasswordEditModal from './UserPasswordEditModal'
+import { mapGetters } from 'vuex';
+import UserEditModal from './UserEditModal';
+import UserPasswordEditModal from './UserPasswordEditModal';
+import {
+  BCard,
+  BCardHeader,
+  BCardBody,
+  BRow,
+  BCol,
+  BDropdown,
+  BDropdownItem,
+  BIconPencilSquare
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'UserProfileCard',
   components: {
     UserEditModal,
-    UserPasswordEditModal
+    UserPasswordEditModal,
+    BCard,
+    BCardHeader,
+    BCardBody,
+    BRow,
+    BCol,
+    BDropdown,
+    BDropdownItem,
+    BIconPencilSquare
+  },
+  data() {
+    return {
+      showPasswordEditModal: false,
+      showUserEditModal: false
+    }
   },
   computed: {
     ...mapGetters('login', [
@@ -70,11 +97,11 @@ export default Vue.extend({
   },
   methods: {
     showUserEdit: function() {
-      this.$bvModal.show('userEditModal')
+      this.showUserEditModal = true;
     },
     showPasswordEdit: function() {
-      this.$bvModal.show('userPasswordEditModal')
+      this.showPasswordEditModal = true;
     }
   }
-})
+}
 </script>

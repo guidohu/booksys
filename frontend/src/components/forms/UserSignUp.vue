@@ -15,6 +15,7 @@
             id="email-input"
             v-model="userData.email"
             type="text"
+            autocomplete="username"
           />
         </b-form-group>
         <!-- Password -->
@@ -29,6 +30,7 @@
             id="password-input"
             v-model="userData.password"
             type="password"
+            autocomplete="new-password"
           />
         </b-form-group>
         <!-- Password Confirm -->
@@ -43,6 +45,7 @@
             id="password-confirm-input"
             v-model="userData.passwordConfirm"
             type="password"
+            autocomplete="new-password"
           />
         </b-form-group>
         <hr/>
@@ -174,13 +177,24 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { ToggleButton } from 'vue-js-toggle-button';
+import {
+  BForm,
+  BRow,
+  BCol,
+  BFormGroup,
+  BFormInput
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "UserSignUp",
   components: {
-    ToggleButton
+    ToggleButton,
+    BForm,
+    BRow,
+    BCol,
+    BFormGroup,
+    BFormInput
   },
   props: [ 'userData', 'showDisclaimer' ],
   data() {
@@ -195,12 +209,10 @@ export default Vue.extend({
       this.$emit('save')
     },
     licenseToggleHandler: function(){
-      console.log("licenseToggleHandler called");
       this.userData.license = !this.userData.license;
       this.licenseToggleState = this.userData.license;
     },
     ownRiskToggleHandler: function(){
-      console.log("ownRiskToggleHandler called");
       this.userData.ownRisk = !this.userData.ownRisk;
       this.ownRiskToggleState = this.userData.ownRisk;
     },
@@ -213,5 +225,5 @@ export default Vue.extend({
       this.ownRiskToggleState = true;
     }
   }
-})
+}
 </script>

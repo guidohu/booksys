@@ -69,12 +69,15 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
-import Pie from "./Pie.vue"
+import Pie from "./Pie.vue";
+import {
+  BRow,
+  BCol,
+  BButton
+} from 'bootstrap-vue';
+ 
 
-export default Vue.extend({
+export default {
   name: "DashboardAdmin",
   data() {
     return {
@@ -86,8 +89,11 @@ export default Vue.extend({
     }
   },
   components: {
-    Pie
+    Pie,
+    BRow,
+    BCol,
+    BButton
   },
   props: ['isMobile', 'sessionData']
-})
+}
 </script>

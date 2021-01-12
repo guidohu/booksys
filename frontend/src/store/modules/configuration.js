@@ -1,4 +1,4 @@
-import { Configuration } from "../../api/configuration";
+import Configuration from "@/api/configuration";
 
 const state = () => ({
   configuration: null,

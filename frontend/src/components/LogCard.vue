@@ -15,14 +15,21 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import WarningBox from '@/components/WarningBox';
+import {
+  BCard,
+  BCardBody,
+  BTable
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "LogCard",
   components: {
-    WarningBox
+    WarningBox,
+    BCard,
+    BCardBody,
+    BTable
   },
   data() {
     return {
@@ -54,5 +61,5 @@ export default Vue.extend({
     this.queryLogLines()
     .catch((errors) => this.errors = errors);
   }
-})
+}
 </script>

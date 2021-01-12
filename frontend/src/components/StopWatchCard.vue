@@ -1,6 +1,10 @@
 <template>
   <b-card no-body>
-    <HeatCommentModal :defaultComment="comment" @commentChangeHandler="changeComment"/>
+    <HeatCommentModal 
+      :defaultComment="comment" 
+      @commentChangeHandler="changeComment"
+      :visible.sync="isVisibleHeatCommentModal"
+    />
     <b-row v-if="errors.length > 0">
       <b-col cols="12">
         <WarningBox :errors="errors"/>
@@ -24,7 +28,7 @@
             <b-form-input v-model="comment"/>
             <template #append>
               <b-button v-on:click="showHeatCommentModal">
-                <b-icon icon="pencil-square"/>
+                <b-icon-pencil-square/>
                 <!-- Edit -->
               </b-button>
             </template>
@@ -42,24 +46,24 @@
     <b-row class="ml-1 mr-1 mb-2 text-center">
       <b-col cols="12">
         <b-button-group v-if="selectedRiderId != null">
-          <b-button size="lg" variant="outline-info" v-if="!getIsRunning">
-            <b-icon icon="arrow-left"/>
+          <b-button size="lg" variant="outline-info" v-if="!getIsRunning" v-on:click="navigateBack">
+            <b-icon-arrow-left/>
             Back
           </b-button>
           <b-button size="lg" variant="outline-info" v-if="!getIsRunning" v-on:click="startTakingTime">
-            <b-icon icon="play"/>
+            <b-icon-play/>
             Start
           </b-button>
           <b-button size="lg" variant="outline-info" v-if="getIsRunning && !getIsPaused" v-on:click="pauseTakingTime">
-            <b-icon icon="pause"/>
+            <b-icon-pause/>
             Pause
           </b-button>
           <b-button size="lg" variant="outline-info" v-if="getIsPaused" v-on:click="resumeTakingTime">
-            <b-icon icon="eject" rotate="90"/>
+            <b-icon-eject rotate="90"/>
             Resume
           </b-button>
           <b-button size="lg" variant="outline-info" v-if="getIsRunning" v-on:click="finish">
-            <b-icon icon="check-square"/>
+            <b-icon-check-square/>
             Finish
           </b-button>
           <b-dropdown right variant="outline-info" v-if="selectedRiderId != null || getIsRunning">
@@ -74,20 +78,58 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import HeatCommentModal from '@/components/HeatCommentModal';
+import {
+  BCard,
+  BRow,
+  BCol,
+  BFormGroup,
+  BInputGroup,
+  BFormInput,
+  BFormSelect,
+  BButton,
+  BButtonGroup,
+  BIconPencilSquare,
+  BIconArrowLeft,
+  BIconPlay,
+  BIconPause,
+  BIconEject,
+  BIconCheckSquare,
+  BDropdown,
+  BDropdownItem,
+  BDropdownDivider
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'StopWatchCard',
   components: {
     WarningBox,
-    HeatCommentModal
+    HeatCommentModal,
+    BCard,
+    BRow,
+    BCol,
+    BFormGroup,
+    BInputGroup,
+    BFormInput,
+    BFormSelect,
+    BButton,
+    BButtonGroup,
+    BIconPencilSquare,
+    BIconArrowLeft,
+    BIconPlay,
+    BIconPause,
+    BIconEject,
+    BIconCheckSquare,
+    BDropdown,
+    BDropdownItem,
+    BDropdownDivider
   },
-  props: [ 'sessionId' ],
+  props: [ 'sessionId', 'visible' ],
   data() {
     return {
+      isVisibleHeatCommentModal: false,
       selectedRiderId: null,
       selectableRiders: [],
       comment: null,
@@ -142,7 +184,7 @@ export default Vue.extend({
       }
     },
     showHeatCommentModal: function(){
-      this.$bvModal.show('heatCommentModal');
+      this.isVisibleHeatCommentModal = true;
     },
     changeComment: function(newComment){
       this.comment = newComment;
@@ -161,7 +203,10 @@ export default Vue.extend({
     ]),
     ...mapActions('sessions', [
       'querySession'
-    ])
+    ]),
+    navigateBack: function(){
+      this.$router.push('/today');
+    }
   },
   created() {
     if(this.sessionId == null){
@@ -180,7 +225,7 @@ export default Vue.extend({
       this.selectedRiderId = storedUserId;
     }
   }
-})
+}
 </script>
 
 <style scoped>

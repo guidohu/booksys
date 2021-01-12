@@ -1,7 +1,10 @@
 <template>
   <b-card no-body class="text-left">
     <b-card-body>
-      <HeatEntryModal :heat="selectedHeat"/>
+      <HeatEntryModal 
+        :heat="selectedHeat"
+        :visible.sync="showHeatEntryModal"
+      />
       <b-table 
         v-if="errors.length==0" 
         striped 
@@ -18,21 +21,29 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { sprintf } from 'sprintf-js';
 import WarningBox from '@/components/WarningBox';
 import HeatEntryModal from '@/components/HeatEntryModal';
+import {
+  BCard,
+  BCardBody,
+  BTable
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'SessionHeatListCard',
   components: {
     WarningBox,
-    HeatEntryModal
+    HeatEntryModal,
+    BCard,
+    BCardBody,
+    BTable
   },
   props: [ 'sessionId' ],
   data() {
     return {
+      showHeatEntryModal: false,
       errors: [],
       columns: [],
       rows: [ { time: "12" }],
@@ -108,7 +119,7 @@ export default Vue.extend({
     rowClick: function(item) {
       console.log("clicked on item", item);
       this.selectedHeat = item;
-      this.$bvModal.show("heatEntryModal");
+      this.showHeatEntryModal = true;
     }
   },
   created() {
@@ -122,7 +133,7 @@ export default Vue.extend({
       console.error("Cannot query heats for session, as no sessionId is provided");
     }
   }
-})
+}
 </script>
 
 <style>

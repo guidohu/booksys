@@ -71,15 +71,30 @@
 </template>
 
 <script>
-import Vue from 'vue';
+import {
+  BContainer,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormInput
+} from "bootstrap-vue";
 
-export default Vue.extend({
+export default {
   name: "DatabaseConfiguration",
+  components: {
+    BContainer,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BFormInput
+  },
   props: [ 'dbConfig' ],
   methods: {
     save: function() {
       this.$emit('save', this.dbConfig);
     }
   }
-})
+}
 </script>

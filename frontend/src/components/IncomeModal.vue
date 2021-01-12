@@ -2,6 +2,9 @@
   <b-modal
     id="incomeModal"
     title="Add New Income"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length > 0">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -96,11 +99,11 @@
     <div slot="modal-footer">
       <div class="text-right d-inline">
         <b-button class="ml-4" type="button" variant="outline-info" v-on:click="add">
-          <b-icon-check></b-icon-check>
+          <b-icon-check/>
           Add
         </b-button>
         <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-          <b-icon-x></b-icon-x>
+          <b-icon-x/>
           Cancel
         </b-button>
       </div>
@@ -109,17 +112,45 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import moment from 'moment';
-import _ from 'lodash';
+import { orderBy } from 'lodash';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormSelect,
+  BFormInput,
+  BInputGroup,
+  BInputGroupAppend,
+  BFormTextarea,
+  BButton,
+  BIconCheck,
+  BIconX
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'IncomeModal',
   components: {
-    WarningBox
+    WarningBox,
+    BModal,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BFormSelect,
+    BFormInput,
+    BInputGroup,
+    BInputGroupAppend,
+    BFormTextarea,
+    BButton,
+    BIconCheck,
+    BIconX
   },
+  props: [ 'visible' ],
   data() {
     return {
       errors: [],
@@ -197,7 +228,7 @@ export default Vue.extend({
           text:  t.name
         }
       });
-      this.incomeTypes = _.orderBy(this.incomeTypes, ['text'], ['asc']);
+      this.incomeTypes = orderBy(this.incomeTypes, ['text'], ['asc']);
       this.incomeTypes.unshift({ value: null, text: "Please select"});
     },
     buildUserSelect: function(users){
@@ -209,7 +240,7 @@ export default Vue.extend({
           firstName: u.firstName
         }
       });
-      this.users = _.orderBy(this.users, ['text'], ['asc']);
+      this.users = orderBy(this.users, ['text'], ['asc']);
       this.users.unshift({ value: null, text: "Please select"});
     },
     clearForm: function() {
@@ -242,7 +273,7 @@ export default Vue.extend({
     },
     close: function() {
       this.clearForm();
-      this.$bvModal.hide('incomeModal');
+      this.$emit('update:visible', false);
     }
   },
   created() {
@@ -258,5 +289,5 @@ export default Vue.extend({
 
     this.form.date = moment().format('YYYY-MM-DD');
   }
-})
+}
 </script>

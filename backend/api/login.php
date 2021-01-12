@@ -17,10 +17,12 @@
   
   switch($_GET['action']){
 	case 'login':
-		login($configuration);
+		$response = login($configuration);
+		echo json_encode($response);
 		exit;
 	case 'isLoggedIn':
-		isLoggedIn($configuration);
+		$response = isLoggedIn($configuration);
+		echo json_encode($response);
 		exit;
 	default:
 		exit;
@@ -37,11 +39,10 @@
 
 	$login = new Login($configuration);
 	if($login->isLoggedIn()){
-		$res['loggedIn'] = TRUE;
+		return Status::successDataResponse("logged in", [ "loggedIn" => TRUE ]);
 	}
 
-	echo json_encode($res);
-	return;
+	return Status::successDataResponse("not logged in", [ "loggedIn" => FALSE ]);
   }
   
   // performs a user login
@@ -56,16 +57,12 @@
 	    and !$sanitizer->isAsciiText($post_data->username)
 	   )
 	  ){
-		HttpHeader::setResponseCode(400);
 		error_log('No valid username provided: "' . $post_data->username . '"');
-		echo 'No valid username given';
-		return;
+		return Status::errorStatus("Please use a valid username");
 	}
 	if(!isset($post_data->password) or !$sanitizer->isAsciiText($post_data->password)){
-		HttpHeader::setResponseCode(400);
 		error_log('No valid password provided for user: "' . $post_data->username . '"');
-		echo 'No valid password given';
-		return;
+		return Status::errorStatus("Please use a valid password");
 	} 
 	
 	// input is valid and we can try to login
@@ -75,22 +72,13 @@
 	switch ($result){
 		case -1:
 			// wrong username/password
-			$response['login_successful']  = false;
-			$response['login_status_code'] = -1;
-			echo json_encode($response);
-			return;
+			return Status::errorStatus("invalid username/password");
 		case -2:
 			// user is locked
-			$response['login_successful']  = false;
-			$response['login_status_code'] = -2;
-			echo json_encode($response);
-			return;
+			return Status::errorStatus("user account is locked");
 		case 1:
 			// successful login
-			$response['login_successful']  = true;
-			$response['login_status_code'] = 1;
-			echo json_encode($response);
-			return;
+			return Status::successStatus("login successful");
 	}
   }
   

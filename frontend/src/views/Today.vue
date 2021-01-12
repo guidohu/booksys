@@ -2,21 +2,15 @@
   <div>
     <SessionEditorModal 
       :defaultValues="selectedSession"
+      :visible.sync="showSessionEditorModal"
     />
     <SessionDeleteModal
       :session="selectedSession"
       @sessionDeletedHandler="sessionDeletedHandler"
+      :visible.sync="showSessionDeleteModal"
     />
     <div v-if="isDesktop" class="display">
-      <b-row>
-        <b-col>
-          <div class="main-title">
-            <h3>
-              Book Your Session
-            </h3>
-          </div>
-        </b-col>
-      </b-row>
+      <main-title title-name="Book Your Session"/>
       <b-row class="ml-1 mr-1">
         <b-col cols="8">
           <SessionDayCard v-if="getSessions != null"
@@ -93,7 +87,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
@@ -102,20 +95,34 @@ import SessionDayCard from '@/components/SessionDayCard';
 import SessionDetailsCard from '@/components/SessionDetailsCard';
 import SessionEditorModal from '@/components/SessionEditorModal';
 import SessionDeleteModal from '@/components/SessionDeleteModal';
+import MainTitle from '@/components/MainTitle';
 import Session from '@/dataTypes/session';
 import moment from 'moment';
 import 'moment-timezone';
-import _ from 'lodash';
+import { difference } from 'lodash';
+import {
+  BRow,
+  BCol,
+  BButton,
+  BIconCalendar3,
+  BIconHouse
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'Today',
   components: {
     NavbarMobile,
+    MainTitle,
     ConditionInfoCard,
     SessionDayCard,
     SessionDetailsCard,
     SessionEditorModal,
-    SessionDeleteModal
+    SessionDeleteModal,
+    BRow,
+    BCol,
+    BButton,
+    BIconCalendar3,
+    BIconHouse
   },
   computed: {
     isMobile: function () {
@@ -202,11 +209,11 @@ export default Vue.extend({
       console.log("createSession clicked");
       console.log("for selectedSession:", this.selectedSession);
       console.log("show session editor");
-      console.log(this.$bvModal.show('sessionEditorModal'));
+      this.showSessionEditorModal = true;
     },
     showDeleteSession: function(){
       console.log("showDeleteSession");
-      this.$bvModal.show('sessionDeleteModal');
+      this.showSessionDeleteModal = true;
     },
     addRiders: function(){
       console.log("addRiders");
@@ -214,6 +221,11 @@ export default Vue.extend({
   },
   watch: {
     getSessions: function(newInfo, oldInfo){
+      if(newInfo == null || newInfo.sessions == null){
+        this.selectedSession = null;
+        return;
+      }
+
       // in case we get an update affecting the sessions
       // we will update our selected session too
       if(this.selectedSession != null 
@@ -225,16 +237,22 @@ export default Vue.extend({
 
       // in case a new session has been created, we select it
       if(newInfo.sessions != null
-        && (oldInfo.sessions == null || newInfo.sessions.length > oldInfo.sessions.length)
+        && (oldInfo == null || oldInfo.sessions == null || newInfo.sessions.length > oldInfo.sessions.length)
       ){
         // find the session that is new
         const newIds = newInfo.sessions.map(s => s.id);
-        const oldIds = oldInfo.sessions.map(s => s.id);
-        const difference = _.difference(newIds, oldIds);
-        if(difference.length == 1){
-          this.selectedSession = newInfo.sessions.find(s => s.id == difference[0])
+        const oldIds = (oldInfo != null && oldInfo.sessions != null) ? oldInfo.sessions.map(s => s.id) : [];
+        const diff   = difference(newIds, oldIds);
+        if(diff.length == 1){
+          this.selectedSession = newInfo.sessions.find(s => s.id == diff[0])
+        }else if(diff.length == 0){
+          // nothing changed, happens during the initial phase when
+          // both have no sessions 
+          this.selectedSession = null;
         }else{
           console.error("old and new session info differs by more than one session");
+          console.error(oldInfo, newInfo);
+          console.error("difference:", diff);
         }
       }else if(newInfo.sessions.length < oldInfo.sessions.length){
         // a session has been deleted -> reset selected session
@@ -245,7 +263,9 @@ export default Vue.extend({
   data() {
     return {
       date: null,
-      selectedSession: null
+      selectedSession: null,
+      showSessionEditorModal: false,
+      showSessionDeleteModal: false
     }
   },
   created() {
@@ -267,5 +287,5 @@ export default Vue.extend({
 
     this.querySessionsForDate();
   }
-})
+}
 </script>

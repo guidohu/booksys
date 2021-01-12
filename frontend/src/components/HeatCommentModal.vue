@@ -2,6 +2,9 @@
   <b-modal
     id="heatCommentModal"
     title="Heat Comment"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -32,11 +35,11 @@
     </b-form>
     <div slot="modal-footer">
       <b-button type="button" variant="outline-danger" v-on:click="removeComment" class="mr-1">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Delete
       </b-button>
       <b-button type="button" variant="outline-info" v-on:click="saveComment">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Save
       </b-button>
     </div>
@@ -44,16 +47,35 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import WarningBox from '@/components/WarningBox';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BButton,
+  BIconX,
+  BIconCheck
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "HeatCommentModal",
   components: {
-    WarningBox
+    WarningBox,
+    BModal,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BFormInput,
+    BButton,
+    BIconX,
+    BIconCheck
   },
   props: [
-    'defaultComment'
+    'defaultComment', 'visible'
   ],
   data() {
     return {
@@ -72,7 +94,7 @@ export default Vue.extend({
     },
     close: function() {
       this.comment = null;
-      this.$bvModal.hide('heatCommentModal');
+      this.$emit('update:visible', false);
     }
   },
   watch: {
@@ -83,5 +105,5 @@ export default Vue.extend({
   mounted() {
     this.comment = this.defaultComment;
   }
-})
+}
 </script>

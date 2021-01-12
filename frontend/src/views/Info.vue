@@ -1,15 +1,7 @@
 <template>
 
 <div v-if="isDesktop" class="display">
-  <b-row>
-    <b-col>
-      <div class="main-title">
-        <h3>
-          Location
-        </h3>
-      </div>
-    </b-col>
-  </b-row>
+  <main-title title-name="Location"/>
   <b-row>
     <b-col cols="12" class="mt-5 text-center">
       <div cols="12" v-if="this.getLocationAddress != null" v-html="this.getLocationAddress" class="main-color"/>
@@ -24,7 +16,7 @@
   </b-row>
   <div class="bottom">
     <b-button variant="outline-light" to="/dashboard">
-      <b-icon-house></b-icon-house>
+      <b-icon-house/>
       HOME
     </b-button>
   </div>
@@ -53,15 +45,32 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import { mapActions, mapGetters } from 'vuex'
-import { BooksysBrowser } from '@/libs/browser'
-import NavbarMobile from '@/components/NavbarMobile.vue'
+import { mapActions, mapGetters } from 'vuex';
+import { BooksysBrowser } from '@/libs/browser';
+import NavbarMobile from '@/components/NavbarMobile';
+import MainTitle from '@/components/MainTitle';
+import {
+  BRow,
+  BCol,
+  BButton,
+  BIconHouse,
+  BCard,
+  BCardBody,
+  BCardText
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'Info',
   components: {
-    NavbarMobile
+    MainTitle,
+    NavbarMobile,
+    BRow,
+    BCol,
+    BButton,
+    BIconHouse,
+    BCard,
+    BCardBody,
+    BCardText
   },
   computed: {
     ...mapGetters('configuration', [
@@ -98,7 +107,7 @@ export default Vue.extend({
     console.log("Info.vue: Try to get all information required")
     this.queryConfiguration()
   }
-})
+}
 </script>
 
 <style>

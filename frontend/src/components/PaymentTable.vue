@@ -2,8 +2,12 @@
   <div class="text-left">
     <WarningBox v-if="errors.length > 0" :errors="errors" dismissible="true" @dismissed="dismissedHandler"/>
     <div v-else>
-      <IncomeModal/>
-      <ExpenseModal/>
+      <IncomeModal
+        :visible.sync="showIncomeModal"
+      />
+      <ExpenseModal
+        :visible.sync="showExpenseModal"
+      />
       <b-row v-if="form.years.length>0" class="text-right">
         <b-col offset="6" cols="6" class="d-sm-none mr-1">
           <b-form-group
@@ -24,8 +28,8 @@
       </b-row>
       <b-row>
         <b-col cols="8">
-          <b-button v-on:click="showAddIncome" size="sm" variant="outline-info" class="mr-1 mb-2"><b-icon icon="plus"/>Income</b-button>
-          <b-button v-on:click="showAddExpense" size="sm" variant="outline-info" class="mb-2"><b-icon icon="dash"/>Expense</b-button>
+          <b-button v-on:click="showAddIncome" size="sm" variant="outline-info" class="mr-1 mb-2"><b-icon-plus/>Income</b-button>
+          <b-button v-on:click="showAddExpense" size="sm" variant="outline-info" class="mb-2"><b-icon-dash/>Expense</b-button>
         </b-col>
         <b-col cols="4" class="d-none d-sm-block">
           <b-form-group
@@ -71,7 +75,7 @@
               <template #cell(action)="data">
                 <div class="text-center">
                   <b-button size="sm" style="font-size: 0.8em;" variant="light">
-                    <b-icon v-on:click="deleteEntry(data.item)" icon="trash" variant="danger"/>
+                    <b-icon-trash v-on:click="deleteEntry(data.item)" variant="danger"/>
                   </b-button>
                 </div>
               </template>
@@ -86,21 +90,51 @@
 <script>
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
-import _ from 'lodash';
+import { reverse } from 'lodash';
 import moment from 'moment';
 import WarningBox from '@/components/WarningBox';
 import IncomeModal from '@/components/IncomeModal';
 import ExpenseModal from '@/components/ExpenseModal';
+import {
+  BRow,
+  BCol,
+  BFormGroup,
+  BFormSelect,
+  BButton,
+  BIconPlus,
+  BIconDash,
+  BIconTrash,
+  BOverlay,
+  BTable,
+  ModalPlugin
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+Vue.use(ModalPlugin);
+
+export default {
   name: "PaymentTable",
   components: {
     WarningBox,
     IncomeModal,
-    ExpenseModal
+    ExpenseModal,
+    BRow,
+    BCol,
+    BFormGroup,
+    BFormSelect,
+    BButton,
+    BIconPlus,
+    BIconDash,
+    BIconTrash,
+    BOverlay,
+    BTable
   },
+  // directives: {
+  //   "b-modal": VBModal
+  // },
   data() {
     return {
+      showExpenseModal: false,
+      showIncomeModal: false,
       errors: [],
       isLoading: false,
       form: {
@@ -158,7 +192,7 @@ export default Vue.extend({
   },
   watch: {
     getYears: function(newValue){
-      const availableYears = _.reverse(newValue);
+      const availableYears = reverse(newValue);
       console.log(availableYears);
       this.form.years = availableYears.map(v => {
         return {
@@ -178,10 +212,10 @@ export default Vue.extend({
       'queryConfiguration'
     ]),
     showAddIncome: function() {
-      this.$bvModal.show('incomeModal');
+      this.showIncomeModal = true;
     },
     showAddExpense: function() {
-      this.$bvModal.show('expenseModal');
+      this.showExpenseModal = true;
     },
     yearSelectionChangeHandler: function(selection){
       this.isLoading = true;
@@ -239,7 +273,7 @@ export default Vue.extend({
     .then(() => this.isLoading = false)
     .catch((errors) => this.errors = errors);
   }
-})
+}
 </script>
 
 <style scoped>

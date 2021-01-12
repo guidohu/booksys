@@ -3,6 +3,7 @@
     <WarningBox v-if="errors.length > 0" :errors="errors"/>
     <EngineHourEntryModal
       :engineHourEntry="selectedEngineHourLogEntry"
+      :visible.sync="showEntryHourModal"
     />
     <b-table v-if="errors.length == 0" 
       hover 
@@ -17,17 +18,20 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import moment from "moment-timezone";
 import WarningBox from '@/components/WarningBox';
 import EngineHourEntryModal from '@/components/EngineHourEntryModal';
+import {
+  BTable
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "EngineHourLogList",
   components: {
     WarningBox,
-    EngineHourEntryModal
+    EngineHourEntryModal,
+    BTable
   },
   data() {
     return {
@@ -35,6 +39,7 @@ export default Vue.extend({
       columns: [],
       errors: [],
       selectedEngineHourLogEntry: null,
+      showEntryHourModal: false
     };
   },
   computed: {
@@ -91,7 +96,7 @@ export default Vue.extend({
     },
     rowClick: function(item){
       this.selectedEngineHourLogEntry = item;
-      this.$bvModal.show('engineHourEntryModal');
+      this.showEntryHourModal = true;
     },
     rowClass: function(item) {
       if(item.type == 0){
@@ -114,7 +119,7 @@ export default Vue.extend({
       this.errors = errors;
     });
   }
-})
+}
 </script>
 
 <style>

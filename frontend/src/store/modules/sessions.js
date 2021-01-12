@@ -1,4 +1,4 @@
-import Sessions from "../../api/sessions";
+import Sessions from "@/api/sessions";
 import moment from 'moment';
 
 const state = () => ({

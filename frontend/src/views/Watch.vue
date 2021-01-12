@@ -1,14 +1,6 @@
 <template>
   <div v-if="isDesktop" class="display">
-    <b-row>
-      <b-col>
-        <div class="main-title">
-          <h3>
-            Stop Watch
-          </h3>
-        </div>
-      </b-col>
-    </b-row>
+    <main-title title-name="Stop Watch"/>
     <b-row class="ml-1 mr-1">
       <b-col cols="8">
         <WarningBox v-if="errors.length > 0" :errors="errors"/>
@@ -46,7 +38,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
@@ -54,15 +45,27 @@ import WarningBox from '@/components/WarningBox';
 import StopWatchCard from '@/components/StopWatchCard';
 import SessionHeatListCard from '@/components/SessionHeatListCard';
 import ConditionInfoCard from '@/components/ConditionInfoCard';
+import MainTitle from '@/components/MainTitle';
+import {
+  BRow,
+  BCol,
+  BButton,
+  BIconHouse
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "Watch",
   components: {
     NavbarMobile,
+    MainTitle,
     WarningBox,
     StopWatchCard,
     SessionHeatListCard,
-    ConditionInfoCard
+    ConditionInfoCard,
+    BRow,
+    BCol,
+    BButton,
+    BIconHouse
   },
   data() {
     return {
@@ -87,7 +90,7 @@ export default Vue.extend({
       this.sessionId = sessionId;
     }
   }
-})
+}
 </script>
 
 <style>

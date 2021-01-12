@@ -2,21 +2,15 @@
   <div>
     <SessionEditorModal 
       :defaultValues="selectedSession"
+      :visible.sync="showSessionEditorModal"
     />
     <SessionDeleteModal
       :session="selectedSession"
       @sessionDeletedHandler="sessionDeletedHandler"
+      :visible.sync="showSessionDeleteModal"
     />
     <div v-if="isDesktop" class="display">
-      <b-row>
-        <b-col>
-          <div class="main-title">
-            <h3>
-              Select Session
-            </h3>
-          </div>
-        </b-col>
-      </b-row>
+      <main-title title-name="Select Session"/>
       <b-row class="ml-1 mr-1">
         <b-col cols="8">
           <SessionDayCard v-if="getSessions != null"
@@ -52,11 +46,11 @@
       </b-row>
       <div class="bottom mr-2">
         <b-button class="mr-1" variant="outline-light" to="/calendar">
-          <b-icon-calendar3></b-icon-calendar3>
+          <b-icon-calendar3/>
           CALENDAR
         </b-button>
         <b-button variant="outline-light" to="/dashboard">
-          <b-icon-house></b-icon-house>
+          <b-icon-house/>
           HOME
         </b-button>
       </div>
@@ -89,7 +83,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
@@ -98,20 +91,34 @@ import SessionDayCard from '@/components/SessionDayCard';
 import SessionDetailsCard from '@/components/SessionDetailsCard';
 import SessionEditorModal from '@/components/SessionEditorModal';
 import SessionDeleteModal from '@/components/SessionDeleteModal';
+import MainTitle from '@/components/MainTitle';
 import Session from '@/dataTypes/session';
 import moment from 'moment';
 import 'moment-timezone';
-import _ from 'lodash';
+import { difference } from 'lodash';
+import {
+  BRow,
+  BCol,
+  BButton,
+  BIconCalendar3,
+  BIconHouse
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'Ride',
   components: {
     NavbarMobile,
+    MainTitle,
     ConditionInfoCard,
     SessionDayCard,
     SessionDetailsCard,
     SessionEditorModal,
-    SessionDeleteModal
+    SessionDeleteModal,
+    BRow,
+    BCol,
+    BButton,
+    BIconCalendar3,
+    BIconHouse
   },
   computed: {
     isMobile: function () {
@@ -183,11 +190,10 @@ export default Vue.extend({
       this.selectedSession = null;
     },
     showCreateSession: function(){
-      this.$bvModal.show('sessionEditorModal');
+      this.showSessionEditorModal = true;
     },
     showDeleteSession: function(){
-      console.log("showDeleteSession");
-      this.$bvModal.show('sessionDeleteModal');
+      this.showSessionDeleteModal = true;
     }
   },
   watch: {
@@ -203,14 +209,14 @@ export default Vue.extend({
 
       // in case a new session has been created, we select it
       if(newInfo.sessions != null
-        && (oldInfo.sessions == null || newInfo.sessions.length > oldInfo.sessions.length)
+        && (oldInfo == null || oldInfo.sessions == null || newInfo.sessions.length > oldInfo.sessions.length)
       ){
         // find the session that is new
         const newIds = newInfo.sessions.map(s => s.id);
-        const oldIds = oldInfo.sessions.map(s => s.id);
-        const difference = _.difference(newIds, oldIds);
-        if(difference.length == 1){
-          this.selectedSession = newInfo.sessions.find(s => s.id == difference[0])
+        const oldIds = (oldInfo == null || oldInfo.session == null) ? [] : oldInfo.sessions.map(s => s.id);
+        const diff   = difference(newIds, oldIds);
+        if(diff.length == 1){
+          this.selectedSession = newInfo.sessions.find(s => s.id == diff[0])
         }else{
           console.error("old and new session info differs by more than one session");
         }
@@ -223,7 +229,9 @@ export default Vue.extend({
   data() {
     return {
       date: null,
-      selectedSession: null
+      selectedSession: null,
+      showSessionEditorModal: false,
+      showSessionDeleteModal: false
     }
   },
   created() {
@@ -250,5 +258,5 @@ export default Vue.extend({
       this.$router.push("/watch?sessionId="+this.getSessionId);
     }
   }
-})
+}
 </script>

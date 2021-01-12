@@ -67,16 +67,27 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
-import _ from 'lodash';
+import { reverse } from 'lodash';
 import moment from 'moment';
 import WarningBox from '@/components/WarningBox';
+import {
+  BRow,
+  BCol,
+  BFormGroup,
+  BFormSelect,
+  BCard
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "PaymentDetails",
   components: {
-    WarningBox
+    WarningBox,
+    BRow,
+    BCol,
+    BFormGroup,
+    BFormSelect,
+    BCard
   },
   data() {
     return {
@@ -103,7 +114,7 @@ export default Vue.extend({
   },
   watch: {
     getYears: function(newValue){
-      const availableYears = _.reverse(newValue);
+      const availableYears = reverse(newValue);
       console.log(availableYears);
       this.form.years = availableYears.map(v => {
         return {
@@ -139,5 +150,5 @@ export default Vue.extend({
     this.queryStatistics(currentYear)
     .catch((errors) => this.errors = errors);
   }
-})
+}
 </script>

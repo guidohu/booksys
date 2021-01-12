@@ -8,19 +8,19 @@
         <b-col cols="4" class="text-right">
           <b-dropdown v-if="showAddRiders || showDeleteSession" id="dropdown-1" variant="light" text="Dropdown Button" toggle-class="btn-xs" right no-caret>
             <template v-slot:button-content>
-              <b-icon icon="list"></b-icon>
+              <b-icon-list/>
             </template>
             <b-dropdown-item v-if="showAddRiders" v-on:click="addRiders">
-              <b-icon icon="person-plus"></b-icon>
+              <b-icon-person-plus/>
               {{"  "}} Add Rider
             </b-dropdown-item>
             <b-dropdown-item v-if="showAddRiders" v-on:click="editSession">
-              <b-icon icon="pencil-square"></b-icon>
+              <b-icon-pencil-square/>
               {{"  "}} Edit Session
             </b-dropdown-item>
             <b-dropdown-divider></b-dropdown-divider>
             <b-dropdown-item v-if="showDeleteSession" v-on:click="deleteSession">
-              <b-icon icon="trash"></b-icon>
+              <b-icon-trash/>
               {{"  "}} Delete Session
             </b-dropdown-item>
           </b-dropdown>
@@ -28,7 +28,10 @@
       </b-row>
     </b-card-header>
     <b-card-body>
-      <RiderSelectionModal :session="session"/>
+      <RiderSelectionModal 
+        :session="session"
+        :visible.sync="showRiderSelectionModal"
+      />
       <b-row v-if="session != null && session.title != null" class="font-weight-bold">
         <b-col cols="4">
           Title
@@ -63,7 +66,9 @@
               {{ rider.name }}
             </b-col>
             <b-col cols="2">
-              <a href="#" v-on:click="removeRider(rider.id)"><b-icon icon="person-dash"></b-icon></a>
+              <a href="#" v-on:click="removeRider(rider.id)">
+                <b-icon-person-dash/>
+              </a>
             </b-col>
           </b-row>
         </b-col>
@@ -83,18 +88,47 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions} from 'vuex';
 import moment from 'moment';
 import 'moment-timezone';
 import { BooksysBrowser } from '@/libs/browser';
 import { UserPointer } from '@/dataTypes/user';
-import RiderSelectionModal from '@/components/RiderSelectionModal.vue';
+import RiderSelectionModal from '@/components/RiderSelectionModal';
+import {
+  BCard,
+  BCardHeader,
+  BCardBody,
+  BRow,
+  BCol,
+  BDropdown,
+  BDropdownItem,
+  BDropdownDivider,
+  BIconList,
+  BIconPersonPlus,
+  BIconPersonDash,
+  BIconPencilSquare,
+  BIconTrash,
+  BButton
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'SessionDetailsCard',
   components: {
-    RiderSelectionModal
+    RiderSelectionModal,
+    BCard,
+    BCardHeader,
+    BCardBody,
+    BRow,
+    BCol,
+    BDropdown,
+    BDropdownItem,
+    BDropdownDivider,
+    BIconList,
+    BIconPersonPlus,
+    BIconPersonDash,
+    BIconPencilSquare,
+    BIconTrash,
+    BButton
   },
   props: [
     "date",
@@ -102,6 +136,7 @@ export default Vue.extend({
   ],
   data() {
     return {
+      showRiderSelectionModal: false,
       sessionSelected: false
     };
   },
@@ -167,7 +202,7 @@ export default Vue.extend({
       this.$emit('deleteSessionHandler', { id: this.session.id });
     },
     addRiders: function(){
-      this.$bvModal.show('riderSelectionModal');
+      this.showRiderSelectionModal = true;
     },
     ...mapActions('sessions', [
       "deleteUserFromSession"
@@ -180,7 +215,7 @@ export default Vue.extend({
       })
     }
   }
-})
+}
 </script>
 
 <style scoped>

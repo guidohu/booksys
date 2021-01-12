@@ -31,18 +31,23 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import EngineHourLogContainer from '@/components/EngineHourLogContainer';
 import FuelLogContainer from '@/components/FuelLogContainer';
 import MaintenanceLogContainer from '@/components/MaintenanceLogContainer';
+import {
+  BTabs,
+  BTab
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'BoatTabs',
   components: {
     EngineHourLogContainer,
     FuelLogContainer,
-    MaintenanceLogContainer
+    MaintenanceLogContainer,
+    BTabs,
+    BTab
   },
   computed: {
     isDesktop: function () {
@@ -74,7 +79,7 @@ export default Vue.extend({
       }
     }
   }
-})
+}
 </script>
 
 <style scoped>

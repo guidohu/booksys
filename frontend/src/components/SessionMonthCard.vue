@@ -4,7 +4,7 @@
       <b-row>
         <b-col cols="4" class="text-right">
           <b-button variant="outline-info" class="btn-xs" v-on:click="prevMonth">
-            <b-icon icon="arrow-left-short"></b-icon>
+            <b-icon-arrow-left-short/>
           </b-button>
         </b-col>
         <b-col cols="4" class="text-center">
@@ -12,7 +12,7 @@
         </b-col>
         <b-col cols="4" class="text-left">
           <b-button variant="outline-info" class="btn-xs" v-on:click="nextMonth">
-            <b-icon icon="arrow-right-short"></b-icon>
+            <b-icon-arrow-right-short/>
           </b-button>
         </b-col>
       </b-row>
@@ -48,12 +48,21 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import Pie from "./Pie.vue";
 import moment from 'moment-timezone';
 import { BooksysBrowser } from '@/libs/browser';
+import {
+  BCard,
+  BCardHeader,
+  BCardBody,
+  BRow,
+  BCol,
+  BButton,
+  BIconArrowLeftShort,
+  BIconArrowRightShort
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'SessionMonthCard',
   data() {
     return {
@@ -101,7 +110,15 @@ export default Vue.extend({
     }
   },
   components: {
-    Pie
+    Pie,
+    BCard,
+    BCardHeader,
+    BCardBody,
+    BRow,
+    BCol,
+    BButton,
+    BIconArrowLeftShort,
+    BIconArrowRightShort
   },
   props: ['sessionData', 'month'],
   mounted() {
@@ -122,7 +139,7 @@ export default Vue.extend({
         labels:          false,
     }
   }
-})
+}
 </script>
 
 <style scoped>

@@ -5,17 +5,18 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import Chart from 'chart.js';
-import 'chartjs-plugin-colorschemes';
-import _ from 'lodash';
+import 'chartjs-plugin-colorschemes/src/plugins/plugin.colorschemes';
+import { ClassicBlue7 } from 'chartjs-plugin-colorschemes/src/colorschemes/colorschemes.tableau';
+import { groupBy, max, sum } from 'lodash';
 import moment from 'moment';
 
-export default Vue.extend({
+export default {
   name: "FuelLogChart",
   data() {
     return {
+      fuelChartObject: null,
       datasets: [],
       options: {
         title: {
@@ -64,7 +65,13 @@ export default Vue.extend({
             }
           }]
         },
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        responsive: true,
+        plugins: {
+          colorschemes: {
+            scheme: ClassicBlue7
+          }
+        }
       }
     }
   },
@@ -81,7 +88,7 @@ export default Vue.extend({
       }
 
       // split by year
-      const fuelLogByYear = _.groupBy(fuelLog, (x) => Number(moment(x.timestamp, "X").format("YYYY")));
+      const fuelLogByYear = groupBy(fuelLog, (x) => Number(moment(x.timestamp, "X").format("YYYY")));
 
       // get all the years with the latest ones first
       const years = Object.keys(fuelLogByYear).sort().reverse();
@@ -92,7 +99,7 @@ export default Vue.extend({
       for(let i = 0; i<displayYears.length; i++){
         const year = displayYears[i];
         const fuelValues = fuelLogByYear[year];
-        const fuelValuesPerDay = _.groupBy(fuelValues, (x) => moment(x.timestamp, "X").dayOfYear());
+        const fuelValuesPerDay = groupBy(fuelValues, (x) => moment(x.timestamp, "X").dayOfYear());
 
         const dataset = {
           label: year,
@@ -109,8 +116,8 @@ export default Vue.extend({
           const fuelEntries = fuelValuesPerDay[dayNumber];
 
           // calculate the engine hours of that day and the liters fueled in total
-          const engineHours     = _.max(fuelEntries.map(entry => Number(entry.engine_hours)));
-          const fuelConsumption = _.sum(fuelEntries.map(entry => Number(entry.liters)));
+          const engineHours     = max(fuelEntries.map(entry => Number(entry.engine_hours)));
+          const fuelConsumption = sum(fuelEntries.map(entry => Number(entry.liters)));
           
           // first value, we cannot calculate an average
           if(lastEngineHours == 0){
@@ -154,7 +161,7 @@ export default Vue.extend({
       var ctx = document.getElementById('fuelChart').getContext('2d');
       const options = this.options;
       const datasets = this.datasets;
-      this.fuelChart = new Chart(ctx, {
+      this.fuelChartObject = new Chart(ctx, {
         type: 'scatter',
         data: {
           datasets: datasets
@@ -171,7 +178,7 @@ export default Vue.extend({
   },
   mounted () {
     this.setDatasets(this.getFuelLog);
-    this.drawChart(); 
+    this.drawChart();
   }
-})
+}
 </script>

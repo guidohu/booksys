@@ -2,6 +2,9 @@
   <b-modal
     id="userEditModal"
     title="Profile"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row class="text-left">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -130,11 +133,11 @@
     </b-row>    
     <div slot="modal-footer">
       <b-button type="button" variant="outline-info" :disabled="isLoading" v-on:click="save">
-        <b-icon-person-check></b-icon-person-check>
+        <b-icon-person-check/>
         Save
       </b-button>
       <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
     </div>
@@ -142,15 +145,37 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BFormCheckbox,
+  BButton,
+  BIconPersonCheck,
+  BIconX
+} from "bootstrap-vue";
 
-export default Vue.extend({
+export default {
   name: 'UserEditModal',
   components: {
-    WarningBox
+    WarningBox,
+    BModal,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BFormInput,
+    BFormCheckbox,
+    BButton,
+    BIconPersonCheck,
+    BIconX
   },
+  props: [ 'visible' ],
   data() {
     return {
       form: {},
@@ -172,7 +197,7 @@ export default Vue.extend({
   },
   methods: {
     close: function(){
-      this.$bvModal.hide('userEditModal');
+      this.$emit('update:visible', false);
     },
     save: function(event){
       event.preventDefault();
@@ -216,5 +241,5 @@ export default Vue.extend({
       license: license
     };
   }
-})
+}
 </script>

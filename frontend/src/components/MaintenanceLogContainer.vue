@@ -6,15 +6,14 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import MaintenanceLogForm from '@/components/MaintenanceLogForm';
 import MaintenanceLogList from '@/components/MaintenanceLogList';
 
-export default Vue.extend({
+export default {
   name: "MaintenanceLogContainer",
   components: {
     MaintenanceLogForm,
     MaintenanceLogList
   }
-})
+}
 </script>

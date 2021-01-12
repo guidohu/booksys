@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="userInfo != null && userInfo.user_role_name == 'admin' && getDbUpdateStatus != null && getDbUpdateStatus.updateAvailable == true">
-      <DatabaseUpdateModal/>
+      <database-update-modal/>
     </div>
     <div v-if="isDesktop" class="display">
       <header v-if="userInfo!=null" class="welcome">
@@ -23,7 +23,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import DashboardAdmin from '../components/DashboardAdmin';
@@ -34,8 +33,9 @@ import DashboardMemberMobile from '../components/DashboardMemberMobile';
 import DashboardGuestMobile from '../components/DashboardGuestMobile';
 import DatabaseUpdateModal from '../components/DatabaseUpdate';
 import moment from 'moment-timezone';
+import { BLink } from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'Dashboard',
   components: {
     DashboardAdmin,
@@ -45,11 +45,15 @@ export default Vue.extend({
     DashboardMemberMobile,
     DashboardGuestMobile,
     DatabaseUpdateModal,
+    BLink
   },
   computed: {
     ...mapGetters('login', [
       'userInfo',
       'role'
+    ]),
+    ...mapGetters('loginStatus', [
+      'isLoggedIn'
     ]),
     ...mapGetters('sessions', [
       'getSessions'
@@ -64,7 +68,15 @@ export default Vue.extend({
       return !BooksysBrowser.isMobile()
     }
   },
+  watch: {
+    role: function(){
+      this.dbUpdateCheck();
+    }
+  },
   methods: {
+    ...mapActions('login', [
+      'getUserInfo',
+    ]),
     ...mapActions('sessions', [
       'querySessions'
     ]),
@@ -73,17 +85,33 @@ export default Vue.extend({
     ]),
     getTimeZone: function() {
       return "Europe/Berlin";
+    },
+    dbUpdateCheck() {
+      if(this.role == "admin"){
+        this.queryDbUpdateStatus()
+      }
+    },
+    getSessionInfo() {
+      const dateStart = moment().tz(this.getTimeZone()).startOf('day');
+      const dateEnd   = moment().tz(this.getTimeZone()).endOf('day');
+      console.log("Query sessions from", dateStart, "to", dateEnd);
+      this.querySessions({start: dateStart, end: dateEnd});
     }
   },
   created() {
-    var dateStart = moment().tz(this.getTimeZone()).startOf('day');
-    var dateEnd   = moment().tz(this.getTimeZone()).endOf('day');
-    console.log("Query sessions from", dateStart, "to", dateEnd);
-    this.querySessions({start: dateStart, end: dateEnd});
-
-    if(this.role == "admin"){
-      this.queryDbUpdateStatus()
-    }
+    // load user info into store
+    this.getUserInfo()
+    .then(() => {
+      console.log("got user info");
+      this.dbUpdateCheck();
+      this.getSessionInfo();
+    })
+    .catch((errors) => {
+      console.log("Cannot get user info (probably not logged in)");
+      if(errors[0] == "login required"){
+        this.$router.push("/login");
+      }
+    })
   }
-})
+}
 </script>

@@ -1,14 +1,6 @@
 <template>
 <div v-if="isDesktop" class="display">
-  <b-row>
-    <b-col>
-      <div class="main-title">
-        <h3>
-          Schedule
-        </h3>
-      </div>
-    </b-col>
-  </b-row>
+  <main-title title-name="Schedule"/>
   <b-row class="ml-1 mr-1">
     <b-col>
       <div class="accordion" role="tablist">
@@ -18,7 +10,7 @@
           </b-card-header>
           <b-collapse id="accordion-1" accordion="my-accordion" role="tabpanel">
             <b-card-body>
-              <UserSessionsTable v-if="pastSessions.length > 0" :userSessions="pastSessions"/>
+              <UserSessionsTable v-if="pastSessions != null && pastSessions.length > 0" :userSessions="pastSessions"/>
               <b-card-text v-else class="text-center">No sessions to display</b-card-text>
             </b-card-body>
           </b-collapse>
@@ -30,7 +22,7 @@
           </b-card-header>
           <b-collapse id="accordion-2" visible accordion="my-accordion" role="tabpanel">
             <b-card-body>
-              <UserSessionsTable v-if="upcomingSessions.length > 0" :userSessions="upcomingSessions" :showCancel="true" @cancel="cancelSessionHandler"/>
+              <UserSessionsTable v-if="upcomingSessions != null && upcomingSessions.length > 0" :userSessions="upcomingSessions" :showCancel="true" @cancel="cancelSessionHandler"/>
               <b-card-text v-else class="text-center">No sessions to display</b-card-text>
             </b-card-body>
           </b-collapse>
@@ -53,11 +45,11 @@
         <b-col>
           <b-tabs content-class="mt-3 text-left">
             <b-tab title="Upcoming Sessions" active>
-              <UserSessionsTable v-if="upcomingSessions.length > 0" :userSessions="upcomingSessions" :showCancel="true" @cancel="cancelSessionHandler"/>
+              <UserSessionsTable v-if="upcomingSessions != null && upcomingSessions.length > 0" :userSessions="upcomingSessions" :showCancel="true" @cancel="cancelSessionHandler"/>
               <div v-else class="text-center">No sessions to display</div>
             </b-tab>
             <b-tab title="Past Sessions">
-              <UserSessionsTable v-if="pastSessions.length > 0" :userSessions="pastSessions"/>
+              <UserSessionsTable v-if="pastSessions != null && pastSessions.length > 0" :userSessions="pastSessions"/>
               <div v-else class="text-center">No sessions to display</div>
             </b-tab>
           </b-tabs>
@@ -69,18 +61,47 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarMobile from '@/components/NavbarMobile';
 import UserSessionsTable from '@/components/UserSessionsTable';
+import MainTitle from '@/components/MainTitle';
+import {
+  BRow,
+  BCol,
+  BCard,
+  BCardHeader,
+  BCollapse,
+  BCardBody,
+  BCardText,
+  BButton,
+  BIconHouse,
+  BTabs,
+  BTab,
+  VBToggle
+} from 'bootstrap-vue';
 
 
-export default Vue.extend({
+export default {
   name: 'Schedule',
   components: {
     NavbarMobile,
-    UserSessionsTable
+    MainTitle,
+    UserSessionsTable,
+    BRow,
+    BCol,
+    BCard,
+    BCardHeader,
+    BCollapse,
+    BCardBody,
+    BCardText,
+    BButton,
+    BIconHouse,
+    BTabs,
+    BTab
+  },
+  directives: {
+    'b-toggle': VBToggle
   },
   computed: {
     isDesktop: function() {
@@ -116,7 +137,7 @@ export default Vue.extend({
         console.error(error)
       })
   }
-})
+}
 </script>
 
 <style scoped>

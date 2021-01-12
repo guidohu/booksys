@@ -1,7 +1,11 @@
 <template>
   <b-modal
     id="sessionDeleteModal"
+    ref="sessionDeleteModal"
     title="Delete Session"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -21,11 +25,11 @@
     </b-form>
     <div slot="modal-footer">
       <b-button type="button" variant="outline-info" v-on:click="confirm">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Delete
       </b-button>
       <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
     </div>
@@ -33,17 +37,33 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BForm,
+  BButton,
+  BIconCheck,
+  BIconX
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'SessionDeleteModal',
   components: {
-    WarningBox
+    WarningBox,
+    BModal,
+    BRow,
+    BCol,
+    BForm,
+    BButton,
+    BIconCheck,
+    BIconX
   },
   props: [
-    'session'
+    'session',
+    'visible'
   ],
   data(){
     return {
@@ -70,8 +90,8 @@ export default Vue.extend({
     },
     close: function(){
       this.errors = [];
-      this.$bvModal.hide('sessionDeleteModal', this.session);
+      this.$emit('update:visible', false);
     }
   }
-})
+}
 </script>

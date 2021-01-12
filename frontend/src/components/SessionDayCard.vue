@@ -4,7 +4,7 @@
       <b-row>
         <b-col cols="4" class="text-right">
           <b-button v-if="!disableDayBrowsing" variant="outline-info" class="btn-xs" v-on:click="prevDay">
-            <b-icon icon="arrow-left-short"></b-icon>
+            <b-icon-arrow-left-short/>
           </b-button>
         </b-col>
         <b-col cols="4" class="text-center">
@@ -12,7 +12,7 @@
         </b-col>
         <b-col cols="4" class="text-left">
           <b-button v-if="!disableDayBrowsing" variant="outline-info" class="btn-xs" v-on:click="nextDay">
-            <b-icon icon="arrow-right-short"></b-icon>
+            <b-icon-arrow-right-short/>
           </b-button>
         </b-col>
       </b-row>
@@ -35,12 +35,21 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import Pie from "./Pie.vue";
 import moment from 'moment-timezone';
+import {
+  BCard,
+  BCardHeader,
+  BRow,
+  BCol,
+  BButton,
+  BIconArrowLeftShort,
+  BIconArrowRightShort,
+  BCardBody
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'SessionDayCard',
   data() {
     return {
@@ -88,7 +97,15 @@ export default Vue.extend({
     }
   },
   components: {
-    Pie
+    Pie,
+    BCard,
+    BCardHeader,
+    BRow,
+    BCol,
+    BButton,
+    BIconArrowLeftShort,
+    BIconArrowRightShort,
+    BCardBody
   },
   props: ['isMobile', 'sessionData', 'selectedSession', 'timezone', 'disableDayBrowsing'],
   created() {
@@ -109,7 +126,7 @@ export default Vue.extend({
       this.properties.timezone = "UTC";
     }
   }
-})
+}
 </script>
 
 <style scoped>

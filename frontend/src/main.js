@@ -3,25 +3,25 @@ import App from "./App.vue";
 import "./registerServiceWorker";
 import router from "./router";
 import store from "./store";
-import { BootstrapVue, IconsPlugin } from 'bootstrap-vue';
+
+// Bootstrap
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
 
-Vue.config.productionTip = false;
-
-// Install BootstrapVue
-Vue.use(BootstrapVue)
-Vue.use(IconsPlugin)
+// Vue.config.productionTip = true;
+// Vue.config.performance = true;
 
 // Override bootstrap styling
-import "./assets/bootstrap/css/bootstrap-theme-bc.css";
-import "./assets/css/style.css";
+import '@/assets/bootstrap/css/bootstrap-theme-bc.css';
+import '@/assets/css/style.css';
+
+// Deactivate normal logging in production
+if(process.env.NODE_ENV === 'production'){
+  console.log = function () {};
+}
 
 new Vue({
   router,
   store,
-  render: h => h(App),
-  beforeCreate() {
-    this.$store.dispatch('initialize');
-  }
+  render: h => h(App)
 }).$mount("#app");

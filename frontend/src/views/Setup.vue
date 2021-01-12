@@ -1,6 +1,7 @@
 <template>
   <b-modal
     id="setupModal"
+    ref="setupModal"
     :title="title"
     no-close-on-backdrop
     no-close-on-esc
@@ -43,7 +44,7 @@
         <b-col cols="1" class="d-none d-sm-block"></b-col>
         <b-col cols="12" sm="10">
           <p class="h4 mb-2">
-            <b-icon icon="check-circle" variant="success"/>
+            <b-icon-check-circle variant="success"/>
             Setup Done.
           </p>
           <p>
@@ -56,19 +57,19 @@
     <!-- Footer -->
     <div slot="modal-footer">
       <b-button v-if="showDbSetup || showUserSetup" class="mr-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
       <b-button v-if="showDbSetup" type="button" variant="outline-info" v-on:click="setDbSettings" :disabled="isLoading">
-        <b-icon icon="arrow-right"/>
+        <b-icon-arrow-right/>
         Next
       </b-button>
       <b-button v-if="showUserSetup" type="button" variant="outline-info" v-on:click="addAdminUser" :disabled="isLoading">
-        <b-icon icon="arrow-right"/>
+        <b-icon-arrow-right/>
         Next
       </b-button>
       <b-button v-if="showSetupDone" class="mr-1" type="button" variant="outline-info" v-on:click="close">
-        <b-icon icon="check"/>
+        <b-icon-check/>
         Done
       </b-button>
     </div>
@@ -76,20 +77,42 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import Backend from '@/api/backend';
-import { Configuration } from '@/api/configuration';
-import DatabaseConfiguration from '@/components/DatabaseConfiguration';
+import Configuration from '@/api/configuration';
 import User from '@/api/user';
-import WarningBox from '@/components/WarningBox';
-import UserSignUp from '@/components/forms/UserSignUp';
 
-export default Vue.extend({
+// Lazy loaded components
+const DatabaseConfiguration = () => import('@/components/DatabaseConfiguration');
+const UserSignUp = () => import('@/components/forms/UserSignUp');
+const WarningBox = () => import('@/components/WarningBox');
+
+import {
+  BModal,
+  BOverlay,
+  BRow,
+  BCol,
+  BIconCheckCircle,
+  BIconX,
+  BIconArrowRight,
+  BIconCheck,
+  BButton
+} from 'bootstrap-vue';
+
+export default {
   name: "Setup",
   components: {
     DatabaseConfiguration,
     WarningBox,
-    UserSignUp
+    UserSignUp,
+    BModal,
+    BOverlay,
+    BRow,
+    BCol,
+    BIconCheckCircle,
+    BIconX,
+    BIconArrowRight,
+    BIconCheck,
+    BButton
   },
   data(){
     return {
@@ -112,10 +135,6 @@ export default Vue.extend({
 
       Configuration.setDbConfig(this.dbConfig)
       .then(() => {
-        // this.showDbSetup = false;
-        // this.showUserSetup = true;
-        // this.title = this.userSetupTitle;
-        // this.errors = [];
         this.isLoading = false;
         this.getBackendStatus();
       })
@@ -125,8 +144,6 @@ export default Vue.extend({
       });
     },
     addAdminUser: function(){
-      console.log("addAdminUser called");
-      
       // check for obvious validation errors
       const errors = this.validateAdminUser();
       if(errors.length > 0){
@@ -139,7 +156,6 @@ export default Vue.extend({
       User.signUp(this.adminUserConfig)
       .then((user) => {
         this.errors = [];
-        console.log("userCreated:", user);
         this.makeUserAdmin(user.user_id)
       })
       .catch((errors) => {
@@ -163,7 +179,7 @@ export default Vue.extend({
       });
     },
     close: function() {
-      this.$bvModal.hide("setupModal");
+      this.$refs['setupModal'].hide();
       this.$router.push("/login");
     },
     validateAdminUser: function() {
@@ -242,5 +258,5 @@ export default Vue.extend({
     this.getBackendStatus();
   }
 
-})
+}
 </script>

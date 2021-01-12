@@ -9,7 +9,7 @@
         <b-navbar-nav>
           <b-nav-item href="#">
             <router-link to="/logout">
-              <b-icon icon="box-arrow-right"></b-icon>
+              <b-icon-box-arrow-right/>
               Logout
             </router-link>
           </b-nav-item>
@@ -34,11 +34,32 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
+import {
+  BNavbar,
+  BNavbarBrand,
+  BNavbarToggle,
+  BCollapse,
+  BNavbarNav,
+  BNavItem,
+  BIconBoxArrowRight,
+  BRow,
+  BCol,
+  BButton
+} from "bootstrap-vue";
 
-export default Vue.extend({
-  name: "DashboardGuestMobile"
-})
+export default {
+  name: "DashboardGuestMobile",
+  components: {
+    BNavbar,
+    BNavbarBrand,
+    BNavbarToggle,
+    BCollapse,
+    BNavbarNav,
+    BNavItem,
+    BIconBoxArrowRight,
+    BRow,
+    BCol,
+    BButton
+  },
+}
 </script>

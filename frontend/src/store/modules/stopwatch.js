@@ -1,7 +1,7 @@
-import moment from 'moment';
 import { sprintf } from 'sprintf-js';
-import _ from 'lodash';
-import Heat from '@/api/heat';
+import { keys } from 'lodash';
+import Heat from'@/api/heat';
+import moment from 'moment';
 
 const state = () => ({
   sessionId: null,
@@ -36,15 +36,12 @@ const getters = {
 
 const actions = {
   init: ({ commit, state, dispatch }) => {
-    console.log("Before initState");
     commit('initState');
 
     // Start watch again
     if(state._isDisplayUpdaterActive){
-      console.log("Display updater was active:", state._isDisplayUpdaterActive, dispatch);
       dispatch('displayTimeUpdate');
     }
-    console.log("After initState");
   },
   startTakingTime: ({ dispatch, commit, state }) => {
     console.log('startTakingTime called');
@@ -108,7 +105,7 @@ const actions = {
           console.log(response);
 
           // check if the heat that was just added, was added successfully
-          const allUids = _.keys(response);
+          const allUids = keys(response);
           const failedHeatUids = allUids.filter(id => response[id].ok != true);
           if(failedHeatUids.length != 0){
             dispatch('heats/queryHeatsForSession', state.sessionId, { root: true});

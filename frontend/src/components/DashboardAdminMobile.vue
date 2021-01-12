@@ -9,13 +9,13 @@
         <b-navbar-nav>
           <b-nav-item href="#">
             <router-link to="/account">
-              <b-icon icon="person"></b-icon>
+              <b-icon-person/>
               Account
               </router-link>
             </b-nav-item>
           <b-nav-item href="#">
             <router-link to="/logout">
-              <b-icon icon="box-arrow-right"></b-icon>
+              <b-icon-box-arrow-right/>
               Logout
             </router-link>
           </b-nav-item>
@@ -88,12 +88,22 @@
 </template>
 
 <script>
-import Vue from 'vue';
-import 'bootstrap/dist/css/bootstrap.css';
-import 'bootstrap-vue/dist/bootstrap-vue.css';
 import Pie from "./Pie.vue";
+import {
+  BNavbar,
+  BNavbarBrand,
+  BNavbarToggle,
+  BCollapse,
+  BNavbarNav,
+  BNavItem,
+  BIconPerson,
+  BIconBoxArrowRight,
+  BRow,
+  BCol,
+  BButton
+} from "bootstrap-vue";
 
-export default Vue.extend({
+export default {
   name: "DashboardAdminMobile",
   data() {
     return {
@@ -105,8 +115,19 @@ export default Vue.extend({
     }
   },
   components: {
-    Pie
+    Pie,
+    BNavbar,
+    BNavbarBrand,
+    BNavbarToggle,
+    BCollapse,
+    BNavbarNav,
+    BNavItem,
+    BIconPerson,
+    BIconBoxArrowRight,
+    BRow,
+    BCol,
+    BButton
   },
   props: ['sessionData']
-})
+}
 </script>

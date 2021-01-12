@@ -130,7 +130,7 @@
         <b-col cols="1" class="d-none d-sm-block"></b-col>
         <b-col cols="12" sm="10">
           <p class="h4 mb-2">
-          <b-icon icon="check-circle" variant="success"/>
+          <b-icon-check-circle variant="success"/>
           <br/>
           Password has been changed successfully.
           </p>
@@ -150,23 +150,23 @@
     </b-row>
     <div slot="modal-footer">
       <b-button v-if="showEmailDialog" class="mr-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
       <b-button v-if="showEmailDialog" type="button" variant="outline-info" v-on:click="requestToken" :disabled="isLoading">
-        <b-icon icon="arrow-right"/>
+        <b-icon-arrow-right/>
         Next
       </b-button>   
       <b-button v-if="showTokenDialog" class="mr-1" type="button" variant="outline-danger" v-on:click="showEmail">
-        <b-icon icon="arrow-left"/>
+        <b-icon-arrow-left/>
         Back
       </b-button>
       <b-button v-if="showTokenDialog" type="button" variant="outline-info" v-on:click="setPassword" :disabled="isLoading">
-        <b-icon icon="check"/>
+        <b-icon-check/>
         Set Password
       </b-button>
       <b-button v-if="showSuccessInfo" type="button" variant="outline-info" v-on:click="close">
-        <b-icon icon="check"/>
+        <b-icon-check/>
         Done
       </b-button>
     </div>
@@ -174,17 +174,45 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import VueRecaptcha from 'vue-recaptcha';
 import User from '@/api/user';
 import WarningBox from '@/components/WarningBox';
+import {
+  BModal,
+  BOverlay,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BButton,
+  BIconCheckCircle,
+  BIconX,
+  BIconArrowRight,
+  BIconArrowLeft,
+  BIconCheck,
 
-export default Vue.extend({
+} from 'bootstrap-vue';
+
+export default {
   name: "PasswordReset",
   components: {
     VueRecaptcha,
-    WarningBox
+    WarningBox,
+    BModal,
+    BOverlay,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BFormInput,
+    BButton,
+    BIconCheckCircle,
+    BIconX,
+    BIconArrowRight,
+    BIconArrowLeft,
+    BIconCheck,
   },
   data() {
     return {
@@ -302,5 +330,5 @@ export default Vue.extend({
   created() {
     this.queryRecaptchaKey();
   }
-})
+}
 </script>

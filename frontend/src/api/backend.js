@@ -1,7 +1,6 @@
 export default class Backend {
 
   static getStatus() {
-    console.log("backend/getStatus called");
     return new Promise((resolve, reject) => {
       fetch('/api/backend.php?action=get_status', {
         method: "GET",
@@ -11,9 +10,9 @@ export default class Backend {
         response.json()
           .then(data => {
             if(data.ok){
-              console.log("backend/getStatus response data:", data);
               resolve(data.data);
             }else{
+              console.error("backend/getStatus: Status is not ok", data);
               reject([data.msg]);
             }
           })

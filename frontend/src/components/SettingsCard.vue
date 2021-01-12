@@ -282,11 +282,11 @@
         <b-row class="text-right">
           <b-col cols="9" offset="3">
             <b-button class="mr-2" variant="outline-danger" to="/admin">
-              <b-icon icon="x"/>
+              <b-icon-x/>
               Cancel
             </b-button>
             <b-button variant="outline-info" v-on:click="save">
-              <b-icon icon="check"/>
+              <b-icon-check/>
               Save
             </b-button>
           </b-col>
@@ -296,14 +296,43 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
+import {
+  BCard,
+  BCardBody,
+  BCardFooter,
+  BForm,
+  BAlert,
+  BFormGroup,
+  BInputGroup,
+  BFormInput,
+  BFormTextarea,
+  BRow,
+  BCol,
+  BButton,
+  BIconX,
+  BIconCheck  
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "SettingsCard",
   components: {
-    WarningBox
+    WarningBox,
+    BCard,
+    BCardBody,
+    BCardFooter,
+    BForm,
+    BAlert,
+    BFormGroup,
+    BInputGroup,
+    BFormInput,
+    BFormTextarea,
+    BRow,
+    BCol,
+    BButton,
+    BIconX,
+    BIconCheck
   },
   data() {
     return {
@@ -398,7 +427,7 @@ export default Vue.extend({
   mounted() {
     this.setFormDefaults(this.getConfiguration)
   }
-})
+}
 </script>
 
 <style>

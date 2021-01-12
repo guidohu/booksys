@@ -1,7 +1,11 @@
 <template>
   <b-modal
     id="sessionEditorModal"
+    ref="sessionEditorModal"
     :title="title"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -118,15 +122,15 @@
     </b-form>
     <div slot="modal-footer">
       <b-button v-if="form.id==null" type="button" variant="outline-info" v-on:click="save">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Create
       </b-button>
       <b-button v-if="form.id!=null" type="button" variant="outline-info" v-on:click="save">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Save
       </b-button>
       <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
     </div>
@@ -134,20 +138,43 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import Session, { SESSION_TYPE_OPEN, SESSION_TYPE_PRIVATE } from '@/dataTypes/session';
 import moment from 'moment';
 import 'moment-timezone';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BFormTextarea,
+  BFormCheckbox,
+  BButton,
+  BIconCheck,
+  BIconX
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'SessionEditorModal',
   components: {
-    WarningBox
+    WarningBox,
+    BModal,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BFormInput,
+    BFormTextarea,
+    BFormCheckbox,
+    BButton,
+    BIconCheck,
+    BIconX
   },
   props: [
-    'defaultValues'
+    'defaultValues', 'visible'
   ],
   data(){
     return {
@@ -240,7 +267,7 @@ export default Vue.extend({
     },
     close: function(){
       this.errors = [];
-      this.$bvModal.hide('sessionEditorModal');
+      this.$emit('update:visible', false);
     },
     setFormContent: function(){
       console.log("SessionEditorModal: Set defaults to:", this.defaultValues);
@@ -303,7 +330,7 @@ export default Vue.extend({
       this.setFormContent();
     }
   }
-})
+}
 </script>
 
 <style scoped>

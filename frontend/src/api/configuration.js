@@ -1,4 +1,4 @@
-export class Configuration {
+export default class Configuration {
 
   /**
    * Returns the recaptcha key.

@@ -2,7 +2,10 @@
   <b-tabs content-class="mt-3">
     <b-tab active>
       <div slot="title">
-        <p class="h6 mt-2 mb-2"><b-icon icon="cash-stack" class="mr-1"></b-icon>Payments</p>
+        <p class="h6 mt-2 mb-2">
+          <b-icon-cash-stack class="mr-1"/>
+          Payments
+        </p>
       </div>
       <div :class="tabClass">
         <PaymentTable/>
@@ -10,7 +13,10 @@
     </b-tab>
     <b-tab>
       <div slot="title">
-        <p class="h6 mt-2 mb-2"><b-icon icon="kanban" rotate="180" class="mr-1"/>Statistics</p>
+        <p class="h6 mt-2 mb-2">
+          <b-icon-kanban rotate="180" class="mr-1"/>
+          Statistics
+        </p>
       </div>
       <div :class="tabClass">
         <PaymentStatistics/>
@@ -20,16 +26,25 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import PaymentTable from '@/components/PaymentTable';
 import PaymentStatistics from '@/components/PaymentStatistics';
+import {
+  BTabs,
+  BTab,
+  BIconKanban,
+  BIconCashStack
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'AccountingTabs',
   components: {
     PaymentStatistics,
-    PaymentTable
+    PaymentTable,
+    BTabs,
+    BTab,
+    BIconKanban,
+    BIconCashStack
   },
   computed: {
     isDesktop: function () {
@@ -43,7 +58,7 @@ export default Vue.extend({
       }
     }
   }
-})
+}
 </script>
 
 <style scoped>

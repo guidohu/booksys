@@ -1,15 +1,7 @@
 <template>
 
 <div v-if="isDesktop" class="display">
-  <b-row>
-    <b-col>
-      <div class="main-title">
-        <h3>
-          Account
-        </h3>
-      </div>
-    </b-col>
-  </b-row>
+  <main-title title-name="Account"/>
   <b-row class="ml-1 mr-1">
     <b-col cols="12">
       <UserProfileCard/>
@@ -27,7 +19,7 @@
   </b-row>
   <div class="bottom mr-2">
     <b-button variant="outline-light" to="/dashboard">
-      <b-icon-house></b-icon-house>
+      <b-icon-house/>
       HOME
     </b-button>
   </div>
@@ -41,21 +33,32 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import { mapActions, mapGetters } from 'vuex'
-import { BooksysBrowser } from '@/libs/browser'
-import NavbarMobile from '@/components/NavbarMobile'
-import UserProfileCard from '@/components/UserProfileCard'
-import UserStatisticsCard from '@/components/UserStatisticsCard'
-import UserBalanceCard from '@/components/UserBalanceCard'
+import { mapActions, mapGetters } from 'vuex';
+import { BooksysBrowser } from '@/libs/browser';
+import NavbarMobile from '@/components/NavbarMobile';
+import UserProfileCard from '@/components/UserProfileCard';
+import UserStatisticsCard from '@/components/UserStatisticsCard';
+import UserBalanceCard from '@/components/UserBalanceCard';
+import MainTitle from '@/components/MainTitle';
+import {
+  BRow,
+  BCol,
+  BButton,
+  BIconHouse
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'Account',
   components: {
     NavbarMobile,
+    MainTitle,
     UserProfileCard,
     UserStatisticsCard,
-    UserBalanceCard
+    UserBalanceCard,
+    BRow,
+    BCol,
+    BButton,
+    BIconHouse
   },
   computed: {
     ...mapGetters('configuration', [
@@ -99,7 +102,7 @@ export default Vue.extend({
     this.queryConfiguration();
     this.queryHeatHistory();
   }
-})
+}
 </script>
 
 <style>

@@ -50,14 +50,35 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import WarningBox from '@/components/WarningBox';
+import {
+  BContainer,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BInputGroup,
+  BFormInput,
+  BInputGroupPrepend,
+  BFormTextarea,
+  BButton
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: "MaintenanceLogForm",
   components: {
-    WarningBox
+    WarningBox,
+    BContainer,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BInputGroup,
+    BFormInput,
+    BInputGroupPrepend,
+    BFormTextarea,
+    BButton
   },
   data() {
     return {
@@ -97,5 +118,5 @@ export default Vue.extend({
       'addMaintenanceEntry'
     ])
   }
-})
+}
 </script>

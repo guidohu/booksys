@@ -1,5 +1,5 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+// const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   // assetsDir: 'assets',
@@ -20,7 +20,8 @@ module.exports = {
   //   // Extracted general chunks and vendor chunk s.
   //   chunks: ['chunk-vendos', 'chunk-common', 'index'],
   // },
-  // configureWebpack: {
+  configureWebpack: {
+    mode: "production",
   //   entry: "./src/main.js",
   //   output: {
   //     filename: 'bundle.js'
@@ -29,7 +30,70 @@ module.exports = {
   //     template: './public/index.html',
   //     title: "Booking System"
   //   })]
-  // }
+    // plugins: [
+    //   new BundleAnalyzerPlugin()
+    // ],
+    // plugins: [
+    //   new MiniCssExtractPlugin()
+    // ],
+    // module: {
+    //   rules: [
+    //     {
+    //         test: /\.css$/,
+    //         use: ExtractTextPlugin.extract({
+    //             use: ['css-loader'],
+    //             fallback: 'style-loader'
+    //         })
+    //     },
+    //     {
+    //         test: /\.scss$/,
+    //         use: ExtractTextPlugin.extract({
+    //             use: ['css-loader', 'sass-loader' ],
+    //             fallback: 'style-loader'
+    //         })
+    //     }
+    //   ]
+    // },
+    // plugins: [
+    //     new ExtractTextPlugin(cssOutput),
+    //     new PurgecssPlugin({
+    //         paths: glob.sync('./Views/**/*.cshtml', { nodir: true }),
+    //         whitelistPatterns: [ /selectize-.*/ ]
+    //     })
+    // ],
+    // module: {
+    //   rules: [
+    //     {
+    //       test: /\.css$/i,
+    //       use: [MiniCssExtractPlugin.loader, 'css-loader']
+    //     }
+    //   ]
+    // },
+    optimization: {
+      splitChunks: {
+        chunks: 'all'
+  //     minSize: 10000,
+  //     maxSize: 250000
+        // cacheGroups: {
+        //   vendor: {
+        //     name: "node_vendors", // part of the bundle name and
+        //     // can be used in chunks array of HtmlWebpackPlugin
+        //     test: /[\\/]node_modules[\\/]/,
+        //     chunks: "initial",
+        //   },
+        //   common: {
+        //     test: /[\\/]src[\\/]components[\\/]/,
+        //     chunks: "all",
+        //     minSize: 0,
+        //   },
+        // }
+      },
+      // minimize: true,
+      // minimizer: [
+      //   new CssMinimizerPlugin()
+      // ]
+    }
+  },
   chainWebpack: config => {
     config
       .plugin('html')

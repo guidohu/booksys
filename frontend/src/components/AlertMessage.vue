@@ -1,16 +1,23 @@
 <template>
-  <div class="alert alert-danger">
-    {{ alertMessage }}
-  </div>
+  <b-card>
+    <b-alert show variant="danger">
+      {{ alertMessage }}
+    </b-alert>
+  </b-card>
 </template>
 
 <script>
-import Vue from 'vue'
+import {
+  BCard,
+  BAlert
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'AlertMessage',
   components: {
+    BCard,
+    BAlert
   },
   props: ['alertMessage']
-})
+}
 </script>

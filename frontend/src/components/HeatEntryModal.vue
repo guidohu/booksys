@@ -2,6 +2,9 @@
   <b-modal
     id="heatEntryModal"
     title="Heat Entry"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -125,17 +128,17 @@
     <div slot="modal-footer">
       <div class="text-left d-inline">
         <b-button class="mr-1" type="button" variant="outline-danger" v-on:click="remove">
-          <b-icon-trash></b-icon-trash>
+          <b-icon-trash/>
           Delete
         </b-button>
       </div>
       <div class="text-right d-inline">
         <b-button class="ml-4" type="button" variant="outline-info" v-on:click="save">
-          <b-icon-check></b-icon-check>
+          <b-icon-check/>
           Save
         </b-button>
         <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-          <b-icon-x></b-icon-x>
+          <b-icon-x/>
           Cancel
         </b-button>
       </div>
@@ -144,18 +147,45 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import moment from 'moment';
 import { sprintf } from 'sprintf-js';
 import WarningBox from '@/components/WarningBox';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BInputGroup,
+  BInputGroupAppend,
+  BFormTextarea,
+  BButton,
+  BIconTrash,
+  BIconCheck,
+  BIconX
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'HeatEntryModal',
   components: {
-    WarningBox
+    WarningBox,
+    BModal,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BFormInput,
+    BInputGroup,
+    BInputGroupAppend,
+    BFormTextarea,
+    BButton,
+    BIconTrash,
+    BIconCheck,
+    BIconX
   },
-  props: [ 'heat' ],
+  props: [ 'heat', 'visible' ],
   data() {
     return {
       errors: [],
@@ -207,7 +237,7 @@ export default Vue.extend({
       }
     },
     close: function() {
-      this.$bvModal.hide("heatEntryModal");
+      this.$emit('update:visible', false);
     },
     remove: function() {
       this.removeHeat(this.form.id)
@@ -255,5 +285,5 @@ export default Vue.extend({
       this.setFormDefaults(this.heat);
     }
   }
-})
+}
 </script>

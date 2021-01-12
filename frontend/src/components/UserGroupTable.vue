@@ -5,23 +5,24 @@
       <UserGroupModal
         :userGroup="selectedItems[0]"
         :editMode="userGroupEditMode"
+        :visible.sync="showUserGroupModal"
       />
       <b-row>
         <b-col cols="12">
           <b-button v-on:click="newGroup" size="sm" variant="outline-info" class="mr-1 mb-2">
-            <b-icon icon="plus"/>
+            <b-icon-plus/>
             New
           </b-button>
           <b-button v-if="selectedItems.length>0" v-on:click="showDetails" size="sm" variant="outline-info" class="mr-1 mb-2">
-            <b-icon icon="eye"/>
+            <b-icon-eye/>
             View
           </b-button>
           <b-button v-if="selectedItems.length>0" v-on:click="editGroup" size="sm" variant="outline-info" class="mr-1 mb-2">
-            <b-icon icon="pencil"/>
+            <b-icon-pencil/>
             Edit
           </b-button>
           <b-button v-if="selectedItems.length>0" v-on:click="showDeleteUserGroupDialog" size="sm" variant="outline-danger" class="mb-2">
-            <b-icon icon="trash"/>
+            <b-icon-trash/>
             Delete
           </b-button>
         </b-col>
@@ -55,12 +56,33 @@ import { mapGetters, mapActions } from 'vuex';
 import { sprintf } from 'sprintf-js';
 import WarningBox from '@/components/WarningBox';
 import UserGroupModal from '@/components/UserGroupModal';
+import {
+  BRow,
+  BButton,
+  BIconPlus,
+  BIconEye,
+  BIconPencil,
+  BIconTrash,
+  BCol,
+  BTable,
+  ModalPlugin
+} from "bootstrap-vue";
 
-export default Vue.extend({
+Vue.use(ModalPlugin);
+
+export default {
   name: 'UserGroupTable',
   components: {
     WarningBox,
-    UserGroupModal
+    UserGroupModal,
+    BRow,
+    BButton,
+    BIconPlus,
+    BIconEye,
+    BIconPencil,
+    BIconTrash,
+    BCol,
+    BTable
   },
   data() {
     return {
@@ -88,7 +110,8 @@ export default Vue.extend({
           formatter: (value) => { return sprintf("%.2f", value) }
         }
       ],
-      userGroupEditMode: false
+      userGroupEditMode: false,
+      showUserGroupModal: false
     };
   },
   computed: {
@@ -179,18 +202,16 @@ export default Vue.extend({
     },
     showDetails: function() {
       this.userGroupEditMode = false;
-      this.$bvModal.show('userGroupModal');
+      this.showUserGroupModal = true;
     },
     editGroup: function() {
-      console.log("TODO implement editGroup");
       this.userGroupEditMode = true;
-      this.$bvModal.show('userGroupModal');
+      this.showUserGroupModal = true;
     },
     newGroup: function() {
-      console.log("TODO implement newGroup");
       this.userGroupEditMode = true;
       this.selectedItems = [];
-      this.$bvModal.show('userGroupModal');
+      this.showUserGroupModal = true;
     }
   },
   created() {
@@ -201,7 +222,7 @@ export default Vue.extend({
     .then(() => this.setRows())
     .catch((errors) => this.errors.push(...errors));
   }
-})
+}
 </script>
 
 <style scoped>

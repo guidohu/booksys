@@ -2,6 +2,7 @@
   <b-modal 
     id="view_database_update_modal"
     title='Database Update'
+    :visible="visible"
   >
     <div v-if="getDbVersionInfo == null" class="text-center">
       <b-spinner variant="primary" label="Spinning"></b-spinner>
@@ -66,19 +67,19 @@
     </div>
     <div v-if="getDbVersionInfo != null" slot="modal-footer">
       <b-button type="button" variant="outline-info" v-on:click="updateDb" v-if="getDbVersionInfo.isUpdated == false && getDbIsUpdating == false">
-        <b-icon-arrow-repeat></b-icon-arrow-repeat>
+        <b-icon-arrow-repeat/>
         Update
       </b-button>
       <b-button type="button" variant="outline-secondary" disabled v-if="getDbVersionInfo.isUpdated == false && getDbIsUpdating == true">
-        <b-icon-hourglass-split></b-icon-hourglass-split>
+        <b-icon-hourglass-split/>
         Updating
       </b-button>
       <b-button type="button" variant="outline-success" v-on:click="cancel" v-if="getDbVersionInfo.isUpdated == true && getDbIsUpdating == false">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Done
       </b-button>
       <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="cancel" v-if="getDbVersionInfo.isUpdated == false && getDbIsUpdating == false">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
     </div>
@@ -86,15 +87,39 @@
 </template>
 
 <script>
-import Vue from 'vue'
 import { mapActions, mapGetters } from 'vuex'
+import {
+  BModal,
+  BSpinner,
+  BRow,
+  BCol,
+  BAlert,
+  BButton,
+  BIconArrowRepeat,
+  BIconHourglassSplit,
+  BIconCheck,
+  BIconX
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'DatabaseUpdateModal',
+  components: {
+    BModal,
+    BSpinner,
+    BRow,
+    BCol,
+    BAlert,
+    BButton,
+    BIconArrowRepeat,
+    BIconHourglassSplit,
+    BIconCheck,
+    BIconX
+  },
   data() {
     return {
       "errors": [],
       dbVersionText: "n/a",
+      visible: false
     }
   },
   watch: {
@@ -109,7 +134,7 @@ export default Vue.extend({
       'updateDb'
     ]),
     cancel: function(){
-      this.$bvModal.hide('view_database_update_modal')
+      this.visible = false;
     },
     getVersionText: function(versionInfo) {
       if(versionInfo == null && this.getDbVersionInfo == null){
@@ -143,7 +168,7 @@ export default Vue.extend({
     .catch((errors) => this.errors = errors);
   },
   mounted() {
-    this.$bvModal.show('view_database_update_modal')
+    this.visible = true;
   }
-})
+}
 </script>

@@ -2,6 +2,9 @@
 <b-modal
     id="riderSelectionModal"
     title="Add Riders"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -42,7 +45,7 @@
             ></b-form-select>
           </b-form-group>
           <b-button v-if="isMobile != true" type="button" variant="outline-success" v-on:click="add" block>
-            <b-icon icon="person-plus"/>{{" "}}Select
+            <b-icon-person-plus/>{{" "}}Select
           </b-button>
           <hr/>
           <b-form-group
@@ -54,8 +57,8 @@
           >
             <ul v-if="usersToAdd.length > 0">
               <li v-for="u in usersToAdd" :key="u.id">
-                {{ u.firstName + " " + u.lastName + " " }}
-                <a href="#" v-on:click="remove(u.id)"><b-icon icon="person-dash"></b-icon></a>
+                {{ u.firstName + " " + u.lastName + "  " }}
+                <a href="#" v-on:click.prevent="remove(u.id)"><b-icon-person-dash/></a>
               </li>
             </ul>
             <ul v-else>
@@ -68,15 +71,15 @@
     </b-form>
     <div slot="modal-footer">
       <b-button v-if="isMobile != true" type="button" variant="outline-info" v-on:click="save">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Add
       </b-button>
       <b-button v-if="isMobile == true" type="button" variant="outline-info" v-on:click="saveMobile">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Add
       </b-button>
       <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
     </div>
@@ -84,20 +87,46 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
-import _ from 'lodash';
+import { uniq } from 'lodash';
 import WarningBox from '@/components/WarningBox';
 import { UserPointer } from '@/dataTypes/user';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BFormSelect,
+  BButton,
+  BIconPersonPlus,
+  BIconPersonDash,
+  BIconCheck,
+  BIconX
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'RiderSelectionModal',
   props: [
-    'session'
+    'session',
+    'visible'
   ],
   components: {
-    WarningBox
+    WarningBox,
+      BModal,
+      BRow,
+      BCol,
+      BForm,
+      BFormGroup,
+      BFormInput,
+      BFormSelect,
+      BButton,
+      BIconPersonPlus,
+      BIconPersonDash,
+      BIconCheck,
+      BIconX
   },
   data() {
     return {
@@ -167,11 +196,11 @@ export default Vue.extend({
       }
 
       // de-duplicate selection
-      this.usersToAdd = _.uniq(this.usersToAdd);
+      this.usersToAdd = uniq(this.usersToAdd);
     },
     remove: function(id){
-      console.log(id);
       this.usersToAdd = this.usersToAdd.filter(u => u.id != id);
+      console.log("Removed user from the selection:", id);
     },
     save: function() {
       console.log(this.session);
@@ -193,7 +222,7 @@ export default Vue.extend({
     },
     close: function() {
       this.usersToAdd = [];
-      this.$bvModal.hide('riderSelectionModal');
+      this.$emit('update:visible', false);
     }
   },
   created() {
@@ -206,5 +235,5 @@ export default Vue.extend({
       this.errors = error;
     });
   }
-})
+}
 </script>

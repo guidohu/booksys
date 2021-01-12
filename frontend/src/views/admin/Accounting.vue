@@ -1,15 +1,7 @@
 <template>
   <div>
     <div v-if="isDesktop" class="display">
-      <b-row>
-        <b-col>
-          <div class="main-title">
-            <h3>
-              Accounting
-            </h3>
-          </div>
-        </b-col>
-      </b-row>
+      <main-title title-name="Accounting"/>
       <b-row class="ml-1 mr-1">
         <b-col cols="12">
           <b-card no-body>
@@ -19,7 +11,7 @@
       </b-row>
       <div class="bottom mr-2">
         <b-button variant="outline-light" to="/admin">
-          <b-icon icon="gear"></b-icon>
+          <b-icon-gear/>
           ADMIN
         </b-button>
       </div>
@@ -34,23 +26,36 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { BooksysBrowser } from '@/libs/browser';
 import NavbarAdminMobile from '@/components/NavbarAdminMobile';
 import AccountingTabs from '@/components/AccountingTabs';
+import MainTitle from '@/components/MainTitle';
+import {
+  BRow,
+  BCol,
+  BCard,
+  BButton,
+  BIconGear
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'Accounting',
   components: {
     NavbarAdminMobile,
-    AccountingTabs
+    MainTitle,
+    AccountingTabs,
+    BRow,
+    BCol,
+    BCard,
+    BButton,
+    BIconGear
   },
   computed: {
     isDesktop: function () {
       return !BooksysBrowser.isMobile()
     }
   }
-})
+}
 </script>
 
 <style>

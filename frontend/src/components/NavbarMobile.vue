@@ -8,19 +8,19 @@
       <b-navbar-nav>
         <b-nav-item href="#">
           <router-link to="/dashboard">
-            <b-icon icon="house"></b-icon>
+            <b-icon-house/>
             Dashboard
           </router-link>
         </b-nav-item>
         <b-nav-item href="#">
           <router-link to="/account">
-            <b-icon icon="person"></b-icon>
+            <b-icon-person/>
             Account
           </router-link>
         </b-nav-item>
         <b-nav-item href="#">
           <router-link to="/logout">
-            <b-icon icon="box-arrow-right"></b-icon>
+            <b-icon-box-arrow-right/>
             Logout
           </router-link>
         </b-nav-item>
@@ -30,10 +30,31 @@
 </template>
 
 <script>
-import Vue from 'vue'
+import {
+  BNavbar,
+  BNavbarBrand,
+  BNavbarToggle,
+  BCollapse,
+  BNavbarNav,
+  BNavItem,
+  BIconHouse,
+  BIconPerson,
+  BIconBoxArrowRight
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'NavbarMobile',
+  components: {
+    BNavbar,
+    BNavbarBrand,
+    BNavbarToggle,
+    BCollapse,
+    BNavbarNav,
+    BNavItem,
+    BIconHouse,
+    BIconPerson,
+    BIconBoxArrowRight
+  },
   props: ['title']
-})
+}
 </script>

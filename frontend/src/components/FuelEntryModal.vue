@@ -2,6 +2,9 @@
   <b-modal
     id="fuelEntryModal"
     title="Fuel Entry"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -157,11 +160,11 @@
     </b-form>
     <div slot="modal-footer">
       <b-button type="button" variant="outline-info" v-on:click="save">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Save
       </b-button>
       <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
     </div>
@@ -169,18 +172,41 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
 import WarningBox from '@/components/WarningBox';
 import moment from 'moment';
+import {
+  BModal,
+  BCol,
+  BRow,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BInputGroup,
+  BInputGroupAppend,
+  BButton,
+  BIconCheck,
+  BIconX
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'fuelEntryModal',
-  props: [ 'fuelEntry' ],
+  props: [ 'fuelEntry', 'visible' ],
   components: {
     WarningBox,
-    ToggleButton
+    ToggleButton,
+    BModal,
+    BCol,
+    BRow,
+    BForm,
+    BFormGroup,
+    BFormInput,
+    BInputGroup,
+    BInputGroupAppend,
+    BButton,
+    BIconCheck,
+    BIconX
   },
   data() {
     return {
@@ -235,7 +261,7 @@ export default Vue.extend({
       this.form.cost = this.form.costGross;
     },
     close: function(){
-      this.$bvModal.hide('fuelEntryModal');
+      this.$emit('update:visible', false);
     },
     save: function(){
       if(this.form.isDiscounted && this.form.costNet == null){
@@ -276,5 +302,5 @@ export default Vue.extend({
     this.setFormContent(this.fuelEntry);
     this.queryConfiguration();
   }
-})
+}
 </script>

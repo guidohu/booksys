@@ -2,6 +2,9 @@
   <b-modal
     id="engineHourEntryModal"
     title="Engine Hour Entry"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -104,11 +107,11 @@
     </b-form>
     <div slot="modal-footer">
       <b-button type="button" variant="outline-info" v-on:click="save">
-        <b-icon-check></b-icon-check>
+        <b-icon-check/>
         Save
       </b-button>
       <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x></b-icon-x>
+        <b-icon-x/>
         Cancel
       </b-button>
     </div>
@@ -116,18 +119,37 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
 import WarningBox from '@/components/WarningBox';
 import moment from 'moment';
+import {
+  BModal,
+  BRow,
+  BCol,
+  BForm,
+  BFormGroup,
+  BFormInput,
+  BButton,
+  BIconCheck,
+  BIconX
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'EngineHourEntryModal',
-  props: [ 'engineHourEntry' ],
+  props: [ 'engineHourEntry', 'visible' ],
   components: {
     WarningBox,
-    ToggleButton
+    ToggleButton,
+    BModal,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BFormInput,
+    BButton,
+    BIconCheck,
+    BIconX
   },
   data() {
     return {
@@ -165,7 +187,7 @@ export default Vue.extend({
       this.form.type = !this.form.type;
     },
     close: function(){
-      this.$bvModal.hide('engineHourEntryModal');
+      this.$emit('update:visible', false);
     },
     save: function(){
       const update = {
@@ -183,5 +205,5 @@ export default Vue.extend({
   created() {
     this.setFormContent(this.engineHourEntry);
   }
-})
+}
 </script>

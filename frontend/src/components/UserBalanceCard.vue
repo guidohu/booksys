@@ -14,25 +14,47 @@
         </b-col>
         <b-col cols="6">
           <b-button size="sm" type="button" variant="outline-info" v-on:click="showPaymentInfo">
-            <b-icon-cash></b-icon-cash>
+            <b-icon-cash/>
             Buy Sessions
           </b-button>
         </b-col>
       </b-row>
-      <PaymentInfoModal/>
+      <PaymentInfoModal
+        :visible.sync="showPaymentInfoModal"
+      />
     </b-card-body>
   </b-card>
 </template>
 
 <script>
-import Vue from 'vue'
-import { mapGetters } from 'vuex'
-import PaymentInfoModal from './PaymentInfoModal'
+import { mapGetters } from 'vuex';
+import PaymentInfoModal from './PaymentInfoModal';
+import {
+  BCard,
+  BCardHeader,
+  BCardBody,
+  BRow,
+  BCol,
+  BButton,
+  BIconCash
+} from 'bootstrap-vue';
 
-export default Vue.extend({
+export default {
   name: 'UserBalanceCard',
   components: {
-    PaymentInfoModal
+    PaymentInfoModal,
+    BCard,
+    BCardHeader,
+    BCardBody,
+    BRow,
+    BCol,
+    BButton,
+    BIconCash
+  },
+  data() {
+    return {
+      showPaymentInfoModal: false
+    }
   },
   computed: {
     ...mapGetters('login', [
@@ -47,8 +69,8 @@ export default Vue.extend({
   },
   methods: {
     showPaymentInfo: function() {
-      this.$bvModal.show('paymentInfoModal')
+      this.showPaymentInfoModal = true;
     }
   } 
-})
+}
 </script>

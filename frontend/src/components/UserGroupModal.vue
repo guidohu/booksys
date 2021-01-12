@@ -2,6 +2,9 @@
   <b-modal
     id="userGroupModal"
     :title="title"
+    :visible="visible"
+    @hide="$emit('update:visible', false)"
+    @show="$emit('update:visible', true)"
   >
     <b-form @submit="save">
       <b-row v-if="errors.length > 0">
@@ -122,21 +125,21 @@
     <div slot="modal-footer">
       <div class="text-left d-inline">
         <b-button v-if="isEditMode==true" class="mr-1" type="button" variant="outline-danger" v-on:click="remove">
-          <b-icon-trash></b-icon-trash>
+          <b-icon-trash/>
           Delete
         </b-button>
       </div>
       <div class="text-right d-inline">
         <b-button v-if="isEditMode==true" class="ml-4" type="button" variant="outline-info" v-on:click="save">
-          <b-icon-check></b-icon-check>
+          <b-icon-check/>
           Save
         </b-button>
         <b-button v-if="isEditMode==false" class="ml-1" type="button" variant="outline-info" v-on:click="enableEditMode">
-          <b-icon icon="pencil"/>
+          <b-icon-pencil/>
           Edit
         </b-button>
         <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-          <b-icon-x></b-icon-x>
+          <b-icon-x/>
           Cancel
         </b-button>
       </div>
@@ -149,11 +152,44 @@ import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { sprintf } from 'sprintf-js';
 import WarningBox from '@/components/WarningBox';
+import {
+  BForm,
+  BRow,
+  BCol,
+  BFormGroup,
+  BFormInput,
+  BFormSelect,
+  BInputGroup,
+  BInputGroupAppend,
+  BButton,
+  BIconTrash,
+  BIconCheck,
+  BIconPencil,
+  BIconX,
+  ModalPlugin
+} from "bootstrap-vue";
 
-export default Vue.extend({
+Vue.use(ModalPlugin);
+
+export default {
   name: 'UserGroupModal',
-  props: [ 'userGroup', 'editMode' ],
-  components: { WarningBox },
+  props: [ 'userGroup', 'editMode', 'visible' ],
+  components: { 
+    WarningBox,
+    BForm,
+    BRow,
+    BCol,
+    BFormGroup,
+    BFormInput,
+    BFormSelect,
+    BInputGroup,
+    BInputGroupAppend,
+    BButton,
+    BIconTrash,
+    BIconCheck,
+    BIconPencil,
+    BIconX 
+  },
   data() {
     return {
       errors: [],
@@ -162,7 +198,7 @@ export default Vue.extend({
         user_role_description: ""
       },
       isEditMode: false,
-      title: "User Group"
+      title: "User Group",
     }
   },
   computed: {
@@ -203,7 +239,7 @@ export default Vue.extend({
     },
     close: function() {
       this.setTitle();
-      this.$bvModal.hide('userGroupModal');
+      this.$emit('update:visible', false);
     },
     remove: function() {
       const name = this.form.user_group_name;
@@ -291,5 +327,5 @@ export default Vue.extend({
       this.setTitle();
     })
   }
-})
+}
 </script>
