@@ -1,0 +1,29 @@
+/* Padding the top navbar */
+body { 
+	padding-top: 70px;
+    padding-left: 2px;
+    padding-right: 2px;
+    background-color: rgb(95, 95, 95);
+    font-family: Arial, Helvetica, sans-serif;
+	text-align: center;
+    background-image: none;
+    background-size: 100% auto;
+}
+
+.navbar-nav>li>a {
+    height: 50px;
+}
+
+/* Definition of Link colors */
+a:active{
+	font-weight: bold;
+}
+
+a:hover, a:focus{
+	color: #5e5e5e;
+}
+
+a{
+	color: #5e5e5e;
+}
+
