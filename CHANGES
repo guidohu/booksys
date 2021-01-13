@@ -1,3 +1,8 @@
+v2.0 2021.01.13
+ - port application to vuejs
+ - separate frontend and backend into separate containers
+ - various bug fixes
+
 v1.26 2020.07.19
  - fix stop watch finish after pause
  - improve linking between calendar and single-day view
