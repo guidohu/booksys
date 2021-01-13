@@ -17,4 +17,4 @@ jobs:
     - name: Build the frontend container
       run: cd frontend; docker build . --file Dockerfile --tag booksys_frontend:$(date +%s)
     - name: Build the backend container
-      run: cd backend; docker build . --file backend/Dockerfile --tag booksys_backend:$(date +%s)
+      run: cd backend; docker build . --file Dockerfile --tag booksys_backend:$(date +%s)
