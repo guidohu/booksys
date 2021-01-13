@@ -1,5 +1,7 @@
 # Wake and Surf Booksys
 
+![Build](https://github.com/guidohu/booksys/workflows/Docker%20Image%20CI/badge.svg)
+
 A booking and management tool small boat communities to schedule boat usage and simplify maintenance as well as accounting.
 
 ![dashboard view](https://raw.githubusercontent.com/guidohu/booksys/master/docs/img/dashboard.png)
