@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build the Docker image UI
-      run: docker build . --file frontend/Dockerfile --tag booksys_frontend:$(date +%s)
-    - name: Build the Docker image backend
-      run: docker build . --file backend/Dockerfile --tag booksys_backend:$(date +%s)
+    - name: Build the frontend container
+      run: cd frontend; docker build . --file Dockerfile --tag booksys_frontend:$(date +%s)
+    - name: Build the backend container
+      run: cd backend; docker build . --file backend/Dockerfile --tag booksys_backend:$(date +%s)
