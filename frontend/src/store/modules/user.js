@@ -80,7 +80,6 @@ const actions = {
   },
   changeUserPassword ( {dispatch}, passwordData ) {
     return new Promise((resolve, reject) => {
-      console.log(passwordData);
       User.changeUserPassword(passwordData)
         .then(() => {
           // load latest user data
