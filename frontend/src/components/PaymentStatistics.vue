@@ -24,21 +24,21 @@
         <b-card border-variant="info" class="m-1">
           <span class="lead">{{getTotalPayments}}</span> {{getCurrency}}
           <br>
-          Income
+          Income <span v-if="form.selectedYear!='any'">({{form.selectedYear}})</span>
         </b-card>
       </b-col>
       <b-col cols="6" md="4">
         <b-card border-variant="info" class="m-1">
           <span class="lead">{{getTotalExpenditures}}</span> {{getCurrency}}
           <br>
-          Expenses
+          Expenses <span v-if="form.selectedYear!='any'">({{form.selectedYear}})</span>
         </b-card>
       </b-col>
       <b-col cols="6" md="4">
         <b-card border-variant="info" class="m-1">
           <span class="lead">{{getTotalSessionPayments}}</span> {{getCurrency}}
           <br>
-          Sessions Income
+          Sessions Income <span v-if="form.selectedYear!='any'">({{form.selectedYear}})</span>
         </b-card>
       </b-col>
       <b-col cols="6" md="4">
@@ -59,7 +59,7 @@
         <b-card border-variant="info" class="m-1">
           <span class="lead">{{getSessionProfit}}</span> {{getCurrency}}
           <br>
-          Session Profit
+          Session Profit <span v-if="form.selectedYear!='any'">({{form.selectedYear}})</span>
         </b-card>
       </b-col>
     </b-row>

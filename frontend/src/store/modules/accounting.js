@@ -63,7 +63,7 @@ const getters = {
     return Math.round(Number(state.sessionProfitAllTime)*100)/100;
   },
   getSessionsBalance: (state) => {
-    return Math.round(Number(state.totalSessionPaymentsAllTime - state.totalSessionUsed)*100)/100;
+    return Math.round(Number(state.totalSessionPaymentsAllTime - state.totalSessionUsedAllTime)*100)/100;
   },
   getTransactions: (state) => {
     return state.transactions;

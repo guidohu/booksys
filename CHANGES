@@ -1,3 +1,6 @@
+v2.1 2021.01.15
+ - fix in accounting statistics
+
 v2.0 2021.01.13
  - port application to vuejs
  - separate frontend and backend into separate containers
