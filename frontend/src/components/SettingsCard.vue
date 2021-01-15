@@ -2,6 +2,8 @@
   <b-card no-body class="text-left">
     <b-card-body class="overflow-scroll">
       <WarningBox v-if="errors.length>0" :errors="errors"/>
+      <logo-upload/>
+      
       <b-form @submit="save">
         <b-alert variant="info" show>
           Timezone and location settings. Users will see the times in the timezone defined by these settings, also sunrise and sunset will be calculated based on these settings.
@@ -314,6 +316,7 @@ import {
   BIconX,
   BIconCheck  
 } from 'bootstrap-vue';
+import LogoUpload from '@/components/LogoUpload';
 
 export default {
   name: "SettingsCard",
@@ -332,7 +335,8 @@ export default {
     BCol,
     BButton,
     BIconX,
-    BIconCheck
+    BIconCheck,
+    LogoUpload
   },
   data() {
     return {
@@ -412,7 +416,7 @@ export default {
         smtpUsername: defaultValues.smtp_username,
         smtpPassword: defaultValues.smtp_password,
         recaptchaPrivateKey: defaultValues.recaptcha_privatekey,
-        recaptchaPublicKey: defaultValues.recaptcha_publickey
+        recaptchaPublicKey: defaultValues.recaptcha_publickey,
       }
     }
   },
