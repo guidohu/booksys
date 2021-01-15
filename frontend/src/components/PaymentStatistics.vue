@@ -59,7 +59,7 @@
         <b-card border-variant="info" class="m-1">
           <span class="lead">{{getSessionProfit}}</span> {{getCurrency}}
           <br>
-          Session Profit
+          Session Profit <span v-if="form.selectedYear!='any'">({{form.selectedYear}})</span>
         </b-card>
       </b-col>
     </b-row>
