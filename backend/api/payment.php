@@ -181,7 +181,7 @@
 			return Status::errorStatus("Cannot connect to database");
 		}
 		
-		// get total of all payments
+		// get total of all payments that we received
 		$query = "SELECT coalesce(sum(amount_chf),0) as sum FROM payment";
 		$res = $db->fetch_data_hash($query);
 		$statistic['total_payment'] = $res[0]['sum'];
