@@ -39,6 +39,7 @@ class Configuration{
 	public $payment_account_iban;
 	public $payment_account_bic;
 	public $payment_account_comment;
+	public $logo_file;
 
 
 	// TODO: remove dependencies on these
@@ -79,8 +80,8 @@ class Configuration{
 
 		// set hard defaults
 		$this->login_page          = '/index.html';
-		$this->version             = "2.0";
-		$this->required_db_version = "1.13";
+		$this->version             = "2.1";
+		$this->required_db_version = "1.14";
 	}
 
 	public function is_db_configured(){
@@ -228,6 +229,9 @@ class Configuration{
 					break;
 				case 'smtp.password':
 					$this->smtp_password = $property['value'];
+					break;
+				case 'logo.file':
+					$this->logo_file = $property['value'];
 					break;
 			}
 		}

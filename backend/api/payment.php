@@ -510,3 +510,5 @@
 		$db->disconnect();
 		return Status::successStatus("Expense added");
 	}
+
+?>
