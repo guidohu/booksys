@@ -273,6 +273,9 @@ class Configuration{
 		
 		$db_key = '';
 		switch ($key) {
+			case 'logo_file':
+				$db_key = "logo.file";
+				break;
 			case 'location_time_zone':
 				$db_key = "location.timezone";
 				break;

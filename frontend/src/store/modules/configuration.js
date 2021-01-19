@@ -101,6 +101,19 @@ const actions = {
       })
     });
   },
+  queryLogoFile({ commit }){
+    return new Promise((resolve, reject) => {
+      Configuration.getLogoFile()
+      .then((uri) => {
+        // load latest configuration
+        commit('setLogoFile', uri);
+        resolve(uri);
+      })
+      .catch((errors) => {
+        reject(errors);
+      })
+    });
+  },
   updateDb({ commit, dispatch }) {
     commit('setIsUpdating', true)
     let successCb = (response) => {
@@ -142,6 +155,9 @@ const mutations = {
   },
   setRecaptchaKey (state, value){
     state.recaptchaKey = value;
+  },
+  setLogoFile (state, value){
+    state.logoFile = value;
   },
   setDbUpdateStatus (state, value){
     console.log(value)

@@ -7,6 +7,11 @@
     spinner-variant="info"
     rounded="sm"
   >
+    <b-row class="text-center mb-3">
+      <b-col cols="12">
+        <b-img :src="getLogoFile" :height="100"/>
+      </b-col>
+    </b-row>
     <login-modal 
       v-if="showLogin"
       :statusMessage="status" 
@@ -22,14 +27,20 @@ import { mapActions, mapGetters } from 'vuex';
 import LoginModal from '@/components/LoginModal.vue';
 import { BooksysBrowser } from '@/libs/browser';
 import {
-  BOverlay
+  BOverlay,
+  BImg,
+  BRow,
+  BCol
 } from 'bootstrap-vue';
 
 export default {
   name: 'Login',
   components: {
     LoginModal,
-    BOverlay
+    BOverlay,
+    BImg,
+    BRow,
+    BCol
   },
   data() {
     return {
@@ -47,12 +58,18 @@ export default {
     },
     ...mapGetters('login', [
       'username'
+    ]),
+    ...mapGetters('configuration', [
+      'getLogoFile'
     ])
   },
   methods: {
     ...mapActions('login', [
       'getIsLoggedIn',
       'login'
+    ]),
+    ...mapActions('configuration', [
+      'queryLogoFile'
     ]),
     handleLogin: function (username, password) {
       this.login({ 
@@ -75,6 +92,10 @@ export default {
   },
   created () {
     this.isLoading = true;
+
+    this. queryLogoFile()
+    .then((uri) => console.log("Loaded logo image", uri))
+    .catch((errors) => console.log(errors));
 
     this.getIsLoggedIn()
     .then((loggedIn) => {

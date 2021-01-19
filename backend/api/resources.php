@@ -39,7 +39,6 @@
     //--------------------------
     function upload_logo($configuration){
         $target_dir = "/var/www/html/uploads/logos/";
-        error_log(print_r($_FILES, true));
         $target_file_name = basename($_FILES['logo']['name']);
         $target_file = $target_dir . $target_file_name;
 

@@ -50,7 +50,7 @@ const routes = [
     path: '/login',
     name: 'Login',
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['login'], next);
+      loadStoreModules(['login', 'configuration'], next);
     },
     component: Login
   },
