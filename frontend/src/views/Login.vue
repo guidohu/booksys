@@ -7,17 +7,19 @@
     spinner-variant="info"
     rounded="sm"
   >
-    <b-row class="text-center mb-3">
-      <b-col cols="12">
-        <b-img :src="getLogoFile" :height="100"/>
-      </b-col>
-    </b-row>
-    <login-modal 
-      v-if="showLogin"
-      :statusMessage="status" 
-      :initialUsername="username" 
-      @login="handleLogin"
-    />
+    <b-container>
+      <b-row class="text-center mb-3">
+        <b-col cols="12">
+          <b-img :src="getLogoFile" fluid :height="100"/>
+        </b-col>
+      </b-row>
+      <login-modal 
+        v-if="showLogin"
+        :statusMessage="status" 
+        :initialUsername="username" 
+        @login="handleLogin"
+      />
+    </b-container>
   </b-overlay>
   <!-- </div> -->
 </template>
@@ -27,6 +29,7 @@ import { mapActions, mapGetters } from 'vuex';
 import LoginModal from '@/components/LoginModal.vue';
 import { BooksysBrowser } from '@/libs/browser';
 import {
+  BContainer,
   BOverlay,
   BImg,
   BRow,
@@ -37,6 +40,7 @@ export default {
   name: 'Login',
   components: {
     LoginModal,
+    BContainer,
     BOverlay,
     BImg,
     BRow,
