@@ -71,22 +71,59 @@ module.exports = {
     // },
     optimization: {
       splitChunks: {
-        chunks: 'all'
+        chunks: 'all',
   //     minSize: 10000,
-  //     maxSize: 250000
-        // cacheGroups: {
-        //   vendor: {
-        //     name: "node_vendors", // part of the bundle name and
-        //     // can be used in chunks array of HtmlWebpackPlugin
-        //     test: /[\\/]node_modules[\\/]/,
-        //     chunks: "initial",
-        //   },
-        //   common: {
-        //     test: /[\\/]src[\\/]components[\\/]/,
-        //     chunks: "all",
-        //     minSize: 0,
-        //   },
-        // }
+        // maxSize: 240000,
+        // maxInitialRequests: 10,
+        cacheGroups: {
+          moment: {
+            test: /[\\/]node_modules[\\/]moment/,
+            reuseExistingChunk: true,
+            chunks: "all",
+          },
+          vue: {
+            test: /[\\/]node_modules[\\/]vue/,
+            reuseExistingChunk: true,
+            chunks: "all",
+          },
+          bootstrap: {
+            test: /[\\/]node_modules[\\/]bootstrap/,
+            reuseExistingChunk: true,
+            chunks: "all",
+          },
+          vendor: {
+            // name: "vendors", // part of the bundle name and
+            // can be used in chunks array of HtmlWebpackPlugin
+            test: /[\\/]node_modules[\\/]/,
+            chunks: "initial",
+            priority: -10,
+            reuseExistingChunk: true,
+            filename: '[name].vendors.js'
+          },
+          components: {
+            name: "components",
+            test: /[\\/]src[\\/]components[\\/]/,
+            chunks: "initial",
+            minSize: 0,
+            reuseExistingChunk: true
+          },
+          // default: {
+          //   name: "chunk",
+          //   chunks: "initial",
+          //   minChunks: 2,
+          //   priority: -20,
+          //   reuseExistingChunk: true
+          // }
+          default: {
+            chunks: "initial",
+            // filename: (pathData) => {
+            //   // Use pathData object for generating filename string based on your requirements
+            //   return `${pathData.chunk.name}-bundle.js`;
+            // }
+            filename: '[name].bundle.js',
+            reuseExistingChunk: true
+          }
+        }
       },
       // minimize: true,
       // minimizer: [
