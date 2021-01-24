@@ -1,4 +1,6 @@
 const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 // const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
@@ -125,10 +127,10 @@ module.exports = {
           }
         }
       },
-      // minimize: true,
-      // minimizer: [
-      //   new CssMinimizerPlugin()
-      // ]
+      minimize: true,
+      minimizer: [
+        new CssMinimizerPlugin()
+      ]
     }
   },
   chainWebpack: config => {
