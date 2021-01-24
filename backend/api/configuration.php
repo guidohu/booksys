@@ -25,6 +25,10 @@
             $response = get_recaptcha_key($configuration);
             echo json_encode($response);
             exit;
+        case 'get_logo_file':
+            $response = get_logo_file($configuration);
+            echo json_encode($response);
+            exit;
         case 'get_customization_parameters':
             get_customization_parameters($configuration);
             exit;
@@ -89,6 +93,12 @@
         return Status::successDataResponse("success", $response);
     }
 
+    function get_logo_file($configuration){
+        $response = array();
+        $response['uri'] = $configuration->logo_file;
+        return Status::successDataResponse("success", $response);
+    }
+
     function get_customization_parameters($configuration){
         // only available to users that are logged in
         _is_logged_in_or_return($configuration);
@@ -133,7 +143,8 @@
             "smtp_username"             => $configuration->smtp_username,
             "smtp_password"             => "hidden", // the proper value is hidden, $configuration->smtp_password,
             "recaptcha_publickey"       => $configuration->recaptcha_publickey,
-            "recaptcha_privatekey"      => $configuration->recaptcha_privatekey
+            "recaptcha_privatekey"      => $configuration->recaptcha_privatekey,
+            "logo_file"                 => $configuration->logo_file
         ];
 
         return Status::successDataResponse('success', $response);
@@ -215,7 +226,8 @@
             'smtp_username',
             'smtp_password',
             'recaptcha_privatekey',
-            'recaptcha_publickey'
+            'recaptcha_publickey',
+            'logo_file'
         );
         foreach ($keys as $key) {
             // if the key is not defined, we do not store anything

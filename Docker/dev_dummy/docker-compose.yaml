@@ -33,12 +33,13 @@ services:
             DB_USER: 'user'
             DB_PASSWORD: 'userpassword'
         labels:
-            - "traefik.http.routers.backend.rule=PathPrefix(`/api/`) || PathPrefix(`/api`)"
+            - "traefik.http.routers.backend.rule=PathPrefix(`/api/`) || PathPrefix(`/api`) || PathPrefix(`/uploads/`) || PathPrefix(`/uploads`)"
             - "traefik.http.services.backend.loadbalancer.server.port=80"
         volumes:
             - ${PWD}/../../backend/api:/var/www/html/api
             - ${PWD}/../../backend/classes:/var/www/html/classes
             - ${PWD}/config.php:/var/www/html/config/config.php
+            - ${PWD}/../../backend/config/db:/var/www/html/config/db
     frontend:
         build: "./frontend"
         user: "node"

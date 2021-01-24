@@ -2,6 +2,8 @@
   <b-card no-body class="text-left">
     <b-card-body class="overflow-scroll">
       <WarningBox v-if="errors.length>0" :errors="errors"/>
+      <logo-upload @logoChanged="logoChangeHandler"/>
+      
       <b-form @submit="save">
         <b-alert variant="info" show>
           Timezone and location settings. Users will see the times in the timezone defined by these settings, also sunrise and sunset will be calculated based on these settings.
@@ -314,6 +316,7 @@ import {
   BIconX,
   BIconCheck  
 } from 'bootstrap-vue';
+import LogoUpload from '@/components/LogoUpload';
 
 export default {
   name: "SettingsCard",
@@ -332,12 +335,15 @@ export default {
     BCol,
     BButton,
     BIconX,
-    BIconCheck
+    BIconCheck,
+    LogoUpload
   },
   data() {
     return {
       errors: [],
-      form: {}
+      form: {
+        logoFile: null
+      }
     }
   },
   computed: {
@@ -350,6 +356,9 @@ export default {
       'queryConfiguration',
       'setConfiguration'
     ]),
+    logoChangeHandler: function(logoUri){
+      this.form.logoFile = logoUri;
+    },
     save: function() {
       // extract correct URL from mapIframe
       const v = this.form;
@@ -364,6 +373,7 @@ export default {
       }
 
       const newConfiguration = {
+        logo_file: v.logoFile,
         location_time_zone: v.timezone,
         location_longitude: Number(v.longitude),
         location_latitude: Number(v.latitude),
@@ -397,6 +407,7 @@ export default {
 
       console.log("set form to defaults:", defaultValues);
       this.form = {
+        logoFile: defaultValues.logo_file,
         timezone: defaultValues.location_time_zone,
         longitude: defaultValues.location_longitude,
         latitude: defaultValues.location_latitude,
@@ -412,7 +423,7 @@ export default {
         smtpUsername: defaultValues.smtp_username,
         smtpPassword: defaultValues.smtp_password,
         recaptchaPrivateKey: defaultValues.recaptcha_privatekey,
-        recaptchaPublicKey: defaultValues.recaptcha_publickey
+        recaptchaPublicKey: defaultValues.recaptcha_publickey,
       }
     }
   },

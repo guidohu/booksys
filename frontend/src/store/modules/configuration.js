@@ -11,7 +11,8 @@ const state = () => ({
   dbIsUpdating: false,
   dbUpdateResult: null,
   timezone: "Europe/Zurich",
-  maxRiders: 12
+  maxRiders: 12,
+  logoFile: null,
 })
 
 const getters = {
@@ -48,6 +49,9 @@ const getters = {
   },
   getMaximumNumberOfRiders: (state) => {
     return state.maxRiders;
+  },
+  getLogoFile: (state) => {
+    return state.logoFile;
   }
 }
 
@@ -97,6 +101,19 @@ const actions = {
       })
     });
   },
+  queryLogoFile({ commit }){
+    return new Promise((resolve, reject) => {
+      Configuration.getLogoFile()
+      .then((uri) => {
+        // load latest configuration
+        commit('setLogoFile', uri);
+        resolve(uri);
+      })
+      .catch((errors) => {
+        reject(errors);
+      })
+    });
+  },
   updateDb({ commit, dispatch }) {
     commit('setIsUpdating', true)
     let successCb = (response) => {
@@ -133,10 +150,14 @@ const mutations = {
     state.locationAddress = (value.location_address != null) ? value.location_address.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g, '<br>') : null;
     state.locationMap = value.location_map;
     state.currency = value.currency;
+    state.logoFile = value.logo_file;
     console.log('configuration set to', value);
   },
   setRecaptchaKey (state, value){
     state.recaptchaKey = value;
+  },
+  setLogoFile (state, value){
+    state.logoFile = value;
   },
   setDbUpdateStatus (state, value){
     console.log(value)
