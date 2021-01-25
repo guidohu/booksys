@@ -144,7 +144,8 @@
             "smtp_password"             => "hidden", // the proper value is hidden, $configuration->smtp_password,
             "recaptcha_publickey"       => $configuration->recaptcha_publickey,
             "recaptcha_privatekey"      => $configuration->recaptcha_privatekey,
-            "logo_file"                 => $configuration->logo_file
+            "logo_file"                 => $configuration->logo_file,
+            "engine_hour_format"        => $configuration->engine_hour_format
         ];
 
         return Status::successDataResponse('success', $response);

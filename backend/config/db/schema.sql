@@ -321,7 +321,7 @@ CREATE TABLE `configuration` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT INTO configuration (property, value) VALUES 
-("schema.version",                  "1.14"          ),
+("schema.version",                  "1.15"          ),
 ("browser.session.timeout.default", "10800"         ),
 ("browser.session.timeout.max",     "604800"        ),
 ("location.longitude",              "8.542939"      ),
@@ -346,4 +346,5 @@ INSERT INTO configuration (property, value) VALUES
 ("smtp.server",                     NULL            ),
 ("smtp.username",                   NULL            ),
 ("smtp.password",                   NULL            ),
-("logo.file",                       NULL            );
+("logo.file",                       NULL            ),
+("engine.hour.format",              "hh.h"          );
