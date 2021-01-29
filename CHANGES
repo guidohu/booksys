@@ -1,3 +1,7 @@
+unreleased
+ - support logo upload
+ - support hh:mm engine hour format
+
 v2.1 2021.01.15
  - fix in accounting statistics
 
