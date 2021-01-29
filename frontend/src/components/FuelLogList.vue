@@ -25,7 +25,10 @@
 import { mapActions, mapGetters } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import FuelEntryModal from '@/components/FuelEntryModal';
-import { formatEngineHour } from '@/libs/formatters';
+import { 
+  formatEngineHour,
+  formatCurrency,
+  formatFuel } from '@/libs/formatters';
 import moment from "moment-timezone";
 import {
   BTable
@@ -89,17 +92,21 @@ export default {
           key: 'engine_hours',
           label: 'EngineHrs',
           sortable: true,
+          class: "text-right",
           formatter: (value) => { return formatEngineHour(value, this.getEngineHourFormat) }
         },
         {
           key: 'liters',
           label: 'Fuel',
-          sortable: true
+          sortable: true,
+          class: "text-right",
+          formatter: (value) => formatFuel(value)
         },
         {
           key: 'cost',
           label: 'Cost',
           sortable: true,
+          class: "text-right",
           formatter: (value, key, item) => { return this.getFuelCost(item) }
         }
       ]);
@@ -107,9 +114,9 @@ export default {
     getFuelCost: function(entry){
       // returns either net or gross values for the cost
       if(entry.cost != null){
-        return Number(entry.cost);
+        return formatCurrency(Number(entry.cost), null);
       }else{
-        return Number(entry.cost_brutto);
+        return formatCurrency(Number(entry.cost_brutto), null);
       }
     },
     rowClick: function(item, index, event){

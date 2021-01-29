@@ -71,6 +71,7 @@ export default {
           key: 'engine_hours',
           label: 'EngineHrs',
           sortable: true,
+          class: "text-right",
           formatter: (value) => { return formatEngineHour(value, this.getEngineHourFormat) }
         },
         {

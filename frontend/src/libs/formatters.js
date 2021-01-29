@@ -79,5 +79,17 @@ export const formatEngineHourLabel = (format) => {
  * @param {*} currency the currency (e.g. CHF)
  */
 export const formatCurrency = (value, currency) => {
-  return sprintf('%.2f %s', Math.round(Number(value)*100)/100, currency);
+  if(currency != null){
+    return sprintf('%.2f %s', Math.round(Number(value)*100)/100, currency);
+  }else{
+    return sprintf('%.2f', Math.round(Number(value)*100)/100);
+  }
+}
+
+/**
+ * Formats a value to be displayed as an amount of fuel in liters
+ * @param {*} value fuel in liters
+ */
+export const formatFuel = (value) => {
+  return sprintf('%.2f', Number(value));
 }

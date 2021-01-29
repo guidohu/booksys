@@ -94,18 +94,21 @@ export default {
           key: 'before_hours',
           label: 'Before',
           sortable: true,
+          class: "text-right",
           formatter: (value) => { return formatEngineHour(value, this.getEngineHourFormat) }
         },
         {
           key: 'after_hours',
           label: 'After',
           sortable: true,
+          class: "text-right",
           formatter: (value) => { return formatEngineHour(value, this.getEngineHourFormat) }
         },
         {
           key: 'delta_hours',
           label: 'Diff',
           sortable: true,
+          class: "text-right",
           formatter: (value) => { return formatEngineHour(value, this.getEngineHourFormat) }
         }
       ]);
