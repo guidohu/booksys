@@ -162,7 +162,7 @@ export default {
           key: "amount",
           label: "Amount",
           sortable: true,
-          formatter: (value) => formatCurrency(value),
+          formatter: (value) => formatCurrency(value, getCurrency),
           tdClass: "text-right",
           thClass: "text-right"
         },
