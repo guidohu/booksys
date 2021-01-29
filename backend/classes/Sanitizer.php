@@ -119,6 +119,17 @@ class Sanitizer{
 		}
 		return TRUE;
 	}
+
+	public function isEngineHourFormat($format){
+		switch ($format) {
+			case "hh:mm":
+				return TRUE;
+			case "hh.h":
+				return TRUE;
+			default:
+				return FALSE;
+		}
+	}
 	
 	function match($var, $regex){
 		if(isset($var) and preg_match($regex, $var)){

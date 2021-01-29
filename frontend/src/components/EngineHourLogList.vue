@@ -104,7 +104,8 @@ export default {
         {
           key: 'delta_hours',
           label: 'Diff',
-          sortable: true
+          sortable: true,
+          formatter: (value) => { return formatEngineHour(value, this.getEngineHourFormat) }
         }
       ]);
     },

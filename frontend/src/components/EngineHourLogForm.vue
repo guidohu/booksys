@@ -50,7 +50,7 @@
                 type="text"
               />
               <b-input-group-prepend is-text>
-                hrs
+                {{ engineHourLabel }}
               </b-input-group-prepend>
             </b-input-group>
           </b-form-group>
@@ -84,6 +84,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
+import { formatEngineHourLabel } from '@/libs/formatters';
 import WarningBox from '@/components/WarningBox';
 import {
   BContainer,
@@ -122,6 +123,7 @@ export default {
         afterHours: null,
         type: false
       },
+      engineHourLabel: null,
       disableBefore: false,
       showAfter: false,
       errors: []
@@ -134,6 +136,9 @@ export default {
     ...mapGetters('login', [
       'userInfo'
     ]),
+    ...mapGetters('configuration',[
+      'getEngineHourFormat'
+    ]),
     toggleWidth: function() {
       return 70;
     }
@@ -142,6 +147,9 @@ export default {
     userInfo: function(){
       console.log("userInfo just changed");
       this.setDriver();
+    },
+    getEngineHourFormat: function(format){
+      this.engineHourLabel = formatEngineHourLabel(format);
     },
     getEngineHourLogLatest: function(newData){
       console.log('engineHourLatest just changed', newData);
@@ -164,6 +172,9 @@ export default {
     ...mapActions('boat', [
       'queryEngineHourLogLatest',
       'addEngineHours'
+    ]),
+    ...mapActions('configuration',[
+      'queryConfiguration'
     ]),
     setDisableBefore: function() {
       if(this.getEngineHourLogLatest != null && this.getEngineHourLogLatest.after_hours != null){
@@ -212,6 +223,7 @@ export default {
     }
   },
   created() {
+    this.queryConfiguration();
     this.setDriver();
     this.queryEngineHourLogLatest();
     this.setDisableBefore();

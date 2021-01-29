@@ -161,6 +161,7 @@ export default class Configuration {
     return new Promise((resolve, reject) => {
       const request = {
         logo_file                : params.logo_file,
+        engine_hour_format       : params.engine_hour_format,
         location_time_zone       : params.location_time_zone,
         location_longitude       : params.location_longitude,
         location_latitude        : params.location_latitude,

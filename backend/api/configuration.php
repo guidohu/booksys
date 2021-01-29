@@ -203,6 +203,9 @@
         if(isset($data->recaptcha_publickey) && !$sanitizer->isAlphaNum($data->recaptcha_publickey)){
             return Status::errorStatus("The provided recaptcha public key is not in a valid format.");
         }
+        if(isset($data->engine_hour_format) && !$sanitizer->isEngineHourFormat($data->engine_hour_format)){
+            return Status::errorStatus("The provided engine hour format is not valid.");
+        }
         // no sanitization for location address
         //                     payment account owner
         //                     payment account comment
@@ -212,23 +215,24 @@
 
         // update database
         $keys = array(
-            'location_time_zone',
-            'location_longitude',
-            'location_latitude',
-            'location_map',
-            'location_address',
             'currency',
-            'payment_account_owner',
-            'payment_account_iban',
+            'engine_hour_format',
+            'location_address',
+            'location_latitude',
+            'location_longitude',
+            'location_map',
+            'location_time_zone',
+            'logo_file',
             'payment_account_bic',
             'payment_account_comment',
+            'payment_account_iban',
+            'payment_account_owner',
+            'recaptcha_privatekey',
+            'recaptcha_publickey',
+            'smtp_password',
             'smtp_sender',
             'smtp_server',
             'smtp_username',
-            'smtp_password',
-            'recaptcha_privatekey',
-            'recaptcha_publickey',
-            'logo_file'
         );
         foreach ($keys as $key) {
             // if the key is not defined, we do not store anything
