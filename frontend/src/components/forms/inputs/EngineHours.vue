@@ -69,7 +69,9 @@ export default {
       this.formValue = formatEngineHour(this.value, this.displayFormat);
     },
     formValue: function(){
-      if(!isValidEngineHour(this.formValue, this.displayFormat)){
+      if(this.formValue == null || this.formValue == ''){
+        this.state = null;
+      }else if(!isValidEngineHour(this.formValue, this.displayFormat)){
         this.state = false;
       }else{
         this.state = null;

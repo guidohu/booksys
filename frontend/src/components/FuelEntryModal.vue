@@ -22,8 +22,10 @@
             label="Date"
             label-for="date-input"
             description=""
+            label-cols="3"
           >
             <b-form-input
+              size="sm"
               id="date-input"
               v-model="form.date"
               type="text"
@@ -36,8 +38,10 @@
             label="Driver"
             label-for="driver-input"
             description=""
+            label-cols="3"
           >
             <b-form-input
+              size="sm"
               id="driver-input"
               v-model="form.driver"
               type="text"
@@ -45,31 +49,19 @@
               disabled
             ></b-form-input>
           </b-form-group>
-          <b-form-group
-            id="engine-hours"
+          <engine-hours
             label="Engine Hours"
-            label-for="engine-hours-input"
-            description=""
-          >
-            <b-input-group>
-              <b-form-input
-                id="engine-hours-input"
-                v-model="form.engineHours"
-                type="text"
-                placeholder=""
-              />
-              <b-input-group-append is-text>
-                hrs
-              </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
+            v-model="form.engineHours"
+            :display-format="getEngineHourFormat"
+          />
           <b-form-group
             id="liters"
             label="Fuel"
             label-for="fuel-input"
             description=""
+            label-cols="3"
           >
-            <b-input-group>
+            <b-input-group size="sm">
               <b-form-input
                 id="fuel-input"
                 v-model="form.fuel"
@@ -87,8 +79,9 @@
             label="Cost"
             label-for="cost-input"
             description=""
+            label-cols="3"
           >
-            <b-input-group>
+            <b-input-group size="sm">
               <b-form-input
                 id="cost-input"
                 v-model="form.cost"
@@ -107,8 +100,9 @@
             label="Cost (Gross)"
             label-for="cost-gross-input"
             description=""
+            label-cols="3"
           >
-            <b-input-group>
+            <b-input-group size="sm">
               <b-form-input
                 id="cost-gross-input"
                 v-model="form.costGross"
@@ -125,6 +119,7 @@
             id="discount"
             label="Discount"
             label-for="discount-input"
+            label-cols="3"
           >
             <toggle-button 
               id="discount-input"
@@ -141,8 +136,9 @@
             label="Cost (net)"
             label-for="cost-net-input"
             description=""
+            label-cols="3"
           >
-            <b-input-group>
+            <b-input-group size="sm">
               <b-form-input
                 id="cost-net-input"
                 v-model="form.costNet"
@@ -175,6 +171,7 @@
 import { mapActions, mapGetters } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
 import WarningBox from '@/components/WarningBox';
+import EngineHours from '@/components/forms/inputs/EngineHours';
 import moment from 'moment';
 import {
   BModal,
@@ -195,6 +192,7 @@ export default {
   props: [ 'fuelEntry', 'visible' ],
   components: {
     WarningBox,
+    EngineHours,
     ToggleButton,
     BModal,
     BCol,
@@ -221,7 +219,8 @@ export default {
       return 100;
     },
     ...mapGetters('configuration',[
-      'getCurrency'
+      'getCurrency',
+      'getEngineHourFormat'
     ])
   },
   watch: {
