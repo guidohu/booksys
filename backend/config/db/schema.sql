@@ -5,9 +5,9 @@
 CREATE TABLE `boat_engine_hours` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `timestamp` datetime DEFAULT NULL,
-  `before_hours` float(10,1) DEFAULT NULL,
-  `after_hours` float(10,1) DEFAULT NULL,
-  `delta_hours` float(10,1) DEFAULT NULL,
+  `before_hours` DECIMAL(10,5) DEFAULT NULL,
+  `after_hours` DECIMAL(10,5) DEFAULT NULL,
+  `delta_hours` DECIMAL(10,5) DEFAULT NULL,
   `type` int(11) DEFAULT NULL,
   `user_id` int(11) DEFAULT NULL,
   `comment` text CHARACTER SET utf8,
@@ -22,10 +22,10 @@ CREATE TABLE `boat_fuel` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `timestamp` datetime DEFAULT NULL,
   `user_id` int(11) DEFAULT NULL,
-  `engine_hours` float(10,1) DEFAULT NULL,
-  `liters` float(10,2) DEFAULT NULL,
-  `cost_chf` float(10,2) DEFAULT NULL,
-  `cost_chf_brutto` float(10,2) DEFAULT NULL,
+  `engine_hours` DECIMAL(10,5) DEFAULT NULL,
+  `liters` DECIMAL(10,3) DEFAULT NULL,
+  `cost_chf` DECIMAL(10,3) DEFAULT NULL,
+  `cost_chf_brutto` DECIMAL(10,3) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -37,21 +37,8 @@ CREATE TABLE `boat_maintenance` (
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `engine_hours` float(10,1) NOT NULL,
+  `engine_hours` DECIMAL(10,5) NOT NULL,
   `description` text CHARACTER SET utf8,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Table structure for table `boat_oil`
---
-
-CREATE TABLE `boat_oil` (
-  `id` mediumint(9) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
-  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `oil_l` float(10,2) DEFAULT NULL,
-  `engine_hours` float(10,2) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -82,7 +69,7 @@ CREATE TABLE `expenditure` (
   `user_id` int(11) DEFAULT NULL,
   `type_id` int(11) DEFAULT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `amount_chf` float(10,2) DEFAULT NULL,
+  `amount_chf` DECIMAL(10,3) DEFAULT NULL,
   `comment` text CHARACTER SET utf8,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -119,7 +106,7 @@ CREATE TABLE `heat` (
   `session_id` int(11) DEFAULT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `duration_s` int(11) DEFAULT NULL,
-  `cost_chf` float(10,2) DEFAULT NULL,
+  `cost_chf` DECIMAL(10,3) DEFAULT NULL,
   `comment` TEXT DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -177,7 +164,7 @@ CREATE TABLE `payment` (
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) DEFAULT NULL,
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `amount_chf` float(10,2) DEFAULT NULL,
+  `amount_chf` DECIMAL(10,3) DEFAULT NULL,
   `type_id` int(11) DEFAULT NULL,
   `comment` text CHARACTER SET utf8,
   PRIMARY KEY (`id`)
@@ -190,7 +177,7 @@ CREATE TABLE `payment` (
 CREATE TABLE `pricing` (
   `id` mediumint(9) NOT NULL AUTO_INCREMENT,
   `user_status_id` int(11) DEFAULT NULL,
-  `price_chf_min` float(10,2) DEFAULT NULL,
+  `price_chf_min` DECIMAL(10,3) DEFAULT NULL,
   `comment` text CHARACTER SET utf8,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -321,7 +308,7 @@ CREATE TABLE `configuration` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT INTO configuration (property, value) VALUES 
-("schema.version",                  "1.14"          ),
+("schema.version",                  "1.15"          ),
 ("browser.session.timeout.default", "10800"         ),
 ("browser.session.timeout.max",     "604800"        ),
 ("location.longitude",              "8.542939"      ),
@@ -346,4 +333,5 @@ INSERT INTO configuration (property, value) VALUES
 ("smtp.server",                     NULL            ),
 ("smtp.username",                   NULL            ),
 ("smtp.password",                   NULL            ),
-("logo.file",                       NULL            );
+("logo.file",                       NULL            ),
+("engine.hour.format",              "hh.h"          );

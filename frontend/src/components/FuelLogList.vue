@@ -25,6 +25,7 @@
 import { mapActions, mapGetters } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import FuelEntryModal from '@/components/FuelEntryModal';
+import { formatEngineHour } from '@/libs/formatters';
 import moment from "moment-timezone";
 import {
   BTable
@@ -49,6 +50,9 @@ export default {
   computed: {
     ...mapGetters('boat', [
       'getFuelLog'
+    ]),
+    ...mapGetters('configuration',[
+      'getEngineHourFormat'
     ])
   },
   methods: {
@@ -68,7 +72,7 @@ export default {
       })
     },
     setColumns: function(){
-      this.columns = [
+      this.$set(this, 'columns', [
         {
           key: 'timestamp',
           label: 'Date',
@@ -84,7 +88,8 @@ export default {
         {
           key: 'engine_hours',
           label: 'EngineHrs',
-          sortable: true
+          sortable: true,
+          formatter: (value) => { return formatEngineHour(value, this.getEngineHourFormat) }
         },
         {
           key: 'liters',
@@ -97,7 +102,7 @@ export default {
           sortable: true,
           formatter: (value, key, item) => { return this.getFuelCost(item) }
         }
-      ]
+      ]);
     },
     getFuelCost: function(entry){
       // returns either net or gross values for the cost
@@ -125,6 +130,11 @@ export default {
     getFuelLog: function(newValues) {
       console.log("fuel log values changed to:", newValues);
       this.setItems(newValues);
+    },
+    getEngineHourFormat: function(newFormat, oldFormat){
+      if(newFormat != oldFormat){
+        this.setColumns();
+      }
     }
   },
   created() {

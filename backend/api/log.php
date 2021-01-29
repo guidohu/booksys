@@ -47,26 +47,26 @@
 					SELECT h.id as id, \"heat\" as type, h.timestamp as time, 
 						   CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, 
 						          ' was riding for ', FORMAT(h.duration_s/60,1), 
-								  ' min and ', h.cost_chf, ' $configuration->currency') as log 
+								  ' min and ', FORMAT(h.cost_chf, 2), ' $configuration->currency') as log 
 						FROM user u, heat h 
 						WHERE u.id = h.user_id AND h.comment IS NULL
 					UNION ALL
 					SELECT h.id as id, \"heat\" as type, h.timestamp as time, 
 						   CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, 
 						          ' was riding for ', FORMAT(h.duration_s/60,1), 
-								  ' min and ', h.cost_chf, ' $configuration->currency (Comment: ', h.comment, ')') as log 
+								  ' min and ', FORMAT(h.cost_chf, 2), ' $configuration->currency (Comment: ', h.comment, ')') as log 
 						FROM user u, heat h 
 						WHERE u.id = h.user_id AND NOT h.comment IS NULL
 					UNION ALL
 					SELECT p.id as id, \"payment\" as type, p.timestamp as time, 
 					       CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, 
-						          ' paid for sessions ', p.amount_chf, ' $configuration->currency') as log 
+						          ' paid for sessions ', FORMAT(p.amount_chf, 2), ' $configuration->currency') as log 
 						FROM user u, payment p 
 						WHERE u.id = p.user_id AND p.type_id = 4
 					UNION ALL
 					SELECT bf.id as id, \"boat_fuel\" as type, bf.timestamp as time, 
 					       CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, ' added ', 
-						          bf.liters, 'L fuel for ', cost_chf, ' $configuration->currency') as log 
+						          bf.liters, 'L fuel for ', FORMAT(cost_chf, 2), ' $configuration->currency') as log 
 						FROM user u, boat_fuel bf 
 						WHERE bf.user_id = u.id
                   ) as c_log ORDER BY time DESC";

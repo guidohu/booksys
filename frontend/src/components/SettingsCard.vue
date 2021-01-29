@@ -6,6 +6,13 @@
       
       <b-form @submit="save">
         <b-alert variant="info" show>
+          Settings related to the boat you are using.
+        </b-alert>
+        <!-- Engine hour format -->
+        <engine-hour-format
+          :selected.sync = "form.engineHourFormat"
+        />
+        <b-alert variant="info" show>
           Timezone and location settings. Users will see the times in the timezone defined by these settings, also sunrise and sunset will be calculated based on these settings.
         </b-alert>
         <!-- Timezone -->
@@ -300,6 +307,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
+import EngineHourFormat from '@/components/forms/inputs/EngineHourFormat';
 import {
   BCard,
   BCardBody,
@@ -322,6 +330,7 @@ export default {
   name: "SettingsCard",
   components: {
     WarningBox,
+    EngineHourFormat,
     BCard,
     BCardBody,
     BCardFooter,
@@ -374,6 +383,7 @@ export default {
 
       const newConfiguration = {
         logo_file: v.logoFile,
+        engine_hour_format: v.engineHourFormat,
         location_time_zone: v.timezone,
         location_longitude: Number(v.longitude),
         location_latitude: Number(v.latitude),
@@ -406,8 +416,9 @@ export default {
       }
 
       console.log("set form to defaults:", defaultValues);
-      this.form = {
+      this.$set(this, 'form', {
         logoFile: defaultValues.logo_file,
+        engineHourFormat: defaultValues.engine_hour_format,
         timezone: defaultValues.location_time_zone,
         longitude: defaultValues.location_longitude,
         latitude: defaultValues.location_latitude,
@@ -424,7 +435,7 @@ export default {
         smtpPassword: defaultValues.smtp_password,
         recaptchaPrivateKey: defaultValues.recaptcha_privatekey,
         recaptchaPublicKey: defaultValues.recaptcha_publickey,
-      }
+      });
     }
   },
   watch: {

@@ -246,9 +246,11 @@
                             blb.delta_hours = ?
                     WHERE blb.after_hours IS NULL';
             $db->prepare($query);
-            $db->bind_param('dd',
-                            $post_data->engine_hours_after,
-                            $post_data->engine_hours_after - $post_data->engine_hours_before);
+            $db->bind_param(
+                'dd',
+                $post_data->engine_hours_after,
+                $post_data->engine_hours_after - $post_data->engine_hours_before
+            );
             if(!$db->execute()){
                 $db->disconnect();
                 return Status::errorStatus("Cannot update existing entry. An error occurred.");
@@ -273,11 +275,13 @@
                     VALUES
                     (?,?,?,?)';
             $db->prepare($query);
-            $db->bind_param('sdii',
-                            $date->format('Y-m-d H:i:s'),
-                            sprintf('%.2f',$post_data->engine_hours_before),
-                            $usage_type,
-                            $post_data->user_id);
+            $db->bind_param(
+                'sdii',
+                $date->format('Y-m-d H:i:s'),
+                sprintf('%.5f',$post_data->engine_hours_before),
+                $usage_type,
+                $post_data->user_id
+            );
             if(!$db->execute()){
                 $db->disconnect();
                 return Status::errorStatus("Internal Server Error, cannot add new engine hours entry.");

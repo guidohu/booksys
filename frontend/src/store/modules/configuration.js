@@ -13,6 +13,7 @@ const state = () => ({
   timezone: "Europe/Zurich",
   maxRiders: 12,
   logoFile: null,
+  engineHourFormat: "hh.h",
 })
 
 const getters = {
@@ -52,6 +53,9 @@ const getters = {
   },
   getLogoFile: (state) => {
     return state.logoFile;
+  },
+  getEngineHourFormat: (state) => {
+    return state.engineHourFormat;
   }
 }
 
@@ -151,6 +155,7 @@ const mutations = {
     state.locationMap = value.location_map;
     state.currency = value.currency;
     state.logoFile = value.logo_file;
+    state.engineHourFormat = value.engine_hour_format;
     console.log('configuration set to', value);
   },
   setRecaptchaKey (state, value){

@@ -1,15 +1,24 @@
 <template>
   <b-card no-body class="text-left">
     <b-card-body>
-      <b-table
-        v-if="errors.length==0"
-        striped
-        hover
-        small
-        :fields="columns"
-        :items="getLogLines"
-      />
-      <WarningBox v-if="errors.length>0" :errors="errors"/>
+      <b-overlay
+        id="overlay-background"
+        :show="showOverlay"
+        spinner-type="border"
+        spinner-variant="info"
+        rounded="sm"
+      >
+        <b-table
+          v-if="errors.length==0"
+          striped
+          hover
+          small
+          :fields="columns"
+          :items="getLogLines"
+          empty-text="no log entries to display"
+        />
+        <WarningBox v-if="errors.length>0" :errors="errors"/>
+      </b-overlay>
     </b-card-body>
   </b-card>
 </template>
@@ -20,7 +29,8 @@ import WarningBox from '@/components/WarningBox';
 import {
   BCard,
   BCardBody,
-  BTable
+  BTable,
+  BOverlay
 } from 'bootstrap-vue';
 
 export default {
@@ -29,10 +39,12 @@ export default {
     WarningBox,
     BCard,
     BCardBody,
-    BTable
+    BTable,
+    BOverlay
   },
   data() {
     return {
+      showOverlay: false,
       errors: [],
       columns: [
         {
@@ -58,8 +70,13 @@ export default {
     ])
   },
   created() {
+    this.showOverlay = true;
     this.queryLogLines()
-    .catch((errors) => this.errors = errors);
+    .then(() => this.showOverlay = false)
+    .catch((errors) => {
+      this.showOverlay = false;
+      this.errors = errors;
+    });
   }
 }
 </script>

@@ -4,23 +4,11 @@
       <b-col cols="12">
         <WarningBox v-if="errors.length > 0" :errors="errors"/>
         <b-form @submit="add">
-          <b-form-group
-            id="input-group-engine-hours"
+          <engine-hours 
             label="Engine Hrs"
-            label-for="input-engine-hours"
-            label-cols="3"
-          >
-            <b-input-group size="sm">
-              <b-form-input
-                id="input-engine-hours"
-                v-model="form.engineHours"
-                type="text"
-              />
-              <b-input-group-prepend is-text>
-                hrs
-              </b-input-group-prepend>
-            </b-input-group>
-          </b-form-group>
+            v-model="form.engineHours"
+            :display-format="getEngineHourFormat"
+          />
           <b-form-group
             id="input-group-description"
             label="Description"
@@ -52,6 +40,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import WarningBox from '@/components/WarningBox';
+import EngineHours from '@/components/forms/inputs/EngineHours';
 import {
   BContainer,
   BRow,
@@ -59,8 +48,6 @@ import {
   BForm,
   BFormGroup,
   BInputGroup,
-  BFormInput,
-  BInputGroupPrepend,
   BFormTextarea,
   BButton
 } from 'bootstrap-vue';
@@ -69,14 +56,13 @@ export default {
   name: "MaintenanceLogForm",
   components: {
     WarningBox,
+    EngineHours,
     BContainer,
     BRow,
     BCol,
     BForm,
     BFormGroup,
     BInputGroup,
-    BFormInput,
-    BInputGroupPrepend,
     BFormTextarea,
     BButton
   },
@@ -93,6 +79,9 @@ export default {
     ...mapGetters('login', [
       'userInfo'
     ]),
+    ...mapGetters('configuration',[
+      'getEngineHourFormat'
+    ])
   },
   methods: {
     add: function() {
@@ -116,7 +105,13 @@ export default {
     },
     ...mapActions('boat', [
       'addMaintenanceEntry'
-    ])
+    ]),
+    ...mapActions('configuration',[
+      'queryConfiguration'
+    ]),
+  },
+  created() {
+    this.queryConfiguration();
   }
 }
 </script>
