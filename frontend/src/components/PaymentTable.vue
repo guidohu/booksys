@@ -92,6 +92,7 @@ import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { reverse } from 'lodash';
 import moment from 'moment';
+import { formatCurrency } from '@/libs/formatters';
 import WarningBox from '@/components/WarningBox';
 import IncomeModal from '@/components/IncomeModal';
 import ExpenseModal from '@/components/ExpenseModal';
@@ -128,9 +129,6 @@ export default {
     BOverlay,
     BTable
   },
-  // directives: {
-  //   "b-modal": VBModal
-  // },
   data() {
     return {
       showExpenseModal: false,
@@ -164,7 +162,7 @@ export default {
           key: "amount",
           label: "Amount",
           sortable: true,
-          formatter: (value) => value + " " + this.getCurrency,
+          formatter: (value) => formatCurrency(value),
           tdClass: "text-right",
           thClass: "text-right"
         },

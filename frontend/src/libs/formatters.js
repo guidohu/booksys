@@ -72,3 +72,12 @@ export const formatEngineHourLabel = (format) => {
   }
   return "hrs";
 }
+
+/**
+ * Formats a value of a given currency into a string with the currency appended.
+ * @param {*} value the value
+ * @param {*} currency the currency (e.g. CHF)
+ */
+export const formatCurrency = (value, currency) => {
+  return sprintf('%.2f %s', Math.round(Number(value)*100)/100, currency);
+}
