@@ -18,42 +18,18 @@
               disabled
             />
           </b-form-group>
-          <b-form-group
-            id="input-group-before-hours"
+          <engine-hours 
             label="Before"
-            label-for="input-before-hours"
-            label-cols="3"
-          >
-            <b-input-group size="sm">
-              <b-form-input
-                id="input-before-hours"
-                v-model="form.beforeHours"
-                type="text"
-                :disabled="disableBefore"
-              />
-              <b-input-group-prepend is-text>
-                hrs
-              </b-input-group-prepend>
-            </b-input-group>
-          </b-form-group>
-          <b-form-group
+            v-model="form.beforeHours"
+            :display-format="getEngineHourFormat"
+            :disabled="disableBefore"
+          />
+          <engine-hours
             v-if="showAfter"
-            id="input-group-after-hours"
             label="After"
-            label-for="input-after-hours"
-            label-cols="3"
-          >
-            <b-input-group size="sm">
-              <b-form-input
-                id="input-after-hours"
-                v-model="form.afterHours"
-                type="text"
-              />
-              <b-input-group-prepend is-text>
-                {{ engineHourLabel }}
-              </b-input-group-prepend>
-            </b-input-group>
-          </b-form-group>
+            v-model="form.afterHours"
+            :display-format="getEngineHourFormat"
+          />
           <b-form-group
             id="input-group-type"
             label="Type"
@@ -84,8 +60,8 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
-import { formatEngineHourLabel } from '@/libs/formatters';
 import WarningBox from '@/components/WarningBox';
+import EngineHours from '@/components/forms/inputs/EngineHours';
 import {
   BContainer,
   BRow,
@@ -93,26 +69,22 @@ import {
   BForm,
   BFormGroup,
   BFormInput,
-  BInputGroup,
-  BInputGroupPrepend,
   BButton
 } from 'bootstrap-vue';
-
 
 export default {
   name: "EngineHourLogForm",
   components: {
     ToggleButton,
     WarningBox,
+    EngineHours,
     BContainer,
     BRow,
     BCol,
     BForm,
     BFormGroup,
     BFormInput,
-    BInputGroup,
-    BInputGroupPrepend,
-    BButton
+    BButton,
   },
   data() {
     return {
@@ -147,9 +119,6 @@ export default {
     userInfo: function(){
       console.log("userInfo just changed");
       this.setDriver();
-    },
-    getEngineHourFormat: function(format){
-      this.engineHourLabel = formatEngineHourLabel(format);
     },
     getEngineHourLogLatest: function(newData){
       console.log('engineHourLatest just changed', newData);

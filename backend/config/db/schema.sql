@@ -5,9 +5,9 @@
 CREATE TABLE `boat_engine_hours` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `timestamp` datetime DEFAULT NULL,
-  `before_hours` float(10,1) DEFAULT NULL,
-  `after_hours` float(10,1) DEFAULT NULL,
-  `delta_hours` float(10,1) DEFAULT NULL,
+  `before_hours` DECIMAL(10,5) DEFAULT NULL,
+  `after_hours` DECIMAL(10,5) DEFAULT NULL,
+  `delta_hours` DECIMAL(10,5) DEFAULT NULL,
   `type` int(11) DEFAULT NULL,
   `user_id` int(11) DEFAULT NULL,
   `comment` text CHARACTER SET utf8,

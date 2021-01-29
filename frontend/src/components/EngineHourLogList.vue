@@ -4,6 +4,7 @@
     <EngineHourEntryModal
       :engineHourEntry="selectedEngineHourLogEntry"
       :visible.sync="showEntryHourModal"
+      :displayFormat="getEngineHourFormat"
     />
     <b-table v-if="errors.length == 0" 
       hover 
