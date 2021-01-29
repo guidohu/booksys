@@ -66,7 +66,7 @@
 					UNION ALL
 					SELECT bf.id as id, \"boat_fuel\" as type, bf.timestamp as time, 
 					       CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, ' added ', 
-						          bf.liters, 'L fuel for ', FORMAT(cost_chf, 2), ' $configuration->currency') as log 
+						          FORMAT(bf.liters, 2), 'L fuel for ', FORMAT(cost_chf, 2), ' $configuration->currency') as log 
 						FROM user u, boat_fuel bf 
 						WHERE bf.user_id = u.id
                   ) as c_log ORDER BY time DESC";
