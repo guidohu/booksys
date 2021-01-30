@@ -141,8 +141,9 @@
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import Session, { SESSION_TYPE_OPEN, SESSION_TYPE_PRIVATE } from '@/dataTypes/session';
-import moment from 'moment';
-import 'moment-timezone';
+import * as dayjs from 'dayjs';
+import * as dayjsUTC from 'dayjs/plugin/utc';
+import * as dayjsTimezone from 'dayjs/plugin/timezone';
 import {
   BModal,
   BRow,
@@ -156,6 +157,9 @@ import {
   BIconCheck,
   BIconX
 } from 'bootstrap-vue';
+
+dayjs.extend(dayjsUTC);
+dayjs.extend(dayjsTimezone);
 
 export default {
   name: 'SessionEditorModal',
@@ -228,17 +232,17 @@ export default {
 
       const startString = this.form.startDate + " " + this.form.startTime;
       // const endString = this.form.endDate + " " + this.form.endTime;
-      console.log("SessionEditorModal: startString moment:", moment(startString));
-      console.log("SessionEditorModal: startString moment.tz(timezone):", moment.tz(startString, this.getTimezone));
-      console.log("SessionEditorModal: startString format:", moment.tz(startString, this.getTimezone).format());
+      console.log("SessionEditorModal: startString moment:", dayjs(startString));
+      console.log("SessionEditorModal: startString moment.tz(timezone):", dayjs.tz(startString, this.getTimezone));
+      console.log("SessionEditorModal: startString format:", dayjs.tz(startString, this.getTimezone).format());
       
 
       const session = new Session(
         this.form.id,
         this.form.title,
         this.form.description,
-        moment.tz(this.form.startDate + " " + this.form.startTime, this.getTimezone).format(),
-        moment.tz(this.form.endDate + " " + this.form.endTime, this.getTimezone).format(),
+        dayjs.tz(this.form.startDate + " " + this.form.startTime, this.getTimezone).format(),
+        dayjs.tz(this.form.endDate + " " + this.form.endTime, this.getTimezone).format(),
         this.form.maximumRiders,
         type
       );
@@ -295,17 +299,17 @@ export default {
 
       // set times
       this.form.startDate = (this.defaultValues != null && this.defaultValues.start != null) 
-        ? moment(this.defaultValues.start).format("YYYY-MM-DD") 
-        : moment().tz(this.getTimezone).format("YYYY-MM-DD");
+        ? dayjs(this.defaultValues.start).format("YYYY-MM-DD") 
+        : dayjs().tz(this.getTimezone).format("YYYY-MM-DD");
       this.form.startTime = (this.defaultValues != null && this.defaultValues.start != null) 
-        ? moment(this.defaultValues.start).format("HH:mm") 
-        : moment().tz(this.getTimezone).format("HH:mm");
+        ? dayjs(this.defaultValues.start).format("HH:mm") 
+        : dayjs().tz(this.getTimezone).format("HH:mm");
       this.form.endDate = (this.defaultValues != null && this.defaultValues.end != null) 
-        ? moment(this.defaultValues.end).format("YYYY-MM-DD") 
-        : moment().tz(this.getTimezone).add(1, 'hour').format("YYYY-MM-DD");
+        ? dayjs(this.defaultValues.end).format("YYYY-MM-DD") 
+        : dayjs().tz(this.getTimezone).add(1, 'hour').format("YYYY-MM-DD");
       this.form.endTime = (this.defaultValues != null && this.defaultValues.end != null) 
-        ? moment(this.defaultValues.end).format("HH:mm") 
-        : moment().tz(this.getTimezone).add(1, 'hour').format("HH:mm");
+        ? dayjs(this.defaultValues.end).format("HH:mm") 
+        : dayjs().tz(this.getTimezone).add(1, 'hour').format("HH:mm");
 
       // set maximum riders
       this.form.maximumRiders = (this.defaultValues != null && this.defaultValues.maximumRiders != null) 

@@ -5,7 +5,7 @@
 
 <script>
 import BooksysPie from "../libs/pie";
-import moment from 'moment-timezone';
+import * as dayjs from 'dayjs';
 
 export default {
   name: 'Pie',
@@ -59,7 +59,7 @@ export default {
   computed: {
     date: function(){
       if(this.sessionData != null){
-        return moment(this.sessionData.window_start).format("YYYY-MM-DD");
+        return dayjs(this.sessionData.window_start).format("YYYY-MM-DD");
       }else{
         return "unknown";
       }
@@ -74,10 +74,6 @@ export default {
 </script>
 
 <style scoped>
-  /* .small-pie {
-    height: 7em;
-    width: 7em;
-  } */
 
   .full-width {
     width: 100%;

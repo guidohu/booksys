@@ -57,14 +57,21 @@ import ConditionInfoCard from '@/components/ConditionInfoCard';
 import SessionMonthCard from '@/components/SessionMonthCard';
 import SessionsOverview from '@/components/SessionsOverview';
 import MainTitle from '@/components/MainTitle';
-import moment from 'moment';
-import 'moment-timezone';
+import * as dayjs from 'dayjs';
+import * as dayjsUTC from 'dayjs/plugin/utc';
+import * as dayjsTimezone from 'dayjs/plugin/timezone';
+import * as dayjsCustomParseFormat from 'dayjs/plugin/customParseFormat';
+
 import {
   BRow,
   BCol,
   BButton,
   BIconHouse
 } from 'bootstrap-vue';
+
+dayjs.extend(dayjsUTC);
+dayjs.extend(dayjsTimezone);
+dayjs.extend(dayjsCustomParseFormat);
 
 export default {
   name: 'Calendar',
@@ -101,11 +108,11 @@ export default {
       'querySessionsCalendar'
     ]),
     prevMonth: function(){
-      this.month = moment(this.month).add(-1, 'month').format();
+      this.month = dayjs(this.month).add(-1, 'month').format();
       this.querySessionsForMonth();
     },
     nextMonth: function(){
-      this.month = moment(this.month).add(1, 'month').format();
+      this.month = dayjs(this.month).add(1, 'month').format();
       this.querySessionsForMonth();
     },
     querySessionsForMonth: function() {
@@ -143,10 +150,11 @@ export default {
     const urlParams = new URLSearchParams(window.location.search);
     const urlDate = urlParams.get('date');
     if(urlDate != null){
-      const urlDateParsed =  moment(urlDate, 'YYYY-MM-DD').tz(this.getTimezone).startOf('month').format();
+      const urlDateParsed =  dayjs(urlDate, 'YYYY-MM-DD').tz(this.getTimezone).startOf('month').format();
       this.month = urlDateParsed;
     }else{
-      this.month = moment().tz(this.getTimezone).startOf('month').format();
+      this.month = dayjs().tz(this.getTimezone).startOf('month').format();
+      console.log("calculated month to be:", this.month);
     }    
 
     this.querySessionsForMonth();

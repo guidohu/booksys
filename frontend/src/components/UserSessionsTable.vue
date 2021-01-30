@@ -24,7 +24,9 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import moment from 'moment-timezone/moment-timezone';
+import * as dayjs from 'dayjs';
+import * as dayjsUTC from 'dayjs/plugin/utc';
+import * as dayjsTimezone from 'dayjs/plugin/timezone';
 import {
   BTable,
   BRow,
@@ -32,6 +34,9 @@ import {
   BButton,
   BIconX
 } from 'bootstrap-vue';
+
+dayjs.extend(dayjsUTC);
+dayjs.extend(dayjsTimezone);
 
 export default {
   name: 'UserSessionsTable',
@@ -70,8 +75,8 @@ export default {
   },
   methods: {
     formatTime: function(item) {
-      return moment(item.start, "X").tz(this.getTimezone).format("DD.MM.YYYY HH:mm")
-      + " - " + moment(item.end, "X").tz(this.getTimezone).format("HH:mm");
+      return dayjs.unix(item.start).tz(this.getTimezone).format("DD.MM.YYYY HH:mm")
+      + " - " + dayjs.unix(item.end).tz(this.getTimezone).format("HH:mm");
     },
     cancelSession: function(sessionId) {
       console.log("Cancel session with id", sessionId);

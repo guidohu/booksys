@@ -32,8 +32,13 @@ import DashboardAdminMobile from '../components/DashboardAdminMobile';
 import DashboardMemberMobile from '../components/DashboardMemberMobile';
 import DashboardGuestMobile from '../components/DashboardGuestMobile';
 import DatabaseUpdateModal from '../components/DatabaseUpdate';
-import moment from 'moment-timezone';
+import * as dayjs from 'dayjs';
+import * as dayjsUTC from 'dayjs/plugin/utc';
+import * as dayjsTimezone from 'dayjs/plugin/timezone';
 import { BLink } from 'bootstrap-vue';
+
+dayjs.extend(dayjsUTC);
+dayjs.extend(dayjsTimezone);
 
 export default {
   name: 'Dashboard',
@@ -92,8 +97,8 @@ export default {
       }
     },
     getSessionInfo() {
-      const dateStart = moment().tz(this.getTimeZone()).startOf('day');
-      const dateEnd   = moment().tz(this.getTimeZone()).endOf('day');
+      const dateStart = dayjs().tz(this.getTimeZone()).startOf('day');
+      const dateEnd   = dayjs().tz(this.getTimeZone()).endOf('day');
       console.log("Query sessions from", dateStart, "to", dateEnd);
       this.querySessions({start: dateStart, end: dateEnd});
     }

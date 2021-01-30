@@ -1,5 +1,5 @@
 import Sessions from "@/api/sessions";
-import moment from 'moment';
+import * as dayjs from 'dayjs';
 
 const state = () => ({
   sessions: null,
@@ -51,8 +51,8 @@ const actions = {
     // do a reload in case we already have sessions loaded
     if(time == null && state.sessions != null){
       time = {
-        start: moment(state.sessions.window_start).format(),
-        end: moment(state.sessions.window_end).format()
+        start: dayjs(state.sessions.window_start).format(),
+        end: dayjs(state.sessions.window_end).format()
       }
     }
 

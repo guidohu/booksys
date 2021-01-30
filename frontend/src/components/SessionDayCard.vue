@@ -37,7 +37,13 @@
 <script>
 import { mapGetters } from 'vuex';
 import Pie from "./Pie.vue";
-import moment from 'moment-timezone';
+import * as dayjs from 'dayjs';
+import * as dayjsUTC from 'dayjs/plugin/utc';
+import * as dayjsTimezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(dayjsUTC);
+dayjs.extend(dayjsTimezone);
+
 import {
   BCard,
   BCardHeader,
@@ -70,12 +76,12 @@ export default {
     ]),
     dateString: function() {
       console.log("sessionData", this.sessionData);
-      return moment(this.sessionData.window_start).format("dddd DD.MM.YYYY");
+      return dayjs(this.sessionData.window_start).format("dddd DD.MM.YYYY");
     },
     isToday: function() {
       console.log(this.getTimezone);
-      const today = moment().tz(this.getTimezone).startOf('day').format();
-      const sessionDay = moment(this.sessionData.window_start).tz(this.getTimezone).startOf('day').format();
+      const today = dayjs().tz(this.getTimezone).startOf('day').format();
+      const sessionDay = dayjs(this.sessionData.window_start).tz(this.getTimezone).startOf('day').format();
       if(today == sessionDay){
         return true;
       }

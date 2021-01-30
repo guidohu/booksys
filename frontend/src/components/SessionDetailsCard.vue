@@ -89,8 +89,7 @@
 
 <script>
 import { mapActions} from 'vuex';
-import moment from 'moment';
-import 'moment-timezone';
+import * as dayjs from 'dayjs';
 import { BooksysBrowser } from '@/libs/browser';
 import { UserPointer } from '@/dataTypes/user';
 import RiderSelectionModal from '@/components/RiderSelectionModal';
@@ -143,7 +142,7 @@ export default {
   computed: {
     dateString: function(){
       const newDate = this.date;
-      return moment(newDate).format('DD.MM.YYYY');
+      return dayjs(newDate).format('DD.MM.YYYY');
     },
     timeString: function(){
       if(this.session == null){
@@ -152,7 +151,7 @@ export default {
 
       const start = this.session.start;
       const end   = this.session.end;
-      return moment(start).format('HH:mm') + " - " + moment(end).format('HH:mm');
+      return dayjs(start).format('HH:mm') + " - " + dayjs(end).format('HH:mm');
     },
     showCreateSession: function(){
       if(this.session != null && this.session.id == null){

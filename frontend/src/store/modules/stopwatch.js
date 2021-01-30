@@ -1,7 +1,7 @@
 import { sprintf } from 'sprintf-js';
 import { keys } from 'lodash';
 import Heat from'@/api/heat';
-import moment from 'moment';
+import * as dayjs from 'dayjs';
 
 const state = () => ({
   sessionId: null,
@@ -47,7 +47,7 @@ const actions = {
     console.log('startTakingTime called');
     if(state.isRunning == false){
       console.log("Start taking time");
-      commit('setStartTime', moment().format());
+      commit('setStartTime', dayjs().format());
       commit('setIsRunning', true);
       dispatch('displayTimeUpdate', { start: true });
     }
@@ -55,13 +55,13 @@ const actions = {
   pauseTakingTime: ({ commit }) => {
     console.log('pauseTakingTime called');
     commit('setIsDisplayUpdaterActive', false);
-    commit('setPause', moment().format());
+    commit('setPause', dayjs().format());
   },
   resumeTakingTime: ({ commit, dispatch, state }) => {
     console.log('resumeTakingTime called');
     if(state.isRunning == true){
       console.log("Resume taking time");
-      commit('setResume', moment().format());
+      commit('setResume', dayjs().format());
       dispatch('displayTimeUpdate', { resume: true });
     }
   },
@@ -75,15 +75,15 @@ const actions = {
 
         // Use current time, or the time when we paused
         const stoppedTime = (state.isPaused) 
-          ? moment(state._pausedAt).format("X")
-          : moment().format("X");
+          ? dayjs(state._pausedAt).unix()
+          : dayjs().unix();
         
         const startTime = state._startTime;
         console.log("state at time of finish:", state);
         const offset = state._timeOffset;
-        console.log("stoppedTime", moment(stoppedTime, "X").format(), stoppedTime);
-        console.log("startTime", moment(state._startTime, "X").format(), state._startTime);
-        console.log("offset", moment(state._timeOffset, "X").format(), state._timeOffset);
+        console.log("stoppedTime", dayjs.unix(stoppedTime).format(), stoppedTime);
+        console.log("startTime", dayjs.unix(state._startTime).format(), state._startTime);
+        console.log("offset", dayjs.unix(state._timeOffset).format(), state._timeOffset);
         const duration = stoppedTime - startTime - offset;
 
         // create a unique ID
@@ -178,13 +178,13 @@ const mutations = {
     storeState(state);
   },
   setStartTime (state, value){
-    const startTime = moment(value).format("X");
+    const startTime = dayjs(value).unix();
     console.log("set startTime to:", startTime);
     state._startTime = startTime;
     storeState(state);
   },
   updateDisplayTime (state){
-    const currentTime = moment().format("X");
+    const currentTime = dayjs().unix();
     const startTime = state._startTime;
     const offset = state._timeOffset;
     const timePassed = currentTime - startTime - offset;
@@ -222,8 +222,8 @@ const mutations = {
   setResume (state, value) {
     console.log("setResume with", value);
     // set the time we resumed in ISO format to calculate additional offset
-    const pausedAt = moment(state._pausedAt).format("X");
-    const resumedAt = moment(value).format("X");
+    const pausedAt = dayjs(state._pausedAt).unix();
+    const resumedAt = dayjs(value).unix();
     const additionalOffset = resumedAt - pausedAt;
     state._timeOffset += additionalOffset;
     state._pausedAt = null;

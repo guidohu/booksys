@@ -1,4 +1,7 @@
-import moment from 'moment';
+import * as dayjs from 'dayjs';
+import * as dayjsUTC from 'dayjs/plugin/utc';
+import * as dayjsTimezone from 'dayjs/plugin/timezone';
+import * as dayjsAdvancedFormat from 'dayjs/plugin/advancedFormat';
 import Session from '@/dataTypes/session';
 
 export default class Sessions {
@@ -8,10 +11,15 @@ export default class Sessions {
    * @param {ISO date} month a day within the month
    */
   static getSessionsCalendar(month){
-    let dateIterator = moment(month).startOf('month');
+
+    dayjs.extend(dayjsUTC);
+    dayjs.extend(dayjsTimezone);
+    dayjs.extend(dayjsAdvancedFormat);
+
+    let dateIterator = dayjs(month).startOf('month');    
     
     // start with a monday
-    while(dateIterator.day() != 1){
+    while(dateIterator.date() != 1){
       dateIterator.add(-1, 'day');
     }
 
@@ -50,19 +58,19 @@ export default class Sessions {
               let timezone     = res.timezone;
               const winStart   = res.window_start;
               // const winEnd     = res.window_end;
-              res.window_start = moment(res.window_start, "X").tz(timezone).format();
-              res.window_end   = moment(res.window_end, "X").tz(timezone).format();
-              res.sunrise      = moment(res.sunrise, "X").tz(timezone).format();
-              res.sunset       = moment(res.sunset, "X").tz(timezone).format();
+              res.window_start = dayjs.unix(res.window_start).tz(timezone).format();
+              res.window_end   = dayjs.unix(res.window_end).tz(timezone).format();
+              res.sunrise      = dayjs.unix(res.sunrise).tz(timezone).format();
+              res.sunset       = dayjs.unix(res.sunset).tz(timezone).format();
               const busDayStart = res.business_day_start.split(":");
               const busDayEnd   = res.business_day_end.split(":");
-              res.business_day_start = moment(winStart, "X")
+              res.business_day_start = dayjs.unix(winStart)
                 .tz(timezone)
                 .set('hour', busDayStart[0])
                 .set('minutes', busDayStart[1])
                 .set('seconds', busDayStart[2])
                 .format();
-              res.business_day_end = moment(winStart, "X")
+              res.business_day_end = dayjs.unix(winStart)
                 .tz(timezone)
                 .set('hour', busDayEnd[0])
                 .set('minutes', busDayEnd[1])
@@ -76,8 +84,8 @@ export default class Sessions {
                   s.id,
                   s.title,
                   s.comment,
-                  moment(s.start, "X").tz(timezone).format(),
-                  moment(s.end, "X").tz(timezone).format(),
+                  dayjs.unix(s.start).tz(timezone).format(),
+                  dayjs.unix(s.end).tz(timezone).format(),
                   s.free,
                   s.type
                 );
@@ -106,11 +114,16 @@ export default class Sessions {
   }
 
   static getSessions(dateStart, dateEnd){
+    
+    dayjs.extend(dayjsUTC);
+    dayjs.extend(dayjsTimezone);
+    dayjs.extend(dayjsAdvancedFormat);
+
     console.log("getSessions:", dateStart);
     return new Promise((resolve, reject) => {
       const query = {
-        start: moment(dateStart).format("X"),
-        end: moment(dateEnd).format("X")
+        start: dayjs(dateStart).format("X"),
+        end: dayjs(dateEnd).format("X")
       }
       fetch('/api/booking.php?action=get_booking_day', {
         method: 'POST',
@@ -126,19 +139,19 @@ export default class Sessions {
             let timezone = res.timezone;
             const winStart   = res.window_start;
             // const winEnd     = res.window_end;
-            res.window_start = moment(res.window_start, "X").tz(timezone).format();
-            res.window_end   = moment(res.window_end, "X").tz(timezone).format();
-            res.sunrise      = moment(res.sunrise, "X").tz(timezone).format();
-            res.sunset       = moment(res.sunset, "X").tz(timezone).format();
+            res.window_start = dayjs.unix(res.window_start).tz(timezone).format();
+            res.window_end   = dayjs.unix(res.window_end).tz(timezone).format();
+            res.sunrise      = dayjs.unix(res.sunrise).tz(timezone).format();
+            res.sunset       = dayjs.unix(res.sunset).tz(timezone).format();
             const busDayStart = res.business_day_start.split(":");
             const busDayEnd   = res.business_day_end.split(":");
-            res.business_day_start = moment(winStart, "X")
+            res.business_day_start = dayjs.unix(winStart)
               .tz(timezone)
               .set('hour', busDayStart[0])
               .set('minutes', busDayStart[1])
               .set('seconds', busDayStart[2])
               .format();
-            res.business_day_end = moment(winStart, "X")
+            res.business_day_end = dayjs.unix(winStart)
               .tz(timezone)
               .set('hour', busDayEnd[0])
               .set('minutes', busDayEnd[1])
@@ -152,8 +165,8 @@ export default class Sessions {
                 s.id,
                 s.title,
                 s.comment,
-                moment(s.start, "X").tz(timezone).format(),
-                moment(s.end, "X").tz(timezone).format(),
+                dayjs.unix(s.start).tz(timezone).format(),
+                dayjs.unix(s.end).tz(timezone).format(),
                 s.free,
                 s.type
               );
@@ -201,14 +214,14 @@ export default class Sessions {
               sR.id,
               sR.title,
               sR.comment,
-              moment(sR.start_time, "X").format(),
-              moment(sR.end_time, "X").format(),
+              dayjs.unix(sR.start_time).format(),
+              dayjs.unix(sR.end_time).format(),
               sR.riders_max,
               sR.type
             );
             const sessionMetaInfo = {
-              sunrise: moment(sR.sunrise, "X").format(),
-              sunset: moment(sR.sunset, "X").format()
+              sunrise: dayjs.unix(sR.sunrise).format(),
+              sunset: dayjs.unix(sR.sunset).format()
             };
             session.addRiders(sR.riders);
             resolve({
@@ -233,14 +246,17 @@ export default class Sessions {
   }
 
   static createSession(sessionData){
+
+    dayjs.extend(dayjsAdvancedFormat);
+
     return new Promise((resolve, reject) => {
       // build request body
       const session = {
         title: sessionData.title,
         comment: sessionData.description,
         max_riders: sessionData.maximumRiders,
-        start: moment(sessionData.start).format('X'),
-        end: moment(sessionData.end).format('X'),
+        start: dayjs(sessionData.start).format('X'),
+        end: dayjs(sessionData.end).format('X'),
         type: sessionData.type
       };
 
@@ -273,6 +289,8 @@ export default class Sessions {
   }
 
   static editSession(sessionData){
+    dayjs.extend(dayjsAdvancedFormat);
+
     return new Promise((resolve, reject) => {
       // build request body
       const session = {
@@ -280,8 +298,8 @@ export default class Sessions {
         title: sessionData.title,
         comment: sessionData.description,
         max_riders: sessionData.maximumRiders,
-        start: moment(sessionData.start).format('X'),
-        end: moment(sessionData.end).format('X'),
+        start: dayjs(sessionData.start).format('X'),
+        end: dayjs(sessionData.end).format('X'),
         type: sessionData.type
       };
 

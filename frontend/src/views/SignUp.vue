@@ -69,8 +69,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
-import UserSignUp from '@/components/forms/UserSignUp';
-import VueRecaptcha from 'vue-recaptcha';
 import User from '@/api/user';
 import {
   BModal,
@@ -81,6 +79,9 @@ import {
   BIconX,
   BButton
 } from 'bootstrap-vue';
+
+const VueRecaptcha = () => import(/* webpackChunkName: "vue-recaptcha" */ 'vue-recaptcha');
+const UserSignUp = () => import(/* webpackChunkName: "user-sign-up" */ '@/components/forms/UserSignUp');
 
 export default {
   name: "SignUp",

@@ -19,7 +19,6 @@
 
 <script>
 import FuelLogForm from '@/components/FuelLogForm';
-import FuelLogChart from '@/components/FuelLogChart';
 import FuelLogList from '@/components/FuelLogList';
 import {
   BCard,
@@ -29,6 +28,8 @@ import {
   BCardBody,
   VBToggle
 } from 'bootstrap-vue';
+
+const FuelLogChart = () => import(/* webpackChunkName: "fuel-log-chart" */ '@/components/FuelLogChart');
 
 export default {
   name: "FuelLogContainer",
