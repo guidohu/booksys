@@ -31,7 +31,7 @@
               type="text"
               placeholder=""
               disabled
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
             id="driver"
@@ -47,7 +47,7 @@
               type="text"
               placeholder=""
               disabled
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
             v-if="form.averageFuelPerHour != null"
