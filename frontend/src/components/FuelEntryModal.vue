@@ -31,7 +31,7 @@
               type="text"
               placeholder=""
               disabled
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
             id="driver"
@@ -47,7 +47,28 @@
               type="text"
               placeholder=""
               disabled
-            ></b-form-input>
+            />
+          </b-form-group>
+          <b-form-group
+            v-if="form.averageFuelPerHour != null"
+            id="liters-per-hour"
+            label="Consumption"
+            label-for="fuel-input"
+            description=""
+            label-cols="3"
+          >
+            <b-input-group size="sm">
+              <b-form-input
+                id="liter-per-hour-input"
+                v-model="form.averageFuelPerHour"
+                type="text"
+                placeholder=""
+                disabled
+              />
+              <b-input-group-append is-text>
+                ltrs/h
+              </b-input-group-append>
+            </b-input-group>
           </b-form-group>
           <engine-hours
             label="Engine Hours"
@@ -172,6 +193,11 @@ import { mapActions, mapGetters } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
 import WarningBox from '@/components/WarningBox';
 import EngineHours from '@/components/forms/inputs/EngineHours';
+import { 
+  formatCurrency,
+  formatFuelConsumption,
+  formatFuel
+} from '@/libs/formatters';
 import moment from 'moment';
 import {
   BModal,
@@ -241,12 +267,13 @@ export default {
           id: entry.id,
           date: moment(entry.timestamp, "X").format("DD.MM.YYYY HH:mm"),
           isDiscounted: (entry.cost != null && entry.cost_brutto != null) ? true : false,
-          cost: cost,
-          costGross: costGross,
-          costNet: costNet,
+          cost: formatCurrency(cost, null),
+          costGross: formatCurrency(costGross, null),
+          costNet: formatCurrency(costNet, null),
           engineHours: entry.engine_hours,
-          fuel: entry.liters,
-          driver: entry.user_first_name
+          fuel: formatFuel(entry.liters),
+          driver: entry.user_first_name,
+          averageFuelPerHour: formatFuelConsumption(entry.avg_liters_per_hour)
         };
       }
     },

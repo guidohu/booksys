@@ -25,10 +25,14 @@
 import { mapActions, mapGetters } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import FuelEntryModal from '@/components/FuelEntryModal';
+import { BooksysBrowser } from '@/libs/browser';
+import { remove } from 'lodash';
 import { 
   formatEngineHour,
   formatCurrency,
-  formatFuel } from '@/libs/formatters';
+  formatFuel,
+  formatFuelConsumption
+} from '@/libs/formatters';
 import moment from "moment-timezone";
 import {
   BTable
@@ -63,7 +67,6 @@ export default {
       'queryFuelLog'
     ]),
     setItems: function(logs){
-      console.log("set Items to:", logs);
       this.items = [];
 
       if(logs == null){
@@ -75,7 +78,7 @@ export default {
       })
     },
     setColumns: function(){
-      this.$set(this, 'columns', [
+      var columns = [
         {
           key: 'timestamp',
           label: 'Date',
@@ -103,13 +106,25 @@ export default {
           formatter: (value) => formatFuel(value)
         },
         {
+          key: 'avg_liters_per_hour',
+          label: "L/hr",
+          sortable: true,
+          class: "text-right",
+          formatter: (value) => formatFuelConsumption(value)
+        },
+        {
           key: 'cost',
           label: 'Cost',
           sortable: true,
           class: "text-right",
           formatter: (value, key, item) => { return this.getFuelCost(item) }
         }
-      ]);
+      ];
+      if(BooksysBrowser.isMobile()){
+        remove(columns, function(n, idx){ return idx == 4 });
+      }
+
+      this.$set(this, 'columns', columns);
     },
     getFuelCost: function(entry){
       // returns either net or gross values for the cost
@@ -119,8 +134,7 @@ export default {
         return formatCurrency(Number(entry.cost_brutto), null);
       }
     },
-    rowClick: function(item, index, event){
-      console.log("rowClick item", item, "index", index, "event", event);
+    rowClick: function(item){
       this.selectedFuelEntry = item;
       this.showFuelEntryModal = true;
     },
@@ -135,7 +149,6 @@ export default {
   },
   watch: {
     getFuelLog: function(newValues) {
-      console.log("fuel log values changed to:", newValues);
       this.setItems(newValues);
     },
     getEngineHourFormat: function(newFormat, oldFormat){

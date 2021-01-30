@@ -93,3 +93,11 @@ export const formatCurrency = (value, currency) => {
 export const formatFuel = (value) => {
   return sprintf('%.2f', Number(value));
 }
+
+/**
+ * Formats a value to be displayed as liters / hour consumption
+ * @param {*} value liters per hour
+ */
+export const formatFuelConsumption = (value) => {
+  return sprintf('%.1f', Number(value));
+}

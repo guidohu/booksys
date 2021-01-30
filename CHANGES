@@ -1,6 +1,7 @@
 unreleased
- - support logo upload
- - support hh:mm engine hour format
+ - support for logo upload
+ - support for hh:mm engine hour format
+ - added average fuel consumption for fuel entries
 
 v2.1 2021.01.15
  - fix in accounting statistics
