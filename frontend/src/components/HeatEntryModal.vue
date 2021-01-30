@@ -148,7 +148,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import moment from 'moment';
+import * as dayjs from 'dayjs';
 import { sprintf } from 'sprintf-js';
 import WarningBox from '@/components/WarningBox';
 import {
@@ -208,7 +208,7 @@ export default {
     setFormDefaults: function(heatData) {
       this.form = {
         id: heatData.heat_id,
-        date: moment(heatData.timestamp, 'X').format("DD.MM.YYYY HH:mm"),
+        date: dayjs(heatData.timestamp*1000).format("DD.MM.YYYY HH:mm"),
         userId: heatData.user_id,
         rider: heatData.first_name + " " + heatData.last_name,
         fare: sprintf('%.2f', heatData.price_per_min),

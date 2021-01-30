@@ -20,7 +20,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import moment from "moment-timezone";
+import * as dayjs from 'dayjs';
 import WarningBox from '@/components/WarningBox';
 import EngineHourEntryModal from '@/components/EngineHourEntryModal';
 import { formatEngineHour } from '@/libs/formatters';
@@ -82,7 +82,7 @@ export default {
           key: 'time',
           label: 'Date',
           sortable: true,
-          formatter: (value) => { return moment(value, "X").format("DD.MM.YYYY HH:mm"); }
+          formatter: (value) => { return dayjs(value*1000).format("DD.MM.YYYY HH:mm"); }
         },
         {
           key: 'user_first_name',

@@ -198,7 +198,7 @@ import {
   formatFuelConsumption,
   formatFuel
 } from '@/libs/formatters';
-import moment from 'moment';
+import * as dayjs from 'dayjs';
 import {
   BModal,
   BCol,
@@ -265,7 +265,7 @@ export default {
 
         this.form = {
           id: entry.id,
-          date: moment(entry.timestamp, "X").format("DD.MM.YYYY HH:mm"),
+          date: dayjs(entry.timestamp*1000).format("DD.MM.YYYY HH:mm"),
           isDiscounted: (entry.cost != null && entry.cost_brutto != null) ? true : false,
           cost: formatCurrency(cost, null),
           costGross: formatCurrency(costGross, null),

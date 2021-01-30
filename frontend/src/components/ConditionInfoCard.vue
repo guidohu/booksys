@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import moment from 'moment-timezone';
+import * as dayjs from 'dayjs';
 import {
   BCard,
   BCardHeader,
@@ -57,13 +57,13 @@ export default {
       if(this.sunrise == null){
         return "n/a";
       }
-      return moment(this.sunrise).format("HH:mm");
+      return dayjs(this.sunrise).format("HH:mm");
     },
     sunsetString: function(){
       if(this.sunset == null){
         return "n/a";
       }
-      return moment(this.sunset).format("HH:mm");
+      return dayjs(this.sunset).format("HH:mm");
     }
   }
 }

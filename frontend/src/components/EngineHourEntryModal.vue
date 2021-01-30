@@ -104,7 +104,7 @@ import { mapActions } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
 import WarningBox from '@/components/WarningBox';
 import EngineHours from '@/components/forms/inputs/EngineHours';
-import moment from 'moment';
+import * as dayjs from 'dayjs';
 import {
   BModal,
   BRow,
@@ -157,7 +157,7 @@ export default {
       if(entry != null){
         this.form = {
           id: entry.id,
-          date: moment(entry.time, "X").format("DD.MM.YYYY HH:mm"),
+          date: dayjs(entry.time*1000).format("DD.MM.YYYY HH:mm"),
           driver: entry.user_first_name,
           beforeHours: entry.before_hours,
           afterHours: entry.after_hours,

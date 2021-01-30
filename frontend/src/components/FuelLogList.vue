@@ -33,7 +33,7 @@ import {
   formatFuel,
   formatFuelConsumption
 } from '@/libs/formatters';
-import moment from "moment-timezone";
+import * as dayjs from 'dayjs';
 import {
   BTable
 } from 'bootstrap-vue';
@@ -83,7 +83,7 @@ export default {
           key: 'timestamp',
           label: 'Date',
           sortable: true,
-          formatter: (value) => { return moment(value, "X").format("DD.MM.YYYY HH:mm"); }
+          formatter: (value) => { return dayjs(value*1000).format("DD.MM.YYYY HH:mm"); }
         },
         {
           key: 'user_first_name',

@@ -151,7 +151,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import EngineHours from '@/components/forms/inputs/EngineHours';
-import moment from 'moment';
+import * as dayjs from 'dayjs';
 import { orderBy } from 'lodash';
 import {
   BModal,
@@ -325,7 +325,7 @@ export default {
         engineHours: null,
         fuelLiters: null,
         type: null,
-        date: moment().format('YYYY-MM-DD'),
+        date: dayjs().format('YYYY-MM-DD'),
         user: null,
         description: null
       };
@@ -412,7 +412,7 @@ export default {
     .then(() => this.buildTypeSelect(this.getExpenseTypes))
     .catch((errors) => this.errors.push(...errors));
 
-    this.form.date = moment().format('YYYY-MM-DD');
+    this.form.date = dayjs().format('YYYY-MM-DD');
   }
 }
 </script>

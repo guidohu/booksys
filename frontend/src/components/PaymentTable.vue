@@ -91,7 +91,7 @@
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
 import { reverse } from 'lodash';
-import moment from 'moment';
+import * as dayjs from 'dayjs';
 import { formatCurrency } from '@/libs/formatters';
 import WarningBox from '@/components/WarningBox';
 import IncomeModal from '@/components/IncomeModal';
@@ -264,7 +264,7 @@ export default {
     this.queryYears()
     .catch((errors) => this.errors = errors);
 
-    const currentYear = moment().year();
+    const currentYear = dayjs().year();
     this.form.selectedYear = currentYear;
 
     this.queryTransactions(currentYear)
