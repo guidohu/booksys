@@ -103,7 +103,7 @@ Raphael.fn.pieChart = function (cx, cy, r, values, labels, colors, stroke, anima
 					}
 					if(labels[j]){
 						txt.stop().animate({opacity: 0}, ms);
-					};
+					}
                 });
 				
 				if(clickCallBack){
