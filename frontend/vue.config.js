@@ -161,11 +161,5 @@ module.exports = {
       msTileImage: 'img/icons/tile150x150.png'
     },
     workboxPluginMode: "GenerateSW",
-  },
-  pluginOptions: {
-    meta: {
-      projectName: 'Boat Community Booking System',
-      description: 'An app to manage everything in your boat community. From scheduling sessions, tracking usage and finances.'
-    }
   }
 }
