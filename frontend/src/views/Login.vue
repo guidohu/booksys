@@ -21,7 +21,7 @@
           </b-aspect>
         </b-col>
       </b-row>
-      <login-modal 
+      <login-modal
         v-if="showLogin"
         :statusMessage="status" 
         :initialUsername="username" 
@@ -106,8 +106,7 @@ export default {
   created () {
     this.isLoading = true;
 
-    this. queryLogoFile()
-    .then((uri) => console.log("Loaded logo image", uri))
+    this.queryLogoFile()
     .catch((errors) => console.log(errors));
 
     this.getIsLoggedIn()

@@ -17,20 +17,18 @@
       </footer>
     </b-container>
     <b-container v-if="isMobile" fluid="true">
-      <div v-if="isMobile">
-        <alert-message 
-          v-if="backendReachable == false" 
-          :alertMessage="backendNotReachableAlertMsg"
-        />
-        <router-view v-else/>
-      </div>
+      <alert-message 
+        v-if="backendReachable == false" 
+        :alertMessage="backendNotReachableAlertMsg"
+      />
+      <router-view v-else/>
     </b-container>
   </div>
 </template>
 
 <script>
 import { BooksysBrowser } from '@/libs/browser';
-import Backend from '@/api/backend';
+import { getBackendStatus }from '@/api/backend';
 import { mapGetters } from 'vuex';
 import {
   BContainer,
@@ -44,10 +42,8 @@ export default{
   name: 'App',
   data: function() {
     return {
-      backendAvailable: false, // if the backend is not available
       backendReachable: true,
       backendNotReachableAlertMsg: "The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible. You might try to simply refresh the page if you feel lucky.",
-      setupDone: false
     }
   },
   components: {
@@ -67,13 +63,6 @@ export default{
     ])
   },
   watch: {
-    setupDone(newValue){
-      if(newValue == false){
-        this.$router.push("/setup");
-      }else{
-        this.$router.push("/login");
-      }
-    },
     isLoggedIn: function(newStatus, oldStatus){
       if(newStatus == false && oldStatus == true){
         console.log("Logout detected by App.");
@@ -100,12 +89,11 @@ export default{
     // short pulse check on the
     // backend to verify whether
     // it is up and configured
-    Backend.getStatus()
+    getBackendStatus()
     .then((status) => {
       // if we do not have a configFile for the app -> go to setup
       if(!status.configFile || !status.configDb){
         console.log("App Setup Done: no");
-        this.setupDone = false;
         if(this.$route.path !== '/setup'){
           this.$router.push("/setup");
         }

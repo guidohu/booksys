@@ -77,7 +77,7 @@
 </template>
 
 <script>
-import Backend from '@/api/backend';
+import { getBackendStatus } from '@/api/backend';
 import Configuration from '@/api/configuration';
 import User from '@/api/user';
 
@@ -215,7 +215,7 @@ export default {
       // reset errors
       this.errors = [];
 
-      Backend.getStatus()
+      getBackendStatus()
       .then(status => {
         if(status.configFile == false){
           // no configuration at all yet

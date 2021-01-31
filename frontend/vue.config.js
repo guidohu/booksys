@@ -105,12 +105,6 @@ module.exports = {
             minSize: 0,
             reuseExistingChunk: true
           },
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            chunks: "all",
-            priority: -10,
-            reuseExistingChunk: true
-          },
           default: {
             chunks: "all",
             minChunks: 2,
@@ -124,15 +118,15 @@ module.exports = {
       // ]
     }
   },
-  chainWebpack: config => {
-    config
-      .plugin('html')
-      .tap(args => {
-        args[0].template = './public/index.html';
-        args[0].title = "Booking System";
-        return args
-      });
-  },
+  // chainWebpack: config => {
+  //   config
+  //     .plugin('html')
+  //     .tap(args => {
+  //       args[0].template = './public/index.html';
+  //       args[0].title = "Booking System";
+  //       return args
+  //     });
+  // },
   pwa: {
     manifestOptions: {
       name: "Booking System",
