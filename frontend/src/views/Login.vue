@@ -1,5 +1,4 @@
 <template>
-  <!-- <div class="login-view"> -->
   <b-overlay
     id="overlay-background"
     :show="isLoading"
@@ -10,13 +9,16 @@
     <b-container>
       <b-row class="text-center mb-3">
         <b-col cols="12">
-          <b-img 
-            v-if="getLogoFile != null"
-            :src="getLogoFile" 
-            alt="Logo" 
-            fluid 
-            :height="100"
-          />
+          <b-aspect aspect="6:1">
+            <b-img 
+              v-if="getLogoFile != null"
+              :src="getLogoFile" 
+              alt="Logo" 
+              fluid
+              :height="100"
+              width="auto"
+            />
+          </b-aspect>
         </b-col>
       </b-row>
       <login-modal 
@@ -27,7 +29,6 @@
       />
     </b-container>
   </b-overlay>
-  <!-- </div> -->
 </template>
 
 <script>
@@ -35,6 +36,7 @@ import { mapActions, mapGetters } from 'vuex';
 import LoginModal from '@/components/LoginModal.vue';
 import { BooksysBrowser } from '@/libs/browser';
 import {
+  BAspect,
   BContainer,
   BOverlay,
   BImg,
@@ -46,6 +48,7 @@ export default {
   name: 'Login',
   components: {
     LoginModal,
+    BAspect,
     BContainer,
     BOverlay,
     BImg,
