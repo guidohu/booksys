@@ -76,11 +76,11 @@ module.exports = {
         // maxSize: 240000,
         // maxInitialRequests: 10,
         cacheGroups: {
-          moment: {
-            test: /[\\/]node_modules[\\/]moment/,
-            reuseExistingChunk: true,
-            chunks: "all",
-          },
+          // moment: {
+          //   test: /[\\/]node_modules[\\/]moment/,
+          //   reuseExistingChunk: true,
+          //   chunks: "all",
+          // },
           vue: {
             test: /[\\/]node_modules[\\/]vue/,
             reuseExistingChunk: true,

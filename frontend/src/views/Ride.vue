@@ -96,7 +96,7 @@ import Session from '@/dataTypes/session';
 import * as dayjs from 'dayjs';
 import * as dayjsUTC from 'dayjs/plugin/utc';
 import * as dayjsTimezone from 'dayjs/plugin/timezone';
-import { difference } from 'lodash';
+import difference from 'lodash/difference';
 import {
   BRow,
   BCol,

@@ -90,12 +90,10 @@
 <script>
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
-import { reverse } from 'lodash';
+import reverse from 'lodash/reverse';
 import * as dayjs from 'dayjs';
 import { formatCurrency } from '@/libs/formatters';
 import WarningBox from '@/components/WarningBox';
-import IncomeModal from '@/components/IncomeModal';
-import ExpenseModal from '@/components/ExpenseModal';
 import {
   BRow,
   BCol,
@@ -109,6 +107,10 @@ import {
   BTable,
   ModalPlugin
 } from 'bootstrap-vue';
+
+const IncomeModal = () => import(/* webpackChunkName: "income-modal" */ '@/components/IncomeModal');
+const ExpenseModal = () => import(/* webpackChunkName: "expense-modal" */ '@/components/ExpenseModal');
+
 
 Vue.use(ModalPlugin);
 

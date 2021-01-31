@@ -1,5 +1,5 @@
 import { sprintf } from 'sprintf-js';
-import { keys } from 'lodash';
+import keys from 'lodash/keys';
 import Heat from'@/api/heat';
 import * as dayjs from 'dayjs';
 

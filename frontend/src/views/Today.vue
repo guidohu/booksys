@@ -100,7 +100,7 @@ import * as dayjsCustomParseFormat from 'dayjs/plugin/customParseFormat';
 import * as dayjsUTC from 'dayjs/plugin/utc';
 import * as dayjsTimezone from 'dayjs/plugin/timezone';
 
-import { difference } from 'lodash';
+import difference from 'lodash/difference';
 import {
   BRow,
   BCol,

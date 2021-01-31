@@ -68,7 +68,7 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import { reverse } from 'lodash';
+import reverse from 'lodash/reverse';
 import * as dayjs from 'dayjs';
 import WarningBox from '@/components/WarningBox';
 import {

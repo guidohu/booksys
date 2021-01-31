@@ -1,4 +1,4 @@
-import { values } from 'lodash';
+import values from 'lodash/values';
 import Login from './login';
 import { UserPointer } from '@/dataTypes/user';
 

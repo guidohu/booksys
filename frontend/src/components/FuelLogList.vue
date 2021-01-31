@@ -26,7 +26,7 @@ import { mapActions, mapGetters } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import FuelEntryModal from '@/components/FuelEntryModal';
 import { BooksysBrowser } from '@/libs/browser';
-import { remove } from 'lodash';
+import remove from 'lodash/remove';
 import { 
   formatEngineHour,
   formatCurrency,

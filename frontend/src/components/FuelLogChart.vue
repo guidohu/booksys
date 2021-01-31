@@ -6,10 +6,12 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import Chart from 'chart.js';
+import Chart from 'chart.js/dist/Chart';
 import 'chartjs-plugin-colorschemes/src/plugins/plugin.colorschemes';
 import { ClassicBlue7 } from 'chartjs-plugin-colorschemes/src/colorschemes/colorschemes.tableau';
-import { groupBy, max, sum } from 'lodash';
+import groupBy from 'lodash/groupBy';
+import max from 'lodash/max';
+import sum from 'lodash/sum';
 import * as dayjs from 'dayjs';
 import * as dayjsDayOfYear from 'dayjs/plugin/dayOfYear';
 

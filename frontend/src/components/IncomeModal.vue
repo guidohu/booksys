@@ -115,7 +115,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import * as dayjs from 'dayjs';
-import { orderBy } from 'lodash';
+import orderBy from 'lodash/orderBy';
 import {
   BModal,
   BRow,
