@@ -72,6 +72,8 @@ module.exports = {
     optimization: {
       splitChunks: {
         chunks: 'all',
+        // maxInitialRequests: 20,
+        // maxAsyncRequests: 15,
         cacheGroups: {
           vue: {
             test: /[\\/]node_modules[\\/]vue/,
@@ -93,7 +95,7 @@ module.exports = {
             priority: 15,
           },
           coreJs: {
-            test: /[\\/]node_modules[\\/]core\-js/,
+            test: /[\\/]node_modules[\\/]core-js/,
             reuseExistingChunk: true,
             minSize: 0,
             chunks: "all",
@@ -136,8 +138,8 @@ module.exports = {
       theme_color: "#1accda",
       icons: [
         {
-          src: "./img/icons/android-chrome-512x512.png",
-          sizes: "512x512",
+          src: "./img/icons/favicon-32x32.png",
+          sizes: "32x32",
           type: "image/png",
           purpose: "any maskable",
         },
