@@ -89,8 +89,6 @@ import NavbarMobile from '@/components/NavbarMobile';
 import ConditionInfoCard from '@/components/ConditionInfoCard';
 import SessionDayCard from '@/components/SessionDayCard';
 import SessionDetailsCard from '@/components/SessionDetailsCard';
-import SessionEditorModal from '@/components/SessionEditorModal';
-import SessionDeleteModal from '@/components/SessionDeleteModal';
 import MainTitle from '@/components/MainTitle';
 import Session from '@/dataTypes/session';
 import * as dayjs from 'dayjs';
@@ -104,6 +102,9 @@ import {
   BIconCalendar3,
   BIconHouse
 } from 'bootstrap-vue';
+
+const SessionEditorModal = () => import(/* webpackChunkName: "session-editor-modal" */ '@/components/SessionEditorModal');
+const SessionDeleteModal = () => import(/* webpackChunkName: "session-delete-modal" */ '@/components/SessionDeleteModal');
 
 dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);

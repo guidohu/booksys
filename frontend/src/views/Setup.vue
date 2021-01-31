@@ -82,9 +82,9 @@ import Configuration from '@/api/configuration';
 import User from '@/api/user';
 
 // Lazy loaded components
-const DatabaseConfiguration = () => import('@/components/DatabaseConfiguration');
-const UserSignUp = () => import('@/components/forms/UserSignUp');
-const WarningBox = () => import('@/components/WarningBox');
+const DatabaseConfiguration = () => import(/* webpackChunkName: "database-configuration" */ '@/components/DatabaseConfiguration');
+const UserSignUp = () => import(/* webpackChunkName: "user-sign-up" */ '@/components/forms/UserSignUp');
+const WarningBox = () => import(/* webpackChunkName: "warning-box" */ '@/components/WarningBox');
 
 import {
   BModal,

@@ -25,13 +25,6 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
-import DashboardAdmin from '../components/DashboardAdmin';
-import DashboardMember from '../components/DashboardMember';
-import DashboardGuest from '../components/DashboardGuest';
-import DashboardAdminMobile from '../components/DashboardAdminMobile';
-import DashboardMemberMobile from '../components/DashboardMemberMobile';
-import DashboardGuestMobile from '../components/DashboardGuestMobile';
-import DatabaseUpdateModal from '../components/DatabaseUpdate';
 import * as dayjs from 'dayjs';
 import * as dayjsUTC from 'dayjs/plugin/utc';
 import * as dayjsTimezone from 'dayjs/plugin/timezone';
@@ -39,6 +32,14 @@ import { BLink } from 'bootstrap-vue';
 
 dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);
+
+const DashboardAdmin = () => import(/* webpackChunkName: "dashboard-admin" */ '@/components/DashboardAdmin');
+const DashboardMember = () => import(/* webpackChunkName: "dashboard-member" */ '@/components/DashboardMember');
+const DashboardGuest = () => import(/* webpackChunkName: "dashboard-guest" */ '@/components/DashboardGuest');
+const DashboardAdminMobile = () => import(/* webpackChunkName: "dashboard-admin-mobile" */ '@/components/DashboardAdminMobile');
+const DashboardMemberMobile = () => import(/* webpackChunkName: "dashboard-member-mobile" */ '@/components/DashboardMemberMobile');
+const DashboardGuestMobile = () => import(/* webpackChunkName: "dashboard-guest-mobile" */ '@/components/DashboardGuestMobile');
+const DatabaseUpdateModal = () => import(/* webpackChunkName: "database-update" */ '@/components/DatabaseUpdate');
 
 export default {
   name: 'Dashboard',

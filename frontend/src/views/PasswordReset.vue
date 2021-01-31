@@ -175,7 +175,6 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import VueRecaptcha from 'vue-recaptcha';
 import User from '@/api/user';
 import WarningBox from '@/components/WarningBox';
 import {
@@ -194,6 +193,8 @@ import {
   BIconCheck,
 
 } from 'bootstrap-vue';
+
+const VueRecaptcha = () => import(/* webpackChunkName: "vue-recaptcha" */ 'vue-recaptcha');
 
 export default {
   name: "PasswordReset",
