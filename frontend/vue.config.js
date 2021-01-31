@@ -132,22 +132,6 @@ module.exports = {
         args[0].title = "Booking System";
         return args
       });
-    // config
-    //   .plugin('pwa')
-    //   .tap(args => {
-    //     args[0].workboxPluginMode = "GenerateSW";
-    //     args[0].manifestOptions = {};
-    //     args[0].name = "Booking System";
-    //     args[0].themeColor = "#19b0e6";
-    //     args[0].iconPaths = {
-    //       favicon32: 'img/icons/favicon-32x32.png',
-    //       favicon16: 'img/icons/favicon-16x16.png',
-    //       appleTouchIcon: 'img/icons/apple-touch-icon-512x512.png',
-    //       maskIcon: 'img/icons/safari-pinned-tab.svg',
-    //       msTileIMage: 'img/icons/tile150x150.png'
-    //     };
-    //     return args
-    //   });
   },
   pwa: {
     manifestOptions: {
@@ -155,19 +139,19 @@ module.exports = {
       short_name: "Booking System",
       start_url: "./",
       display: "standalone",
-      theme_color: "#19b0e6",
-      // icons: [
-      //   {
-      //     src: "./favicon.svg",
-      //     sizes: "512x512",
-      //     type: "image/svg+xml",
-      //     purpose: "any maskable",
-      //   },
-      // ],
+      theme_color: "#1accda",
+      icons: [
+        {
+          src: "./img/icons/android-chrome-512x512.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "any maskable",
+        },
+      ],
     },
-    themeColor: "#19b0e6",
-    msTileColor: "#19b0e6",
-    appleMobileWebAppCapable: "yes",
+    themeColor: "#1accda",
+    msTileColor: "#1accda",
+    appleMobileWebAppCapable: "no",
     appleMobileWebAppStatusBarStyle: "black",
     iconPaths: {
       maskicon: null,
@@ -176,7 +160,6 @@ module.exports = {
       appleTouchIcon: 'img/icons/apple-touch-icon-512x512.png',
       msTileImage: 'img/icons/tile150x150.png'
     },
-    // configure the workbox plugin
     workboxPluginMode: "GenerateSW",
   }
 }
