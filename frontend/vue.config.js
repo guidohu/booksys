@@ -72,55 +72,48 @@ module.exports = {
     optimization: {
       splitChunks: {
         chunks: 'all',
-  //     minSize: 10000,
-        // maxSize: 240000,
-        // maxInitialRequests: 10,
         cacheGroups: {
-          // moment: {
-          //   test: /[\\/]node_modules[\\/]moment/,
-          //   reuseExistingChunk: true,
-          //   chunks: "all",
-          // },
           vue: {
             test: /[\\/]node_modules[\\/]vue/,
             reuseExistingChunk: true,
             chunks: "all",
           },
-          bootstrap: {
-            test: /[\\/]node_modules[\\/]bootstrap/,
+          raphael: {
+            test: /[\\/]node_modules[\\/]raphael/,
             reuseExistingChunk: true,
+            minSize: 0,
             chunks: "all",
+            priority: 20,
           },
-          vendor: {
-            // name: "vendors", // part of the bundle name and
-            // can be used in chunks array of HtmlWebpackPlugin
-            test: /[\\/]node_modules[\\/]/,
-            chunks: "initial",
-            priority: -10,
+          popper: {
+            test: /[\\/]node_modules[\\/]popper/,
             reuseExistingChunk: true,
-            filename: '[name].vendors.js'
+            minSize: 0,
+            chunks: "all",
+            priority: 15,
+          },
+          coreJs: {
+            test: /[\\/]node_modules[\\/]core\-js/,
+            reuseExistingChunk: true,
+            minSize: 0,
+            chunks: "all",
+            priority: 10,
           },
           components: {
-            name: "components",
             test: /[\\/]src[\\/]components[\\/]/,
-            chunks: "initial",
+            chunks: "all",
             minSize: 0,
             reuseExistingChunk: true
           },
-          // default: {
-          //   name: "chunk",
-          //   chunks: "initial",
-          //   minChunks: 2,
-          //   priority: -20,
-          //   reuseExistingChunk: true
-          // }
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            chunks: "all",
+            priority: -10,
+            reuseExistingChunk: true
+          },
           default: {
-            chunks: "initial",
-            // filename: (pathData) => {
-            //   // Use pathData object for generating filename string based on your requirements
-            //   return `${pathData.chunk.name}-bundle.js`;
-            // }
-            filename: '[name].bundle.js',
+            chunks: "all",
+            minChunks: 2,
             reuseExistingChunk: true
           }
         }
@@ -145,7 +138,7 @@ module.exports = {
         args[0].workboxPluginMode = "GenerateSW";
         args[0].manifestOptions = {};
         args[0].name = "Booking System";
-        args[0].themeColor = "aliceblue";
+        args[0].themeColor = "#19b0e6";
         args[0].iconPaths = {
           favicon32: 'img/icons/favicon-32x32.png',
           favicon16: 'img/icons/favicon-16x16.png',
