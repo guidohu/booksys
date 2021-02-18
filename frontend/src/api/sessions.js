@@ -19,8 +19,8 @@ export default class Sessions {
     let dateIterator = dayjs(month).startOf('month');    
     
     // start with a monday
-    while(dateIterator.date() != 1){
-      dateIterator.add(-1, 'day');
+    while(dateIterator.day() != 1){
+      dateIterator = dateIterator.subtract(1, 'day');
     }
 
     // build 42 time windows (7 days for 6 weeks)
@@ -30,12 +30,14 @@ export default class Sessions {
 
     for(let i=0; i<42; i++){
       // create new time window
+      const start = dateIterator.startOf('day').format("X");
+      const end   = dateIterator.endOf('day').format("X");
       const window = {
-        start: dateIterator.startOf('day').format("X"),
-        end: dateIterator.endOf('day').format("X")
+        start: start,
+        end: end
       };
       query.timeWindows.push(window);
-      dateIterator.add(1, 'day');
+      dateIterator = dateIterator.add(1, 'day');
     }
 
     console.log("getSessionsCalendar:", query);
