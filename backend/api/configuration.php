@@ -25,6 +25,10 @@
             $response = get_recaptcha_key($configuration);
             echo json_encode($response);
             exit;
+        case 'get_logo_file':
+            $response = get_logo_file($configuration);
+            echo json_encode($response);
+            exit;
         case 'get_customization_parameters':
             get_customization_parameters($configuration);
             exit;
@@ -89,6 +93,12 @@
         return Status::successDataResponse("success", $response);
     }
 
+    function get_logo_file($configuration){
+        $response = array();
+        $response['uri'] = $configuration->logo_file;
+        return Status::successDataResponse("success", $response);
+    }
+
     function get_customization_parameters($configuration){
         // only available to users that are logged in
         _is_logged_in_or_return($configuration);
@@ -133,7 +143,9 @@
             "smtp_username"             => $configuration->smtp_username,
             "smtp_password"             => "hidden", // the proper value is hidden, $configuration->smtp_password,
             "recaptcha_publickey"       => $configuration->recaptcha_publickey,
-            "recaptcha_privatekey"      => $configuration->recaptcha_privatekey
+            "recaptcha_privatekey"      => $configuration->recaptcha_privatekey,
+            "logo_file"                 => $configuration->logo_file,
+            "engine_hour_format"        => $configuration->engine_hour_format
         ];
 
         return Status::successDataResponse('success', $response);
@@ -191,6 +203,9 @@
         if(isset($data->recaptcha_publickey) && !$sanitizer->isAlphaNum($data->recaptcha_publickey)){
             return Status::errorStatus("The provided recaptcha public key is not in a valid format.");
         }
+        if(isset($data->engine_hour_format) && !$sanitizer->isEngineHourFormat($data->engine_hour_format)){
+            return Status::errorStatus("The provided engine hour format is not valid.");
+        }
         // no sanitization for location address
         //                     payment account owner
         //                     payment account comment
@@ -200,22 +215,24 @@
 
         // update database
         $keys = array(
-            'location_time_zone',
-            'location_longitude',
-            'location_latitude',
-            'location_map',
-            'location_address',
             'currency',
-            'payment_account_owner',
-            'payment_account_iban',
+            'engine_hour_format',
+            'location_address',
+            'location_latitude',
+            'location_longitude',
+            'location_map',
+            'location_time_zone',
+            'logo_file',
             'payment_account_bic',
             'payment_account_comment',
+            'payment_account_iban',
+            'payment_account_owner',
+            'recaptcha_privatekey',
+            'recaptcha_publickey',
+            'smtp_password',
             'smtp_sender',
             'smtp_server',
             'smtp_username',
-            'smtp_password',
-            'recaptcha_privatekey',
-            'recaptcha_publickey'
         );
         foreach ($keys as $key) {
             // if the key is not defined, we do not store anything

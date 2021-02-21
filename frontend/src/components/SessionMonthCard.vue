@@ -49,7 +49,7 @@
 
 <script>
 import Pie from "./Pie.vue";
-import moment from 'moment-timezone';
+import * as dayjs from 'dayjs';
 import { BooksysBrowser } from '@/libs/browser';
 import {
   BCard,
@@ -79,7 +79,7 @@ export default {
   },
   computed: {
     monthString: function() {
-      return moment(this.month).format("MMMM YYYY");
+      return dayjs(this.month).format("MMMM YYYY");
     }
   },
   methods: {
@@ -90,20 +90,20 @@ export default {
       this.$emit('nextMonth');
     },
     getDay: function(isoTime) {
-      return moment(isoTime).format("DD");
+      return dayjs(isoTime).format("DD");
     },
     isMobile: function() {
       return BooksysBrowser.isMobile();
     },
     getCalendarDayBoxClass: function(daySessionData){
-      const boxMonth = moment(daySessionData.window_start).startOf('month').format();
+      const boxMonth = dayjs(daySessionData.window_start).startOf('month').format();
       if(this.month == boxMonth){
         return "calendar-day-box";
       }
       return "different-month";
     },
     navigateTo: function(daySessionData){
-      window.location.href = "/today?date="+moment(daySessionData.window_start).format("YYYY-MM-DD");
+      window.location.href = "/today?date="+dayjs(daySessionData.window_start).format("YYYY-MM-DD");
     },
     mouseOver: function(daySessionData){
       this.$emit('mouseOverHandler', daySessionData);

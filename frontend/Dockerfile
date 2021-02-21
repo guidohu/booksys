@@ -13,7 +13,8 @@ FROM node:14 as build-stage
 WORKDIR /home/node/app
 COPY package*.json     ./
 COPY babel.config.js   ./
-COPY webpack.config.js ./
+# COPY webpack.config.js ./
+COPY vue.config.js     ./
 COPY src               ./src
 COPY public            ./public
 RUN npm install

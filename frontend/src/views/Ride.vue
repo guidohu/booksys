@@ -89,13 +89,12 @@ import NavbarMobile from '@/components/NavbarMobile';
 import ConditionInfoCard from '@/components/ConditionInfoCard';
 import SessionDayCard from '@/components/SessionDayCard';
 import SessionDetailsCard from '@/components/SessionDetailsCard';
-import SessionEditorModal from '@/components/SessionEditorModal';
-import SessionDeleteModal from '@/components/SessionDeleteModal';
 import MainTitle from '@/components/MainTitle';
 import Session from '@/dataTypes/session';
-import moment from 'moment';
-import 'moment-timezone';
-import { difference } from 'lodash';
+import * as dayjs from 'dayjs';
+import * as dayjsUTC from 'dayjs/plugin/utc';
+import * as dayjsTimezone from 'dayjs/plugin/timezone';
+import difference from 'lodash/difference';
 import {
   BRow,
   BCol,
@@ -103,6 +102,12 @@ import {
   BIconCalendar3,
   BIconHouse
 } from 'bootstrap-vue';
+
+const SessionEditorModal = () => import(/* webpackChunkName: "session-editor-modal" */ '@/components/SessionEditorModal');
+const SessionDeleteModal = () => import(/* webpackChunkName: "session-delete-modal" */ '@/components/SessionDeleteModal');
+
+dayjs.extend(dayjsUTC);
+dayjs.extend(dayjsTimezone);
 
 export default {
   name: 'Ride',
@@ -163,8 +168,8 @@ export default {
       'createSession'
     ]),
     querySessionsForDate: function() {
-      const dateStart = moment(this.date).startOf('day').format();
-      const dateEnd = moment(this.date).endOf('day').format();
+      const dateStart = dayjs(this.date).startOf('day').format();
+      const dateEnd = dayjs(this.date).endOf('day').format();
 
       // query get_booking_day
       this.querySessions({
@@ -245,10 +250,10 @@ export default {
     const urlParams = new URLSearchParams(window.location.search);
     const urlDate = urlParams.get('date');
     if(urlDate != null){
-      const urlDateParsed =  moment(urlDate, 'YYYY-MM-DD').tz(this.getTimezone).startOf('day').format();
+      const urlDateParsed =  dayjs(urlDate, 'YYYY-MM-DD').tz(this.getTimezone).startOf('day').format();
       this.date = urlDateParsed;
     }else{
-      this.date = moment().tz(this.getTimezone).startOf('day').format();
+      this.date = dayjs().tz(this.getTimezone).startOf('day').format();
     }    
 
     this.querySessionsForDate();

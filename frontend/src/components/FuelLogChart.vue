@@ -6,11 +6,16 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import Chart from 'chart.js';
+import Chart from 'chart.js/dist/Chart';
 import 'chartjs-plugin-colorschemes/src/plugins/plugin.colorschemes';
 import { ClassicBlue7 } from 'chartjs-plugin-colorschemes/src/colorschemes/colorschemes.tableau';
-import { groupBy, max, sum } from 'lodash';
-import moment from 'moment';
+import groupBy from 'lodash/groupBy';
+import max from 'lodash/max';
+import sum from 'lodash/sum';
+import * as dayjs from 'dayjs';
+import * as dayjsDayOfYear from 'dayjs/plugin/dayOfYear';
+
+dayjs.extend(dayjsDayOfYear);
 
 export default {
   name: "FuelLogChart",
@@ -88,7 +93,7 @@ export default {
       }
 
       // split by year
-      const fuelLogByYear = groupBy(fuelLog, (x) => Number(moment(x.timestamp, "X").format("YYYY")));
+      const fuelLogByYear = groupBy(fuelLog, (x) => Number(dayjs.unix(x.timestamp).format("YYYY")));
 
       // get all the years with the latest ones first
       const years = Object.keys(fuelLogByYear).sort().reverse();
@@ -99,7 +104,7 @@ export default {
       for(let i = 0; i<displayYears.length; i++){
         const year = displayYears[i];
         const fuelValues = fuelLogByYear[year];
-        const fuelValuesPerDay = groupBy(fuelValues, (x) => moment(x.timestamp, "X").dayOfYear());
+        const fuelValuesPerDay = groupBy(fuelValues, (x) => dayjs.unix(x.timestamp).dayOfYear());
 
         const dataset = {
           label: year,
@@ -143,7 +148,7 @@ export default {
 
           // add the entry to the graph dataset
           dataset.data.push({
-            x: moment(moment(fuelEntries[0].timestamp, "X").set('year', 1970)),
+            x: dayjs(dayjs.unix(fuelEntries[0].timestamp).set('year', 1970)).toDate(),
             y: fuelConsumptionPerHour
           });
 

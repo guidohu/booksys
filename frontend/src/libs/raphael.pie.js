@@ -3,6 +3,8 @@
 	of the Raphael library.
 */
 
+import Raphael from 'raphael';
+
 Raphael.fn.pieChart = function (cx, cy, r, values, labels, colors, stroke, animate, clickCallBack) {
     var paper = this,
         rad = Math.PI / 180,
@@ -69,7 +71,6 @@ Raphael.fn.pieChart = function (cx, cy, r, values, labels, colors, stroke, anima
 	// draws the sector and adds the gestures and the text
     var angle = 90,
         total = 0,
-        start = 0,
         process = function (j) {
             var value = values[j],
                 angleplus = 360 * value / total,
@@ -87,23 +88,23 @@ Raphael.fn.pieChart = function (cx, cy, r, values, labels, colors, stroke, anima
 			// Check if labels are defined, if yes we create the labels
 			if(labels[j]){
                 var txt = paper.text(cx + (r + delta + 55) * Math.cos(-popangle * rad), cy + (r + delta + 25) * Math.sin(-popangle * rad), 
-						  labels[j]).attr({fill: colors[j], stroke: "none", opacity: 0, "font-size": 18});
+							labels[j]).attr({fill: colors[j], stroke: "none", opacity: 0, "font-size": 18});
 			}
 			
 			// If the pie has some functionality/animation we add events
 			if(animate){
                 p.mouseover(function () {
 					p.stop().animate({transform: "s1.15 1.15 " + cx + " " + cy}, ms, "elastic");
-				    if(labels[j]){
+					if(labels[j]){
                         txt.stop().animate({opacity: 1}, ms, "elastic");
-				    }
+					}
                 }).mouseout(function () {
 					if(sectors_active[j] == 0){
 						p.stop().animate({transform: ""}, ms, "elastic");
 					}
 					if(labels[j]){
 						txt.stop().animate({opacity: 0}, ms);
-					};
+					}
                 });
 				
 				if(clickCallBack){
@@ -116,15 +117,15 @@ Raphael.fn.pieChart = function (cx, cy, r, values, labels, colors, stroke, anima
 							sectors_active[j] = 1;
 							sector_active = 1;
 						}
-				    	clickCallBack(j);
+						clickCallBack(j);
 						p.stop().animate({transform: "s1.15 1.15 " + cx + " " + cy}, ms, "elastic");
-				    });
+					});
 				}
 			}
             angle -= angleplus;
             chart.push(p);
             //chart.push(txt);
-            start += .1;
+            // start += .1;
         };
 	
 	// get the total hours that are available

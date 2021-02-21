@@ -2,7 +2,16 @@
   <b-card no-body class="text-left">
     <b-card-body class="overflow-scroll">
       <WarningBox v-if="errors.length>0" :errors="errors"/>
+      <logo-upload @logoChanged="logoChangeHandler"/>
+      
       <b-form @submit="save">
+        <b-alert variant="info" show>
+          Settings related to the boat you are using.
+        </b-alert>
+        <!-- Engine hour format -->
+        <engine-hour-format
+          :selected.sync = "form.engineHourFormat"
+        />
         <b-alert variant="info" show>
           Timezone and location settings. Users will see the times in the timezone defined by these settings, also sunrise and sunset will be calculated based on these settings.
         </b-alert>
@@ -298,6 +307,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
+import EngineHourFormat from '@/components/forms/inputs/EngineHourFormat';
 import {
   BCard,
   BCardBody,
@@ -314,11 +324,13 @@ import {
   BIconX,
   BIconCheck  
 } from 'bootstrap-vue';
+import LogoUpload from '@/components/LogoUpload';
 
 export default {
   name: "SettingsCard",
   components: {
     WarningBox,
+    EngineHourFormat,
     BCard,
     BCardBody,
     BCardFooter,
@@ -332,12 +344,15 @@ export default {
     BCol,
     BButton,
     BIconX,
-    BIconCheck
+    BIconCheck,
+    LogoUpload
   },
   data() {
     return {
       errors: [],
-      form: {}
+      form: {
+        logoFile: null
+      }
     }
   },
   computed: {
@@ -350,6 +365,9 @@ export default {
       'queryConfiguration',
       'setConfiguration'
     ]),
+    logoChangeHandler: function(logoUri){
+      this.form.logoFile = logoUri;
+    },
     save: function() {
       // extract correct URL from mapIframe
       const v = this.form;
@@ -364,6 +382,8 @@ export default {
       }
 
       const newConfiguration = {
+        logo_file: v.logoFile,
+        engine_hour_format: v.engineHourFormat,
         location_time_zone: v.timezone,
         location_longitude: Number(v.longitude),
         location_latitude: Number(v.latitude),
@@ -396,7 +416,9 @@ export default {
       }
 
       console.log("set form to defaults:", defaultValues);
-      this.form = {
+      this.$set(this, 'form', {
+        logoFile: defaultValues.logo_file,
+        engineHourFormat: defaultValues.engine_hour_format,
         timezone: defaultValues.location_time_zone,
         longitude: defaultValues.location_longitude,
         latitude: defaultValues.location_latitude,
@@ -412,8 +434,8 @@ export default {
         smtpUsername: defaultValues.smtp_username,
         smtpPassword: defaultValues.smtp_password,
         recaptchaPrivateKey: defaultValues.recaptcha_privatekey,
-        recaptchaPublicKey: defaultValues.recaptcha_publickey
-      }
+        recaptchaPublicKey: defaultValues.recaptcha_publickey,
+      });
     }
   },
   watch: {

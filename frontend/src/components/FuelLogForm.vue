@@ -4,23 +4,11 @@
       <b-col cols="12">
         <WarningBox v-if="errors.length > 0" :errors="errors"/>
         <b-form @submit="add">
-          <b-form-group
-            id="input-group-engine-hours"
+          <engine-hours
             label="Engine Hrs"
-            label-for="input-engine-hours"
-            label-cols="3"
-          >
-            <b-input-group size="sm">
-              <b-form-input
-                id="input-engine-hours"
-                v-model="form.engineHours"
-                type="text"
-              />
-              <b-input-group-append is-text>
-                hrs
-              </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
+            v-model="form.engineHours"
+            :display-format="getEngineHourFormat"
+          />
           <b-form-group
             id="input-group-cost"
             label="Cost"
@@ -69,6 +57,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import WarningBox from '@/components/WarningBox';
+import EngineHours from '@/components/forms/inputs/EngineHours';
 import {
   BContainer,
   BRow,
@@ -85,6 +74,7 @@ export default {
   name: "FuelLogForm",
   components: {
     WarningBox,
+    EngineHours,
     BContainer,
     BRow,
     BCol,
@@ -110,7 +100,8 @@ export default {
       'userInfo'
     ]),
     ...mapGetters('configuration',[
-      'getCurrency'
+      'getCurrency',
+      'getEngineHourFormat'
     ])
   },
   methods: {

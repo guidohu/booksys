@@ -77,14 +77,14 @@
 </template>
 
 <script>
-import Backend from '@/api/backend';
+import { getBackendStatus } from '@/api/backend';
 import Configuration from '@/api/configuration';
 import User from '@/api/user';
 
 // Lazy loaded components
-const DatabaseConfiguration = () => import('@/components/DatabaseConfiguration');
-const UserSignUp = () => import('@/components/forms/UserSignUp');
-const WarningBox = () => import('@/components/WarningBox');
+const DatabaseConfiguration = () => import(/* webpackChunkName: "database-configuration" */ '@/components/DatabaseConfiguration');
+const UserSignUp = () => import(/* webpackChunkName: "user-sign-up" */ '@/components/forms/UserSignUp');
+const WarningBox = () => import(/* webpackChunkName: "warning-box" */ '@/components/WarningBox');
 
 import {
   BModal,
@@ -215,7 +215,7 @@ export default {
       // reset errors
       this.errors = [];
 
-      Backend.getStatus()
+      getBackendStatus()
       .then(status => {
         if(status.configFile == false){
           // no configuration at all yet

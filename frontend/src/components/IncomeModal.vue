@@ -114,8 +114,8 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
-import moment from 'moment';
-import { orderBy } from 'lodash';
+import * as dayjs from 'dayjs';
+import orderBy from 'lodash/orderBy';
 import {
   BModal,
   BRow,
@@ -247,7 +247,7 @@ export default {
       this.form = {
         amount: null,
         type: null,
-        date: moment().format('YYYY-MM-DD'),
+        date: dayjs().format('YYYY-MM-DD'),
         user: null,
         comment: null
       };
@@ -287,7 +287,7 @@ export default {
     .then(() => this.buildTypeSelect(this.getIncomeTypes))
     .catch((errors) => this.errors.push(...errors));
 
-    this.form.date = moment().format('YYYY-MM-DD');
+    this.form.date = dayjs().format('YYYY-MM-DD');
   }
 }
 </script>

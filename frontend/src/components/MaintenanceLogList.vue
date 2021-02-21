@@ -13,8 +13,9 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import moment from "moment-timezone";
+import * as dayjs from 'dayjs';
 import WarningBox from '@/components/WarningBox';
+import { formatEngineHour } from '@/libs/formatters';
 import { BTable } from 'bootstrap-vue';
 
 export default {
@@ -33,11 +34,19 @@ export default {
   computed: {
     ...mapGetters('boat',[
       'getMaintenanceLog'
+    ]),
+    ...mapGetters('configuration',[
+      'getEngineHourFormat'
     ])
   },
   watch: {
     getMaintenanceLog: function(newEntries){
       this.setItems(newEntries);
+    },
+    getEngineHourFormat: function(newFormat, oldFormat){
+      if(newFormat != oldFormat){
+        this.setColumns();
+      }
     }
   },
   methods: {
@@ -51,17 +60,19 @@ export default {
       })
     },
     setColumns: function(){
-      this.columns = [
+      this.$set(this, 'columns', [
         {
           key: 'timestamp',
           label: 'Date',
           sortable: true,
-          formatter: (value) => { return moment(value, "X").format("DD.MM.YYYY HH:mm"); }
+          formatter: (value) => { return dayjs(value*1000).format("DD.MM.YYYY HH:mm"); }
         },
         {
           key: 'engine_hours',
           label: 'EngineHrs',
-          sortable: true
+          sortable: true,
+          class: "text-right",
+          formatter: (value) => { return formatEngineHour(value, this.getEngineHourFormat) }
         },
         {
           key: 'user_first_name',
@@ -73,7 +84,7 @@ export default {
           label: 'Maintenance Work',
           sortable: false
         }
-      ]
+      ]);
     }
   },
   created() {

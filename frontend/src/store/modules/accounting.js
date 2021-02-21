@@ -144,6 +144,7 @@ const actions = {
       Accounting.deleteTransaction(transaction)
       .then(() => {
         dispatch('queryTransactions', state.selectedYear);
+        dispatch('queryStatistics', state.selectedYear);
         resolve();
       })
       .catch((errors) => {
@@ -157,6 +158,7 @@ const actions = {
       Accounting.addIncome(income)
       .then(() => {
         dispatch('queryTransactions', state.selectedYear);
+        dispatch('queryStatistics', state.selectedYear);
         resolve();
       })
       .catch((errors) => {
@@ -170,6 +172,7 @@ const actions = {
       Accounting.addExpense(expense)
       .then(() => {
         dispatch('queryTransactions', state.selectedYear);
+        dispatch('queryStatistics', state.selectedYear);
         resolve();
       })
       .catch((errors) => {

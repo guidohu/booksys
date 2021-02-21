@@ -22,8 +22,10 @@
             label="Date"
             label-for="date-input"
             description=""
+            label-cols="3"
           >
             <b-form-input
+              size="sm"
               id="date-input"
               v-model="form.date"
               type="text"
@@ -36,8 +38,10 @@
             label="Driver"
             label-for="driver-input"
             description=""
+            label-cols="3"
           >
             <b-form-input
+              size="sm"
               id="driver-input"
               v-model="form.driver"
               type="text"
@@ -45,52 +49,29 @@
               disabled
             ></b-form-input>
           </b-form-group>
-          <b-form-group
-            id="before"
+          <engine-hours
             label="Before"
-            label-for="before-input"
-            description=""
-          >
-            <b-form-input
-              id="before-input"
-              v-model="form.beforeHours"
-              type="text"
-              placeholder=""
-              disabled
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="after"
+            v-model="form.beforeHours"
+            :display-format="displayFormat"
+            :disabled="true"
+          />
+          <engine-hours
             label="After"
-            label-for="after-input"
-            description=""
-          >
-            <b-form-input
-              id="after-input"
-              v-model="form.afterHours"
-              type="text"
-              placeholder=""
-              disabled
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="difference"
+            v-model="form.afterHours"
+            :display-format="displayFormat"
+            :disabled="true"
+          />
+          <engine-hours
             label="Difference"
-            label-for="difference-input"
-            description=""
-          >
-            <b-form-input
-              id="difference-input"
-              v-model="form.deltaHours"
-              type="text"
-              placeholder=""
-              disabled
-            ></b-form-input>
-          </b-form-group>
+            v-model="form.deltaHours"
+            :display-format="displayFormat"
+            :disabled="true"
+          />
           <b-form-group
             id="input-group-type"
             label="Type"
             label-for="input-type"
+            label-cols="3"
           >
             <toggle-button 
               id="input-type"
@@ -122,7 +103,8 @@
 import { mapActions } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
 import WarningBox from '@/components/WarningBox';
-import moment from 'moment';
+import EngineHours from '@/components/forms/inputs/EngineHours';
+import * as dayjs from 'dayjs';
 import {
   BModal,
   BRow,
@@ -137,9 +119,10 @@ import {
 
 export default {
   name: 'EngineHourEntryModal',
-  props: [ 'engineHourEntry', 'visible' ],
+  props: [ 'engineHourEntry', 'visible', 'displayFormat' ],
   components: {
     WarningBox,
+    EngineHours,
     ToggleButton,
     BModal,
     BRow,
@@ -174,7 +157,7 @@ export default {
       if(entry != null){
         this.form = {
           id: entry.id,
-          date: moment(entry.time, "X").format("DD.MM.YYYY HH:mm"),
+          date: dayjs(entry.time*1000).format("DD.MM.YYYY HH:mm"),
           driver: entry.user_first_name,
           beforeHours: entry.before_hours,
           afterHours: entry.after_hours,

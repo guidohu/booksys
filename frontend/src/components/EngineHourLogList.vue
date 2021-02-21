@@ -4,6 +4,7 @@
     <EngineHourEntryModal
       :engineHourEntry="selectedEngineHourLogEntry"
       :visible.sync="showEntryHourModal"
+      :displayFormat="getEngineHourFormat"
     />
     <b-table v-if="errors.length == 0" 
       hover 
@@ -19,9 +20,10 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import moment from "moment-timezone";
+import * as dayjs from 'dayjs';
 import WarningBox from '@/components/WarningBox';
 import EngineHourEntryModal from '@/components/EngineHourEntryModal';
+import { formatEngineHour } from '@/libs/formatters';
 import {
   BTable
 } from 'bootstrap-vue';
@@ -45,17 +47,28 @@ export default {
   computed: {
     ...mapGetters('boat',[
       'getEngineHourLog'
+    ]),
+    ...mapGetters('configuration',[
+      'getEngineHourFormat'
     ])
   },
   watch: {
     getEngineHourLog: function(newEntries){
       console.log("getEngineHourLog just changed to", newEntries);
       this.setItems(newEntries);
+    },
+    getEngineHourFormat: function(newFormat, oldFormat){
+      if(newFormat != oldFormat){
+        this.setColumns();
+      }
     }
   },
   methods: {
     ...mapActions('boat',[
       'queryEngineHourLog'
+    ]),
+    ...mapActions('configuration',[
+      'queryConfiguration'
     ]),
     setItems: function(logs){
       this.items = [];
@@ -64,12 +77,12 @@ export default {
       })
     },
     setColumns: function(){
-      this.columns = [
+      this.$set(this, 'columns', [
         {
           key: 'time',
           label: 'Date',
           sortable: true,
-          formatter: (value) => { return moment(value, "X").format("DD.MM.YYYY HH:mm"); }
+          formatter: (value) => { return dayjs(value*1000).format("DD.MM.YYYY HH:mm"); }
         },
         {
           key: 'user_first_name',
@@ -80,19 +93,25 @@ export default {
         {
           key: 'before_hours',
           label: 'Before',
-          sortable: true
+          sortable: true,
+          class: "text-right",
+          formatter: (value) => { return formatEngineHour(value, this.getEngineHourFormat) }
         },
         {
           key: 'after_hours',
           label: 'After',
-          sortable: true
+          sortable: true,
+          class: "text-right",
+          formatter: (value) => { return formatEngineHour(value, this.getEngineHourFormat) }
         },
         {
           key: 'delta_hours',
           label: 'Diff',
-          sortable: true
+          sortable: true,
+          class: "text-right",
+          formatter: (value) => { return formatEngineHour(value, this.getEngineHourFormat) }
         }
-      ]
+      ]);
     },
     rowClick: function(item){
       this.selectedEngineHourLogEntry = item;
@@ -107,6 +126,8 @@ export default {
     }
   },
   created() {
+    this.queryConfiguration();
+    
     // generate header of table
     this.setColumns();
 

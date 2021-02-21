@@ -113,6 +113,25 @@
             HttpHeader::setResponseCode(500);
             return Status::errorStatus("Cannot get the fuel logs from the database.");
         }
+
+        $last_engine_hour = NULL;
+        for($i = count($res) - 1; $i >= 0; $i--){
+            if($last_engine_hour == NULL){
+                $last_engine_hour = $res[$i]["engine_hours"];
+                continue;
+            }
+
+            $diff_hours = $res[$i]["engine_hours"] - $last_engine_hour;
+            if($diff_hours <= 0){
+                $last_engine_hour = $res[$i]["engine_hours"];
+                continue;
+            }
+
+            $avg_fuel_p_hour = $res[$i]["liters"] / $diff_hours;
+            $res[$i]["avg_liters_per_hour"] = $avg_fuel_p_hour;
+            $last_engine_hour = $res[$i]["engine_hours"];
+        }
+
         return Status::successDataResponse("success", $res);
     }
 
@@ -246,9 +265,11 @@
                             blb.delta_hours = ?
                     WHERE blb.after_hours IS NULL';
             $db->prepare($query);
-            $db->bind_param('dd',
-                            $post_data->engine_hours_after,
-                            $post_data->engine_hours_after - $post_data->engine_hours_before);
+            $db->bind_param(
+                'dd',
+                $post_data->engine_hours_after,
+                $post_data->engine_hours_after - $post_data->engine_hours_before
+            );
             if(!$db->execute()){
                 $db->disconnect();
                 return Status::errorStatus("Cannot update existing entry. An error occurred.");
@@ -273,11 +294,13 @@
                     VALUES
                     (?,?,?,?)';
             $db->prepare($query);
-            $db->bind_param('sdii',
-                            $date->format('Y-m-d H:i:s'),
-                            sprintf('%.2f',$post_data->engine_hours_before),
-                            $usage_type,
-                            $post_data->user_id);
+            $db->bind_param(
+                'sdii',
+                $date->format('Y-m-d H:i:s'),
+                sprintf('%.5f',$post_data->engine_hours_before),
+                $usage_type,
+                $post_data->user_id
+            );
             if(!$db->execute()){
                 $db->disconnect();
                 return Status::errorStatus("Internal Server Error, cannot add new engine hours entry.");
@@ -326,9 +349,9 @@
         $db->prepare($query);
         $db->bind_param('sdddi',
             $date->format('Y-m-d H:i:s'),
-            sprintf('%.2f', $post_data->engine_hours),
-            sprintf('%.2f', $post_data->liters),
-            sprintf('%.2f', $post_data->cost),
+            sprintf('%.5f', $post_data->engine_hours),
+            sprintf('%.3f', $post_data->liters),
+            sprintf('%.3f', $post_data->cost),
             $post_data->user_id
         );
         if(!$db->execute()){
@@ -416,7 +439,7 @@
         $db->prepare($query);
         $db->bind_param('sdsi',
                         $date->format('Y-m-d H:i:s'),
-                        sprintf('%.2f', $post_data->engine_hours),
+                        sprintf('%.5f', $post_data->engine_hours),
                         $post_data->description,
                         $post_data->user_id);
         if(!$db->execute()){

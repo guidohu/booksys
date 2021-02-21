@@ -89,7 +89,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
 import { BooksysBrowser } from '@/libs/browser';
-import { uniq } from 'lodash';
+import uniq from 'lodash/uniq';
 import WarningBox from '@/components/WarningBox';
 import { UserPointer } from '@/dataTypes/user';
 import {

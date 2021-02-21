@@ -93,13 +93,14 @@ import NavbarMobile from '@/components/NavbarMobile';
 import ConditionInfoCard from '@/components/ConditionInfoCard';
 import SessionDayCard from '@/components/SessionDayCard';
 import SessionDetailsCard from '@/components/SessionDetailsCard';
-import SessionEditorModal from '@/components/SessionEditorModal';
-import SessionDeleteModal from '@/components/SessionDeleteModal';
 import MainTitle from '@/components/MainTitle';
 import Session from '@/dataTypes/session';
-import moment from 'moment';
-import 'moment-timezone';
-import { difference } from 'lodash';
+import * as dayjs from 'dayjs';
+import * as dayjsCustomParseFormat from 'dayjs/plugin/customParseFormat';
+import * as dayjsUTC from 'dayjs/plugin/utc';
+import * as dayjsTimezone from 'dayjs/plugin/timezone';
+
+import difference from 'lodash/difference';
 import {
   BRow,
   BCol,
@@ -107,6 +108,13 @@ import {
   BIconCalendar3,
   BIconHouse
 } from 'bootstrap-vue';
+
+const SessionEditorModal = () => import('@/components/SessionEditorModal');
+const SessionDeleteModal = () => import('@/components/SessionDeleteModal');
+
+dayjs.extend(dayjsCustomParseFormat);
+dayjs.extend(dayjsUTC);
+dayjs.extend(dayjsTimezone);
 
 export default {
   name: 'Today',
@@ -163,19 +171,19 @@ export default {
       'createSession'
     ]),
     prevDay: function(){
-      this.date = moment(this.date).add(-1, 'days');
+      this.date = dayjs(this.date).add(-1, 'days');
       this.selectedSession = null;
       this.querySessionsForDate();
     },
     nextDay: function(){
-      this.date = moment(this.date).add(1, 'days');
+      this.date = dayjs(this.date).add(1, 'days');
       this.selectedSession = null;
       this.querySessionsForDate();
     },
     querySessionsForDate: function() {
       console.log("the time", this.date);
-      const dateStart = moment(this.date).startOf('day').format();
-      const dateEnd = moment(this.date).endOf('day').format();
+      const dateStart = dayjs(this.date).startOf('day').format();
+      const dateEnd = dayjs(this.date).endOf('day').format();
       console.log("dateStart:",dateStart);
       console.log("dateEnd:",dateEnd);
 
@@ -187,7 +195,7 @@ export default {
     },
     selectSlot: function(selectedSession) {
       console.log("selectedSlot", selectedSession);
-      console.log(moment(selectedSession.start).format(), moment(selectedSession.end).format());
+      console.log(dayjs(selectedSession.start).format(), dayjs(selectedSession.end).format());
       const sessionWithSelectedId = this.getSessions.sessions.find(s => selectedSession.id == s.id);
       if(sessionWithSelectedId == null){
         this.selectedSession = new Session(
@@ -279,10 +287,10 @@ export default {
     const urlParams = new URLSearchParams(window.location.search);
     const urlDate = urlParams.get('date');
     if(urlDate != null){
-      const urlDateParsed =  moment(urlDate, 'YYYY-MM-DD').tz(this.getTimezone).startOf('day').format();
+      const urlDateParsed =  dayjs(urlDate, 'YYYY-MM-DD').tz(this.getTimezone).startOf('day').format();
       this.date = urlDateParsed;
     }else{
-      this.date = moment().tz(this.getTimezone).startOf('day').format();
+      this.date = dayjs().tz(this.getTimezone).startOf('day').format();
     }    
 
     this.querySessionsForDate();

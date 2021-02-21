@@ -90,11 +90,10 @@
 <script>
 import Vue from 'vue';
 import { mapGetters, mapActions } from 'vuex';
-import { reverse } from 'lodash';
-import moment from 'moment';
+import reverse from 'lodash/reverse';
+import * as dayjs from 'dayjs';
+import { formatCurrency } from '@/libs/formatters';
 import WarningBox from '@/components/WarningBox';
-import IncomeModal from '@/components/IncomeModal';
-import ExpenseModal from '@/components/ExpenseModal';
 import {
   BRow,
   BCol,
@@ -108,6 +107,10 @@ import {
   BTable,
   ModalPlugin
 } from 'bootstrap-vue';
+
+const IncomeModal = () => import(/* webpackChunkName: "income-modal" */ '@/components/IncomeModal');
+const ExpenseModal = () => import(/* webpackChunkName: "expense-modal" */ '@/components/ExpenseModal');
+
 
 Vue.use(ModalPlugin);
 
@@ -128,9 +131,6 @@ export default {
     BOverlay,
     BTable
   },
-  // directives: {
-  //   "b-modal": VBModal
-  // },
   data() {
     return {
       showExpenseModal: false,
@@ -164,7 +164,7 @@ export default {
           key: "amount",
           label: "Amount",
           sortable: true,
-          formatter: (value) => value + " " + this.getCurrency,
+          formatter: (value) => formatCurrency(value, this.getCurrency),
           tdClass: "text-right",
           thClass: "text-right"
         },
@@ -266,7 +266,7 @@ export default {
     this.queryYears()
     .catch((errors) => this.errors = errors);
 
-    const currentYear = moment().year();
+    const currentYear = dayjs().year();
     this.form.selectedYear = currentYear;
 
     this.queryTransactions(currentYear)

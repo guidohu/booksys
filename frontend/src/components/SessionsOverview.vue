@@ -82,7 +82,7 @@
 </template>
 
 <script>
-import moment from 'moment';
+import * as dayjs from 'dayjs';
 import {
   BCard,
   BCardHeader,
@@ -112,7 +112,7 @@ export default {
   computed: {
     date: function(){
       if(this.sessions != null && this.sessions.window_start != null){
-        return moment(this.sessions.window_start).format("ddd DD.MM.YYYY");
+        return dayjs(this.sessions.window_start).format("ddd DD.MM.YYYY");
       }
       return "no date selected";
     }
@@ -126,8 +126,8 @@ export default {
       }
     },
     getTime: function(session){
-      const startStr = moment(session.start).format("HH:mm");
-      const endStr = moment(session.end).format("HH:mm");
+      const startStr = dayjs(session.start).format("HH:mm");
+      const endStr = dayjs(session.end).format("HH:mm");
       return startStr + " - " + endStr;
     }
   }

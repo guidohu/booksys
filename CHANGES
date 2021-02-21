@@ -1,3 +1,10 @@
+v2.2 2021.02.21
+ - support for logo upload
+ - support for hh:mm engine hour format
+ - added average fuel consumption for fuel entries
+ - cleanup and optimizations for webpack
+ - minor bug fixes
+
 v2.1 2021.01.15
  - fix in accounting statistics
 

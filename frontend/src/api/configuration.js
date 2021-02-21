@@ -33,6 +33,39 @@ export default class Configuration {
     })
   }
 
+  /**
+   * Returns the path to the logo.
+   */
+  static getLogoFile() {
+    console.log("configuration/getLogoFile called");
+    return new Promise((resolve, reject) => {
+      fetch('/api/configuration.php?action=get_logo_file', {
+        method: "GET",
+        cache: "no-cache",
+      })
+      .then(response => {
+        response.json()
+          .then(data => {
+            console.log("configuration/getLogoFile response data:", data);
+            if(data.ok && data.data != null){
+              resolve(data.data.uri);
+            }else{
+              console.log("configuration/getLogoFile: Cannot retrieve logo file, due to:", data.msg);
+              reject([data.msg]);
+            }
+          })
+          .catch(error => {
+            console.error("configuration/getLogoFile: Cannot parse server response", error);
+            reject([error]);
+          })
+      })
+      .catch(error => {
+        console.error("configuration/getLogoFile", error);
+        reject([error]);
+      })
+    })
+  }
+
   static getDbConfig(){
     console.log("configuration/getDbConfig called");
     return new Promise((resolve, reject) => {
@@ -127,6 +160,8 @@ export default class Configuration {
   static setConfiguration(params){
     return new Promise((resolve, reject) => {
       const request = {
+        logo_file                : params.logo_file,
+        engine_hour_format       : params.engine_hour_format,
         location_time_zone       : params.location_time_zone,
         location_longitude       : params.location_longitude,
         location_latitude        : params.location_latitude,

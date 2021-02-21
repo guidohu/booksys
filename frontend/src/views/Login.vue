@@ -1,5 +1,4 @@
 <template>
-  <!-- <div class="login-view"> -->
   <b-overlay
     id="overlay-background"
     :show="isLoading"
@@ -7,14 +6,29 @@
     spinner-variant="info"
     rounded="sm"
   >
-    <login-modal 
-      v-if="showLogin"
-      :statusMessage="status" 
-      :initialUsername="username" 
-      @login="handleLogin"
-    />
+    <b-container>
+      <b-row class="text-center mb-3">
+        <b-col cols="12">
+          <b-aspect aspect="6:1">
+            <b-img 
+              v-if="getLogoFile != null"
+              :src="getLogoFile" 
+              alt="Logo" 
+              fluid
+              :height="100"
+              width="auto"
+            />
+          </b-aspect>
+        </b-col>
+      </b-row>
+      <login-modal
+        v-if="showLogin"
+        :statusMessage="status" 
+        :initialUsername="username" 
+        @login="handleLogin"
+      />
+    </b-container>
   </b-overlay>
-  <!-- </div> -->
 </template>
 
 <script>
@@ -22,14 +36,24 @@ import { mapActions, mapGetters } from 'vuex';
 import LoginModal from '@/components/LoginModal.vue';
 import { BooksysBrowser } from '@/libs/browser';
 import {
-  BOverlay
+  BAspect,
+  BContainer,
+  BOverlay,
+  BImg,
+  BRow,
+  BCol
 } from 'bootstrap-vue';
 
 export default {
   name: 'Login',
   components: {
     LoginModal,
-    BOverlay
+    BAspect,
+    BContainer,
+    BOverlay,
+    BImg,
+    BRow,
+    BCol
   },
   data() {
     return {
@@ -47,12 +71,18 @@ export default {
     },
     ...mapGetters('login', [
       'username'
+    ]),
+    ...mapGetters('configuration', [
+      'getLogoFile'
     ])
   },
   methods: {
     ...mapActions('login', [
       'getIsLoggedIn',
       'login'
+    ]),
+    ...mapActions('configuration', [
+      'queryLogoFile'
     ]),
     handleLogin: function (username, password) {
       this.login({ 
@@ -75,6 +105,9 @@ export default {
   },
   created () {
     this.isLoading = true;
+
+    this.queryLogoFile()
+    .catch((errors) => console.log(errors));
 
     this.getIsLoggedIn()
     .then((loggedIn) => {

@@ -68,8 +68,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex';
-import { reverse } from 'lodash';
-import moment from 'moment';
+import reverse from 'lodash/reverse';
+import * as dayjs from 'dayjs';
 import WarningBox from '@/components/WarningBox';
 import {
   BRow,
@@ -144,7 +144,7 @@ export default {
     .catch((errors) => this.errors = errors);
 
     // get current year
-    const currentYear = moment().year();
+    const currentYear = dayjs().year();
     this.form.selectedYear = currentYear;
 
     this.queryStatistics(currentYear)

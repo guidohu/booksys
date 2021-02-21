@@ -22,54 +22,67 @@
             label="Date"
             label-for="date-input"
             description=""
+            label-cols="3"
           >
             <b-form-input
+              size="sm"
               id="date-input"
               v-model="form.date"
               type="text"
               placeholder=""
               disabled
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
             id="driver"
             label="Driver"
             label-for="driver-input"
             description=""
+            label-cols="3"
           >
             <b-form-input
+              size="sm"
               id="driver-input"
               v-model="form.driver"
               type="text"
               placeholder=""
               disabled
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
-            id="engine-hours"
-            label="Engine Hours"
-            label-for="engine-hours-input"
+            v-if="form.averageFuelPerHour != null"
+            id="liters-per-hour"
+            label="Consumption"
+            label-for="fuel-input"
             description=""
+            label-cols="3"
           >
-            <b-input-group>
+            <b-input-group size="sm">
               <b-form-input
-                id="engine-hours-input"
-                v-model="form.engineHours"
+                id="liter-per-hour-input"
+                v-model="form.averageFuelPerHour"
                 type="text"
                 placeholder=""
+                disabled
               />
               <b-input-group-append is-text>
-                hrs
+                ltrs/h
               </b-input-group-append>
             </b-input-group>
           </b-form-group>
+          <engine-hours
+            label="Engine Hours"
+            v-model="form.engineHours"
+            :display-format="getEngineHourFormat"
+          />
           <b-form-group
             id="liters"
             label="Fuel"
             label-for="fuel-input"
             description=""
+            label-cols="3"
           >
-            <b-input-group>
+            <b-input-group size="sm">
               <b-form-input
                 id="fuel-input"
                 v-model="form.fuel"
@@ -87,8 +100,9 @@
             label="Cost"
             label-for="cost-input"
             description=""
+            label-cols="3"
           >
-            <b-input-group>
+            <b-input-group size="sm">
               <b-form-input
                 id="cost-input"
                 v-model="form.cost"
@@ -107,8 +121,9 @@
             label="Cost (Gross)"
             label-for="cost-gross-input"
             description=""
+            label-cols="3"
           >
-            <b-input-group>
+            <b-input-group size="sm">
               <b-form-input
                 id="cost-gross-input"
                 v-model="form.costGross"
@@ -125,6 +140,7 @@
             id="discount"
             label="Discount"
             label-for="discount-input"
+            label-cols="3"
           >
             <toggle-button 
               id="discount-input"
@@ -141,8 +157,9 @@
             label="Cost (net)"
             label-for="cost-net-input"
             description=""
+            label-cols="3"
           >
-            <b-input-group>
+            <b-input-group size="sm">
               <b-form-input
                 id="cost-net-input"
                 v-model="form.costNet"
@@ -175,7 +192,13 @@
 import { mapActions, mapGetters } from 'vuex';
 import { ToggleButton } from 'vue-js-toggle-button';
 import WarningBox from '@/components/WarningBox';
-import moment from 'moment';
+import EngineHours from '@/components/forms/inputs/EngineHours';
+import { 
+  formatCurrency,
+  formatFuelConsumption,
+  formatFuel
+} from '@/libs/formatters';
+import * as dayjs from 'dayjs';
 import {
   BModal,
   BCol,
@@ -195,6 +218,7 @@ export default {
   props: [ 'fuelEntry', 'visible' ],
   components: {
     WarningBox,
+    EngineHours,
     ToggleButton,
     BModal,
     BCol,
@@ -221,7 +245,8 @@ export default {
       return 100;
     },
     ...mapGetters('configuration',[
-      'getCurrency'
+      'getCurrency',
+      'getEngineHourFormat'
     ])
   },
   watch: {
@@ -240,14 +265,15 @@ export default {
 
         this.form = {
           id: entry.id,
-          date: moment(entry.timestamp, "X").format("DD.MM.YYYY HH:mm"),
+          date: dayjs(entry.timestamp*1000).format("DD.MM.YYYY HH:mm"),
           isDiscounted: (entry.cost != null && entry.cost_brutto != null) ? true : false,
-          cost: cost,
-          costGross: costGross,
-          costNet: costNet,
+          cost: formatCurrency(cost, null),
+          costGross: formatCurrency(costGross, null),
+          costNet: formatCurrency(costNet, null),
           engineHours: entry.engine_hours,
-          fuel: entry.liters,
-          driver: entry.user_first_name
+          fuel: formatFuel(entry.liters),
+          driver: entry.user_first_name,
+          averageFuelPerHour: formatFuelConsumption(entry.avg_liters_per_hour)
         };
       }
     },

@@ -97,26 +97,14 @@
               </b-input-group-append>
             </b-input-group>
           </b-form-group>
-          <b-form-group
+          <engine-hours
             v-if="form.type != null && form.type == 0"
-            id="engine-hours"
             label="Engine Hours"
-            label-for="engine-hours-input"
-            description=""
-            label-cols="3"
-          >
-            <b-input-group>
-              <b-form-input
-                id="engine-hours-input"
-                v-model="form.engineHours"
-                type="text"
-                placeholder="0.00"
-              ></b-form-input>
-              <b-input-group-append is-text>
-                hrs
-              </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
+            v-model="form.engineHours"
+            :display-format="getEngineHourFormat"
+            size="md"
+            placeholder="0"
+          />
           <b-form-group
             v-if="form.type != null && form.type != 0"
             id="description"
@@ -162,8 +150,9 @@
 <script>
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
-import moment from 'moment';
-import { orderBy } from 'lodash';
+import EngineHours from '@/components/forms/inputs/EngineHours';
+import * as dayjs from 'dayjs';
+import orderBy from 'lodash/orderBy';
 import {
   BModal,
   BRow,
@@ -198,7 +187,8 @@ export default {
     BOverlay,
     BButton,
     BIconCheck,
-    BIconX
+    BIconX,
+    EngineHours
   },
   props: [ 'visible' ],
   data() {
@@ -219,7 +209,8 @@ export default {
   },
   computed: {
     ...mapGetters('configuration', [
-      'getCurrency'
+      'getCurrency',
+      'getEngineHourFormat'
     ]),
     ...mapGetters('user', [
       'userList'
@@ -334,7 +325,7 @@ export default {
         engineHours: null,
         fuelLiters: null,
         type: null,
-        date: moment().format('YYYY-MM-DD'),
+        date: dayjs().format('YYYY-MM-DD'),
         user: null,
         description: null
       };
@@ -421,7 +412,7 @@ export default {
     .then(() => this.buildTypeSelect(this.getExpenseTypes))
     .catch((errors) => this.errors.push(...errors));
 
-    this.form.date = moment().format('YYYY-MM-DD');
+    this.form.date = dayjs().format('YYYY-MM-DD');
   }
 }
 </script>

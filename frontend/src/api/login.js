@@ -1,5 +1,4 @@
-import sha256 from 'crypto-js/sha256';
-import hex from 'crypto-js/enc-hex';
+import { sha256 } from 'js-sha256';
 
 export default class Login {
 
@@ -143,13 +142,13 @@ export default class Login {
   }
 
   static calcHash(password) {
-      try {
-          // let hasher = new jsSha(password, "TEXT")
-          // let pwHash = hasher.getHash("SHA-256", "HEX")
-          return hex.stringify(sha256(password))
-      } catch(e) {
-          console.error("Cannot calculate sha256 of password")
-          return null
-      }
+    try {
+      var hash = sha256.create();
+      hash.update(password);
+      return hash.hex();
+    } catch(e) {
+      console.error("Cannot calculate sha256 of password", e);
+      return null;
+    }
   }
 }

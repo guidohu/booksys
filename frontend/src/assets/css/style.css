@@ -1,21 +1,13 @@
-/* Basic definition of the website body */
-html { 
-	background: url(/img/water_drops_low_2015.jpg) no-repeat center center fixed; 
-	-webkit-background-size: cover;
-	-moz-background-size: cover;
-	-o-background-size: cover;
-	background-size: cover;
-}
-
 body {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 0.85rem;
-	background: url(/img/water_drops_low_2015.jpg) no-repeat center center fixed; 
+	background: url(/img/water_drops_lower_2015.jpg) no-repeat center center fixed; 
 	-webkit-background-size: cover;
 	-moz-background-size: cover;
 	-o-background-size: cover;
 	background-size: cover;
-	color: #a1a1a1;
+	height: 100vh;
+	width: 100vw;
 }
 
 a.header-desktop {
