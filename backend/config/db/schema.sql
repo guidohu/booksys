@@ -26,6 +26,7 @@ CREATE TABLE `boat_fuel` (
   `liters` DECIMAL(10,3) DEFAULT NULL,
   `cost_chf` DECIMAL(10,3) DEFAULT NULL,
   `cost_chf_brutto` DECIMAL(10,3) DEFAULT NULL,
+  `contributes_to_balance` int(8) DEFAULT 1,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -308,7 +309,7 @@ CREATE TABLE `configuration` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT INTO configuration (property, value) VALUES 
-("schema.version",                  "1.15"          ),
+("schema.version",                  "1.16"          ),
 ("browser.session.timeout.default", "10800"         ),
 ("browser.session.timeout.max",     "604800"        ),
 ("location.longitude",              "8.542939"      ),
