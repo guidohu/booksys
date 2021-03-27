@@ -145,7 +145,8 @@
             "recaptcha_publickey"       => $configuration->recaptcha_publickey,
             "recaptcha_privatekey"      => $configuration->recaptcha_privatekey,
             "logo_file"                 => $configuration->logo_file,
-            "engine_hour_format"        => $configuration->engine_hour_format
+            "engine_hour_format"        => $configuration->engine_hour_format,
+            "fuel_payment_type"         => $configuration->fuel_payment_type
         ];
 
         return Status::successDataResponse('success', $response);
@@ -206,6 +207,9 @@
         if(isset($data->engine_hour_format) && !$sanitizer->isEngineHourFormat($data->engine_hour_format)){
             return Status::errorStatus("The provided engine hour format is not valid.");
         }
+        if(isset($data->fuel_payment_type) && !$sanitizer->isFuelPaymentType($data->fuel_payment_type)){
+            return Status::errorStatus("The provided fuel payment type value is not valid.");
+        }
         // no sanitization for location address
         //                     payment account owner
         //                     payment account comment
@@ -217,6 +221,7 @@
         $keys = array(
             'currency',
             'engine_hour_format',
+            'fuel_payment_type',
             'location_address',
             'location_latitude',
             'location_longitude',

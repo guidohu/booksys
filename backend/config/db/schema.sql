@@ -335,4 +335,5 @@ INSERT INTO configuration (property, value) VALUES
 ("smtp.username",                   NULL            ),
 ("smtp.password",                   NULL            ),
 ("logo.file",                       NULL            ),
-("engine.hour.format",              "hh.h"          );
+("engine.hour.format",              "hh.h"          ),
+("fuel.payment.type",               "instant"       );
