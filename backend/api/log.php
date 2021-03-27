@@ -68,10 +68,16 @@
 					       CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, ' added ', 
 						          FORMAT(bf.liters, 2), 'L fuel for ', FORMAT(cost_chf, 2), ' $configuration->currency') as log 
 						FROM user u, boat_fuel bf 
-						WHERE bf.user_id = u.id
+						WHERE bf.user_id = u.id AND bf.contributes_to_balance = 1
+					UNION ALL
+					SELECT bf.id as id, \"boat_fuel\" as type, bf.timestamp as time, 
+					       CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, ' added ', 
+						          FORMAT(bf.liters, 2), 'L fuel for ', FORMAT(cost_chf, 2), ' $configuration->currency (on credit)') as log 
+						FROM user u, boat_fuel bf 
+						WHERE bf.user_id = u.id AND bf.contributes_to_balance = 0
                   ) as c_log ORDER BY time DESC";
 
-		// Limit the number of returned log line for mobile browsers
+		// limit the number of returned log line for mobile browsers
 		if(MobileDevice::isMobileBrowser() or isset($_GET['mobile'])){
 			$query .= "  LIMIT 0, 200";
 		}
