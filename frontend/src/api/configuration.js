@@ -162,6 +162,7 @@ export default class Configuration {
       const request = {
         logo_file                : params.logo_file,
         engine_hour_format       : params.engine_hour_format,
+        fuel_payment_type        : params.fuel_payment_type,
         location_time_zone       : params.location_time_zone,
         location_longitude       : params.location_longitude,
         location_latitude        : params.location_latitude,

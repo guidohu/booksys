@@ -13,6 +13,13 @@
           :selected.sync = "form.engineHourFormat"
         />
         <b-alert variant="info" show>
+          Settings for your daily operations.
+        </b-alert>
+        <!-- Direct Payment vs Billed Payment -->
+        <fuel-payment-type-selector
+          :selected.sync = "form.fuelPaymentType"
+        />
+        <b-alert variant="info" show>
           Timezone and location settings. Users will see the times in the timezone defined by these settings, also sunrise and sunset will be calculated based on these settings.
         </b-alert>
         <!-- Timezone -->
@@ -308,6 +315,7 @@
 import { mapGetters, mapActions } from 'vuex';
 import WarningBox from '@/components/WarningBox';
 import EngineHourFormat from '@/components/forms/inputs/EngineHourFormat';
+import FuelPaymentTypeSelector from '@/components/forms/inputs/FuelPaymentTypeSelector';
 import {
   BCard,
   BCardBody,
@@ -331,6 +339,7 @@ export default {
   components: {
     WarningBox,
     EngineHourFormat,
+    FuelPaymentTypeSelector,
     BCard,
     BCardBody,
     BCardFooter,
@@ -384,6 +393,7 @@ export default {
       const newConfiguration = {
         logo_file: v.logoFile,
         engine_hour_format: v.engineHourFormat,
+        fuel_payment_type: v.fuelPaymentType,
         location_time_zone: v.timezone,
         location_longitude: Number(v.longitude),
         location_latitude: Number(v.latitude),
@@ -419,6 +429,7 @@ export default {
       this.$set(this, 'form', {
         logoFile: defaultValues.logo_file,
         engineHourFormat: defaultValues.engine_hour_format,
+        fuelPaymentType: defaultValues.fuel_payment_type,
         timezone: defaultValues.location_time_zone,
         longitude: defaultValues.location_longitude,
         latitude: defaultValues.location_latitude,
