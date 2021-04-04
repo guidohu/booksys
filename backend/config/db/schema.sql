@@ -95,7 +95,8 @@ INSERT INTO `expenditure_type` (`id`, `name`, `comment`) VALUES
 (5, 'other', 'Other costs'),
 (6, 'membership fee', 'Membership Fee'),
 (7, 'salary', 'money for towing people or do whatever in the name of the community'),
-(8, 'owners refund', 'Payback of investments from owners');
+(8, 'owners refund', 'Payback of investments from owners'),
+(9, 'fuel bill', 'Costs for fuel through bill');
 
 --
 -- Table structure for table `heat`

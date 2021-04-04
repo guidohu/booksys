@@ -138,7 +138,7 @@
 		}elseif($post_data->table_id){
 			$table_name = "boat_fuel";
 		}else{
-			error_log("api/payment: illegal table_id");
+			error_log("api/payment: invalid table_id");
 			return Status::errorStatus("The provided table_id is not a valid one.");
 		}
 		

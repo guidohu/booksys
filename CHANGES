@@ -1,3 +1,6 @@
+unreleased
+ - allow credit payments for fuel
+
 v2.2 2021.02.21
  - support for logo upload
  - support for hh:mm engine hour format

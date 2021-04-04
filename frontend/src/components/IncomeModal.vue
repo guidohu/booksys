@@ -98,7 +98,7 @@
     </b-form>
     <div slot="modal-footer">
       <div class="text-right d-inline">
-        <b-button class="ml-4" type="button" variant="outline-info" v-on:click="add">
+        <b-button v-if="this.form.type != null" class="ml-4" type="button" variant="outline-info" v-on:click="add">
           <b-icon-check/>
           Add
         </b-button>
