@@ -1,3 +1,6 @@
+v2.3.2 2021.04.05
+ - fix user roles for non admin users
+
 v2.3.1 2021.04.05
  - expense dialog bugfix to not display loading overlay on error
  - income dialog bugfix if no comment given
