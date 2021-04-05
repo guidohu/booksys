@@ -341,7 +341,7 @@ export default {
         })
         .catch((errors) => {
           this.errors = errors;
-          this.isLoaing = false;
+          this.isLoading = false;
         });
     },
     addFuel: function () {

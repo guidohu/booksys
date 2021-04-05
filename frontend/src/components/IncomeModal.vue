@@ -83,7 +83,7 @@
           >
             <b-form-textarea
               id="description-input"
-              v-model="form.description"
+              v-model="form.comment"
               type="text"
               rows="2"
               placeholder=""
@@ -169,6 +169,7 @@ export default {
         type: null,
         user: null,
         date: null,
+        comment: null,
       },
     };
   },
