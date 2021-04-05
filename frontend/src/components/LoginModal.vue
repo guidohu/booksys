@@ -1,13 +1,10 @@
 <template>
   <b-form v-on:submit.prevent="login" role="form">
     <b-row class="text-left">
-      <b-col cols="3" class="d-none d-sm-block">
-      </b-col>
+      <b-col cols="3" class="d-none d-sm-block"> </b-col>
       <b-col cols="12" sm="6">
         <b-card no-body>
-          <b-card-header>
-            Please Login
-          </b-card-header>
+          <b-card-header> Please Login </b-card-header>
           <b-card-body>
             <b-card-text>
               <b-form-group
@@ -49,7 +46,7 @@
               <b-row class="text-right">
                 <b-col cols="12">
                   <b-button variant="outline-dark" type="submit">
-                    <b-icon-caret-right-fill/>
+                    <b-icon-caret-right-fill />
                     Login
                   </b-button>
                 </b-col>
@@ -58,16 +55,14 @@
           </b-card-body>
           <b-card-footer>
             <b-form-group class="text-left">
-                <b-col cols="3" class="d-xs-none"></b-col>
-                <b-col cols="12" xs="8">
-                    <b-button to="/password/reset" variant="light">
-                        Forgot password
-                    </b-button>
-                    <b-button to="/signup" variant="light">
-                        Sign-Up
-                    </b-button>
-                </b-col>
-                <b-col cols="1" class="d-xs-none"></b-col>
+              <b-col cols="3" class="d-xs-none"></b-col>
+              <b-col cols="12" xs="8">
+                <b-button to="/password/reset" variant="light">
+                  Forgot password
+                </b-button>
+                <b-button to="/signup" variant="light"> Sign-Up </b-button>
+              </b-col>
+              <b-col cols="1" class="d-xs-none"></b-col>
             </b-form-group>
           </b-card-footer>
         </b-card>
@@ -92,10 +87,10 @@ import {
   BCardBody,
   BCardFooter,
   BCardText,
-} from 'bootstrap-vue';
+} from "bootstrap-vue";
 
 export default {
-  name: 'LoginModal',
+  name: "LoginModal",
   components: {
     BForm,
     BFormGroup,
@@ -111,27 +106,27 @@ export default {
     BCardFooter,
     BCardText,
   },
-  props: ['statusMessage', 'initialUsername'],
+  props: ["statusMessage", "initialUsername"],
   data: function () {
     return {
       notifications: [],
       form: {
         username: null,
-        password: null
+        password: null,
       },
-    }
+    };
   },
   methods: {
     login: function () {
-      this.$emit("login", this.form.username, this.form.password)
+      this.$emit("login", this.form.username, this.form.password);
     },
     focusUsername() {
       this.$refs.username.focus();
-    }
+    },
   },
   mounted() {
     this.focusUsername();
     this.form.username = this.initialUsername;
-  }
-}
+  },
+};
 </script>

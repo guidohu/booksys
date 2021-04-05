@@ -3,68 +3,62 @@
     <b-tab active>
       <div slot="title">
         <p class="h6 mt-2 mb-2">
-          <b-icon-person/>
+          <b-icon-person />
           Users
         </p>
       </div>
       <div :class="tabClass">
-        <UserTable/>
+        <UserTable />
       </div>
     </b-tab>
     <b-tab>
       <div slot="title">
         <p class="h6 mt-2 mb-2">
-          <b-icon-people/>
+          <b-icon-people />
           User Groups
         </p>
       </div>
-      <div :class="tabClass">        
-        <UserGroupTable/>
+      <div :class="tabClass">
+        <UserGroupTable />
       </div>
     </b-tab>
   </b-tabs>
-
 </template>
 
 <script>
-import { BooksysBrowser } from '@/libs/browser';
-import UserTable from '@/components/UserTable';
-import UserGroupTable from '@/components/UserGroupTable';
-import {
-  BTabs,
-  BTab,
-  BIconPerson,
-  BIconPeople
-} from 'bootstrap-vue';
+import { BooksysBrowser } from "@/libs/browser";
+import UserTable from "@/components/UserTable";
+import UserGroupTable from "@/components/UserGroupTable";
+import { BTabs, BTab, BIconPerson, BIconPeople } from "bootstrap-vue";
 
 export default {
-  name: 'UserManagementTabs',
+  name: "UserManagementTabs",
   components: {
     UserTable,
     UserGroupTable,
     BTabs,
     BTab,
     BIconPerson,
-    BIconPeople
+    BIconPeople,
   },
   computed: {
     isDesktop: function () {
-      return !BooksysBrowser.isMobile()
+      return !BooksysBrowser.isMobile();
     },
-    tabClass: function (){
-      if(!BooksysBrowser.isMobile()){
+    tabClass: function () {
+      if (!BooksysBrowser.isMobile()) {
         return "user-management-tab-limited-height";
-      }else{
+      } else {
         return "";
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped>
-  .user-management-tab-limited-height {
-    max-height: 400px;
-    overflow: scroll;
-  }
+.user-management-tab-limited-height {
+  max-height: 400px;
+  overflow: scroll;
+}
 </style>

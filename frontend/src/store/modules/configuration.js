@@ -14,7 +14,7 @@ const state = () => ({
   maxRiders: 12,
   logoFile: null,
   engineHourFormat: "hh.h",
-})
+});
 
 const getters = {
   getRecaptchaKey: (state) => {
@@ -56,167 +56,181 @@ const getters = {
   },
   getEngineHourFormat: (state) => {
     return state.engineHourFormat;
-  }
-}
+  },
+};
 
 const actions = {
   queryConfiguration({ commit }) {
     let successCb = (config) => {
-      commit('setConfiguration', config)
-    }
+      commit("setConfiguration", config);
+    };
     let failureCb = () => {
-      commit('setConfiguration', null)
-    }
-    Configuration.getConfiguration(successCb, failureCb)
+      commit("setConfiguration", null);
+    };
+    Configuration.getConfiguration(successCb, failureCb);
   },
   queryDbUpdateStatus({ commit }) {
     let successCb = (response) => {
-      commit('setDbUpdateStatus', response)
-    }
+      commit("setDbUpdateStatus", response);
+    };
     let failureCb = (error) => {
-      console.error("store/configuration: Cannot get needsDbUpdate:", error)
-      commit('setDbUpdateStatus', null)
-    }
-    Configuration.needsDbUpdate(successCb, failureCb)
+      console.error("store/configuration: Cannot get needsDbUpdate:", error);
+      commit("setDbUpdateStatus", null);
+    };
+    Configuration.needsDbUpdate(successCb, failureCb);
   },
   queryDbVersionInfo({ commit }) {
     return new Promise((resolve, reject) => {
       Configuration.getDbVersion()
-      .then((info) => {
-        commit('setDbVersionInfo', info);
-        resolve();
-      })
-      .catch((errors) => {
-        commit('setDbVersionInfo', null);
-        reject(errors);
-      })
-    })
-  },
-  queryRecaptchaKey({ commit }){
-    return new Promise((resolve, reject) => {
-      Configuration.getRecaptchaKey()
-      .then((key) => {
-        // load latest configuration
-        commit('setRecaptchaKey', key);
-        resolve();
-      })
-      .catch((errors) => {
-        reject(errors);
-      })
+        .then((info) => {
+          commit("setDbVersionInfo", info);
+          resolve();
+        })
+        .catch((errors) => {
+          commit("setDbVersionInfo", null);
+          reject(errors);
+        });
     });
   },
-  queryLogoFile({ commit }){
+  queryRecaptchaKey({ commit }) {
+    return new Promise((resolve, reject) => {
+      Configuration.getRecaptchaKey()
+        .then((key) => {
+          // load latest configuration
+          commit("setRecaptchaKey", key);
+          resolve();
+        })
+        .catch((errors) => {
+          reject(errors);
+        });
+    });
+  },
+  queryLogoFile({ commit }) {
     return new Promise((resolve, reject) => {
       Configuration.getLogoFile()
-      .then((uri) => {
-        // load latest configuration
-        commit('setLogoFile', uri);
-        resolve(uri);
-      })
-      .catch((errors) => {
-        reject(errors);
-      })
+        .then((uri) => {
+          // load latest configuration
+          commit("setLogoFile", uri);
+          resolve(uri);
+        })
+        .catch((errors) => {
+          reject(errors);
+        });
     });
   },
   updateDb({ commit, dispatch }) {
-    commit('setIsUpdating', true)
+    commit("setIsUpdating", true);
     let successCb = (response) => {
       console.log("updateDb response:", response);
-      dispatch('queryDbVersionInfo');
-      commit('setIsUpdating', false);
-      commit('setUpdateResult', response); 
+      dispatch("queryDbVersionInfo");
+      commit("setIsUpdating", false);
+      commit("setUpdateResult", response);
     };
     let failureCb = (error) => {
       console.log("updateDb error:", error);
-      commit('setIsUpdating', false);
-      commit('setUpdateResult ', { ok: false, msg: error});
+      commit("setIsUpdating", false);
+      commit("setUpdateResult ", { ok: false, msg: error });
     };
     Configuration.updateDb(successCb, failureCb);
   },
-  setConfiguration({ dispatch }, configurationValues){
+  setConfiguration({ dispatch }, configurationValues) {
     return new Promise((resolve, reject) => {
       Configuration.setConfiguration(configurationValues)
-      .then(() => {
-        // load latest configuration
-        dispatch('queryConfiguration', {});
-        resolve();
-      })
-      .catch((errors) => {
-        reject(errors);
-      })
+        .then(() => {
+          // load latest configuration
+          dispatch("queryConfiguration", {});
+          resolve();
+        })
+        .catch((errors) => {
+          reject(errors);
+        });
     });
-  }
-}
+  },
+};
 
 const mutations = {
-  setConfiguration (state, value){
-    state.configuration = value
-    state.locationAddress = (value.location_address != null) ? value.location_address.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g, '<br>') : null;
+  setConfiguration(state, value) {
+    state.configuration = value;
+    state.locationAddress =
+      value.location_address != null
+        ? value.location_address
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\n/g, "<br>")
+        : null;
     state.locationMap = value.location_map;
     state.currency = value.currency;
     state.logoFile = value.logo_file;
     state.engineHourFormat = value.engine_hour_format;
-    console.log('configuration set to', value);
+    console.log("configuration set to", value);
   },
-  setRecaptchaKey (state, value){
+  setRecaptchaKey(state, value) {
     state.recaptchaKey = value;
   },
-  setLogoFile (state, value){
+  setLogoFile(state, value) {
     state.logoFile = value;
   },
-  setDbUpdateStatus (state, value){
-    console.log(value)
-    state.dbUpdateStatus = value
+  setDbUpdateStatus(state, value) {
+    console.log(value);
+    state.dbUpdateStatus = value;
   },
-  setDbVersionInfo (state, value){
+  setDbVersionInfo(state, value) {
     if (value == null) {
       // set to null by default
-      console.log("setDbVersionInfo to null")
-      state.dbVersionInfo = null
-      return
+      console.log("setDbVersionInfo to null");
+      state.dbVersionInfo = null;
+      return;
     }
 
-    console.log("start updating")
+    console.log("start updating");
     if (state.dbVersionInfo == null) {
       state.dbVersionInfo = {
-        isUpdated: true
+        isUpdated: true,
       };
     }
-    state.dbVersionInfo.appVersion = value.app_version != null ? parseFloat(value.app_version) : null
-    state.dbVersionInfo.dbVersion = value.db_version != null ? parseFloat(value.db_version) : null
-    state.dbVersionInfo.dbVersionRequired = value.db_version_required != null ? parseFloat(value.db_version_required) : null
+    state.dbVersionInfo.appVersion =
+      value.app_version != null ? parseFloat(value.app_version) : null;
+    state.dbVersionInfo.dbVersion =
+      value.db_version != null ? parseFloat(value.db_version) : null;
+    state.dbVersionInfo.dbVersionRequired =
+      value.db_version_required != null
+        ? parseFloat(value.db_version_required)
+        : null;
 
     // decide if is updated
-    if (state.dbVersionInfo.dbVersion != state.dbVersionInfo.dbVersionRequired) {
-      state.dbVersionInfo.isUpdated = false
-    }else{
-      state.dbVersionInfo.isUpdated = true
+    if (
+      state.dbVersionInfo.dbVersion != state.dbVersionInfo.dbVersionRequired
+    ) {
+      state.dbVersionInfo.isUpdated = false;
+    } else {
+      state.dbVersionInfo.isUpdated = true;
     }
-    console.log("setDbVersionInfo updated to:", state.dbVersionInfo)
+    console.log("setDbVersionInfo updated to:", state.dbVersionInfo);
   },
-  setIsUpdating (state, value){
-    state.dbIsUpdating = value
+  setIsUpdating(state, value) {
+    state.dbIsUpdating = value;
   },
-  setUpdateResult (state, value){
-    if(value.ok == true){
+  setUpdateResult(state, value) {
+    if (value.ok == true) {
       state.dbUpdateResult = {
         success: true,
-        msg: 'Database upgrade was successful',
-        queries: value.queries
+        msg: "Database upgrade was successful",
+        queries: value.queries,
       };
-    }else{
+    } else {
       state.dbUpdateResult = {
         success: false,
-        msg: value.msg
+        msg: value.msg,
       };
     }
-  }
-}
+  },
+};
 
 export default {
   namespaced: true,
   state,
   getters,
   actions,
-  mutations
-}
+  mutations,
+};

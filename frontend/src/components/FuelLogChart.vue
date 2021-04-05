@@ -5,15 +5,15 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import Chart from 'chart.js/dist/Chart';
-import 'chartjs-plugin-colorschemes/src/plugins/plugin.colorschemes';
-import { ClassicBlue7 } from 'chartjs-plugin-colorschemes/src/colorschemes/colorschemes.tableau';
-import groupBy from 'lodash/groupBy';
-import max from 'lodash/max';
-import sum from 'lodash/sum';
-import * as dayjs from 'dayjs';
-import * as dayjsDayOfYear from 'dayjs/plugin/dayOfYear';
+import { mapGetters } from "vuex";
+import Chart from "chart.js/dist/Chart";
+import "chartjs-plugin-colorschemes/src/plugins/plugin.colorschemes";
+import { ClassicBlue7 } from "chartjs-plugin-colorschemes/src/colorschemes/colorschemes.tableau";
+import groupBy from "lodash/groupBy";
+import max from "lodash/max";
+import sum from "lodash/sum";
+import * as dayjs from "dayjs";
+import * as dayjsDayOfYear from "dayjs/plugin/dayOfYear";
 
 dayjs.extend(dayjsDayOfYear);
 
@@ -26,74 +26,82 @@ export default {
       options: {
         title: {
           display: true,
-          text: 'Average Fuel Consumption',
-          fontStyle: 'none'
+          text: "Average Fuel Consumption",
+          fontStyle: "none",
         },
         legend: {
-          position: 'bottom'
+          position: "bottom",
         },
         tooltips: {
           enabled: true,
           callbacks: {
-            title: function() {
-                return "Average Fuel Consumption";
+            title: function () {
+              return "Average Fuel Consumption";
             },
-            label: function(tooltipItem, data) {
-                let time   = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index].x.format("DD. MMM");
-                let liters = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index].y
-                liters = Math.round(liters * 10)/10;
-                return time + " - " + liters + " L";
+            label: function (tooltipItem, data) {
+              let time = data.datasets[tooltipItem.datasetIndex].data[
+                tooltipItem.index
+              ].x.format("DD. MMM");
+              let liters =
+                data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index]
+                  .y;
+              liters = Math.round(liters * 10) / 10;
+              return time + " - " + liters + " L";
             },
-            afterLabel: function() {
-                return '';
-            }
-          }
+            afterLabel: function () {
+              return "";
+            },
+          },
         },
         scales: {
-          xAxes: [{
-            type: 'time',
-            distribution: 'series',
-            time: {
-              unit: 'day'
-            }
-          }],
-          yAxis: [{
-            ticks: {
-              min: 0,
-              max: 40,
-              suggestedMin: 0,
-              suggestedMax: 40
+          xAxes: [
+            {
+              type: "time",
+              distribution: "series",
+              time: {
+                unit: "day",
+              },
             },
-            scaleLabel: {
-              display: true,
-              labelString: 'liter/hour'
-            }
-          }]
+          ],
+          yAxis: [
+            {
+              ticks: {
+                min: 0,
+                max: 40,
+                suggestedMin: 0,
+                suggestedMax: 40,
+              },
+              scaleLabel: {
+                display: true,
+                labelString: "liter/hour",
+              },
+            },
+          ],
         },
         maintainAspectRatio: false,
         responsive: true,
         plugins: {
           colorschemes: {
-            scheme: ClassicBlue7
-          }
-        }
-      }
-    }
+            scheme: ClassicBlue7,
+          },
+        },
+      },
+    };
   },
   computed: {
-    ...mapGetters('boat', [
-      'getFuelLog'
-    ])
+    ...mapGetters("boat", ["getFuelLog"]),
   },
   methods: {
-    setDatasets: function(fuelLog){
-      if(fuelLog == null || fuelLog == 0){
+    setDatasets: function (fuelLog) {
+      if (fuelLog == null || fuelLog == 0) {
         this.datasets = [];
         return;
       }
 
       // split by year
-      const fuelLogByYear = groupBy(fuelLog, (x) => Number(dayjs.unix(x.timestamp).format("YYYY")));
+      const fuelLogByYear = groupBy(fuelLog, (x) =>
+        Number(dayjs.unix(x.timestamp).format("YYYY"))
+      );
 
       // get all the years with the latest ones first
       const years = Object.keys(fuelLogByYear).sort().reverse();
@@ -101,43 +109,49 @@ export default {
 
       // build the datasets per year
       const datasets = [];
-      for(let i = 0; i<displayYears.length; i++){
+      for (let i = 0; i < displayYears.length; i++) {
         const year = displayYears[i];
         const fuelValues = fuelLogByYear[year];
-        const fuelValuesPerDay = groupBy(fuelValues, (x) => dayjs.unix(x.timestamp).dayOfYear());
+        const fuelValuesPerDay = groupBy(fuelValues, (x) =>
+          dayjs.unix(x.timestamp).dayOfYear()
+        );
 
         const dataset = {
           label: year,
           data: [],
           showLine: true,
           fill: false,
-          hidden: i != 0 // hide the stats for previous years by default
+          hidden: i != 0, // hide the stats for previous years by default
         };
 
         let lastEngineHours = 0;
         const dayKeys = Object.keys(fuelValuesPerDay).sort((a, b) => a - b);
-        for(let j = 0; j < dayKeys.length; j++){
-          const dayNumber   = dayKeys[j]
+        for (let j = 0; j < dayKeys.length; j++) {
+          const dayNumber = dayKeys[j];
           const fuelEntries = fuelValuesPerDay[dayNumber];
 
           // calculate the engine hours of that day and the liters fueled in total
-          const engineHours     = max(fuelEntries.map(entry => Number(entry.engine_hours)));
-          const fuelConsumption = sum(fuelEntries.map(entry => Number(entry.liters)));
-          
+          const engineHours = max(
+            fuelEntries.map((entry) => Number(entry.engine_hours))
+          );
+          const fuelConsumption = sum(
+            fuelEntries.map((entry) => Number(entry.liters))
+          );
+
           // first value, we cannot calculate an average
-          if(lastEngineHours == 0){
+          if (lastEngineHours == 0) {
             lastEngineHours = engineHours;
             continue;
           }
           // check if engine hours decreased
-          if(lastEngineHours > engineHours){
+          if (lastEngineHours > engineHours) {
             lastEngineHours = engineHours;
             continue;
           }
 
           // calculate engine hour difference
           const engineHoursDiff = engineHours - lastEngineHours;
-          if(engineHoursDiff == 0){
+          if (engineHoursDiff == 0) {
             console.log("FuelLogChart: division by 0, skip value");
             lastEngineHours = engineHours;
             continue;
@@ -148,8 +162,10 @@ export default {
 
           // add the entry to the graph dataset
           dataset.data.push({
-            x: dayjs(dayjs.unix(fuelEntries[0].timestamp).set('year', 1970)).toDate(),
-            y: fuelConsumptionPerHour
+            x: dayjs(
+              dayjs.unix(fuelEntries[0].timestamp).set("year", 1970)
+            ).toDate(),
+            y: fuelConsumptionPerHour,
           });
 
           // update the lastEngineHour reference
@@ -162,28 +178,28 @@ export default {
 
       this.datasets = datasets;
     },
-    drawChart: function() {
-      var ctx = document.getElementById('fuelChart').getContext('2d');
+    drawChart: function () {
+      var ctx = document.getElementById("fuelChart").getContext("2d");
       const options = this.options;
       const datasets = this.datasets;
       this.fuelChartObject = new Chart(ctx, {
-        type: 'scatter',
+        type: "scatter",
         data: {
-          datasets: datasets
+          datasets: datasets,
         },
-        options: options
+        options: options,
       });
-    }
+    },
   },
   watch: {
-    getFuelLog: function(newValues){
+    getFuelLog: function (newValues) {
       this.setDatasets(newValues);
       this.drawChart();
-    }
+    },
   },
-  mounted () {
+  mounted() {
     this.setDatasets(this.getFuelLog);
     this.drawChart();
-  }
-}
+  },
+};
 </script>

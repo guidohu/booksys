@@ -11,49 +11,46 @@
 </template>
 
 <script>
-import {
-  BFormGroup,
-  BFormSelect
-} from 'bootstrap-vue';
+import { BFormGroup, BFormSelect } from "bootstrap-vue";
 
 export default {
   name: "FuelPaymentTypeSelector",
   components: {
     BFormGroup,
-    BFormSelect
+    BFormSelect,
   },
-  props: [ 'selected' ],
+  props: ["selected"],
   data() {
     return {
       formSelected: "instant",
       options: [
-        { value: 'instant',  text: 'pay directly' },
-        { value: 'billed', text: 'pay by bill' }
-      ]
-    }
+        { value: "instant", text: "pay directly" },
+        { value: "billed", text: "pay by bill" },
+      ],
+    };
   },
   watch: {
-    formSelected: function(){
-      this.$emit('update:selected', this.formSelected);
+    formSelected: function () {
+      this.$emit("update:selected", this.formSelected);
     },
-    selected: function(){
+    selected: function () {
       this.setFormSelected(this.selected);
-    }
+    },
   },
   methods: {
-    setFormSelected: function(format){
-      if(format == null){
+    setFormSelected: function (format) {
+      if (format == null) {
         console.log("no default payment type specified");
         this.formSelected = "instant";
-      } else if(format == "instant" || format == "billed"){
+      } else if (format == "instant" || format == "billed") {
         this.formSelected = format;
-      } else{
+      } else {
         this.formSelected = "instant";
       }
-    }
+    },
   },
   created() {
     this.setFormSelected(this.selected);
-  }
-}
+  },
+};
 </script>

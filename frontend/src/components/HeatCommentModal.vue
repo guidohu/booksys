@@ -9,7 +9,7 @@
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
       <b-col cols="12" sm="10">
-        <WarningBox :errors="errors"/>
+        <WarningBox :errors="errors" />
       </b-col>
       <b-col cols="1" class="d-none d-sm-block"></b-col>
     </b-row>
@@ -17,12 +17,7 @@
       <b-row class="text-left">
         <b-col cols="1" class="d-none d-sm-block"></b-col>
         <b-col cols="12" sm="10">
-          <b-form-group
-            id="comment"
-            label=""
-            label-for=""
-            description=""
-          >
+          <b-form-group id="comment" label="" label-for="" description="">
             <b-form-input
               id="comment-input"
               v-model="comment"
@@ -34,12 +29,17 @@
       </b-row>
     </b-form>
     <div slot="modal-footer">
-      <b-button type="button" variant="outline-danger" v-on:click="removeComment" class="mr-1">
-        <b-icon-x/>
+      <b-button
+        type="button"
+        variant="outline-danger"
+        v-on:click="removeComment"
+        class="mr-1"
+      >
+        <b-icon-x />
         Delete
       </b-button>
       <b-button type="button" variant="outline-info" v-on:click="saveComment">
-        <b-icon-check/>
+        <b-icon-check />
         Save
       </b-button>
     </div>
@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import WarningBox from '@/components/WarningBox';
+import WarningBox from "@/components/WarningBox";
 import {
   BModal,
   BRow,
@@ -57,8 +57,8 @@ import {
   BFormInput,
   BButton,
   BIconX,
-  BIconCheck
-} from 'bootstrap-vue';
+  BIconCheck,
+} from "bootstrap-vue";
 
 export default {
   name: "HeatCommentModal",
@@ -72,38 +72,36 @@ export default {
     BFormInput,
     BButton,
     BIconX,
-    BIconCheck
+    BIconCheck,
   },
-  props: [
-    'defaultComment', 'visible'
-  ],
+  props: ["defaultComment", "visible"],
   data() {
     return {
       errors: [],
-      comment: null
-    }
+      comment: null,
+    };
   },
   methods: {
-    saveComment: function(){
-      this.$emit('commentChangeHandler', this.comment);
+    saveComment: function () {
+      this.$emit("commentChangeHandler", this.comment);
       this.close();
     },
-    removeComment: function() {
-      this.$emit('commentChangeHandler', null);
+    removeComment: function () {
+      this.$emit("commentChangeHandler", null);
       this.close();
     },
-    close: function() {
+    close: function () {
       this.comment = null;
-      this.$emit('update:visible', false);
-    }
+      this.$emit("update:visible", false);
+    },
   },
   watch: {
-    defaultComment: function(newComment){
+    defaultComment: function (newComment) {
       this.comment = newComment;
-    }
+    },
   },
   mounted() {
     this.comment = this.defaultComment;
-  }
-}
+  },
+};
 </script>

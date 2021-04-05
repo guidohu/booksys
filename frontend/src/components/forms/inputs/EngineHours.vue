@@ -15,9 +15,7 @@
         v-on:blur="propagateValue"
         :placeholder="formPlaceholder"
       />
-      <b-input-group-append 
-        is-text
-      >
+      <b-input-group-append is-text>
         {{ unitText }}
       </b-input-group-append>
     </b-input-group>
@@ -25,81 +23,84 @@
 </template>
 
 <script>
-import { 
+import {
   formatEngineHourLabel,
   formatEngineHour,
   isValidEngineHour,
-  convertEngineHour
-} from '@/libs/formatters';
+  convertEngineHour,
+} from "@/libs/formatters";
 import {
   BFormGroup,
   BFormInput,
   BInputGroup,
-  BInputGroupAppend
-} from 'bootstrap-vue';
+  BInputGroupAppend,
+} from "bootstrap-vue";
 
 export default {
   name: "EngineHours",
-  props: [ 'label', 'value', 'displayFormat', 'disabled', 'size', 'placeholder' ],
+  props: ["label", "value", "displayFormat", "disabled", "size", "placeholder"],
   components: {
     BFormGroup,
     BFormInput,
     BInputGroup,
-    BInputGroupAppend
+    BInputGroupAppend,
   },
   data() {
     return {
       formValue: null,
-      formSize: 'sm',
+      formSize: "sm",
       formPlaceholder: null,
       state: null,
-    }
+    };
   },
   computed: {
-    inputGroupId: function() {
-      return 'input-group-' + this.label.toLowerCase().replace(' ', '-');
+    inputGroupId: function () {
+      return "input-group-" + this.label.toLowerCase().replace(" ", "-");
     },
-    labelFor: function() {
-      return 'input-' + this.label.toLowerCase().replace(' ', '-');
+    labelFor: function () {
+      return "input-" + this.label.toLowerCase().replace(" ", "-");
     },
-    id: function() {
-      return 'input-' + this.label.toLowerCase().replace(' ', '-');
+    id: function () {
+      return "input-" + this.label.toLowerCase().replace(" ", "-");
     },
-    unitText: function() {
+    unitText: function () {
       return formatEngineHourLabel(this.displayFormat);
-    }
+    },
   },
   watch: {
-    value: function(){
+    value: function () {
       this.formValue = formatEngineHour(this.value, this.displayFormat);
     },
-    formValue: function(){
-      if(this.formValue == null || this.formValue == ''){
+    formValue: function () {
+      if (this.formValue == null || this.formValue == "") {
         this.state = null;
-      }else if(!isValidEngineHour(this.formValue, this.displayFormat)){
+      } else if (!isValidEngineHour(this.formValue, this.displayFormat)) {
         this.state = false;
-      }else{
+      } else {
         this.state = null;
       }
-    }
+    },
   },
   methods: {
-    propagateValue: function(){
-      if(this.formValue != null){
-        this.$emit('input', convertEngineHour(this.formValue));
-      }else{
-        this.$emit('input', null);
+    propagateValue: function () {
+      if (this.formValue != null) {
+        this.$emit("input", convertEngineHour(this.formValue));
+      } else {
+        this.$emit("input", null);
       }
-    }
+    },
   },
-  created(){
+  created() {
     this.formValue = formatEngineHour(this.value, this.displayFormat);
-    if(this.size != null){
+    if (this.size != null) {
       this.formSize = this.size;
     }
-    if(this.placeholder != null){
-      this.formPlaceholder = formatEngineHour(this.placeholder, this.displayFormat);
+    if (this.placeholder != null) {
+      this.formPlaceholder = formatEngineHour(
+        this.placeholder,
+        this.displayFormat
+      );
     }
-  }
-}
+  },
+};
 </script>

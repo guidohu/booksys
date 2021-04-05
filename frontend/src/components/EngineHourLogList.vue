@@ -1,17 +1,18 @@
 <template>
   <div>
-    <WarningBox v-if="errors.length > 0" :errors="errors"/>
+    <WarningBox v-if="errors.length > 0" :errors="errors" />
     <EngineHourEntryModal
       :engineHourEntry="selectedEngineHourLogEntry"
       :visible.sync="showEntryHourModal"
       :displayFormat="getEngineHourFormat"
     />
-    <b-table v-if="errors.length == 0" 
-      hover 
+    <b-table
+      v-if="errors.length == 0"
+      hover
       small
-      :items="items" 
-      :fields="columns" 
-      @row-clicked="rowClick" 
+      :items="items"
+      :fields="columns"
+      @row-clicked="rowClick"
       :tbody-tr-class="rowClass"
       class="text-left"
     />
@@ -19,21 +20,19 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
-import * as dayjs from 'dayjs';
-import WarningBox from '@/components/WarningBox';
-import EngineHourEntryModal from '@/components/EngineHourEntryModal';
-import { formatEngineHour } from '@/libs/formatters';
-import {
-  BTable
-} from 'bootstrap-vue';
+import { mapActions, mapGetters } from "vuex";
+import * as dayjs from "dayjs";
+import WarningBox from "@/components/WarningBox";
+import EngineHourEntryModal from "@/components/EngineHourEntryModal";
+import { formatEngineHour } from "@/libs/formatters";
+import { BTable } from "bootstrap-vue";
 
 export default {
   name: "EngineHourLogList",
   components: {
     WarningBox,
     EngineHourEntryModal,
-    BTable
+    BTable,
   },
   data() {
     return {
@@ -41,115 +40,117 @@ export default {
       columns: [],
       errors: [],
       selectedEngineHourLogEntry: null,
-      showEntryHourModal: false
+      showEntryHourModal: false,
     };
   },
   computed: {
-    ...mapGetters('boat',[
-      'getEngineHourLog'
-    ]),
-    ...mapGetters('configuration',[
-      'getEngineHourFormat'
-    ])
+    ...mapGetters("boat", ["getEngineHourLog"]),
+    ...mapGetters("configuration", ["getEngineHourFormat"]),
   },
   watch: {
-    getEngineHourLog: function(newEntries){
+    getEngineHourLog: function (newEntries) {
       console.log("getEngineHourLog just changed to", newEntries);
       this.setItems(newEntries);
     },
-    getEngineHourFormat: function(newFormat, oldFormat){
-      if(newFormat != oldFormat){
+    getEngineHourFormat: function (newFormat, oldFormat) {
+      if (newFormat != oldFormat) {
         this.setColumns();
       }
-    }
+    },
   },
   methods: {
-    ...mapActions('boat',[
-      'queryEngineHourLog'
-    ]),
-    ...mapActions('configuration',[
-      'queryConfiguration'
-    ]),
-    setItems: function(logs){
+    ...mapActions("boat", ["queryEngineHourLog"]),
+    ...mapActions("configuration", ["queryConfiguration"]),
+    setItems: function (logs) {
       this.items = [];
-      logs.slice(0,200).forEach( l => {
+      logs.slice(0, 200).forEach((l) => {
         this.items.push(l);
-      })
+      });
     },
-    setColumns: function(){
-      this.$set(this, 'columns', [
+    setColumns: function () {
+      this.$set(this, "columns", [
         {
-          key: 'time',
-          label: 'Date',
+          key: "time",
+          label: "Date",
           sortable: true,
-          formatter: (value) => { return dayjs(value*1000).format("DD.MM.YYYY HH:mm"); }
+          formatter: (value) => {
+            return dayjs(value * 1000).format("DD.MM.YYYY HH:mm");
+          },
         },
         {
-          key: 'user_first_name',
-          label: 'Driver',
+          key: "user_first_name",
+          label: "Driver",
           sortable: true,
-          formatter: (value, key, item) => { return item.user_first_name }
+          formatter: (value, key, item) => {
+            return item.user_first_name;
+          },
         },
         {
-          key: 'before_hours',
-          label: 'Before',
+          key: "before_hours",
+          label: "Before",
           sortable: true,
           class: "text-right",
-          formatter: (value) => { return formatEngineHour(value, this.getEngineHourFormat) }
+          formatter: (value) => {
+            return formatEngineHour(value, this.getEngineHourFormat);
+          },
         },
         {
-          key: 'after_hours',
-          label: 'After',
+          key: "after_hours",
+          label: "After",
           sortable: true,
           class: "text-right",
-          formatter: (value) => { return formatEngineHour(value, this.getEngineHourFormat) }
+          formatter: (value) => {
+            return formatEngineHour(value, this.getEngineHourFormat);
+          },
         },
         {
-          key: 'delta_hours',
-          label: 'Diff',
+          key: "delta_hours",
+          label: "Diff",
           sortable: true,
           class: "text-right",
-          formatter: (value) => { return formatEngineHour(value, this.getEngineHourFormat) }
-        }
+          formatter: (value) => {
+            return formatEngineHour(value, this.getEngineHourFormat);
+          },
+        },
       ]);
     },
-    rowClick: function(item){
+    rowClick: function (item) {
       this.selectedEngineHourLogEntry = item;
       this.showEntryHourModal = true;
     },
-    rowClass: function(item) {
-      if(item.type == 0){
+    rowClass: function (item) {
+      if (item.type == 0) {
         return "clickable";
-      }else{
+      } else {
         return "highlight clickable";
       }
-    }
+    },
   },
   created() {
     this.queryConfiguration();
-    
+
     // generate header of table
     this.setColumns();
 
     // query content
     this.queryEngineHourLog()
-    .then( () => {
-      this.setItems(this.getEngineHourLog);
-    })
-    .catch( (errors) => {
-      this.errors = errors;
-    });
-  }
-}
+      .then(() => {
+        this.setItems(this.getEngineHourLog);
+      })
+      .catch((errors) => {
+        this.errors = errors;
+      });
+  },
+};
 </script>
 
 <style>
-  tr.highlight {
-    color: #ffffff;
-    background-color: rgb(91,192,222);
-  }
+tr.highlight {
+  color: #ffffff;
+  background-color: rgb(91, 192, 222);
+}
 
-  tr.clickable {
-    cursor: pointer;
-  }
+tr.clickable {
+  cursor: pointer;
+}
 </style>

@@ -1,11 +1,11 @@
 <template>
   <div>
     <div v-if="isDesktop" class="display">
-      <main-title title-name="Boat"/>
+      <main-title title-name="Boat" />
       <b-row class="ml-1 mr-1">
         <b-col cols="12">
           <b-card no-body>
-            <BoatTabs/>
+            <BoatTabs />
           </b-card>
         </b-col>
       </b-row>
@@ -17,29 +17,23 @@
       </div>
     </div>
     <div v-else>
-      <NavbarMobile title="Boat"/>
+      <NavbarMobile title="Boat" />
       <b-card no-body>
-        <BoatTabs/>
+        <BoatTabs />
       </b-card>
     </div>
   </div>
 </template>
 
 <script>
-import { BooksysBrowser } from '@/libs/browser';
-import NavbarMobile from '@/components/NavbarMobile';
-import BoatTabs from '@/components/BoatTabs';
-import MainTitle from '@/components/MainTitle';
-import {
-  BRow,
-  BCol,
-  BCard,
-  BButton,
-  BIconHouse
-} from 'bootstrap-vue';
+import { BooksysBrowser } from "@/libs/browser";
+import NavbarMobile from "@/components/NavbarMobile";
+import BoatTabs from "@/components/BoatTabs";
+import MainTitle from "@/components/MainTitle";
+import { BRow, BCol, BCard, BButton, BIconHouse } from "bootstrap-vue";
 
 export default {
-  name: 'Boat',
+  name: "Boat",
   components: {
     NavbarMobile,
     MainTitle,
@@ -48,12 +42,12 @@ export default {
     BCol,
     BCard,
     BButton,
-    BIconHouse
+    BIconHouse,
   },
   computed: {
     isDesktop: function () {
-      return !BooksysBrowser.isMobile()
-    }
-  }
-}
+      return !BooksysBrowser.isMobile();
+    },
+  },
+};
 </script>

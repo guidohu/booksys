@@ -7,17 +7,14 @@
 </template>
 
 <script>
-import {
-  BCard,
-  BAlert
-} from 'bootstrap-vue';
+import { BCard, BAlert } from "bootstrap-vue";
 
 export default {
-  name: 'AlertMessage',
+  name: "AlertMessage",
   components: {
     BCard,
-    BAlert
+    BAlert,
   },
-  props: ['alertMessage']
-}
+  props: ["alertMessage"],
+};
 </script>

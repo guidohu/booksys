@@ -1,13 +1,13 @@
 <template>
   <b-card no-body>
-    <HeatCommentModal 
-      :defaultComment="comment" 
+    <HeatCommentModal
+      :defaultComment="comment"
       @commentChangeHandler="changeComment"
       :visible.sync="isVisibleHeatCommentModal"
     />
     <b-row v-if="errors.length > 0">
       <b-col cols="12">
-        <WarningBox :errors="errors"/>
+        <WarningBox :errors="errors" />
       </b-col>
     </b-row>
     <b-row class="mt-4 ml-1 mr-1 mb-4">
@@ -15,20 +15,20 @@
         <b-card bg-variant="light">
           <b-row class="stopwatch-text text-center">
             <b-col cols="12">
-              {{getDisplayTime}}
+              {{ getDisplayTime }}
             </b-col>
           </b-row>
         </b-card>
       </b-col>
     </b-row>
-    <b-row v-if="comment!=null" class="ml-1 mr-1">
+    <b-row v-if="comment != null" class="ml-1 mr-1">
       <b-col cols="12">
         <b-form-group>
           <b-input-group>
-            <b-form-input v-model="comment"/>
+            <b-form-input v-model="comment" />
             <template #append>
               <b-button v-on:click="showHeatCommentModal">
-                <b-icon-pencil-square/>
+                <b-icon-pencil-square />
                 <!-- Edit -->
               </b-button>
             </template>
@@ -39,36 +39,75 @@
     <b-row class="ml-1 mr-1">
       <b-col cols="12">
         <b-form-group>
-          <b-form-select v-model="selectedRiderId" :options="selectableRiders" :disabled="getIsRunning || sessionId==null"/>
+          <b-form-select
+            v-model="selectedRiderId"
+            :options="selectableRiders"
+            :disabled="getIsRunning || sessionId == null"
+          />
         </b-form-group>
       </b-col>
     </b-row>
     <b-row class="ml-1 mr-1 mb-2 text-center">
       <b-col cols="12">
         <b-button-group v-if="selectedRiderId != null">
-          <b-button size="lg" variant="outline-info" v-if="!getIsRunning" v-on:click="navigateBack">
-            <b-icon-arrow-left/>
+          <b-button
+            size="lg"
+            variant="outline-info"
+            v-if="!getIsRunning"
+            v-on:click="navigateBack"
+          >
+            <b-icon-arrow-left />
             Back
           </b-button>
-          <b-button size="lg" variant="outline-info" v-if="!getIsRunning" v-on:click="startTakingTime">
-            <b-icon-play/>
+          <b-button
+            size="lg"
+            variant="outline-info"
+            v-if="!getIsRunning"
+            v-on:click="startTakingTime"
+          >
+            <b-icon-play />
             Start
           </b-button>
-          <b-button size="lg" variant="outline-info" v-if="getIsRunning && !getIsPaused" v-on:click="pauseTakingTime">
-            <b-icon-pause/>
+          <b-button
+            size="lg"
+            variant="outline-info"
+            v-if="getIsRunning && !getIsPaused"
+            v-on:click="pauseTakingTime"
+          >
+            <b-icon-pause />
             Pause
           </b-button>
-          <b-button size="lg" variant="outline-info" v-if="getIsPaused" v-on:click="resumeTakingTime">
-            <b-icon-eject rotate="90"/>
+          <b-button
+            size="lg"
+            variant="outline-info"
+            v-if="getIsPaused"
+            v-on:click="resumeTakingTime"
+          >
+            <b-icon-eject rotate="90" />
             Resume
           </b-button>
-          <b-button size="lg" variant="outline-info" v-if="getIsRunning" v-on:click="finish">
-            <b-icon-check-square/>
+          <b-button
+            size="lg"
+            variant="outline-info"
+            v-if="getIsRunning"
+            v-on:click="finish"
+          >
+            <b-icon-check-square />
             Finish
           </b-button>
-          <b-dropdown right variant="outline-info" v-if="selectedRiderId != null || getIsRunning">
-            <b-dropdown-item v-if="selectedRiderId != null" v-on:click="showHeatCommentModal">Add Comment</b-dropdown-item>
-            <b-dropdown-divider v-if="getIsRunning && selectedRiderId != null"/>
+          <b-dropdown
+            right
+            variant="outline-info"
+            v-if="selectedRiderId != null || getIsRunning"
+          >
+            <b-dropdown-item
+              v-if="selectedRiderId != null"
+              v-on:click="showHeatCommentModal"
+              >Add Comment</b-dropdown-item
+            >
+            <b-dropdown-divider
+              v-if="getIsRunning && selectedRiderId != null"
+            />
             <b-dropdown-item v-if="getIsRunning">Cancel Heat</b-dropdown-item>
           </b-dropdown>
         </b-button-group>
@@ -78,9 +117,9 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
-import WarningBox from '@/components/WarningBox';
-import HeatCommentModal from '@/components/HeatCommentModal';
+import { mapGetters, mapActions } from "vuex";
+import WarningBox from "@/components/WarningBox";
+import HeatCommentModal from "@/components/HeatCommentModal";
 import {
   BCard,
   BRow,
@@ -99,11 +138,11 @@ import {
   BIconCheckSquare,
   BDropdown,
   BDropdownItem,
-  BDropdownDivider
-} from 'bootstrap-vue';
+  BDropdownDivider,
+} from "bootstrap-vue";
 
 export default {
-  name: 'StopWatchCard',
+  name: "StopWatchCard",
   components: {
     WarningBox,
     HeatCommentModal,
@@ -124,9 +163,9 @@ export default {
     BIconCheckSquare,
     BDropdown,
     BDropdownItem,
-    BDropdownDivider
+    BDropdownDivider,
   },
-  props: [ 'sessionId', 'visible' ],
+  props: ["sessionId", "visible"],
   data() {
     return {
       isVisibleHeatCommentModal: false,
@@ -134,102 +173,99 @@ export default {
       selectableRiders: [],
       comment: null,
       displayTime: "00:00",
-      errors: []
-    }
+      errors: [],
+    };
   },
   computed: {
-    ...mapGetters('stopwatch', [
-      'getDisplayTime',
-      'getIsPaused',
-      'getIsRunning',
-      'getUserId'
+    ...mapGetters("stopwatch", [
+      "getDisplayTime",
+      "getIsPaused",
+      "getIsRunning",
+      "getUserId",
     ]),
-    ...mapGetters('sessions', [
-      'getSession'
-    ])
+    ...mapGetters("sessions", ["getSession"]),
   },
   watch: {
-    getUserId: function(selectedUserId) {
-      if(selectedUserId != this.selectedRiderId){
+    getUserId: function (selectedUserId) {
+      if (selectedUserId != this.selectedRiderId) {
         this.selectedRiderId = selectedUserId;
       }
     },
-    selectedRiderId: function(newRiderId) {
+    selectedRiderId: function (newRiderId) {
       this.setUserId(newRiderId);
     },
-    getSession: function(newSession) {
+    getSession: function (newSession) {
       console.log("session data changed to", newSession);
-      if(newSession != null){
+      if (newSession != null) {
         this.setSelectableRiders(newSession.riders);
       }
-    }
+    },
   },
   methods: {
-    setSelectableRiders: function(riders){
+    setSelectableRiders: function (riders) {
       console.log("set selectable riders", riders);
-      if(riders != null && riders.length > 0){
-        this.selectableRiders = [{
-          value: null,
-          text: 'Please select a rider'
-        }];
-        const ridersToAdd = riders.map(r => {
+      if (riders != null && riders.length > 0) {
+        this.selectableRiders = [
+          {
+            value: null,
+            text: "Please select a rider",
+          },
+        ];
+        const ridersToAdd = riders.map((r) => {
           return {
             value: r.id,
-            text: r.first_name + " " + r.last_name
-          }
-        })
+            text: r.first_name + " " + r.last_name,
+          };
+        });
         console.log("ridersToAdd", ridersToAdd);
         this.selectableRiders.push(...ridersToAdd);
         console.log("new selectableRiders", this.selectableRiders);
       }
     },
-    showHeatCommentModal: function(){
+    showHeatCommentModal: function () {
       this.isVisibleHeatCommentModal = true;
     },
-    changeComment: function(newComment){
+    changeComment: function (newComment) {
       this.comment = newComment;
     },
-    finish: function(){
-      this.finishTakingTime()
-      .catch(errors => this.errors = errors);
+    finish: function () {
+      this.finishTakingTime().catch((errors) => (this.errors = errors));
     },
-    ...mapActions('stopwatch', [
-      'startTakingTime',
-      'pauseTakingTime',
-      'resumeTakingTime',
-      'finishTakingTime',
-      'setSessionId',
-      'setUserId'
+    ...mapActions("stopwatch", [
+      "startTakingTime",
+      "pauseTakingTime",
+      "resumeTakingTime",
+      "finishTakingTime",
+      "setSessionId",
+      "setUserId",
     ]),
-    ...mapActions('sessions', [
-      'querySession'
-    ]),
-    navigateBack: function(){
-      this.$router.push('/today');
-    }
+    ...mapActions("sessions", ["querySession"]),
+    navigateBack: function () {
+      this.$router.push("/today");
+    },
   },
   created() {
-    if(this.sessionId == null){
-      this.errors = [ "No session selected" ];
-    }else{
+    if (this.sessionId == null) {
+      this.errors = ["No session selected"];
+    } else {
       this.setSessionId(this.sessionId);
       this.querySession(this.sessionId)
-      .then(() => console.log("queried session"))
-      .catch((errors) => this.errors = errors);
+        .then(() => console.log("queried session"))
+        .catch((errors) => (this.errors = errors));
     }
 
     // select rider (if one is stored)
     const storedUserId = this.getUserId;
     console.log("Stored UserId is:", storedUserId);
-    if(storedUserId != null){
+    if (storedUserId != null) {
       this.selectedRiderId = storedUserId;
     }
-  }
-}
+  },
+};
 </script>
 
 <style scoped>
-  .stopwatch-text {
-    font-size: 4rem
-  }
+.stopwatch-text {
+  font-size: 4rem;
+}
 </style>

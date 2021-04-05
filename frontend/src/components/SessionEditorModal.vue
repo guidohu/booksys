@@ -10,7 +10,7 @@
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
       <b-col cols="12" sm="10">
-        <WarningBox :errors="errors"/>
+        <WarningBox :errors="errors" />
       </b-col>
       <b-col cols="1" class="d-none d-sm-block"></b-col>
     </b-row>
@@ -53,17 +53,17 @@
           >
             <b-row>
               <b-col cols="6">
-                <b-form-input 
+                <b-form-input
                   id="start-date-input"
-                  type="date" 
+                  type="date"
                   v-model="form.startDate"
                   placeholder=""
                 />
               </b-col>
               <b-col cols="6">
-                <b-form-input 
+                <b-form-input
                   id="start-time-input"
-                  type="time" 
+                  type="time"
                   v-model="form.startTime"
                   placeholder=""
                 />
@@ -78,17 +78,17 @@
           >
             <b-row>
               <b-col cols="6">
-              <b-form-input 
-                id="end-date-input"
-                type="date" 
-                v-model="form.endDate"
-                placeholder=""
-              />
+                <b-form-input
+                  id="end-date-input"
+                  type="date"
+                  v-model="form.endDate"
+                  placeholder=""
+                />
               </b-col>
               <b-col cols="6">
-                <b-form-input 
+                <b-form-input
                   id="end-time-input"
-                  type="time" 
+                  type="time"
                   v-model="form.endTime"
                   placeholder=""
                 />
@@ -101,7 +101,7 @@
             label-for="capacity-input"
             description=""
           >
-            <b-form-input type="number" v-model="form.maximumRiders"/>
+            <b-form-input type="number" v-model="form.maximumRiders" />
           </b-form-group>
           <b-form-group
             id="type"
@@ -109,11 +109,8 @@
             label-for="type-input"
             description="Choose whether this session is open to others or a closed group"
           >
-            <b-form-checkbox 
-              v-model="form.type" 
-              switch
-            >
-              {{getTypeText}}
+            <b-form-checkbox v-model="form.type" switch>
+              {{ getTypeText }}
             </b-form-checkbox>
           </b-form-group>
         </b-col>
@@ -121,16 +118,31 @@
       </b-row>
     </b-form>
     <div slot="modal-footer">
-      <b-button v-if="form.id==null" type="button" variant="outline-info" v-on:click="save">
-        <b-icon-check/>
+      <b-button
+        v-if="form.id == null"
+        type="button"
+        variant="outline-info"
+        v-on:click="save"
+      >
+        <b-icon-check />
         Create
       </b-button>
-      <b-button v-if="form.id!=null" type="button" variant="outline-info" v-on:click="save">
-        <b-icon-check/>
+      <b-button
+        v-if="form.id != null"
+        type="button"
+        variant="outline-info"
+        v-on:click="save"
+      >
+        <b-icon-check />
         Save
       </b-button>
-      <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x/>
+      <b-button
+        class="ml-1"
+        type="button"
+        variant="outline-danger"
+        v-on:click="close"
+      >
+        <b-icon-x />
         Cancel
       </b-button>
     </div>
@@ -138,12 +150,15 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
-import WarningBox from '@/components/WarningBox';
-import Session, { SESSION_TYPE_OPEN, SESSION_TYPE_PRIVATE } from '@/dataTypes/session';
-import * as dayjs from 'dayjs';
-import * as dayjsUTC from 'dayjs/plugin/utc';
-import * as dayjsTimezone from 'dayjs/plugin/timezone';
+import { mapGetters, mapActions } from "vuex";
+import WarningBox from "@/components/WarningBox";
+import Session, {
+  SESSION_TYPE_OPEN,
+  SESSION_TYPE_PRIVATE,
+} from "@/dataTypes/session";
+import * as dayjs from "dayjs";
+import * as dayjsUTC from "dayjs/plugin/utc";
+import * as dayjsTimezone from "dayjs/plugin/timezone";
 import {
   BModal,
   BRow,
@@ -155,14 +170,14 @@ import {
   BFormCheckbox,
   BButton,
   BIconCheck,
-  BIconX
-} from 'bootstrap-vue';
+  BIconX,
+} from "bootstrap-vue";
 
 dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);
 
 export default {
-  name: 'SessionEditorModal',
+  name: "SessionEditorModal",
   components: {
     WarningBox,
     BModal,
@@ -175,12 +190,10 @@ export default {
     BFormCheckbox,
     BButton,
     BIconCheck,
-    BIconX
+    BIconX,
   },
-  props: [
-    'defaultValues', 'visible'
-  ],
-  data(){
+  props: ["defaultValues", "visible"],
+  data() {
     return {
       title: "",
       errors: [],
@@ -193,149 +206,163 @@ export default {
         endDate: null,
         endTime: null,
         maximumRiders: null,
-        type: null
-      }
-    }
+        type: null,
+      },
+    };
   },
   computed: {
-    getTypeText: function() {
-      if(this.form.type == true){
-        return "Private Session"
-      }else{
-        return "Open Session"
+    getTypeText: function () {
+      if (this.form.type == true) {
+        return "Private Session";
+      } else {
+        return "Open Session";
       }
     },
-    getMaximumRidersLabel: function() {
-      if(this.form.id == null){
-        return "Maximum Riders"
-      }else{
-        return "Additional Slots for Riders"
+    getMaximumRidersLabel: function () {
+      if (this.form.id == null) {
+        return "Maximum Riders";
+      } else {
+        return "Additional Slots for Riders";
       }
     },
-    ...mapGetters('configuration', [
-      'getTimezone',
-      'getMaximumNumberOfRiders'
-    ])
+    ...mapGetters("configuration", ["getTimezone", "getMaximumNumberOfRiders"]),
   },
   methods: {
-    ...mapActions('sessions', [
-      'createSession',
-      'editSession'
-    ]),
-    save: function(event){
+    ...mapActions("sessions", ["createSession", "editSession"]),
+    save: function (event) {
       event.preventDefault();
       console.log("SessionEditorModal, save:", this.form);
 
-      const type = (this.form.type == SESSION_TYPE_PRIVATE)
-        ? SESSION_TYPE_PRIVATE
-        : SESSION_TYPE_OPEN;
+      const type =
+        this.form.type == SESSION_TYPE_PRIVATE
+          ? SESSION_TYPE_PRIVATE
+          : SESSION_TYPE_OPEN;
 
       const startString = this.form.startDate + " " + this.form.startTime;
       // const endString = this.form.endDate + " " + this.form.endTime;
-      console.log("SessionEditorModal: startString moment:", dayjs(startString));
-      console.log("SessionEditorModal: startString moment.tz(timezone):", dayjs.tz(startString, this.getTimezone));
-      console.log("SessionEditorModal: startString format:", dayjs.tz(startString, this.getTimezone).format());
-      
+      console.log(
+        "SessionEditorModal: startString moment:",
+        dayjs(startString)
+      );
+      console.log(
+        "SessionEditorModal: startString moment.tz(timezone):",
+        dayjs.tz(startString, this.getTimezone)
+      );
+      console.log(
+        "SessionEditorModal: startString format:",
+        dayjs.tz(startString, this.getTimezone).format()
+      );
 
       const session = new Session(
         this.form.id,
         this.form.title,
         this.form.description,
-        dayjs.tz(this.form.startDate + " " + this.form.startTime, this.getTimezone).format(),
-        dayjs.tz(this.form.endDate + " " + this.form.endTime, this.getTimezone).format(),
+        dayjs
+          .tz(this.form.startDate + " " + this.form.startTime, this.getTimezone)
+          .format(),
+        dayjs
+          .tz(this.form.endDate + " " + this.form.endTime, this.getTimezone)
+          .format(),
         this.form.maximumRiders,
         type
       );
 
       console.log("SessionEditorModal, save session dataType:", session);
-      if(session.id == null){
+      if (session.id == null) {
         this.createSession(session)
-        .then( response => {
-          this.$emit("sessionCreatedHandler", response.session_id);
-          this.close();
-        })
-        .catch( err => {
-          this.errors = err;
-        });
-      }else{
+          .then((response) => {
+            this.$emit("sessionCreatedHandler", response.session_id);
+            this.close();
+          })
+          .catch((err) => {
+            this.errors = err;
+          });
+      } else {
         this.editSession(session)
-        .then( () => {
-          this.$emit("sessionEditedHandler", session.id);
-          this.close();
-        })
-        .catch( err => {
-          this.errors = err;
-        })
+          .then(() => {
+            this.$emit("sessionEditedHandler", session.id);
+            this.close();
+          })
+          .catch((err) => {
+            this.errors = err;
+          });
       }
-      
     },
-    close: function(){
+    close: function () {
       this.errors = [];
-      this.$emit('update:visible', false);
+      this.$emit("update:visible", false);
     },
-    setFormContent: function(){
+    setFormContent: function () {
       console.log("SessionEditorModal: Set defaults to:", this.defaultValues);
 
       // set ID
-      this.form.id = (this.defaultValues != null && this.defaultValues.id != null) 
-        ? this.defaultValues.id
-        : null;
+      this.form.id =
+        this.defaultValues != null && this.defaultValues.id != null
+          ? this.defaultValues.id
+          : null;
 
-      if(this.form.id != null){
+      if (this.form.id != null) {
         this.title = "Edit Session";
-      }else{
+      } else {
         this.title = "Create Session";
       }
 
       // set title
-      this.form.title = (this.defaultValues != null && this.defaultValues.title != null) 
-        ? this.defaultValues.title
-        : null;
+      this.form.title =
+        this.defaultValues != null && this.defaultValues.title != null
+          ? this.defaultValues.title
+          : null;
 
       // set description
-      this.form.description = (this.defaultValues != null && this.defaultValues.description != null) 
-        ? this.defaultValues.description
-        : null;
+      this.form.description =
+        this.defaultValues != null && this.defaultValues.description != null
+          ? this.defaultValues.description
+          : null;
 
       // set times
-      this.form.startDate = (this.defaultValues != null && this.defaultValues.start != null) 
-        ? dayjs(this.defaultValues.start).format("YYYY-MM-DD") 
-        : dayjs().tz(this.getTimezone).format("YYYY-MM-DD");
-      this.form.startTime = (this.defaultValues != null && this.defaultValues.start != null) 
-        ? dayjs(this.defaultValues.start).format("HH:mm") 
-        : dayjs().tz(this.getTimezone).format("HH:mm");
-      this.form.endDate = (this.defaultValues != null && this.defaultValues.end != null) 
-        ? dayjs(this.defaultValues.end).format("YYYY-MM-DD") 
-        : dayjs().tz(this.getTimezone).add(1, 'hour').format("YYYY-MM-DD");
-      this.form.endTime = (this.defaultValues != null && this.defaultValues.end != null) 
-        ? dayjs(this.defaultValues.end).format("HH:mm") 
-        : dayjs().tz(this.getTimezone).add(1, 'hour').format("HH:mm");
+      this.form.startDate =
+        this.defaultValues != null && this.defaultValues.start != null
+          ? dayjs(this.defaultValues.start).format("YYYY-MM-DD")
+          : dayjs().tz(this.getTimezone).format("YYYY-MM-DD");
+      this.form.startTime =
+        this.defaultValues != null && this.defaultValues.start != null
+          ? dayjs(this.defaultValues.start).format("HH:mm")
+          : dayjs().tz(this.getTimezone).format("HH:mm");
+      this.form.endDate =
+        this.defaultValues != null && this.defaultValues.end != null
+          ? dayjs(this.defaultValues.end).format("YYYY-MM-DD")
+          : dayjs().tz(this.getTimezone).add(1, "hour").format("YYYY-MM-DD");
+      this.form.endTime =
+        this.defaultValues != null && this.defaultValues.end != null
+          ? dayjs(this.defaultValues.end).format("HH:mm")
+          : dayjs().tz(this.getTimezone).add(1, "hour").format("HH:mm");
 
       // set maximum riders
-      this.form.maximumRiders = (this.defaultValues != null && this.defaultValues.maximumRiders != null) 
-        ? this.defaultValues.maximumRiders
-        : this.getMaximumNumberOfRiders;
+      this.form.maximumRiders =
+        this.defaultValues != null && this.defaultValues.maximumRiders != null
+          ? this.defaultValues.maximumRiders
+          : this.getMaximumNumberOfRiders;
 
       // set session type
-      this.form.type = (this.defaultValues != null && this.defaultValues.type != null) 
-        ? this.defaultValues.type
-        : null;
+      this.form.type =
+        this.defaultValues != null && this.defaultValues.type != null
+          ? this.defaultValues.type
+          : null;
 
       console.log("SessionEditorModal: Form values are now:", this.form);
-    }
+    },
   },
   created() {
     // set form content based on props
     this.setFormContent();
   },
   watch: {
-    defaultValues: function() {
+    defaultValues: function () {
       // set form content whenever the default props change
       this.setFormContent();
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

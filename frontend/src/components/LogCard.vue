@@ -9,7 +9,7 @@
         rounded="sm"
       >
         <b-table
-          v-if="errors.length==0"
+          v-if="errors.length == 0"
           striped
           hover
           small
@@ -17,21 +17,16 @@
           :items="getLogLines"
           empty-text="no log entries to display"
         />
-        <WarningBox v-if="errors.length>0" :errors="errors"/>
+        <WarningBox v-if="errors.length > 0" :errors="errors" />
       </b-overlay>
     </b-card-body>
   </b-card>
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
-import WarningBox from '@/components/WarningBox';
-import {
-  BCard,
-  BCardBody,
-  BTable,
-  BOverlay
-} from 'bootstrap-vue';
+import { mapActions, mapGetters } from "vuex";
+import WarningBox from "@/components/WarningBox";
+import { BCard, BCardBody, BTable, BOverlay } from "bootstrap-vue";
 
 export default {
   name: "LogCard",
@@ -40,7 +35,7 @@ export default {
     BCard,
     BCardBody,
     BTable,
-    BOverlay
+    BOverlay,
   },
   data() {
     return {
@@ -49,34 +44,30 @@ export default {
       columns: [
         {
           key: "time",
-          label: "Time"
+          label: "Time",
         },
         {
           key: "log",
-          label: "Message"
-        }
+          label: "Message",
+        },
       ],
-      rows: []
-    }
+      rows: [],
+    };
   },
   computed: {
-    ...mapGetters('log', [
-      'getLogLines'
-    ])
+    ...mapGetters("log", ["getLogLines"]),
   },
   methods: {
-    ...mapActions('log', [
-      'queryLogLines'
-    ])
+    ...mapActions("log", ["queryLogLines"]),
   },
   created() {
     this.showOverlay = true;
     this.queryLogLines()
-    .then(() => this.showOverlay = false)
-    .catch((errors) => {
-      this.showOverlay = false;
-      this.errors = errors;
-    });
-  }
-}
+      .then(() => (this.showOverlay = false))
+      .catch((errors) => {
+        this.showOverlay = false;
+        this.errors = errors;
+      });
+  },
+};
 </script>

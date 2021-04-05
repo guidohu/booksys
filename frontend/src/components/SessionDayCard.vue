@@ -3,31 +3,55 @@
     <b-card-header>
       <b-row>
         <b-col cols="4" class="text-right">
-          <b-button v-if="!disableDayBrowsing" variant="outline-info" class="btn-xs" v-on:click="prevDay">
-            <b-icon-arrow-left-short/>
+          <b-button
+            v-if="!disableDayBrowsing"
+            variant="outline-info"
+            class="btn-xs"
+            v-on:click="prevDay"
+          >
+            <b-icon-arrow-left-short />
           </b-button>
         </b-col>
         <b-col cols="4" class="text-center">
-          {{dateString}}
+          {{ dateString }}
         </b-col>
         <b-col cols="4" class="text-left">
-          <b-button v-if="!disableDayBrowsing" variant="outline-info" class="btn-xs" v-on:click="nextDay">
-            <b-icon-arrow-right-short/>
+          <b-button
+            v-if="!disableDayBrowsing"
+            variant="outline-info"
+            class="btn-xs"
+            v-on:click="nextDay"
+          >
+            <b-icon-arrow-right-short />
           </b-button>
         </b-col>
       </b-row>
     </b-card-header>
     <b-card-body>
       <b-row>
-        <Pie 
-          :sessionData="sessionData" 
+        <Pie
+          :sessionData="sessionData"
           :selectedSession="selectedSession"
           :properties="properties"
-          @selectHandler="selectSession"/>
+          @selectHandler="selectSession"
+        />
       </b-row>
-      <b-row v-if="isToday && selectedSession != null && selectedSession.id != null && selectedSession.riders.length > 0" class="text-center">
+      <b-row
+        v-if="
+          isToday &&
+          selectedSession != null &&
+          selectedSession.id != null &&
+          selectedSession.riders.length > 0
+        "
+        class="text-center"
+      >
         <b-col cols="12" class="text-center">
-          <b-button v-on:click="navigateSessionStart" type="button" variant="outline-success">Start Session</b-button>
+          <b-button
+            v-on:click="navigateSessionStart"
+            type="button"
+            variant="outline-success"
+            >Start Session</b-button
+          >
         </b-col>
       </b-row>
     </b-card-body>
@@ -35,11 +59,11 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters } from "vuex";
 import Pie from "./Pie.vue";
-import * as dayjs from 'dayjs';
-import * as dayjsUTC from 'dayjs/plugin/utc';
-import * as dayjsTimezone from 'dayjs/plugin/timezone';
+import * as dayjs from "dayjs";
+import * as dayjsUTC from "dayjs/plugin/utc";
+import * as dayjsTimezone from "dayjs/plugin/timezone";
 
 dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);
@@ -52,11 +76,11 @@ import {
   BButton,
   BIconArrowLeftShort,
   BIconArrowRightShort,
-  BCardBody
-} from 'bootstrap-vue';
+  BCardBody,
+} from "bootstrap-vue";
 
 export default {
-  name: 'SessionDayCard',
+  name: "SessionDayCard",
   data() {
     return {
       properties: {
@@ -66,41 +90,42 @@ export default {
         circleY: 170,
         circleRadius: 100,
         animate: true,
-        labels: true
-      }
-    }
+        labels: true,
+      },
+    };
   },
   computed: {
-    ...mapGetters('configuration', [
-      'getTimezone'
-    ]),
-    dateString: function() {
+    ...mapGetters("configuration", ["getTimezone"]),
+    dateString: function () {
       console.log("sessionData", this.sessionData);
       return dayjs(this.sessionData.window_start).format("dddd DD.MM.YYYY");
     },
-    isToday: function() {
+    isToday: function () {
       console.log(this.getTimezone);
-      const today = dayjs().tz(this.getTimezone).startOf('day').format();
-      const sessionDay = dayjs(this.sessionData.window_start).tz(this.getTimezone).startOf('day').format();
-      if(today == sessionDay){
+      const today = dayjs().tz(this.getTimezone).startOf("day").format();
+      const sessionDay = dayjs(this.sessionData.window_start)
+        .tz(this.getTimezone)
+        .startOf("day")
+        .format();
+      if (today == sessionDay) {
         return true;
       }
       return false;
-    }
+    },
   },
   methods: {
-    prevDay: function(){
-      this.$emit('prevDay');
+    prevDay: function () {
+      this.$emit("prevDay");
     },
-    nextDay: function(){
-      this.$emit('nextDay');
+    nextDay: function () {
+      this.$emit("nextDay");
     },
-    selectSession: function(slot) {
-      this.$emit('selectSessionHandler', slot);
+    selectSession: function (slot) {
+      this.$emit("selectSessionHandler", slot);
     },
-    navigateSessionStart: function() {
-      window.location.href = '/watch?sessionId='+this.selectedSession.id;
-    }
+    navigateSessionStart: function () {
+      window.location.href = "/watch?sessionId=" + this.selectedSession.id;
+    },
   },
   components: {
     Pie,
@@ -111,36 +136,41 @@ export default {
     BButton,
     BIconArrowLeftShort,
     BIconArrowRightShort,
-    BCardBody
+    BCardBody,
   },
-  props: ['isMobile', 'sessionData', 'selectedSession', 'timezone', 'disableDayBrowsing'],
+  props: [
+    "isMobile",
+    "sessionData",
+    "selectedSession",
+    "timezone",
+    "disableDayBrowsing",
+  ],
   created() {
-    if(this.isMobile != null && this.isMobile == true){
+    if (this.isMobile != null && this.isMobile == true) {
       this.properties = {
         containerHeight: 300,
-        containerWidth:  350,
-        circleX:         175,
-        circleY:         150,
-        circleRadius:    90,
-        animation:       false,
-        labels:          true,
-      }
+        containerWidth: 350,
+        circleX: 175,
+        circleY: 150,
+        circleRadius: 90,
+        animation: false,
+        labels: true,
+      };
     }
-    if(this.timezone != null){
+    if (this.timezone != null) {
       this.properties.timezone = this.timezone;
-    }else{
+    } else {
       this.properties.timezone = "UTC";
     }
-  }
-}
+  },
+};
 </script>
 
 <style scoped>
-
-  .btn-xs {
-    padding: .2rem .4rem;
-    font-size: .6rem;
-    line-height: 1;
-    border-radius: .2rem;
-  }
+.btn-xs {
+  padding: 0.2rem 0.4rem;
+  font-size: 0.6rem;
+  line-height: 1;
+  border-radius: 0.2rem;
+}
 </style>

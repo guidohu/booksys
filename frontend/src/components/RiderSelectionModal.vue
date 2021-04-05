@@ -1,5 +1,5 @@
 <template>
-<b-modal
+  <b-modal
     id="riderSelectionModal"
     title="Add Riders"
     :visible="visible"
@@ -9,7 +9,7 @@
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
       <b-col cols="12" sm="10">
-        <WarningBox :errors="errors"/>
+        <WarningBox :errors="errors" />
       </b-col>
       <b-col cols="1" class="d-none d-sm-block"></b-col>
     </b-row>
@@ -24,11 +24,7 @@
             label-for="rider-search"
             description=""
           >
-            <b-form-input
-              id="rider-search"
-              v-model="search"
-              type="text"
-            />
+            <b-form-input id="rider-search" v-model="search" type="text" />
           </b-form-group>
           <b-form-group
             id="rider"
@@ -40,14 +36,20 @@
               id="rider-select"
               v-model="selected"
               :options="filteredOptions"
-              multiple 
+              multiple
               :select-size="5"
             ></b-form-select>
           </b-form-group>
-          <b-button v-if="isMobile != true" type="button" variant="outline-success" v-on:click="add" block>
-            <b-icon-person-plus/>{{" "}}Select
+          <b-button
+            v-if="isMobile != true"
+            type="button"
+            variant="outline-success"
+            v-on:click="add"
+            block
+          >
+            <b-icon-person-plus />{{ " " }}Select
           </b-button>
-          <hr/>
+          <hr />
           <b-form-group
             v-if="isMobile != true"
             id="selected"
@@ -58,7 +60,9 @@
             <ul v-if="usersToAdd.length > 0">
               <li v-for="u in usersToAdd" :key="u.id">
                 {{ u.firstName + " " + u.lastName + "  " }}
-                <a href="#" v-on:click.prevent="remove(u.id)"><b-icon-person-dash/></a>
+                <a href="#" v-on:click.prevent="remove(u.id)"
+                  ><b-icon-person-dash
+                /></a>
               </li>
             </ul>
             <ul v-else>
@@ -70,16 +74,31 @@
       </b-row>
     </b-form>
     <div slot="modal-footer">
-      <b-button v-if="isMobile != true" type="button" variant="outline-info" v-on:click="save">
-        <b-icon-check/>
+      <b-button
+        v-if="isMobile != true"
+        type="button"
+        variant="outline-info"
+        v-on:click="save"
+      >
+        <b-icon-check />
         Add
       </b-button>
-      <b-button v-if="isMobile == true" type="button" variant="outline-info" v-on:click="saveMobile">
-        <b-icon-check/>
+      <b-button
+        v-if="isMobile == true"
+        type="button"
+        variant="outline-info"
+        v-on:click="saveMobile"
+      >
+        <b-icon-check />
         Add
       </b-button>
-      <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x/>
+      <b-button
+        class="ml-1"
+        type="button"
+        variant="outline-danger"
+        v-on:click="close"
+      >
+        <b-icon-x />
         Cancel
       </b-button>
     </div>
@@ -87,11 +106,11 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
-import { BooksysBrowser } from '@/libs/browser';
-import uniq from 'lodash/uniq';
-import WarningBox from '@/components/WarningBox';
-import { UserPointer } from '@/dataTypes/user';
+import { mapActions, mapGetters } from "vuex";
+import { BooksysBrowser } from "@/libs/browser";
+import uniq from "lodash/uniq";
+import WarningBox from "@/components/WarningBox";
+import { UserPointer } from "@/dataTypes/user";
 import {
   BModal,
   BRow,
@@ -104,29 +123,26 @@ import {
   BIconPersonPlus,
   BIconPersonDash,
   BIconCheck,
-  BIconX
-} from 'bootstrap-vue';
+  BIconX,
+} from "bootstrap-vue";
 
 export default {
-  name: 'RiderSelectionModal',
-  props: [
-    'session',
-    'visible'
-  ],
+  name: "RiderSelectionModal",
+  props: ["session", "visible"],
   components: {
     WarningBox,
-      BModal,
-      BRow,
-      BCol,
-      BForm,
-      BFormGroup,
-      BFormInput,
-      BFormSelect,
-      BButton,
-      BIconPersonPlus,
-      BIconPersonDash,
-      BIconCheck,
-      BIconX
+    BModal,
+    BRow,
+    BCol,
+    BForm,
+    BFormGroup,
+    BFormInput,
+    BFormSelect,
+    BButton,
+    BIconPersonPlus,
+    BIconPersonDash,
+    BIconCheck,
+    BIconX,
   },
   data() {
     return {
@@ -136,104 +152,108 @@ export default {
       selected: [],
       search: "",
       filteredOptions: [],
-      usersToAdd: []
-    }
+      usersToAdd: [],
+    };
   },
   computed: {
-    ...mapGetters('user', [
-      'userList'
-    ]),
-    userOptions: function(){
+    ...mapGetters("user", ["userList"]),
+    userOptions: function () {
       let users = [];
-      this.userList.forEach(u => {
+      this.userList.forEach((u) => {
         users.push({
           value: u.id,
-          text: u.firstName + " " + u.lastName
-        })
+          text: u.firstName + " " + u.lastName,
+        });
       });
 
-      users = users.filter(u => !this.usersToAdd.map(uta => uta.id).includes(u.value))
+      users = users.filter(
+        (u) => !this.usersToAdd.map((uta) => uta.id).includes(u.value)
+      );
       return users;
     },
     isMobile: function () {
-      return BooksysBrowser.isMobile()
-    }
+      return BooksysBrowser.isMobile();
+    },
   },
   watch: {
-    search: function(newSearch){
-      // filteredOptions are the ones that 
-      this.filteredOptions = this.userOptions
-        .filter(u => u.text.toLowerCase().includes(newSearch.toLowerCase()))
+    search: function (newSearch) {
+      // filteredOptions are the ones that
+      this.filteredOptions = this.userOptions.filter((u) =>
+        u.text.toLowerCase().includes(newSearch.toLowerCase())
+      );
     },
-    userOptions: function(newOptions){
+    userOptions: function (newOptions) {
       this.filteredOptions = newOptions;
     },
-    selected: function(newSelected){
+    selected: function (newSelected) {
       console.log("newSelected", newSelected);
     },
-    usersToAdd: function(newUsersToAdd){
+    usersToAdd: function (newUsersToAdd) {
       console.log("usersToAdd", newUsersToAdd);
-    }
+    },
   },
   methods: {
-    ...mapActions('user', [
-      'queryUserList'
-    ]),
-    ...mapActions('sessions', [
-      'addUsersToSession'
-    ]),
-    add: function(event) {
+    ...mapActions("user", ["queryUserList"]),
+    ...mapActions("sessions", ["addUsersToSession"]),
+    add: function (event) {
       event.preventDefault();
 
       console.log("add Called");
       console.log("selected", this.selected);
 
-      if(this.selected.length > 0){
+      if (this.selected.length > 0) {
         console.log("Add selected");
-        this.usersToAdd.push(...this.userList.filter(u => this.selected.includes(u.id)))
-      }else if(this.selected.length == 0 && this.filteredOptions.length == 1){
-        this.usersToAdd.push(...this.userList.filter(u => u.id == this.filteredOptions[0].value))
+        this.usersToAdd.push(
+          ...this.userList.filter((u) => this.selected.includes(u.id))
+        );
+      } else if (
+        this.selected.length == 0 &&
+        this.filteredOptions.length == 1
+      ) {
+        this.usersToAdd.push(
+          ...this.userList.filter((u) => u.id == this.filteredOptions[0].value)
+        );
       }
 
       // de-duplicate selection
       this.usersToAdd = uniq(this.usersToAdd);
     },
-    remove: function(id){
-      this.usersToAdd = this.usersToAdd.filter(u => u.id != id);
+    remove: function (id) {
+      this.usersToAdd = this.usersToAdd.filter((u) => u.id != id);
       console.log("Removed user from the selection:", id);
     },
-    save: function() {
+    save: function () {
       console.log(this.session);
       this.addUsersToSession({
         sessionId: this.session.id,
-        users: this.usersToAdd
+        users: this.usersToAdd,
       })
-      .then(() => this.close())
-      .catch((errs) => this.errors = errs);
+        .then(() => this.close())
+        .catch((errs) => (this.errors = errs));
     },
-    saveMobile: function() {
+    saveMobile: function () {
       console.log(this.selected);
       this.addUsersToSession({
         sessionId: this.session.id,
-        users: this.selected.map(i => new UserPointer(Number(i)))
+        users: this.selected.map((i) => new UserPointer(Number(i))),
       })
-      .then(() => this.close())
-      .catch((errors) => this.errors = errors);
+        .then(() => this.close())
+        .catch((errors) => (this.errors = errors));
     },
-    close: function() {
+    close: function () {
       this.usersToAdd = [];
-      this.$emit('update:visible', false);
-    }
+      this.$emit("update:visible", false);
+    },
   },
   created() {
     this.queryUserList()
-    .then( () => {
-      console.log("userList received");
-    })
-    .catch( (error) => {
-      console.log("errors")
-      this.errors = error;
-    });
-  }
-}
+      .then(() => {
+        console.log("userList received");
+      })
+      .catch((error) => {
+        console.log("errors");
+        this.errors = error;
+      });
+  },
+};
 </script>

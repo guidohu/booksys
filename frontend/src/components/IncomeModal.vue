@@ -9,7 +9,7 @@
     <b-row v-if="errors.length > 0">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
       <b-col cols="12" sm="10">
-        <WarningBox :errors="errors" dismissible="true"/>
+        <WarningBox :errors="errors" dismissible="true" />
       </b-col>
       <b-col cols="1" class="d-none d-sm-block"></b-col>
     </b-row>
@@ -37,11 +37,7 @@
             description=""
             label-cols="3"
           >
-            <b-form-input
-              id="date-select"
-              type="date"
-              v-model="form.date"
-            />
+            <b-form-input id="date-select" type="date" v-model="form.date" />
           </b-form-group>
           <b-form-group
             v-if="form.type != null"
@@ -73,7 +69,7 @@
                 placeholder="0.00"
               ></b-form-input>
               <b-input-group-append is-text>
-                {{getCurrency}}
+                {{ getCurrency }}
               </b-input-group-append>
             </b-input-group>
           </b-form-group>
@@ -98,12 +94,23 @@
     </b-form>
     <div slot="modal-footer">
       <div class="text-right d-inline">
-        <b-button v-if="this.form.type != null" class="ml-4" type="button" variant="outline-info" v-on:click="add">
-          <b-icon-check/>
+        <b-button
+          v-if="this.form.type != null"
+          class="ml-4"
+          type="button"
+          variant="outline-info"
+          v-on:click="add"
+        >
+          <b-icon-check />
           Add
         </b-button>
-        <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-          <b-icon-x/>
+        <b-button
+          class="ml-1"
+          type="button"
+          variant="outline-danger"
+          v-on:click="close"
+        >
+          <b-icon-x />
           Cancel
         </b-button>
       </div>
@@ -112,10 +119,10 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
-import WarningBox from '@/components/WarningBox';
-import * as dayjs from 'dayjs';
-import orderBy from 'lodash/orderBy';
+import { mapGetters, mapActions } from "vuex";
+import WarningBox from "@/components/WarningBox";
+import * as dayjs from "dayjs";
+import orderBy from "lodash/orderBy";
 import {
   BModal,
   BRow,
@@ -129,11 +136,11 @@ import {
   BFormTextarea,
   BButton,
   BIconCheck,
-  BIconX
-} from 'bootstrap-vue';
+  BIconX,
+} from "bootstrap-vue";
 
 export default {
-  name: 'IncomeModal',
+  name: "IncomeModal",
   components: {
     WarningBox,
     BModal,
@@ -148,9 +155,9 @@ export default {
     BFormTextarea,
     BButton,
     BIconCheck,
-    BIconX
+    BIconX,
   },
-  props: [ 'visible' ],
+  props: ["visible"],
   data() {
     return {
       errors: [],
@@ -161,133 +168,120 @@ export default {
       form: {
         type: null,
         user: null,
-        date: null
-      }
-    }
+        date: null,
+      },
+    };
   },
   computed: {
-    ...mapGetters('configuration', [
-      'getCurrency'
-    ]),
-    ...mapGetters('user', [
-      'userList'
-    ]),
-    ...mapGetters('accounting', [
-      'getIncomeTypes'
-    ])
+    ...mapGetters("configuration", ["getCurrency"]),
+    ...mapGetters("user", ["userList"]),
+    ...mapGetters("accounting", ["getIncomeTypes"]),
   },
   watch: {
-    getIncomeTypes: function(newValues){
+    getIncomeTypes: function (newValues) {
       this.buildTypeSelect(newValues);
     },
-    userList: function(newValues){
+    userList: function (newValues) {
       // console.log("TODO, add userList:", newValues);
       this.buildUserSelect(newValues);
     },
-    'form.type': function(newValue, oldValue){
+    "form.type": function (newValue, oldValue) {
       console.log(newValue, oldValue);
-      if(newValue != oldValue){
-          // if the type is either
-          if([6, 4].includes(Number(newValue))){
-            // 6: membership fee
-            // 4: session
-            this.userLabel = "Account";
-            this.userDescription = "User that paid for sessions or membership.";
-          }else if([3, 5].includes(Number(newValue))){
-            // 3: invest
-            // 5: other
-            this.userLabel = "User";
-            this.userDescription = "Payer or internal reference";
-          }else if([7].includes(Number(newValue))){
-            // 7: salary
-            this.userLabel = "Driver";
-            this.userDescription = "Driver that got paid for a session.";
-          }else{
-            // Default case
-            this.userLabel = "User";
-            this.userDescription = "";
-          }
+      if (newValue != oldValue) {
+        // if the type is either
+        if ([6, 4].includes(Number(newValue))) {
+          // 6: membership fee
+          // 4: session
+          this.userLabel = "Account";
+          this.userDescription = "User that paid for sessions or membership.";
+        } else if ([3, 5].includes(Number(newValue))) {
+          // 3: invest
+          // 5: other
+          this.userLabel = "User";
+          this.userDescription = "Payer or internal reference";
+        } else if ([7].includes(Number(newValue))) {
+          // 7: salary
+          this.userLabel = "Driver";
+          this.userDescription = "Driver that got paid for a session.";
+        } else {
+          // Default case
+          this.userLabel = "User";
+          this.userDescription = "";
         }
-    }
+      }
+    },
   },
   methods: {
-    ...mapActions('configuration', [
-      'queryConfiguration'
-    ]),
-    ...mapActions('user', [
-      'queryUserList'
-    ]),
-    ...mapActions('accounting', [
-      'queryIncomeTypes',
-      'addIncome'
-    ]),
-    buildTypeSelect: function(types){
+    ...mapActions("configuration", ["queryConfiguration"]),
+    ...mapActions("user", ["queryUserList"]),
+    ...mapActions("accounting", ["queryIncomeTypes", "addIncome"]),
+    buildTypeSelect: function (types) {
       this.incomeTypes = types.map((t) => {
         return {
           value: t.id,
-          text:  t.name
-        }
+          text: t.name,
+        };
       });
-      this.incomeTypes = orderBy(this.incomeTypes, ['text'], ['asc']);
-      this.incomeTypes.unshift({ value: null, text: "Please select"});
+      this.incomeTypes = orderBy(this.incomeTypes, ["text"], ["asc"]);
+      this.incomeTypes.unshift({ value: null, text: "Please select" });
     },
-    buildUserSelect: function(users){
+    buildUserSelect: function (users) {
       this.users = users.map((u) => {
         return {
           value: u.id,
-          text:  u.firstName + " " + u.lastName,
+          text: u.firstName + " " + u.lastName,
           lastName: u.lastName,
-          firstName: u.firstName
-        }
+          firstName: u.firstName,
+        };
       });
-      this.users = orderBy(this.users, ['text'], ['asc']);
-      this.users.unshift({ value: null, text: "Please select"});
+      this.users = orderBy(this.users, ["text"], ["asc"]);
+      this.users.unshift({ value: null, text: "Please select" });
     },
-    clearForm: function() {
+    clearForm: function () {
       this.form = {
         amount: null,
         type: null,
-        date: dayjs().format('YYYY-MM-DD'),
+        date: dayjs().format("YYYY-MM-DD"),
         user: null,
-        comment: null
+        comment: null,
       };
     },
-    add: function() {
+    add: function () {
       const income = {
-        amount:   Number(this.form.amount),
-        typeId:   Number(this.form.type),
-        date:     this.form.date,
-        userId:   Number(this.form.user),
-        comment:  this.form.comment
+        amount: Number(this.form.amount),
+        typeId: Number(this.form.type),
+        date: this.form.date,
+        userId: Number(this.form.user),
+        comment: this.form.comment,
       };
 
       this.addIncome(income)
-      .then(() => {
-        this.errors = [];
-        this.close();
-      })
-      .catch((errors) => this.errors = errors);
+        .then(() => {
+          this.errors = [];
+          this.close();
+        })
+        .catch((errors) => (this.errors = errors));
     },
-    save: function() {
+    save: function () {
       this.add();
     },
-    close: function() {
+    close: function () {
       this.clearForm();
-      this.$emit('update:visible', false);
-    }
+      this.$emit("update:visible", false);
+    },
   },
   created() {
     this.queryConfiguration();
 
     this.queryUserList()
-    .then(() => this.buildUserSelect(this.userList))
-    .catch((errors) => this.errors.push(...errors))
+      .then(() => this.buildUserSelect(this.userList))
+      .catch((errors) => this.errors.push(...errors));
 
     this.queryIncomeTypes()
-    .then(() => this.buildTypeSelect(this.getIncomeTypes))
-    .catch((errors) => this.errors.push(...errors));
+      .then(() => this.buildTypeSelect(this.getIncomeTypes))
+      .catch((errors) => this.errors.push(...errors));
 
-    this.form.date = dayjs().format('YYYY-MM-DD');
-  }
-}
+    this.form.date = dayjs().format("YYYY-MM-DD");
+  },
+};
 </script>

@@ -1,81 +1,89 @@
 <template>
-  <div :id="pieElementId" class="text-center full-width">
-  </div>
+  <div :id="pieElementId" class="text-center full-width"></div>
 </template>
 
 <script>
 import BooksysPie from "../libs/pie";
-import * as dayjs from 'dayjs';
+import * as dayjs from "dayjs";
 
 export default {
-  name: 'Pie',
+  name: "Pie",
   mounted() {
     let el = document.getElementById(this.pieElementId);
     const pie = new BooksysPie();
     this.pie = pie;
-    this.pieSessions = pie.drawPie(el, this.sessionData, this.selectHandler, this.properties);
+    this.pieSessions = pie.drawPie(
+      el,
+      this.sessionData,
+      this.selectHandler,
+      this.properties
+    );
   },
   methods: {
-    selectHandler: function(selectedId) {
+    selectHandler: function (selectedId) {
       this.$emit("selectHandler", this.pieSessions[selectedId]);
     },
-    repaint: function(){
+    repaint: function () {
       let el = document.getElementById(this.pieElementId);
-      el.innerHTML = '';
-      this.pieSessions = this.pie.drawPie(el, this.sessionData, this.selectHandler, this.properties);
-    }
+      el.innerHTML = "";
+      this.pieSessions = this.pie.drawPie(
+        el,
+        this.sessionData,
+        this.selectHandler,
+        this.properties
+      );
+    },
   },
   watch: {
-    sessionData: function() {
+    sessionData: function () {
       // repaint the pie upon any change
       this.repaint();
     },
-    selectedSession: function(newSelectedSession) {
-      if(newSelectedSession == null){
+    selectedSession: function (newSelectedSession) {
+      if (newSelectedSession == null) {
         this.pie.resetSelection();
         return;
       }
 
-      if(newSelectedSession.id != null){
-        for(let i=0; i<this.pieSessions.length; i++){
-          if(this.pieSessions[i].id == newSelectedSession.id){
+      if (newSelectedSession.id != null) {
+        for (let i = 0; i < this.pieSessions.length; i++) {
+          if (this.pieSessions[i].id == newSelectedSession.id) {
             this.pie.selectSector(i);
             break;
           }
         }
       }
     },
-    properties: function() {
+    properties: function () {
       this.repaint();
-    }
+    },
   },
-  props: ['sessionData', 'selectedSession', 'properties', 'pieId'],
+  props: ["sessionData", "selectedSession", "properties", "pieId"],
   data() {
     return {
       pieSessions: [],
-      pieElementId: "someId"
-    }
+      pieElementId: "someId",
+    };
   },
   computed: {
-    date: function(){
-      if(this.sessionData != null){
+    date: function () {
+      if (this.sessionData != null) {
         return dayjs(this.sessionData.window_start).format("YYYY-MM-DD");
-      }else{
+      } else {
         return "unknown";
       }
-    }
+    },
   },
   created() {
-    if(this.pieId != null){
+    if (this.pieId != null) {
       this.pieElementId = "pie" + this.pieId;
     }
-  }
-}
+  },
+};
 </script>
 
 <style scoped>
-
-  .full-width {
-    width: 100%;
-  }
+.full-width {
+  width: 100%;
+}
 </style>

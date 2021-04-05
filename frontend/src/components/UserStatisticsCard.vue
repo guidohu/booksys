@@ -1,49 +1,46 @@
 <template>
   <b-card no-body class="text-left">
-    <b-card-header>
-      Statistics
-    </b-card-header>
+    <b-card-header> Statistics </b-card-header>
     <b-card-body>
       <b-row>
         <b-col cols="6">
           <b-row>
-            <b-col cols="12">
-              Riding Time: {{heatTimeMinutesYTD}} min
-            </b-col>
+            <b-col cols="12"> Riding Time: {{ heatTimeMinutesYTD }} min </b-col>
           </b-row>
           <b-row>
             <b-col cols="12">
-              Riding Time (all-time): {{heatTimeMinutes}} min
+              Riding Time (all-time): {{ heatTimeMinutes }} min
             </b-col>
           </b-row>
           <b-row>
-            <b-col cols="12">
-              Cost: {{heatCostYTD}} {{getCurrency}}
-            </b-col>
+            <b-col cols="12"> Cost: {{ heatCostYTD }} {{ getCurrency }} </b-col>
           </b-row>
           <b-row>
             <b-col cols="12">
-              Cost (all-time): {{heatCost}} {{getCurrency}}
+              Cost (all-time): {{ heatCost }} {{ getCurrency }}
             </b-col>
           </b-row>
         </b-col>
         <b-col cols="6">
-          <b-button size="sm" type="button" variant="outline-info" v-on:click="showLatestHeats">
-            <b-icon-list-ul/>
+          <b-button
+            size="sm"
+            type="button"
+            variant="outline-info"
+            v-on:click="showLatestHeats"
+          >
+            <b-icon-list-ul />
             Latest Heats
           </b-button>
         </b-col>
       </b-row>
     </b-card-body>
-    <UserHeatsModal
-      :visible.sync="showUserHeatsModal"
-    />
+    <UserHeatsModal :visible.sync="showUserHeatsModal" />
   </b-card>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
-import UserHeatsModal from './UserHeatsModal';
+import { mapGetters } from "vuex";
+import UserHeatsModal from "./UserHeatsModal";
 import {
   BCard,
   BCardHeader,
@@ -51,15 +48,15 @@ import {
   BRow,
   BCol,
   BButton,
-  BIconListUl
-} from 'bootstrap-vue';
+  BIconListUl,
+} from "bootstrap-vue";
 
 export default {
-  name: 'UserStatisticsCard',
+  name: "UserStatisticsCard",
   data() {
     return {
-      showUserHeatsModal: false
-    }
+      showUserHeatsModal: false,
+    };
   },
   components: {
     UserHeatsModal,
@@ -69,27 +66,23 @@ export default {
     BRow,
     BCol,
     BButton,
-    BIconListUl
+    BIconListUl,
   },
   computed: {
-    ...mapGetters('login', [
-      'userInfo'
+    ...mapGetters("login", ["userInfo"]),
+    ...mapGetters("configuration", ["getCurrency"]),
+    ...mapGetters("user", [
+      "heatHistory",
+      "heatTimeMinutes",
+      "heatTimeMinutesYTD",
+      "heatCost",
+      "heatCostYTD",
     ]),
-    ...mapGetters('configuration', [
-      'getCurrency'
-    ]),
-    ...mapGetters('user', [
-      'heatHistory',
-      'heatTimeMinutes',
-      'heatTimeMinutesYTD',
-      'heatCost',
-      'heatCostYTD'
-    ])
   },
   methods: {
-    showLatestHeats: function(){
+    showLatestHeats: function () {
       this.showUserHeatsModal = true;
-    }
-  }
-}
+    },
+  },
+};
 </script>

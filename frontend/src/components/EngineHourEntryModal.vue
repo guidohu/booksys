@@ -9,7 +9,7 @@
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
       <b-col cols="12" sm="10">
-        <WarningBox :errors="errors"/>
+        <WarningBox :errors="errors" />
       </b-col>
       <b-col cols="1" class="d-none d-sm-block"></b-col>
     </b-row>
@@ -73,13 +73,13 @@
             label-for="input-type"
             label-cols="3"
           >
-            <toggle-button 
+            <toggle-button
               id="input-type"
               :value="form.type"
               @change="toggleType"
               color="#17a2b8"
               :width="toggleWidth"
-              :labels="{checked: 'Course', unchecked: 'Private'}"
+              :labels="{ checked: 'Course', unchecked: 'Private' }"
             />
           </b-form-group>
         </b-col>
@@ -88,11 +88,16 @@
     </b-form>
     <div slot="modal-footer">
       <b-button type="button" variant="outline-info" v-on:click="save">
-        <b-icon-check/>
+        <b-icon-check />
         Save
       </b-button>
-      <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x/>
+      <b-button
+        class="ml-1"
+        type="button"
+        variant="outline-danger"
+        v-on:click="close"
+      >
+        <b-icon-x />
         Cancel
       </b-button>
     </div>
@@ -100,11 +105,11 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
-import { ToggleButton } from 'vue-js-toggle-button';
-import WarningBox from '@/components/WarningBox';
-import EngineHours from '@/components/forms/inputs/EngineHours';
-import * as dayjs from 'dayjs';
+import { mapActions } from "vuex";
+import { ToggleButton } from "vue-js-toggle-button";
+import WarningBox from "@/components/WarningBox";
+import EngineHours from "@/components/forms/inputs/EngineHours";
+import * as dayjs from "dayjs";
 import {
   BModal,
   BRow,
@@ -114,12 +119,12 @@ import {
   BFormInput,
   BButton,
   BIconCheck,
-  BIconX
-} from 'bootstrap-vue';
+  BIconX,
+} from "bootstrap-vue";
 
 export default {
-  name: 'EngineHourEntryModal',
-  props: [ 'engineHourEntry', 'visible', 'displayFormat' ],
+  name: "EngineHourEntryModal",
+  props: ["engineHourEntry", "visible", "displayFormat"],
   components: {
     WarningBox,
     EngineHours,
@@ -132,61 +137,59 @@ export default {
     BFormInput,
     BButton,
     BIconCheck,
-    BIconX
+    BIconX,
   },
   data() {
     return {
       errors: [],
       form: {
-        date: null
-      }
-    }
+        date: null,
+      },
+    };
   },
   computed: {
-    toggleWidth: function() {
+    toggleWidth: function () {
       return 70;
-    }
+    },
   },
   watch: {
-    engineHourEntry: function(newValue){
+    engineHourEntry: function (newValue) {
       this.setFormContent(newValue);
-    }
+    },
   },
   methods: {
-    setFormContent: function(entry){
-      if(entry != null){
+    setFormContent: function (entry) {
+      if (entry != null) {
         this.form = {
           id: entry.id,
-          date: dayjs(entry.time*1000).format("DD.MM.YYYY HH:mm"),
+          date: dayjs(entry.time * 1000).format("DD.MM.YYYY HH:mm"),
           driver: entry.user_first_name,
           beforeHours: entry.before_hours,
           afterHours: entry.after_hours,
           deltaHours: entry.delta_hours,
-          type: (entry.type == 0) ? false : true
-        }
+          type: entry.type == 0 ? false : true,
+        };
       }
     },
-    toggleType: function(){
+    toggleType: function () {
       this.form.type = !this.form.type;
     },
-    close: function(){
-      this.$emit('update:visible', false);
+    close: function () {
+      this.$emit("update:visible", false);
     },
-    save: function(){
+    save: function () {
       const update = {
         id: this.form.id,
-        type: (this.form.type == true) ? 1 : 0
+        type: this.form.type == true ? 1 : 0,
       };
       this.updateEngineHours(update)
-      .then(() => this.close())
-      .catch((errors) => this.errors = errors);
+        .then(() => this.close())
+        .catch((errors) => (this.errors = errors));
     },
-    ...mapActions('boat', [
-      'updateEngineHours'
-    ])
+    ...mapActions("boat", ["updateEngineHours"]),
   },
   created() {
     this.setFormContent(this.engineHourEntry);
-  }
-}
+  },
+};
 </script>

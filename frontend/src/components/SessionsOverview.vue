@@ -2,27 +2,23 @@
   <b-card no-body class="text-left">
     <b-card-header>
       <b-row>
-        <b-col cols="12">
-          Sessions
-        </b-col>
+        <b-col cols="12"> Sessions </b-col>
       </b-row>
     </b-card-header>
     <b-card-body>
-      <div v-if="sessions!=null && sessions.sessions != null">
+      <div v-if="sessions != null && sessions.sessions != null">
         <b-row v-if="sessions.sessions.length == 0">
-          <b-col cols="12">
-            No sessions for this day.
-          </b-col>
+          <b-col cols="12"> No sessions for this day. </b-col>
         </b-row>
-        <b-row 
-          v-for="session in sessions.sessions.slice(0,2)"
+        <b-row
+          v-for="session in sessions.sessions.slice(0, 2)"
           :key="session.id"
           class="mt-2 small-text"
         >
           <b-col cols="12">
             <b-row>
               <b-col cols="5">
-                <b-icon-book/>
+                <b-icon-book />
                 Title
               </b-col>
               <b-col cols="7">
@@ -31,7 +27,7 @@
             </b-row>
             <b-row>
               <b-col cols="5">
-                <b-icon-clock/>
+                <b-icon-clock />
                 Time
               </b-col>
               <b-col cols="7">
@@ -40,41 +36,36 @@
             </b-row>
             <b-row>
               <b-col cols="5">
-                <b-icon-person/>
+                <b-icon-person />
                 Riders
               </b-col>
-              <b-col cols="7" v-if="session.riders!=null && session.riders.length>0">
-                <b-row v-for="rider in session.riders.slice(0,3)" :key="rider.id">
+              <b-col
+                cols="7"
+                v-if="session.riders != null && session.riders.length > 0"
+              >
+                <b-row
+                  v-for="rider in session.riders.slice(0, 3)"
+                  :key="rider.id"
+                >
                   <b-col cols="12" class="text-truncate">
                     {{ rider.name }}
                   </b-col>
                 </b-row>
-                <b-row v-if="session.riders.length>3">
-                  <b-col cols="12" class="text-truncate">
-                    ...
-                  </b-col>
+                <b-row v-if="session.riders.length > 3">
+                  <b-col cols="12" class="text-truncate"> ... </b-col>
                 </b-row>
               </b-col>
-              <b-col cols="7" v-else>
-                -
-              </b-col>
+              <b-col cols="7" v-else> - </b-col>
             </b-row>
           </b-col>
         </b-row>
-        <b-row 
-          v-if="sessions.sessions.length > 2" 
-          class="mt-4 small-text"
-        >
-          <b-col cols="12">
-            click for more details...
-          </b-col>
+        <b-row v-if="sessions.sessions.length > 2" class="mt-4 small-text">
+          <b-col cols="12"> click for more details... </b-col>
         </b-row>
       </div>
-      <div v-if="sessions==null || sessions.sessions == null">
+      <div v-if="sessions == null || sessions.sessions == null">
         <b-row>
-          <b-col cols="12">
-            No day selected
-          </b-col>
+          <b-col cols="12"> No day selected </b-col>
         </b-row>
       </div>
     </b-card-body>
@@ -82,7 +73,7 @@
 </template>
 
 <script>
-import * as dayjs from 'dayjs';
+import * as dayjs from "dayjs";
 import {
   BCard,
   BCardHeader,
@@ -91,11 +82,11 @@ import {
   BCol,
   BIconBook,
   BIconClock,
-  BIconPerson
-} from 'bootstrap-vue';
+  BIconPerson,
+} from "bootstrap-vue";
 
 export default {
-  name: 'SessionsOverview',
+  name: "SessionsOverview",
   components: {
     BCard,
     BCardHeader,
@@ -104,38 +95,36 @@ export default {
     BCol,
     BIconBook,
     BIconClock,
-    BIconPerson
+    BIconPerson,
   },
-  props: [
-    'sessions'
-  ],
+  props: ["sessions"],
   computed: {
-    date: function(){
-      if(this.sessions != null && this.sessions.window_start != null){
+    date: function () {
+      if (this.sessions != null && this.sessions.window_start != null) {
         return dayjs(this.sessions.window_start).format("ddd DD.MM.YYYY");
       }
       return "no date selected";
-    }
+    },
   },
   methods: {
-    getTitle: function(session){
-      if(session.title){
+    getTitle: function (session) {
+      if (session.title) {
         return session.title;
-      }else{
+      } else {
         return "-";
       }
     },
-    getTime: function(session){
+    getTime: function (session) {
       const startStr = dayjs(session.start).format("HH:mm");
       const endStr = dayjs(session.end).format("HH:mm");
       return startStr + " - " + endStr;
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped>
-  .small-text {
-    font-size: 0.7rem;
-  }
+.small-text {
+  font-size: 0.7rem;
+}
 </style>

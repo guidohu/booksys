@@ -9,7 +9,7 @@
         <b-navbar-nav>
           <b-nav-item href="#">
             <router-link to="/logout">
-              <b-icon-box-arrow-right/>
+              <b-icon-box-arrow-right />
               Logout
             </router-link>
           </b-nav-item>
@@ -17,12 +17,16 @@
       </b-collapse>
     </b-navbar>
 
-    <b-row class="mt-3"> 
+    <b-row class="mt-3">
       <b-col cols="1"></b-col>
       <b-col cols="10">
         <b-row class="mt-3">
           <b-col offset="3" cols="6">
-            <b-button to="/info" variant="light" class="btn btn-default btn-dashboard">
+            <b-button
+              to="/info"
+              variant="light"
+              class="btn btn-default btn-dashboard"
+            >
               <div class="bc_icon bc_icon_dashboard bc_icon_info"></div>
               INFO
             </b-button>
@@ -44,7 +48,7 @@ import {
   BIconBoxArrowRight,
   BRow,
   BCol,
-  BButton
+  BButton,
 } from "bootstrap-vue";
 
 export default {
@@ -59,7 +63,7 @@ export default {
     BIconBoxArrowRight,
     BRow,
     BCol,
-    BButton
+    BButton,
   },
-}
+};
 </script>

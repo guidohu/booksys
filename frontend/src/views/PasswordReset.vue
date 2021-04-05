@@ -15,11 +15,12 @@
       spinner-variant="info"
       rounded="sm"
     >
-      <div v-if="showEmailDialog==true">
+      <div v-if="showEmailDialog == true">
         <b-row class="text-left mb-4">
           <b-col cols="1" class="d-none d-sm-block"></b-col>
           <b-col cols="12" sm="10">
-            Please enter your email address to get the password reset information sent to you by email.
+            Please enter your email address to get the password reset
+            information sent to you by email.
           </b-col>
           <b-col cols="1" class="d-none d-sm-block"></b-col>
         </b-row>
@@ -44,7 +45,12 @@
               <!-- Captcha -->
               <b-row v-if="getRecaptchaKey != null" class="mt-3">
                 <b-col cols="9" offset="3">
-                  <vue-recaptcha :sitekey="getRecaptchaKey" :loadRecaptchaScript="true" size="compact" @verify="verifiedHandler"></vue-recaptcha>
+                  <vue-recaptcha
+                    :sitekey="getRecaptchaKey"
+                    :loadRecaptchaScript="true"
+                    size="compact"
+                    @verify="verifiedHandler"
+                  ></vue-recaptcha>
                 </b-col>
               </b-row>
             </b-col>
@@ -52,11 +58,12 @@
           </b-row>
         </b-form>
       </div>
-      <div v-if="showTokenDialog==true">
+      <div v-if="showTokenDialog == true">
         <b-row class="text-left mb-4">
           <b-col cols="1" class="d-none d-sm-block"></b-col>
           <b-col cols="12" sm="10">
-            Please enter the token that has been sent to your email address and choose new password.
+            Please enter the token that has been sent to your email address and
+            choose new password.
           </b-col>
           <b-col cols="1" class="d-none d-sm-block"></b-col>
         </b-row>
@@ -130,13 +137,11 @@
         <b-col cols="1" class="d-none d-sm-block"></b-col>
         <b-col cols="12" sm="10">
           <p class="h4 mb-2">
-          <b-icon-check-circle variant="success"/>
-          <br/>
-          Password has been changed successfully.
+            <b-icon-check-circle variant="success" />
+            <br />
+            Password has been changed successfully.
           </p>
-          <p>
-            Please login with your new password.
-          </p>
+          <p>Please login with your new password.</p>
         </b-col>
         <b-col cols="1" class="d-none d-sm-block"></b-col>
       </b-row>
@@ -144,29 +149,58 @@
     <b-row v-if="errors.length > 0" class="mt-4">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
       <b-col cols="12" sm="10">
-        <warning-box :errors="errors"/>
+        <warning-box :errors="errors" />
       </b-col>
       <b-col cols="1" class="d-none d-sm-block"></b-col>
     </b-row>
     <div slot="modal-footer">
-      <b-button v-if="showEmailDialog" class="mr-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x/>
+      <b-button
+        v-if="showEmailDialog"
+        class="mr-1"
+        type="button"
+        variant="outline-danger"
+        v-on:click="close"
+      >
+        <b-icon-x />
         Cancel
       </b-button>
-      <b-button v-if="showEmailDialog" type="button" variant="outline-info" v-on:click="requestToken" :disabled="isLoading">
-        <b-icon-arrow-right/>
+      <b-button
+        v-if="showEmailDialog"
+        type="button"
+        variant="outline-info"
+        v-on:click="requestToken"
+        :disabled="isLoading"
+      >
+        <b-icon-arrow-right />
         Next
-      </b-button>   
-      <b-button v-if="showTokenDialog" class="mr-1" type="button" variant="outline-danger" v-on:click="showEmail">
-        <b-icon-arrow-left/>
+      </b-button>
+      <b-button
+        v-if="showTokenDialog"
+        class="mr-1"
+        type="button"
+        variant="outline-danger"
+        v-on:click="showEmail"
+      >
+        <b-icon-arrow-left />
         Back
       </b-button>
-      <b-button v-if="showTokenDialog" type="button" variant="outline-info" v-on:click="setPassword" :disabled="isLoading">
-        <b-icon-check/>
+      <b-button
+        v-if="showTokenDialog"
+        type="button"
+        variant="outline-info"
+        v-on:click="setPassword"
+        :disabled="isLoading"
+      >
+        <b-icon-check />
         Set Password
       </b-button>
-      <b-button v-if="showSuccessInfo" type="button" variant="outline-info" v-on:click="close">
-        <b-icon-check/>
+      <b-button
+        v-if="showSuccessInfo"
+        type="button"
+        variant="outline-info"
+        v-on:click="close"
+      >
+        <b-icon-check />
         Done
       </b-button>
     </div>
@@ -174,9 +208,9 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
-import User from '@/api/user';
-import WarningBox from '@/components/WarningBox';
+import { mapGetters, mapActions } from "vuex";
+import User from "@/api/user";
+import WarningBox from "@/components/WarningBox";
 import {
   BModal,
   BOverlay,
@@ -191,10 +225,10 @@ import {
   BIconArrowRight,
   BIconArrowLeft,
   BIconCheck,
+} from "bootstrap-vue";
 
-} from 'bootstrap-vue';
-
-const VueRecaptcha = () => import(/* webpackChunkName: "vue-recaptcha" */ 'vue-recaptcha');
+const VueRecaptcha = () =>
+  import(/* webpackChunkName: "vue-recaptcha" */ "vue-recaptcha");
 
 export default {
   name: "PasswordReset",
@@ -224,29 +258,25 @@ export default {
       errors: [],
       form: {
         email: null,
-        recaptchaResponse: null
-      }
-    }
+        recaptchaResponse: null,
+      },
+    };
   },
   computed: {
-    ...mapGetters('configuration', [
-      'getRecaptchaKey'
-    ])
+    ...mapGetters("configuration", ["getRecaptchaKey"]),
   },
   methods: {
-    ...mapActions('configuration', [
-      'queryRecaptchaKey'
-    ]),
-    verifiedHandler: function(response){
+    ...mapActions("configuration", ["queryRecaptchaKey"]),
+    verifiedHandler: function (response) {
       this.form.recaptchaResponse = response;
     },
-    validatePassword: function() {
+    validatePassword: function () {
       const errors = [];
 
-      if(this.form.password != this.form.passwordConfirm){
+      if (this.form.password != this.form.passwordConfirm) {
         errors.push("Password and Password Confirmation are not identical.");
       }
-      if(this.form.password.length <= 8){
+      if (this.form.password.length <= 8) {
         errors.push("Please use a password longer than 8 characters.");
       }
 
@@ -254,82 +284,86 @@ export default {
       const pwUpperRegex = /[A-Z]+/;
       const pwLowerRegex = /[a-z]+/;
       const pwDigitRegex = /[0-9]+/;
-      if(this.form.password.match(pwUpperRegex) == null){
-          errors.push("The password needs to contain at least one upper case letter (A-Z)");
+      if (this.form.password.match(pwUpperRegex) == null) {
+        errors.push(
+          "The password needs to contain at least one upper case letter (A-Z)"
+        );
       }
-      if(this.form.password.match(pwLowerRegex) == null){
-          errors.push("The password needs to contain at least one lower case letter (a-z)");
+      if (this.form.password.match(pwLowerRegex) == null) {
+        errors.push(
+          "The password needs to contain at least one lower case letter (a-z)"
+        );
       }
-      if(this.form.password.match(pwDigitRegex) == null){
-          errors.push("The password needs to contain at least one digit (0-9)");
+      if (this.form.password.match(pwDigitRegex) == null) {
+        errors.push("The password needs to contain at least one digit (0-9)");
       }
 
       return errors;
     },
-    requestToken: function(event){
-      if(event != null){
+    requestToken: function (event) {
+      if (event != null) {
         event.preventDefault();
       }
 
       this.isLoading = true;
 
       const request = {
-        email:             this.form.email,
-        recaptchaResponse: this.form.recaptchaResponse
+        email: this.form.email,
+        recaptchaResponse: this.form.recaptchaResponse,
       };
-    
+
       User.requestPasswordResetToken(request)
-      .then(() => {
-        this.isLoading = false;
-        this.errors = [];
-        this.showSuccessInfo = false;
-        this.showEmailDialog = false;
-        this.showTokenDialog = true;
-      })
-      .catch((errors) => {
-        this.errors = errors;
-        this.isLoading = false;
-      });
+        .then(() => {
+          this.isLoading = false;
+          this.errors = [];
+          this.showSuccessInfo = false;
+          this.showEmailDialog = false;
+          this.showTokenDialog = true;
+        })
+        .catch((errors) => {
+          this.errors = errors;
+          this.isLoading = false;
+        });
     },
-    setPassword: function(event){
-      if(event != null){
+    setPassword: function (event) {
+      if (event != null) {
         event.preventDefault();
       }
 
       this.isLoading = true;
 
       const errors = this.validatePassword();
-      if(errors != null && errors.length != 0){
+      if (errors != null && errors.length != 0) {
         this.errors = errors;
         this.isLoading = false;
         return;
       }
 
       const request = {
-        email:             this.form.email,
-        password:          this.form.password,
-        token:             this.form.token
+        email: this.form.email,
+        password: this.form.password,
+        token: this.form.token,
       };
 
       User.changeUserPasswordByToken(request)
-      .then(() => {
-        this.errors = [];
-        this.isLoading = false;
-        this.showEmailDialog = false;
-        this.showTokenDialog = false;
-        this.showSuccessInfo = true;
-      })
-      .catch((errors) => {
-        this.isLoading = false;
-        this.errors = errors
-      });
+        .then(() => {
+          this.errors = [];
+          this.isLoading = false;
+          this.showEmailDialog = false;
+          this.showTokenDialog = false;
+          this.showSuccessInfo = true;
+        })
+        .catch((errors) => {
+          this.isLoading = false;
+          this.errors = errors;
+        });
     },
-    close: function() {
+    close: function () {
       this.$router.push("/");
-    }
+    },
   },
   created() {
     this.queryRecaptchaKey();
-  }
-}
+  },
+};
 </script>

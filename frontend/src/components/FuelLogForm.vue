@@ -2,7 +2,7 @@
   <b-container float class="text-left">
     <b-row>
       <b-col cols="12">
-        <WarningBox v-if="errors.length > 0" :errors="errors"/>
+        <WarningBox v-if="errors.length > 0" :errors="errors" />
         <b-form @submit="add">
           <engine-hours
             label="Engine Hrs"
@@ -16,13 +16,9 @@
             label-cols="3"
           >
             <b-input-group size="sm">
-              <b-form-input
-                id="input-cost"
-                v-model="form.cost"
-                type="text"
-              />
+              <b-form-input id="input-cost" v-model="form.cost" type="text" />
               <b-input-group-append is-text>
-                {{getCurrency}}
+                {{ getCurrency }}
               </b-input-group-append>
             </b-input-group>
           </b-form-group>
@@ -38,14 +34,14 @@
                 v-model="form.liters"
                 type="text"
               />
-              <b-input-group-append is-text>
-                ltrs
-              </b-input-group-append>
+              <b-input-group-append is-text> ltrs </b-input-group-append>
             </b-input-group>
           </b-form-group>
           <b-row class="text-right">
             <b-col cols="9" offset="3">
-              <b-button block variant="outline-info" size="sm" v-on:click="add">Add</b-button>
+              <b-button block variant="outline-info" size="sm" v-on:click="add"
+                >Add</b-button
+              >
             </b-col>
           </b-row>
         </b-form>
@@ -55,9 +51,9 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
-import WarningBox from '@/components/WarningBox';
-import EngineHours from '@/components/forms/inputs/EngineHours';
+import { mapActions, mapGetters } from "vuex";
+import WarningBox from "@/components/WarningBox";
+import EngineHours from "@/components/forms/inputs/EngineHours";
 import {
   BContainer,
   BRow,
@@ -67,8 +63,8 @@ import {
   BInputGroup,
   BInputGroupAppend,
   BFormInput,
-  BButton
-} from 'bootstrap-vue';
+  BButton,
+} from "bootstrap-vue";
 
 export default {
   name: "FuelLogForm",
@@ -83,7 +79,7 @@ export default {
     BInputGroup,
     BInputGroupAppend,
     BFormInput,
-    BButton
+    BButton,
   },
   data() {
     return {
@@ -91,51 +87,42 @@ export default {
       form: {
         engineHours: null,
         cost: null,
-        liters: null
-      }
-    }
+        liters: null,
+      },
+    };
   },
   computed: {
-    ...mapGetters('login', [
-      'userInfo'
-    ]),
-    ...mapGetters('configuration',[
-      'getCurrency',
-      'getEngineHourFormat'
-    ])
+    ...mapGetters("login", ["userInfo"]),
+    ...mapGetters("configuration", ["getCurrency", "getEngineHourFormat"]),
   },
   methods: {
-    add: function() {
+    add: function () {
       console.log("add has been clicked");
       const entry = {
         user_id: this.userInfo.id,
         engine_hours: this.form.engineHours,
         liters: this.form.liters,
-        cost: this.form.cost
+        cost: this.form.cost,
       };
       this.addFuelEntry(entry)
-      .then(() => {
-        this.resetForm();
-      })
-      .catch((errors) => this.errors = errors);
+        .then(() => {
+          this.resetForm();
+        })
+        .catch((errors) => (this.errors = errors));
     },
-    resetForm: function() {
+    resetForm: function () {
       this.form = {
         engineHours: null,
         cost: null,
-        liters: null
+        liters: null,
       };
       this.errors = [];
     },
-    ...mapActions('boat', [
-      'addFuelEntry'
-    ]),
-    ...mapActions('configuration', [
-      'queryConfiguration'
-    ])
+    ...mapActions("boat", ["addFuelEntry"]),
+    ...mapActions("configuration", ["queryConfiguration"]),
   },
   created() {
     this.queryConfiguration();
-  }
-}
+  },
+};
 </script>

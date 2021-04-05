@@ -1,6 +1,11 @@
 <template>
   <div v-if="errors != null && errors.length > 0" class="text-left">
-    <b-alert variant="warning" show :dismissible="isDismissible" @dismissed="dismissedHandler">
+    <b-alert
+      variant="warning"
+      show
+      :dismissible="isDismissible"
+      @dismissed="dismissedHandler"
+    >
       <b>Please correct the following error(s):</b>
       <ul>
         <li v-for="err in errors" :key="err">{{ err }}</li>
@@ -8,34 +13,32 @@
     </b-alert>
   </div>
   <div v-else>
-    <b-alert variant="success" show>
-      No issues found.
-    </b-alert>
+    <b-alert variant="success" show> No issues found. </b-alert>
   </div>
 </template>
 
 <script>
-import { BAlert } from 'bootstrap-vue';
+import { BAlert } from "bootstrap-vue";
 
 export default {
   name: "WarningBox",
   components: {
-    BAlert
+    BAlert,
   },
-  props: [ 'errors', 'dismissible' ],
+  props: ["errors", "dismissible"],
   mounted() {
     console.log("WarningBox just mounted");
     console.log("warningbox:", this.errors);
   },
   computed: {
-    isDismissible: function(){
+    isDismissible: function () {
       return this.dismissible != null && this.dismissible == "true";
-    }
+    },
   },
   methods: {
-    dismissedHandler: function(){
-      this.$emit('dismissed');
-    }
-  }
-}
+    dismissedHandler: function () {
+      this.$emit("dismissed");
+    },
+  },
+};
 </script>

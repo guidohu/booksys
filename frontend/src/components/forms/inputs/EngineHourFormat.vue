@@ -11,49 +11,46 @@
 </template>
 
 <script>
-import {
-  BFormGroup,
-  BFormSelect
-} from 'bootstrap-vue';
+import { BFormGroup, BFormSelect } from "bootstrap-vue";
 
 export default {
   name: "EngineHourFormat",
   components: {
     BFormGroup,
-    BFormSelect
+    BFormSelect,
   },
-  props: [ 'selected' ],
+  props: ["selected"],
   data() {
     return {
       formSelected: "hh.h",
       options: [
-        { value: 'hh.h',  text: 'hh.h  - such as 9.7' },
-        { value: 'hh:mm', text: 'hh:mm - such as 9:42' }
-      ]
-    }
+        { value: "hh.h", text: "hh.h  - such as 9.7" },
+        { value: "hh:mm", text: "hh:mm - such as 9:42" },
+      ],
+    };
   },
   watch: {
-    formSelected: function(){
-      this.$emit('update:selected', this.formSelected);
+    formSelected: function () {
+      this.$emit("update:selected", this.formSelected);
     },
-    selected: function(){
+    selected: function () {
       this.setFormSelected(this.selected);
-    }
+    },
   },
   methods: {
-    setFormSelected: function(format){
-      if(format == null){
+    setFormSelected: function (format) {
+      if (format == null) {
         console.log("no default engine hour format specified");
         this.formSelected = "hh.h";
-      } else if(format == "hh.h" || format == "hh:mm"){
+      } else if (format == "hh.h" || format == "hh:mm") {
         this.formSelected = format;
-      } else{
+      } else {
         this.formSelected = "hh.h";
       }
-    }
+    },
   },
   created() {
     this.setFormSelected(this.selected);
-  }
-}
+  },
+};
 </script>

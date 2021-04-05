@@ -1,33 +1,49 @@
 <template>
   <div>
     <div v-if="isDesktop" class="display">
-      <main-title title-name="Administrator Menu"/>
+      <main-title title-name="Administrator Menu" />
       <b-row class="mt-5 ml-1 mr-1">
         <b-col cols="3"></b-col>
         <b-col cols="6" class="text-center">
           <b-row class="mt-4">
             <b-col cols="4" offset="2">
-              <b-button to="/users" variant="light" class="btn btn-default btn-dashboard">
+              <b-button
+                to="/users"
+                variant="light"
+                class="btn btn-default btn-dashboard"
+              >
                 <div class="bc_icon bc_icon_dashboard bc_icon_users"></div>
                 USERS
               </b-button>
             </b-col>
             <b-col cols="4">
-              <b-button to="/accounting" variant="light" class="btn btn-default btn-dashboard">
+              <b-button
+                to="/accounting"
+                variant="light"
+                class="btn btn-default btn-dashboard"
+              >
                 <div class="bc_icon bc_icon_dashboard bc_icon_money"></div>
                 FINANCE
               </b-button>
             </b-col>
-          </b-row>		
+          </b-row>
           <b-row class="mt-4">
             <b-col cols="4" offset="2">
-              <b-button to="/settings" variant="light" class="btn btn-default btn-dashboard">
+              <b-button
+                to="/settings"
+                variant="light"
+                class="btn btn-default btn-dashboard"
+              >
                 <div class="bc_icon bc_icon_dashboard bc_icon_wrench"></div>
                 SETTINGS
               </b-button>
             </b-col>
             <b-col cols="4">
-              <b-button to="/logs" variant="light" class="btn btn-default btn-dashboard">
+              <b-button
+                to="/logs"
+                variant="light"
+                class="btn btn-default btn-dashboard"
+              >
                 <div class="bc_icon bc_icon_dashboard bc_icon_statistics"></div>
                 LOGS
               </b-button>
@@ -51,13 +67,13 @@
           <b-navbar-nav>
             <b-nav-item href="#">
               <router-link to="/dashboard">
-                <b-icon-house/>
+                <b-icon-house />
                 Home
-                </router-link>
-              </b-nav-item>
+              </router-link>
+            </b-nav-item>
             <b-nav-item href="#">
               <router-link to="/logout">
-                <b-icon-box-arrow-right/>
+                <b-icon-box-arrow-right />
                 Logout
               </router-link>
             </b-nav-item>
@@ -65,18 +81,26 @@
         </b-collapse>
       </b-navbar>
 
-      <b-row class="mt-3"> 
+      <b-row class="mt-3">
         <b-col cols="1"></b-col>
         <b-col cols="10">
           <b-row>
             <b-col cols="6">
-              <b-button to="/users" variant="light" class="btn btn-default btn-dashboard">
+              <b-button
+                to="/users"
+                variant="light"
+                class="btn btn-default btn-dashboard"
+              >
                 <div class="bc_icon bc_icon_dashboard bc_icon_users"></div>
                 USERS
               </b-button>
             </b-col>
             <b-col cols="6">
-              <b-button to="/accounting" variant="light" class="btn btn-default btn-dashboard">
+              <b-button
+                to="/accounting"
+                variant="light"
+                class="btn btn-default btn-dashboard"
+              >
                 <div class="bc_icon bc_icon_dashboard bc_icon_money"></div>
                 FINANCE
               </b-button>
@@ -84,13 +108,21 @@
           </b-row>
           <b-row class="mt-3">
             <b-col cols="6">
-              <b-button to="/settings" variant="light" class="btn btn-default btn-dashboard">
+              <b-button
+                to="/settings"
+                variant="light"
+                class="btn btn-default btn-dashboard"
+              >
                 <div class="bc_icon bc_icon_dashboard bc_icon_wrench"></div>
                 SETTINGS
               </b-button>
             </b-col>
             <b-col cols="6">
-              <b-button to="/logs" variant="light" class="btn btn-default btn-dashboard">
+              <b-button
+                to="/logs"
+                variant="light"
+                class="btn btn-default btn-dashboard"
+              >
                 <div class="bc_icon bc_icon_dashboard bc_icon_statistics"></div>
                 LOGS
               </b-button>
@@ -99,13 +131,12 @@
         </b-col>
       </b-row>
     </div>
-    
   </div>
 </template>
 
 <script>
-import MainTitle from '@/components/MainTitle';
-import { BooksysBrowser } from '@/libs/browser';
+import MainTitle from "@/components/MainTitle";
+import { BooksysBrowser } from "@/libs/browser";
 import {
   BRow,
   BCol,
@@ -117,8 +148,8 @@ import {
   BNavbarToggle,
   BCollapse,
   BNavbarNav,
-  BNavItem
-} from 'bootstrap-vue';
+  BNavItem,
+} from "bootstrap-vue";
 
 export default {
   name: "Admin",
@@ -134,12 +165,12 @@ export default {
     BNavbarToggle,
     BCollapse,
     BNavbarNav,
-    BNavItem
+    BNavItem,
   },
   computed: {
     isDesktop: function () {
-      return !BooksysBrowser.isMobile()
-    }
-  }
-}
+      return !BooksysBrowser.isMobile();
+    },
+  },
+};
 </script>

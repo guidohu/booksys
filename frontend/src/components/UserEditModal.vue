@@ -12,7 +12,7 @@
         <b-form @submit="save">
           <b-row v-if="errors.length">
             <b-col cols="12">
-              <WarningBox :error="errors"/>
+              <WarningBox :error="errors" />
             </b-col>
           </b-row>
           <b-form-group
@@ -119,25 +119,35 @@
             label-for="license-input"
             description=""
           >
-            <b-form-checkbox 
-              v-model="form.license" 
-              name="license-switch" switch
+            <b-form-checkbox
+              v-model="form.license"
+              name="license-switch"
+              switch
             >
               {{ boatLicenseText }}
             </b-form-checkbox>
           </b-form-group>
         </b-form>
       </b-col>
-      <b-col cols="1" class="d-none d-sm-block">
-      </b-col>
-    </b-row>    
+      <b-col cols="1" class="d-none d-sm-block"> </b-col>
+    </b-row>
     <div slot="modal-footer">
-      <b-button type="button" variant="outline-info" :disabled="isLoading" v-on:click="save">
-        <b-icon-person-check/>
+      <b-button
+        type="button"
+        variant="outline-info"
+        :disabled="isLoading"
+        v-on:click="save"
+      >
+        <b-icon-person-check />
         Save
       </b-button>
-      <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x/>
+      <b-button
+        class="ml-1"
+        type="button"
+        variant="outline-danger"
+        v-on:click="close"
+      >
+        <b-icon-x />
         Cancel
       </b-button>
     </div>
@@ -145,8 +155,8 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
-import WarningBox from '@/components/WarningBox';
+import { mapGetters, mapActions } from "vuex";
+import WarningBox from "@/components/WarningBox";
 import {
   BModal,
   BRow,
@@ -157,11 +167,11 @@ import {
   BFormCheckbox,
   BButton,
   BIconPersonCheck,
-  BIconX
+  BIconX,
 } from "bootstrap-vue";
 
 export default {
-  name: 'UserEditModal',
+  name: "UserEditModal",
   components: {
     WarningBox,
     BModal,
@@ -173,33 +183,31 @@ export default {
     BFormCheckbox,
     BButton,
     BIconPersonCheck,
-    BIconX
+    BIconX,
   },
-  props: [ 'visible' ],
+  props: ["visible"],
   data() {
     return {
       form: {},
       errors: [],
-      isLoading: false
-    }
+      isLoading: false,
+    };
   },
   computed: {
-    ...mapGetters('login', [
-      'userInfo'
-    ]),
-    boatLicenseText: function(){
-      if(this.form.license != null && this.form.license == true){
+    ...mapGetters("login", ["userInfo"]),
+    boatLicenseText: function () {
+      if (this.form.license != null && this.form.license == true) {
         return "I have a driving license for boats";
-      }else{
+      } else {
         return "I do NOT have a driving license for boats";
       }
-    }
+    },
   },
   methods: {
-    close: function(){
-      this.$emit('update:visible', false);
+    close: function () {
+      this.$emit("update:visible", false);
     },
-    save: function(event){
+    save: function (event) {
       event.preventDefault();
 
       this.isLoading = true;
@@ -212,24 +220,25 @@ export default {
         city: this.form.city,
         email: this.form.email,
         mobile: this.form.phone,
-        license: (this.form.license == true) ? 1 : 0
+        license: this.form.license == true ? 1 : 0,
       })
-      .then(() => {
-        this.isLoading = false;
-        this.errors = [];
-        this.close();
-      })
-      .catch(errors => {
-        this.isLoading = false;
-        this.errors = errors;
-      })
+        .then(() => {
+          this.isLoading = false;
+          this.errors = [];
+          this.close();
+        })
+        .catch((errors) => {
+          this.isLoading = false;
+          this.errors = errors;
+        });
     },
-    ...mapActions('user', [
-      'changeUserProfile'
-    ])
+    ...mapActions("user", ["changeUserProfile"]),
   },
-  beforeMount () {
-    const license = (this.userInfo.license != null && this.userInfo.license == 1) ? true : false;
+  beforeMount() {
+    const license =
+      this.userInfo.license != null && this.userInfo.license == 1
+        ? true
+        : false;
     this.form = {
       firstName: this.userInfo.first_name,
       lastName: this.userInfo.last_name,
@@ -238,8 +247,8 @@ export default {
       city: this.userInfo.city,
       email: this.userInfo.email,
       phone: this.userInfo.mobile,
-      license: license
+      license: license,
     };
-  }
-}
+  },
+};
 </script>
