@@ -1,6 +1,7 @@
 import Configuration from "@/api/configuration";
 
 const state = () => ({
+  CONFIG_LOADED: false,
   configuration: null,
   recaptchaKey: null,
   currency: null,
@@ -60,7 +61,11 @@ const getters = {
 };
 
 const actions = {
-  queryConfiguration({ commit }) {
+  queryConfiguration({ commit, state }) {
+    if(state.CONFIG_LOADED == true){
+      return;
+    }
+
     let successCb = (config) => {
       commit("setConfiguration", config);
     };
@@ -138,6 +143,7 @@ const actions = {
       Configuration.setConfiguration(configurationValues)
         .then(() => {
           // load latest configuration
+          commit("invalidateConfiguration", {});
           dispatch("queryConfiguration", {});
           resolve();
         })
@@ -149,6 +155,9 @@ const actions = {
 };
 
 const mutations = {
+  invalidateConfiguration(state) {
+    state.CONFIG_LOADED = false;
+  },
   setConfiguration(state, value) {
     state.configuration = value;
     state.locationAddress =
@@ -163,6 +172,8 @@ const mutations = {
     state.currency = value.currency;
     state.logoFile = value.logo_file;
     state.engineHourFormat = value.engine_hour_format;
+
+    state.CONFIG_LOADED = true;
     console.log("configuration set to", value);
   },
   setRecaptchaKey(state, value) {
