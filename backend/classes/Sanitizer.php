@@ -130,6 +130,17 @@ class Sanitizer{
 				return FALSE;
 		}
 	}
+
+	public function isFuelPaymentType($format){
+		switch ($format) {
+			case "instant":
+				return TRUE;
+			case "billed":
+				return TRUE;
+			default:
+				return FALSE;
+		}
+	}
 	
 	function match($var, $regex){
 		if(isset($var) and preg_match($regex, $var)){

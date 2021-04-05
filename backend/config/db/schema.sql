@@ -26,6 +26,7 @@ CREATE TABLE `boat_fuel` (
   `liters` DECIMAL(10,3) DEFAULT NULL,
   `cost_chf` DECIMAL(10,3) DEFAULT NULL,
   `cost_chf_brutto` DECIMAL(10,3) DEFAULT NULL,
+  `contributes_to_balance` int(8) DEFAULT 1,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -94,7 +95,8 @@ INSERT INTO `expenditure_type` (`id`, `name`, `comment`) VALUES
 (5, 'other', 'Other costs'),
 (6, 'membership fee', 'Membership Fee'),
 (7, 'salary', 'money for towing people or do whatever in the name of the community'),
-(8, 'owners refund', 'Payback of investments from owners');
+(8, 'owners refund', 'Payback of investments from owners'),
+(9, 'fuel bill', 'Costs for fuel through bill');
 
 --
 -- Table structure for table `heat`
@@ -308,7 +310,7 @@ CREATE TABLE `configuration` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 INSERT INTO configuration (property, value) VALUES 
-("schema.version",                  "1.15"          ),
+("schema.version",                  "1.16"          ),
 ("browser.session.timeout.default", "10800"         ),
 ("browser.session.timeout.max",     "604800"        ),
 ("location.longitude",              "8.542939"      ),
@@ -334,4 +336,5 @@ INSERT INTO configuration (property, value) VALUES
 ("smtp.username",                   NULL            ),
 ("smtp.password",                   NULL            ),
 ("logo.file",                       NULL            ),
-("engine.hour.format",              "hh.h"          );
+("engine.hour.format",              "hh.h"          ),
+("fuel.payment.type",               "instant"       );

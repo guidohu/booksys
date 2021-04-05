@@ -1,29 +1,29 @@
 const state = () => ({
-  isLoggedIn: null
-})
+  isLoggedIn: null,
+});
 
 const getters = {
   isLoggedIn: (state) => {
     return state.isLoggedIn;
-  }
-}
+  },
+};
 
 const actions = {
-  setIsLoggedIn ({ commit }, value) {
-    commit('setIsLoggedIn', value);
-  }
-}
+  setIsLoggedIn({ commit }, value) {
+    commit("setIsLoggedIn", value);
+  },
+};
 
 const mutations = {
-  setIsLoggedIn (state, value) {
+  setIsLoggedIn(state, value) {
     state.isLoggedIn = value;
-  }
-}
+  },
+};
 
 export default {
   namespaced: true,
   state,
   getters,
   actions,
-  mutations
-}
+  mutations,
+};

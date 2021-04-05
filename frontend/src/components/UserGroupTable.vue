@@ -1,6 +1,11 @@
 <template>
   <div class="text-left">
-    <WarningBox v-if="errors.length > 0" :errors="errors" dismissible="true" @dismissed="dismissedHandler"/>
+    <WarningBox
+      v-if="errors.length > 0"
+      :errors="errors"
+      dismissible="true"
+      @dismissed="dismissedHandler"
+    />
     <div v-else>
       <UserGroupModal
         :userGroup="selectedItems[0]"
@@ -9,27 +14,50 @@
       />
       <b-row>
         <b-col cols="12">
-          <b-button v-on:click="newGroup" size="sm" variant="outline-info" class="mr-1 mb-2">
-            <b-icon-plus/>
+          <b-button
+            v-on:click="newGroup"
+            size="sm"
+            variant="outline-info"
+            class="mr-1 mb-2"
+          >
+            <b-icon-plus />
             New
           </b-button>
-          <b-button v-if="selectedItems.length>0" v-on:click="showDetails" size="sm" variant="outline-info" class="mr-1 mb-2">
-            <b-icon-eye/>
+          <b-button
+            v-if="selectedItems.length > 0"
+            v-on:click="showDetails"
+            size="sm"
+            variant="outline-info"
+            class="mr-1 mb-2"
+          >
+            <b-icon-eye />
             View
           </b-button>
-          <b-button v-if="selectedItems.length>0" v-on:click="editGroup" size="sm" variant="outline-info" class="mr-1 mb-2">
-            <b-icon-pencil/>
+          <b-button
+            v-if="selectedItems.length > 0"
+            v-on:click="editGroup"
+            size="sm"
+            variant="outline-info"
+            class="mr-1 mb-2"
+          >
+            <b-icon-pencil />
             Edit
           </b-button>
-          <b-button v-if="selectedItems.length>0" v-on:click="showDeleteUserGroupDialog" size="sm" variant="outline-danger" class="mb-2">
-            <b-icon-trash/>
+          <b-button
+            v-if="selectedItems.length > 0"
+            v-on:click="showDeleteUserGroupDialog"
+            size="sm"
+            variant="outline-danger"
+            class="mb-2"
+          >
+            <b-icon-trash />
             Delete
           </b-button>
         </b-col>
       </b-row>
       <b-row>
         <b-col cols="12">
-          <b-table 
+          <b-table
             striped
             hover
             response
@@ -51,11 +79,11 @@
 </template>
 
 <script>
-import Vue from 'vue';
-import { mapGetters, mapActions } from 'vuex';
-import { sprintf } from 'sprintf-js';
-import WarningBox from '@/components/WarningBox';
-import UserGroupModal from '@/components/UserGroupModal';
+import Vue from "vue";
+import { mapGetters, mapActions } from "vuex";
+import { sprintf } from "sprintf-js";
+import WarningBox from "@/components/WarningBox";
+import UserGroupModal from "@/components/UserGroupModal";
 import {
   BRow,
   BButton,
@@ -65,13 +93,13 @@ import {
   BIconTrash,
   BCol,
   BTable,
-  ModalPlugin
+  ModalPlugin,
 } from "bootstrap-vue";
 
 Vue.use(ModalPlugin);
 
 export default {
-  name: 'UserGroupTable',
+  name: "UserGroupTable",
   components: {
     WarningBox,
     UserGroupModal,
@@ -82,151 +110,149 @@ export default {
     BIconPencil,
     BIconTrash,
     BCol,
-    BTable
+    BTable,
   },
   data() {
     return {
       errors: [],
-      userGroupList: [
-      ],
+      userGroupList: [],
       items: [],
       selectedItems: [],
       fields: [
-        { 
+        {
           key: "user_group_name",
           label: "User Group",
-          sortable: true
+          sortable: true,
         },
-        { 
+        {
           key: "user_role_description",
           label: "User Role",
-          sortable: true
+          sortable: true,
         },
-        { 
+        {
           key: "price_min",
           label: "Price " + this.getCurrency + "/min",
           sortable: true,
           sortKey: "price_min",
-          formatter: (value) => { return sprintf("%.2f", value) }
-        }
+          formatter: (value) => {
+            return sprintf("%.2f", value);
+          },
+        },
       ],
       userGroupEditMode: false,
-      showUserGroupModal: false
+      showUserGroupModal: false,
     };
   },
   computed: {
-    ...mapGetters("user", [
-      'userListDetailed',
-      'userGroups'
-    ]),
-    ...mapGetters("configuration", [
-      'getCurrency'
-    ])
+    ...mapGetters("user", ["userListDetailed", "userGroups"]),
+    ...mapGetters("configuration", ["getCurrency"]),
   },
   watch: {
-    userGroups: function(newUserGroups) {
+    userGroups: function (newUserGroups) {
       this.setRows(newUserGroups);
     },
-    getCurrency: function(currency){
+    getCurrency: function (currency) {
       this.fields[2].label = "Price " + currency + "/min";
-    }
+    },
   },
   methods: {
     ...mapActions("user", [
-      'queryUserListDetailed',
-      'queryUserGroups',
-      'lockUser',
-      'unlockUser',
-      'deleteUserGroup',
-      'setUserGroup'
+      "queryUserListDetailed",
+      "queryUserGroups",
+      "lockUser",
+      "unlockUser",
+      "deleteUserGroup",
+      "setUserGroup",
     ]),
-    ...mapActions("configuration", [
-      'queryConfiguration'
-    ]),
-    dismissedHandler: function() {
+    ...mapActions("configuration", ["queryConfiguration"]),
+    dismissedHandler: function () {
       this.errors = [];
     },
-    setRows: function() {
+    setRows: function () {
       this.items = this.userGroups;
     },
-    getBalance: function(row) {
-      return sprintf("%.2f %s", row.total_payment - row.total_heat_cost, this.getCurrency)
+    getBalance: function (row) {
+      return sprintf(
+        "%.2f %s",
+        row.total_payment - row.total_heat_cost,
+        this.getCurrency
+      );
     },
-    rowSelected: function(rows) {
+    rowSelected: function (rows) {
       this.selectedItems = rows;
     },
-    isSelected: function() {
+    isSelected: function () {
       return this.selectedItems.length > 0;
     },
-    lock: function(user){
-      this.lockUser(user.id)
-      .catch((errors) => this.errors = errors);
+    lock: function (user) {
+      this.lockUser(user.id).catch((errors) => (this.errors = errors));
     },
-    unlock: function(user){
-      this.unlockUser(user.id)
-      .catch((errors) => this.errors = errors);
+    unlock: function (user) {
+      this.unlockUser(user.id).catch((errors) => (this.errors = errors));
     },
-    groupChangeHandler: function(userGroupId, user){
+    groupChangeHandler: function (userGroupId, user) {
       const userGroupUpdate = {
         userId: user.id,
-        userGroupId: userGroupId
+        userGroupId: userGroupId,
       };
       this.setUserGroup(userGroupUpdate)
-      .then(() => this.errors = [])
-      .catch((errors) => this.errors = errors);
+        .then(() => (this.errors = []))
+        .catch((errors) => (this.errors = errors));
     },
-    showDeleteUserGroupDialog: function(){
+    showDeleteUserGroupDialog: function () {
       const name = this.selectedItems[0].user_group_name;
-      const id   = this.selectedItems[0].user_group_id;
-      this.$bvModal.msgBoxConfirm('Do you really want to delete user group '+name+'?', {
-        title: 'Delete User Group',
-        size: 'sm',
-        buttonSize: 'sm',
-        okVariant: 'danger',
-        okTitle: 'Delete',
-        cancelTitle: 'Cancel',
-        footerClass: 'p-2',
-        hideHeaderClose: false,
-        centered: true
-      })
-      .then(value => {
-        // delete user group
-        if(value == true){
-          this.deleteUserGroup(id)
-          .catch((errors) => this.errors = errors);
-        }
-      })
-      .catch(err => {
-        this.errors = [ err ]
-      })
+      const id = this.selectedItems[0].user_group_id;
+      this.$bvModal
+        .msgBoxConfirm(
+          "Do you really want to delete user group " + name + "?",
+          {
+            title: "Delete User Group",
+            size: "sm",
+            buttonSize: "sm",
+            okVariant: "danger",
+            okTitle: "Delete",
+            cancelTitle: "Cancel",
+            footerClass: "p-2",
+            hideHeaderClose: false,
+            centered: true,
+          }
+        )
+        .then((value) => {
+          // delete user group
+          if (value == true) {
+            this.deleteUserGroup(id).catch((errors) => (this.errors = errors));
+          }
+        })
+        .catch((err) => {
+          this.errors = [err];
+        });
     },
-    showDetails: function() {
+    showDetails: function () {
       this.userGroupEditMode = false;
       this.showUserGroupModal = true;
     },
-    editGroup: function() {
+    editGroup: function () {
       this.userGroupEditMode = true;
       this.showUserGroupModal = true;
     },
-    newGroup: function() {
+    newGroup: function () {
       this.userGroupEditMode = true;
       this.selectedItems = [];
       this.showUserGroupModal = true;
-    }
+    },
   },
   created() {
-    this.queryConfiguration()
-    .catch((errors) => this.errors.push(...errors));
+    this.queryConfiguration().catch((errors) => this.errors.push(...errors));
 
     this.queryUserGroups()
-    .then(() => this.setRows())
-    .catch((errors) => this.errors.push(...errors));
-  }
-}
+      .then(() => this.setRows())
+      .catch((errors) => this.errors.push(...errors));
+  },
+};
 </script>
 
 <style scoped>
-  .b-table-sticky-header {
-    max-height: 340px;
-  }
+.b-table-sticky-header {
+  max-height: 340px;
+}
 </style>

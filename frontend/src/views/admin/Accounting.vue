@@ -1,45 +1,39 @@
 <template>
   <div>
     <div v-if="isDesktop" class="display">
-      <main-title title-name="Accounting"/>
+      <main-title title-name="Accounting" />
       <b-row class="ml-1 mr-1">
         <b-col cols="12">
           <b-card no-body>
-            <AccountingTabs class="content-max-height"/>
+            <AccountingTabs class="content-max-height" />
           </b-card>
         </b-col>
       </b-row>
       <div class="bottom mr-2">
         <b-button variant="outline-light" to="/admin">
-          <b-icon-gear/>
+          <b-icon-gear />
           ADMIN
         </b-button>
       </div>
     </div>
     <div v-else>
-      <NavbarAdminMobile title="Accounting"/>
+      <NavbarAdminMobile title="Accounting" />
       <b-card no-body>
-        <AccountingTabs/>
+        <AccountingTabs />
       </b-card>
     </div>
   </div>
 </template>
 
 <script>
-import { BooksysBrowser } from '@/libs/browser';
-import NavbarAdminMobile from '@/components/NavbarAdminMobile';
-import AccountingTabs from '@/components/AccountingTabs';
-import MainTitle from '@/components/MainTitle';
-import {
-  BRow,
-  BCol,
-  BCard,
-  BButton,
-  BIconGear
-} from 'bootstrap-vue';
+import { BooksysBrowser } from "@/libs/browser";
+import NavbarAdminMobile from "@/components/NavbarAdminMobile";
+import AccountingTabs from "@/components/AccountingTabs";
+import MainTitle from "@/components/MainTitle";
+import { BRow, BCol, BCard, BButton, BIconGear } from "bootstrap-vue";
 
 export default {
-  name: 'Accounting',
+  name: "Accounting",
   components: {
     NavbarAdminMobile,
     MainTitle,
@@ -48,20 +42,20 @@ export default {
     BCol,
     BCard,
     BButton,
-    BIconGear
+    BIconGear,
   },
   computed: {
     isDesktop: function () {
-      return !BooksysBrowser.isMobile()
-    }
-  }
-}
+      return !BooksysBrowser.isMobile();
+    },
+  },
+};
 </script>
 
 <style>
-  .content-max-height {
-    min-height: 480px;
-    max-height: 480px;
-    overflow-y: scroll;
-  }
+.content-max-height {
+  min-height: 480px;
+  max-height: 480px;
+  overflow-y: scroll;
+}
 </style>

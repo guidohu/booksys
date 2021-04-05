@@ -1,10 +1,10 @@
 <template>
   <b-form-group
-    id="input-group-engine-hour-format"
-    label="Engine Hour Format*"
-    label-for="input-engine-hour-format"
+    id="input-group-fuel-payment-type-selector"
+    label="Fuel Payment*"
+    label-for="input-fuel-payment-type-selector"
     label-cols="3"
-    description="select the format your engine hour display uses"
+    description="select between direct payment and credited payment where you add payments for fuel in the payments section separately"
   >
     <b-form-select v-model="formSelected" :options="options"></b-form-select>
   </b-form-group>
@@ -14,7 +14,7 @@
 import { BFormGroup, BFormSelect } from "bootstrap-vue";
 
 export default {
-  name: "EngineHourFormat",
+  name: "FuelPaymentTypeSelector",
   components: {
     BFormGroup,
     BFormSelect,
@@ -22,10 +22,10 @@ export default {
   props: ["selected"],
   data() {
     return {
-      formSelected: "hh.h",
+      formSelected: "instant",
       options: [
-        { value: "hh.h", text: "hh.h  - such as 9.7" },
-        { value: "hh:mm", text: "hh:mm - such as 9:42" },
+        { value: "instant", text: "pay directly" },
+        { value: "billed", text: "pay by bill" },
       ],
     };
   },
@@ -40,12 +40,12 @@ export default {
   methods: {
     setFormSelected: function (format) {
       if (format == null) {
-        console.log("no default engine hour format specified");
-        this.formSelected = "hh.h";
-      } else if (format == "hh.h" || format == "hh:mm") {
+        console.log("no default payment type specified");
+        this.formSelected = "instant";
+      } else if (format == "instant" || format == "billed") {
         this.formSelected = format;
       } else {
-        this.formSelected = "hh.h";
+        this.formSelected = "instant";
       }
     },
   },

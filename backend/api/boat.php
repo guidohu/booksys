@@ -340,19 +340,28 @@
             $max_hours = $res[0]['max_hours'];
         }
 
+        // handle the fuel payment type
+        // note: either we pay instantly -> contributes_to_balance = 1
+        //       or we pay when we get a bill -> contributes_to_balance = 0
+        $contributes_to_balance = 1;
+        if($configuration->fuel_payment_type == "billed"){
+            $contributes_to_balance = 0;
+        }
+
         // create a new entry
         $date = new DateTime();
         $query = "INSERT INTO boat_fuel
-                (timestamp, engine_hours, liters, cost_chf, user_id)
+                (timestamp, engine_hours, liters, cost_chf, user_id, contributes_to_balance)
                 VALUES
-                (?,?,?,?,?);";
+                (?,?,?,?,?, ?);";
         $db->prepare($query);
-        $db->bind_param('sdddi',
+        $db->bind_param('sdddii',
             $date->format('Y-m-d H:i:s'),
             sprintf('%.5f', $post_data->engine_hours),
             sprintf('%.3f', $post_data->liters),
             sprintf('%.3f', $post_data->cost),
-            $post_data->user_id
+            $post_data->user_id,
+            $contributes_to_balance
         );
         if(!$db->execute()){
             $db->disconnect();

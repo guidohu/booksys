@@ -1,8 +1,6 @@
 <template>
   <b-card no-body class="text-left">
-    <b-card-header>
-      Condition Info
-    </b-card-header>
+    <b-card-header> Condition Info </b-card-header>
     <b-card-body>
       <b-row>
         <b-col cols="5">
@@ -27,7 +25,7 @@
 </template>
 
 <script>
-import * as dayjs from 'dayjs';
+import * as dayjs from "dayjs";
 import {
   BCard,
   BCardHeader,
@@ -35,11 +33,11 @@ import {
   BRow,
   BIconBrightnessAltLowFill,
   BIconBrightnessAltHigh,
-  BCol
-} from 'bootstrap-vue';
+  BCol,
+} from "bootstrap-vue";
 
 export default {
-  name: 'ConditionInfoCard',
+  name: "ConditionInfoCard",
   components: {
     BCard,
     BCardHeader,
@@ -47,24 +45,22 @@ export default {
     BRow,
     BCol,
     BIconBrightnessAltLowFill,
-    BIconBrightnessAltHigh
+    BIconBrightnessAltHigh,
   },
-  props: [ 
-    'sunrise',
-    'sunset' ],
+  props: ["sunrise", "sunset"],
   computed: {
-    sunriseString: function(){
-      if(this.sunrise == null){
+    sunriseString: function () {
+      if (this.sunrise == null) {
         return "n/a";
       }
       return dayjs(this.sunrise).format("HH:mm");
     },
-    sunsetString: function(){
-      if(this.sunset == null){
+    sunsetString: function () {
+      if (this.sunset == null) {
         return "n/a";
       }
       return dayjs(this.sunset).format("HH:mm");
-    }
-  }
-}
+    },
+  },
+};
 </script>

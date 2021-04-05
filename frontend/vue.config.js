@@ -1,13 +1,13 @@
 // const path = require('path');
 
 module.exports = {
-  outputDir: 'dist',
-  publicPath: '/',
+  outputDir: "dist",
+  publicPath: "/",
   configureWebpack: {
     mode: "production",
     optimization: {
       splitChunks: {
-        chunks: 'all',
+        chunks: "all",
         cacheGroups: {
           vue: {
             test: /[\\/]node_modules[\\/]vue/,
@@ -39,16 +39,16 @@ module.exports = {
             test: /[\\/]src[\\/]components[\\/]/,
             chunks: "all",
             minSize: 0,
-            reuseExistingChunk: true
+            reuseExistingChunk: true,
           },
           default: {
             chunks: "all",
             minChunks: 2,
-            reuseExistingChunk: true
-          }
-        }
-      }
-    }
+            reuseExistingChunk: true,
+          },
+        },
+      },
+    },
   },
   pwa: {
     manifestOptions: {
@@ -72,11 +72,11 @@ module.exports = {
     appleMobileWebAppStatusBarStyle: "black",
     iconPaths: {
       maskicon: null,
-      favicon32: 'img/icons/favicon-32x32.png',
-      favicon16: 'img/icons/favicon-16x16.png',
-      appleTouchIcon: 'img/icons/apple-touch-icon-512x512.png',
-      msTileImage: 'img/icons/tile150x150.png'
+      favicon32: "img/icons/favicon-32x32.png",
+      favicon16: "img/icons/favicon-16x16.png",
+      appleTouchIcon: "img/icons/apple-touch-icon-512x512.png",
+      msTileImage: "img/icons/tile150x150.png",
     },
     workboxPluginMode: "GenerateSW",
-  }
-}
+  },
+};

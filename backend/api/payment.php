@@ -91,8 +91,8 @@
                      UNION ALL
                      SELECT 2 as tbl, b.id, b.user_id, 0 as type_id,
                             b.timestamp, b.cost_chf as amount, 
-							CONCAT(b.liters, 'L Tanken') as comment
-                     FROM boat_fuel b
+							CONCAT(b.liters, 'L fuel') as comment
+                     FROM boat_fuel b WHERE contributes_to_balance = 1
                     ) as acc, user u, expenditure_type et 
                   WHERE (u.id = acc.user_id OR acc.user_id = 0)
                   AND acc.type_id = et.id " . $year_constraint . "
@@ -138,7 +138,7 @@
 		}elseif($post_data->table_id){
 			$table_name = "boat_fuel";
 		}else{
-			error_log("api/payment: illegal table_id");
+			error_log("api/payment: invalid table_id");
 			return Status::errorStatus("The provided table_id is not a valid one.");
 		}
 		
@@ -213,7 +213,7 @@
 		          FROM
 				  ( SELECT coalesce(sum(e.amount_chf),0) as tot FROM expenditure e WHERE year(e.timestamp) = $year
 				    UNION ALL
-					SELECT coalesce(sum(b.cost_chf), 0) as tot FROM boat_fuel b WHERE year(b.timestamp) = $year
+					SELECT coalesce(sum(b.cost_chf), 0) as tot FROM boat_fuel b WHERE year(b.timestamp) = $year AND b.contributes_to_balance = 1
 				  ) as t";
 			$res = $db->fetch_data_hash($query);
 			$statistic['total_expenditure_selected_year'] = $res[0]['sum'];
@@ -226,7 +226,7 @@
 		          FROM
 				  ( SELECT coalesce(sum(e.amount_chf),0) as tot FROM expenditure e WHERE e.type_id <> 8
 				    UNION ALL
-					SELECT coalesce(sum(b.cost_chf), 0) as tot FROM boat_fuel b
+					SELECT coalesce(sum(b.cost_chf), 0) as tot FROM boat_fuel b WHERE b.contributes_to_balance = 1
 				  ) as t";
 		$res = $db->fetch_data_hash($query);
 		$statistic['total_expenditure_no_refunds'] = $res[0]['sum'];
@@ -237,7 +237,7 @@
 		          FROM
 				  ( SELECT coalesce(sum(e.amount_chf),0) as tot FROM expenditure e WHERE e.type_id <> 8 AND year(e.timestamp) = $year
 				    UNION ALL
-					SELECT coalesce(sum(b.cost_chf), 0) as tot FROM boat_fuel b WHERE year(b.timestamp) = $year
+					SELECT coalesce(sum(b.cost_chf), 0) as tot FROM boat_fuel b WHERE year(b.timestamp) = $year AND b.contributes_to_balance = 1
 				  ) as t";
 			$res = $db->fetch_data_hash($query);
 			$statistic['total_expenditure_selected_year_no_refunds'] = $res[0]['sum'];

@@ -2,9 +2,9 @@
   <b-container float class="text-left">
     <b-row>
       <b-col cols="12">
-        <WarningBox v-if="errors.length > 0" :errors="errors"/>
+        <WarningBox v-if="errors.length > 0" :errors="errors" />
         <b-form @submit="add">
-          <engine-hours 
+          <engine-hours
             label="Engine Hrs"
             v-model="form.engineHours"
             :display-format="getEngineHourFormat"
@@ -28,7 +28,9 @@
           </b-form-group>
           <b-row class="text-right">
             <b-col cols="9" offset="3">
-              <b-button block variant="outline-info" size="sm" v-on:click="add">Add</b-button>
+              <b-button block variant="outline-info" size="sm" v-on:click="add"
+                >Add</b-button
+              >
             </b-col>
           </b-row>
         </b-form>
@@ -38,9 +40,9 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
-import WarningBox from '@/components/WarningBox';
-import EngineHours from '@/components/forms/inputs/EngineHours';
+import { mapActions, mapGetters } from "vuex";
+import WarningBox from "@/components/WarningBox";
+import EngineHours from "@/components/forms/inputs/EngineHours";
 import {
   BContainer,
   BRow,
@@ -49,8 +51,8 @@ import {
   BFormGroup,
   BInputGroup,
   BFormTextarea,
-  BButton
-} from 'bootstrap-vue';
+  BButton,
+} from "bootstrap-vue";
 
 export default {
   name: "MaintenanceLogForm",
@@ -64,54 +66,46 @@ export default {
     BFormGroup,
     BInputGroup,
     BFormTextarea,
-    BButton
+    BButton,
   },
   data() {
     return {
       errors: [],
       form: {
         engineHours: null,
-        description: null
-      }
-    }
+        description: null,
+      },
+    };
   },
   computed: {
-    ...mapGetters('login', [
-      'userInfo'
-    ]),
-    ...mapGetters('configuration',[
-      'getEngineHourFormat'
-    ])
+    ...mapGetters("login", ["userInfo"]),
+    ...mapGetters("configuration", ["getEngineHourFormat"]),
   },
   methods: {
-    add: function() {
+    add: function () {
       const entry = {
         user_id: this.userInfo.id,
         engine_hours: this.form.engineHours,
-        description: this.form.description
+        description: this.form.description,
       };
       this.addMaintenanceEntry(entry)
-      .then(() => {
-        this.resetForm();
-      })
-      .catch((errors) => this.errors = errors);
+        .then(() => {
+          this.resetForm();
+        })
+        .catch((errors) => (this.errors = errors));
     },
-    resetForm: function() {
+    resetForm: function () {
       this.form = {
         engineHours: null,
-        description: null
+        description: null,
       };
       this.errors = [];
     },
-    ...mapActions('boat', [
-      'addMaintenanceEntry'
-    ]),
-    ...mapActions('configuration',[
-      'queryConfiguration'
-    ]),
+    ...mapActions("boat", ["addMaintenanceEntry"]),
+    ...mapActions("configuration", ["queryConfiguration"]),
   },
   created() {
     this.queryConfiguration();
-  }
-}
+  },
+};
 </script>

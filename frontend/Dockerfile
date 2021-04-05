@@ -1,4 +1,4 @@
-FROM node:14 as build-stage
+FROM node:15 as build-stage
 
 # copy project configuration
 # COPY  package.json /home/node/app/
@@ -13,12 +13,10 @@ FROM node:14 as build-stage
 WORKDIR /home/node/app
 COPY package*.json     ./
 COPY babel.config.js   ./
-# COPY webpack.config.js ./
 COPY vue.config.js     ./
 COPY src               ./src
 COPY public            ./public
 RUN npm install
-RUN ls -lah
 RUN npm run build
 
 # # setup vue build environment for the app
@@ -31,7 +29,7 @@ RUN npm run build
 
 
 
-FROM nginx as production-stage
+FROM nginx:alpine as production-stage
 RUN mkdir /app
 COPY --from=build-stage /home/node/app/dist /app
 COPY nginx.conf /etc/nginx/nginx.conf

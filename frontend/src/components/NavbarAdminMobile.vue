@@ -1,6 +1,6 @@
 <template>
   <b-navbar fixed="top" toggleable="lg" type="light" variant="light">
-    <b-navbar-brand href="#">{{title}}</b-navbar-brand>
+    <b-navbar-brand href="#">{{ title }}</b-navbar-brand>
 
     <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
@@ -8,19 +8,19 @@
       <b-navbar-nav>
         <b-nav-item href="#">
           <router-link to="/dashboard">
-            <b-icon-house/>
+            <b-icon-house />
             Home
           </router-link>
         </b-nav-item>
         <b-nav-item href="#">
           <router-link to="/admin">
-            <b-icon-gear/>
+            <b-icon-gear />
             Administrator Menu
           </router-link>
         </b-nav-item>
         <b-nav-item href="#">
           <router-link to="/logout">
-            <b-icon-box-arrow-right/>
+            <b-icon-box-arrow-right />
             Logout
           </router-link>
         </b-nav-item>
@@ -39,11 +39,11 @@ import {
   BNavItem,
   BIconHouse,
   BIconGear,
-  BIconBoxArrowRight
-} from 'bootstrap-vue';
+  BIconBoxArrowRight,
+} from "bootstrap-vue";
 
 export default {
-  name: 'NavbarAdminMobile',
+  name: "NavbarAdminMobile",
   components: {
     BNavbar,
     BNavbarBrand,
@@ -53,8 +53,8 @@ export default {
     BNavItem,
     BIconHouse,
     BIconGear,
-    BIconBoxArrowRight
+    BIconBoxArrowRight,
   },
-  props: ['title']
-}
+  props: ["title"],
+};
 </script>

@@ -1,229 +1,243 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
-import { loadStoreModules, store } from '@/store';
+import Vue from "vue";
+import VueRouter from "vue-router";
+import { loadStoreModules, store } from "@/store";
 
 // Lazy import of all the Views used by the router
-const Login     = () => import(/* webpackChunkName: "login" */ '@/views/Login');
-const Logout    = () => import(/* webpackChunkName: "logout" */ '@/views/Logout');
-const SignUp    = () => import(/* webpackChunkName: "signup" */ '@/views/SignUp');
-const Dashboard = () => import(/* webpackChunkName: "dashboard" */ '@/views/Dashboard');
-const Account   = () => import(/* webpackChunkName: "account" */ '@/views/Account');
-const Info      = () => import(/* webpackChunkName: "info" */ '@/views/Info');
-const Schedule  = () => import(/* webpackChunkName: "schedule" */ '@/views/Schedule');
-const Today     = () => import(/* webpackChunkName: "today" */ '@/views/Today');
-const Calendar  = () => import(/* webpackChunkName: "calendar" */ '@/views/Calendar');
-const Boat      = () => import(/* webpackChunkName: "boat" */ '@/views/Boat');
-const Ride      = () => import(/* webpackChunkName: "ride" */ '@/views/Ride');
-const Watch     = () => import(/* webpackChunkName: "watch" */ '@/views/Watch');
-const Admin     = () => import(/* webpackChunkName: "admin" */ '@/views/Admin');
-const Users     = () => import(/* webpackChunkName: "users" */ '@/views/admin/Users');
-const Accounting = () => import(/* webpackChunkName: "accounting" */ '@/views/admin/Accounting');
-const Settings  = () => import(/* webpackChunkName: "settings" */ '@/views/admin/Settings');
-const Logs      = () => import(/* webpackChunkName: "logs" */ '@/views/admin/Logs');
-const PasswordReset = () => import(/* webpackChunkName: "password-reset" */ '@/views/PasswordReset');
-const Setup     = () => import(/* webpackChunkName: "setup" */ '@/views/Setup');
+const Login = () => import(/* webpackChunkName: "login" */ "@/views/Login");
+const Logout = () => import(/* webpackChunkName: "logout" */ "@/views/Logout");
+const SignUp = () => import(/* webpackChunkName: "signup" */ "@/views/SignUp");
+const Dashboard = () =>
+  import(/* webpackChunkName: "dashboard" */ "@/views/Dashboard");
+const Account = () =>
+  import(/* webpackChunkName: "account" */ "@/views/Account");
+const Info = () => import(/* webpackChunkName: "info" */ "@/views/Info");
+const Schedule = () =>
+  import(/* webpackChunkName: "schedule" */ "@/views/Schedule");
+const Today = () => import(/* webpackChunkName: "today" */ "@/views/Today");
+const Calendar = () =>
+  import(/* webpackChunkName: "calendar" */ "@/views/Calendar");
+const Boat = () => import(/* webpackChunkName: "boat" */ "@/views/Boat");
+const Ride = () => import(/* webpackChunkName: "ride" */ "@/views/Ride");
+const Watch = () => import(/* webpackChunkName: "watch" */ "@/views/Watch");
+const Admin = () => import(/* webpackChunkName: "admin" */ "@/views/Admin");
+const Users = () =>
+  import(/* webpackChunkName: "users" */ "@/views/admin/Users");
+const Accounting = () =>
+  import(/* webpackChunkName: "accounting" */ "@/views/admin/Accounting");
+const Settings = () =>
+  import(/* webpackChunkName: "settings" */ "@/views/admin/Settings");
+const Logs = () => import(/* webpackChunkName: "logs" */ "@/views/admin/Logs");
+const PasswordReset = () =>
+  import(/* webpackChunkName: "password-reset" */ "@/views/PasswordReset");
+const Setup = () => import(/* webpackChunkName: "setup" */ "@/views/Setup");
 
 Vue.use(VueRouter);
 
 const loginEnforced = (to, from, next) => {
-  if(!store.state.loginStatus.isLoggedIn){
+  if (!store.state.loginStatus.isLoggedIn) {
     console.log("Login required to access this route");
     console.log("Navigate from:", from, "To:", to);
-    next({ name: "Login", query: { target: to.fullPath }});
+    next({ name: "Login", query: { target: to.fullPath } });
     return false;
-  }else{
+  } else {
     return true;
   }
-}
+};
 
 const routes = [
   {
-    path: '/',
-    redirect: '/login'
+    path: "/",
+    redirect: "/login",
   },
   {
-    path: '/setup',
-    name: 'Setup',
-    component: Setup
+    path: "/setup",
+    name: "Setup",
+    component: Setup,
   },
   {
-    path: '/login',
-    name: 'Login',
+    path: "/login",
+    name: "Login",
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['login', 'configuration'], next);
+      loadStoreModules(["login", "configuration"], next);
     },
-    component: Login
+    component: Login,
   },
   {
-    path: '/logout',
-    name: 'Logout',
+    path: "/logout",
+    name: "Logout",
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['login'], next);
+      loadStoreModules(["login"], next);
     },
-    component: Logout
+    component: Logout,
   },
   {
-    path: '/signup',
-    name: 'SignUp',
+    path: "/signup",
+    name: "SignUp",
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['configuration'], next);
+      loadStoreModules(["configuration"], next);
     },
-    component: SignUp
+    component: SignUp,
   },
   {
-    path: '/password/reset',
-    name: 'PasswordReset',
+    path: "/password/reset",
+    name: "PasswordReset",
     beforeEnter: (to, from, next) => {
-      loadStoreModules(['configuration'], next);
+      loadStoreModules(["configuration"], next);
     },
-    component: PasswordReset
+    component: PasswordReset,
   },
   {
-    path: '/today',
-    name: 'Today',
+    path: "/today",
+    name: "Today",
     beforeEnter: (to, from, next) => {
-      if(loginEnforced(to, from, next)){
-        loadStoreModules(['configuration', 'sessions', 'user'], next);
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["configuration", "sessions", "user"], next);
       }
     },
-    component: Today
+    component: Today,
   },
   {
-    path: '/dashboard',
-    name: 'Dashboard',
+    path: "/dashboard",
+    name: "Dashboard",
     beforeEnter: (to, from, next) => {
-      if(loginEnforced(to, from, next)){
-        loadStoreModules(['sessions', 'configuration', 'login'], next);
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["sessions", "configuration", "login"], next);
       }
     },
-    component: Dashboard
+    component: Dashboard,
   },
   {
-    path: '/account',
-    name: 'Account',
+    path: "/account",
+    name: "Account",
     beforeEnter: (to, from, next) => {
-      if(loginEnforced(to, from, next)){
-        loadStoreModules(['user', 'configuration', 'login'], next);
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["user", "configuration", "login"], next);
       }
     },
-    component: Account
+    component: Account,
   },
   {
-    path: '/info',
-    name: 'Info',
+    path: "/info",
+    name: "Info",
     beforeEnter: (to, from, next) => {
-      if(loginEnforced(to, from, next)){
-        loadStoreModules(['configuration'], next);
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["configuration"], next);
       }
     },
-    component: Info
+    component: Info,
   },
   {
-    path: '/schedule',
-    name: 'Schedule',
+    path: "/schedule",
+    name: "Schedule",
     beforeEnter: (to, from, next) => {
-      if(loginEnforced(to, from, next)){
-        loadStoreModules(['configuration', 'user'], next);
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["configuration", "user"], next);
       }
     },
-    component: Schedule
+    component: Schedule,
   },
   {
-    path: '/calendar',
-    name: 'Calendar',
+    path: "/calendar",
+    name: "Calendar",
     beforeEnter: (to, from, next) => {
-      if(loginEnforced(to, from, next)){
-       loadStoreModules(['sessions', 'configuration'], next);
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["sessions", "configuration"], next);
       }
     },
-    component: Calendar
+    component: Calendar,
   },
   {
-    path: '/boat',
-    name: 'Boat',
+    path: "/boat",
+    name: "Boat",
     beforeEnter: (to, from, next) => {
-      if(loginEnforced(to, from, next)){
-        loadStoreModules(['boat', 'configuration', 'login'], next);
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["boat", "configuration", "login"], next);
       }
     },
-    component: Boat
+    component: Boat,
   },
   {
-    path: '/ride',
-    name: 'Ride',
+    path: "/ride",
+    name: "Ride",
     beforeEnter: (to, from, next) => {
-      if(loginEnforced(to, from, next)){
-        loadStoreModules(['sessions', 'configuration', 'stopwatch', 'user'], next);
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(
+          ["sessions", "configuration", "stopwatch", "user"],
+          next
+        );
       }
     },
-    component: Ride
+    component: Ride,
   },
   {
-    path: '/watch',
-    name: 'Watch',
+    path: "/watch",
+    name: "Watch",
     beforeEnter: (to, from, next) => {
-      if(loginEnforced(to, from, next)){
-        loadStoreModules(['sessions', 'configuration', 'stopwatch', 'heats'], next);
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(
+          ["sessions", "configuration", "stopwatch", "heats"],
+          next
+        );
       }
     },
-    component: Watch
+    component: Watch,
   },
   {
-    path: '/admin',
-    name: 'Admin',
+    path: "/admin",
+    name: "Admin",
     component: Admin,
     beforeEnter: (to, from, next) => {
-      if(loginEnforced(to, from, next)){
+      if (loginEnforced(to, from, next)) {
         next();
       }
-    }
+    },
   },
   {
-    path: '/users',
-    name: 'Users',
+    path: "/users",
+    name: "Users",
     beforeEnter: (to, from, next) => {
-      if(loginEnforced(to, from, next)){
-        loadStoreModules(['user', 'configuration'], next);
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["user", "configuration"], next);
       }
     },
-    component: Users
+    component: Users,
   },
   {
-    path: '/accounting',
-    name: 'Accounting',
+    path: "/accounting",
+    name: "Accounting",
     beforeEnter: (to, from, next) => {
-      if(loginEnforced(to, from, next)){
-        loadStoreModules(['configuration', 'accounting', 'user' ], next);
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["configuration", "accounting", "user"], next);
       }
     },
-    component: Accounting
+    component: Accounting,
   },
   {
-    path: '/settings',
-    name: 'Settings',
+    path: "/settings",
+    name: "Settings",
     beforeEnter: (to, from, next) => {
-      if(loginEnforced(to, from, next)){
-        loadStoreModules(['configuration'], next);
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["configuration"], next);
       }
     },
-    component: Settings
+    component: Settings,
   },
   {
-    path: '/logs',
-    name: 'Logs',
+    path: "/logs",
+    name: "Logs",
     beforeEnter: (to, from, next) => {
-      if(loginEnforced(to, from, next)){
-        loadStoreModules(['log'], next);
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["log"], next);
       }
     },
-    component: Logs
-  }
-]
+    component: Logs,
+  },
+];
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: "history",
   base: process.env.BASE_URL,
-  routes
-})
+  routes,
+});
 
-export default router
+export default router;

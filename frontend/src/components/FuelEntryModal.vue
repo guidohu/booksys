@@ -9,7 +9,7 @@
     <b-row v-if="errors.length">
       <b-col cols="1" class="d-none d-sm-block"></b-col>
       <b-col cols="12" sm="10">
-        <WarningBox :errors="errors"/>
+        <WarningBox :errors="errors" />
       </b-col>
       <b-col cols="1" class="d-none d-sm-block"></b-col>
     </b-row>
@@ -65,9 +65,7 @@
                 placeholder=""
                 disabled
               />
-              <b-input-group-append is-text>
-                ltrs/h
-              </b-input-group-append>
+              <b-input-group-append is-text> ltrs/h </b-input-group-append>
             </b-input-group>
           </b-form-group>
           <engine-hours
@@ -89,9 +87,7 @@
                 type="text"
                 placeholder=""
               />
-              <b-input-group-append is-text>
-                ltrs
-              </b-input-group-append>
+              <b-input-group-append is-text> ltrs </b-input-group-append>
             </b-input-group>
           </b-form-group>
           <b-form-group
@@ -111,7 +107,7 @@
                 v-on:change="costChange"
               />
               <b-input-group-append is-text>
-                {{getCurrency}}
+                {{ getCurrency }}
               </b-input-group-append>
             </b-input-group>
           </b-form-group>
@@ -132,7 +128,7 @@
                 v-on:change="costGrossChange"
               />
               <b-input-group-append is-text>
-                {{getCurrency}}
+                {{ getCurrency }}
               </b-input-group-append>
             </b-input-group>
           </b-form-group>
@@ -142,13 +138,13 @@
             label-for="discount-input"
             label-cols="3"
           >
-            <toggle-button 
+            <toggle-button
               id="discount-input"
               :value="form.isDiscounted"
               @change="toggleDiscount"
               color="#17a2b8"
               :width="toggleWidth"
-              :labels="{checked: 'Discount', unchecked: 'No Discount'}"
+              :labels="{ checked: 'Discount', unchecked: 'No Discount' }"
             />
           </b-form-group>
           <b-form-group
@@ -167,7 +163,7 @@
                 placeholder=""
               />
               <b-input-group-append is-text>
-                {{getCurrency}}
+                {{ getCurrency }}
               </b-input-group-append>
             </b-input-group>
           </b-form-group>
@@ -177,11 +173,16 @@
     </b-form>
     <div slot="modal-footer">
       <b-button type="button" variant="outline-info" v-on:click="save">
-        <b-icon-check/>
+        <b-icon-check />
         Save
       </b-button>
-      <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x/>
+      <b-button
+        class="ml-1"
+        type="button"
+        variant="outline-danger"
+        v-on:click="close"
+      >
+        <b-icon-x />
         Cancel
       </b-button>
     </div>
@@ -189,16 +190,16 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
-import { ToggleButton } from 'vue-js-toggle-button';
-import WarningBox from '@/components/WarningBox';
-import EngineHours from '@/components/forms/inputs/EngineHours';
-import { 
+import { mapActions, mapGetters } from "vuex";
+import { ToggleButton } from "vue-js-toggle-button";
+import WarningBox from "@/components/WarningBox";
+import EngineHours from "@/components/forms/inputs/EngineHours";
+import {
   formatCurrency,
   formatFuelConsumption,
-  formatFuel
-} from '@/libs/formatters';
-import * as dayjs from 'dayjs';
+  formatFuel,
+} from "@/libs/formatters";
+import * as dayjs from "dayjs";
 import {
   BModal,
   BCol,
@@ -210,12 +211,12 @@ import {
   BInputGroupAppend,
   BButton,
   BIconCheck,
-  BIconX
-} from 'bootstrap-vue';
+  BIconX,
+} from "bootstrap-vue";
 
 export default {
-  name: 'fuelEntryModal',
-  props: [ 'fuelEntry', 'visible' ],
+  name: "fuelEntryModal",
+  props: ["fuelEntry", "visible"],
   components: {
     WarningBox,
     EngineHours,
@@ -230,77 +231,76 @@ export default {
     BInputGroupAppend,
     BButton,
     BIconCheck,
-    BIconX
+    BIconX,
   },
   data() {
     return {
       errors: [],
       form: {
-        date: null
-      }
-    }
+        date: null,
+      },
+    };
   },
   computed: {
-    toggleWidth: function() {
+    toggleWidth: function () {
       return 100;
     },
-    ...mapGetters('configuration',[
-      'getCurrency',
-      'getEngineHourFormat'
-    ])
+    ...mapGetters("configuration", ["getCurrency", "getEngineHourFormat"]),
   },
   watch: {
-    fuelEntry: function(newValue){
+    fuelEntry: function (newValue) {
       this.setFormContent(newValue);
-    }
+    },
   },
   methods: {
-    setFormContent: function(entry){
-      if(entry != null){
+    setFormContent: function (entry) {
+      if (entry != null) {
         // apply some logic depending on the backend data to get the right values for
         // net/gross and cost
-        const costGross = (entry.cost_brutto == null) ? entry.cost : entry.cost_brutto;
-        const costNet   = (entry.cost_brutto == null) ? null : entry.cost;
-        const cost      = (entry.cost_brutto == null) ? entry.cost : entry.cost_brutto;
+        const costGross =
+          entry.cost_brutto == null ? entry.cost : entry.cost_brutto;
+        const costNet = entry.cost_brutto == null ? null : entry.cost;
+        const cost = entry.cost_brutto == null ? entry.cost : entry.cost_brutto;
 
         this.form = {
           id: entry.id,
-          date: dayjs(entry.timestamp*1000).format("DD.MM.YYYY HH:mm"),
-          isDiscounted: (entry.cost != null && entry.cost_brutto != null) ? true : false,
+          date: dayjs(entry.timestamp * 1000).format("DD.MM.YYYY HH:mm"),
+          isDiscounted:
+            entry.cost != null && entry.cost_brutto != null ? true : false,
           cost: formatCurrency(cost, null),
           costGross: formatCurrency(costGross, null),
           costNet: formatCurrency(costNet, null),
           engineHours: entry.engine_hours,
           fuel: formatFuel(entry.liters),
           driver: entry.user_first_name,
-          averageFuelPerHour: formatFuelConsumption(entry.avg_liters_per_hour)
+          averageFuelPerHour: formatFuelConsumption(entry.avg_liters_per_hour),
         };
       }
     },
-    toggleDiscount: function(){
+    toggleDiscount: function () {
       this.form.isDiscounted = !this.form.isDiscounted;
     },
-    costChange: function() {
+    costChange: function () {
       this.form.costGross = this.form.cost;
     },
-    costGrossChange: function() {
+    costGrossChange: function () {
       this.form.cost = this.form.costGross;
     },
-    close: function(){
-      this.$emit('update:visible', false);
+    close: function () {
+      this.$emit("update:visible", false);
     },
-    save: function(){
-      if(this.form.isDiscounted && this.form.costNet == null){
-        this.errors = [ "Cost (net) cannot be empty if you select a discount."];
+    save: function () {
+      if (this.form.isDiscounted && this.form.costNet == null) {
+        this.errors = ["Cost (net) cannot be empty if you select a discount."];
         return;
       }
 
       let cost = 0;
       let costBrutto = 0;
-      if(this.form.isDiscounted){
+      if (this.form.isDiscounted) {
         cost = this.form.costNet;
         costBrutto = this.form.costGross;
-      }else{
+      } else {
         cost = this.form.cost;
         costBrutto = null;
       }
@@ -310,23 +310,19 @@ export default {
         engine_hours: this.form.engineHours,
         liters: this.form.fuel,
         cost: cost,
-        cost_brutto: costBrutto
+        cost_brutto: costBrutto,
       };
 
       this.updateFuelEntry(updatedEntry)
-      .then(() => this.close())
-      .catch((errors) => this.errors = errors);
+        .then(() => this.close())
+        .catch((errors) => (this.errors = errors));
     },
-    ...mapActions('boat', [
-      'updateFuelEntry'
-    ]),
-    ...mapActions('configuration', [
-      'queryConfiguration'
-    ])
+    ...mapActions("boat", ["updateFuelEntry"]),
+    ...mapActions("configuration", ["queryConfiguration"]),
   },
   created() {
     this.setFormContent(this.fuelEntry);
     this.queryConfiguration();
-  }
-}
+  },
+};
 </script>

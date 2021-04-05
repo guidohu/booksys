@@ -1,12 +1,12 @@
 import Sessions from "@/api/sessions";
-import * as dayjs from 'dayjs';
+import * as dayjs from "dayjs";
 
 const state = () => ({
   sessions: null,
   sessionsCalendar: null,
   session: null,
-  sessionConditionInfo: null
-})
+  sessionConditionInfo: null,
+});
 
 const getters = {
   getSession: (state) => {
@@ -22,8 +22,8 @@ const getters = {
   },
   getSessionsCalendar: (state) => {
     return state.sessionsCalendar;
-  }
-}
+  },
+};
 
 const actions = {
   querySessionsCalendar({ commit }, month) {
@@ -31,55 +31,59 @@ const actions = {
 
     return new Promise((resolve, reject) => {
       Sessions.getSessionsCalendar(month)
-      .then((sessions) => {
-        commit('setSessionsCalendar', { sessions: sessions });
-        resolve();
-      })
-      .catch(error => {
-        commit('setSessionsCalendar', null);
-        reject(error);
-      })
-    })    
+        .then((sessions) => {
+          commit("setSessionsCalendar", { sessions: sessions });
+          resolve();
+        })
+        .catch((error) => {
+          commit("setSessionsCalendar", null);
+          reject(error);
+        });
+    });
   },
   querySessions({ commit, state, rootState }, time) {
     console.log("Trigger querySessions with timespan", time);
-    if(time == null && state.sessions == null){
+    if (time == null && state.sessions == null) {
       console.log("vuex/querySessions: no time window provided, do nothing");
       return;
     }
 
     // do a reload in case we already have sessions loaded
-    if(time == null && state.sessions != null){
+    if (time == null && state.sessions != null) {
       time = {
         start: dayjs(state.sessions.window_start).format(),
-        end: dayjs(state.sessions.window_end).format()
-      }
+        end: dayjs(state.sessions.window_end).format(),
+      };
     }
 
     return new Promise((resolve, reject) => {
-      Sessions.getSessions(time.start, time.end, rootState.configuration.timezone)
-      .then((sessions) => {
-        commit('setSessions', { sessions: sessions, timeWindow: time });
-        resolve();
-      })
-      .catch(error => {
-        commit('setSessions', null);
-        reject(error);
-      })
-    })
+      Sessions.getSessions(
+        time.start,
+        time.end,
+        rootState.configuration.timezone
+      )
+        .then((sessions) => {
+          commit("setSessions", { sessions: sessions, timeWindow: time });
+          resolve();
+        })
+        .catch((error) => {
+          commit("setSessions", null);
+          reject(error);
+        });
+    });
   },
   querySession({ commit }, sessionId) {
     console.log("Trigger querySession with:", sessionId);
     return new Promise((resolve, reject) => {
       Sessions.getSession(sessionId)
         .then((s) => {
-          commit('setSession', s.session);
-          commit('setSessionConditionInfo', s.metaInfo)
+          commit("setSession", s.session);
+          commit("setSessionConditionInfo", s.metaInfo);
           resolve();
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
-        })
+        });
     });
   },
   createSession({ dispatch }, sessionObj) {
@@ -87,12 +91,12 @@ const actions = {
     return new Promise((resolve, reject) => {
       Sessions.createSession(sessionObj)
         .then((response) => {
-          dispatch('querySessions');
+          dispatch("querySessions");
           resolve(response.data);
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
-        })
+        });
     });
   },
   editSession({ dispatch }, sessionObj) {
@@ -100,25 +104,25 @@ const actions = {
     return new Promise((resolve, reject) => {
       Sessions.editSession(sessionObj)
         .then((response) => {
-          dispatch('querySessions');
+          dispatch("querySessions");
           resolve(response.data);
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
-        })
+        });
     });
   },
   deleteSession({ dispatch }, sessionObj) {
     console.log("Trigger deleteSession action with", sessionObj);
-    return new Promise((resolve ,reject) => {
+    return new Promise((resolve, reject) => {
       Sessions.deleteSession(sessionObj)
         .then(() => {
-          dispatch('querySessions');
+          dispatch("querySessions");
           resolve();
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
-        })
+        });
     });
   },
   addUsersToSession({ dispatch }, data) {
@@ -126,12 +130,12 @@ const actions = {
     return new Promise((resolve, reject) => {
       Sessions.addUsersToSession(data.sessionId, data.users)
         .then(() => {
-          dispatch('querySessions');
+          dispatch("querySessions");
           resolve();
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
-        })
+        });
     });
   },
   deleteUserFromSession({ dispatch }, data) {
@@ -139,45 +143,45 @@ const actions = {
     return new Promise((resolve, reject) => {
       Sessions.deleteUserFromSession(data.sessionId, data.user)
         .then(() => {
-          dispatch('querySessions');
+          dispatch("querySessions");
           resolve();
         })
-        .catch(error => {
+        .catch((error) => {
           reject(error);
-        })
+        });
     });
   },
-}
+};
 
 const mutations = {
-  setLoadedTime (state, value){
+  setLoadedTime(state, value) {
     state.loadedTime = {
       start: value.start,
-      end: value.end
+      end: value.end,
     };
   },
-  setSessionsCalendar (state, value){
+  setSessionsCalendar(state, value) {
     state.sessionsCalendar = value.sessions;
-    console.log('sessionsCalendar set to', value.sessions);
+    console.log("sessionsCalendar set to", value.sessions);
   },
-  setSessions (state, value){
+  setSessions(state, value) {
     state.sessions = value.sessions;
-    console.log('sessions set to', value);
+    console.log("sessions set to", value);
   },
-  setSession (state, session){
+  setSession(state, session) {
     state.session = session;
-    console.log('session set to', session);
+    console.log("session set to", session);
   },
-  setSessionConditionInfo (state, info){
+  setSessionConditionInfo(state, info) {
     state.sessionConditionInfo = info;
-    console.log('sessionConditionInfo set to', info);
-  }
-}
+    console.log("sessionConditionInfo set to", info);
+  },
+};
 
 export default {
   namespaced: true,
   state,
   getters,
   actions,
-  mutations
-}
+  mutations,
+};

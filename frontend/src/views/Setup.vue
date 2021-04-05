@@ -18,19 +18,21 @@
       <b-row v-if="errors.length > 0" class="mt-4">
         <b-col cols="1" class="d-none d-sm-block"></b-col>
         <b-col cols="12" sm="10">
-          <warning-box :errors="errors"/>
+          <warning-box :errors="errors" />
         </b-col>
         <b-col cols="1" class="d-none d-sm-block"></b-col>
       </b-row>
       <!-- Database setup -->
-      <database-configuration v-if="showDbSetup" :dbConfig="dbConfig" @save="setDbSettings"/>
+      <database-configuration
+        v-if="showDbSetup"
+        :dbConfig="dbConfig"
+        @save="setDbSettings"
+      />
       <!-- Administrator setup -->
       <div v-if="showUserSetup">
         <b-row class="mb-4">
           <b-col cols="1" class="d-none d-sm-block"></b-col>
-          <b-col cols="12" sm="10">
-            Setup the Administrator Account
-          </b-col>
+          <b-col cols="12" sm="10"> Setup the Administrator Account </b-col>
           <b-col cols="1" class="d-none d-sm-block"></b-col>
         </b-row>
         <user-sign-up
@@ -44,32 +46,54 @@
         <b-col cols="1" class="d-none d-sm-block"></b-col>
         <b-col cols="12" sm="10">
           <p class="h4 mb-2">
-            <b-icon-check-circle variant="success"/>
+            <b-icon-check-circle variant="success" />
             Setup Done.
           </p>
-          <p>
-            Please go back to the login page and login.
-          </p>
+          <p>Please go back to the login page and login.</p>
         </b-col>
         <b-col cols="1" class="d-none d-sm-block"></b-col>
       </b-row>
     </b-overlay>
     <!-- Footer -->
     <div slot="modal-footer">
-      <b-button v-if="showDbSetup || showUserSetup" class="mr-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x/>
+      <b-button
+        v-if="showDbSetup || showUserSetup"
+        class="mr-1"
+        type="button"
+        variant="outline-danger"
+        v-on:click="close"
+      >
+        <b-icon-x />
         Cancel
       </b-button>
-      <b-button v-if="showDbSetup" type="button" variant="outline-info" v-on:click="setDbSettings" :disabled="isLoading">
-        <b-icon-arrow-right/>
+      <b-button
+        v-if="showDbSetup"
+        type="button"
+        variant="outline-info"
+        v-on:click="setDbSettings"
+        :disabled="isLoading"
+      >
+        <b-icon-arrow-right />
         Next
       </b-button>
-      <b-button v-if="showUserSetup" type="button" variant="outline-info" v-on:click="addAdminUser" :disabled="isLoading">
-        <b-icon-arrow-right/>
+      <b-button
+        v-if="showUserSetup"
+        type="button"
+        variant="outline-info"
+        v-on:click="addAdminUser"
+        :disabled="isLoading"
+      >
+        <b-icon-arrow-right />
         Next
       </b-button>
-      <b-button v-if="showSetupDone" class="mr-1" type="button" variant="outline-info" v-on:click="close">
-        <b-icon-check/>
+      <b-button
+        v-if="showSetupDone"
+        class="mr-1"
+        type="button"
+        variant="outline-info"
+        v-on:click="close"
+      >
+        <b-icon-check />
         Done
       </b-button>
     </div>
@@ -77,14 +101,21 @@
 </template>
 
 <script>
-import { getBackendStatus } from '@/api/backend';
-import Configuration from '@/api/configuration';
-import User from '@/api/user';
+import { getBackendStatus } from "@/api/backend";
+import Configuration from "@/api/configuration";
+import User from "@/api/user";
 
 // Lazy loaded components
-const DatabaseConfiguration = () => import(/* webpackChunkName: "database-configuration" */ '@/components/DatabaseConfiguration');
-const UserSignUp = () => import(/* webpackChunkName: "user-sign-up" */ '@/components/forms/UserSignUp');
-const WarningBox = () => import(/* webpackChunkName: "warning-box" */ '@/components/WarningBox');
+const DatabaseConfiguration = () =>
+  import(
+    /* webpackChunkName: "database-configuration" */ "@/components/DatabaseConfiguration"
+  );
+const UserSignUp = () =>
+  import(
+    /* webpackChunkName: "user-sign-up" */ "@/components/forms/UserSignUp"
+  );
+const WarningBox = () =>
+  import(/* webpackChunkName: "warning-box" */ "@/components/WarningBox");
 
 import {
   BModal,
@@ -95,8 +126,8 @@ import {
   BIconX,
   BIconArrowRight,
   BIconCheck,
-  BButton
-} from 'bootstrap-vue';
+  BButton,
+} from "bootstrap-vue";
 
 export default {
   name: "Setup",
@@ -112,9 +143,9 @@ export default {
     BIconX,
     BIconArrowRight,
     BIconCheck,
-    BButton
+    BButton,
   },
-  data(){
+  data() {
     return {
       errors: [],
       title: "Setup",
@@ -126,27 +157,27 @@ export default {
       adminUserConfig: {},
       dbSetupTitle: "Setup 1/2",
       userSetupTitle: "Setup 2/2",
-      setupDoneTitle: "Setup Done"
-    }
+      setupDoneTitle: "Setup Done",
+    };
   },
   methods: {
-    setDbSettings: function(){
+    setDbSettings: function () {
       this.isLoading = true;
 
       Configuration.setDbConfig(this.dbConfig)
-      .then(() => {
-        this.isLoading = false;
-        this.getBackendStatus();
-      })
-      .catch((errors) => {
-        this.errors = errors;
-        this.isLoading = false;
-      });
+        .then(() => {
+          this.isLoading = false;
+          this.getBackendStatus();
+        })
+        .catch((errors) => {
+          this.errors = errors;
+          this.isLoading = false;
+        });
     },
-    addAdminUser: function(){
+    addAdminUser: function () {
       // check for obvious validation errors
       const errors = this.validateAdminUser();
-      if(errors.length > 0){
+      if (errors.length > 0) {
         this.errors = errors;
         return;
       }
@@ -154,44 +185,49 @@ export default {
       this.isLoading = true;
 
       User.signUp(this.adminUserConfig)
-      .then((user) => {
-        this.errors = [];
-        this.makeUserAdmin(user.user_id)
-      })
-      .catch((errors) => {
-        this.errors = errors;
-        this.isLoading = false;
-      });
+        .then((user) => {
+          this.errors = [];
+          this.makeUserAdmin(user.user_id);
+        })
+        .catch((errors) => {
+          this.errors = errors;
+          this.isLoading = false;
+        });
     },
-    makeUserAdmin: function(userId){
+    makeUserAdmin: function (userId) {
       User.makeAdmin(userId)
-      .then(() => {
-        this.errors = [];
-        this.showDbSetup = false;
-        this.showUserSetup = false;
-        this.showSetupDone = true;
-        this.title = this.setupDoneTitle;
-        this.isLoading = false;
-      })
-      .catch((errors) => {
-        this.errors = errors;
-        this.isLoading = false;
-      });
+        .then(() => {
+          this.errors = [];
+          this.showDbSetup = false;
+          this.showUserSetup = false;
+          this.showSetupDone = true;
+          this.title = this.setupDoneTitle;
+          this.isLoading = false;
+        })
+        .catch((errors) => {
+          this.errors = errors;
+          this.isLoading = false;
+        });
     },
-    close: function() {
-      this.$refs['setupModal'].hide();
+    close: function () {
+      this.$refs["setupModal"].hide();
       this.$router.push("/login");
     },
-    validateAdminUser: function() {
+    validateAdminUser: function () {
       const errors = [];
 
-      if(this.adminUserConfig.password != this.adminUserConfig.passwordConfirm){
+      if (
+        this.adminUserConfig.password != this.adminUserConfig.passwordConfirm
+      ) {
         errors.push("Password and Password Confirmation are not identical.");
       }
-      if(this.adminUserConfig.password.length <= 8){
+      if (this.adminUserConfig.password.length <= 8) {
         errors.push("Please use a password longer than 8 characters.");
       }
-      if(this.adminUserConfig.recaptchaResponse == null && this.getRecaptchaKey){
+      if (
+        this.adminUserConfig.recaptchaResponse == null &&
+        this.getRecaptchaKey
+      ) {
         errors.push("Please tick `I'm not a robot`.");
       }
 
@@ -199,64 +235,67 @@ export default {
       const pwUpperRegex = /[A-Z]+/;
       const pwLowerRegex = /[a-z]+/;
       const pwDigitRegex = /[0-9]+/;
-      if(this.adminUserConfig.password.match(pwUpperRegex) == null){
-          errors.push("The password needs to contain at least one upper case letter (A-Z)");
+      if (this.adminUserConfig.password.match(pwUpperRegex) == null) {
+        errors.push(
+          "The password needs to contain at least one upper case letter (A-Z)"
+        );
       }
-      if(this.adminUserConfig.password.match(pwLowerRegex) == null){
-          errors.push("The password needs to contain at least one lower case letter (a-z)");
+      if (this.adminUserConfig.password.match(pwLowerRegex) == null) {
+        errors.push(
+          "The password needs to contain at least one lower case letter (a-z)"
+        );
       }
-      if(this.adminUserConfig.password.match(pwDigitRegex) == null){
-          errors.push("The password needs to contain at least one digit (0-9)");
+      if (this.adminUserConfig.password.match(pwDigitRegex) == null) {
+        errors.push("The password needs to contain at least one digit (0-9)");
       }
 
-      return errors;      
+      return errors;
     },
-    getBackendStatus: function() {
+    getBackendStatus: function () {
       // reset errors
       this.errors = [];
 
       getBackendStatus()
-      .then(status => {
-        if(status.configFile == false){
-          // no configuration at all yet
-          this.showDbSetup = true;
-          this.showUserSetup = false;
-          this.title = this.dbSetupTitle;
-        }else if(status.configDb == false){
-          // no database configuration
-          this.showDbSetup = true;
-          this.showUserSetup = false;
-          this.title = this.dbSetupTitle;
-        }else if(status.dbReachable == false){
-          // cannot reach database, thus allow to change settings
-          this.showDbSetup = true;
-          this.showUserSetup = false;
-          this.title = this.dbSetupTitle;
-        }else if(status.adminExists == false){
-          // database is up, but there is no admin user yet
-          this.showDbSetup = false;
-          this.showUserSetup = false;
-          this.showUserSetup = true;
-          this.title = this.userSetupTitle;
-        }else{
-          // setup is done
+        .then((status) => {
+          if (status.configFile == false) {
+            // no configuration at all yet
+            this.showDbSetup = true;
+            this.showUserSetup = false;
+            this.title = this.dbSetupTitle;
+          } else if (status.configDb == false) {
+            // no database configuration
+            this.showDbSetup = true;
+            this.showUserSetup = false;
+            this.title = this.dbSetupTitle;
+          } else if (status.dbReachable == false) {
+            // cannot reach database, thus allow to change settings
+            this.showDbSetup = true;
+            this.showUserSetup = false;
+            this.title = this.dbSetupTitle;
+          } else if (status.adminExists == false) {
+            // database is up, but there is no admin user yet
+            this.showDbSetup = false;
+            this.showUserSetup = false;
+            this.showUserSetup = true;
+            this.title = this.userSetupTitle;
+          } else {
+            // setup is done
 
-          this.showDbSetup = false;
-          this.showSetupDone = true;
-          this.title = this.setupDoneTitle;
-        }
-        this.isLoading = false;
-      })
-      .catch(errors => {
-        this.errors = errors;
-        this.isLoading = false;
-      });
-    }
+            this.showDbSetup = false;
+            this.showSetupDone = true;
+            this.title = this.setupDoneTitle;
+          }
+          this.isLoading = false;
+        })
+        .catch((errors) => {
+          this.errors = errors;
+          this.isLoading = false;
+        });
+    },
   },
-  mounted(){
+  mounted() {
     this.isLoading = true;
     this.getBackendStatus();
-  }
-
-}
+  },
+};
 </script>

@@ -12,7 +12,7 @@
         <b-form @submit="save">
           <b-row v-if="errors.length">
             <b-col cols="12">
-              <WarningBox :error="errors"/>
+              <WarningBox :error="errors" />
             </b-col>
           </b-row>
           <b-form-group
@@ -62,16 +62,25 @@
           </b-form-group>
         </b-form>
       </b-col>
-      <b-col cols="1" class="d-none d-sm-block">
-      </b-col>
-    </b-row>    
+      <b-col cols="1" class="d-none d-sm-block"> </b-col>
+    </b-row>
     <div slot="modal-footer">
-      <b-button type="button" variant="outline-info" :disabled="isLoading" v-on:click="save">
-        <b-icon-person-check/>
+      <b-button
+        type="button"
+        variant="outline-info"
+        :disabled="isLoading"
+        v-on:click="save"
+      >
+        <b-icon-person-check />
         Save
       </b-button>
-      <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-        <b-icon-x/>
+      <b-button
+        class="ml-1"
+        type="button"
+        variant="outline-danger"
+        v-on:click="close"
+      >
+        <b-icon-x />
         Cancel
       </b-button>
     </div>
@@ -79,8 +88,8 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
-import WarningBox from '@/components/WarningBox';
+import { mapActions } from "vuex";
+import WarningBox from "@/components/WarningBox";
 import {
   BModal,
   BRow,
@@ -90,11 +99,11 @@ import {
   BFormInput,
   BButton,
   BIconPersonCheck,
-  BIconX
-} from 'bootstrap-vue';
+  BIconX,
+} from "bootstrap-vue";
 
 export default {
-  name: 'UserPasswordEditModal',
+  name: "UserPasswordEditModal",
   components: {
     WarningBox,
     BModal,
@@ -105,60 +114,61 @@ export default {
     BFormInput,
     BButton,
     BIconPersonCheck,
-    BIconX
+    BIconX,
   },
-  props: [ 'visible' ],
+  props: ["visible"],
   data() {
     return {
       form: {
-        oldPassword: '',
-        newPassword: '',
-        newPasswordConfirm: ''
+        oldPassword: "",
+        newPassword: "",
+        newPasswordConfirm: "",
       },
       errors: [],
-      isLoading: false
-    }
+      isLoading: false,
+    };
   },
   methods: {
-    close: function(){
-      this.$emit('update:visible', false);
+    close: function () {
+      this.$emit("update:visible", false);
     },
-    save: function(event){
+    save: function (event) {
       event.preventDefault();
 
-      if(this.form.oldPassword == this.form.newPassword){
-        this.errors = [
-          "Old and new password cannot be identical."
-        ];
+      if (this.form.oldPassword == this.form.newPassword) {
+        this.errors = ["Old and new password cannot be identical."];
         return;
       }
-      if(this.form.newPassword != this.form.newPasswordConfirm){
+      if (this.form.newPassword != this.form.newPasswordConfirm) {
         this.errors = [
-          "The new passwords do not match. Please enter the same values for the new passwords."
+          "The new passwords do not match. Please enter the same values for the new passwords.",
         ];
         return;
       }
 
       this.isLoading = true;
-      console.log("change password from", this.form.oldPassword, "to", this.form.newPassword);
+      console.log(
+        "change password from",
+        this.form.oldPassword,
+        "to",
+        this.form.newPassword
+      );
 
       this.changeUserPassword({
         oldPassword: this.form.oldPassword,
-        newPassword: this.form.newPassword
+        newPassword: this.form.newPassword,
       })
-      .then(() => {
-        this.isLoading = false;
-        this.errors = [];
-        this.close();
-      })
-      .catch(errors => {
-        this.isLoading = false;
-        this.errors = errors;
-      })
+        .then(() => {
+          this.isLoading = false;
+          this.errors = [];
+          this.close();
+        })
+        .catch((errors) => {
+          this.isLoading = false;
+          this.errors = errors;
+        });
     },
-    ...mapActions('user', [
-      'changeUserPassword'
-    ])
-  }
-}
+    ...mapActions("user", ["changeUserPassword"]),
+  },
+};
 </script>

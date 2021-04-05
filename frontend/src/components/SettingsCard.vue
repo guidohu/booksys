@@ -1,19 +1,24 @@
 <template>
   <b-card no-body class="text-left">
     <b-card-body class="overflow-scroll">
-      <WarningBox v-if="errors.length>0" :errors="errors"/>
-      <logo-upload @logoChanged="logoChangeHandler"/>
-      
+      <WarningBox v-if="errors.length > 0" :errors="errors" />
+      <logo-upload @logoChanged="logoChangeHandler" />
+
       <b-form @submit="save">
         <b-alert variant="info" show>
           Settings related to the boat you are using.
         </b-alert>
         <!-- Engine hour format -->
-        <engine-hour-format
-          :selected.sync = "form.engineHourFormat"
-        />
+        <engine-hour-format :selected.sync="form.engineHourFormat" />
         <b-alert variant="info" show>
-          Timezone and location settings. Users will see the times in the timezone defined by these settings, also sunrise and sunset will be calculated based on these settings.
+          Settings for your daily operations.
+        </b-alert>
+        <!-- Direct Payment vs Billed Payment -->
+        <fuel-payment-type-selector :selected.sync="form.fuelPaymentType" />
+        <b-alert variant="info" show>
+          Timezone and location settings. Users will see the times in the
+          timezone defined by these settings, also sunrise and sunset will be
+          calculated based on these settings.
         </b-alert>
         <!-- Timezone -->
         <b-form-group
@@ -87,17 +92,18 @@
           label-cols="3"
           description=""
         >
-          <b-form-textarea size="sm"
-              id="input-address"
-              v-model="form.address"
-              rows="3"
-              max-rows="3"
+          <b-form-textarea
+            size="sm"
+            id="input-address"
+            v-model="form.address"
+            rows="3"
+            max-rows="3"
           />
         </b-form-group>
 
-
         <b-alert variant="info" show>
-          Payment Information. This information is displayed to users in case they want to top-up their balance.
+          Payment Information. This information is displayed to users in case
+          they want to top-up their balance.
         </b-alert>
         <!-- Currency -->
         <b-form-group
@@ -140,11 +146,7 @@
           description=""
         >
           <b-input-group size="sm">
-            <b-form-input
-              id="input-iban"
-              v-model="form.iban"
-              type="text"
-            />
+            <b-form-input id="input-iban" v-model="form.iban" type="text" />
           </b-input-group>
         </b-form-group>
         <!-- Account BIC -->
@@ -156,11 +158,7 @@
           description=""
         >
           <b-input-group size="sm">
-            <b-form-input
-              id="input-bic"
-              v-model="form.bic"
-              type="text"
-            />
+            <b-form-input id="input-bic" v-model="form.bic" type="text" />
           </b-input-group>
         </b-form-group>
         <!-- Account Comment -->
@@ -180,9 +178,9 @@
           </b-input-group>
         </b-form-group>
 
-
         <b-alert variant="info" show>
-          Notification Settings. The application will send emails to users, therefore it needs to have access to an email account for doing so.
+          Notification Settings. The application will send emails to users,
+          therefore it needs to have access to an email account for doing so.
         </b-alert>
         <!-- SMTP Sender -->
         <b-form-group
@@ -250,9 +248,9 @@
         </b-input-group>
       </b-form-group>
 
-
       <b-alert variant="info" show>
-        ReCAPTCHA protects the application and its users from SPAMers. Thus it is recommended to use ReCAPTCHA.
+        ReCAPTCHA protects the application and its users from SPAMers. Thus it
+        is recommended to use ReCAPTCHA.
       </b-alert>
       <!-- ReCAPTCHA private key -->
       <b-form-group
@@ -288,26 +286,27 @@
       </b-form-group>
     </b-card-body>
     <b-card-footer>
-        <b-row class="text-right">
-          <b-col cols="9" offset="3">
-            <b-button class="mr-2" variant="outline-danger" to="/admin">
-              <b-icon-x/>
-              Cancel
-            </b-button>
-            <b-button variant="outline-info" v-on:click="save">
-              <b-icon-check/>
-              Save
-            </b-button>
-          </b-col>
-        </b-row>
+      <b-row class="text-right">
+        <b-col cols="9" offset="3">
+          <b-button class="mr-2" variant="outline-danger" to="/admin">
+            <b-icon-x />
+            Cancel
+          </b-button>
+          <b-button variant="outline-info" v-on:click="save">
+            <b-icon-check />
+            Save
+          </b-button>
+        </b-col>
+      </b-row>
     </b-card-footer>
   </b-card>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex';
-import WarningBox from '@/components/WarningBox';
-import EngineHourFormat from '@/components/forms/inputs/EngineHourFormat';
+import { mapGetters, mapActions } from "vuex";
+import WarningBox from "@/components/WarningBox";
+import EngineHourFormat from "@/components/forms/inputs/EngineHourFormat";
+import FuelPaymentTypeSelector from "@/components/forms/inputs/FuelPaymentTypeSelector";
 import {
   BCard,
   BCardBody,
@@ -322,15 +321,16 @@ import {
   BCol,
   BButton,
   BIconX,
-  BIconCheck  
-} from 'bootstrap-vue';
-import LogoUpload from '@/components/LogoUpload';
+  BIconCheck,
+} from "bootstrap-vue";
+import LogoUpload from "@/components/LogoUpload";
 
 export default {
   name: "SettingsCard",
   components: {
     WarningBox,
     EngineHourFormat,
+    FuelPaymentTypeSelector,
     BCard,
     BCardBody,
     BCardFooter,
@@ -345,38 +345,33 @@ export default {
     BButton,
     BIconX,
     BIconCheck,
-    LogoUpload
+    LogoUpload,
   },
   data() {
     return {
       errors: [],
       form: {
-        logoFile: null
-      }
-    }
+        logoFile: null,
+      },
+    };
   },
   computed: {
-    ...mapGetters('configuration', [
-      'getConfiguration'
-    ])
+    ...mapGetters("configuration", ["getConfiguration"]),
   },
   methods: {
-    ...mapActions('configuration', [
-      'queryConfiguration',
-      'setConfiguration'
-    ]),
-    logoChangeHandler: function(logoUri){
+    ...mapActions("configuration", ["queryConfiguration", "setConfiguration"]),
+    logoChangeHandler: function (logoUri) {
       this.form.logoFile = logoUri;
     },
-    save: function() {
+    save: function () {
       // extract correct URL from mapIframe
       const v = this.form;
       let mapUrl = [];
-      if(v.mapIframe != null && v.mapIframe != ''){
+      if (v.mapIframe != null && v.mapIframe != "") {
         const mapUrlRegex = /https:\/\/www\.google\.com\/maps\/embed\?pb=[^"\s]+/;
         mapUrl = v.mapIframe.match(mapUrlRegex);
-        if(mapUrl == null || mapUrl.length != 1){
-          this.errors = ['Google Maps Iframe URL is not in a valid format.'];
+        if (mapUrl == null || mapUrl.length != 1) {
+          this.errors = ["Google Maps Iframe URL is not in a valid format."];
           return;
         }
       }
@@ -384,6 +379,7 @@ export default {
       const newConfiguration = {
         logo_file: v.logoFile,
         engine_hour_format: v.engineHourFormat,
+        fuel_payment_type: v.fuelPaymentType,
         location_time_zone: v.timezone,
         location_longitude: Number(v.longitude),
         location_latitude: Number(v.latitude),
@@ -399,26 +395,27 @@ export default {
         smtp_username: v.smtpUsername,
         smtp_password: v.smtpPassword,
         recaptcha_privatekey: v.recaptchaPrivateKey,
-        recaptcha_publickey: v.recaptchaPublicKey
+        recaptcha_publickey: v.recaptchaPublicKey,
       };
 
       this.setConfiguration(newConfiguration)
-      .then(() => {
-        this.errors = [];
-        this.$router.go(-1);
-      })
-      .catch((errors) => this.errors = errors);
+        .then(() => {
+          this.errors = [];
+          this.$router.go(-1);
+        })
+        .catch((errors) => (this.errors = errors));
     },
-    setFormDefaults: function(defaultValues) {
-      if(defaultValues == null){
+    setFormDefaults: function (defaultValues) {
+      if (defaultValues == null) {
         this.form = {};
         return;
       }
 
       console.log("set form to defaults:", defaultValues);
-      this.$set(this, 'form', {
+      this.$set(this, "form", {
         logoFile: defaultValues.logo_file,
         engineHourFormat: defaultValues.engine_hour_format,
+        fuelPaymentType: defaultValues.fuel_payment_type,
         timezone: defaultValues.location_time_zone,
         longitude: defaultValues.location_longitude,
         latitude: defaultValues.location_latitude,
@@ -436,24 +433,24 @@ export default {
         recaptchaPrivateKey: defaultValues.recaptcha_privatekey,
         recaptchaPublicKey: defaultValues.recaptcha_publickey,
       });
-    }
+    },
   },
   watch: {
-    getConfiguration: function(newValues){
-      this.setFormDefaults(newValues)
-    }
+    getConfiguration: function (newValues) {
+      this.setFormDefaults(newValues);
+    },
   },
   created() {
     this.queryConfiguration();
   },
   mounted() {
-    this.setFormDefaults(this.getConfiguration)
-  }
-}
+    this.setFormDefaults(this.getConfiguration);
+  },
+};
 </script>
 
 <style>
-  .overflow-scroll {
-    overflow-y: scroll;
-  }
+.overflow-scroll {
+  overflow-y: scroll;
+}
 </style>

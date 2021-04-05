@@ -10,7 +10,7 @@
       <b-row v-if="errors.length > 0">
         <b-col cols="1" class="d-none d-sm-block"></b-col>
         <b-col cols="12" sm="10">
-          <WarningBox :errors="errors"/>
+          <WarningBox :errors="errors" />
         </b-col>
         <b-col cols="1" class="d-none d-sm-block"></b-col>
       </b-row>
@@ -99,7 +99,7 @@
                 :disabled="!isEditMode"
               ></b-form-input>
               <b-input-group-append is-text>
-                {{getCurrency}}/min
+                {{ getCurrency }}/min
               </b-input-group-append>
             </b-input-group>
           </b-form-group>
@@ -124,22 +124,45 @@
     </b-form>
     <div slot="modal-footer">
       <div class="text-left d-inline">
-        <b-button v-if="isEditMode==true" class="mr-1" type="button" variant="outline-danger" v-on:click="remove">
-          <b-icon-trash/>
+        <b-button
+          v-if="isEditMode == true"
+          class="mr-1"
+          type="button"
+          variant="outline-danger"
+          v-on:click="remove"
+        >
+          <b-icon-trash />
           Delete
         </b-button>
       </div>
       <div class="text-right d-inline">
-        <b-button v-if="isEditMode==true" class="ml-4" type="button" variant="outline-info" v-on:click="save">
-          <b-icon-check/>
+        <b-button
+          v-if="isEditMode == true"
+          class="ml-4"
+          type="button"
+          variant="outline-info"
+          v-on:click="save"
+        >
+          <b-icon-check />
           Save
         </b-button>
-        <b-button v-if="isEditMode==false" class="ml-1" type="button" variant="outline-info" v-on:click="enableEditMode">
-          <b-icon-pencil/>
+        <b-button
+          v-if="isEditMode == false"
+          class="ml-1"
+          type="button"
+          variant="outline-info"
+          v-on:click="enableEditMode"
+        >
+          <b-icon-pencil />
           Edit
         </b-button>
-        <b-button class="ml-1" type="button" variant="outline-danger" v-on:click="close">
-          <b-icon-x/>
+        <b-button
+          class="ml-1"
+          type="button"
+          variant="outline-danger"
+          v-on:click="close"
+        >
+          <b-icon-x />
           Cancel
         </b-button>
       </div>
@@ -148,10 +171,10 @@
 </template>
 
 <script>
-import Vue from 'vue';
-import { mapGetters, mapActions } from 'vuex';
-import { sprintf } from 'sprintf-js';
-import WarningBox from '@/components/WarningBox';
+import Vue from "vue";
+import { mapGetters, mapActions } from "vuex";
+import { sprintf } from "sprintf-js";
+import WarningBox from "@/components/WarningBox";
 import {
   BForm,
   BRow,
@@ -166,15 +189,15 @@ import {
   BIconCheck,
   BIconPencil,
   BIconX,
-  ModalPlugin
+  ModalPlugin,
 } from "bootstrap-vue";
 
 Vue.use(ModalPlugin);
 
 export default {
-  name: 'UserGroupModal',
-  props: [ 'userGroup', 'editMode', 'visible' ],
-  components: { 
+  name: "UserGroupModal",
+  props: ["userGroup", "editMode", "visible"],
+  components: {
     WarningBox,
     BForm,
     BRow,
@@ -188,133 +211,131 @@ export default {
     BIconTrash,
     BIconCheck,
     BIconPencil,
-    BIconX 
+    BIconX,
   },
   data() {
     return {
       errors: [],
       userRoleList: [],
       form: {
-        user_role_description: ""
+        user_role_description: "",
       },
       isEditMode: false,
       title: "User Group",
-    }
+    };
   },
   computed: {
-    ...mapGetters('configuration', [
-      'getCurrency'
-    ]),
-    ...mapGetters('user', [
-      'userRoles'
-    ])
+    ...mapGetters("configuration", ["getCurrency"]),
+    ...mapGetters("user", ["userRoles"]),
   },
   watch: {
-    userGroup: function(newValue) {
-      if(newValue != null){
-        this.form = { ...newValue }; 
+    userGroup: function (newValue) {
+      if (newValue != null) {
+        this.form = { ...newValue };
         this.form.price_min = sprintf("%.2f", newValue.price_min);
         console.log("price_min", this.form);
-      }else{
+      } else {
         this.form = {};
       }
     },
-    editMode: function(newValue) {
+    editMode: function (newValue) {
       console.log("editMode changed to:", newValue);
       this.isEditMode = newValue;
       this.setTitle();
     },
-    userRoles: function(newValue) {
+    userRoles: function (newValue) {
       this.userRolesToList(newValue);
-    }
+    },
   },
   methods: {
-    save: function() {
+    save: function () {
       this.saveUserGroup(this.form)
-      .then(() => {
-        this.errors = [];
-        this.close()
-      })
-      .catch((errors) => this.errors = errors);
+        .then(() => {
+          this.errors = [];
+          this.close();
+        })
+        .catch((errors) => (this.errors = errors));
     },
-    close: function() {
+    close: function () {
       this.setTitle();
-      this.$emit('update:visible', false);
+      this.$emit("update:visible", false);
     },
-    remove: function() {
+    remove: function () {
       const name = this.form.user_group_name;
-      const id   = this.form.user_group_id;
-      this.$bvModal.msgBoxConfirm('Do you really want to delete user group '+name+'?', {
-        title: 'Delete User Group',
-        size: 'sm',
-        buttonSize: 'sm',
-        okVariant: 'danger',
-        okTitle: 'Delete',
-        cancelTitle: 'Cancel',
-        footerClass: 'p-2',
-        hideHeaderClose: false,
-        centered: true
-      })
-      .then(value => {
-        // delete user group
-        if(value == true){
-          this.deleteUserGroup(id)
-          .then(() => this.close())
-          .catch((errors) => this.errors = errors);
-        }
-      })
-      .catch(err => {
-        this.errors = [ err ]
-      })
+      const id = this.form.user_group_id;
+      this.$bvModal
+        .msgBoxConfirm(
+          "Do you really want to delete user group " + name + "?",
+          {
+            title: "Delete User Group",
+            size: "sm",
+            buttonSize: "sm",
+            okVariant: "danger",
+            okTitle: "Delete",
+            cancelTitle: "Cancel",
+            footerClass: "p-2",
+            hideHeaderClose: false,
+            centered: true,
+          }
+        )
+        .then((value) => {
+          // delete user group
+          if (value == true) {
+            this.deleteUserGroup(id)
+              .then(() => this.close())
+              .catch((errors) => (this.errors = errors));
+          }
+        })
+        .catch((err) => {
+          this.errors = [err];
+        });
     },
-    ...mapActions('configuration', [
-      'queryConfiguration'
+    ...mapActions("configuration", ["queryConfiguration"]),
+    ...mapActions("user", [
+      "queryUserRoles",
+      "saveUserGroup",
+      "deleteUserGroup",
     ]),
-    ...mapActions('user', [
-      'queryUserRoles',
-      'saveUserGroup',
-      'deleteUserGroup'
-    ]),
-    enableEditMode: function() {
+    enableEditMode: function () {
       console.log("Enable edit mode");
       this.isEditMode = true;
       this.setTitle();
     },
-    setTitle: function() {
+    setTitle: function () {
       console.log("Set title with:", this.isEditMode);
-      if(this.isEditMode == true && this.form.user_group_id == null){
+      if (this.isEditMode == true && this.form.user_group_id == null) {
         this.title = "New User Group";
-      }else if(this.isEditMode == true){
+      } else if (this.isEditMode == true) {
         this.title = "Edit User Group";
-      }else{
+      } else {
         this.title = "User Group";
       }
     },
-    userRolesToList: function(userRoles){
-      if(userRoles == null){
-        userRoles = this.userRoles
+    userRolesToList: function (userRoles) {
+      if (userRoles == null) {
+        userRoles = this.userRoles;
       }
-      this.userRoleList = userRoles.map(ur => {
+      this.userRoleList = userRoles.map((ur) => {
         return {
           value: ur.user_role_id,
-          text: ur.user_role_name
-        }
-      })
+          text: ur.user_role_name,
+        };
+      });
     },
-    roleChangeHandler: function(user_role_id){
-      const role = this.userRoles.find(ur => ur.user_role_id == user_role_id);
+    roleChangeHandler: function (user_role_id) {
+      const role = this.userRoles.find((ur) => ur.user_role_id == user_role_id);
       this.form.user_role_name = role.user_role_name;
       this.form.user_role_description = role.user_role_description;
-    }
+    },
   },
   created() {
     this.queryConfiguration();
 
     this.queryUserRoles()
-    .then(() => this.userRolesToList())
-    .catch( (errors) => this.errors.append(...errors));
+      .then(() => this.userRolesToList())
+      .catch((errors) => this.errors.append(...errors));
 
-    if(this.userGroup != null){
+    if (this.userGroup != null) {
       this.form = { ...this.userGroup };
     }
 
@@ -322,10 +343,10 @@ export default {
     this.setTitle();
   },
   mounted() {
-    this.$root.$on('bv::modal::show', () => {
+    this.$root.$on("bv::modal::show", () => {
       this.isEditMode = this.editMode;
       this.setTitle();
-    })
-  }
-}
+    });
+  },
+};
 </script>
