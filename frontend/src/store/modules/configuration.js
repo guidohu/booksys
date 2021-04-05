@@ -61,8 +61,11 @@ const getters = {
 };
 
 const actions = {
+  invalidateConfiguration({ commit }) {
+    commit("invalidateConfiguration", {});
+  },
   queryConfiguration({ commit, state }) {
-    if(state.CONFIG_LOADED == true){
+    if (state.CONFIG_LOADED == true) {
       return;
     }
 
@@ -138,7 +141,7 @@ const actions = {
     };
     Configuration.updateDb(successCb, failureCb);
   },
-  setConfiguration({ dispatch }, configurationValues) {
+  setConfiguration({ dispatch, commit }, configurationValues) {
     return new Promise((resolve, reject) => {
       Configuration.setConfiguration(configurationValues)
         .then(() => {

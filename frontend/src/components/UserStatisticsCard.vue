@@ -87,6 +87,6 @@ export default {
   },
   created() {
     this.queryConfiguration();
-  }
+  },
 };
 </script>
