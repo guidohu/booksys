@@ -76,8 +76,6 @@ class SessionInfo {
 
 class Login{
 
-	private $role = 0;
-
 	public static function autoloader($class){
 		include $class . '.php';
 	}
@@ -299,8 +297,9 @@ class Login{
 
 	// Check if the user has a valid session
 	// Return TRUE if the user is already logged in, else return FALSE
-    // Use for roles: 0 guest, 1 member, 2 admin, 3 course
-	public function isLoggedIn($role=NULL){
+    // Use for roles: 1 guest, 2 member, 3 admin
+	// Use role 'NULL' to know whether the user is logged in (no particular role check)
+	public function isLoggedInAs($role=NULL){
 		// use sanitizer
 		$filter = new Sanitizer();
 
@@ -355,18 +354,6 @@ class Login{
 		// If the role does not match, the user is logged out because he
 		// tampered with some sites he should not have access to
 		if(isset($role) and $role != $result[0]['user_role_id']){
-			error_log('Access to resources which need more permissions. Destroy all for :' . $_COOKIE['SESSION']);
-			$query = 'UPDATE browser_session
-				SET valid_thru = ?
-				WHERE session_secret = ?';
-			$db->prepare($query);
-			$db->bind_param('ss',
-				date("Y-m-d H:i:s", time()-1),
-				$_COOKIE['SESSION']
-			);
-			$db->execute();
-			$db->disconnect();
-			setcookie('SESSION', null, -1, '/');
 			return FALSE;
 		}
 
@@ -387,42 +374,12 @@ class Login{
 		return TRUE;
 	}
 
-	public function isLoggedInAndRole($role=0){
-		if($this->isLoggedIn($role)){
-			return TRUE;
-		}else{
-			return FALSE;
-		}
-	}
-
-	public function isLoggedInRedirect($redirect_url=NULL){
-		if($this->isLoggedIn()){
-			return TRUE;
-		}else{
-			if($redirect_url){
-				header("Location: ".$redirect_url);
-			}
-			return FALSE;
-		}
-	}
-
-	public function isLoggedInAndRoleRedirect($role, $redirect_url){
-		if($this->isLoggedIn($role)){
-			return TRUE;
-		}else{
-			header("Location:".$redirect_url);
-			return FALSE;
-		}
+	public function isLoggedIn(){
+		return $this->isLoggedInAs();
 	}
 
 	public function isAdmin(){
-		if(isset($this->role) and $this->role == $this->config->admin_user_status_id){
-			return TRUE;
-		}elseif(!$this->role){
-			return $this->isLoggedInAndRole($this->config->admin_user_status_id);
-		}else{
-			return FALSE;
-		}
+		return $this->isLoggedInAs($this->config->admin_user_role_id);
 	}
 
 	private function verify_password_hash($username, $password, $password_salt, $db){

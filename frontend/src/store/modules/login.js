@@ -36,6 +36,9 @@ const actions = {
           dispatch("getUserInfo");
           commit("setIsLoggedIn", true);
           dispatch("loginStatus/setIsLoggedIn", true, { root: true });
+          dispatch("configuration/invalidateConfiguration", true, {
+            root: true,
+          });
           resolve();
         })
         .catch((errors) => {

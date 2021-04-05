@@ -122,11 +122,12 @@
         if(!_is_db_configured($configuration)){
             return Status::errorStatus("no db configuration found");
         }
-        
-        // only admins can retrieve configuration data
-        // returns with a HTTP 403
-        _is_admin_or_return($configuration);
 
+        // only logged in users can retrieve configuration
+        _is_logged_in_or_return($configuration);
+
+        // configuration parameters that are public
+        // to all logged in users
         $response = [
             "location_time_zone"        => $configuration->location_time_zone,
             "location_longitude"        => $configuration->location_longitude,
@@ -138,17 +139,21 @@
             "payment_account_iban"      => $configuration->payment_account_iban,
             "payment_account_bic"       => $configuration->payment_account_bic,
             "payment_account_comment"   => $configuration->payment_account_comment,
-            "smtp_sender"               => $configuration->smtp_sender,
-            "smtp_server"               => $configuration->smtp_server,
-            "smtp_username"             => $configuration->smtp_username,
-            "smtp_password"             => "hidden", // the proper value is hidden, $configuration->smtp_password,
             "recaptcha_publickey"       => $configuration->recaptcha_publickey,
-            "recaptcha_privatekey"      => $configuration->recaptcha_privatekey,
             "logo_file"                 => $configuration->logo_file,
-            "engine_hour_format"        => $configuration->engine_hour_format,
-            "fuel_payment_type"         => $configuration->fuel_payment_type
         ];
 
+        // configuration parameters that are only available to admins
+        if(_is_admin($configuration)){
+            $response["smtp_sender"]          = $configuration->smtp_sender;
+            $response["smtp_server"]          = $configuration->smtp_server;
+            $response["smtp_username"]        = $configuration->smtp_username;
+            $response["smtp_password"]        = "hidden"; // the proper value is hidden, $configuration->smtp_password,
+            $response["recaptcha_privatekey"] = $configuration->recaptcha_privatekey;
+            $response["engine_hour_format"]   = $configuration->engine_hour_format;
+            $response["fuel_payment_type"]    = $configuration->fuel_payment_type;
+        }
+        
         return Status::successDataResponse('success', $response);
     }
 
@@ -390,7 +395,7 @@
             WHERE id = ?;';
         $db->prepare($query);
         $db->bind_param('iii',
-            $configuration->admin_user_status_id,
+            $configuration->default_admin_user_status_id,
             0,
             $data->user_id
         );
@@ -435,16 +440,21 @@
     // returns http status permission denied in case the user is not an admin
     function _is_admin_or_return($configuration){
         $lc = new Login($configuration);
-        if(!$lc->isLoggedIn($configuration->admin_user_status_id)){
+        if(!$lc->isLoggedIn($configuration->admin_user_role_id)){
             echo json_encode(Status::errorStatus("not sufficient permissions"));
             exit;
         }
     }
 
+    function _is_admin($configuration){
+        $lc = new Login($configuration);
+        return $lc->isAdmin();
+    }
+
     function _is_logged_in_or_return($configuration){
         $lc = new Login($configuration);
         if(!$lc->isLoggedIn()){
-            HttpHeader::setResponseCode(403);
+            echo json_encode(Status::errorStatus("not logged in"));
             exit;
         }
     }

@@ -9,7 +9,9 @@
 
   // only users which are logged in are allowed to handle invitations
   $lc = new Login($config);
-  if(!$lc->isLoggedInRedirect($config['login_page'])){
+  if(!$lc->isLoggedIn()){
+	header("Location:".$configuration->$configuration->login_page);
+	HttpHeader::setResponseCode(302);
 	exit;
   }
 

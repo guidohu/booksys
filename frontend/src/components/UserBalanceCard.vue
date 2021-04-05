@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 import PaymentInfoModal from "./PaymentInfoModal";
 import {
   BCard,
@@ -63,9 +63,13 @@ export default {
     ...mapGetters("user", ["balanceRounded"]),
   },
   methods: {
+    ...mapActions("configuration", ["queryConfiguration"]),
     showPaymentInfo: function () {
       this.showPaymentInfoModal = true;
     },
+  },
+  created() {
+    this.queryConfiguration();
   },
 };
 </script>

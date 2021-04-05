@@ -11,10 +11,17 @@ class Configuration{
 	public $db_user;
 	public $db_password;
 
-	// user status
-	public $guest_user_status_id;
-	public $member_user_status_id;
-	public $admin_user_status_id;
+	// default user status / the ones that are shipped with the installation by default
+	// Note: they have to match the IDs in the default
+	//       schema definition
+	public $default_guest_user_status_id = 1;
+	public $default_member_user_status_id = 2;
+	public $default_admin_user_status_id = 3;
+
+	// user roles
+	public $guest_user_role_id;
+	public $member_user_role_id;
+	public $admin_user_role_id;
 
 	// properties
 	public $browser_session_timeout_max;
@@ -71,10 +78,9 @@ class Configuration{
 		// from the configuration file
 		$this->get_configuration_file($this->config_file_variables);
 
-		// get all the user status that
+		// get all the user roles from the database that
 		// are required for the code to run
-		// TODO: that dependency should be removed
-		$this->get_user_status($this->config_file_variables);
+		$this->get_user_roles($this->config_file_variables);
 
 		// get all the configuration settings from the
 		// database
@@ -82,7 +88,7 @@ class Configuration{
 
 		// set hard defaults
 		$this->login_page          = '/index.html';
-		$this->version             = "2.3.1";
+		$this->version             = "2.3.2";
 		$this->required_db_version = "1.16";
 	}
 
@@ -113,7 +119,7 @@ class Configuration{
 	}
 	
 	// Returns a hash with the user's profile
-	private function get_user_status($config){
+	private function get_user_roles($config){
 		// connect to the database
 		$db = new DBAccess($this);
 		if(!$db->connect()){
@@ -122,27 +128,30 @@ class Configuration{
 		}
 		
 		// get different user_status from database (the default ones)
-		$query = 'SELECT id, name FROM user_status;';
+		$query = 'SELECT id, name FROM user_role;';
 		$db->prepare($query);
 		$db->execute();
 		$res = $db->fetch_stmt_hash();
 		$db->disconnect();
 		if(! isset($res) or $res === FALSE){
-			error_log('classes/Configuration: Cannot retrieve user status');
+			error_log('classes/Configuration: Cannot retrieve user roles');
 			return $config;
 		}
 
-		// go through result
-		foreach($res as $user_status){
-			switch($user_status['name']){
-				case 'Guest':
-					$this->guest_user_status_id = $user_status['id'];
+		// go through result and handle all supported user roles
+		foreach($res as $user_role){
+			switch($user_role['name']){
+				case 'guest':
+					$this->guest_user_role_id = $user_role['id'];
 					break;
-				case 'Member':
-					$this->member_user_status_id = $user_status['id'];
+				case 'member':
+					$this->member_user_role_id = $user_role['id'];
 					break;
-				case 'Admin':
-					$this->admin_user_status_id = $user_status['id'];
+				case 'admin':
+					$this->admin_user_role_id = $user_role['id'];
+					break;
+				default:
+				    error_log("Unsupported user role: " . $user_role['name'] . " make sure this one is handled properly in the code");
 					break;
 			}
 		}

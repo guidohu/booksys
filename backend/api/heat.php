@@ -19,7 +19,9 @@
 	
 	// only users which are logged in and are admin are allowed to see booking information
 	$lc = new Login($configuration);
-	if(!$lc->isLoggedInAndRoleRedirect($configuration->admin_user_status_id, $configuration->login_page)){
+	if(!$lc->isAdmin($configuration->admin_user_role_id)){
+		header("Location:".$configuration->$configuration->login_page);
+		HttpHeader::setResponseCode(302);
 		exit;
 	}
 	
