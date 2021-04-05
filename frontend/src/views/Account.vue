@@ -55,7 +55,6 @@ export default {
     BIconHouse,
   },
   computed: {
-    ...mapGetters("configuration", ["getLocationAddress", "getLocationMap"]),
     ...mapGetters("login", ["userInfo"]),
     isMobile: function () {
       return BooksysBrowser.isMobile();
@@ -79,12 +78,10 @@ export default {
     },
   },
   methods: {
-    ...mapActions("configuration", ["queryConfiguration"]),
     ...mapActions("user", ["queryHeatHistory"]),
   },
   created() {
     console.log("Info.vue: Try to get all information required");
-    this.queryConfiguration();
     this.queryHeatHistory();
   },
 };

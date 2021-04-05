@@ -10,7 +10,7 @@
 	
 	// Check if the user is already logged in and is of type admin
 	$lc = new Login($configuration);
-	if(!$lc->isLoggedInAndRoleRedirect($configuration->admin_user_status_id, $configuration->login_page)){
+	if(!$lc->isAdmin()){
 		echo json_encode(Status::errorStatus("Insufficient permissions"));
 		exit;
 	}

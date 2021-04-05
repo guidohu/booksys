@@ -9,7 +9,7 @@
   // Load configuration
   $configuration = new Configuration();
   
-  // Check if the user is already logged in and is of type admin
+  // Check if the user is already logged in
   $lc = new Login($configuration);
   if(!$lc->isLoggedIn()){
       echo json_encode(Status::errorStatus("login required"));
@@ -93,7 +93,7 @@
   function delete_user($configuration, $lc){
     // user needs to be admin
     if(!$lc->isAdmin()){
-        return Status::errorStatus("permission denied");
+        return Status::errorStatus("insufficient permissions");
     }
 
     $data = json_decode(file_get_contents('php://input'));
@@ -221,7 +221,7 @@
   function save_user_group($configuration, $lc){
     // only admins are allowed to call this function
     if(!$lc->isAdmin()){
-        return Status::errorStatus("Insufficient permissions");
+        return Status::errorStatus("insufficient permissions");
     }
 
     // get all the values from the query
@@ -238,6 +238,10 @@
   }
 
   function create_user_group($configuration, $data){
+    // only admins are allowed to call this function
+    if(!$lc->isAdmin()){
+        return Status::errorStatus("insufficient permissions");
+    }
 
     // sanitize data
     $sanitizer = new Sanitizer();
@@ -303,6 +307,11 @@
   }
 
   function update_user_group($configuration, $data){
+    // only admins are allowed to call this function
+    if(!$lc->isAdmin()){
+        return Status::errorStatus("insufficient permissions");
+    }
+
     $user_group_price_update_status = update_user_group_price($configuration, $data);
     if($user_group_price_update_status['ok'] != TRUE){
         return $user_group_price_update_status;
@@ -345,6 +354,11 @@
   }
 
   function update_user_group_price($configuration, $data){
+    // only admins are allowed to call this function
+    if(!$lc->isAdmin()){
+        return Status::errorStatus("insufficient permissions");
+    }
+
     // sanitize data
     $sanitizer = new Sanitizer();
     if(! $data->price_id or !$sanitizer->isInt($data->price_id)){

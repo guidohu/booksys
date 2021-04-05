@@ -223,7 +223,7 @@
     // returns http status permission denied in case the user is not an admin
     function _is_admin_or_return($configuration){
         $lc = new Login($configuration);
-        if(!$lc->isLoggedIn($configuration->admin_user_status_id)){
+        if(!$lc->isLoggedIn($configuration->admin_user_role_id)){
             HttpHeader::setResponseCode(403);
             exit;
         }

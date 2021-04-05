@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 import { BModal, BRow, BCol, BTable, BButton, BIconCheck } from "bootstrap-vue";
 
 export default {
@@ -75,6 +75,7 @@ export default {
     ...mapGetters("user", ["heatHistory"]),
   },
   methods: {
+    ...mapActions("configuration", ["queryConfiguration"]),
     close: function () {
       this.$emit("update:visible", false);
     },
@@ -84,6 +85,9 @@ export default {
       return value + " " + this.getCurrency;
     },
   },
+  created() {
+    this.queryConfiguration();
+  }
 };
 </script>
 

@@ -132,7 +132,7 @@
 			$data->mobile,
 			$data->email,
 			$data->license,
-			$configuration->guest_user_status_id,
+			$configuration->default_guest_user_status_id,
 			$data->comment);
 		
 		if(!$db->execute()){

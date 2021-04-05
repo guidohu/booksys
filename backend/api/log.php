@@ -10,7 +10,9 @@
 	
 	// Check if the user is already logged in and is of type admin
 	$lc = new Login($configuration);
-	if(!$lc->isLoggedInAndRoleRedirect($configuration->admin_user_status_id, $configuration->login_page)){
+	if(!$lc->isAdmin()){
+		header("Location:".$configuration->$configuration->login_page);
+		HttpHeader::setResponseCode(302);
 		exit;
 	}
 	

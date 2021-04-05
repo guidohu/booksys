@@ -575,7 +575,7 @@
 
 		// only an admin is allowed to do so
 		$session_data = Login::getSessionData($configuration, $db);
-		if($session_data['user_role_id'] != $configuration->admin_user_status_id){
+		if($session_data['user_role_id'] != $configuration->admin_user_role_id){
 			error_log('api/booking.php: Attempt to delete a session as non-admin ' . $session_data[username]);
 			return Status::errorStatus('Only an administrator can delete sessions.');
 		}
@@ -738,7 +738,7 @@
 
 		// check if the user is still allowed to cancel the session
 		$time = strtotime($res[0]['date'] .' ' . $res[0]['start']);
-		if($session_data['user_role_id'] != $configuration->admin_user_status_id
+		if($session_data['user_role_id'] != $configuration->admin_user_role_id
 		   && $session_data['user_id'] != $data->user_id){
 		    error_log('api/booking.php: Attempt to delete another user from a session (logged_in_user/session): '
 			          . $session_data['user_id'] . ' / ' . $data->session_id);
@@ -746,7 +746,7 @@
 
 		}
 		if(time() > $time - $configuration->session_cancel_graceperiod
-		   && $session_data['user_role_id'] != $configuration->admin_user_status_id){
+		   && $session_data['user_role_id'] != $configuration->admin_user_role_id){
 			error_log('api/booking.php: Attempt to delete a user from a session too late (user/session) ' . $data->user_id . '/' . $data->session_id );
 			return Status::errorStatus("The session cannot be cancelled anymore at the time being.");
 		}
@@ -829,7 +829,7 @@
 
 		// all is valid, add all users
 		for($i=0; $i<count($data->user_ids); $i++){
-			if($session_data['user_role_id'] == $configuration->admin_user_status_id){
+			if($session_data['user_role_id'] == $configuration->admin_user_role_id){
 				_add_rider_to_session($data->user_ids[$i], $data->session_id, $db);
 			}else{
 				error_log('api/booking.php: User is not admin and cannot add person to session: user '

@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 import UserHeatsModal from "./UserHeatsModal";
 import {
   BCard,
@@ -80,9 +80,13 @@ export default {
     ]),
   },
   methods: {
+    ...mapActions("configuration", ["queryConfiguration"]),
     showLatestHeats: function () {
       this.showUserHeatsModal = true;
     },
   },
+  created() {
+    this.queryConfiguration();
+  }
 };
 </script>
