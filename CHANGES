@@ -1,3 +1,7 @@
+v2.3.1 2021.04.05
+ - expense dialog bugfix to not display loading overlay on error
+ - income dialog bugfix if no comment given
+
 v2.3 2021.04.05
  - allow credit payments for fuel
  - upgrade to node 15
