@@ -234,8 +234,13 @@ export default {
           this.userLabel = "Driver";
           this.userDescription = "Driver that fueled the boat";
           this.typeDescription = "Add a fuel entry.";
+        } else if([9].includes(Number(newValue))) {
+          // 9: fuel bill
+          this.userLabel = "Payer";
+          this.userDescription = "Pays the bill";
+          this.typeDescription = "Fuel bill";
         } else if ([3].includes(Number(newValue))) {
-          // 0: invest
+          // 3: invest
           this.userLabel = "Payee";
           this.userDescription = "Payee or internal reference.";
           this.typeDescription = "";

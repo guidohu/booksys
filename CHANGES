@@ -1,3 +1,8 @@
+v2.3.3 2021.06.20
+ - fix calculation of balance when fuel is billed
+ - fix display issue if 'fuel bill' is selected in expense modals
+ - fix display issue if no user is selected for an expense
+
 v2.3.2 2021.04.05
  - fix user roles for non admin users
 
