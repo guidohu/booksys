@@ -198,12 +198,12 @@
 		$res = $db->fetch_data_hash($query);
 		$statistic['total_payment_selected_year'] = $res[0]['sum'];
 		
-		// get total of all expenditures
+		// get total of all expenses
 		$query = "SELECT sum(t.tot) as sum 
 		          FROM
 				  ( SELECT coalesce(sum(e.amount_chf),0) as tot FROM expenditure e
 				    UNION ALL
-					SELECT coalesce(sum(b.cost_chf), 0) as tot FROM boat_fuel b
+					SELECT coalesce(sum(b.cost_chf), 0) as tot FROM boat_fuel b WHERE b.contributes_to_balance = 1
 				  ) as t";
 		$res = $db->fetch_data_hash($query);
 		$statistic['total_expenditure'] = $res[0]['sum'];
