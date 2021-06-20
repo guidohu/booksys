@@ -64,9 +64,9 @@
 		
 		$sanitizer = new Sanitizer();
 		
-		// general input validation
+		// general input validation and date selection
 		$year = 'any';
-		$year_constraint = "";
+		$year_constraint = " 1 ";
 		if(isset($post_data->year) and $sanitizer->isInt($post_data->year)){
 			$year = intval($post_data->year);
 			$year_constraint = " year(acc.timestamp) = $year ";

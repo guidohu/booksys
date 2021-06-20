@@ -1,3 +1,6 @@
+unreleased
+ - fix transaction overview for 'any' selection
+
 v2.3.3 2021.06.20
  - fix calculation of balance when fuel is billed
  - fix display issue if 'fuel bill' is selected in expense modals
