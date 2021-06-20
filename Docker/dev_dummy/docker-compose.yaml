@@ -15,7 +15,7 @@ services:
         volumes:
           - "/var/run/docker.sock:/var/run/docker.sock:ro"
     db:
-        image: booksys_dummy_db:latest
+        build: ./db
         environment:
             MYSQL_DATABASE: 'booksys'
             MYSQL_USER: 'user'
@@ -26,7 +26,7 @@ services:
         expose:
             - '3306'
     backend:
-        image: booksys_api:latest
+        build: ../../backend
         environment:
             DB_SERVER: 'db:3306'
             DB_NAME: 'booksys'
