@@ -69,7 +69,7 @@
 		$year_constraint = "";
 		if(isset($post_data->year) and $sanitizer->isInt($post_data->year)){
 			$year = intval($post_data->year);
-			$year_constraint = " AND year(acc.timestamp) = $year ";
+			$year_constraint = " year(acc.timestamp) = $year ";
 		}
 		
 		$db = new DBAccess($configuration);
@@ -93,9 +93,10 @@
                             b.timestamp, b.cost_chf as amount, 
 							CONCAT(b.liters, 'L fuel') as comment
                      FROM boat_fuel b WHERE contributes_to_balance = 1
-                    ) as acc, user u, expenditure_type et 
-                  WHERE (u.id = acc.user_id OR acc.user_id = 0)
-                  AND acc.type_id = et.id " . $year_constraint . "
+                    ) as acc 
+				  LEFT JOIN user u ON u.id = acc.user_id
+				  LEFT JOIN expenditure_type et ON et.id = acc.type_id 
+                  WHERE " . $year_constraint . "
                   ORDER BY acc.timestamp DESC";			  
 		$res = $db->fetch_data_hash($query);
 		if(!isset($res)){
