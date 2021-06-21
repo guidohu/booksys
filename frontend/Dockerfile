@@ -16,6 +16,7 @@ COPY babel.config.js   ./
 COPY vue.config.js     ./
 COPY src               ./src
 COPY public            ./public
+RUN npm install -g npm
 RUN npm install
 RUN npm run build
 
