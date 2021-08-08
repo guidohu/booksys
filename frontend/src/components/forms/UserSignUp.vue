@@ -206,6 +206,9 @@ export default {
     };
   },
   methods: {
+    save: function() {
+      this.$emit("save");
+    },
     update: function () {
       this.$emit("update:user", this.signUpData);
     },

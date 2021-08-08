@@ -39,6 +39,7 @@
           :userData="adminUserConfig"
           :showDisclaimer="false"
           @save="addAdminUser"
+          v-on:update:user="handleUserUpdate"
         />
       </div>
       <!-- Setup Done -->
@@ -173,6 +174,19 @@ export default {
           this.errors = errors;
           this.isLoading = false;
         });
+    },
+    handleUserUpdate: function(u) {
+      this.adminUserConfig.email = u.email;
+      this.adminUserConfig.password = u.password;
+      this.adminUserConfig.passwordConfirm = u.passwordConfirm;
+      this.adminUserConfig.firstName = u.firstName;
+      this.adminUserConfig.lastName = u.lastName;
+      this.adminUserConfig.street = u.street;
+      this.adminUserConfig.zip = u.zip;
+      this.adminUserConfig.city = u.city;
+      this.adminUserConfig.phone = u.phone;
+      this.adminUserConfig.ownRisk = u.ownRisk;
+      this.adminUserConfig.license = u.license;
     },
     addAdminUser: function () {
       // check for obvious validation errors
