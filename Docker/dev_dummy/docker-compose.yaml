@@ -52,4 +52,3 @@ services:
             - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
             - "traefik.http.services.frontend.loadbalancer.server.port=8080"
         command: "npm run serve"
-    
