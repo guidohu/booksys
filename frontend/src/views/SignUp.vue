@@ -7,6 +7,7 @@
     hide-header-close
     visible
   >
+    <!-- User sign up form -->
     <div v-if="isSignedUp == false">
       <b-row class="text-left mb-4">
         <b-col cols="1" class="d-none d-sm-block"></b-col>
@@ -15,7 +16,7 @@
         </b-col>
         <b-col cols="1" class="d-none d-sm-block"></b-col>
       </b-row>
-      <user-sign-up :user-data="form" :show-disclaimer="true" />
+      <user-sign-up :user-data="form" :show-disclaimer="true" v-on:update:user="handleUserUpdate" />
       <b-row v-if="getRecaptchaKey != null" class="mt-3">
         <b-col cols="1" class="d-none d-sm-block"></b-col>
         <b-col cols="12" sm="10">
@@ -135,6 +136,19 @@ export default {
     ...mapActions("configuration", ["queryRecaptchaKey"]),
     recaptchaVerifiedHandler: function (response) {
       this.form.recaptchaResponse = response;
+    },
+    handleUserUpdate: function(userData) {
+      this.form.email = userData.email;
+      this.form.password = userData.password;
+      this.form.passwordConfirm = userData.passwordConfirm;
+      this.form.firstName = userData.firstName;
+      this.form.lastName = userData.lastName;
+      this.form.street = userData.street;
+      this.form.zip = userData.zip;
+      this.form.city = userData.city;
+      this.form.phone = userData.phone;
+      this.form.ownRisk = userData.ownRisk;
+      this.form.license = userData.license;
     },
     validateForm: function () {
       const errors = [];

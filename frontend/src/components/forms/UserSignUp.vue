@@ -13,7 +13,8 @@
         >
           <b-form-input
             id="email-input"
-            v-model="userData.email"
+            v-model="signUpData.email"
+            @input="update()"
             type="text"
             autocomplete="username"
           />
@@ -28,7 +29,8 @@
         >
           <b-form-input
             id="password-input"
-            v-model="userData.password"
+            v-model="signUpData.password"
+            @input="update()"
             type="password"
             autocomplete="new-password"
           />
@@ -43,7 +45,8 @@
         >
           <b-form-input
             id="password-confirm-input"
-            v-model="userData.passwordConfirm"
+            v-model="signUpData.passwordConfirm"
+            @input="update()"
             type="password"
             autocomplete="new-password"
           />
@@ -59,7 +62,8 @@
         >
           <b-form-input
             id="first-name-input"
-            v-model="userData.firstName"
+            v-model="signUpData.firstName"
+            @input="update()"
             type="text"
           />
         </b-form-group>
@@ -73,7 +77,8 @@
         >
           <b-form-input
             id="last-name-input"
-            v-model="userData.lastName"
+            v-model="signUpData.lastName"
+            @input="update()"
             type="text"
           />
         </b-form-group>
@@ -87,7 +92,8 @@
         >
           <b-form-input
             id="street-input"
-            v-model="userData.street"
+            v-model="signUpData.street"
+            @input="update()"
             type="text"
           />
         </b-form-group>
@@ -99,7 +105,12 @@
           description=""
           label-cols="3"
         >
-          <b-form-input id="zip-input" v-model="userData.zip" type="text" />
+          <b-form-input
+            id="zip-input"
+            v-model="signUpData.zip"
+            @input="update()"
+            type="text"
+          />
         </b-form-group>
         <!-- Place / City -->
         <b-form-group
@@ -109,7 +120,12 @@
           description=""
           label-cols="3"
         >
-          <b-form-input id="city-input" v-model="userData.city" type="text" />
+          <b-form-input
+            id="city-input"
+            v-model="signUpData.city"
+            @input="update()"
+            type="text"
+          />
         </b-form-group>
         <!-- Phone -->
         <b-form-group
@@ -119,7 +135,12 @@
           description=""
           label-cols="3"
         >
-          <b-form-input id="phone-input" v-model="userData.phone" type="text" />
+          <b-form-input
+            id="phone-input"
+            v-model="signUpData.phone"
+            @input="update()"
+            type="text"
+          />
         </b-form-group>
         <hr />
         <!-- License -->
@@ -178,31 +199,39 @@ export default {
   props: ["userData", "showDisclaimer"],
   data() {
     return {
+      signUpData: {},
       toggleWidth: 50,
       licenseToggleState: false,
       ownRiskToggleState: false,
     };
   },
   methods: {
-    save: function () {
-      this.$emit("save");
+    update: function () {
+      this.$emit("update:user", this.signUpData);
     },
     licenseToggleHandler: function () {
-      this.userData.license = !this.userData.license;
-      this.licenseToggleState = this.userData.license;
+      this.signUpData.license = !this.signUpData.license;
+      this.licenseToggleState = this.signUpData.license;
+      this.update();
     },
     ownRiskToggleHandler: function () {
-      this.userData.ownRisk = !this.userData.ownRisk;
-      this.ownRiskToggleState = this.userData.ownRisk;
+      this.signUpData.ownRisk = !this.signUpData.ownRisk;
+      this.ownRiskToggleState = this.signUpData.ownRisk;
+      this.update();
     },
   },
   mounted() {
-    if (this.userData.license == true) {
+    if (this.signUpData.license == true) {
       this.licenseToggleState = true;
     }
-    if (this.userData.ownRisk == true) {
+    if (this.signUpData.ownRisk == true) {
       this.ownRiskToggleState = true;
     }
+  },
+  created() {
+    // if we already get data provided upon initialization,
+    // we use it
+    this.signUpData = this.$props.userData;
   },
 };
 </script>
