@@ -472,13 +472,13 @@ export default class Sessions {
     });
   }
 
+  /**
+   * Deletes a user from a specific session.
+   * @param {*} sessionId ID of the session
+   * @param {*} user ID of the user
+   * @returns 
+   */
   static deleteUserFromSession(sessionId, user) {
-    console.log(
-      "api/deleteUserFromSession called for session:",
-      sessionId,
-      "and user",
-      user
-    );
     return new Promise((resolve, reject) => {
       // build request body
       const requestBody = {
@@ -518,7 +518,7 @@ export default class Sessions {
             });
         })
         .catch((error) => {
-          console.error("Sessions/deleteUserFromSession", error);
+          console.error("Sessions/deleteUserFromSession fetch:", error);
           reject([error]);
         });
     });

@@ -70,9 +70,9 @@
               {{ rider.name }}
             </b-col>
             <b-col cols="2">
-              <a href="#" v-on:click="removeRider(rider.id)">
+              <b-link href="#" v-on:click="removeRider(rider.id)">
                 <b-icon-person-dash />
-              </a>
+              </b-link>
             </b-col>
           </b-row>
         </b-col>
@@ -116,6 +116,7 @@ import {
   BIconPencilSquare,
   BIconTrash,
   BButton,
+  BLink,
 } from "bootstrap-vue";
 
 export default {
@@ -136,6 +137,7 @@ export default {
     BIconPencilSquare,
     BIconTrash,
     BButton,
+    BLink,
   },
   props: ["date", "session"],
   data() {
@@ -214,10 +216,12 @@ export default {
     },
     ...mapActions("sessions", ["deleteUserFromSession"]),
     removeRider: function (id) {
-      console.log("TODO remove rider with id", id);
       this.deleteUserFromSession({
         sessionId: this.session.id,
         user: new UserPointer(id),
+      })
+      .catch((errors) => {
+        console.error("Cannot delete user:", errors)
       });
     },
   },

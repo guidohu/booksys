@@ -159,8 +159,7 @@
 		}
 		$db->disconnect();
 		
-		return Status::successStatus("deleted transaction successfully");
-		
+		return Status::successStatus("deleted transaction successfully");	
 	}
 	
 	/* Returns some statistics about balance and minute usage */

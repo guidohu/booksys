@@ -146,8 +146,8 @@ const actions = {
           dispatch("querySessions");
           resolve();
         })
-        .catch((error) => {
-          reject(error);
+        .catch((errors) => {
+          reject(errors);
         });
     });
   },
