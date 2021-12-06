@@ -21,7 +21,7 @@ const Ride = () => import(/* webpackChunkName: "ride" */ "@/views/Ride");
 const Watch = () => import(/* webpackChunkName: "watch" */ "@/views/Watch");
 const Admin = () => import(/* webpackChunkName: "admin" */ "@/views/Admin");
 const Users = () =>
-  import(/* webpackChunkName: "users" */ "@/views/admin/Users");
+  import(/* webpackChunkName: "users" */ "@/views/admin/UsersPage");
 const Accounting = () =>
   import(/* webpackChunkName: "accounting" */ "@/views/admin/Accounting");
 const Settings = () =>
@@ -29,7 +29,7 @@ const Settings = () =>
 const Logs = () => import(/* webpackChunkName: "logs" */ "@/views/admin/Logs");
 const PasswordReset = () =>
   import(/* webpackChunkName: "password-reset" */ "@/views/PasswordReset");
-const Setup = () => import(/* webpackChunkName: "setup" */ "@/views/Setup");
+const Setup = () => import(/* webpackChunkName: "setup" */ "@/views/SetupPage");
 
 Vue.use(VueRouter);
 

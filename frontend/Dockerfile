@@ -1,4 +1,4 @@
-FROM node:15 as build-stage
+FROM node:17 as build-stage
 
 # copy project configuration
 # COPY  package.json /home/node/app/
