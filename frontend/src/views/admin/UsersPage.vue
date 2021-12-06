@@ -33,7 +33,7 @@ import MainTitle from "@/components/MainTitle";
 import { BRow, BCol, BCard, BButton, BIconGear } from "bootstrap-vue";
 
 export default {
-  name: "Users",
+  name: "UsersPage",
   components: {
     NavbarAdminMobile,
     MainTitle,
