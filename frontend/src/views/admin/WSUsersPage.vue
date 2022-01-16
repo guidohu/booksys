@@ -1,11 +1,11 @@
 <template>
   <div>
     <div v-if="isDesktop" class="display">
-      <main-title title-name="Accounting" />
+      <main-title title-name="User Management" />
       <b-row class="ml-1 mr-1">
         <b-col cols="12">
           <b-card no-body>
-            <AccountingTabs class="content-max-height" />
+            <UserManagementTabs class="content-max-height" />
           </b-card>
         </b-col>
       </b-row>
@@ -17,9 +17,9 @@
       </div>
     </div>
     <div v-else>
-      <NavbarAdminMobile title="Accounting" />
+      <NavbarAdminMobile title="User Management" />
       <b-card no-body>
-        <AccountingTabs />
+        <UserManagementTabs />
       </b-card>
     </div>
   </div>
@@ -28,16 +28,16 @@
 <script>
 import { BooksysBrowser } from "@/libs/browser";
 import NavbarAdminMobile from "@/components/NavbarAdminMobile";
-import AccountingTabs from "@/components/AccountingTabs";
+import UserManagementTabs from "@/components/UserManagementTabs";
 import MainTitle from "@/components/MainTitle";
 import { BRow, BCol, BCard, BButton, BIconGear } from "bootstrap-vue";
 
 export default {
-  name: "Accounting",
+  name: "WSUsersPage",
   components: {
     NavbarAdminMobile,
     MainTitle,
-    AccountingTabs,
+    UserManagementTabs,
     BRow,
     BCol,
     BCard,

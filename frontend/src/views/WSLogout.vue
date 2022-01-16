@@ -15,7 +15,7 @@ import { mapActions, mapGetters } from "vuex";
 import { BCard, BCardText, BLink } from "bootstrap-vue";
 
 export default {
-  name: "Logout",
+  name: "WSLogout",
   components: {
     BCard,
     BCardText,

@@ -7,7 +7,7 @@ import BooksysPie from "../libs/pie";
 import * as dayjs from "dayjs";
 
 export default {
-  name: "Pie",
+  name: "BooksysPie",
   mounted() {
     let el = document.getElementById(this.pieElementId);
     const pie = new BooksysPie();

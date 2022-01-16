@@ -52,7 +52,7 @@ import MainTitle from "@/components/MainTitle";
 import { BRow, BCol, BButton, BIconHouse } from "bootstrap-vue";
 
 export default {
-  name: "Watch",
+  name: "WSWatch",
   components: {
     NavbarMobile,
     MainTitle,

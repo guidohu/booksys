@@ -1,4 +1,4 @@
-FROM php:7.4.4-apache
+FROM php:7.4-apache
 
 # activate mysqli extension for PHP
 RUN mkdir -p /usr/local/etc/php/conf.d

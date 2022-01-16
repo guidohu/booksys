@@ -1,43 +1,48 @@
 <template>
   <div>
     <div v-if="isDesktop" class="display">
-      <main-title title-name="Logs" />
+      <main-title title-name="Boat" />
       <b-row class="ml-1 mr-1">
         <b-col cols="12">
-          <LogCard class="content-max-height" />
+          <b-card no-body>
+            <BoatTabs />
+          </b-card>
         </b-col>
       </b-row>
       <div class="bottom mr-2">
-        <b-button variant="outline-light" to="/admin">
-          <b-icon-gear />
-          ADMIN
+        <b-button variant="outline-light" to="/dashboard">
+          <b-icon-house></b-icon-house>
+          HOME
         </b-button>
       </div>
     </div>
     <div v-else>
-      <NavbarAdminMobile title="Logs" />
-      <LogCard />
+      <NavbarMobile title="Boat" />
+      <b-card no-body>
+        <BoatTabs />
+      </b-card>
     </div>
   </div>
 </template>
 
 <script>
 import { BooksysBrowser } from "@/libs/browser";
-import NavbarAdminMobile from "@/components/NavbarAdminMobile";
-import LogCard from "@/components/LogCard";
+import NavbarMobile from "@/components/NavbarMobile";
+import BoatTabs from "@/components/BoatTabs";
 import MainTitle from "@/components/MainTitle";
-import { BRow, BCol, BButton, BIconGear } from "bootstrap-vue";
+import { BRow, BCol, BCard, BButton, BIconHouse } from "bootstrap-vue";
 
 export default {
-  name: "Logs",
+  name: "WSBoat",
   components: {
-    NavbarAdminMobile,
+    NavbarMobile,
     MainTitle,
-    LogCard,
+    BoatTabs,
     BRow,
     BCol,
+    BCard,
     BButton,
-    BIconGear,
+    BIconHouse,
   },
   computed: {
     isDesktop: function () {
@@ -46,10 +51,3 @@ export default {
   },
 };
 </script>
-
-<style>
-.content-max-height {
-  max-height: 480px;
-  overflow-y: scroll;
-}
-</style>

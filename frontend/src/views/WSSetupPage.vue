@@ -131,7 +131,7 @@ import {
 } from "bootstrap-vue";
 
 export default {
-  name: "Setup",
+  name: "WSSetupPage",
   components: {
     DatabaseConfiguration,
     WarningBox,
@@ -175,7 +175,7 @@ export default {
           this.isLoading = false;
         });
     },
-    handleUserUpdate: function(u) {
+    handleUserUpdate: function (u) {
       this.adminUserConfig.email = u.email;
       this.adminUserConfig.password = u.password;
       this.adminUserConfig.passwordConfirm = u.passwordConfirm;

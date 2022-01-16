@@ -66,7 +66,7 @@ dayjs.extend(dayjsTimezone);
 dayjs.extend(dayjsCustomParseFormat);
 
 export default {
-  name: "Calendar",
+  name: "WSCalendar",
   components: {
     NavbarMobile,
     MainTitle,

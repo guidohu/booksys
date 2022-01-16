@@ -58,7 +58,7 @@
               variant="light"
               class="btn btn-default btn-dashboard"
             >
-              <Pie
+              <BooksysPie
                 v-bind:sessionData="sessionData"
                 v-bind:properties="properties"
               />
@@ -126,7 +126,7 @@
 </template>
 
 <script>
-import Pie from "./Pie.vue";
+import BooksysPie from "./Pie.vue";
 import {
   BNavbar,
   BNavbarBrand,
@@ -153,7 +153,7 @@ export default {
     };
   },
   components: {
-    Pie,
+    BooksysPie,
     BNavbar,
     BNavbarBrand,
     BNavbarToggle,

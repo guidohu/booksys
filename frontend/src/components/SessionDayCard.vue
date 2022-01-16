@@ -29,7 +29,7 @@
     </b-card-header>
     <b-card-body>
       <b-row>
-        <Pie
+        <BooksysPie
           :sessionData="sessionData"
           :selectedSession="selectedSession"
           :properties="properties"
@@ -60,7 +60,7 @@
 
 <script>
 import { mapGetters } from "vuex";
-import Pie from "./Pie.vue";
+import BooksysPie from "./Pie.vue";
 import * as dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
@@ -128,7 +128,7 @@ export default {
     },
   },
   components: {
-    Pie,
+    BooksysPie,
     BCard,
     BCardHeader,
     BRow,

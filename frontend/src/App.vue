@@ -13,7 +13,7 @@
         </div>
       </b-row>
       <footer class="legal-footer">
-        Copyright 2013-2021 by Guido Hungerbuehler
+        Copyright 2013-2022 by Guido Hungerbuehler
         <a href="https://github.com/guidohu/booksys">Find me on Github</a>
       </footer>
     </b-container>
@@ -40,6 +40,7 @@ export default {
   name: "App",
   data: function () {
     return {
+      errors: [],
       backendReachable: true,
       backendNotReachableAlertMsg:
         "The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible. You might try to simply refresh the page if you feel lucky.",
@@ -104,7 +105,13 @@ export default {
         }
       })
       .catch((error) => {
-        this.errors = [error];
+        this.errors = error;
+        this.backendReachable = false;
+        if (this.errors.length > 0) {
+          this.backendNotReachableAlertMsg = this.errors[0];
+        } else {
+          this.backendNotReachableAlertMsg = "Unknown error when connecting to the backend.";
+        }
       });
   },
 };
