@@ -90,7 +90,7 @@ import {
 } from "bootstrap-vue";
 
 export default {
-  name: "Info",
+  name: "WSInfo",
   components: {
     MainTitle,
     NavbarMobile,

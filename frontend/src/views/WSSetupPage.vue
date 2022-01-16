@@ -131,7 +131,7 @@ import {
 } from "bootstrap-vue";
 
 export default {
-  name: "SetupPage",
+  name: "WSSetupPage",
   components: {
     DatabaseConfiguration,
     WarningBox,

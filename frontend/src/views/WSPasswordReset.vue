@@ -231,7 +231,7 @@ const VueRecaptcha = () =>
   import(/* webpackChunkName: "vue-recaptcha" */ "vue-recaptcha");
 
 export default {
-  name: "PasswordReset",
+  name: "WSPasswordReset",
   components: {
     VueRecaptcha,
     WarningBox,

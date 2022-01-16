@@ -42,7 +42,7 @@ import MainTitle from "@/components/MainTitle";
 import { BRow, BCol, BButton, BIconHouse } from "bootstrap-vue";
 
 export default {
-  name: "Account",
+  name: "WSAccount",
   components: {
     NavbarMobile,
     MainTitle,

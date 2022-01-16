@@ -104,7 +104,7 @@ const UserSignUp = () =>
   );
 
 export default {
-  name: "SignUp",
+  name: "WSSignUp",
   components: {
     WarningBox,
     UserSignUp,

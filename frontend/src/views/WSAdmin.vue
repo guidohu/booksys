@@ -152,7 +152,7 @@ import {
 } from "bootstrap-vue";
 
 export default {
-  name: "Admin",
+  name: "WSAdmin",
   components: {
     MainTitle,
     BRow,

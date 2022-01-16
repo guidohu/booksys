@@ -115,7 +115,7 @@ import {
 } from "bootstrap-vue";
 
 export default {
-  name: "Schedule",
+  name: "WSSchedule",
   components: {
     NavbarMobile,
     MainTitle,

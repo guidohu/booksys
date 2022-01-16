@@ -44,7 +44,7 @@
             v-on:mouseover="mouseOver(sessionData[i * 7 + j])"
           >
             <div :class="getCalendarDayBoxClass(sessionData[i * 7 + j])">
-              <Pie
+              <BooksysPie
                 :sessionData="sessionData[i * 7 + j]"
                 :properties="properties"
                 :pieId="i * 7 + j"
@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import Pie from "./Pie.vue";
+import BooksysPie from "./Pie.vue";
 import * as dayjs from "dayjs";
 import { BooksysBrowser } from "@/libs/browser";
 import {
@@ -127,7 +127,7 @@ export default {
     },
   },
   components: {
-    Pie,
+    BooksysPie,
     BCard,
     BCardHeader,
     BCardBody,

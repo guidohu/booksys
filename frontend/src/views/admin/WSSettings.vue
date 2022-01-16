@@ -23,7 +23,7 @@ import MainTitle from "@/components/MainTitle";
 import { BRow, BCol } from "bootstrap-vue";
 
 export default {
-  name: "Settings",
+  name: "WSSettings",
   components: {
     NavbarAdminMobile,
     MainTitle,

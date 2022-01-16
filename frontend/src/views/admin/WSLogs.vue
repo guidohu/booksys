@@ -1,12 +1,10 @@
 <template>
   <div>
     <div v-if="isDesktop" class="display">
-      <main-title title-name="User Management" />
+      <main-title title-name="Logs" />
       <b-row class="ml-1 mr-1">
         <b-col cols="12">
-          <b-card no-body>
-            <UserManagementTabs class="content-max-height" />
-          </b-card>
+          <LogCard class="content-max-height" />
         </b-col>
       </b-row>
       <div class="bottom mr-2">
@@ -17,10 +15,8 @@
       </div>
     </div>
     <div v-else>
-      <NavbarAdminMobile title="User Management" />
-      <b-card no-body>
-        <UserManagementTabs />
-      </b-card>
+      <NavbarAdminMobile title="Logs" />
+      <LogCard />
     </div>
   </div>
 </template>
@@ -28,19 +24,18 @@
 <script>
 import { BooksysBrowser } from "@/libs/browser";
 import NavbarAdminMobile from "@/components/NavbarAdminMobile";
-import UserManagementTabs from "@/components/UserManagementTabs";
+import LogCard from "@/components/LogCard";
 import MainTitle from "@/components/MainTitle";
-import { BRow, BCol, BCard, BButton, BIconGear } from "bootstrap-vue";
+import { BRow, BCol, BButton, BIconGear } from "bootstrap-vue";
 
 export default {
-  name: "UsersPage",
+  name: "WSLogs",
   components: {
     NavbarAdminMobile,
     MainTitle,
-    UserManagementTabs,
+    LogCard,
     BRow,
     BCol,
-    BCard,
     BButton,
     BIconGear,
   },
@@ -54,7 +49,6 @@ export default {
 
 <style>
 .content-max-height {
-  min-height: 480px;
   max-height: 480px;
   overflow-y: scroll;
 }

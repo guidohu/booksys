@@ -10,7 +10,7 @@
       :visible.sync="showSessionDeleteModal"
     />
     <div v-if="isDesktop" class="display">
-      <main-title title-name="Select Session" />
+      <main-title title-name="Book Your Session" />
       <b-row class="ml-1 mr-1">
         <b-col cols="8">
           <SessionDayCard
@@ -19,7 +19,8 @@
             :selectedSession="selectedSession"
             :isMobile="isMobile"
             :timezone="getTimezone"
-            disableDayBrowsing="true"
+            @prevDay="prevDay"
+            @nextDay="nextDay"
             @selectSessionHandler="selectSlot"
           />
         </b-col>
@@ -32,6 +33,7 @@
                 @createSessionHandler="showCreateSession"
                 @editSessionHandler="showCreateSession"
                 @deleteSessionHandler="showDeleteSession"
+                @addRidersHandler="addRiders"
               />
             </b-col>
           </b-row>
@@ -48,17 +50,17 @@
       </b-row>
       <div class="bottom mr-2">
         <b-button class="mr-1" variant="outline-light" to="/calendar">
-          <b-icon-calendar3 />
+          <b-icon-calendar3></b-icon-calendar3>
           CALENDAR
         </b-button>
         <b-button variant="outline-light" to="/dashboard">
-          <b-icon-house />
+          <b-icon-house></b-icon-house>
           HOME
         </b-button>
       </div>
     </div>
     <div v-else>
-      <NavbarMobile title="Select Session" />
+      <NavbarMobile title="Book Your Session" />
       <SessionDayCard
         v-if="getSessions != null"
         class="mb-1"
@@ -66,7 +68,8 @@
         :selectedSession="selectedSession"
         :isMobile="isMobile"
         :timezone="getTimezone"
-        disableDayBrowsing="true"
+        @prevDay="prevDay"
+        @nextDay="nextDay"
         @selectSessionHandler="selectSlot"
       />
       <SessionDetailsCard
@@ -76,6 +79,7 @@
         @createSessionHandler="showCreateSession"
         @editSessionHandler="showCreateSession"
         @deleteSessionHandler="showDeleteSession"
+        @addRidersHandler="addRiders"
       />
       <ConditionInfoCard
         v-if="sunrise != null"
@@ -96,25 +100,22 @@ import SessionDetailsCard from "@/components/SessionDetailsCard";
 import MainTitle from "@/components/MainTitle";
 import Session from "@/dataTypes/session";
 import * as dayjs from "dayjs";
+import * as dayjsCustomParseFormat from "dayjs/plugin/customParseFormat";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
+
 import difference from "lodash/difference";
 import { BRow, BCol, BButton, BIconCalendar3, BIconHouse } from "bootstrap-vue";
 
-const SessionEditorModal = () =>
-  import(
-    /* webpackChunkName: "session-editor-modal" */ "@/components/SessionEditorModal"
-  );
-const SessionDeleteModal = () =>
-  import(
-    /* webpackChunkName: "session-delete-modal" */ "@/components/SessionDeleteModal"
-  );
+const SessionEditorModal = () => import("@/components/SessionEditorModal");
+const SessionDeleteModal = () => import("@/components/SessionDeleteModal");
 
+dayjs.extend(dayjsCustomParseFormat);
 dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);
 
 export default {
-  name: "Ride",
+  name: "WSToday",
   components: {
     NavbarMobile,
     MainTitle,
@@ -138,7 +139,6 @@ export default {
     },
     ...mapGetters("configuration", ["getTimezone"]),
     ...mapGetters("sessions", ["getSessions"]),
-    ...mapGetters("stopwatch", ["getIsRunning", "getSessionId"]),
     sunrise: function () {
       const sessions = this.getSessions;
       if (sessions == null) {
@@ -159,9 +159,22 @@ export default {
   methods: {
     ...mapActions("configuration", ["queryConfiguration"]),
     ...mapActions("sessions", ["querySessions", "createSession"]),
+    prevDay: function () {
+      this.date = dayjs(this.date).add(-1, "days");
+      this.selectedSession = null;
+      this.querySessionsForDate();
+    },
+    nextDay: function () {
+      this.date = dayjs(this.date).add(1, "days");
+      this.selectedSession = null;
+      this.querySessionsForDate();
+    },
     querySessionsForDate: function () {
+      console.log("the time", this.date);
       const dateStart = dayjs(this.date).startOf("day").format();
       const dateEnd = dayjs(this.date).endOf("day").format();
+      console.log("dateStart:", dateStart);
+      console.log("dateEnd:", dateEnd);
 
       // query get_booking_day
       this.querySessions({
@@ -170,6 +183,11 @@ export default {
       });
     },
     selectSlot: function (selectedSession) {
+      console.log("selectedSlot", selectedSession);
+      console.log(
+        dayjs(selectedSession.start).format(),
+        dayjs(selectedSession.end).format()
+      );
       const sessionWithSelectedId = this.getSessions.sessions.find(
         (s) => selectedSession.id == s.id
       );
@@ -186,17 +204,30 @@ export default {
       }
     },
     sessionDeletedHandler: function () {
+      console.log("sessionDeletedHandler");
       this.selectedSession = null;
     },
     showCreateSession: function () {
+      console.log("createSession clicked");
+      console.log("for selectedSession:", this.selectedSession);
+      console.log("show session editor");
       this.showSessionEditorModal = true;
     },
     showDeleteSession: function () {
+      console.log("showDeleteSession");
       this.showSessionDeleteModal = true;
+    },
+    addRiders: function () {
+      console.log("addRiders");
     },
   },
   watch: {
     getSessions: function (newInfo, oldInfo) {
+      if (newInfo == null || newInfo.sessions == null) {
+        this.selectedSession = null;
+        return;
+      }
+
       // in case we get an update affecting the sessions
       // we will update our selected session too
       if (
@@ -219,16 +250,22 @@ export default {
         // find the session that is new
         const newIds = newInfo.sessions.map((s) => s.id);
         const oldIds =
-          oldInfo == null || oldInfo.session == null
-            ? []
-            : oldInfo.sessions.map((s) => s.id);
+          oldInfo != null && oldInfo.sessions != null
+            ? oldInfo.sessions.map((s) => s.id)
+            : [];
         const diff = difference(newIds, oldIds);
         if (diff.length == 1) {
           this.selectedSession = newInfo.sessions.find((s) => s.id == diff[0]);
+        } else if (diff.length == 0) {
+          // nothing changed, happens during the initial phase when
+          // both have no sessions
+          this.selectedSession = null;
         } else {
           console.error(
             "old and new session info differs by more than one session"
           );
+          console.error(oldInfo, newInfo);
+          console.error("difference:", diff);
         }
       } else if (newInfo.sessions.length < oldInfo.sessions.length) {
         // a session has been deleted -> reset selected session
@@ -265,11 +302,6 @@ export default {
     }
 
     this.querySessionsForDate();
-
-    // check if the watch is running currently -> then go to watch
-    if (this.getIsRunning == true) {
-      this.$router.push("/watch?sessionId=" + this.getSessionId);
-    }
   },
 };
 </script>
