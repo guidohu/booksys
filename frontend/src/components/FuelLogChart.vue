@@ -39,9 +39,10 @@ export default {
               return "Average Fuel Consumption";
             },
             label: function (tooltipItem, data) {
-              let time = data.datasets[tooltipItem.datasetIndex].data[
-                tooltipItem.index
-              ].x.format("DD. MMM");
+              let time =
+                data.datasets[tooltipItem.datasetIndex].data[
+                  tooltipItem.index
+                ].x.format("DD. MMM");
               let liters =
                 data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index]
                   .y;

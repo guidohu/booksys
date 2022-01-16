@@ -38,7 +38,7 @@ import { BooksysBrowser } from "@/libs/browser";
 import { BAspect, BContainer, BOverlay, BImg, BRow, BCol } from "bootstrap-vue";
 
 export default {
-  name: "Login",
+  name: "WSLogin",
   components: {
     LoginModal,
     BAspect,

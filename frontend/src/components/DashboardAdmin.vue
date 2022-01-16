@@ -10,7 +10,7 @@
             class="btn btn-default btn-dashboard"
           >
             <!-- <div class="bc_dashboard" id="today"></div> -->
-            <Pie
+            <BooksysPie
               v-bind:sessionData="sessionData"
               v-bind:properties="properties"
             />
@@ -108,7 +108,7 @@
 </template>
 
 <script>
-import Pie from "./Pie.vue";
+import BooksysPie from "./Pie.vue";
 import { BRow, BCol, BButton } from "bootstrap-vue";
 
 export default {
@@ -123,7 +123,7 @@ export default {
     };
   },
   components: {
-    Pie,
+    BooksysPie,
     BRow,
     BCol,
     BButton,

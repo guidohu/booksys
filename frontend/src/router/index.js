@@ -3,33 +3,33 @@ import VueRouter from "vue-router";
 import { loadStoreModules, store } from "@/store";
 
 // Lazy import of all the Views used by the router
-const Login = () => import(/* webpackChunkName: "login" */ "@/views/Login");
-const Logout = () => import(/* webpackChunkName: "logout" */ "@/views/Logout");
-const SignUp = () => import(/* webpackChunkName: "signup" */ "@/views/SignUp");
+const Login = () => import(/* webpackChunkName: "login" */ "@/views/WSLogin");
+const Logout = () => import(/* webpackChunkName: "logout" */ "@/views/WSLogout");
+const SignUp = () => import(/* webpackChunkName: "signup" */ "@/views/WSSignUp");
 const Dashboard = () =>
-  import(/* webpackChunkName: "dashboard" */ "@/views/Dashboard");
+  import(/* webpackChunkName: "dashboard" */ "@/views/WSDashboard");
 const Account = () =>
-  import(/* webpackChunkName: "account" */ "@/views/Account");
-const Info = () => import(/* webpackChunkName: "info" */ "@/views/Info");
+  import(/* webpackChunkName: "account" */ "@/views/WSAccount");
+const Info = () => import(/* webpackChunkName: "info" */ "@/views/WSInfo");
 const Schedule = () =>
-  import(/* webpackChunkName: "schedule" */ "@/views/Schedule");
-const Today = () => import(/* webpackChunkName: "today" */ "@/views/Today");
+  import(/* webpackChunkName: "schedule" */ "@/views/WSSchedule");
+const Today = () => import(/* webpackChunkName: "today" */ "@/views/WSToday");
 const Calendar = () =>
-  import(/* webpackChunkName: "calendar" */ "@/views/Calendar");
-const Boat = () => import(/* webpackChunkName: "boat" */ "@/views/Boat");
-const Ride = () => import(/* webpackChunkName: "ride" */ "@/views/Ride");
-const Watch = () => import(/* webpackChunkName: "watch" */ "@/views/Watch");
-const Admin = () => import(/* webpackChunkName: "admin" */ "@/views/Admin");
+  import(/* webpackChunkName: "calendar" */ "@/views/WSCalendar");
+const Boat = () => import(/* webpackChunkName: "boat" */ "@/views/WSBoat");
+const Ride = () => import(/* webpackChunkName: "ride" */ "@/views/WSRide");
+const Watch = () => import(/* webpackChunkName: "watch" */ "@/views/WSWatch");
+const Admin = () => import(/* webpackChunkName: "admin" */ "@/views/WSAdmin");
 const Users = () =>
-  import(/* webpackChunkName: "users" */ "@/views/admin/Users");
+  import(/* webpackChunkName: "users" */ "@/views/admin/WSUsersPage");
 const Accounting = () =>
-  import(/* webpackChunkName: "accounting" */ "@/views/admin/Accounting");
+  import(/* webpackChunkName: "accounting" */ "@/views/admin/WSAccounting");
 const Settings = () =>
-  import(/* webpackChunkName: "settings" */ "@/views/admin/Settings");
-const Logs = () => import(/* webpackChunkName: "logs" */ "@/views/admin/Logs");
+  import(/* webpackChunkName: "settings" */ "@/views/admin/WSSettings");
+const Logs = () => import(/* webpackChunkName: "logs" */ "@/views/admin/WSLogs");
 const PasswordReset = () =>
-  import(/* webpackChunkName: "password-reset" */ "@/views/PasswordReset");
-const Setup = () => import(/* webpackChunkName: "setup" */ "@/views/Setup");
+  import(/* webpackChunkName: "password-reset" */ "@/views/WSPasswordReset");
+const Setup = () => import(/* webpackChunkName: "setup" */ "@/views/WSSetupPage");
 
 Vue.use(VueRouter);
 

@@ -1,3 +1,8 @@
+v2.4.0 2022.01.16
+ - npm package version updates
+ - display expense with minus
+ - fix transaction overview for 'any' selection
+
 v2.3.3 2021.06.20
  - fix calculation of balance when fuel is billed
  - fix display issue if 'fuel bill' is selected in expense modals

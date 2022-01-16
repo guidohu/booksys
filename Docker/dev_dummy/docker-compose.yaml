@@ -40,6 +40,7 @@ services:
             - ${PWD}/../../backend/classes:/var/www/html/classes
             - ${PWD}/config.php:/var/www/html/config/config.php
             - ${PWD}/../../backend/config/db:/var/www/html/config/db
+            - ${PWD}/backend/etc/apache2/000-default.conf:/etc/apache2/sites-available/000-default.conf
     frontend:
         build: "./frontend"
         user: "node"
@@ -52,4 +53,3 @@ services:
             - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
             - "traefik.http.services.frontend.loadbalancer.server.port=8080"
         command: "npm run serve"
-    

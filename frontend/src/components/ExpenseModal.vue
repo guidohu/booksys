@@ -234,7 +234,7 @@ export default {
           this.userLabel = "Driver";
           this.userDescription = "Driver that fueled the boat";
           this.typeDescription = "Add a fuel entry.";
-        } else if([9].includes(Number(newValue))) {
+        } else if ([9].includes(Number(newValue))) {
           // 9: fuel bill
           this.userLabel = "Payer";
           this.userDescription = "Pays the bill";

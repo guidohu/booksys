@@ -88,7 +88,7 @@ const DatabaseUpdateModal = () =>
   );
 
 export default {
-  name: "Dashboard",
+  name: "WSDashboard",
   components: {
     DashboardAdmin,
     DashboardMember,

@@ -22,7 +22,7 @@
             description="Database Host (e.g. 127.0.0.1:3306)"
             label-cols="3"
           >
-            <b-form-input id="host-input" v-model="dbConfig.host" type="text" />
+            <b-form-input id="host-input" v-model="config.host" type="text" />
           </b-form-group>
           <b-form-group
             id="name"
@@ -31,7 +31,7 @@
             description="Database Name (e.g. booksys)"
             label-cols="3"
           >
-            <b-form-input id="name-input" v-model="dbConfig.name" type="text" />
+            <b-form-input id="name-input" v-model="config.name" type="text" />
           </b-form-group>
           <b-form-group
             id="user"
@@ -40,7 +40,7 @@
             description="Database User (e.g. dbUser)"
             label-cols="3"
           >
-            <b-form-input id="user-input" v-model="dbConfig.user" type="text" />
+            <b-form-input id="user-input" v-model="config.user" type="text" />
           </b-form-group>
           <b-form-group
             id="password"
@@ -51,7 +51,7 @@
           >
             <b-form-input
               id="password-input"
-              v-model="dbConfig.password"
+              v-model="config.password"
               type="password"
             />
           </b-form-group>
@@ -83,10 +83,26 @@ export default {
     BFormInput,
   },
   props: ["dbConfig"],
+  data() {
+    return {
+      conf: {
+        host: "",
+        name: "",
+        user: "",
+        password: "",
+      }
+    }
+  },
   methods: {
     save: function () {
-      this.$emit("save", this.dbConfig);
+      this.$emit("save", this.conf);
     },
   },
+  created() {
+    this.conf.host = this.dbConfig.host;
+    this.conf.name = this.dbConfig.name;
+    this.conf.user = this.dbConfig.user;
+    this.conf.password = this.dbConfig.password;
+  }
 };
 </script>

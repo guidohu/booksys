@@ -64,9 +64,9 @@
 		
 		$sanitizer = new Sanitizer();
 		
-		// general input validation
+		// general input validation and date selection
 		$year = 'any';
-		$year_constraint = "";
+		$year_constraint = " 1 ";
 		if(isset($post_data->year) and $sanitizer->isInt($post_data->year)){
 			$year = intval($post_data->year);
 			$year_constraint = " year(acc.timestamp) = $year ";
@@ -82,7 +82,7 @@
                          acc.amount as amount, acc.comment as comment, '$configuration->currency' as currency
 			      FROM 
 				    (SELECT 0 as tbl, e.id, e.user_id, e.type_id, 
-                            e.timestamp, e.amount_chf as amount, e.comment 
+                            e.timestamp, e.amount_chf * -1 as amount, e.comment 
                      FROM expenditure e
                      UNION ALL
                      SELECT 1 as tbl, p.id, p.user_id, p.type_id as type_id, 
@@ -90,7 +90,7 @@
                      FROM payment p
                      UNION ALL
                      SELECT 2 as tbl, b.id, b.user_id, 0 as type_id,
-                            b.timestamp, b.cost_chf as amount, 
+                            b.timestamp, b.cost_chf * -1 as amount, 
 							CONCAT(b.liters, 'L fuel') as comment
                      FROM boat_fuel b WHERE contributes_to_balance = 1
                     ) as acc 
@@ -159,8 +159,7 @@
 		}
 		$db->disconnect();
 		
-		return Status::successStatus("deleted transaction successfully");
-		
+		return Status::successStatus("deleted transaction successfully");	
 	}
 	
 	/* Returns some statistics about balance and minute usage */
