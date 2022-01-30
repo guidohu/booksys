@@ -1,8 +1,5 @@
 <template>
-  <b-card
-    no-body
-    class="text-left"
-  >
+  <b-card no-body class="text-left">
     <b-card-body>
       <HeatEntryModal
         v-model:visible="showHeatEntryModal"
@@ -18,10 +15,7 @@
         tbody-tr-class="clickable"
         @row-clicked="rowClick"
       />
-      <WarningBox
-        v-if="errors.length > 0"
-        :errors="errors"
-      />
+      <WarningBox v-if="errors.length > 0" :errors="errors" />
     </b-card-body>
   </b-card>
 </template>

@@ -20,7 +20,9 @@ export const getBackendStatus = () => {
               "getBackendStatus: Cannot parse server response:",
               error
             );
-            const error_msg = "There is an issue with the response from the server. A status report was expected but something else go received. Full details: " + error;
+            const error_msg =
+              "There is an issue with the response from the server. A status report was expected but something else go received. Full details: " +
+              error;
             reject([error_msg]);
           });
       })

@@ -8,31 +8,16 @@
     @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
-      <b-col
-        cols="1"
-        class="d-none d-sm-block"
-      />
-      <b-col
-        cols="12"
-        sm="10"
-      >
+      <b-col cols="1" class="d-none d-sm-block" />
+      <b-col cols="12" sm="10">
         <WarningBox :errors="errors" />
       </b-col>
-      <b-col
-        cols="1"
-        class="d-none d-sm-block"
-      />
+      <b-col cols="1" class="d-none d-sm-block" />
     </b-row>
     <b-form @submit="save">
       <b-row class="text-left">
-        <b-col
-          cols="1"
-          class="d-none d-sm-block"
-        />
-        <b-col
-          cols="12"
-          sm="10"
-        >
+        <b-col cols="1" class="d-none d-sm-block" />
+        <b-col cols="12" sm="10">
           <b-form-group
             id="title"
             label="Title"
@@ -116,10 +101,7 @@
             label-for="capacity-input"
             description=""
           >
-            <b-form-input
-              v-model="form.maximumRiders"
-              type="number"
-            />
+            <b-form-input v-model="form.maximumRiders" type="number" />
           </b-form-group>
           <b-form-group
             id="type"
@@ -127,18 +109,12 @@
             label-for="type-input"
             description="Choose whether this session is open to others or a closed group"
           >
-            <b-form-checkbox
-              v-model="form.type"
-              switch
-            >
+            <b-form-checkbox v-model="form.type" switch>
               {{ getTypeText }}
             </b-form-checkbox>
           </b-form-group>
         </b-col>
-        <b-col
-          cols="1"
-          class="d-none d-sm-block"
-        />
+        <b-col cols="1" class="d-none d-sm-block" />
       </b-row>
     </b-form>
     <div slot="modal-footer">

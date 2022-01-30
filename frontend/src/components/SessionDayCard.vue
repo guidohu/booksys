@@ -1,14 +1,8 @@
 <template>
-  <b-card
-    no-body
-    class="text-left"
-  >
+  <b-card no-body class="text-left">
     <b-card-header>
       <b-row>
-        <b-col
-          cols="4"
-          class="text-right"
-        >
+        <b-col cols="4" class="text-right">
           <b-button
             v-if="!disableDayBrowsing"
             variant="outline-info"
@@ -18,16 +12,10 @@
             <b-icon-arrow-left-short />
           </b-button>
         </b-col>
-        <b-col
-          cols="4"
-          class="text-center"
-        >
+        <b-col cols="4" class="text-center">
           {{ dateString }}
         </b-col>
-        <b-col
-          cols="4"
-          class="text-left"
-        >
+        <b-col cols="4" class="text-left">
           <b-button
             v-if="!disableDayBrowsing"
             variant="outline-info"
@@ -51,16 +39,13 @@
       <b-row
         v-if="
           isToday &&
-            selectedSession != null &&
-            selectedSession.id != null &&
-            selectedSession.riders.length > 0
+          selectedSession != null &&
+          selectedSession.id != null &&
+          selectedSession.riders.length > 0
         "
         class="text-center"
       >
-        <b-col
-          cols="12"
-          class="text-center"
-        >
+        <b-col cols="12" class="text-center">
           <b-button
             type="button"
             variant="outline-success"

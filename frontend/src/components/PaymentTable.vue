@@ -9,15 +9,8 @@
     <div v-else>
       <IncomeModal v-model:visible="showIncomeModal" />
       <ExpenseModal v-model:visible="showExpenseModal" />
-      <b-row
-        v-if="form.years.length > 0"
-        class="text-right"
-      >
-        <b-col
-          offset="6"
-          cols="6"
-          class="d-sm-none mr-1"
-        >
+      <b-row v-if="form.years.length > 0" class="text-right">
+        <b-col offset="6" cols="6" class="d-sm-none mr-1">
           <b-form-group
             id="year"
             label="Year"
@@ -53,10 +46,7 @@
             <b-icon-dash />Expense
           </b-button>
         </b-col>
-        <b-col
-          cols="4"
-          class="d-none d-sm-block"
-        >
+        <b-col cols="4" class="d-none d-sm-block">
           <b-form-group
             id="year"
             label="Year"
@@ -99,11 +89,7 @@
             >
               <template #cell(action)="data">
                 <div class="text-center">
-                  <b-button
-                    size="sm"
-                    style="font-size: 0.8em"
-                    variant="light"
-                  >
+                  <b-button size="sm" style="font-size: 0.8em" variant="light">
                     <b-icon-trash
                       variant="danger"
                       @click="deleteEntry(data.item)"

@@ -9,10 +9,7 @@
       :fields="fields"
     >
       <template #cell(riders)="data">
-        <b-row
-          v-for="rider in data.item.riders"
-          :key="rider.id"
-        >
+        <b-row v-for="rider in data.item.riders" :key="rider.id">
           <b-col> {{ rider.first_name }} {{ rider.last_name }} </b-col>
         </b-row>
       </template>

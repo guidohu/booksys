@@ -1,14 +1,8 @@
 <template>
-  <b-container
-    float
-    class="text-left"
-  >
+  <b-container float class="text-left">
     <b-row>
       <b-col cols="12">
-        <WarningBox
-          v-if="errors.length > 0"
-          :errors="errors"
-        />
+        <WarningBox v-if="errors.length > 0" :errors="errors" />
         <b-form @submit="add">
           <b-form-group
             id="input-group-driver"
@@ -52,10 +46,7 @@
             />
           </b-form-group>
           <b-row class="text-right">
-            <b-col
-              cols="9"
-              offset="3"
-            >
+            <b-col cols="9" offset="3">
               <b-button
                 v-if="!disableBefore"
                 block

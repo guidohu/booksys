@@ -9,10 +9,7 @@
       :session="selectedSession"
       @sessionDeletedHandler="sessionDeletedHandler"
     />
-    <div
-      v-if="isDesktop"
-      class="display"
-    >
+    <div v-if="isDesktop" class="display">
       <main-title title-name="Book Your Session" />
       <b-row class="ml-1 mr-1">
         <b-col cols="8">
@@ -52,18 +49,11 @@
         </b-col>
       </b-row>
       <div class="bottom mr-2">
-        <b-button
-          class="mr-1"
-          variant="outline-light"
-          to="/calendar"
-        >
+        <b-button class="mr-1" variant="outline-light" to="/calendar">
           <b-icon-calendar3 />
           CALENDAR
         </b-button>
-        <b-button
-          variant="outline-light"
-          to="/dashboard"
-        >
+        <b-button variant="outline-light" to="/dashboard">
           <b-icon-house />
           HOME
         </b-button>

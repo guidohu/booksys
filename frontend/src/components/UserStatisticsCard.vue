@@ -1,16 +1,11 @@
 <template>
-  <b-card
-    no-body
-    class="text-left"
-  >
+  <b-card no-body class="text-left">
     <b-card-header> Statistics </b-card-header>
     <b-card-body>
       <b-row>
         <b-col cols="6">
           <b-row>
-            <b-col cols="12">
-              Riding Time: {{ heatTimeMinutesYTD }} min
-            </b-col>
+            <b-col cols="12"> Riding Time: {{ heatTimeMinutesYTD }} min </b-col>
           </b-row>
           <b-row>
             <b-col cols="12">
@@ -18,9 +13,7 @@
             </b-col>
           </b-row>
           <b-row>
-            <b-col cols="12">
-              Cost: {{ heatCostYTD }} {{ getCurrency }}
-            </b-col>
+            <b-col cols="12"> Cost: {{ heatCostYTD }} {{ getCurrency }} </b-col>
           </b-row>
           <b-row>
             <b-col cols="12">

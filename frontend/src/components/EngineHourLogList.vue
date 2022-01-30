@@ -1,9 +1,6 @@
 <template>
   <div>
-    <WarningBox
-      v-if="errors.length > 0"
-      :errors="errors"
-    />
+    <WarningBox v-if="errors.length > 0" :errors="errors" />
     <EngineHourEntryModal
       v-model:visible="showEntryHourModal"
       :engine-hour-entry="selectedEngineHourLogEntry"

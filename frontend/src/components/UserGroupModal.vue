@@ -8,34 +8,17 @@
   >
     <b-form @submit="save">
       <b-row v-if="errors.length > 0">
-        <b-col
-          cols="1"
-          class="d-none d-sm-block"
-        />
-        <b-col
-          cols="12"
-          sm="10"
-        >
+        <b-col cols="1" class="d-none d-sm-block" />
+        <b-col cols="12" sm="10">
           <WarningBox :errors="errors" />
         </b-col>
-        <b-col
-          cols="1"
-          class="d-none d-sm-block"
-        />
+        <b-col cols="1" class="d-none d-sm-block" />
       </b-row>
       <b-row class="text-left">
-        <b-col
-          cols="1"
-          class="d-none d-sm-block"
-        />
-        <b-col
-          cols="12"
-          sm="10"
-        >
+        <b-col cols="1" class="d-none d-sm-block" />
+        <b-col cols="12" sm="10">
           <!-- User Group -->
-          <h6 class="mt-2 mb-3">
-            User Group
-          </h6>
+          <h6 class="mt-2 mb-3">User Group</h6>
           <b-form-group
             id="user-group-name"
             label="Name"
@@ -67,9 +50,7 @@
             />
           </b-form-group>
           <!-- User Role -->
-          <h6 class="mt-5 mb-3">
-            User Role and Permissions
-          </h6>
+          <h6 class="mt-5 mb-3">User Role and Permissions</h6>
           <b-form-group
             id="user-role-name"
             label="Role"
@@ -101,9 +82,7 @@
             />
           </b-form-group>
           <!-- Pricing -->
-          <h6 class="mt-5 mb-3">
-            Pricing
-          </h6>
+          <h6 class="mt-5 mb-3">Pricing</h6>
           <b-form-group
             id="price"
             label="Price"
@@ -140,10 +119,7 @@
             />
           </b-form-group>
         </b-col>
-        <b-col
-          cols="1"
-          class="d-none d-sm-block"
-        />
+        <b-col cols="1" class="d-none d-sm-block" />
       </b-row>
     </b-form>
     <div slot="modal-footer">

@@ -21,10 +21,7 @@
         </b-card>
       </b-col>
     </b-row>
-    <b-row
-      v-if="comment != null"
-      class="ml-1 mr-1"
-    >
+    <b-row v-if="comment != null" class="ml-1 mr-1">
       <b-col cols="12">
         <b-form-group>
           <b-input-group>
@@ -112,9 +109,7 @@
             <b-dropdown-divider
               v-if="getIsRunning && selectedRiderId != null"
             />
-            <b-dropdown-item v-if="getIsRunning">
-              Cancel Heat
-            </b-dropdown-item>
+            <b-dropdown-item v-if="getIsRunning"> Cancel Heat </b-dropdown-item>
           </b-dropdown>
         </b-button-group>
       </b-col>

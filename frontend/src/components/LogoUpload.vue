@@ -1,16 +1,10 @@
 <template>
   <b-form @submit="uploadNewLogo">
-    <b-alert
-      variant="info"
-      show
-    >
+    <b-alert variant="info" show>
       This logo will be displayed within the application to customize the look
       to your needs.
     </b-alert>
-    <warning-box
-      v-if="errors.length > 0"
-      :errors="errors"
-    />
+    <warning-box v-if="errors.length > 0" :errors="errors" />
     <!-- Image Upload -->
     <b-overlay
       id="overlay-background"
@@ -47,22 +41,15 @@
           :height="50"
           :src="getLogoFile"
         />
-        <b-img
-          v-if="newLogoUri != null"
-          :height="50"
-          :src="newLogoUri"
-        />
+        <b-img v-if="newLogoUri != null" :height="50" :src="newLogoUri" />
       </b-form-group>
       <b-row class="text-right mb-3">
-        <b-col
-          offset="3"
-          cols="9"
-        >
+        <b-col offset="3" cols="9">
           <b-button
             v-if="
               newLogoUri != null ||
-                form.logoFile != null ||
-                (getLogoFile != null && showLogo == true)
+              form.logoFile != null ||
+              (getLogoFile != null && showLogo == true)
             "
             variant="outline-danger"
             @click="clearLogo"

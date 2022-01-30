@@ -1,8 +1,5 @@
 <template>
-  <b-card
-    no-body
-    class="text-left"
-  >
+  <b-card no-body class="text-left">
     <b-card-header> Condition Info </b-card-header>
     <b-card-body>
       <b-row>

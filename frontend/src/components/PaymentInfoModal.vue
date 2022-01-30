@@ -7,14 +7,8 @@
     @show="$emit('update:visible', true)"
   >
     <b-row class="text-left">
-      <b-col
-        cols="1"
-        class="d-none d-sm-block"
-      />
-      <b-col
-        cols="12"
-        sm="10"
-      >
+      <b-col cols="1" class="d-none d-sm-block" />
+      <b-col cols="12" sm="10">
         <b-row>
           <b-col cols="12">
             Please transfer the desired amount to the bank account below and let
@@ -22,9 +16,7 @@
           </b-col>
         </b-row>
         <b-row class="mt-3">
-          <b-col cols="3">
-            Owner
-          </b-col>
+          <b-col cols="3"> Owner </b-col>
           <b-col cols="7">
             {{
               getConfiguration && getConfiguration.payment_account_owner
@@ -34,9 +26,7 @@
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="3">
-            IBAN
-          </b-col>
+          <b-col cols="3"> IBAN </b-col>
           <b-col cols="7">
             {{
               getConfiguration && getConfiguration.payment_account_iban
@@ -46,9 +36,7 @@
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="3">
-            BIC
-          </b-col>
+          <b-col cols="3"> BIC </b-col>
           <b-col cols="7">
             {{
               getConfiguration && getConfiguration.payment_account_bic
@@ -58,9 +46,7 @@
           </b-col>
         </b-row>
         <b-row>
-          <b-col cols="3">
-            Comment
-          </b-col>
+          <b-col cols="3"> Comment </b-col>
           <b-col cols="7">
             {{
               getConfiguration && getConfiguration.payment_account_comment
@@ -70,17 +56,10 @@
           </b-col>
         </b-row>
       </b-col>
-      <b-col
-        cols="1"
-        class="d-none d-sm-block"
-      />
+      <b-col cols="1" class="d-none d-sm-block" />
     </b-row>
     <div slot="modal-footer">
-      <b-button
-        type="button"
-        variant="outline-info"
-        @click="close"
-      >
+      <b-button type="button" variant="outline-info" @click="close">
         <b-icon-check />
         Done
       </b-button>

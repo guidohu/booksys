@@ -1,8 +1,5 @@
 <template>
-  <b-card
-    no-body
-    class="text-left"
-  >
+  <b-card no-body class="text-left">
     <b-card-header> Balance </b-card-header>
     <b-card-body>
       <b-row>

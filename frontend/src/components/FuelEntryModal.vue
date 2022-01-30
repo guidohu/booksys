@@ -7,31 +7,16 @@
     @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
-      <b-col
-        cols="1"
-        class="d-none d-sm-block"
-      />
-      <b-col
-        cols="12"
-        sm="10"
-      >
+      <b-col cols="1" class="d-none d-sm-block" />
+      <b-col cols="12" sm="10">
         <WarningBox :errors="errors" />
       </b-col>
-      <b-col
-        cols="1"
-        class="d-none d-sm-block"
-      />
+      <b-col cols="1" class="d-none d-sm-block" />
     </b-row>
     <b-form @submit="save">
       <b-row class="text-left">
-        <b-col
-          cols="1"
-          class="d-none d-sm-block"
-        />
-        <b-col
-          cols="12"
-          sm="10"
-        >
+        <b-col cols="1" class="d-none d-sm-block" />
+        <b-col cols="12" sm="10">
           <b-form-group
             id="date"
             label="Date"
@@ -80,9 +65,7 @@
                 placeholder=""
                 disabled
               />
-              <b-input-group-append is-text>
-                ltrs/h
-              </b-input-group-append>
+              <b-input-group-append is-text> ltrs/h </b-input-group-append>
             </b-input-group>
           </b-form-group>
           <engine-hours
@@ -104,9 +87,7 @@
                 type="text"
                 placeholder=""
               />
-              <b-input-group-append is-text>
-                ltrs
-              </b-input-group-append>
+              <b-input-group-append is-text> ltrs </b-input-group-append>
             </b-input-group>
           </b-form-group>
           <b-form-group
@@ -187,18 +168,11 @@
             </b-input-group>
           </b-form-group>
         </b-col>
-        <b-col
-          cols="1"
-          class="d-none d-sm-block"
-        />
+        <b-col cols="1" class="d-none d-sm-block" />
       </b-row>
     </b-form>
     <div slot="modal-footer">
-      <b-button
-        type="button"
-        variant="outline-info"
-        @click="save"
-      >
+      <b-button type="button" variant="outline-info" @click="save">
         <b-icon-check />
         Save
       </b-button>

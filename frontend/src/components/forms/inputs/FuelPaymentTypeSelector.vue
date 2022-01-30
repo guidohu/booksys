@@ -6,10 +6,7 @@
     label-cols="3"
     description="select between direct payment and credited payment where you add payments for fuel in the payments section separately"
   >
-    <b-form-select
-      v-model="formSelected"
-      :options="options"
-    />
+    <b-form-select v-model="formSelected" :options="options" />
   </b-form-group>
 </template>
 

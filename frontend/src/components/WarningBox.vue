@@ -1,8 +1,5 @@
 <template>
-  <div
-    v-if="errors != null && errors.length > 0"
-    class="text-left"
-  >
+  <div v-if="errors != null && errors.length > 0" class="text-left">
     <b-alert
       variant="warning"
       show
@@ -11,22 +8,14 @@
     >
       <b>Please correct the following error(s):</b>
       <ul>
-        <li
-          v-for="err in errors"
-          :key="err"
-        >
+        <li v-for="err in errors" :key="err">
           {{ err }}
         </li>
       </ul>
     </b-alert>
   </div>
   <div v-else>
-    <b-alert
-      variant="success"
-      show
-    >
-      No issues found.
-    </b-alert>
+    <b-alert variant="success" show> No issues found. </b-alert>
   </div>
 </template>
 

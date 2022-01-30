@@ -1,21 +1,11 @@
 <template>
   <div>
-    <b-navbar
-      fixed="top"
-      toggleable="lg"
-      type="light"
-      variant="light"
-    >
-      <b-navbar-brand href="#">
-        Dashboard
-      </b-navbar-brand>
+    <b-navbar fixed="top" toggleable="lg" type="light" variant="light">
+      <b-navbar-brand href="#"> Dashboard </b-navbar-brand>
 
       <b-navbar-toggle target="nav-collapse" />
 
-      <b-collapse
-        id="nav-collapse"
-        is-nav
-      >
+      <b-collapse id="nav-collapse" is-nav>
         <b-navbar-nav>
           <b-nav-item href="#">
             <router-link to="/account">
@@ -43,10 +33,7 @@
               variant="light"
               class="btn btn-default btn-dashboard"
             >
-              <div
-                id="boat"
-                class="bc_icon bc_icon_dashboard bc_icon_boat"
-              />
+              <div id="boat" class="bc_icon bc_icon_dashboard bc_icon_boat" />
               BOAT
             </b-button>
           </b-col>

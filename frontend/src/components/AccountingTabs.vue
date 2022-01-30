@@ -14,10 +14,7 @@
     <b-tab>
       <div slot="title">
         <p class="h6 mt-2 mb-2">
-          <b-icon-kanban
-            rotate="180"
-            class="mr-1"
-          />
+          <b-icon-kanban rotate="180" class="mr-1" />
           Statistics
         </p>
       </div>

@@ -1,31 +1,28 @@
 <template>
-  <form
-    role="form"
-    @submit="login"
-  >
+  <form role="form" @submit="login">
     <div class="card">
-      <div class="card-header">
-        Please login
-      </div>
+      <div class="card-header">Please login</div>
       <div class="card-body">
         <div class="form-floating mb-3">
-          <input 
-            v-model="form.username" 
-            type="text" 
-            class="form-control" 
-            id="username" 
+          <input
+            v-model="form.username"
+            type="text"
+            class="form-control"
+            id="username"
             ref="username"
-            placeholder="name@example.com">
+            placeholder="name@example.com"
+          />
           <label for="floatingInput">Email address</label>
         </div>
         <div class="form-floating mb-3">
-          <input 
+          <input
             v-model="form.password"
-            type="password" 
-            class="form-control" 
-            id="password" 
+            type="password"
+            class="form-control"
+            id="password"
             placeholder="Password"
-            autocomplete="current-password">
+            autocomplete="current-password"
+          />
           <label for="floatingPassword">Password</label>
         </div>
         <div class="row text-center mb-3" v-if="statusMessage">
@@ -47,10 +44,18 @@
       <div class="card-footer">
         <div class="row">
           <div class="col-12">
-            <button type="button" class="btn btn-outline-dark btn-sm" to="/password/reset">
+            <button
+              type="button"
+              class="btn btn-outline-dark btn-sm"
+              to="/password/reset"
+            >
               Forgot password
             </button>
-            <button type="button" class="btn btn-outline-dark btn-sm ms-1" to="/signup">
+            <button
+              type="button"
+              class="btn btn-outline-dark btn-sm ms-1"
+              to="/signup"
+            >
               Register
             </button>
           </div>
@@ -61,8 +66,6 @@
 </template>
 
 <script>
-
-
 export default {
   name: "LoginForm",
   props: ["statusMessage", "initialUsername"],

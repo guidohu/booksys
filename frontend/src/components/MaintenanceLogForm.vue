@@ -1,14 +1,8 @@
 <template>
-  <b-container
-    float
-    class="text-left"
-  >
+  <b-container float class="text-left">
     <b-row>
       <b-col cols="12">
-        <WarningBox
-          v-if="errors.length > 0"
-          :errors="errors"
-        />
+        <WarningBox v-if="errors.length > 0" :errors="errors" />
         <b-form @submit="add">
           <engine-hours
             v-model="form.engineHours"
@@ -33,16 +27,8 @@
             </b-input-group>
           </b-form-group>
           <b-row class="text-right">
-            <b-col
-              cols="9"
-              offset="3"
-            >
-              <b-button
-                block
-                variant="outline-info"
-                size="sm"
-                @click="add"
-              >
+            <b-col cols="9" offset="3">
+              <b-button block variant="outline-info" size="sm" @click="add">
                 Add
               </b-button>
             </b-col>

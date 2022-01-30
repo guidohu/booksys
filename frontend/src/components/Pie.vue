@@ -1,8 +1,5 @@
 <template>
-  <div
-    :id="pieElementId"
-    class="text-center full-width"
-  />
+  <div :id="pieElementId" class="text-center full-width" />
 </template>
 
 <script>

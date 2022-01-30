@@ -1,15 +1,9 @@
 <template>
-  <div
-    v-if="isDesktop"
-    class="display"
-  >
+  <div v-if="isDesktop" class="display">
     <main-title title-name="Stop Watch" />
     <b-row class="ml-1 mr-1">
       <b-col cols="8">
-        <WarningBox
-          v-if="errors.length > 0"
-          :errors="errors"
-        />
+        <WarningBox v-if="errors.length > 0" :errors="errors" />
         <StopWatchCard :session-id="sessionId" />
       </b-col>
       <b-col cols="4">
@@ -26,10 +20,7 @@
       </b-col>
     </b-row>
     <div class="bottom mr-2">
-      <b-button
-        variant="outline-light"
-        to="/dashboard"
-      >
+      <b-button variant="outline-light" to="/dashboard">
         <b-icon-house />
         HOME
       </b-button>
@@ -37,15 +28,9 @@
   </div>
   <div v-else>
     <NavbarMobile title="Stop Watch" />
-    <WarningBox
-      v-if="errors.length > 0"
-      :errors="errors"
-    />
+    <WarningBox v-if="errors.length > 0" :errors="errors" />
     <StopWatchCard :session-id="sessionId" />
-    <SessionHeatListCard
-      :session-id="sessionId"
-      class="mt-2"
-    />
+    <SessionHeatListCard :session-id="sessionId" class="mt-2" />
     <ConditionInfoCard
       v-if="getSessionConditionInfo != null"
       class="mt-2"

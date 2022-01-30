@@ -7,37 +7,17 @@
     @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
-      <b-col
-        cols="1"
-        class="d-none d-sm-block"
-      />
-      <b-col
-        cols="12"
-        sm="10"
-      >
+      <b-col cols="1" class="d-none d-sm-block" />
+      <b-col cols="12" sm="10">
         <WarningBox :errors="errors" />
       </b-col>
-      <b-col
-        cols="1"
-        class="d-none d-sm-block"
-      />
+      <b-col cols="1" class="d-none d-sm-block" />
     </b-row>
     <b-form @submit="saveComment">
       <b-row class="text-left">
-        <b-col
-          cols="1"
-          class="d-none d-sm-block"
-        />
-        <b-col
-          cols="12"
-          sm="10"
-        >
-          <b-form-group
-            id="comment"
-            label=""
-            label-for=""
-            description=""
-          >
+        <b-col cols="1" class="d-none d-sm-block" />
+        <b-col cols="12" sm="10">
+          <b-form-group id="comment" label="" label-for="" description="">
             <b-form-input
               id="comment-input"
               v-model="comment"
@@ -58,11 +38,7 @@
         <b-icon-x />
         Delete
       </b-button>
-      <b-button
-        type="button"
-        variant="outline-info"
-        @click="saveComment"
-      >
+      <b-button type="button" variant="outline-info" @click="saveComment">
         <b-icon-check />
         Save
       </b-button>

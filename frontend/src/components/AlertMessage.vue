@@ -1,9 +1,6 @@
 <template>
   <div class="card">
-    <div
-      class="alert alert-danger"
-      role="alert"
-    >
+    <div class="alert alert-danger" role="alert">
       {{ alertMessage }}
     </div>
   </div>

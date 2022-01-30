@@ -1,37 +1,17 @@
 <template>
-  <b-card
-    no-body
-    class="text-left"
-  >
+  <b-card no-body class="text-left">
     <b-card-header>
       <b-row>
-        <b-col
-          cols="4"
-          class="text-right"
-        >
-          <b-button
-            variant="outline-info"
-            class="btn-xs"
-            @click="prevMonth"
-          >
+        <b-col cols="4" class="text-right">
+          <b-button variant="outline-info" class="btn-xs" @click="prevMonth">
             <b-icon-arrow-left-short />
           </b-button>
         </b-col>
-        <b-col
-          cols="4"
-          class="text-center"
-        >
+        <b-col cols="4" class="text-center">
           {{ monthString }}
         </b-col>
-        <b-col
-          cols="4"
-          class="text-left"
-        >
-          <b-button
-            variant="outline-info"
-            class="btn-xs"
-            @click="nextMonth"
-          >
+        <b-col cols="4" class="text-left">
+          <b-button variant="outline-info" class="btn-xs" @click="nextMonth">
             <b-icon-arrow-right-short />
           </b-button>
         </b-col>
@@ -40,32 +20,15 @@
     <b-card-body ref="calendarBody">
       <table>
         <tr>
-          <th class="table-title-text">
-            Mon
-          </th>
-          <th class="table-title-text">
-            Tue
-          </th>
-          <th class="table-title-text">
-            Wed
-          </th>
-          <th class="table-title-text">
-            Thu
-          </th>
-          <th class="table-title-text">
-            Fri
-          </th>
-          <th class="table-title-text">
-            Sat
-          </th>
-          <th class="table-title-text">
-            Sun
-          </th>
+          <th class="table-title-text">Mon</th>
+          <th class="table-title-text">Tue</th>
+          <th class="table-title-text">Wed</th>
+          <th class="table-title-text">Thu</th>
+          <th class="table-title-text">Fri</th>
+          <th class="table-title-text">Sat</th>
+          <th class="table-title-text">Sun</th>
         </tr>
-        <tr
-          v-for="i in Array.from(Array(6).keys())"
-          :key="i"
-        >
+        <tr v-for="i in Array.from(Array(6).keys())" :key="i">
           <td
             v-for="j in Array.from(Array(7).keys())"
             :key="j"

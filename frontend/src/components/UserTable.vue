@@ -70,17 +70,11 @@
               <div v-if="userGroupList.length == 1">
                 {{ userGroupList[0].text }}
               </div>
-              <div v-if="userGroupList.length == 0">
-                -
-              </div>
+              <div v-if="userGroupList.length == 0">-</div>
             </template>
             <template #cell(locked)="data">
               <div class="text-center">
-                <b-button
-                  size="sm"
-                  style="font-size: 0.8em"
-                  variant="light"
-                >
+                <b-button size="sm" style="font-size: 0.8em" variant="light">
                   <b-icon-lock-fill
                     v-if="data.item.locked == 1"
                     variant="danger"

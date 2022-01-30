@@ -1,9 +1,6 @@
 <template>
-  <div id="app-content">      
-    <div
-      v-if="isDesktop"
-      class="container"
-    >
+  <div id="app-content">
+    <div v-if="isDesktop" class="container">
       <div class="row display noborder nobackground">
         <div class="vcenter_placeholder">
           <div class="vcenter_content">
@@ -20,10 +17,7 @@
         <a href="https://github.com/guidohu/booksys">Find me on Github</a>
       </footer>
     </div>
-    <div
-      v-if="isMobile"
-      class="container-fluid"
-    >
+    <div v-if="isMobile" class="container-fluid">
       <alert-message
         v-if="backendReachable == false"
         :alert-message="backendNotReachableAlertMsg"
@@ -34,13 +28,15 @@
 </template>
 
 <script>
-import { defineAsyncComponent } from 'vue';
+import { defineAsyncComponent } from "vue";
 import { BooksysBrowser } from "@/libs/browser";
 import { getBackendStatus } from "@/api/backend";
 import { mapGetters } from "vuex";
 
 // Lazy imports
-const AlertMessage = defineAsyncComponent(() => import("@/components/AlertMessage"));
+const AlertMessage = defineAsyncComponent(() =>
+  import("@/components/AlertMessage")
+);
 
 export default {
   name: "App",
@@ -119,5 +115,5 @@ export default {
         }
       });
   },
-}
+};
 </script>

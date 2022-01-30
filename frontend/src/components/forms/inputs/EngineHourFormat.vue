@@ -6,10 +6,7 @@
     label-cols="3"
     description="select the format your engine hour display uses"
   >
-    <b-form-select
-      v-model="formSelected"
-      :options="options"
-    />
+    <b-form-select v-model="formSelected" :options="options" />
   </b-form-group>
 </template>
 

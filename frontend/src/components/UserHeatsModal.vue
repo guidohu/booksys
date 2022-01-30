@@ -7,14 +7,8 @@
     @show="$emit('update:visible', true)"
   >
     <b-row class="text-left">
-      <b-col
-        cols="1"
-        class="d-none d-sm-block"
-      />
-      <b-col
-        cols="12"
-        sm="10"
-      >
+      <b-col cols="1" class="d-none d-sm-block" />
+      <b-col cols="12" sm="10">
         <b-table
           class="heatTableHeight"
           sticky-header
@@ -26,17 +20,10 @@
           :fields="fields"
         />
       </b-col>
-      <b-col
-        cols="1"
-        class="d-none d-sm-block"
-      />
+      <b-col cols="1" class="d-none d-sm-block" />
     </b-row>
     <div slot="modal-footer">
-      <b-button
-        type="button"
-        variant="outline-info"
-        @click="close"
-      >
+      <b-button type="button" variant="outline-info" @click="close">
         <b-icon-check />
         OK
       </b-button>

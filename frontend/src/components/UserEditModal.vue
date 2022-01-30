@@ -7,14 +7,8 @@
     @show="$emit('update:visible', true)"
   >
     <b-row class="text-left">
-      <b-col
-        cols="1"
-        class="d-none d-sm-block"
-      />
-      <b-col
-        cols="12"
-        sm="10"
-      >
+      <b-col cols="1" class="d-none d-sm-block" />
+      <b-col cols="12" sm="10">
         <b-form @submit="save">
           <b-row v-if="errors.length">
             <b-col cols="12">
@@ -135,10 +129,7 @@
           </b-form-group>
         </b-form>
       </b-col>
-      <b-col
-        cols="1"
-        class="d-none d-sm-block"
-      />
+      <b-col cols="1" class="d-none d-sm-block" />
     </b-row>
     <div slot="modal-footer">
       <b-button

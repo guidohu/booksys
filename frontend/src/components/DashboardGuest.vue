@@ -4,12 +4,12 @@
     <div class="cols-6 text-center">
       <div class="row mt-4">
         <dashboard-button to="/info" colWidth="4" offsetWidth="2">
-            <div class="bc_icon bc_icon_dashboard bc_icon_info" />
-            INFO
+          <div class="bc_icon bc_icon_dashboard bc_icon_info" />
+          INFO
         </dashboard-button>
         <dashboard-button to="/logout" colWidth="4">
-            <div class="bc_icon bc_icon_dashboard bc_icon_logout" />
-            LOGOUT
+          <div class="bc_icon bc_icon_dashboard bc_icon_logout" />
+          LOGOUT
         </dashboard-button>
       </div>
     </div>
@@ -23,7 +23,7 @@ import DashboardButton from "./bricks/DashboardButton.vue";
 export default {
   name: "DashboardGuest",
   components: {
-    DashboardButton
+    DashboardButton,
   },
 };
 </script>

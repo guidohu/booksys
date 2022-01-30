@@ -4,10 +4,7 @@
     <div class="col-6 text-center">
       <div class="row mt-4">
         <dashboard-button to="/today" colWidth="4">
-          <booksys-pie
-            :session-data="sessionData"
-            :properties="properties"
-          />
+          <booksys-pie :session-data="sessionData" :properties="properties" />
           TODAY
         </dashboard-button>
         <dashboard-button to="/boat" colWidth="4">

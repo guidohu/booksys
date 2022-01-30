@@ -1,10 +1,6 @@
 <template>
   <div>
-    <canvas
-      id="fuelChart"
-      width="400"
-      height="200"
-    />
+    <canvas id="fuelChart" width="400" height="200" />
   </div>
 </template>
 

@@ -15,24 +15,12 @@
       spinner-variant="info"
       rounded="sm"
     >
-      <b-row
-        v-if="errors.length > 0"
-        class="mt-4"
-      >
-        <b-col
-          cols="1"
-          class="d-none d-sm-block"
-        />
-        <b-col
-          cols="12"
-          sm="10"
-        >
+      <b-row v-if="errors.length > 0" class="mt-4">
+        <b-col cols="1" class="d-none d-sm-block" />
+        <b-col cols="12" sm="10">
           <warning-box :errors="errors" />
         </b-col>
-        <b-col
-          cols="1"
-          class="d-none d-sm-block"
-        />
+        <b-col cols="1" class="d-none d-sm-block" />
       </b-row>
       <!-- Database setup -->
       <database-configuration
@@ -43,20 +31,9 @@
       <!-- Administrator setup -->
       <div v-if="showUserSetup">
         <b-row class="mb-4">
-          <b-col
-            cols="1"
-            class="d-none d-sm-block"
-          />
-          <b-col
-            cols="12"
-            sm="10"
-          >
-            Setup the Administrator Account
-          </b-col>
-          <b-col
-            cols="1"
-            class="d-none d-sm-block"
-          />
+          <b-col cols="1" class="d-none d-sm-block" />
+          <b-col cols="12" sm="10"> Setup the Administrator Account </b-col>
+          <b-col cols="1" class="d-none d-sm-block" />
         </b-row>
         <user-sign-up
           :user-data="adminUserConfig"
@@ -66,28 +43,16 @@
         />
       </div>
       <!-- Setup Done -->
-      <b-row
-        v-if="showSetupDone"
-        class="text-center"
-      >
-        <b-col
-          cols="1"
-          class="d-none d-sm-block"
-        />
-        <b-col
-          cols="12"
-          sm="10"
-        >
+      <b-row v-if="showSetupDone" class="text-center">
+        <b-col cols="1" class="d-none d-sm-block" />
+        <b-col cols="12" sm="10">
           <p class="h4 mb-2">
             <b-icon-check-circle variant="success" />
             Setup Done.
           </p>
           <p>Please go back to the login page and login.</p>
         </b-col>
-        <b-col
-          cols="1"
-          class="d-none d-sm-block"
-        />
+        <b-col cols="1" class="d-none d-sm-block" />
       </b-row>
     </b-overlay>
     <!-- Footer -->

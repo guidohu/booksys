@@ -1,9 +1,6 @@
 <template>
   <div>
-    <div
-      v-if="isDesktop"
-      class="display"
-    >
+    <div v-if="isDesktop" class="display">
       <main-title title-name="Calendar" />
       <b-row class="ml-1 mr-1">
         <b-col cols="8">
@@ -24,19 +21,13 @@
           </b-row>
           <b-row class="mt-2">
             <b-col cols="12">
-              <ConditionInfoCard
-                :sunrise="sunrise"
-                :sunset="sunset"
-              />
+              <ConditionInfoCard :sunrise="sunrise" :sunset="sunset" />
             </b-col>
           </b-row>
         </b-col>
       </b-row>
       <div class="bottom mr-2">
-        <b-button
-          variant="outline-light"
-          to="/dashboard"
-        >
+        <b-button variant="outline-light" to="/dashboard">
           <b-icon-house />
           HOME
         </b-button>

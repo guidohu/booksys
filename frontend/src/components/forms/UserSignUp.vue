@@ -1,14 +1,8 @@
 <template>
   <b-form @submit.prevent="save">
     <b-row class="text-left">
-      <b-col
-        cols="1"
-        class="d-none d-sm-block"
-      />
-      <b-col
-        cols="12"
-        sm="10"
-      >
+      <b-col cols="1" class="d-none d-sm-block" />
+      <b-col cols="12" sm="10">
         <!-- Email -->
         <b-form-group
           id="email"
@@ -57,7 +51,7 @@
             @input="update()"
           />
         </b-form-group>
-        <hr>
+        <hr />
         <!-- First Name -->
         <b-form-group
           id="first-name"
@@ -148,16 +142,11 @@
             @input="update()"
           />
         </b-form-group>
-        <hr>
+        <hr />
         <!-- License -->
         <b-row class="text-left align-middle">
-          <b-col cols="9">
-            I have a driver's license for boats.
-          </b-col>
-          <b-col
-            cols="3"
-            class="text-right"
-          >
+          <b-col cols="9"> I have a driver's license for boats. </b-col>
+          <b-col cols="3" class="text-right">
             <toggle-button
               id="license-toggle"
               :value="licenseToggleState"
@@ -170,18 +159,12 @@
           </b-col>
         </b-row>
         <!-- Own risk -->
-        <b-row
-          v-if="showDisclaimer"
-          class="text-left align-middle mt-3"
-        >
+        <b-row v-if="showDisclaimer" class="text-left align-middle mt-3">
           <b-col cols="9">
             I know the boat community and I perform the activities on my own
             risk.
           </b-col>
-          <b-col
-            cols="3"
-            class="text-right"
-          >
+          <b-col cols="3" class="text-right">
             <toggle-button
               id="own-risk-toggle"
               :value="ownRiskToggleState"
@@ -194,10 +177,7 @@
           </b-col>
         </b-row>
       </b-col>
-      <b-col
-        cols="1"
-        class="d-none d-sm-block"
-      />
+      <b-col cols="1" class="d-none d-sm-block" />
     </b-row>
   </b-form>
 </template>
@@ -239,7 +219,7 @@ export default {
     this.signUpData = this.$props.userData;
   },
   methods: {
-    save: function() {
+    save: function () {
       this.$emit("save");
     },
     update: function () {
