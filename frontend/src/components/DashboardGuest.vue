@@ -1,43 +1,29 @@
 <template>
-  <b-row class="mt-5">
-    <b-col cols="3"></b-col>
-    <b-col cols="6" class="text-center">
-      <b-row class="mt-4">
-        <b-col offset="2" cols="4">
-          <b-button
-            to="/info"
-            variant="light"
-            class="btn btn-default btn-dashboard"
-          >
-            <div class="bc_icon bc_icon_dashboard bc_icon_info"></div>
+  <div class="row mt-5">
+    <div class="col-3" />
+    <div class="cols-6 text-center">
+      <div class="row mt-4">
+        <dashboard-button to="/info" colWidth="4" offsetWidth="2">
+            <div class="bc_icon bc_icon_dashboard bc_icon_info" />
             INFO
-          </b-button>
-        </b-col>
-        <b-col cols="4">
-          <b-button
-            to="/logout"
-            variant="light"
-            class="btn btn-default btn-dashboard"
-          >
-            <div class="bc_icon bc_icon_dashboard bc_icon_logout"></div>
+        </dashboard-button>
+        <dashboard-button to="/logout" colWidth="4">
+            <div class="bc_icon bc_icon_dashboard bc_icon_logout" />
             LOGOUT
-          </b-button>
-        </b-col>
-      </b-row>
-    </b-col>
-    <b-col cols="3"></b-col>
-  </b-row>
+        </dashboard-button>
+      </div>
+    </div>
+    <div cols="3" />
+  </div>
 </template>
 
 <script>
-import { BRow, BCol, BButton } from "bootstrap-vue";
+import DashboardButton from "./bricks/DashboardButton.vue";
 
 export default {
   name: "DashboardGuest",
   components: {
-    BRow,
-    BCol,
-    BButton,
+    DashboardButton
   },
 };
 </script>

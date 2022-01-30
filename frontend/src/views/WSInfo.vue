@@ -1,22 +1,33 @@
 <template>
-  <div v-if="isDesktop" class="display">
+  <div
+    v-if="isDesktop"
+    class="display"
+  >
     <main-title title-name="Location" />
     <b-row>
-      <b-col cols="12" class="mt-5 text-center">
+      <b-col
+        cols="12"
+        class="mt-5 text-center"
+      >
         <div
+          v-if="getLocationAddress != null"
           cols="12"
-          v-if="this.getLocationAddress != null"
-          v-html="this.getLocationAddress"
           class="main-color"
+          v-html="getLocationAddress"
         />
-        <div v-else>no address set by the site-owner</div>
+        <div v-else>
+          no address set by the site-owner
+        </div>
       </b-col>
     </b-row>
     <b-row>
-      <b-col cols="12" class="text-center mt-3">
+      <b-col
+        cols="12"
+        class="text-center mt-3"
+      >
         <iframe
-          v-if="this.getLocationMap != null"
-          :src="this.getLocationMap"
+          v-if="getLocationMap != null"
+          :src="getLocationMap"
           frameborder="0"
           style="
              {
@@ -24,13 +35,18 @@
             }
           "
           :width="mapWidth"
-          :height="this.mapHeight"
+          :height="mapHeight"
         />
-        <div v-else>no map to display for this adress</div>
+        <div v-else>
+          no map to display for this adress
+        </div>
       </b-col>
     </b-row>
     <div class="bottom">
-      <b-button variant="outline-light" to="/dashboard">
+      <b-button
+        variant="outline-light"
+        to="/dashboard"
+      >
         <b-icon-house />
         HOME
       </b-button>
@@ -42,20 +58,28 @@
       <b-card-body>
         <b-card-text>
           <b-row class="text-center">
-            <b-col cols="12" class="text-center">
+            <b-col
+              cols="12"
+              class="text-center"
+            >
               <div
+                v-if="getLocationAddress != null"
                 cols="12"
-                v-if="this.getLocationAddress != null"
-                v-html="this.getLocationAddress"
+                v-html="getLocationAddress"
               />
-              <div v-else>no address is configured</div>
+              <div v-else>
+                no address is configured
+              </div>
             </b-col>
           </b-row>
           <b-row>
-            <b-col cols="12" class="text-center mt-3">
+            <b-col
+              cols="12"
+              class="text-center mt-3"
+            >
               <iframe
-                v-if="this.getLocationMap != null"
-                :src="this.getLocationMap"
+                v-if="getLocationMap != null"
+                :src="getLocationMap"
                 frameborder="0"
                 style="
                    {
@@ -63,9 +87,11 @@
                   }
                 "
                 :width="mapWidth"
-                :height="this.mapHeight"
+                :height="mapHeight"
               />
-              <div v-else>no map is configured</div>
+              <div v-else>
+                no map is configured
+              </div>
             </b-col>
           </b-row>
         </b-card-text>

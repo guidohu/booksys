@@ -17,17 +17,32 @@
     >
       <div v-if="showEmailDialog == true">
         <b-row class="text-left mb-4">
-          <b-col cols="1" class="d-none d-sm-block"></b-col>
-          <b-col cols="12" sm="10">
+          <b-col
+            cols="1"
+            class="d-none d-sm-block"
+          />
+          <b-col
+            cols="12"
+            sm="10"
+          >
             Please enter your email address to get the password reset
             information sent to you by email.
           </b-col>
-          <b-col cols="1" class="d-none d-sm-block"></b-col>
+          <b-col
+            cols="1"
+            class="d-none d-sm-block"
+          />
         </b-row>
         <b-form @submit="requestToken">
           <b-row class="text-left">
-            <b-col cols="1" class="d-none d-sm-block"></b-col>
-            <b-col cols="12" sm="10">
+            <b-col
+              cols="1"
+              class="d-none d-sm-block"
+            />
+            <b-col
+              cols="12"
+              sm="10"
+            >
               <!-- Email -->
               <b-form-group
                 id="email"
@@ -43,34 +58,58 @@
                 />
               </b-form-group>
               <!-- Captcha -->
-              <b-row v-if="getRecaptchaKey != null" class="mt-3">
-                <b-col cols="9" offset="3">
+              <b-row
+                v-if="getRecaptchaKey != null"
+                class="mt-3"
+              >
+                <b-col
+                  cols="9"
+                  offset="3"
+                >
                   <vue-recaptcha
                     :sitekey="getRecaptchaKey"
-                    :loadRecaptchaScript="true"
+                    :load-recaptcha-script="true"
                     size="compact"
                     @verify="verifiedHandler"
-                  ></vue-recaptcha>
+                  />
                 </b-col>
               </b-row>
             </b-col>
-            <b-col cols="1" class="d-none d-sm-block"></b-col>
+            <b-col
+              cols="1"
+              class="d-none d-sm-block"
+            />
           </b-row>
         </b-form>
       </div>
       <div v-if="showTokenDialog == true">
         <b-row class="text-left mb-4">
-          <b-col cols="1" class="d-none d-sm-block"></b-col>
-          <b-col cols="12" sm="10">
+          <b-col
+            cols="1"
+            class="d-none d-sm-block"
+          />
+          <b-col
+            cols="12"
+            sm="10"
+          >
             Please enter the token that has been sent to your email address and
             choose new password.
           </b-col>
-          <b-col cols="1" class="d-none d-sm-block"></b-col>
+          <b-col
+            cols="1"
+            class="d-none d-sm-block"
+          />
         </b-row>
         <b-form @submit="setPassword">
           <b-row class="text-left">
-            <b-col cols="1" class="d-none d-sm-block"></b-col>
-            <b-col cols="12" sm="10">
+            <b-col
+              cols="1"
+              class="d-none d-sm-block"
+            />
+            <b-col
+              cols="12"
+              sm="10"
+            >
               <!-- Email -->
               <b-form-group
                 id="email"
@@ -129,29 +168,56 @@
                 />
               </b-form-group>
             </b-col>
-            <b-col cols="1" class="d-none d-sm-block"></b-col>
+            <b-col
+              cols="1"
+              class="d-none d-sm-block"
+            />
           </b-row>
         </b-form>
       </div>
-      <b-row v-if="showSuccessInfo" class="text-center">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
+      <b-row
+        v-if="showSuccessInfo"
+        class="text-center"
+      >
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
+        <b-col
+          cols="12"
+          sm="10"
+        >
           <p class="h4 mb-2">
             <b-icon-check-circle variant="success" />
-            <br />
+            <br>
             Password has been changed successfully.
           </p>
           <p>Please login with your new password.</p>
         </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
       </b-row>
     </b-overlay>
-    <b-row v-if="errors.length > 0" class="mt-4">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
+    <b-row
+      v-if="errors.length > 0"
+      class="mt-4"
+    >
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
+      <b-col
+        cols="12"
+        sm="10"
+      >
         <warning-box :errors="errors" />
       </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
     </b-row>
     <div slot="modal-footer">
       <b-button
@@ -159,7 +225,7 @@
         class="mr-1"
         type="button"
         variant="outline-danger"
-        v-on:click="close"
+        @click="close"
       >
         <b-icon-x />
         Cancel
@@ -168,8 +234,8 @@
         v-if="showEmailDialog"
         type="button"
         variant="outline-info"
-        v-on:click="requestToken"
         :disabled="isLoading"
+        @click="requestToken"
       >
         <b-icon-arrow-right />
         Next
@@ -179,7 +245,7 @@
         class="mr-1"
         type="button"
         variant="outline-danger"
-        v-on:click="showEmail"
+        @click="showEmail"
       >
         <b-icon-arrow-left />
         Back
@@ -188,8 +254,8 @@
         v-if="showTokenDialog"
         type="button"
         variant="outline-info"
-        v-on:click="setPassword"
         :disabled="isLoading"
+        @click="setPassword"
       >
         <b-icon-check />
         Set Password
@@ -198,7 +264,7 @@
         v-if="showSuccessInfo"
         type="button"
         variant="outline-info"
-        v-on:click="close"
+        @click="close"
       >
         <b-icon-check />
         Done

@@ -1,5 +1,8 @@
 <template>
-  <b-card no-body class="text-left">
+  <b-card
+    no-body
+    class="text-left"
+  >
     <b-card-header> Balance </b-card-header>
     <b-card-body>
       <b-row>
@@ -15,14 +18,14 @@
             size="sm"
             type="button"
             variant="outline-info"
-            v-on:click="showPaymentInfo"
+            @click="showPaymentInfo"
           >
             <b-icon-cash />
             Buy Sessions
           </b-button>
         </b-col>
       </b-row>
-      <PaymentInfoModal :visible.sync="showPaymentInfoModal" />
+      <PaymentInfoModal v-model:visible="showPaymentInfoModal" />
     </b-card-body>
   </b-card>
 </template>

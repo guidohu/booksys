@@ -1,26 +1,38 @@
 <template>
-  <b-card no-body class="text-left">
+  <b-card
+    no-body
+    class="text-left"
+  >
     <b-card-header>
       <b-row>
-        <b-col cols="4" class="text-right">
+        <b-col
+          cols="4"
+          class="text-right"
+        >
           <b-button
             v-if="!disableDayBrowsing"
             variant="outline-info"
             class="btn-xs"
-            v-on:click="prevDay"
+            @click="prevDay"
           >
             <b-icon-arrow-left-short />
           </b-button>
         </b-col>
-        <b-col cols="4" class="text-center">
+        <b-col
+          cols="4"
+          class="text-center"
+        >
           {{ dateString }}
         </b-col>
-        <b-col cols="4" class="text-left">
+        <b-col
+          cols="4"
+          class="text-left"
+        >
           <b-button
             v-if="!disableDayBrowsing"
             variant="outline-info"
             class="btn-xs"
-            v-on:click="nextDay"
+            @click="nextDay"
           >
             <b-icon-arrow-right-short />
           </b-button>
@@ -30,8 +42,8 @@
     <b-card-body>
       <b-row>
         <BooksysPie
-          :sessionData="sessionData"
-          :selectedSession="selectedSession"
+          :session-data="sessionData"
+          :selected-session="selectedSession"
           :properties="properties"
           @selectHandler="selectSession"
         />
@@ -39,19 +51,23 @@
       <b-row
         v-if="
           isToday &&
-          selectedSession != null &&
-          selectedSession.id != null &&
-          selectedSession.riders.length > 0
+            selectedSession != null &&
+            selectedSession.id != null &&
+            selectedSession.riders.length > 0
         "
         class="text-center"
       >
-        <b-col cols="12" class="text-center">
+        <b-col
+          cols="12"
+          class="text-center"
+        >
           <b-button
-            v-on:click="navigateSessionStart"
             type="button"
             variant="outline-success"
-            >Start Session</b-button
+            @click="navigateSessionStart"
           >
+            Start Session
+          </b-button>
         </b-col>
       </b-row>
     </b-card-body>
@@ -113,6 +129,24 @@ export default {
       return false;
     },
   },
+  created() {
+    if (this.isMobile != null && this.isMobile == true) {
+      this.properties = {
+        containerHeight: 300,
+        containerWidth: 350,
+        circleX: 175,
+        circleY: 150,
+        circleRadius: 90,
+        animation: false,
+        labels: true,
+      };
+    }
+    if (this.timezone != null) {
+      this.properties.timezone = this.timezone;
+    } else {
+      this.properties.timezone = "UTC";
+    }
+  },
   methods: {
     prevDay: function () {
       this.$emit("prevDay");
@@ -145,24 +179,6 @@ export default {
     "timezone",
     "disableDayBrowsing",
   ],
-  created() {
-    if (this.isMobile != null && this.isMobile == true) {
-      this.properties = {
-        containerHeight: 300,
-        containerWidth: 350,
-        circleX: 175,
-        circleY: 150,
-        circleRadius: 90,
-        animation: false,
-        labels: true,
-      };
-    }
-    if (this.timezone != null) {
-      this.properties.timezone = this.timezone;
-    } else {
-      this.properties.timezone = "UTC";
-    }
-  },
 };
 </script>
 

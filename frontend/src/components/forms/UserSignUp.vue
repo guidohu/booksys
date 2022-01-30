@@ -1,8 +1,14 @@
 <template>
-  <b-form v-on:submit.prevent="save">
+  <b-form @submit.prevent="save">
     <b-row class="text-left">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
+      <b-col
+        cols="12"
+        sm="10"
+      >
         <!-- Email -->
         <b-form-group
           id="email"
@@ -14,9 +20,9 @@
           <b-form-input
             id="email-input"
             v-model="signUpData.email"
-            @input="update()"
             type="text"
             autocomplete="username"
+            @input="update()"
           />
         </b-form-group>
         <!-- Password -->
@@ -30,9 +36,9 @@
           <b-form-input
             id="password-input"
             v-model="signUpData.password"
-            @input="update()"
             type="password"
             autocomplete="new-password"
+            @input="update()"
           />
         </b-form-group>
         <!-- Password Confirm -->
@@ -46,12 +52,12 @@
           <b-form-input
             id="password-confirm-input"
             v-model="signUpData.passwordConfirm"
-            @input="update()"
             type="password"
             autocomplete="new-password"
+            @input="update()"
           />
         </b-form-group>
-        <hr />
+        <hr>
         <!-- First Name -->
         <b-form-group
           id="first-name"
@@ -63,8 +69,8 @@
           <b-form-input
             id="first-name-input"
             v-model="signUpData.firstName"
-            @input="update()"
             type="text"
+            @input="update()"
           />
         </b-form-group>
         <!-- Surname -->
@@ -78,8 +84,8 @@
           <b-form-input
             id="last-name-input"
             v-model="signUpData.lastName"
-            @input="update()"
             type="text"
+            @input="update()"
           />
         </b-form-group>
         <!-- Street / No -->
@@ -93,8 +99,8 @@
           <b-form-input
             id="street-input"
             v-model="signUpData.street"
-            @input="update()"
             type="text"
+            @input="update()"
           />
         </b-form-group>
         <!-- Zip Code -->
@@ -108,8 +114,8 @@
           <b-form-input
             id="zip-input"
             v-model="signUpData.zip"
-            @input="update()"
             type="text"
+            @input="update()"
           />
         </b-form-group>
         <!-- Place / City -->
@@ -123,8 +129,8 @@
           <b-form-input
             id="city-input"
             v-model="signUpData.city"
-            @input="update()"
             type="text"
+            @input="update()"
           />
         </b-form-group>
         <!-- Phone -->
@@ -138,46 +144,60 @@
           <b-form-input
             id="phone-input"
             v-model="signUpData.phone"
-            @input="update()"
             type="text"
+            @input="update()"
           />
         </b-form-group>
-        <hr />
+        <hr>
         <!-- License -->
         <b-row class="text-left align-middle">
-          <b-col cols="9"> I have a driver's license for boats. </b-col>
-          <b-col cols="3" class="text-right">
+          <b-col cols="9">
+            I have a driver's license for boats.
+          </b-col>
+          <b-col
+            cols="3"
+            class="text-right"
+          >
             <toggle-button
               id="license-toggle"
               :value="licenseToggleState"
               sync
-              @change="licenseToggleHandler"
               color="#17a2b8"
               :width="toggleWidth"
               :labels="{ checked: 'Yes', unchecked: 'No' }"
+              @change="licenseToggleHandler"
             />
           </b-col>
         </b-row>
         <!-- Own risk -->
-        <b-row v-if="showDisclaimer" class="text-left align-middle mt-3">
+        <b-row
+          v-if="showDisclaimer"
+          class="text-left align-middle mt-3"
+        >
           <b-col cols="9">
             I know the boat community and I perform the activities on my own
             risk.
           </b-col>
-          <b-col cols="3" class="text-right">
+          <b-col
+            cols="3"
+            class="text-right"
+          >
             <toggle-button
               id="own-risk-toggle"
               :value="ownRiskToggleState"
               sync
-              @change="ownRiskToggleHandler"
               color="#17a2b8"
               :width="toggleWidth"
               :labels="{ checked: 'Yes', unchecked: 'No' }"
+              @change="ownRiskToggleHandler"
             />
           </b-col>
         </b-row>
       </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
     </b-row>
   </b-form>
 </template>
@@ -205,6 +225,19 @@ export default {
       ownRiskToggleState: false,
     };
   },
+  mounted() {
+    if (this.signUpData.license == true) {
+      this.licenseToggleState = true;
+    }
+    if (this.signUpData.ownRisk == true) {
+      this.ownRiskToggleState = true;
+    }
+  },
+  created() {
+    // if we already get data provided upon initialization,
+    // we use it
+    this.signUpData = this.$props.userData;
+  },
   methods: {
     save: function() {
       this.$emit("save");
@@ -222,19 +255,6 @@ export default {
       this.ownRiskToggleState = this.signUpData.ownRisk;
       this.update();
     },
-  },
-  mounted() {
-    if (this.signUpData.license == true) {
-      this.licenseToggleState = true;
-    }
-    if (this.signUpData.ownRisk == true) {
-      this.ownRiskToggleState = true;
-    }
-  },
-  created() {
-    // if we already get data provided upon initialization,
-    // we use it
-    this.signUpData = this.$props.userData;
   },
 };
 </script>

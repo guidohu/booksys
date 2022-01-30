@@ -1,7 +1,13 @@
 <template>
-  <b-card no-body class="text-left">
+  <b-card
+    no-body
+    class="text-left"
+  >
     <b-card-body>
-      <HeatEntryModal :heat="selectedHeat" :visible.sync="showHeatEntryModal" />
+      <HeatEntryModal
+        v-model:visible="showHeatEntryModal"
+        :heat="selectedHeat"
+      />
       <b-table
         v-if="errors.length == 0"
         striped
@@ -9,10 +15,13 @@
         small
         :fields="columns"
         :items="getHeatsForSession"
-        @row-clicked="rowClick"
         tbody-tr-class="clickable"
+        @row-clicked="rowClick"
       />
-      <WarningBox v-if="errors.length > 0" :errors="errors" />
+      <WarningBox
+        v-if="errors.length > 0"
+        :errors="errors"
+      />
     </b-card-body>
   </b-card>
 </template>

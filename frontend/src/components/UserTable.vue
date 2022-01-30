@@ -11,20 +11,22 @@
         <b-col cols="12">
           <b-button
             :disabled="selectedItems.length == 0"
-            v-on:click="showDetails"
             size="sm"
             variant="outline-info"
             class="mr-1 mb-2"
-            >View</b-button
+            @click="showDetails"
           >
+            View
+          </b-button>
           <b-button
             :disabled="selectedItems.length == 0"
-            v-on:click="showDeleteUserDialog"
             size="sm"
             variant="outline-danger"
             class="mb-2"
-            >Delete</b-button
+            @click="showDeleteUserDialog"
           >
+            Delete
+          </b-button>
         </b-col>
       </b-row>
       <b-row>
@@ -60,28 +62,34 @@
               <b-form-select
                 v-if="userGroupList.length > 1"
                 v-model="data.item.status"
-                @change="groupChangeHandler($event, data.item)"
                 :options="userGroupList"
                 size="sm"
                 :data-index="data.item"
-              ></b-form-select>
+                @change="groupChangeHandler($event, data.item)"
+              />
               <div v-if="userGroupList.length == 1">
                 {{ userGroupList[0].text }}
               </div>
-              <div v-if="userGroupList.length == 0">-</div>
+              <div v-if="userGroupList.length == 0">
+                -
+              </div>
             </template>
             <template #cell(locked)="data">
               <div class="text-center">
-                <b-button size="sm" style="font-size: 0.8em" variant="light">
+                <b-button
+                  size="sm"
+                  style="font-size: 0.8em"
+                  variant="light"
+                >
                   <b-icon-lock-fill
                     v-if="data.item.locked == 1"
-                    v-on:click="unlock(data.item)"
                     variant="danger"
+                    @click="unlock(data.item)"
                   />
                   <b-icon-unlock-fill
                     v-if="data.item.locked == 0"
-                    v-on:click="lock(data.item)"
                     variant="success"
+                    @click="lock(data.item)"
                   />
                 </b-button>
               </div>

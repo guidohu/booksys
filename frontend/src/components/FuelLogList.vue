@@ -5,17 +5,17 @@
     </div>
     <div v-else>
       <FuelEntryModal
-        :fuelEntry="selectedFuelEntry"
-        :visible.sync="showFuelEntryModal"
+        v-model:visible="showFuelEntryModal"
+        :fuel-entry="selectedFuelEntry"
       />
       <b-table
         hover
         small
         :items="items"
         :fields="columns"
-        @row-clicked="rowClick"
         :tbody-tr-class="rowClass"
         class="text-left"
+        @row-clicked="rowClick"
       />
     </div>
   </div>

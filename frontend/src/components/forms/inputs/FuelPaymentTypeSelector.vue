@@ -6,7 +6,10 @@
     label-cols="3"
     description="select between direct payment and credited payment where you add payments for fuel in the payments section separately"
   >
-    <b-form-select v-model="formSelected" :options="options"></b-form-select>
+    <b-form-select
+      v-model="formSelected"
+      :options="options"
+    />
   </b-form-group>
 </template>
 
@@ -37,6 +40,9 @@ export default {
       this.setFormSelected(this.selected);
     },
   },
+  created() {
+    this.setFormSelected(this.selected);
+  },
   methods: {
     setFormSelected: function (format) {
       if (format == null) {
@@ -48,9 +54,6 @@ export default {
         this.formSelected = "instant";
       }
     },
-  },
-  created() {
-    this.setFormSelected(this.selected);
   },
 };
 </script>

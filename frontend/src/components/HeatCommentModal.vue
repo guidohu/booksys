@@ -7,17 +7,37 @@
     @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
+      <b-col
+        cols="12"
+        sm="10"
+      >
         <WarningBox :errors="errors" />
       </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
     </b-row>
     <b-form @submit="saveComment">
       <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
-          <b-form-group id="comment" label="" label-for="" description="">
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
+        <b-col
+          cols="12"
+          sm="10"
+        >
+          <b-form-group
+            id="comment"
+            label=""
+            label-for=""
+            description=""
+          >
             <b-form-input
               id="comment-input"
               v-model="comment"
@@ -32,13 +52,17 @@
       <b-button
         type="button"
         variant="outline-danger"
-        v-on:click="removeComment"
         class="mr-1"
+        @click="removeComment"
       >
         <b-icon-x />
         Delete
       </b-button>
-      <b-button type="button" variant="outline-info" v-on:click="saveComment">
+      <b-button
+        type="button"
+        variant="outline-info"
+        @click="saveComment"
+      >
         <b-icon-check />
         Save
       </b-button>
@@ -81,6 +105,14 @@ export default {
       comment: null,
     };
   },
+  watch: {
+    defaultComment: function (newComment) {
+      this.comment = newComment;
+    },
+  },
+  mounted() {
+    this.comment = this.defaultComment;
+  },
   methods: {
     saveComment: function () {
       this.$emit("commentChangeHandler", this.comment);
@@ -94,14 +126,6 @@ export default {
       this.comment = null;
       this.$emit("update:visible", false);
     },
-  },
-  watch: {
-    defaultComment: function (newComment) {
-      this.comment = newComment;
-    },
-  },
-  mounted() {
-    this.comment = this.defaultComment;
   },
 };
 </script>

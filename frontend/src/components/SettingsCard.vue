@@ -1,21 +1,36 @@
 <template>
-  <b-card no-body class="text-left">
+  <b-card
+    no-body
+    class="text-left"
+  >
     <b-card-body class="overflow-scroll">
-      <WarningBox v-if="errors.length > 0" :errors="errors" />
+      <WarningBox
+        v-if="errors.length > 0"
+        :errors="errors"
+      />
       <logo-upload @logoChanged="logoChangeHandler" />
 
       <b-form @submit="save">
-        <b-alert variant="info" show>
+        <b-alert
+          variant="info"
+          show
+        >
           Settings related to the boat you are using.
         </b-alert>
         <!-- Engine hour format -->
-        <engine-hour-format :selected.sync="form.engineHourFormat" />
-        <b-alert variant="info" show>
+        <engine-hour-format v-model:selected="form.engineHourFormat" />
+        <b-alert
+          variant="info"
+          show
+        >
           Settings for your daily operations.
         </b-alert>
         <!-- Direct Payment vs Billed Payment -->
-        <fuel-payment-type-selector :selected.sync="form.fuelPaymentType" />
-        <b-alert variant="info" show>
+        <fuel-payment-type-selector v-model:selected="form.fuelPaymentType" />
+        <b-alert
+          variant="info"
+          show
+        >
           Timezone and location settings. Users will see the times in the
           timezone defined by these settings, also sunrise and sunset will be
           calculated based on these settings.
@@ -93,15 +108,18 @@
           description=""
         >
           <b-form-textarea
-            size="sm"
             id="input-address"
             v-model="form.address"
+            size="sm"
             rows="3"
             max-rows="3"
           />
         </b-form-group>
 
-        <b-alert variant="info" show>
+        <b-alert
+          variant="info"
+          show
+        >
           Payment Information. This information is displayed to users in case
           they want to top-up their balance.
         </b-alert>
@@ -146,7 +164,11 @@
           description=""
         >
           <b-input-group size="sm">
-            <b-form-input id="input-iban" v-model="form.iban" type="text" />
+            <b-form-input
+              id="input-iban"
+              v-model="form.iban"
+              type="text"
+            />
           </b-input-group>
         </b-form-group>
         <!-- Account BIC -->
@@ -158,7 +180,11 @@
           description=""
         >
           <b-input-group size="sm">
-            <b-form-input id="input-bic" v-model="form.bic" type="text" />
+            <b-form-input
+              id="input-bic"
+              v-model="form.bic"
+              type="text"
+            />
           </b-input-group>
         </b-form-group>
         <!-- Account Comment -->
@@ -178,7 +204,10 @@
           </b-input-group>
         </b-form-group>
 
-        <b-alert variant="info" show>
+        <b-alert
+          variant="info"
+          show
+        >
           Notification Settings. The application will send emails to users,
           therefore it needs to have access to an email account for doing so.
         </b-alert>
@@ -248,7 +277,10 @@
         </b-input-group>
       </b-form-group>
 
-      <b-alert variant="info" show>
+      <b-alert
+        variant="info"
+        show
+      >
         ReCAPTCHA protects the application and its users from SPAMers. Thus it
         is recommended to use ReCAPTCHA.
       </b-alert>
@@ -287,12 +319,22 @@
     </b-card-body>
     <b-card-footer>
       <b-row class="text-right">
-        <b-col cols="9" offset="3">
-          <b-button class="mr-2" variant="outline-danger" to="/admin">
+        <b-col
+          cols="9"
+          offset="3"
+        >
+          <b-button
+            class="mr-2"
+            variant="outline-danger"
+            to="/admin"
+          >
             <b-icon-x />
             Cancel
           </b-button>
-          <b-button variant="outline-info" v-on:click="save">
+          <b-button
+            variant="outline-info"
+            @click="save"
+          >
             <b-icon-check />
             Save
           </b-button>

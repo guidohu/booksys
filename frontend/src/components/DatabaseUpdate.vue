@@ -1,202 +1,196 @@
 <template>
-  <b-modal
-    id="view_database_update_modal"
-    title="Database Update"
-    :visible="visible"
-  >
-    <div v-if="getDbVersionInfo == null" class="text-center">
-      <b-spinner variant="primary" label="Spinning"></b-spinner>
-    </div>
-    <div v-else>
-      <form>
-        <b-row v-if="errors.length">
-          <b-col offset="1" cols="10">
-            <b-alert variant="warning" show>
-              <b>Please correct the following error(s):</b>
-              <ul>
-                <li v-for="error in errors" :key="error">{{ error }}</li>
-              </ul>
-            </b-alert>
-          </b-col>
-        </b-row>
-        <b-row v-if="getDbVersionInfo != null">
-          <b-col offset="1" cols="4" class="font-weight-bold">
-            App Version
-          </b-col>
-          <b-col cols="6"> v{{ getDbVersionInfo.appVersion }} </b-col>
-        </b-row>
-        <b-row v-if="getDbVersionInfo != null">
-          <b-col offset="1" cols="4" class="font-weight-bold">
-            DB Version
-          </b-col>
-          <b-col cols="6">
-            {{ dbVersionText }}
-          </b-col>
-        </b-row>
-        <b-row class="mt-3">
-          <b-col offset="1" cols="10">
-            <b-alert
-              variant="info"
-              v-if="
-                getDbVersionInfo != null &&
-                getDbVersionInfo.isUpdated == false &&
-                getDbUpdateResult == null
-              "
-              show
-            >
-              The database version is outdated and needs to be upgraded. If the
-              upgrade is not done, there might occur data inconsisstencies and
-              the app will stop working properly. Thus it is highly recommended
-              to upgrade now.
-            </b-alert>
-            <b-alert
-              variant="success"
-              v-if="
-                getDbVersionInfo.isUpdated == false && getDbIsUpdating == true
-              "
-              show
-            >
-              Updating database. Please wait, this might take a few minutes.
-            </b-alert>
-            <b-alert
-              variant="success"
-              v-if="
-                getDbVersionInfo.isUpdated == true &&
-                getDbIsUpdating == false &&
-                (getDbUpdateResult == null || getDbUpdateResult.success == true)
-              "
-              show
-            >
-              Update successful.
-            </b-alert>
-            <b-alert
-              variant="danger"
-              v-if="
-                getDbIsUpdating == false &&
-                getDbUpdateResult != null &&
-                getDbUpdateResult.success == false
-              "
-              show
-            >
-              Update failed. Please let the administrator know about this,
-              together with the error message below:<br /><br />
-              <strong>Error:</strong> {{ getDbUpdateResult.msg }}
-            </b-alert>
-          </b-col>
-        </b-row>
-        <b-row
-          class="mt-3"
-          v-if="
-            getDbUpdateResult != null &&
-            getDbUpdateResult.queries != null &&
-            getDbUpdateResult.queries.length > 0 &&
-            getDbUpdateResult.ok == false
-          "
-        >
-          <b-col offset="1" cols="10">
-            <b-row
-              v-bind:key="query.query"
-              v-for="query in getDbUpdateResult.queries"
-            >
-              <div class="col-sm-12 col-xs-12">
-                <span
-                  class="glyphicon glyphicon-ok"
-                  v-if="query.ok == true"
-                ></span>
-                <span
-                  class="glyphicon glyphicon-remove"
-                  v-if="query.ok == false"
-                ></span>
-                {{ query.query }}
+  <modal-container name="dbUpdateModal" :visible="visible">    
+    <modal-header title="Database Update" closable="true" @close="cancel">
+      <h5 class="modal-title">Database Update</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </modal-header>
+    <modal-body>
+      <div
+        v-if="getDbVersionInfo == null"
+        class="text-center"
+      >
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      <div v-else>
+        <form>
+          <div class="row" v-if="errors.length">
+            <div class="col-10 offset-sm-1">
+              <div class="alert alert-warning">
+                <b>Please correct the following error(s):</b>
+                <ul>
+                  <li
+                    v-for="error in errors"
+                    :key="error"
+                  >
+                    {{ error }}
+                  </li>
+                </ul>
               </div>
-            </b-row>
-          </b-col>
-        </b-row>
-      </form>
-    </div>
-    <div v-if="getDbVersionInfo != null" slot="modal-footer">
-      <b-button
+            </div>
+          </div>
+          <div class="row" v-if="getDbVersionInfo != null">
+            <div class="col-4 offset-sm-1 font-weight-bold">
+              App Version
+            </div>
+            <div class="col-6">
+              v{{ getDbVersionInfo.appVersion }}
+            </div>
+          </div>
+          <div class="row" v-if="getDbVersionInfo != null">
+            <div class="col-4 offset-sm-1 font-weight-bold">
+              DB Version
+            </div>
+            <div class="col-6">
+              {{ dbVersionText }}
+            </div>
+          </div>
+          <div class="row mt-3">
+            <div class="col-10 offset-sm-1 font-weight-bold">
+              <div class="alert alert-info"
+                v-if="
+                  getDbVersionInfo != null &&
+                    getDbVersionInfo.isUpdated == false &&
+                    getDbUpdateResult == null
+                "
+              >
+                The database version is outdated and needs to be upgraded. If the
+                upgrade is not done, there might occur data inconsisstencies and
+                the app will stop working properly. Thus it is highly recommended
+                to upgrade now.
+              </div>
+              <div class="alert alert-success"
+                v-if="
+                  getDbVersionInfo.isUpdated == false && getDbIsUpdating == true
+                "
+              >
+                Updating database. Please wait, this might take a few minutes.
+              </div>
+              <div class="alert alert-success"
+                v-if="
+                  getDbVersionInfo.isUpdated == true &&
+                    getDbIsUpdating == false &&
+                    (getDbUpdateResult == null || getDbUpdateResult.success == true)
+                "
+              >
+                Update successful.
+              </div>
+              <div class="alert alert-danger"
+                v-if="
+                  getDbIsUpdating == false &&
+                    getDbUpdateResult != null &&
+                    getDbUpdateResult.success == false
+                "
+                variant="danger"
+                show
+              >
+                Update failed. Please let the administrator know about this,
+                together with the error message below:<br><br>
+                <strong>Error:</strong> {{ getDbUpdateResult.msg }}
+              </div>
+            </div>
+          </div>
+          <div
+            v-if="
+              getDbUpdateResult != null &&
+                getDbUpdateResult.queries != null &&
+                getDbUpdateResult.queries.length > 0 &&
+                getDbUpdateResult.ok == false
+            "
+            class="row mt-3"
+          >
+            <div class="col-10 offset-sm-1">
+              <div class="row"
+                v-for="query in getDbUpdateResult.queries"
+                :key="query.query"
+              >
+                <div class="col-sm-12 col-xs-12">
+                  <span
+                    v-if="query.ok == true"
+                    class="glyphicon glyphicon-ok"
+                  />
+                  <span
+                    v-if="query.ok == false"
+                    class="glyphicon glyphicon-remove"
+                  />
+                  {{ query.query }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </modal-body>
+    <modal-footer>
+      <button
+        v-if="getDbVersionInfo != null && getDbVersionInfo.isUpdated == false && getDbIsUpdating == false"
         type="button"
-        variant="outline-info"
-        v-on:click="updateDb"
-        v-if="getDbVersionInfo.isUpdated == false && getDbIsUpdating == false"
+        class="btn btn-outline-info"
+        @click="updateDb"
       >
-        <b-icon-arrow-repeat />
+        <i class="bi bi-arrow-clockwise"></i>
         Update
-      </b-button>
-      <b-button
+      </button>
+      <button
+        v-if="getDbVersionInfo != null && getDbVersionInfo.isUpdated == false && getDbIsUpdating == true"
         type="button"
-        variant="outline-secondary"
+        class="btn btn-outline-secondary"
         disabled
-        v-if="getDbVersionInfo.isUpdated == false && getDbIsUpdating == true"
       >
-        <b-icon-hourglass-split />
+        <i class="bi bi-hourglass-split"></i>
         Updating
-      </b-button>
-      <b-button
+      </button>
+      <button
+        v-if="getDbVersionInfo != null && getDbVersionInfo.isUpdated == true && getDbIsUpdating == false"
         type="button"
-        variant="outline-success"
-        v-on:click="cancel"
-        v-if="getDbVersionInfo.isUpdated == true && getDbIsUpdating == false"
+        class="btn btn-outline-success"
+        @click="cancel"
       >
-        <b-icon-check />
+        <i class="bi bi-check2"></i>
         Done
-      </b-button>
-      <b-button
-        class="ml-1"
+      </button>
+      <button
+        v-if="getDbVersionInfo != null && getDbVersionInfo.isUpdated == false && getDbIsUpdating == false"
+        class="btn btn-outline-danger ml-1"
         type="button"
-        variant="outline-danger"
-        v-on:click="cancel"
-        v-if="getDbVersionInfo.isUpdated == false && getDbIsUpdating == false"
+        @click="cancel"
       >
-        <b-icon-x />
+        <i class="bi bi-x"></i>
         Cancel
-      </b-button>
-    </div>
-  </b-modal>
+      </button>
+    </modal-footer>
+  </modal-container>
 </template>
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import {
-  BModal,
-  BSpinner,
-  BRow,
-  BCol,
-  BAlert,
-  BButton,
-  BIconArrowRepeat,
-  BIconHourglassSplit,
-  BIconCheck,
-  BIconX,
-} from "bootstrap-vue";
+import ModalContainer from '@/components/bricks/ModalContainer.vue';
+import ModalHeader from '@/components/bricks/ModalHeader.vue';
+import ModalBody from '@/components/bricks/ModalBody.vue';
+import ModalFooter from '@/components/bricks/ModalFooter.vue';
 
 export default {
   name: "DatabaseUpdateModal",
   components: {
-    BModal,
-    BSpinner,
-    BRow,
-    BCol,
-    BAlert,
-    BButton,
-    BIconArrowRepeat,
-    BIconHourglassSplit,
-    BIconCheck,
-    BIconX,
+    ModalContainer,
+    ModalHeader,
+    ModalBody,
+    ModalFooter
   },
   data() {
     return {
       errors: [],
       dbVersionText: "n/a",
       visible: false,
+      modal: null,
     };
   },
   watch: {
-    getDbVersionInfo: function (newValue) {
-      console.log("getDbVersionInfo value changed to", newValue);
-      this.dbVersionText = this.getVersionText(newValue);
-    },
+    'getDbVersionInfo.dbVersion': function(newValue) {
+      console.info("getDbVersionInfo.dbVersion value changed to", newValue);
+      this.dbVersionText = this.getVersionText(this.getDbVersionInfo);
+    } 
   },
   methods: {
     ...mapActions("configuration", ["queryDbVersionInfo", "updateDb"]),
@@ -204,6 +198,7 @@ export default {
       this.visible = false;
     },
     getVersionText: function (versionInfo) {
+      console.log()
       if (versionInfo == null && this.getDbVersionInfo == null) {
         return "loading";
       }
@@ -237,10 +232,17 @@ export default {
       .then(() => {
         this.dbVersionText = this.getVersionText();
       })
-      .catch((errors) => (this.errors = errors));
+      .catch((errors) => {
+        this.errors = errors
+      });
   },
   mounted() {
     this.visible = true;
+    this.$store.subscribe((mutation, state) => {
+      console.log("Type:",mutation.type)
+      console.log("Payload",mutation.payload)
+      console.log("state",state)
+    });
   },
 };
 </script>

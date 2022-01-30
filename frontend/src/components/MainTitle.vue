@@ -15,11 +15,11 @@ import { BRow, BCol } from "bootstrap-vue";
 
 export default {
   name: "MainTitle",
-  props: ["titleName"],
   components: {
     BRow,
     BCol,
   },
+  props: ["titleName"],
 };
 </script>
 

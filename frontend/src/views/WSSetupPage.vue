@@ -15,44 +15,79 @@
       spinner-variant="info"
       rounded="sm"
     >
-      <b-row v-if="errors.length > 0" class="mt-4">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
+      <b-row
+        v-if="errors.length > 0"
+        class="mt-4"
+      >
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
+        <b-col
+          cols="12"
+          sm="10"
+        >
           <warning-box :errors="errors" />
         </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
       </b-row>
       <!-- Database setup -->
       <database-configuration
         v-if="showDbSetup"
-        :dbConfig="dbConfig"
+        :db-config="dbConfig"
         @save="setDbSettings"
       />
       <!-- Administrator setup -->
       <div v-if="showUserSetup">
         <b-row class="mb-4">
-          <b-col cols="1" class="d-none d-sm-block"></b-col>
-          <b-col cols="12" sm="10"> Setup the Administrator Account </b-col>
-          <b-col cols="1" class="d-none d-sm-block"></b-col>
+          <b-col
+            cols="1"
+            class="d-none d-sm-block"
+          />
+          <b-col
+            cols="12"
+            sm="10"
+          >
+            Setup the Administrator Account
+          </b-col>
+          <b-col
+            cols="1"
+            class="d-none d-sm-block"
+          />
         </b-row>
         <user-sign-up
-          :userData="adminUserConfig"
-          :showDisclaimer="false"
+          :user-data="adminUserConfig"
+          :show-disclaimer="false"
           @save="addAdminUser"
-          v-on:update:user="handleUserUpdate"
+          @update:user="handleUserUpdate"
         />
       </div>
       <!-- Setup Done -->
-      <b-row v-if="showSetupDone" class="text-center">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
+      <b-row
+        v-if="showSetupDone"
+        class="text-center"
+      >
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
+        <b-col
+          cols="12"
+          sm="10"
+        >
           <p class="h4 mb-2">
             <b-icon-check-circle variant="success" />
             Setup Done.
           </p>
           <p>Please go back to the login page and login.</p>
         </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
       </b-row>
     </b-overlay>
     <!-- Footer -->
@@ -62,7 +97,7 @@
         class="mr-1"
         type="button"
         variant="outline-danger"
-        v-on:click="close"
+        @click="close"
       >
         <b-icon-x />
         Cancel
@@ -71,8 +106,8 @@
         v-if="showDbSetup"
         type="button"
         variant="outline-info"
-        v-on:click="setDbSettings"
         :disabled="isLoading"
+        @click="setDbSettings"
       >
         <b-icon-arrow-right />
         Next
@@ -81,8 +116,8 @@
         v-if="showUserSetup"
         type="button"
         variant="outline-info"
-        v-on:click="addAdminUser"
         :disabled="isLoading"
+        @click="addAdminUser"
       >
         <b-icon-arrow-right />
         Next
@@ -92,7 +127,7 @@
         class="mr-1"
         type="button"
         variant="outline-info"
-        v-on:click="close"
+        @click="close"
       >
         <b-icon-check />
         Done
@@ -160,6 +195,10 @@ export default {
       userSetupTitle: "Setup 2/2",
       setupDoneTitle: "Setup Done",
     };
+  },
+  mounted() {
+    this.isLoading = true;
+    this.getBackendStatus();
   },
   methods: {
     setDbSettings: function () {
@@ -306,10 +345,6 @@ export default {
           this.isLoading = false;
         });
     },
-  },
-  mounted() {
-    this.isLoading = true;
-    this.getBackendStatus();
   },
 };
 </script>

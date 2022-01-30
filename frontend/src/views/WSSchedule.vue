@@ -1,14 +1,31 @@
 <template>
-  <div v-if="isDesktop" class="display">
+  <div
+    v-if="isDesktop"
+    class="display"
+  >
     <main-title title-name="Schedule" />
     <b-row class="ml-1 mr-1">
       <b-col>
-        <div class="accordion" role="tablist">
-          <b-card no-body class="mb-1">
-            <b-card-header header-tag="header" class="p-1" role="tab">
-              <b-button block v-b-toggle.accordion-1 variant="outline-dark"
-                >Past Sessions</b-button
+        <div
+          class="accordion"
+          role="tablist"
+        >
+          <b-card
+            no-body
+            class="mb-1"
+          >
+            <b-card-header
+              header-tag="header"
+              class="p-1"
+              role="tab"
+            >
+              <b-button
+                v-b-toggle.accordion-1
+                block
+                variant="outline-dark"
               >
+                Past Sessions
+              </b-button>
             </b-card-header>
             <b-collapse
               id="accordion-1"
@@ -18,20 +35,34 @@
               <b-card-body>
                 <UserSessionsTable
                   v-if="pastSessions != null && pastSessions.length > 0"
-                  :userSessions="pastSessions"
+                  :user-sessions="pastSessions"
                 />
-                <b-card-text v-else class="text-center"
-                  >No sessions to display</b-card-text
+                <b-card-text
+                  v-else
+                  class="text-center"
                 >
+                  No sessions to display
+                </b-card-text>
               </b-card-body>
             </b-collapse>
           </b-card>
 
-          <b-card no-body class="mb-1">
-            <b-card-header header-tag="header" class="p-1" role="tab">
-              <b-button block v-b-toggle.accordion-2 variant="outline-dark"
-                >Upcoming Sessions</b-button
+          <b-card
+            no-body
+            class="mb-1"
+          >
+            <b-card-header
+              header-tag="header"
+              class="p-1"
+              role="tab"
+            >
+              <b-button
+                v-b-toggle.accordion-2
+                block
+                variant="outline-dark"
               >
+                Upcoming Sessions
+              </b-button>
             </b-card-header>
             <b-collapse
               id="accordion-2"
@@ -42,13 +73,16 @@
               <b-card-body>
                 <UserSessionsTable
                   v-if="upcomingSessions != null && upcomingSessions.length > 0"
-                  :userSessions="upcomingSessions"
-                  :showCancel="true"
+                  :user-sessions="upcomingSessions"
+                  :show-cancel="true"
                   @cancel="cancelSessionHandler"
                 />
-                <b-card-text v-else class="text-center"
-                  >No sessions to display</b-card-text
+                <b-card-text
+                  v-else
+                  class="text-center"
                 >
+                  No sessions to display
+                </b-card-text>
               </b-card-body>
             </b-collapse>
           </b-card>
@@ -56,8 +90,11 @@
       </b-col>
     </b-row>
     <div class="bottom mr-2">
-      <b-button variant="outline-light" to="/dashboard">
-        <b-icon-house></b-icon-house>
+      <b-button
+        variant="outline-light"
+        to="/dashboard"
+      >
+        <b-icon-house />
         HOME
       </b-button>
     </div>
@@ -69,21 +106,34 @@
         <b-row>
           <b-col>
             <b-tabs content-class="mt-3 text-left">
-              <b-tab title="Upcoming Sessions" active>
+              <b-tab
+                title="Upcoming Sessions"
+                active
+              >
                 <UserSessionsTable
                   v-if="upcomingSessions != null && upcomingSessions.length > 0"
-                  :userSessions="upcomingSessions"
-                  :showCancel="true"
+                  :user-sessions="upcomingSessions"
+                  :show-cancel="true"
                   @cancel="cancelSessionHandler"
                 />
-                <div v-else class="text-center">No sessions to display</div>
+                <div
+                  v-else
+                  class="text-center"
+                >
+                  No sessions to display
+                </div>
               </b-tab>
               <b-tab title="Past Sessions">
                 <UserSessionsTable
                   v-if="pastSessions != null && pastSessions.length > 0"
-                  :userSessions="pastSessions"
+                  :user-sessions="pastSessions"
                 />
-                <div v-else class="text-center">No sessions to display</div>
+                <div
+                  v-else
+                  class="text-center"
+                >
+                  No sessions to display
+                </div>
               </b-tab>
             </b-tabs>
           </b-col>

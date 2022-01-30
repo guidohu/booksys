@@ -1,6 +1,9 @@
 <template>
   <div>
-    <WarningBox v-if="errors.length > 0" :errors="errors" />
+    <WarningBox
+      v-if="errors.length > 0"
+      :errors="errors"
+    />
     <b-table
       v-if="errors.length == 0"
       hover

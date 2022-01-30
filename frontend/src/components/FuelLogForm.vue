@@ -1,12 +1,18 @@
 <template>
-  <b-container float class="text-left">
+  <b-container
+    float
+    class="text-left"
+  >
     <b-row>
       <b-col cols="12">
-        <WarningBox v-if="errors.length > 0" :errors="errors" />
+        <WarningBox
+          v-if="errors.length > 0"
+          :errors="errors"
+        />
         <b-form @submit="add">
           <engine-hours
-            label="Engine Hrs"
             v-model="form.engineHours"
+            label="Engine Hrs"
             :display-format="getEngineHourFormat"
           />
           <b-form-group
@@ -16,7 +22,11 @@
             label-cols="3"
           >
             <b-input-group size="sm">
-              <b-form-input id="input-cost" v-model="form.cost" type="text" />
+              <b-form-input
+                id="input-cost"
+                v-model="form.cost"
+                type="text"
+              />
               <b-input-group-append is-text>
                 {{ getCurrency }}
               </b-input-group-append>
@@ -34,14 +44,24 @@
                 v-model="form.liters"
                 type="text"
               />
-              <b-input-group-append is-text> ltrs </b-input-group-append>
+              <b-input-group-append is-text>
+                ltrs
+              </b-input-group-append>
             </b-input-group>
           </b-form-group>
           <b-row class="text-right">
-            <b-col cols="9" offset="3">
-              <b-button block variant="outline-info" size="sm" v-on:click="add"
-                >Add</b-button
+            <b-col
+              cols="9"
+              offset="3"
+            >
+              <b-button
+                block
+                variant="outline-info"
+                size="sm"
+                @click="add"
               >
+                Add
+              </b-button>
             </b-col>
           </b-row>
         </b-form>

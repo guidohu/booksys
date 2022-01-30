@@ -1,10 +1,13 @@
 <template>
-  <b-card no-body class="text-left">
+  <b-card
+    no-body
+    class="text-left"
+  >
     <b-card-header> Condition Info </b-card-header>
     <b-card-body>
       <b-row>
         <b-col cols="5">
-          <b-icon-brightness-alt-high></b-icon-brightness-alt-high>
+          <b-icon-brightness-alt-high />
           Sunrise
         </b-col>
         <b-col cols="7">
@@ -13,7 +16,7 @@
       </b-row>
       <b-row>
         <b-col cols="5">
-          <b-icon-brightness-alt-low-fill></b-icon-brightness-alt-low-fill>
+          <b-icon-brightness-alt-low-fill />
           Sunset
         </b-col>
         <b-col cols="7">

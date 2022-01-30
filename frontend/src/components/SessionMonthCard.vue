@@ -1,24 +1,36 @@
 <template>
-  <b-card no-body class="text-left">
+  <b-card
+    no-body
+    class="text-left"
+  >
     <b-card-header>
       <b-row>
-        <b-col cols="4" class="text-right">
+        <b-col
+          cols="4"
+          class="text-right"
+        >
           <b-button
             variant="outline-info"
             class="btn-xs"
-            v-on:click="prevMonth"
+            @click="prevMonth"
           >
             <b-icon-arrow-left-short />
           </b-button>
         </b-col>
-        <b-col cols="4" class="text-center">
+        <b-col
+          cols="4"
+          class="text-center"
+        >
           {{ monthString }}
         </b-col>
-        <b-col cols="4" class="text-left">
+        <b-col
+          cols="4"
+          class="text-left"
+        >
           <b-button
             variant="outline-info"
             class="btn-xs"
-            v-on:click="nextMonth"
+            @click="nextMonth"
           >
             <b-icon-arrow-right-short />
           </b-button>
@@ -28,26 +40,43 @@
     <b-card-body ref="calendarBody">
       <table>
         <tr>
-          <th class="table-title-text">Mon</th>
-          <th class="table-title-text">Tue</th>
-          <th class="table-title-text">Wed</th>
-          <th class="table-title-text">Thu</th>
-          <th class="table-title-text">Fri</th>
-          <th class="table-title-text">Sat</th>
-          <th class="table-title-text">Sun</th>
+          <th class="table-title-text">
+            Mon
+          </th>
+          <th class="table-title-text">
+            Tue
+          </th>
+          <th class="table-title-text">
+            Wed
+          </th>
+          <th class="table-title-text">
+            Thu
+          </th>
+          <th class="table-title-text">
+            Fri
+          </th>
+          <th class="table-title-text">
+            Sat
+          </th>
+          <th class="table-title-text">
+            Sun
+          </th>
         </tr>
-        <tr v-for="i in Array.from(Array(6).keys())" :key="i">
+        <tr
+          v-for="i in Array.from(Array(6).keys())"
+          :key="i"
+        >
           <td
             v-for="j in Array.from(Array(7).keys())"
             :key="j"
-            v-on:click="navigateTo(sessionData[i * 7 + j])"
-            v-on:mouseover="mouseOver(sessionData[i * 7 + j])"
+            @click="navigateTo(sessionData[i * 7 + j])"
+            @mouseover="mouseOver(sessionData[i * 7 + j])"
           >
             <div :class="getCalendarDayBoxClass(sessionData[i * 7 + j])">
               <BooksysPie
-                :sessionData="sessionData[i * 7 + j]"
+                :session-data="sessionData[i * 7 + j]"
                 :properties="properties"
-                :pieId="i * 7 + j"
+                :pie-id="i * 7 + j"
               />
               <div class="day-number">
                 {{ getDay(sessionData[i * 7 + j].window_start) }}
@@ -77,6 +106,18 @@ import {
 
 export default {
   name: "SessionMonthCard",
+  components: {
+    BooksysPie,
+    BCard,
+    BCardHeader,
+    BCardBody,
+    BRow,
+    BCol,
+    BButton,
+    BIconArrowLeftShort,
+    BIconArrowRightShort,
+  },
+  props: ["sessionData", "month"],
   data() {
     return {
       properties: {
@@ -94,6 +135,24 @@ export default {
     monthString: function () {
       return dayjs(this.month).format("MMMM YYYY");
     },
+  },
+  mounted() {
+    const totalWidth = this.$refs.calendarBody.clientWidth - 61;
+    const cardWidth = totalWidth / 7;
+    let cardHeight = cardWidth * 0.75;
+    if (this.isMobile()) {
+      cardHeight = cardWidth * 1.5;
+    }
+    const radius = (Math.min(cardWidth, cardHeight) / 2) * 0.7;
+    this.properties = {
+      containerHeight: cardHeight,
+      containerWidth: cardWidth,
+      circleX: (cardWidth - 3) / 2,
+      circleY: cardHeight / 2,
+      circleRadius: radius,
+      animate: false,
+      labels: false,
+    };
   },
   methods: {
     prevMonth: function () {
@@ -125,36 +184,6 @@ export default {
     mouseOver: function (daySessionData) {
       this.$emit("mouseOverHandler", daySessionData);
     },
-  },
-  components: {
-    BooksysPie,
-    BCard,
-    BCardHeader,
-    BCardBody,
-    BRow,
-    BCol,
-    BButton,
-    BIconArrowLeftShort,
-    BIconArrowRightShort,
-  },
-  props: ["sessionData", "month"],
-  mounted() {
-    const totalWidth = this.$refs.calendarBody.clientWidth - 61;
-    const cardWidth = totalWidth / 7;
-    let cardHeight = cardWidth * 0.75;
-    if (this.isMobile()) {
-      cardHeight = cardWidth * 1.5;
-    }
-    const radius = (Math.min(cardWidth, cardHeight) / 2) * 0.7;
-    this.properties = {
-      containerHeight: cardHeight,
-      containerWidth: cardWidth,
-      circleX: (cardWidth - 3) / 2,
-      circleY: cardHeight / 2,
-      circleRadius: radius,
-      animate: false,
-      labels: false,
-    };
   },
 };
 </script>

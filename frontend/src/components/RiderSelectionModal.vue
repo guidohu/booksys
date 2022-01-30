@@ -7,16 +7,31 @@
     @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
+      <b-col
+        cols="12"
+        sm="10"
+      >
         <WarningBox :errors="errors" />
       </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
     </b-row>
     <b-form @submit="add">
       <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
+        <b-col
+          cols="12"
+          sm="10"
+        >
           <b-form-group
             v-if="isMobile != true"
             id="search"
@@ -24,7 +39,11 @@
             label-for="rider-search"
             description=""
           >
-            <b-form-input id="rider-search" v-model="search" type="text" />
+            <b-form-input
+              id="rider-search"
+              v-model="search"
+              type="text"
+            />
           </b-form-group>
           <b-form-group
             id="rider"
@@ -38,18 +57,18 @@
               :options="filteredOptions"
               multiple
               :select-size="5"
-            ></b-form-select>
+            />
           </b-form-group>
           <b-button
             v-if="isMobile != true"
             type="button"
             variant="outline-success"
-            v-on:click="add"
             block
+            @click="add"
           >
             <b-icon-person-plus />{{ " " }}Select
           </b-button>
-          <hr />
+          <hr>
           <b-form-group
             v-if="isMobile != true"
             id="selected"
@@ -58,11 +77,15 @@
             description=""
           >
             <ul v-if="usersToAdd.length > 0">
-              <li v-for="u in usersToAdd" :key="u.id">
+              <li
+                v-for="u in usersToAdd"
+                :key="u.id"
+              >
                 {{ u.firstName + " " + u.lastName + "  " }}
-                <a href="#" v-on:click.prevent="remove(u.id)"
-                  ><b-icon-person-dash
-                /></a>
+                <a
+                  href="#"
+                  @click.prevent="remove(u.id)"
+                ><b-icon-person-dash /></a>
               </li>
             </ul>
             <ul v-else>
@@ -70,7 +93,10 @@
             </ul>
           </b-form-group>
         </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
       </b-row>
     </b-form>
     <div slot="modal-footer">
@@ -78,7 +104,7 @@
         v-if="isMobile != true"
         type="button"
         variant="outline-info"
-        v-on:click="save"
+        @click="save"
       >
         <b-icon-check />
         Add
@@ -87,7 +113,7 @@
         v-if="isMobile == true"
         type="button"
         variant="outline-info"
-        v-on:click="saveMobile"
+        @click="saveMobile"
       >
         <b-icon-check />
         Add
@@ -96,7 +122,7 @@
         class="ml-1"
         type="button"
         variant="outline-danger"
-        v-on:click="close"
+        @click="close"
       >
         <b-icon-x />
         Cancel
@@ -128,7 +154,6 @@ import {
 
 export default {
   name: "RiderSelectionModal",
-  props: ["session", "visible"],
   components: {
     WarningBox,
     BModal,
@@ -144,6 +169,7 @@ export default {
     BIconCheck,
     BIconX,
   },
+  props: ["session", "visible"],
   data() {
     return {
       errors: [],

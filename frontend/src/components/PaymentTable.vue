@@ -7,10 +7,17 @@
       @dismissed="dismissedHandler"
     />
     <div v-else>
-      <IncomeModal :visible.sync="showIncomeModal" />
-      <ExpenseModal :visible.sync="showExpenseModal" />
-      <b-row v-if="form.years.length > 0" class="text-right">
-        <b-col offset="6" cols="6" class="d-sm-none mr-1">
+      <IncomeModal v-model:visible="showIncomeModal" />
+      <ExpenseModal v-model:visible="showExpenseModal" />
+      <b-row
+        v-if="form.years.length > 0"
+        class="text-right"
+      >
+        <b-col
+          offset="6"
+          cols="6"
+          class="d-sm-none mr-1"
+        >
           <b-form-group
             id="year"
             label="Year"
@@ -30,21 +37,26 @@
       <b-row>
         <b-col cols="8">
           <b-button
-            v-on:click="showAddIncome"
             size="sm"
             variant="outline-info"
             class="mr-1 mb-2"
-            ><b-icon-plus />Income</b-button
+            @click="showAddIncome"
           >
+            <b-icon-plus />Income
+          </b-button>
           <b-button
-            v-on:click="showAddExpense"
             size="sm"
             variant="outline-info"
             class="mb-2"
-            ><b-icon-dash />Expense</b-button
+            @click="showAddExpense"
           >
+            <b-icon-dash />Expense
+          </b-button>
         </b-col>
-        <b-col cols="4" class="d-none d-sm-block">
+        <b-col
+          cols="4"
+          class="d-none d-sm-block"
+        >
           <b-form-group
             id="year"
             label="Year"
@@ -87,10 +99,14 @@
             >
               <template #cell(action)="data">
                 <div class="text-center">
-                  <b-button size="sm" style="font-size: 0.8em" variant="light">
+                  <b-button
+                    size="sm"
+                    style="font-size: 0.8em"
+                    variant="light"
+                  >
                     <b-icon-trash
-                      v-on:click="deleteEntry(data.item)"
                       variant="danger"
+                      @click="deleteEntry(data.item)"
                     />
                   </b-button>
                 </div>

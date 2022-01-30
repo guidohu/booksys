@@ -1,10 +1,13 @@
 <template>
   <div>
-    <WarningBox v-if="errors.length > 0" :errors="errors" />
+    <WarningBox
+      v-if="errors.length > 0"
+      :errors="errors"
+    />
     <EngineHourEntryModal
-      :engineHourEntry="selectedEngineHourLogEntry"
-      :visible.sync="showEntryHourModal"
-      :displayFormat="getEngineHourFormat"
+      v-model:visible="showEntryHourModal"
+      :engine-hour-entry="selectedEngineHourLogEntry"
+      :display-format="getEngineHourFormat"
     />
     <b-table
       v-if="errors.length == 0"
@@ -12,9 +15,9 @@
       small
       :items="items"
       :fields="columns"
-      @row-clicked="rowClick"
       :tbody-tr-class="rowClass"
       class="text-left"
+      @row-clicked="rowClick"
     />
   </div>
 </template>

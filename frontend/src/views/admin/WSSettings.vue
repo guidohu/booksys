@@ -1,6 +1,9 @@
 <template>
   <div>
-    <div v-if="isDesktop" class="display">
+    <div
+      v-if="isDesktop"
+      class="display"
+    >
       <main-title title-name="Settings" />
       <b-row class="ml-1 mr-1">
         <b-col cols="12">

@@ -8,47 +8,47 @@
     />
     <div v-else>
       <UserGroupModal
-        :userGroup="selectedItems[0]"
-        :editMode="userGroupEditMode"
-        :visible.sync="showUserGroupModal"
+        v-model:visible="showUserGroupModal"
+        :user-group="selectedItems[0]"
+        :edit-mode="userGroupEditMode"
       />
       <b-row>
         <b-col cols="12">
           <b-button
-            v-on:click="newGroup"
             size="sm"
             variant="outline-info"
             class="mr-1 mb-2"
+            @click="newGroup"
           >
             <b-icon-plus />
             New
           </b-button>
           <b-button
             v-if="selectedItems.length > 0"
-            v-on:click="showDetails"
             size="sm"
             variant="outline-info"
             class="mr-1 mb-2"
+            @click="showDetails"
           >
             <b-icon-eye />
             View
           </b-button>
           <b-button
             v-if="selectedItems.length > 0"
-            v-on:click="editGroup"
             size="sm"
             variant="outline-info"
             class="mr-1 mb-2"
+            @click="editGroup"
           >
             <b-icon-pencil />
             Edit
           </b-button>
           <b-button
             v-if="selectedItems.length > 0"
-            v-on:click="showDeleteUserGroupDialog"
             size="sm"
             variant="outline-danger"
             class="mb-2"
+            @click="showDeleteUserGroupDialog"
           >
             <b-icon-trash />
             Delete
@@ -70,8 +70,7 @@
             :selectable="true"
             select-mode="single"
             @row-selected="rowSelected"
-          >
-          </b-table>
+          />
         </b-col>
       </b-row>
     </div>

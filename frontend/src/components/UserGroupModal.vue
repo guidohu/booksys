@@ -8,17 +8,34 @@
   >
     <b-form @submit="save">
       <b-row v-if="errors.length > 0">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
+        <b-col
+          cols="12"
+          sm="10"
+        >
           <WarningBox :errors="errors" />
         </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
       </b-row>
       <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
+        <b-col
+          cols="12"
+          sm="10"
+        >
           <!-- User Group -->
-          <h6 class="mt-2 mb-3">User Group</h6>
+          <h6 class="mt-2 mb-3">
+            User Group
+          </h6>
           <b-form-group
             id="user-group-name"
             label="Name"
@@ -32,7 +49,7 @@
               type="text"
               placeholder=""
               :disabled="!isEditMode"
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
             id="user-group-description"
@@ -47,10 +64,12 @@
               type="text"
               placeholder=""
               :disabled="!isEditMode"
-            ></b-form-input>
+            />
           </b-form-group>
           <!-- User Role -->
-          <h6 class="mt-5 mb-3">User Role and Permissions</h6>
+          <h6 class="mt-5 mb-3">
+            User Role and Permissions
+          </h6>
           <b-form-group
             id="user-role-name"
             label="Role"
@@ -61,10 +80,10 @@
             <b-form-select
               id="user-role-name-select"
               v-model="form.user_role_id"
-              @change="roleChangeHandler($event)"
               :options="userRoleList"
               :disabled="!isEditMode"
-            ></b-form-select>
+              @change="roleChangeHandler($event)"
+            />
           </b-form-group>
           <b-form-group
             id="user-role-description"
@@ -79,10 +98,12 @@
               type="text"
               placeholder=""
               disabled
-            ></b-form-input>
+            />
           </b-form-group>
           <!-- Pricing -->
-          <h6 class="mt-5 mb-3">Pricing</h6>
+          <h6 class="mt-5 mb-3">
+            Pricing
+          </h6>
           <b-form-group
             id="price"
             label="Price"
@@ -97,7 +118,7 @@
                 type="text"
                 placeholder=""
                 :disabled="!isEditMode"
-              ></b-form-input>
+              />
               <b-input-group-append is-text>
                 {{ getCurrency }}/min
               </b-input-group-append>
@@ -116,10 +137,13 @@
               type="text"
               placeholder=""
               :disabled="!isEditMode"
-            ></b-form-input>
+            />
           </b-form-group>
         </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
       </b-row>
     </b-form>
     <div slot="modal-footer">
@@ -129,7 +153,7 @@
           class="mr-1"
           type="button"
           variant="outline-danger"
-          v-on:click="remove"
+          @click="remove"
         >
           <b-icon-trash />
           Delete
@@ -141,7 +165,7 @@
           class="ml-4"
           type="button"
           variant="outline-info"
-          v-on:click="save"
+          @click="save"
         >
           <b-icon-check />
           Save
@@ -151,7 +175,7 @@
           class="ml-1"
           type="button"
           variant="outline-info"
-          v-on:click="enableEditMode"
+          @click="enableEditMode"
         >
           <b-icon-pencil />
           Edit
@@ -160,7 +184,7 @@
           class="ml-1"
           type="button"
           variant="outline-danger"
-          v-on:click="close"
+          @click="close"
         >
           <b-icon-x />
           Cancel
@@ -196,7 +220,6 @@ Vue.use(ModalPlugin);
 
 export default {
   name: "UserGroupModal",
-  props: ["userGroup", "editMode", "visible"],
   components: {
     WarningBox,
     BForm,
@@ -213,6 +236,7 @@ export default {
     BIconPencil,
     BIconX,
   },
+  props: ["userGroup", "editMode", "visible"],
   data() {
     return {
       errors: [],

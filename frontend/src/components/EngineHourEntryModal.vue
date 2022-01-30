@@ -7,16 +7,31 @@
     @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
+      <b-col
+        cols="12"
+        sm="10"
+      >
         <WarningBox :errors="errors" />
       </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
     </b-row>
     <b-form @submit="save">
       <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
+        <b-col
+          cols="12"
+          sm="10"
+        >
           <b-form-group
             id="date"
             label="Date"
@@ -25,13 +40,13 @@
             label-cols="3"
           >
             <b-form-input
-              size="sm"
               id="date-input"
               v-model="form.date"
+              size="sm"
               type="text"
               placeholder=""
               disabled
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
             id="driver"
@@ -41,29 +56,29 @@
             label-cols="3"
           >
             <b-form-input
-              size="sm"
               id="driver-input"
               v-model="form.driver"
+              size="sm"
               type="text"
               placeholder=""
               disabled
-            ></b-form-input>
+            />
           </b-form-group>
           <engine-hours
-            label="Before"
             v-model="form.beforeHours"
+            label="Before"
             :display-format="displayFormat"
             :disabled="true"
           />
           <engine-hours
-            label="After"
             v-model="form.afterHours"
+            label="After"
             :display-format="displayFormat"
             :disabled="true"
           />
           <engine-hours
-            label="Difference"
             v-model="form.deltaHours"
+            label="Difference"
             :display-format="displayFormat"
             :disabled="true"
           />
@@ -76,18 +91,25 @@
             <toggle-button
               id="input-type"
               :value="form.type"
-              @change="toggleType"
               color="#17a2b8"
               :width="toggleWidth"
               :labels="{ checked: 'Course', unchecked: 'Private' }"
+              @change="toggleType"
             />
           </b-form-group>
         </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
       </b-row>
     </b-form>
     <div slot="modal-footer">
-      <b-button type="button" variant="outline-info" v-on:click="save">
+      <b-button
+        type="button"
+        variant="outline-info"
+        @click="save"
+      >
         <b-icon-check />
         Save
       </b-button>
@@ -95,7 +117,7 @@
         class="ml-1"
         type="button"
         variant="outline-danger"
-        v-on:click="close"
+        @click="close"
       >
         <b-icon-x />
         Cancel
@@ -124,7 +146,6 @@ import {
 
 export default {
   name: "EngineHourEntryModal",
-  props: ["engineHourEntry", "visible", "displayFormat"],
   components: {
     WarningBox,
     EngineHours,
@@ -139,6 +160,7 @@ export default {
     BIconCheck,
     BIconX,
   },
+  props: ["engineHourEntry", "visible", "displayFormat"],
   data() {
     return {
       errors: [],

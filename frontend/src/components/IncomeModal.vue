@@ -7,16 +7,34 @@
     @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length > 0">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
-        <WarningBox :errors="errors" dismissible="true" />
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
+      <b-col
+        cols="12"
+        sm="10"
+      >
+        <WarningBox
+          :errors="errors"
+          dismissible="true"
+        />
       </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
     </b-row>
     <b-form @submit="save">
       <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
+        <b-col
+          cols="12"
+          sm="10"
+        >
           <b-form-group
             id="type-select-group"
             label="Type"
@@ -37,7 +55,11 @@
             description=""
             label-cols="3"
           >
-            <b-form-input id="date-select" type="date" v-model="form.date" />
+            <b-form-input
+              id="date-select"
+              v-model="form.date"
+              type="date"
+            />
           </b-form-group>
           <b-form-group
             v-if="form.type != null"
@@ -67,7 +89,7 @@
                 v-model="form.amount"
                 type="text"
                 placeholder="0.00"
-              ></b-form-input>
+              />
               <b-input-group-append is-text>
                 {{ getCurrency }}
               </b-input-group-append>
@@ -95,11 +117,11 @@
     <div slot="modal-footer">
       <div class="text-right d-inline">
         <b-button
-          v-if="this.form.type != null"
+          v-if="form.type != null"
           class="ml-4"
           type="button"
           variant="outline-info"
-          v-on:click="add"
+          @click="add"
         >
           <b-icon-check />
           Add
@@ -108,7 +130,7 @@
           class="ml-1"
           type="button"
           variant="outline-danger"
-          v-on:click="close"
+          @click="close"
         >
           <b-icon-x />
           Cancel

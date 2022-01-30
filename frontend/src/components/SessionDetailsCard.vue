@@ -1,9 +1,20 @@
 <template>
-  <b-card no-body class="text-left">
+  <b-card
+    no-body
+    class="text-left"
+  >
     <b-card-header>
       <b-row>
-        <b-col cols="8" class="align-middle"> Session Details </b-col>
-        <b-col cols="4" class="text-right">
+        <b-col
+          cols="8"
+          class="align-middle"
+        >
+          Session Details
+        </b-col>
+        <b-col
+          cols="4"
+          class="text-right"
+        >
           <b-dropdown
             v-if="showAddRiders || showDeleteSession"
             id="dropdown-1"
@@ -13,21 +24,27 @@
             right
             no-caret
           >
-            <template v-slot:button-content>
+            <template #button-content>
               <b-icon-list />
             </template>
-            <b-dropdown-item v-if="showAddRiders" v-on:click="addRiders">
+            <b-dropdown-item
+              v-if="showAddRiders"
+              @click="addRiders"
+            >
               <b-icon-person-plus />
               {{ "  " }} Add Rider
             </b-dropdown-item>
-            <b-dropdown-item v-if="showAddRiders" v-on:click="editSession">
+            <b-dropdown-item
+              v-if="showAddRiders"
+              @click="editSession"
+            >
               <b-icon-pencil-square />
               {{ "  " }} Edit Session
             </b-dropdown-item>
-            <b-dropdown-divider></b-dropdown-divider>
+            <b-dropdown-divider />
             <b-dropdown-item
               v-if="showDeleteSession"
-              v-on:click="deleteSession"
+              @click="deleteSession"
             >
               <b-icon-trash />
               {{ "  " }} Delete Session
@@ -38,57 +55,99 @@
     </b-card-header>
     <b-card-body>
       <RiderSelectionModal
+        v-model:visible="showRiderSelectionModal"
         :session="session"
-        :visible.sync="showRiderSelectionModal"
       />
       <b-row
         v-if="session != null && session.title != null"
         class="font-weight-bold"
       >
-        <b-col cols="4"> Title </b-col>
+        <b-col cols="4">
+          Title
+        </b-col>
         <b-col cols="8">
           {{ session.title }}
         </b-col>
       </b-row>
       <b-row>
-        <b-col cols="4"> Date </b-col>
+        <b-col cols="4">
+          Date
+        </b-col>
         <b-col cols="8">
           {{ dateString }}
         </b-col>
       </b-row>
       <b-row>
-        <b-col cols="4"> Session </b-col>
+        <b-col cols="4">
+          Session
+        </b-col>
         <b-col cols="8">
           {{ timeString }}
         </b-col>
       </b-row>
-      <b-row v-if="showRiders" class="mt-2">
-        <b-col cols="4"> Riders </b-col>
+      <b-row
+        v-if="showRiders"
+        class="mt-2"
+      >
+        <b-col cols="4">
+          Riders
+        </b-col>
         <b-col cols="8">
-          <b-row v-for="rider in session.riders" :key="rider.id">
-            <b-col cols="10" class="text-truncate">
+          <b-row
+            v-for="rider in session.riders"
+            :key="rider.id"
+          >
+            <b-col
+              cols="10"
+              class="text-truncate"
+            >
               {{ rider.name }}
             </b-col>
             <b-col cols="2">
-              <b-link href="#" v-on:click="removeRider(rider.id)">
+              <b-link
+                href="#"
+                @click="removeRider(rider.id)"
+              >
                 <b-icon-person-dash />
               </b-link>
             </b-col>
           </b-row>
         </b-col>
       </b-row>
-      <b-row v-if="showCreateSession" class="mt-3">
-        <b-col offset="4" cols="8">
-          <b-button v-on:click="createSession" size="sm" variant="success" block
-            >Create Session</b-button
+      <b-row
+        v-if="showCreateSession"
+        class="mt-3"
+      >
+        <b-col
+          offset="4"
+          cols="8"
+        >
+          <b-button
+            size="sm"
+            variant="success"
+            block
+            @click="createSession"
           >
+            Create Session
+          </b-button>
         </b-col>
       </b-row>
-      <b-row v-if="showAddRiders" class="mt-3">
-        <b-col offset="4" cols="8">
-          <b-button v-on:click="addRiders" size="sm" variant="success" block
-            >Add Riders</b-button
+      <b-row
+        v-if="showAddRiders"
+        class="mt-3"
+      >
+        <b-col
+          offset="4"
+          cols="8"
+        >
+          <b-button
+            size="sm"
+            variant="success"
+            block
+            @click="addRiders"
           >
+            Add Riders
+          </b-button>
         </b-col>
       </b-row>
     </b-card-body>

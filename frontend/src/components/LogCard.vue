@@ -1,5 +1,8 @@
 <template>
-  <b-card no-body class="text-left">
+  <b-card
+    no-body
+    class="text-left"
+  >
     <b-card-body>
       <b-overlay
         id="overlay-background"
@@ -17,7 +20,10 @@
           :items="getLogLines"
           empty-text="no log entries to display"
         />
-        <WarningBox v-if="errors.length > 0" :errors="errors" />
+        <WarningBox
+          v-if="errors.length > 0"
+          :errors="errors"
+        />
       </b-overlay>
     </b-card-body>
   </b-card>

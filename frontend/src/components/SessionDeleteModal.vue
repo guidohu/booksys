@@ -8,23 +8,45 @@
     @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
+      <b-col
+        cols="12"
+        sm="10"
+      >
         <WarningBox :errors="errors" />
       </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
     </b-row>
     <b-form @submit="confirm">
       <b-row>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
+        <b-col
+          cols="12"
+          sm="10"
+        >
           Do you really want to delete this session?
         </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
       </b-row>
     </b-form>
     <div slot="modal-footer">
-      <b-button type="button" variant="outline-info" v-on:click="confirm">
+      <b-button
+        type="button"
+        variant="outline-info"
+        @click="confirm"
+      >
         <b-icon-check />
         Delete
       </b-button>
@@ -32,7 +54,7 @@
         class="ml-1"
         type="button"
         variant="outline-danger"
-        v-on:click="close"
+        @click="close"
       >
         <b-icon-x />
         Cancel

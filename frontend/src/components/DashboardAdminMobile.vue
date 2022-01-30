@@ -1,11 +1,21 @@
 <template>
   <div>
-    <b-navbar fixed="top" toggleable="lg" type="light" variant="light">
-      <b-navbar-brand href="#">Dashboard</b-navbar-brand>
+    <b-navbar
+      fixed="top"
+      toggleable="lg"
+      type="light"
+      variant="light"
+    >
+      <b-navbar-brand href="#">
+        Dashboard
+      </b-navbar-brand>
 
-      <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+      <b-navbar-toggle target="nav-collapse" />
 
-      <b-collapse id="nav-collapse" is-nav>
+      <b-collapse
+        id="nav-collapse"
+        is-nav
+      >
         <b-navbar-nav>
           <b-nav-item href="#">
             <router-link to="/account">
@@ -24,7 +34,7 @@
     </b-navbar>
 
     <b-row class="mt-3">
-      <b-col cols="1"></b-col>
+      <b-col cols="1" />
       <b-col cols="10">
         <b-row>
           <b-col cols="6">
@@ -34,9 +44,9 @@
               class="btn btn-default btn-dashboard"
             >
               <div
-                class="bc_icon bc_icon_dashboard bc_icon_boat"
                 id="boat"
-              ></div>
+                class="bc_icon bc_icon_dashboard bc_icon_boat"
+              />
               BOAT
             </b-button>
           </b-col>
@@ -46,7 +56,7 @@
               variant="light"
               class="btn btn-default btn-dashboard"
             >
-              <div class="bc_icon bc_icon_dashboard bc_icon_wakeboard"></div>
+              <div class="bc_icon bc_icon_dashboard bc_icon_wakeboard" />
               RIDE
             </b-button>
           </b-col>
@@ -59,8 +69,8 @@
               class="btn btn-default btn-dashboard"
             >
               <BooksysPie
-                v-bind:sessionData="sessionData"
-                v-bind:properties="properties"
+                :session-data="sessionData"
+                :properties="properties"
               />
               TODAY
             </b-button>
@@ -71,7 +81,7 @@
               variant="light"
               class="btn btn-default btn-dashboard"
             >
-              <div class="bc_icon bc_icon_dashboard bc_icon_calendar_add"></div>
+              <div class="bc_icon bc_icon_dashboard bc_icon_calendar_add" />
               BOOK
             </b-button>
           </b-col>
@@ -83,7 +93,7 @@
               variant="light"
               class="btn btn-default btn-dashboard"
             >
-              <div class="bc_icon bc_icon_dashboard bc_icon_setting"></div>
+              <div class="bc_icon bc_icon_dashboard bc_icon_setting" />
               ADMIN
             </b-button>
           </b-col>
@@ -93,7 +103,7 @@
               variant="light"
               class="btn btn-default btn-dashboard"
             >
-              <div class="bc_icon bc_icon_dashboard bc_icon_calendar"></div>
+              <div class="bc_icon bc_icon_dashboard bc_icon_calendar" />
               MY CAL
             </b-button>
           </b-col>
@@ -105,7 +115,7 @@
               variant="light"
               class="btn btn-default btn-dashboard"
             >
-              <div class="bc_icon bc_icon_dashboard bc_icon_user"></div>
+              <div class="bc_icon bc_icon_dashboard bc_icon_user" />
               ACCOUNT
             </b-button>
           </b-col>
@@ -115,7 +125,7 @@
               variant="light"
               class="btn btn-default btn-dashboard"
             >
-              <div class="bc_icon bc_icon_dashboard bc_icon_info"></div>
+              <div class="bc_icon bc_icon_dashboard bc_icon_info" />
               INFO
             </b-button>
           </b-col>
@@ -143,15 +153,6 @@ import {
 
 export default {
   name: "DashboardAdminMobile",
-  data() {
-    return {
-      properties: {
-        containerWidth: 80,
-        containerHeight: 85,
-        animate: false,
-      },
-    };
-  },
   components: {
     BooksysPie,
     BNavbar,
@@ -167,5 +168,14 @@ export default {
     BButton,
   },
   props: ["sessionData"],
+  data() {
+    return {
+      properties: {
+        containerWidth: 80,
+        containerHeight: 85,
+        animate: false,
+      },
+    };
+  },
 };
 </script>

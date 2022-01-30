@@ -2,7 +2,7 @@
   <b-tabs content-class="mt-3">
     <b-tab active>
       <div slot="title">
-        <div :class="titleClassEngineHours"></div>
+        <div :class="titleClassEngineHours" />
         Engine Hours
       </div>
       <div :class="tabClass">
@@ -11,7 +11,7 @@
     </b-tab>
     <b-tab>
       <div slot="title">
-        <div :class="titleClassFuel"></div>
+        <div :class="titleClassFuel" />
         Fuel
       </div>
       <div :class="tabClass">
@@ -20,7 +20,7 @@
     </b-tab>
     <b-tab>
       <div slot="title">
-        <div :class="titleClassMaintenance"></div>
+        <div :class="titleClassMaintenance" />
         Maintenance
       </div>
       <div :class="tabClass">

@@ -1,8 +1,14 @@
 <template>
-  <b-container float class="text-left">
+  <b-container
+    float
+    class="text-left"
+  >
     <b-row>
       <b-col cols="12">
-        <WarningBox v-if="errors.length > 0" :errors="errors" />
+        <WarningBox
+          v-if="errors.length > 0"
+          :errors="errors"
+        />
         <b-form @submit="add">
           <b-form-group
             id="input-group-driver"
@@ -19,15 +25,15 @@
             />
           </b-form-group>
           <engine-hours
-            label="Before"
             v-model="form.beforeHours"
+            label="Before"
             :display-format="getEngineHourFormat"
             :disabled="disableBefore"
           />
           <engine-hours
             v-if="showAfter"
-            label="After"
             v-model="form.afterHours"
+            label="After"
             :display-format="getEngineHourFormat"
           />
           <b-form-group
@@ -39,30 +45,35 @@
             <toggle-button
               id="input-type"
               :value="false"
-              @change="toggleType"
               color="#17a2b8"
               :width="toggleWidth"
               :labels="{ checked: 'Course', unchecked: 'Private' }"
+              @change="toggleType"
             />
           </b-form-group>
           <b-row class="text-right">
-            <b-col cols="9" offset="3">
+            <b-col
+              cols="9"
+              offset="3"
+            >
               <b-button
                 v-if="!disableBefore"
                 block
                 variant="outline-info"
                 size="sm"
-                v-on:click="add"
-                >Start</b-button
+                @click="add"
               >
+                Start
+              </b-button>
               <b-button
                 v-if="disableBefore"
                 block
                 variant="outline-info"
                 size="sm"
-                v-on:click="add"
-                >Finish</b-button
+                @click="add"
               >
+                Finish
+              </b-button>
             </b-col>
           </b-row>
         </b-form>

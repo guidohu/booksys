@@ -1,11 +1,16 @@
 <template>
-  <b-card no-body class="text-left">
+  <b-card
+    no-body
+    class="text-left"
+  >
     <b-card-header> Statistics </b-card-header>
     <b-card-body>
       <b-row>
         <b-col cols="6">
           <b-row>
-            <b-col cols="12"> Riding Time: {{ heatTimeMinutesYTD }} min </b-col>
+            <b-col cols="12">
+              Riding Time: {{ heatTimeMinutesYTD }} min
+            </b-col>
           </b-row>
           <b-row>
             <b-col cols="12">
@@ -13,7 +18,9 @@
             </b-col>
           </b-row>
           <b-row>
-            <b-col cols="12"> Cost: {{ heatCostYTD }} {{ getCurrency }} </b-col>
+            <b-col cols="12">
+              Cost: {{ heatCostYTD }} {{ getCurrency }}
+            </b-col>
           </b-row>
           <b-row>
             <b-col cols="12">
@@ -26,7 +33,7 @@
             size="sm"
             type="button"
             variant="outline-info"
-            v-on:click="showLatestHeats"
+            @click="showLatestHeats"
           >
             <b-icon-list-ul />
             Latest Heats
@@ -34,7 +41,7 @@
         </b-col>
       </b-row>
     </b-card-body>
-    <UserHeatsModal :visible.sync="showUserHeatsModal" />
+    <UserHeatsModal v-model:visible="showUserHeatsModal" />
   </b-card>
 </template>
 
@@ -53,11 +60,6 @@ import {
 
 export default {
   name: "UserStatisticsCard",
-  data() {
-    return {
-      showUserHeatsModal: false,
-    };
-  },
   components: {
     UserHeatsModal,
     BCard,
@@ -67,6 +69,11 @@ export default {
     BCol,
     BButton,
     BIconListUl,
+  },
+  data() {
+    return {
+      showUserHeatsModal: false,
+    };
   },
   computed: {
     ...mapGetters("login", ["userInfo"]),

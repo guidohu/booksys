@@ -10,51 +10,100 @@
     <!-- User sign up form -->
     <div v-if="isSignedUp == false">
       <b-row class="text-left mb-4">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
+        <b-col
+          cols="12"
+          sm="10"
+        >
           Please fill the form below to create your own personal account.
         </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
       </b-row>
-      <user-sign-up :user-data="form" :show-disclaimer="true" v-on:update:user="handleUserUpdate" />
-      <b-row v-if="getRecaptchaKey != null" class="mt-3">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
+      <user-sign-up
+        :user-data="form"
+        :show-disclaimer="true"
+        @update:user="handleUserUpdate"
+      />
+      <b-row
+        v-if="getRecaptchaKey != null"
+        class="mt-3"
+      >
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
+        <b-col
+          cols="12"
+          sm="10"
+        >
           <vue-recaptcha
             :sitekey="getRecaptchaKey"
-            :loadRecaptchaScript="true"
+            :load-recaptcha-script="true"
             @verify="recaptchaVerifiedHandler"
-          ></vue-recaptcha>
+          />
         </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
       </b-row>
     </div>
     <!-- Sign up confirmation -->
-    <b-row v-if="isSignedUp == true" class="text-center">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
+    <b-row
+      v-if="isSignedUp == true"
+      class="text-center"
+    >
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
+      <b-col
+        cols="12"
+        sm="10"
+      >
         <p class="h4 mb-2">
           <b-icon-check-circle variant="success" />
-          <br />
+          <br>
           You have been signed up successfully.
         </p>
         <p>Please wait until we activate your new account.</p>
       </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
     </b-row>
-    <b-row v-if="errors.length > 0" class="mt-4">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
+    <b-row
+      v-if="errors.length > 0"
+      class="mt-4"
+    >
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
+      <b-col
+        cols="12"
+        sm="10"
+      >
         <warning-box :errors="errors" />
       </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
     </b-row>
     <div slot="modal-footer">
       <b-button
         v-if="isSignedUp == true"
         type="button"
         variant="outline-info"
-        v-on:click="close"
+        @click="close"
       >
         <b-icon-person-check />
         Done
@@ -63,7 +112,7 @@
         v-if="isSignedUp == false"
         type="button"
         variant="outline-info"
-        v-on:click="save"
+        @click="save"
       >
         <b-icon-person-check />
         Sign-Up
@@ -73,7 +122,7 @@
         class="ml-1"
         type="button"
         variant="outline-danger"
-        v-on:click="close"
+        @click="close"
       >
         <b-icon-x />
         Cancel

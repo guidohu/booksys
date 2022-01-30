@@ -1,9 +1,9 @@
 <template>
   <b-card no-body>
     <HeatCommentModal
-      :defaultComment="comment"
+      v-model:visible="isVisibleHeatCommentModal"
+      :default-comment="comment"
       @commentChangeHandler="changeComment"
-      :visible.sync="isVisibleHeatCommentModal"
     />
     <b-row v-if="errors.length > 0">
       <b-col cols="12">
@@ -21,13 +21,16 @@
         </b-card>
       </b-col>
     </b-row>
-    <b-row v-if="comment != null" class="ml-1 mr-1">
+    <b-row
+      v-if="comment != null"
+      class="ml-1 mr-1"
+    >
       <b-col cols="12">
         <b-form-group>
           <b-input-group>
             <b-form-input v-model="comment" />
             <template #append>
-              <b-button v-on:click="showHeatCommentModal">
+              <b-button @click="showHeatCommentModal">
                 <b-icon-pencil-square />
                 <!-- Edit -->
               </b-button>
@@ -51,64 +54,67 @@
       <b-col cols="12">
         <b-button-group v-if="selectedRiderId != null">
           <b-button
+            v-if="!getIsRunning"
             size="lg"
             variant="outline-info"
-            v-if="!getIsRunning"
-            v-on:click="navigateBack"
+            @click="navigateBack"
           >
             <b-icon-arrow-left />
             Back
           </b-button>
           <b-button
+            v-if="!getIsRunning"
             size="lg"
             variant="outline-info"
-            v-if="!getIsRunning"
-            v-on:click="startTakingTime"
+            @click="startTakingTime"
           >
             <b-icon-play />
             Start
           </b-button>
           <b-button
+            v-if="getIsRunning && !getIsPaused"
             size="lg"
             variant="outline-info"
-            v-if="getIsRunning && !getIsPaused"
-            v-on:click="pauseTakingTime"
+            @click="pauseTakingTime"
           >
             <b-icon-pause />
             Pause
           </b-button>
           <b-button
+            v-if="getIsPaused"
             size="lg"
             variant="outline-info"
-            v-if="getIsPaused"
-            v-on:click="resumeTakingTime"
+            @click="resumeTakingTime"
           >
             <b-icon-eject rotate="90" />
             Resume
           </b-button>
           <b-button
+            v-if="getIsRunning"
             size="lg"
             variant="outline-info"
-            v-if="getIsRunning"
-            v-on:click="finish"
+            @click="finish"
           >
             <b-icon-check-square />
             Finish
           </b-button>
           <b-dropdown
+            v-if="selectedRiderId != null || getIsRunning"
             right
             variant="outline-info"
-            v-if="selectedRiderId != null || getIsRunning"
           >
             <b-dropdown-item
               v-if="selectedRiderId != null"
-              v-on:click="showHeatCommentModal"
-              >Add Comment</b-dropdown-item
+              @click="showHeatCommentModal"
             >
+              Add Comment
+            </b-dropdown-item>
             <b-dropdown-divider
               v-if="getIsRunning && selectedRiderId != null"
             />
-            <b-dropdown-item v-if="getIsRunning">Cancel Heat</b-dropdown-item>
+            <b-dropdown-item v-if="getIsRunning">
+              Cancel Heat
+            </b-dropdown-item>
           </b-dropdown>
         </b-button-group>
       </b-col>

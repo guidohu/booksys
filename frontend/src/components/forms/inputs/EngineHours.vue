@@ -12,8 +12,8 @@
         type="text"
         :state="state"
         :disabled="disabled"
-        v-on:blur="propagateValue"
         :placeholder="formPlaceholder"
+        @blur="propagateValue"
       />
       <b-input-group-append is-text>
         {{ unitText }}
@@ -38,13 +38,13 @@ import {
 
 export default {
   name: "EngineHours",
-  props: ["label", "value", "displayFormat", "disabled", "size", "placeholder"],
   components: {
     BFormGroup,
     BFormInput,
     BInputGroup,
     BInputGroupAppend,
   },
+  props: ["label", "value", "displayFormat", "disabled", "size", "placeholder"],
   data() {
     return {
       formValue: null,
@@ -81,15 +81,6 @@ export default {
       }
     },
   },
-  methods: {
-    propagateValue: function () {
-      if (this.formValue != null) {
-        this.$emit("input", convertEngineHour(this.formValue));
-      } else {
-        this.$emit("input", null);
-      }
-    },
-  },
   created() {
     this.formValue = formatEngineHour(this.value, this.displayFormat);
     if (this.size != null) {
@@ -101,6 +92,15 @@ export default {
         this.displayFormat
       );
     }
+  },
+  methods: {
+    propagateValue: function () {
+      if (this.formValue != null) {
+        this.$emit("input", convertEngineHour(this.formValue));
+      } else {
+        this.$emit("input", null);
+      }
+    },
   },
 };
 </script>

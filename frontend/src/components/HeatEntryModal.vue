@@ -7,16 +7,31 @@
     @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
+      <b-col
+        cols="12"
+        sm="10"
+      >
         <WarningBox :errors="errors" />
       </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
     </b-row>
     <b-form @submit="save">
       <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
+        <b-col
+          cols="12"
+          sm="10"
+        >
           <b-form-group
             id="date"
             label="Date"
@@ -30,7 +45,7 @@
               type="text"
               placeholder=""
               disabled
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
             id="rider"
@@ -45,7 +60,7 @@
               type="text"
               placeholder=""
               disabled
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
             id="fare"
@@ -79,11 +94,13 @@
               <b-form-input
                 id="duration-input"
                 v-model="form.duration"
-                v-on:input="durationChangeHandler"
                 type="text"
                 placeholder=""
+                @input="durationChangeHandler"
               />
-              <b-input-group-append is-text> mm:ss </b-input-group-append>
+              <b-input-group-append is-text>
+                mm:ss
+              </b-input-group-append>
             </b-input-group>
           </b-form-group>
           <b-form-group
@@ -120,7 +137,10 @@
             />
           </b-form-group>
         </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
       </b-row>
     </b-form>
     <div slot="modal-footer">
@@ -129,7 +149,7 @@
           class="mr-1"
           type="button"
           variant="outline-danger"
-          v-on:click="remove"
+          @click="remove"
         >
           <b-icon-trash />
           Delete
@@ -140,7 +160,7 @@
           class="ml-4"
           type="button"
           variant="outline-info"
-          v-on:click="save"
+          @click="save"
         >
           <b-icon-check />
           Save
@@ -149,7 +169,7 @@
           class="ml-1"
           type="button"
           variant="outline-danger"
-          v-on:click="close"
+          @click="close"
         >
           <b-icon-x />
           Cancel

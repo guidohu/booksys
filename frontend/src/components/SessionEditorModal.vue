@@ -8,16 +8,31 @@
     @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
+      <b-col
+        cols="12"
+        sm="10"
+      >
         <WarningBox :errors="errors" />
       </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
     </b-row>
     <b-form @submit="save">
       <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
+        <b-col
+          cols="12"
+          sm="10"
+        >
           <b-form-group
             id="title"
             label="Title"
@@ -29,7 +44,7 @@
               v-model="form.title"
               type="text"
               placeholder=""
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
             id="description"
@@ -55,16 +70,16 @@
               <b-col cols="6">
                 <b-form-input
                   id="start-date-input"
-                  type="date"
                   v-model="form.startDate"
+                  type="date"
                   placeholder=""
                 />
               </b-col>
               <b-col cols="6">
                 <b-form-input
                   id="start-time-input"
-                  type="time"
                   v-model="form.startTime"
+                  type="time"
                   placeholder=""
                 />
               </b-col>
@@ -80,16 +95,16 @@
               <b-col cols="6">
                 <b-form-input
                   id="end-date-input"
-                  type="date"
                   v-model="form.endDate"
+                  type="date"
                   placeholder=""
                 />
               </b-col>
               <b-col cols="6">
                 <b-form-input
                   id="end-time-input"
-                  type="time"
                   v-model="form.endTime"
+                  type="time"
                   placeholder=""
                 />
               </b-col>
@@ -97,11 +112,14 @@
           </b-form-group>
           <b-form-group
             id="capacity"
-            v-bind:label="getMaximumRidersLabel"
+            :label="getMaximumRidersLabel"
             label-for="capacity-input"
             description=""
           >
-            <b-form-input type="number" v-model="form.maximumRiders" />
+            <b-form-input
+              v-model="form.maximumRiders"
+              type="number"
+            />
           </b-form-group>
           <b-form-group
             id="type"
@@ -109,12 +127,18 @@
             label-for="type-input"
             description="Choose whether this session is open to others or a closed group"
           >
-            <b-form-checkbox v-model="form.type" switch>
+            <b-form-checkbox
+              v-model="form.type"
+              switch
+            >
               {{ getTypeText }}
             </b-form-checkbox>
           </b-form-group>
         </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
       </b-row>
     </b-form>
     <div slot="modal-footer">
@@ -122,7 +146,7 @@
         v-if="form.id == null"
         type="button"
         variant="outline-info"
-        v-on:click="save"
+        @click="save"
       >
         <b-icon-check />
         Create
@@ -131,7 +155,7 @@
         v-if="form.id != null"
         type="button"
         variant="outline-info"
-        v-on:click="save"
+        @click="save"
       >
         <b-icon-check />
         Save
@@ -140,7 +164,7 @@
         class="ml-1"
         type="button"
         variant="outline-danger"
-        v-on:click="close"
+        @click="close"
       >
         <b-icon-x />
         Cancel
@@ -352,15 +376,15 @@ export default {
       console.log("SessionEditorModal: Form values are now:", this.form);
     },
   },
-  created() {
-    // set form content based on props
-    this.setFormContent();
-  },
   watch: {
     defaultValues: function () {
       // set form content whenever the default props change
       this.setFormContent();
     },
+  },
+  created() {
+    // set form content based on props
+    this.setFormContent();
   },
 };
 </script>

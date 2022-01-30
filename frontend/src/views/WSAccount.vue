@@ -1,5 +1,8 @@
 <template>
-  <div v-if="isDesktop" class="display">
+  <div
+    v-if="isDesktop"
+    class="display"
+  >
     <main-title title-name="Account" />
     <b-row class="ml-1 mr-1">
       <b-col cols="12">
@@ -17,7 +20,10 @@
       </b-col>
     </b-row>
     <div class="bottom mr-2">
-      <b-button variant="outline-light" to="/dashboard">
+      <b-button
+        variant="outline-light"
+        to="/dashboard"
+      >
         <b-icon-house />
         HOME
       </b-button>

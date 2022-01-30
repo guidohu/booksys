@@ -7,16 +7,31 @@
     @show="$emit('update:visible', true)"
   >
     <b-row v-if="errors.length">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
+      <b-col
+        cols="12"
+        sm="10"
+      >
         <WarningBox :errors="errors" />
       </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
     </b-row>
     <b-form @submit="save">
       <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
+        <b-col
+          cols="12"
+          sm="10"
+        >
           <b-form-group
             id="date"
             label="Date"
@@ -25,9 +40,9 @@
             label-cols="3"
           >
             <b-form-input
-              size="sm"
               id="date-input"
               v-model="form.date"
+              size="sm"
               type="text"
               placeholder=""
               disabled
@@ -41,9 +56,9 @@
             label-cols="3"
           >
             <b-form-input
-              size="sm"
               id="driver-input"
               v-model="form.driver"
+              size="sm"
               type="text"
               placeholder=""
               disabled
@@ -65,12 +80,14 @@
                 placeholder=""
                 disabled
               />
-              <b-input-group-append is-text> ltrs/h </b-input-group-append>
+              <b-input-group-append is-text>
+                ltrs/h
+              </b-input-group-append>
             </b-input-group>
           </b-form-group>
           <engine-hours
-            label="Engine Hours"
             v-model="form.engineHours"
+            label="Engine Hours"
             :display-format="getEngineHourFormat"
           />
           <b-form-group
@@ -87,12 +104,14 @@
                 type="text"
                 placeholder=""
               />
-              <b-input-group-append is-text> ltrs </b-input-group-append>
+              <b-input-group-append is-text>
+                ltrs
+              </b-input-group-append>
             </b-input-group>
           </b-form-group>
           <b-form-group
-            id="cost"
             v-if="!form.isDiscounted"
+            id="cost"
             label="Cost"
             label-for="cost-input"
             description=""
@@ -104,7 +123,7 @@
                 v-model="form.cost"
                 type="text"
                 placeholder=""
-                v-on:change="costChange"
+                @change="costChange"
               />
               <b-input-group-append is-text>
                 {{ getCurrency }}
@@ -112,8 +131,8 @@
             </b-input-group>
           </b-form-group>
           <b-form-group
-            id="cost-gross"
             v-if="form.isDiscounted"
+            id="cost-gross"
             label="Cost (Gross)"
             label-for="cost-gross-input"
             description=""
@@ -125,7 +144,7 @@
                 v-model="form.costGross"
                 type="text"
                 placeholder=""
-                v-on:change="costGrossChange"
+                @change="costGrossChange"
               />
               <b-input-group-append is-text>
                 {{ getCurrency }}
@@ -141,15 +160,15 @@
             <toggle-button
               id="discount-input"
               :value="form.isDiscounted"
-              @change="toggleDiscount"
               color="#17a2b8"
               :width="toggleWidth"
               :labels="{ checked: 'Discount', unchecked: 'No Discount' }"
+              @change="toggleDiscount"
             />
           </b-form-group>
           <b-form-group
-            id="cost-net"
             v-if="form.isDiscounted"
+            id="cost-net"
             label="Cost (net)"
             label-for="cost-net-input"
             description=""
@@ -168,11 +187,18 @@
             </b-input-group>
           </b-form-group>
         </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
+        <b-col
+          cols="1"
+          class="d-none d-sm-block"
+        />
       </b-row>
     </b-form>
     <div slot="modal-footer">
-      <b-button type="button" variant="outline-info" v-on:click="save">
+      <b-button
+        type="button"
+        variant="outline-info"
+        @click="save"
+      >
         <b-icon-check />
         Save
       </b-button>
@@ -180,7 +206,7 @@
         class="ml-1"
         type="button"
         variant="outline-danger"
-        v-on:click="close"
+        @click="close"
       >
         <b-icon-x />
         Cancel
@@ -215,8 +241,7 @@ import {
 } from "bootstrap-vue";
 
 export default {
-  name: "fuelEntryModal",
-  props: ["fuelEntry", "visible"],
+  name: "FuelEntryModal",
   components: {
     WarningBox,
     EngineHours,
@@ -233,6 +258,7 @@ export default {
     BIconCheck,
     BIconX,
   },
+  props: ["fuelEntry", "visible"],
   data() {
     return {
       errors: [],

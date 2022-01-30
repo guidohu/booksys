@@ -1,7 +1,14 @@
 <template>
   <div>
-    <WarningBox v-if="errors.length > 0" :errors="errors" dismissible="true" />
-    <b-row v-if="form.years.length > 0" class="text-right">
+    <WarningBox
+      v-if="errors.length > 0"
+      :errors="errors"
+      dismissible="true"
+    />
+    <b-row
+      v-if="form.years.length > 0"
+      class="text-right"
+    >
       <b-col cols="12">
         <b-form-group
           id="year"
@@ -20,59 +27,95 @@
       </b-col>
     </b-row>
     <b-row class="text-right">
-      <b-col cols="6" md="4">
-        <b-card border-variant="info" class="m-1">
+      <b-col
+        cols="6"
+        md="4"
+      >
+        <b-card
+          border-variant="info"
+          class="m-1"
+        >
           <span class="lead">{{ getTotalPayments }}</span> {{ getCurrency }}
-          <br />
+          <br>
           Income
-          <span v-if="form.selectedYear != 'any'"
-            >({{ form.selectedYear }})</span
-          >
+          <span
+            v-if="form.selectedYear != 'any'"
+          >({{ form.selectedYear }})</span>
         </b-card>
       </b-col>
-      <b-col cols="6" md="4">
-        <b-card border-variant="info" class="m-1">
+      <b-col
+        cols="6"
+        md="4"
+      >
+        <b-card
+          border-variant="info"
+          class="m-1"
+        >
           <span class="lead">{{ getTotalExpenditures }}</span> {{ getCurrency }}
-          <br />
+          <br>
           Expenses
-          <span v-if="form.selectedYear != 'any'"
-            >({{ form.selectedYear }})</span
-          >
+          <span
+            v-if="form.selectedYear != 'any'"
+          >({{ form.selectedYear }})</span>
         </b-card>
       </b-col>
-      <b-col cols="6" md="4">
-        <b-card border-variant="info" class="m-1">
+      <b-col
+        cols="6"
+        md="4"
+      >
+        <b-card
+          border-variant="info"
+          class="m-1"
+        >
           <span class="lead">{{ getTotalSessionPayments }}</span>
           {{ getCurrency }}
-          <br />
+          <br>
           Sessions Income
-          <span v-if="form.selectedYear != 'any'"
-            >({{ form.selectedYear }})</span
-          >
+          <span
+            v-if="form.selectedYear != 'any'"
+          >({{ form.selectedYear }})</span>
         </b-card>
       </b-col>
-      <b-col cols="6" md="4">
-        <b-card border-variant="info" class="m-1">
+      <b-col
+        cols="6"
+        md="4"
+      >
+        <b-card
+          border-variant="info"
+          class="m-1"
+        >
           <span class="lead">{{ getSessionsBalance }}</span> {{ getCurrency }}
-          <br />
+          <br>
           Sessions Credits
         </b-card>
       </b-col>
-      <b-col cols="6" md="4">
-        <b-card border-variant="info" class="m-1">
+      <b-col
+        cols="6"
+        md="4"
+      >
+        <b-card
+          border-variant="info"
+          class="m-1"
+        >
           <span class="lead">{{ getBalance }}</span> {{ getCurrency }}
-          <br />
+          <br>
           Balance
         </b-card>
       </b-col>
-      <b-col cols="6" md="4">
-        <b-card border-variant="info" class="m-1">
+      <b-col
+        cols="6"
+        md="4"
+      >
+        <b-card
+          border-variant="info"
+          class="m-1"
+        >
           <span class="lead">{{ getSessionProfit }}</span> {{ getCurrency }}
-          <br />
+          <br>
           Session Profit
-          <span v-if="form.selectedYear != 'any'"
-            >({{ form.selectedYear }})</span
-          >
+          <span
+            v-if="form.selectedYear != 'any'"
+          >({{ form.selectedYear }})</span>
         </b-card>
       </b-col>
     </b-row>

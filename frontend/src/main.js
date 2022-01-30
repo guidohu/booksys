@@ -1,12 +1,14 @@
-import Vue from "vue";
+import { createApp } from "vue";
 import App from "./App.vue";
 import "./registerServiceWorker";
 import router from "./router";
-import store from "./store";
+import { store } from "./store";
 
 // Bootstrap
 import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.esm";
 import "bootstrap-vue/dist/bootstrap-vue.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 // Override bootstrap styling
 import "@/assets/bootstrap/css/bootstrap-theme-bc.css";
@@ -17,8 +19,13 @@ if (process.env.NODE_ENV === "production") {
   console.log = function () {};
 }
 
-new Vue({
-  router,
-  store,
-  render: (h) => h(App),
-}).$mount("#app");
+// new Vue({
+//   router,
+//   store,
+//   render: (h) => h(App),
+// }).$mount("#app");
+
+const app = createApp(App);
+app.use(router);
+app.use(store);
+app.mount("#app");

@@ -7,8 +7,14 @@
     @show="$emit('update:visible', true)"
   >
     <b-row class="text-left">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
+      <b-col
+        cols="12"
+        sm="10"
+      >
         <b-form @submit="save">
           <b-row v-if="errors.length">
             <b-col cols="12">
@@ -27,7 +33,7 @@
               type="text"
               required
               placeholder=""
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
             id="last-name"
@@ -41,7 +47,7 @@
               type="text"
               required
               placeholder=""
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
             id="street-nr"
@@ -55,7 +61,7 @@
               type="text"
               required
               placeholder=""
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
             id="plz"
@@ -69,7 +75,7 @@
               type="text"
               required
               placeholder=""
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
             id="city"
@@ -83,7 +89,7 @@
               type="text"
               required
               placeholder=""
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
             id="email"
@@ -97,7 +103,7 @@
               type="email"
               required
               placeholder=""
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
             id="tel"
@@ -111,7 +117,7 @@
               type="tel"
               required
               placeholder=""
-            ></b-form-input>
+            />
           </b-form-group>
           <b-form-group
             id="license"
@@ -129,14 +135,17 @@
           </b-form-group>
         </b-form>
       </b-col>
-      <b-col cols="1" class="d-none d-sm-block"> </b-col>
+      <b-col
+        cols="1"
+        class="d-none d-sm-block"
+      />
     </b-row>
     <div slot="modal-footer">
       <b-button
         type="button"
         variant="outline-info"
         :disabled="isLoading"
-        v-on:click="save"
+        @click="save"
       >
         <b-icon-person-check />
         Save
@@ -145,7 +154,7 @@
         class="ml-1"
         type="button"
         variant="outline-danger"
-        v-on:click="close"
+        @click="close"
       >
         <b-icon-x />
         Cancel

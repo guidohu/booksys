@@ -1,14 +1,21 @@
 <template>
-  <b-card no-body class="text-left">
+  <b-card
+    no-body
+    class="text-left"
+  >
     <b-card-header>
       <b-row>
-        <b-col cols="12"> Sessions </b-col>
+        <b-col cols="12">
+          Sessions
+        </b-col>
       </b-row>
     </b-card-header>
     <b-card-body>
       <div v-if="sessions != null && sessions.sessions != null">
         <b-row v-if="sessions.sessions.length == 0">
-          <b-col cols="12"> No sessions for this day. </b-col>
+          <b-col cols="12">
+            No sessions for this day.
+          </b-col>
         </b-row>
         <b-row
           v-for="session in sessions.sessions.slice(0, 2)"
@@ -40,32 +47,52 @@
                 Riders
               </b-col>
               <b-col
-                cols="7"
                 v-if="session.riders != null && session.riders.length > 0"
+                cols="7"
               >
                 <b-row
                   v-for="rider in session.riders.slice(0, 3)"
                   :key="rider.id"
                 >
-                  <b-col cols="12" class="text-truncate">
+                  <b-col
+                    cols="12"
+                    class="text-truncate"
+                  >
                     {{ rider.name }}
                   </b-col>
                 </b-row>
                 <b-row v-if="session.riders.length > 3">
-                  <b-col cols="12" class="text-truncate"> ... </b-col>
+                  <b-col
+                    cols="12"
+                    class="text-truncate"
+                  >
+                    ...
+                  </b-col>
                 </b-row>
               </b-col>
-              <b-col cols="7" v-else> - </b-col>
+              <b-col
+                v-else
+                cols="7"
+              >
+                -
+              </b-col>
             </b-row>
           </b-col>
         </b-row>
-        <b-row v-if="sessions.sessions.length > 2" class="mt-4 small-text">
-          <b-col cols="12"> click for more details... </b-col>
+        <b-row
+          v-if="sessions.sessions.length > 2"
+          class="mt-4 small-text"
+        >
+          <b-col cols="12">
+            click for more details...
+          </b-col>
         </b-row>
       </div>
       <div v-if="sessions == null || sessions.sessions == null">
         <b-row>
-          <b-col cols="12"> No day selected </b-col>
+          <b-col cols="12">
+            No day selected
+          </b-col>
         </b-row>
       </div>
     </b-card-body>
