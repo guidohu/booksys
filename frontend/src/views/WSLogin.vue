@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-column">    
+  <div class="d-flex flex-column">
     <div class="container">
       <div class="row text-center mb-3">
         <div class="col-12">
@@ -16,7 +16,7 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-3 d-none d-sm-block"/>
+        <div class="col-3 d-none d-sm-block" />
         <div class="col-12 col-sm-6">
           <overlay-spinner v-model:active="isLoading" :fullPage="false">
             <login-form
@@ -26,8 +26,8 @@
               @login="handleLogin"
             />
           </overlay-spinner>
-        <div class="col-3 d-none d-sm-block"/>
-      </div>
+          <div class="col-3 d-none d-sm-block" />
+        </div>
       </div>
     </div>
   </div>
@@ -43,7 +43,7 @@ export default {
   name: "WSLogin",
   components: {
     LoginForm,
-    OverlaySpinner
+    OverlaySpinner,
   },
   data() {
     return {
@@ -72,7 +72,7 @@ export default {
           if (this.$route.query != null && this.$route.query.target != null) {
             this.$router.push(this.$route.query.target);
           } else {
-            this.$router.push({name:"Dashboard"});
+            this.$router.push({ name: "Dashboard" });
           }
           this.isLoading = false;
         })

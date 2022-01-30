@@ -1,29 +1,22 @@
 <template>
   <div class="vld-parent">
-    <loading
-      :active="active"
-      :can-cancel="false"
-      :is-full-page="fullPage"
-    />
+    <loading :active="active" :can-cancel="false" :is-full-page="fullPage" />
     <div>
-      <slot /> 
+      <slot />
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue'
-import Loading from 'vue-loading-overlay';
-import 'vue-loading-overlay/dist/vue-loading.css';
+import { defineComponent } from "vue";
+import Loading from "vue-loading-overlay";
+import "vue-loading-overlay/dist/vue-loading.css";
 
 export default defineComponent({
   name: "OverlaySpinner",
   components: {
-    Loading
+    Loading,
   },
-  props: [
-    "active",
-    "fullPage"
-  ]
-})
+  props: ["active", "fullPage"],
+});
 </script>

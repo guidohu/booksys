@@ -3,26 +3,17 @@
     <div
       v-if="
         userInfo != null &&
-          userInfo.user_role_name == 'admin' &&
-          getDbUpdateStatus != null &&
-          getDbUpdateStatus.updateAvailable == true
+        userInfo.user_role_name == 'admin' &&
+        getDbUpdateStatus != null &&
+        getDbUpdateStatus.updateAvailable == true
       "
     >
       <database-update-modal />
     </div>
-    <div
-      v-if="isDesktop"
-      class="display"
-    >
-      <header
-        v-if="userInfo != null"
-        class="welcome"
-      >
+    <div v-if="isDesktop" class="display">
+      <header v-if="userInfo != null" class="welcome">
         Welcome,
-        <router-link
-          to="/account"
-          class="header-desktop"
-        >
+        <router-link to="/account" class="header-desktop">
           {{ userInfo.first_name }} {{ userInfo.last_name }}
         </router-link>
       </header>
@@ -57,7 +48,7 @@
 </template>
 
 <script>
-import { defineAsyncComponent } from 'vue';
+import { defineAsyncComponent } from "vue";
 import { mapGetters, mapActions } from "vuex";
 import { BooksysBrowser } from "@/libs/browser";
 import * as dayjs from "dayjs";
@@ -67,20 +58,41 @@ import * as dayjsTimezone from "dayjs/plugin/timezone";
 dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);
 
-const DashboardAdmin = defineAsyncComponent(() => 
-  import(/* webpackChunkName: "dashboard-admin" */ "@/components/DashboardAdmin.vue"));
-const DashboardMember = defineAsyncComponent(() => 
-  import(/* webpackChunkName: "dashboard-member" */ "@/components/DashboardMember.vue"));
-const DashboardGuest = defineAsyncComponent(() => 
-  import(/* webpackChunkName: "dashboard-guest" */ "@/components/DashboardGuest.vue"));
-const DashboardAdminMobile = defineAsyncComponent(() => 
-  import(/* webpackChunkName: "dashboard-admin-mobile" */ "@/components/DashboardAdminMobile.vue"));
-const DashboardMemberMobile = defineAsyncComponent(() => 
-  import(/* webpackChunkName: "dashboard-member-mobile" */ "@/components/DashboardMemberMobile.vue"));
-const DashboardGuestMobile = defineAsyncComponent(() => 
-  import(/* webpackChunkName: "dashboard-guest-mobile" */ "@/components/DashboardGuestMobile.vue"));
-const DatabaseUpdateModal = defineAsyncComponent(() => 
-  import(/* webpackChunkName: "database-update" */ "@/components/DatabaseUpdate.vue"));
+const DashboardAdmin = defineAsyncComponent(() =>
+  import(
+    /* webpackChunkName: "dashboard-admin" */ "@/components/DashboardAdmin.vue"
+  )
+);
+const DashboardMember = defineAsyncComponent(() =>
+  import(
+    /* webpackChunkName: "dashboard-member" */ "@/components/DashboardMember.vue"
+  )
+);
+const DashboardGuest = defineAsyncComponent(() =>
+  import(
+    /* webpackChunkName: "dashboard-guest" */ "@/components/DashboardGuest.vue"
+  )
+);
+const DashboardAdminMobile = defineAsyncComponent(() =>
+  import(
+    /* webpackChunkName: "dashboard-admin-mobile" */ "@/components/DashboardAdminMobile.vue"
+  )
+);
+const DashboardMemberMobile = defineAsyncComponent(() =>
+  import(
+    /* webpackChunkName: "dashboard-member-mobile" */ "@/components/DashboardMemberMobile.vue"
+  )
+);
+const DashboardGuestMobile = defineAsyncComponent(() =>
+  import(
+    /* webpackChunkName: "dashboard-guest-mobile" */ "@/components/DashboardGuestMobile.vue"
+  )
+);
+const DatabaseUpdateModal = defineAsyncComponent(() =>
+  import(
+    /* webpackChunkName: "database-update" */ "@/components/DatabaseUpdate.vue"
+  )
+);
 
 export default {
   name: "WSDashboard",

@@ -1,7 +1,5 @@
 <template>
-  <card-module
-    title="Goodbye"
-  >
+  <card-module title="Goodbye">
     You have been logged out. To sign back in, please click
     <router-link to="/login">here</router-link>.
   </card-module>
@@ -14,7 +12,7 @@ import CardModule from "@/components/bricks/CardModule.vue";
 export default {
   name: "WSLogout",
   components: {
-    CardModule
+    CardModule,
   },
   created() {
     this.logout();

@@ -6,6 +6,6 @@
 
 <script>
 export default {
-  name: "ModalFooter"
-}
+  name: "ModalFooter",
+};
 </script>

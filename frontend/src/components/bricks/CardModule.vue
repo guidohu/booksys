@@ -10,9 +10,8 @@
 </template>
 
 <script>
-
 export default {
   name: "CardModule",
-  props: [ "title" ]
-}
+  props: ["title"],
+};
 </script>

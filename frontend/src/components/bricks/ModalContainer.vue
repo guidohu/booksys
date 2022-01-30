@@ -20,20 +20,19 @@ import { Modal } from "bootstrap";
 
 export default {
   name: "ModalContainer",
-  props: [ "visible", "name" ],
+  props: ["visible", "name"],
   mounted() {
     this.modal = new Modal(this.$refs[this.name]);
     this.modal.show();
   },
   watch: {
-    visible: function(newValue) {
+    visible: function (newValue) {
       if (newValue) {
         this.modal.show();
-      }else{
+      } else {
         this.modal.hide();
       }
-    }
-  }
+    },
+  },
 };
-
 </script>

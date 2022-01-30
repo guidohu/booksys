@@ -3,7 +3,8 @@ import { loadStoreModules, store } from "@/store";
 
 // Lazy import of all the Views used by the router
 const Login = () => import(/* webpackChunkName: "login" */ "@/views/WSLogin");
-const Logout = () => import(/* webpackChunkName: "logout" */ "@/views/WSLogout");
+const Logout = () =>
+  import(/* webpackChunkName: "logout" */ "@/views/WSLogout");
 // const SignUp = () => import(/* webpackChunkName: "signup" */ "@/views/WSSignUp");
 const Dashboard = () =>
   import(/* webpackChunkName: "dashboard" */ "@/views/WSDashboard");
