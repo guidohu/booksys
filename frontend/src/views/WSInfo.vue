@@ -76,29 +76,13 @@ import { BooksysBrowser } from "@/libs/browser";
 import NavbarMobile from "@/components/NavbarMobile";
 import MainTitle from "@/components/MainTitle";
 import CardModule from "@/components/bricks/CardModule.vue";
-import {
-  BRow,
-  BCol,
-  BButton,
-  BIconHouse,
-  BCard,
-  BCardBody,
-  BCardText,
-  CardModule,
-} from "bootstrap-vue";
 
 export default {
   name: "WSInfo",
   components: {
     MainTitle,
     NavbarMobile,
-    BRow,
-    BCol,
-    BButton,
-    BIconHouse,
-    BCard,
-    BCardBody,
-    BCardText,
+    CardModule,
   },
   computed: {
     ...mapGetters("configuration", ["getLocationAddress", "getLocationMap"]),

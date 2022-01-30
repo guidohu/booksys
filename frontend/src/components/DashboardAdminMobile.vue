@@ -1,6 +1,6 @@
 <template>
   <div>
-    <navbar-mobile :title="Home" role="admin-home"/>
+    <navbar-mobile title="Dashboard" role="admin-home"/>
 
     <div class="row">
       <div class="col-1"/>

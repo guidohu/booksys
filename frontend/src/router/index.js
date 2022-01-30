@@ -10,7 +10,7 @@ const Dashboard = () =>
   import(/* webpackChunkName: "dashboard" */ "@/views/WSDashboard");
 // const Account = () =>
 //   import(/* webpackChunkName: "account" */ "@/views/WSAccount");
-// const Info = () => import(/* webpackChunkName: "info" */ "@/views/WSInfo");
+const Info = () => import(/* webpackChunkName: "info" */ "@/views/WSInfo");
 // const Schedule = () =>
 //   import(/* webpackChunkName: "schedule" */ "@/views/WSSchedule");
 // const Today = () => import(/* webpackChunkName: "today" */ "@/views/WSToday");
@@ -115,16 +115,16 @@ const routes = [
   //   },
   //   component: Account,
   // },
-  // {
-  //   path: "/info",
-  //   name: "Info",
-  //   beforeEnter: (to, from, next) => {
-  //     if (loginEnforced(to, from, next)) {
-  //       loadStoreModules(["configuration"], next);
-  //     }
-  //   },
-  //   component: Info,
-  // },
+  {
+    path: "/info",
+    name: "Info",
+    beforeEnter: (to, from, next) => {
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["configuration"], next);
+      }
+    },
+    component: Info,
+  },
   // {
   //   path: "/schedule",
   //   name: "Schedule",
