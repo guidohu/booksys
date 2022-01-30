@@ -1,39 +1,23 @@
 <template>
-  <b-card
-    v-if="userInfo != null"
+  <card-module
     title="Goodbye"
   >
-    <b-card-text> Logging you out. </b-card-text>
-  </b-card>
-  <b-card
-    v-else
-    title="Goodbye"
-  >
-    <b-card-text>
-      You have been logged out. To sign back in, please click
-      <b-link to="/login">
-        here
-      </b-link>.
-    </b-card-text>
-  </b-card>
+    You have been logged out. To sign back in, please click
+    <router-link to="/login">here</router-link>.
+  </card-module>
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
-import { BCard, BCardText, BLink } from "bootstrap-vue";
+import { mapActions } from "vuex";
+import CardModule from "@/components/bricks/CardModule.vue";
 
 export default {
   name: "WSLogout",
   components: {
-    BCard,
-    BCardText,
-    BLink,
+    CardModule
   },
   created() {
     this.logout();
-  },
-  computed: {
-    ...mapGetters("login", ["userInfo"]),
   },
   methods: {
     ...mapActions("login", ["logout"]),
