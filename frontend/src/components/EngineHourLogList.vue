@@ -1,20 +1,18 @@
 <template>
   <div>
     <WarningBox v-if="errors.length > 0" :errors="errors" />
-    <EngineHourEntryModal
+    <engine-hour-entry-modal
       v-model:visible="showEntryHourModal"
       :engine-hour-entry="selectedEngineHourLogEntry"
       :display-format="getEngineHourFormat"
     />
-    <b-table
+    <table-module
       v-if="errors.length == 0"
-      hover
-      small
-      :items="items"
-      :fields="columns"
-      :tbody-tr-class="rowClass"
-      class="text-left"
-      @row-clicked="rowClick"
+      :rows="items"
+      :columns="columns"
+      :rowClassFunction="rowClass"
+      size="small"
+      @rowclick="rowClick"
     />
   </div>
 </template>
@@ -25,14 +23,14 @@ import * as dayjs from "dayjs";
 import WarningBox from "@/components/WarningBox";
 import EngineHourEntryModal from "@/components/EngineHourEntryModal";
 import { formatEngineHour } from "@/libs/formatters";
-import { BTable } from "bootstrap-vue";
+import TableModule from "@/components/bricks/TableModule.vue";
 
 export default {
   name: "EngineHourLogList",
   components: {
     WarningBox,
+    TableModule,
     EngineHourEntryModal,
-    BTable,
   },
   data() {
     return {
@@ -68,7 +66,8 @@ export default {
       });
     },
     setColumns: function () {
-      this.$set(this, "columns", [
+      // this.$set(this, "columns", [
+      this.columns = [
         {
           key: "time",
           label: "Date",
@@ -89,7 +88,7 @@ export default {
           key: "before_hours",
           label: "Before",
           sortable: true,
-          class: "text-right",
+          class: "text-end",
           formatter: (value) => {
             return formatEngineHour(value, this.getEngineHourFormat);
           },
@@ -98,7 +97,7 @@ export default {
           key: "after_hours",
           label: "After",
           sortable: true,
-          class: "text-right",
+          class: "text-end",
           formatter: (value) => {
             return formatEngineHour(value, this.getEngineHourFormat);
           },
@@ -107,12 +106,12 @@ export default {
           key: "delta_hours",
           label: "Diff",
           sortable: true,
-          class: "text-right",
+          class: "text-end",
           formatter: (value) => {
             return formatEngineHour(value, this.getEngineHourFormat);
           },
         },
-      ]);
+      ];
     },
     rowClick: function (item) {
       this.selectedEngineHourLogEntry = item;

@@ -1,5 +1,40 @@
 <template>
-  <b-tabs content-class="mt-3">
+  <div>
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#engine-hours">
+          <div :class="titleClassEngineHours" />
+          Engine Hours
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#fuel">
+          <div :class="titleClassFuel" />
+          Fuel
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#maintenance">
+          <div :class="titleClassMaintenance" />
+          Maintenance
+        </a>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <div :class="'tab-pane container ' + tabClass + ' active'" id="engine-hours">
+        <EngineHourLogContainer />
+      </div>
+      <div :class="'tab-pane container ' + tabClass" id="fuel">
+        <!-- <FuelLogContainer /> -->
+      </div>
+      <div :class="'tab-pane container ' + tabClass" id="maintenance">
+        <!-- <MaintenanceLogContainer /> -->
+      </div>
+    </div>
+  </div>
+
+  <!-- <b-tabs content-class="mt-3">
     <b-tab active>
       <div slot="title">
         <div :class="titleClassEngineHours" />
@@ -27,24 +62,21 @@
         <MaintenanceLogContainer />
       </div>
     </b-tab>
-  </b-tabs>
+  </b-tabs> -->
 </template>
 
 <script>
 import { BooksysBrowser } from "@/libs/browser";
 import EngineHourLogContainer from "@/components/EngineHourLogContainer";
-import FuelLogContainer from "@/components/FuelLogContainer";
-import MaintenanceLogContainer from "@/components/MaintenanceLogContainer";
-import { BTabs, BTab } from "bootstrap-vue";
+// import FuelLogContainer from "@/components/FuelLogContainer";
+// import MaintenanceLogContainer from "@/components/MaintenanceLogContainer";
 
 export default {
   name: "BoatTabs",
   components: {
     EngineHourLogContainer,
-    FuelLogContainer,
-    MaintenanceLogContainer,
-    BTabs,
-    BTab,
+    // FuelLogContainer,
+    // MaintenanceLogContainer,
   },
   computed: {
     isDesktop: function () {
@@ -82,6 +114,15 @@ export default {
 <style scoped>
 .boat-tab-limited-height {
   max-height: 400px;
-  overflow: scroll;
+  height: 400px;
+  /* overflow: scroll; */
+}
+
+.nav-link {
+  color: #bdbdbd;
+}
+
+a {
+  color: #bdbdbd;
 }
 </style>

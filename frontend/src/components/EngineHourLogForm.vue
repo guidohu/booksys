@@ -1,106 +1,75 @@
 <template>
-  <b-container float class="text-left">
-    <b-row>
-      <b-col cols="12">
+  <div class="container text-left">
+    <div class="row">
+      <div class="col-12">
         <WarningBox v-if="errors.length > 0" :errors="errors" />
-        <b-form @submit="add">
-          <b-form-group
-            id="input-group-driver"
+        <form @submit="add">
+          <input-text
+            id="driver"
             label="Driver"
-            label-for="input-driver"
-            label-cols="3"
-          >
-            <b-form-input
-              id="input-driver"
-              v-model="form.driverName"
-              type="text"
-              size="sm"
-              disabled
-            />
-          </b-form-group>
-          <engine-hours
-            v-model="form.beforeHours"
+            v-model="form.driverName"
+            size="small"
+            :disabled="true"
+            type="text"
+          />
+          <input-engine-hours
+            id="before-hours"
             label="Before"
             :display-format="getEngineHourFormat"
             :disabled="disableBefore"
+            v-model="form.beforeHours"
+            placeholder="0"
+            size="small"
           />
-          <engine-hours
+          <input-engine-hours
             v-if="showAfter"
-            v-model="form.afterHours"
+            id="after-hours"
             label="After"
             :display-format="getEngineHourFormat"
+            :disabled="!showAfter"
+            v-model="form.afterHours"
+            placeholder="0"
+            size="small"
           />
-          <b-form-group
-            id="input-group-type"
+          <input-toggle
+            id="type"
             label="Type"
-            label-for="input-type"
-            label-cols="3"
-          >
-            <toggle-button
-              id="input-type"
-              :value="false"
-              color="#17a2b8"
-              :width="toggleWidth"
-              :labels="{ checked: 'Course', unchecked: 'Private' }"
-              @change="toggleType"
-            />
-          </b-form-group>
-          <b-row class="text-right">
-            <b-col cols="9" offset="3">
-              <b-button
-                v-if="!disableBefore"
-                block
-                variant="outline-info"
-                size="sm"
-                @click="add"
-              >
-                Start
-              </b-button>
-              <b-button
-                v-if="disableBefore"
-                block
-                variant="outline-info"
-                size="sm"
-                @click="add"
-              >
-                Finish
-              </b-button>
-            </b-col>
-          </b-row>
-        </b-form>
-      </b-col>
-    </b-row>
-  </b-container>
+            off-label="Private"
+            on-label="Course"
+            v-model="form.type"
+          />
+          <div class="row text-right mt-2">
+            <div class="col-9 offset-3">
+              <div class="d-grid gap-2">
+                <button
+                  class="btn btn-outline-info btn-sm"
+                  @click="add"
+                >
+                  {{ showAfter ? "Finish" : "Start" }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import { ToggleButton } from "vue-js-toggle-button";
+import InputEngineHours from "@/components/forms/inputs/InputEngineHours.vue";
+import InputText from "@/components/forms/inputs/InputText.vue";
+import InputToggle from "@/components/forms/inputs/InputToggle.vue";
 import WarningBox from "@/components/WarningBox";
-import EngineHours from "@/components/forms/inputs/EngineHours";
-import {
-  BContainer,
-  BRow,
-  BCol,
-  BForm,
-  BFormGroup,
-  BFormInput,
-  BButton,
-} from "bootstrap-vue";
 
 export default {
   name: "EngineHourLogForm",
   components: {
-    ToggleButton,
+    InputEngineHours,
+    InputText,
+    InputToggle,
     WarningBox,
-    EngineHours,
-    BContainer,
-    BRow,
-    BCol,
-    BForm,
-    BFormGroup,
-    BFormInput,
-    BButton,
   },
   data() {
     return {
@@ -111,7 +80,6 @@ export default {
         afterHours: null,
         type: false,
       },
-      engineHourLabel: null,
       disableBefore: false,
       showAfter: false,
       errors: [],
@@ -121,13 +89,9 @@ export default {
     ...mapGetters("boat", ["getEngineHourLogLatest"]),
     ...mapGetters("login", ["userInfo"]),
     ...mapGetters("configuration", ["getEngineHourFormat"]),
-    toggleWidth: function () {
-      return 70;
-    },
   },
   watch: {
     userInfo: function () {
-      console.log("userInfo just changed");
       this.setDriver();
     },
     getEngineHourLogLatest: function (newData) {
@@ -136,6 +100,7 @@ export default {
         this.form.beforeHours = null;
       } else if (newData.before_hours != null && newData.after_hours != null) {
         this.form.beforeHours = null;
+        this.form.type = false;
       } else {
         this.form.beforeHours = newData.before_hours;
       }
@@ -191,10 +156,10 @@ export default {
         this.form.driverId = null;
       }
     },
-    toggleType: function () {
-      this.form.type = !this.form.type;
-    },
-    add: function () {
+    add: function (e) {
+      // get the type
+      // 0: private
+      // 1: course
       const type = this.form.type ? 1 : 0;
 
       const data = {
@@ -204,8 +169,12 @@ export default {
         type: type,
       };
       this.addEngineHours(data)
-        .then(() => (this.errors = []))
+        .then(() => {
+          this.errors = [];
+        })
         .catch((errors) => (this.errors = errors));
+
+      e.preventDefault();
     },
   },
   created() {

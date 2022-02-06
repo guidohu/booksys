@@ -1,142 +1,101 @@
 <template>
-  <b-modal
-    id="engineHourEntryModal"
-    title="Engine Hour Entry"
-    :visible="visible"
-    @hide="$emit('update:visible', false)"
-    @show="$emit('update:visible', true)"
-  >
-    <b-row v-if="errors.length">
-      <b-col cols="1" class="d-none d-sm-block" />
-      <b-col cols="12" sm="10">
-        <WarningBox :errors="errors" />
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block" />
-    </b-row>
-    <b-form @submit="save">
-      <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block" />
-        <b-col cols="12" sm="10">
-          <b-form-group
-            id="date"
-            label="Date"
-            label-for="date-input"
-            description=""
-            label-cols="3"
-          >
-            <b-form-input
-              id="date-input"
-              v-model="form.date"
-              size="sm"
-              type="text"
-              placeholder=""
-              disabled
-            />
-          </b-form-group>
-          <b-form-group
-            id="driver"
-            label="Driver"
-            label-for="driver-input"
-            description=""
-            label-cols="3"
-          >
-            <b-form-input
-              id="driver-input"
-              v-model="form.driver"
-              size="sm"
-              type="text"
-              placeholder=""
-              disabled
-            />
-          </b-form-group>
-          <engine-hours
-            v-model="form.beforeHours"
-            label="Before"
-            :display-format="displayFormat"
-            :disabled="true"
-          />
-          <engine-hours
-            v-model="form.afterHours"
-            label="After"
-            :display-format="displayFormat"
-            :disabled="true"
-          />
-          <engine-hours
-            v-model="form.deltaHours"
-            label="Difference"
-            :display-format="displayFormat"
-            :disabled="true"
-          />
-          <b-form-group
-            id="input-group-type"
-            label="Type"
-            label-for="input-type"
-            label-cols="3"
-          >
-            <toggle-button
-              id="input-type"
-              :value="form.type"
-              color="#17a2b8"
-              :width="toggleWidth"
-              :labels="{ checked: 'Course', unchecked: 'Private' }"
-              @change="toggleType"
-            />
-          </b-form-group>
-        </b-col>
-        <b-col cols="1" class="d-none d-sm-block" />
-      </b-row>
-    </b-form>
-    <div slot="modal-footer">
-      <b-button type="button" variant="outline-info" @click="save">
-        <b-icon-check />
+  <modal-container
+    name="engineHourentryModal"
+    :visible="visible">
+    <modal-header :closable="true" title="Engine Hour Entry" @close="$emit('update:visible', false)"/>
+    <modal-body>
+      <div class="row" v-if="errors.length">
+        <div class="col-1 d-none d-sm-block"/>
+        <div class="col-12 col-sm-10">
+          <warning-box :errors="errors" />
+        </div>
+      </div>
+      <form @submit="save">
+        <input-date-time-local
+          id="date"
+          label="Date"
+          v-model="form.date"
+          size="small"
+          :disabled="true"
+        />
+        <input-text
+          id="driver"
+          label="Driver"
+          v-model="form.driver"
+          size="small"
+          :disabled="true"
+        />
+        <input-engine-hours
+          id="before"
+          label="Before"
+          v-model="form.beforeHours"
+          :displayFormat="displayFormat"
+          size="small"
+          :disabled="true"
+        />
+        <input-engine-hours
+          id="after"
+          label="After"
+          v-model="form.afterHours"
+          :displayFormat="displayFormat"
+          size="small"
+          :disabled="true"
+        />
+        <input-engine-hours
+          id="delta"
+          label="Difference"
+          v-model="form.deltaHours"
+          :displayFormat="displayFormat"
+          size="small"
+          :disabled="true"
+        />
+        <input-toggle
+          id="type"
+          label="Type"
+          v-model="form.type"
+          offLabel="Private"
+          onLabel="Course"
+        />
+      </form>
+    </modal-body>
+    <modal-footer>
+      <button type="button" class="btn btn-outline-info" @click="save">
+        <i class="bi bi-check"></i>
         Save
-      </b-button>
-      <b-button
-        class="ml-1"
-        type="button"
-        variant="outline-danger"
-        @click="close"
-      >
-        <b-icon-x />
+        </button>
+        <button type="button" class="btn btn-outline-danger" @click="close">
+        <i class="bi bi-x"></i>
         Cancel
-      </b-button>
-    </div>
-  </b-modal>
+        </button>
+    </modal-footer>
+  </modal-container>
 </template>
 
 <script>
 import { mapActions } from "vuex";
-import { ToggleButton } from "vue-js-toggle-button";
 import WarningBox from "@/components/WarningBox";
-import EngineHours from "@/components/forms/inputs/EngineHours";
+import ModalContainer from "@/components/bricks/ModalContainer.vue";
+import ModalHeader from  "@/components/bricks/ModalHeader.vue";
+import ModalBody from  "@/components/bricks/ModalBody.vue";
+import ModalFooter from  "@/components/bricks/ModalFooter.vue";
 import * as dayjs from "dayjs";
-import {
-  BModal,
-  BRow,
-  BCol,
-  BForm,
-  BFormGroup,
-  BFormInput,
-  BButton,
-  BIconCheck,
-  BIconX,
-} from "bootstrap-vue";
+import InputDateTimeLocal from '@/components/forms/inputs/InputDateTimeLocal.vue';
+import InputText from '@/components/forms/inputs/InputText.vue';
+import InputEngineHours from '@/components/forms/inputs/InputEngineHours.vue';
+import InputToggle from '@/components/forms/inputs/InputToggle.vue';
 
 export default {
   name: "EngineHourEntryModal",
   components: {
-    WarningBox,
-    EngineHours,
-    ToggleButton,
-    BModal,
-    BRow,
-    BCol,
-    BForm,
-    BFormGroup,
-    BFormInput,
-    BButton,
-    BIconCheck,
-    BIconX,
+    ModalContainer,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    InputDateTimeLocal,
+    InputText,
+    InputEngineHours,
+    InputToggle,
+    WarningBox
   },
   props: ["engineHourEntry", "visible", "displayFormat"],
   data() {
@@ -162,7 +121,7 @@ export default {
       if (entry != null) {
         this.form = {
           id: entry.id,
-          date: dayjs(entry.time * 1000).format("DD.MM.YYYY HH:mm"),
+          date: dayjs(entry.time * 1000).format("YYYY-MM-DDTHH:mm"),
           driver: entry.user_first_name,
           beforeHours: entry.before_hours,
           afterHours: entry.after_hours,
