@@ -22,13 +22,13 @@
     </ul>
 
     <div class="tab-content">
-      <div :class="'tab-pane container ' + tabClass + ' active'" id="engine-hours">
-        <EngineHourLogContainer />
+      <div :class="'tab-pane ' + tabClass + ' active'" id="engine-hours">
+        <engine-hour-log-container />
       </div>
-      <div :class="'tab-pane container ' + tabClass" id="fuel">
-        <!-- <FuelLogContainer /> -->
+      <div :class="'tab-pane ' + tabClass" id="fuel">
+        <fuel-log-container />
       </div>
-      <div :class="'tab-pane container ' + tabClass" id="maintenance">
+      <div :class="'tab-pane ' + tabClass" id="maintenance">
         <!-- <MaintenanceLogContainer /> -->
       </div>
     </div>
@@ -68,14 +68,14 @@
 <script>
 import { BooksysBrowser } from "@/libs/browser";
 import EngineHourLogContainer from "@/components/EngineHourLogContainer";
-// import FuelLogContainer from "@/components/FuelLogContainer";
+import FuelLogContainer from "@/components/FuelLogContainer";
 // import MaintenanceLogContainer from "@/components/MaintenanceLogContainer";
 
 export default {
   name: "BoatTabs",
   components: {
     EngineHourLogContainer,
-    // FuelLogContainer,
+    FuelLogContainer,
     // MaintenanceLogContainer,
   },
   computed: {

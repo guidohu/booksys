@@ -4,14 +4,14 @@
     <div class="col-9">
       <div :class="inputGroupClass()">
         <input
-          :type="type"
+          type="text"
           class="form-control"
           :disabled="disabled"
           :id="id"
           :value="modelValue"
           @input="changeHandler($event.target.value)"
         />
-        <span v-if="suffix != null" class="input-group-text">{{ suffix }}</span>
+        <span class="input-group-text">ltr</span>
       </div>
     </div>
   </div>
@@ -19,8 +19,8 @@
 
 <script>
 export default {
-  name: "InputText",
-  props: ["id", "label", "modelValue", "type", "disabled", "size", "suffix"],
+  name: "InputFuel",
+  props: ["id", "label", "modelValue", "disabled", "size"],
   emits: ["update:modelValue"],
   methods: {
     changeHandler(value) {
@@ -28,16 +28,16 @@ export default {
       this.$emit("update:modelValue", value);
     },
     inputGroupClass() {
-      if (this.size == null) {
+      if(this.size == null){
         return "input-group";
       }
-      if (this.size == "small") {
-        return "input-group input-group-sm";
+      if(this.size == "small"){
+        return "input-group input-group-sm"
       }
-      if (this.size == "large") {
-        return "input-group input-group-lg";
+      if(this.size == "large"){
+        return "input-group input-group-lg"
       }
-    },
+    }
   },
 };
 </script>

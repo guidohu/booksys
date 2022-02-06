@@ -1,236 +1,138 @@
 <template>
-  <b-modal
-    id="fuelEntryModal"
-    title="Fuel Entry"
-    :visible="visible"
-    @hide="$emit('update:visible', false)"
-    @show="$emit('update:visible', true)"
-  >
-    <b-row v-if="errors.length">
-      <b-col cols="1" class="d-none d-sm-block" />
-      <b-col cols="12" sm="10">
-        <WarningBox :errors="errors" />
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block" />
-    </b-row>
-    <b-form @submit="save">
-      <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block" />
-        <b-col cols="12" sm="10">
-          <b-form-group
-            id="date"
-            label="Date"
-            label-for="date-input"
-            description=""
-            label-cols="3"
-          >
-            <b-form-input
-              id="date-input"
-              v-model="form.date"
-              size="sm"
-              type="text"
-              placeholder=""
-              disabled
-            />
-          </b-form-group>
-          <b-form-group
-            id="driver"
-            label="Driver"
-            label-for="driver-input"
-            description=""
-            label-cols="3"
-          >
-            <b-form-input
-              id="driver-input"
-              v-model="form.driver"
-              size="sm"
-              type="text"
-              placeholder=""
-              disabled
-            />
-          </b-form-group>
-          <b-form-group
-            v-if="form.averageFuelPerHour != null"
-            id="liters-per-hour"
-            label="Consumption"
-            label-for="fuel-input"
-            description=""
-            label-cols="3"
-          >
-            <b-input-group size="sm">
-              <b-form-input
-                id="liter-per-hour-input"
-                v-model="form.averageFuelPerHour"
-                type="text"
-                placeholder=""
-                disabled
-              />
-              <b-input-group-append is-text> ltrs/h </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-          <engine-hours
-            v-model="form.engineHours"
-            label="Engine Hours"
-            :display-format="getEngineHourFormat"
-          />
-          <b-form-group
-            id="liters"
+  <modal-container name="fuelEntrymodal" :visible="visible">
+    <modal-header
+      :closable="true"
+      title="Fuel Entry"
+      @close="$emit('update:visible', false)"
+    />
+    <modal-body>
+      <div class="row" v-if="errors.length">
+        <div class="col-1 d-none d-sm-block" />
+        <div class="col-12 col-sm-10">
+          <warning-box :errors="errors" />
+        </div>
+      </div>
+      <form @submit.prevent.self="save">
+        <input-date-time-local
+          id="date"
+          label="Date"
+          v-model="form.date"
+          size="small"
+          :disabled="true"
+        />
+        <input-text
+          id="driver"
+          label="Driver"
+          v-model="form.driver"
+          size="small"
+          :disabled="true"
+        />
+        <input-text
+          id="consumption"
+          label="Consumption"
+          v-model="form.averageFuelPerHour"
+          size="small"
+          :disabled="true"
+          suffix="ltrs/h"
+        />
+        <input-engine-hours
+          id="engine-hours"
+          label="Engine Hours"
+          v-model="form.engineHours"
+          :displayFormat="getEngineHourFormat"
+          size="small"
+        />
+        <input-fuel
+            id="fuel"
             label="Fuel"
-            label-for="fuel-input"
-            description=""
-            label-cols="3"
-          >
-            <b-input-group size="sm">
-              <b-form-input
-                id="fuel-input"
-                v-model="form.fuel"
-                type="text"
-                placeholder=""
-              />
-              <b-input-group-append is-text> ltrs </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-          <b-form-group
+            v-model="form.fuel"
+            placeholder="0"
+            size="small"
+          />
+          <input-currency
             v-if="!form.isDiscounted"
             id="cost"
             label="Cost"
-            label-for="cost-input"
-            description=""
-            label-cols="3"
-          >
-            <b-input-group size="sm">
-              <b-form-input
-                id="cost-input"
-                v-model="form.cost"
-                type="text"
-                placeholder=""
-                @change="costChange"
-              />
-              <b-input-group-append is-text>
-                {{ getCurrency }}
-              </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-          <b-form-group
+            :currency="getCurrency"
+            v-model="form.cost"
+            placeholder="0"
+            size="small"
+          />
+          <input-currency
             v-if="form.isDiscounted"
             id="cost-gross"
             label="Cost (Gross)"
-            label-for="cost-gross-input"
-            description=""
-            label-cols="3"
-          >
-            <b-input-group size="sm">
-              <b-form-input
-                id="cost-gross-input"
-                v-model="form.costGross"
-                type="text"
-                placeholder=""
-                @change="costGrossChange"
-              />
-              <b-input-group-append is-text>
-                {{ getCurrency }}
-              </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-          <b-form-group
+            :currency="getCurrency"
+            v-model="form.costGross"
+            placeholder="0"
+            size="small"
+          />
+          <input-toggle
             id="discount"
             label="Discount"
-            label-for="discount-input"
-            label-cols="3"
-          >
-            <toggle-button
-              id="discount-input"
-              :value="form.isDiscounted"
-              color="#17a2b8"
-              :width="toggleWidth"
-              :labels="{ checked: 'Discount', unchecked: 'No Discount' }"
-              @change="toggleDiscount"
-            />
-          </b-form-group>
-          <b-form-group
+            v-model="form.isDiscounted"
+            offLabel="No Discount"
+            onLabel="Discounted"
+          />
+          <input-currency
             v-if="form.isDiscounted"
             id="cost-net"
-            label="Cost (net)"
-            label-for="cost-net-input"
-            description=""
-            label-cols="3"
-          >
-            <b-input-group size="sm">
-              <b-form-input
-                id="cost-net-input"
-                v-model="form.costNet"
-                type="text"
-                placeholder=""
-              />
-              <b-input-group-append is-text>
-                {{ getCurrency }}
-              </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-        </b-col>
-        <b-col cols="1" class="d-none d-sm-block" />
-      </b-row>
-    </b-form>
-    <div slot="modal-footer">
-      <b-button type="button" variant="outline-info" @click="save">
-        <b-icon-check />
+            label="Cost (Net)"
+            :currency="getCurrency"
+            v-model="form.costNet"
+            placeholder="0"
+            size="small"
+          />
+      </form>
+    </modal-body>
+    <modal-footer> 
+      <button type="submit" class="btn btn-outline-info" @click.prevent.self="save">
+        <i class="bi bi-check"></i>
         Save
-      </b-button>
-      <b-button
-        class="ml-1"
-        type="button"
-        variant="outline-danger"
-        @click="close"
-      >
-        <b-icon-x />
+      </button>
+      <button type="button" class="btn btn-outline-danger" @click.prevent.self="close">
+        <i class="bi bi-x"></i>
         Cancel
-      </b-button>
-    </div>
-  </b-modal>
+      </button>
+    </modal-footer>
+  </modal-container>
 </template>
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import { ToggleButton } from "vue-js-toggle-button";
 import WarningBox from "@/components/WarningBox";
-import EngineHours from "@/components/forms/inputs/EngineHours";
 import {
   formatCurrency,
   formatFuelConsumption,
   formatFuel,
 } from "@/libs/formatters";
 import * as dayjs from "dayjs";
-import {
-  BModal,
-  BCol,
-  BRow,
-  BForm,
-  BFormGroup,
-  BFormInput,
-  BInputGroup,
-  BInputGroupAppend,
-  BButton,
-  BIconCheck,
-  BIconX,
-} from "bootstrap-vue";
+import ModalContainer from "@/components/bricks/ModalContainer.vue";
+import ModalHeader from "@/components/bricks/ModalHeader.vue";
+import ModalBody from "@/components/bricks/ModalBody.vue";
+import ModalFooter from "@/components/bricks/ModalFooter.vue";
+import InputDateTimeLocal from "@/components/forms/inputs/InputDateTimeLocal.vue";
+import InputText from "@/components/forms/inputs/InputText.vue";
+import InputEngineHours from "@/components/forms/inputs/InputEngineHours.vue";
+import InputFuel from "@/components/forms/inputs/InputFuel.vue";
+import InputCurrency from "@/components/forms/inputs/InputCurrency.vue";
+import InputToggle from "@/components/forms/inputs/InputToggle.vue";
+
 
 export default {
   name: "FuelEntryModal",
   components: {
     WarningBox,
-    EngineHours,
-    ToggleButton,
-    BModal,
-    BCol,
-    BRow,
-    BForm,
-    BFormGroup,
-    BFormInput,
-    BInputGroup,
-    BInputGroupAppend,
-    BButton,
-    BIconCheck,
-    BIconX,
+    ModalContainer,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    InputDateTimeLocal,
+    InputText,
+    InputEngineHours,
+    InputFuel,
+    InputCurrency,
+    InputToggle
   },
   props: ["fuelEntry", "visible"],
   data() {
@@ -264,7 +166,7 @@ export default {
 
         this.form = {
           id: entry.id,
-          date: dayjs(entry.timestamp * 1000).format("DD.MM.YYYY HH:mm"),
+          date: dayjs(entry.timestamp * 1000).format("YYYY-MM-DDTHH:mm"),
           isDiscounted:
             entry.cost != null && entry.cost_brutto != null ? true : false,
           cost: formatCurrency(cost, null),

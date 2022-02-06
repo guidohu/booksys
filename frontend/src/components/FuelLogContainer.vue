@@ -1,49 +1,35 @@
 <template>
-  <div>
-    <FuelLogForm class="mb-4" />
-    <div class="accordion" role="tablist">
-      <b-card no-body class="mb-4">
-        <b-card-header header-tag="header" class="p-1" role="tab">
-          <b-button
-            v-b-toggle.accordion-1
-            size="sm"
-            block
-            variant="outline-info"
-          >
-            {{ visualizationLabel }}
-          </b-button>
-        </b-card-header>
-        <b-collapse
-          id="accordion-1"
-          accordion="my-accordion"
-          role="tabpanel"
-          @shown="displayChart"
-          @hidden="hideChart"
-        >
-          <b-card-body>
-            <FuelLogChart v-if="showChart" />
-          </b-card-body>
-        </b-collapse>
-      </b-card>
+  <div class="box">
+    <fuel-log-form class="mb-4" />
+    <div class="d-grid gap-2 ms-1 me-1">
+      <button
+        class="btn btn-outline-info btn-sm"
+        data-bs-toggle="collapse"
+        data-bs-target="#fuel-visualization"
+        aria-expanded="false"
+        aria-controls="collapseExample"
+        @click="toggleChart"
+      >
+        {{ visualizationLabel }}
+      </button>
     </div>
-    <FuelLogList />
+    <div class="collapse ms-1 me-1" id="fuel-visualization">
+      <div class="card card-body">
+        <fuel-log-chart v-if="showChart" />
+      </div>
+    </div>
+    <fuel-log-list />
   </div>
 </template>
 
 <script>
+import { defineAsyncComponent } from "vue";
 import FuelLogForm from "@/components/FuelLogForm";
 import FuelLogList from "@/components/FuelLogList";
-import {
-  BCard,
-  BCardHeader,
-  BButton,
-  BCollapse,
-  BCardBody,
-  VBToggle,
-} from "bootstrap-vue";
 
-const FuelLogChart = () =>
-  import(/* webpackChunkName: "fuel-log-chart" */ "@/components/FuelLogChart");
+const FuelLogChart = defineAsyncComponent(() =>
+  import(/* webpackChunkName: "fuel-log-chart" */ "@/components/FuelLogChart")
+);
 
 export default {
   name: "FuelLogContainer",
@@ -51,14 +37,6 @@ export default {
     FuelLogForm,
     FuelLogChart,
     FuelLogList,
-    BCard,
-    BCardHeader,
-    BButton,
-    BCollapse,
-    BCardBody,
-  },
-  directives: {
-    "b-toggle": VBToggle,
   },
   data() {
     return {
@@ -77,12 +55,18 @@ export default {
     },
   },
   methods: {
-    displayChart: function () {
-      this.showChart = true;
-    },
-    hideChart: function () {
-      this.showChart = false;
+    toggleChart: function () {
+      this.showChart = !this.showChart;
     },
   },
 };
 </script>
+
+<style scoped>
+.box {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+  overflow: scroll;
+}
+</style>

@@ -2,8 +2,8 @@
   <div class="container text-left">
     <div class="row">
       <div class="col-12">
-        <WarningBox v-if="errors.length > 0" :errors="errors" />
-        <form @submit="add">
+        <warning-box v-if="errors.length > 0" :errors="errors" />
+        <form @submit.prevent.self="add">
           <input-text
             id="driver"
             label="Driver"
@@ -38,18 +38,14 @@
             on-label="Course"
             v-model="form.type"
           />
-          <div class="row text-right mt-2">
-            <div class="col-9 offset-3">
-              <div class="d-grid gap-2">
-                <button
-                  class="btn btn-outline-info btn-sm"
-                  @click="add"
-                >
-                  {{ showAfter ? "Finish" : "Start" }}
-                </button>
-              </div>
-            </div>
-          </div>
+          <form-button
+            type="submit"
+            btn-style="info"
+            btn-size="small"
+            @click.prevent.self="add"
+          >
+            {{ showAfter ? "Finish" : "Start" }}
+          </form-button>
         </form>
       </div>
     </div>
@@ -61,7 +57,8 @@ import { mapActions, mapGetters } from "vuex";
 import InputEngineHours from "@/components/forms/inputs/InputEngineHours.vue";
 import InputText from "@/components/forms/inputs/InputText.vue";
 import InputToggle from "@/components/forms/inputs/InputToggle.vue";
-import WarningBox from "@/components/WarningBox";
+import FormButton from "@/components/forms/FormButton.vue";
+import WarningBox from "@/components/WarningBox.vue";
 
 export default {
   name: "EngineHourLogForm",
@@ -69,6 +66,7 @@ export default {
     InputEngineHours,
     InputText,
     InputToggle,
+    FormButton,
     WarningBox,
   },
   data() {
@@ -156,7 +154,7 @@ export default {
         this.form.driverId = null;
       }
     },
-    add: function (e) {
+    add: function () {
       // get the type
       // 0: private
       // 1: course
@@ -173,8 +171,6 @@ export default {
           this.errors = [];
         })
         .catch((errors) => (this.errors = errors));
-
-      e.preventDefault();
     },
   },
   created() {

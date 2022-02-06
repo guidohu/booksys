@@ -1,16 +1,18 @@
 <template>
-  <modal-container
-    name="engineHourentryModal"
-    :visible="visible">
-    <modal-header :closable="true" title="Engine Hour Entry" @close="$emit('update:visible', false)"/>
+  <modal-container name="engineHourentryModal" :visible="visible">
+    <modal-header
+      :closable="true"
+      title="Engine Hour Entry"
+      @close="$emit('update:visible', false)"
+    />
     <modal-body>
       <div class="row" v-if="errors.length">
-        <div class="col-1 d-none d-sm-block"/>
+        <div class="col-1 d-none d-sm-block" />
         <div class="col-12 col-sm-10">
           <warning-box :errors="errors" />
         </div>
       </div>
-      <form @submit="save">
+      <form @submit.prevent.self="save">
         <input-date-time-local
           id="date"
           label="Date"
@@ -62,11 +64,11 @@
       <button type="button" class="btn btn-outline-info" @click="save">
         <i class="bi bi-check"></i>
         Save
-        </button>
-        <button type="button" class="btn btn-outline-danger" @click="close">
+      </button>
+      <button type="button" class="btn btn-outline-danger" @click="close">
         <i class="bi bi-x"></i>
         Cancel
-        </button>
+      </button>
     </modal-footer>
   </modal-container>
 </template>
@@ -75,14 +77,14 @@
 import { mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
 import ModalContainer from "@/components/bricks/ModalContainer.vue";
-import ModalHeader from  "@/components/bricks/ModalHeader.vue";
-import ModalBody from  "@/components/bricks/ModalBody.vue";
-import ModalFooter from  "@/components/bricks/ModalFooter.vue";
+import ModalHeader from "@/components/bricks/ModalHeader.vue";
+import ModalBody from "@/components/bricks/ModalBody.vue";
+import ModalFooter from "@/components/bricks/ModalFooter.vue";
 import * as dayjs from "dayjs";
-import InputDateTimeLocal from '@/components/forms/inputs/InputDateTimeLocal.vue';
-import InputText from '@/components/forms/inputs/InputText.vue';
-import InputEngineHours from '@/components/forms/inputs/InputEngineHours.vue';
-import InputToggle from '@/components/forms/inputs/InputToggle.vue';
+import InputDateTimeLocal from "@/components/forms/inputs/InputDateTimeLocal.vue";
+import InputText from "@/components/forms/inputs/InputText.vue";
+import InputEngineHours from "@/components/forms/inputs/InputEngineHours.vue";
+import InputToggle from "@/components/forms/inputs/InputToggle.vue";
 
 export default {
   name: "EngineHourEntryModal",
@@ -95,7 +97,7 @@ export default {
     InputText,
     InputEngineHours,
     InputToggle,
-    WarningBox
+    WarningBox,
   },
   props: ["engineHourEntry", "visible", "displayFormat"],
   data() {

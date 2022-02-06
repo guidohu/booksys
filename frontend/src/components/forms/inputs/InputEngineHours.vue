@@ -5,7 +5,7 @@
       <div :class="inputGroupClass()">
         <input
           type="text"
-          :class="classStyle"
+          class="form-control"
           :id="id"
           :state="state"
           :disabled="disabled"
@@ -70,13 +70,6 @@ export default {
     unitText: function () {
       return formatEngineHourLabel(this.displayFormat);
     },
-    classStyle: function() {
-      if(this.size != null){
-        return "form-control " + this.size;
-      } else {
-        return "form-control";
-      }
-    }
   },
   watch: {
     modelValue: function() {
