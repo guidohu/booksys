@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col-12">
         <warning-box v-if="errors.length > 0" :errors="errors" />
-        <form @submit.prevent.self="add">
+        <form @submit.prevent="add">
           <input-text
             id="driver"
             label="Driver"
@@ -42,7 +42,7 @@
             type="submit"
             btn-style="info"
             btn-size="small"
-            @click.prevent.self="add"
+            @click.prevent="add"
           >
             {{ showAfter ? "Finish" : "Start" }}
           </form-button>

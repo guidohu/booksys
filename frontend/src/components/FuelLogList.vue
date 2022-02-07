@@ -5,16 +5,14 @@
       v-model:visible="showFuelEntryModal"
       :fuel-entry="selectedFuelEntry"
     />
-    <div v-if="true">
-      <table-module
-        v-if="errors.length == 0"
-        :rows="items"
-        :columns="columns"
-        :rowClassFunction="rowClass"
-        size="small"
-        @rowclick="rowClick"
-      />
-    </div>
+    <table-module
+      v-if="errors.length == 0"
+      :rows="items"
+      :columns="columns"
+      :rowClassFunction="rowClass"
+      size="small"
+      @rowclick="rowClick"
+    />
   </div>
 </template>
 

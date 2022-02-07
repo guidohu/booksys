@@ -1,13 +1,11 @@
 <template>
   <div>
-    <WarningBox v-if="errors.length > 0" :errors="errors" />
-    <b-table
+    <warning-box v-if="errors.length > 0" :errors="errors" />
+    <table-module
       v-if="errors.length == 0"
-      hover
-      small
-      :items="items"
-      :fields="columns"
-      class="text-left"
+      :rows="items"
+      :columns="columns"
+      size="small"
     />
   </div>
 </template>
@@ -17,13 +15,13 @@ import { mapActions, mapGetters } from "vuex";
 import * as dayjs from "dayjs";
 import WarningBox from "@/components/WarningBox";
 import { formatEngineHour } from "@/libs/formatters";
-import { BTable } from "bootstrap-vue";
+import TableModule from "@/components/bricks/TableModule.vue";
 
 export default {
   name: "MaintenanceLogList",
   components: {
     WarningBox,
-    BTable,
+    TableModule,
   },
   data() {
     return {
@@ -55,7 +53,7 @@ export default {
       });
     },
     setColumns: function () {
-      this.$set(this, "columns", [
+      this.columns = [
         {
           key: "timestamp",
           label: "Date",
@@ -68,7 +66,7 @@ export default {
           key: "engine_hours",
           label: "EngineHrs",
           sortable: true,
-          class: "text-right",
+          class: "text-end",
           formatter: (value) => {
             return formatEngineHour(value, this.getEngineHourFormat);
           },
@@ -83,7 +81,7 @@ export default {
           label: "Maintenance Work",
           sortable: false,
         },
-      ]);
+      ];
     },
   },
   created() {

@@ -61,7 +61,7 @@
       </form>
     </modal-body>
     <modal-footer>
-      <button type="button" class="btn btn-outline-info" @click="save">
+      <button type="submit" class="btn btn-outline-info" @click.prevent.self="save">
         <i class="bi bi-check"></i>
         Save
       </button>

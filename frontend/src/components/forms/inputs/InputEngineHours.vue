@@ -10,7 +10,7 @@
           :state="state"
           :disabled="disabled"
           v-model="formValue"
-          @blur="changeHandler($event.target.value)"
+          @input="changeHandler($event.target.value)"
           :placeholder="formPlaceholder"
         />
         <span class="input-group-text">{{ unitText }}</span>

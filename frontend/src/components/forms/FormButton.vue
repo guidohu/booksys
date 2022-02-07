@@ -5,7 +5,7 @@
         <button
           :class="getClass"
           :type="type ? type : 'button'"
-          @click="$emit('click')"
+          @click="$emit('click', $event)"
         >
           <slot></slot>
         </button>

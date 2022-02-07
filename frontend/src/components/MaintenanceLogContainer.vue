@@ -1,7 +1,7 @@
 <template>
   <div>
-    <MaintenanceLogForm class="mb-4" />
-    <MaintenanceLogList />
+    <maintenance-log-form class="mb-4" />
+    <maintenance-log-list />
   </div>
 </template>
 
@@ -13,7 +13,7 @@ export default {
   name: "MaintenanceLogContainer",
   components: {
     MaintenanceLogForm,
-    MaintenanceLogList,
+    MaintenanceLogList
   },
 };
 </script>

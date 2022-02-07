@@ -29,7 +29,7 @@
         <fuel-log-container />
       </div>
       <div :class="'tab-pane ' + tabClass" id="maintenance">
-        <!-- <MaintenanceLogContainer /> -->
+        <maintenance-log-container />
       </div>
     </div>
   </div>
@@ -69,14 +69,14 @@
 import { BooksysBrowser } from "@/libs/browser";
 import EngineHourLogContainer from "@/components/EngineHourLogContainer";
 import FuelLogContainer from "@/components/FuelLogContainer";
-// import MaintenanceLogContainer from "@/components/MaintenanceLogContainer";
+import MaintenanceLogContainer from "@/components/MaintenanceLogContainer";
 
 export default {
   name: "BoatTabs",
   components: {
     EngineHourLogContainer,
     FuelLogContainer,
-    // MaintenanceLogContainer,
+    MaintenanceLogContainer,
   },
   computed: {
     isDesktop: function () {
