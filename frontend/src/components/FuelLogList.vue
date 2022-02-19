@@ -17,9 +17,10 @@
 </template>
 
 <script>
+import { defineAsyncComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
 import WarningBox from "@/components/WarningBox";
-import FuelEntryModal from "@/components/FuelEntryModal";
+// import FuelEntryModal from "@/components/FuelEntryModal";
 import { BooksysBrowser } from "@/libs/browser";
 import remove from "lodash/remove";
 import {
@@ -30,6 +31,12 @@ import {
 } from "@/libs/formatters";
 import * as dayjs from "dayjs";
 import TableModule from "@/components/bricks/TableModule.vue";
+
+const FuelEntryModal = defineAsyncComponent(() =>
+  import(
+    /* webpackChunkName: "fuel-entry-modal" */ "@/components/FuelEntryModal"
+  )
+);
 
 export default {
   name: "FuelLogList",

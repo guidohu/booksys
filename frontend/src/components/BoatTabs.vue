@@ -33,36 +33,6 @@
       </div>
     </div>
   </div>
-
-  <!-- <b-tabs content-class="mt-3">
-    <b-tab active>
-      <div slot="title">
-        <div :class="titleClassEngineHours" />
-        Engine Hours
-      </div>
-      <div :class="tabClass">
-        <EngineHourLogContainer />
-      </div>
-    </b-tab>
-    <b-tab>
-      <div slot="title">
-        <div :class="titleClassFuel" />
-        Fuel
-      </div>
-      <div :class="tabClass">
-        <FuelLogContainer />
-      </div>
-    </b-tab>
-    <b-tab>
-      <div slot="title">
-        <div :class="titleClassMaintenance" />
-        Maintenance
-      </div>
-      <div :class="tabClass">
-        <MaintenanceLogContainer />
-      </div>
-    </b-tab>
-  </b-tabs> -->
 </template>
 
 <script>
@@ -115,7 +85,6 @@ export default {
 .boat-tab-limited-height {
   max-height: 400px;
   height: 400px;
-  /* overflow: scroll; */
 }
 
 .nav-link {

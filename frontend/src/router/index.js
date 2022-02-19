@@ -8,8 +8,8 @@ const Logout = () =>
 // const SignUp = () => import(/* webpackChunkName: "signup" */ "@/views/WSSignUp");
 const Dashboard = () =>
   import(/* webpackChunkName: "dashboard" */ "@/views/WSDashboard");
-// const Account = () =>
-//   import(/* webpackChunkName: "account" */ "@/views/WSAccount");
+const Account = () =>
+  import(/* webpackChunkName: "account" */ "@/views/WSAccount");
 const Info = () => import(/* webpackChunkName: "info" */ "@/views/WSInfo");
 // const Schedule = () =>
 //   import(/* webpackChunkName: "schedule" */ "@/views/WSSchedule");
@@ -105,16 +105,16 @@ const routes = [
     },
     component: Dashboard,
   },
-  // {
-  //   path: "/account",
-  //   name: "Account",
-  //   beforeEnter: (to, from, next) => {
-  //     if (loginEnforced(to, from, next)) {
-  //       loadStoreModules(["user", "configuration", "login"], next);
-  //     }
-  //   },
-  //   component: Account,
-  // },
+  {
+    path: "/account",
+    name: "Account",
+    beforeEnter: (to, from, next) => {
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["user", "configuration", "login"], next);
+      }
+    },
+    component: Account,
+  },
   {
     path: "/info",
     name: "Info",

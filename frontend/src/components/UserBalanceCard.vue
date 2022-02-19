@@ -1,56 +1,41 @@
 <template>
-  <b-card no-body class="text-left">
-    <b-card-header> Balance </b-card-header>
-    <b-card-body>
-      <b-row>
-        <b-col cols="6">
-          <b-row>
-            <b-col cols="12">
-              Current Balance: {{ balanceRounded }} {{ getCurrency }}
-            </b-col>
-          </b-row>
-        </b-col>
-        <b-col cols="6">
-          <b-button
-            size="sm"
-            type="button"
-            variant="outline-info"
-            @click="showPaymentInfo"
-          >
-            <b-icon-cash />
+  <sectioned-card-module>
+    <template v-slot:header>
+      <div class="row">
+        <div class="col-6">
+          <h5>Balance</h5>
+        </div>
+      </div>
+    </template>
+    <template v-slot:body>
+      <payment-info-modal v-model:visible="showPaymentInfoModal" />
+      <div class="row">
+        <div class="col-6">
+          <div class="row">
+            <div class="col-12">Current Balance: {{ balanceRounded }} {{ getCurrency }}</div>
+          </div>
+        </div>
+        <div class="col-6">
+          <button type="button" class="btn btn-outline-info btn-sm" @click="showPaymentInfo">
+            <i class="bi bi-cash-coin"></i>
             Buy Sessions
-          </b-button>
-        </b-col>
-      </b-row>
-      <PaymentInfoModal v-model:visible="showPaymentInfoModal" />
-    </b-card-body>
-  </b-card>
+          </button>
+        </div>
+      </div>
+    </template>
+  </sectioned-card-module>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import PaymentInfoModal from "./PaymentInfoModal";
-import {
-  BCard,
-  BCardHeader,
-  BCardBody,
-  BRow,
-  BCol,
-  BButton,
-  BIconCash,
-} from "bootstrap-vue";
+import SectionedCardModule from "./bricks/SectionedCardModule.vue";
+import PaymentInfoModal from './PaymentInfoModal.vue';
 
 export default {
   name: "UserBalanceCard",
   components: {
     PaymentInfoModal,
-    BCard,
-    BCardHeader,
-    BCardBody,
-    BRow,
-    BCol,
-    BButton,
-    BIconCash,
+    SectionedCardModule
   },
   data() {
     return {

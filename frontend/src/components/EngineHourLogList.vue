@@ -18,12 +18,18 @@
 </template>
 
 <script>
+import { defineAsyncComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
 import * as dayjs from "dayjs";
 import WarningBox from "@/components/WarningBox";
-import EngineHourEntryModal from "@/components/EngineHourEntryModal";
 import { formatEngineHour } from "@/libs/formatters";
 import TableModule from "@/components/bricks/TableModule.vue";
+
+const EngineHourEntryModal = defineAsyncComponent(() =>
+  import(
+    /* webpackChunkName: "engine-hour-entry-modal" */ "@/components/EngineHourEntryModal"
+  )
+);
 
 export default {
   name: "EngineHourLogList",

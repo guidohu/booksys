@@ -1,33 +1,24 @@
 <template>
-  <div v-if="isDesktop" class="display">
-    <main-title title-name="Account" />
-    <b-row class="ml-1 mr-1">
-      <b-col cols="12">
-        <UserProfileCard />
-      </b-col>
-    </b-row>
-    <b-row class="ml-1 mr-1 mt-1">
-      <b-col cols="12">
-        <UserStatisticsCard />
-      </b-col>
-    </b-row>
-    <b-row class="ml-1 mr-1 mt-1">
-      <b-col cols="12">
-        <UserBalanceCard />
-      </b-col>
-    </b-row>
-    <div class="bottom mr-2">
-      <b-button variant="outline-light" to="/dashboard">
-        <b-icon-house />
-        HOME
-      </b-button>
-    </div>
+  <div v-if="isDesktop">
+    <subpage-desktop title="Account">
+      <template v-slot:content>
+        <user-profile-card class="m-1"/>
+        <user-statistics-card class="m-1"/>
+        <user-balance-card class="m-1"/>
+      </template>
+      <template v-slot:bottom>
+        <router-link tag="button" class="btn btn-outline-light" to="/dashboard">
+          <i class="bi bi-house"></i>
+          HOME
+        </router-link>
+      </template>
+    </subpage-desktop>
   </div>
   <div v-else>
-    <NavbarMobile title="Account" />
-    <UserProfileCard />
-    <UserStatisticsCard class="mt-2" />
-    <UserBalanceCard class="mt-2" />
+    <navbar-mobile title="Account" />
+    <user-profile-card />
+    <user-statistics-card class="mt-2" />
+    <user-balance-card class="mt-2" />
   </div>
 </template>
 
@@ -38,21 +29,17 @@ import NavbarMobile from "@/components/NavbarMobile";
 import UserProfileCard from "@/components/UserProfileCard";
 import UserStatisticsCard from "@/components/UserStatisticsCard";
 import UserBalanceCard from "@/components/UserBalanceCard";
-import MainTitle from "@/components/MainTitle";
-import { BRow, BCol, BButton, BIconHouse } from "bootstrap-vue";
+import SubpageDesktop from '@/components/bricks/SubpageDesktop.vue';
+
 
 export default {
   name: "WSAccount",
   components: {
     NavbarMobile,
-    MainTitle,
     UserProfileCard,
     UserStatisticsCard,
     UserBalanceCard,
-    BRow,
-    BCol,
-    BButton,
-    BIconHouse,
+    SubpageDesktop,
   },
   computed: {
     ...mapGetters("login", ["userInfo"]),
@@ -86,19 +73,3 @@ export default {
   },
 };
 </script>
-
-<style>
-div.main-title {
-  font-family: Arial, Helvetica, sans-serif;
-  color: #a1a1a1;
-  border-bottom: 1px solid #eee;
-  margin: 0px 0px 10px;
-  padding-top: 10px;
-  padding-bottom: 0px;
-  padding-left: 15px;
-}
-
-div.main-color {
-  color: #a1a1a1;
-}
-</style>

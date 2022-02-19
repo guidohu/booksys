@@ -19,12 +19,6 @@ if (process.env.NODE_ENV === "production") {
   console.log = function () {};
 }
 
-// new Vue({
-//   router,
-//   store,
-//   render: (h) => h(App),
-// }).$mount("#app");
-
 const app = createApp(App);
 app.use(router);
 app.use(store);

@@ -1,49 +1,40 @@
 <template>
-  <b-modal
-    id="userHeatsModal"
-    title="Heat History"
-    :visible="visible"
-    @hide="$emit('update:visible', false)"
-    @show="$emit('update:visible', true)"
-  >
-    <b-row class="text-left">
-      <b-col cols="1" class="d-none d-sm-block" />
-      <b-col cols="12" sm="10">
-        <b-table
-          class="heatTableHeight"
-          sticky-header
-          small
-          striped
-          hover
-          responsive
-          :items="heatHistory"
-          :fields="fields"
-        />
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block" />
-    </b-row>
-    <div slot="modal-footer">
-      <b-button type="button" variant="outline-info" @click="close">
-        <b-icon-check />
+  <modal-container name="user-heats-modal" :visible="visible">
+    <modal-header
+      :closable="true"
+      title="Heat History"
+      @close="$emit('update:visible', false)"
+    />
+    <modal-body>
+      <div class="heatTableHeight">
+        <table-module size="small" :columns="fields" :rows="heatHistory" />
+      </div>
+    </modal-body>
+    <modal-footer>
+      <button type="submit" class="btn btn-outline-info" @click="close">
+        <i class="bi bi-check"></i>
         OK
-      </b-button>
-    </div>
-  </b-modal>
+      </button>
+    </modal-footer>
+  </modal-container>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import { BModal, BRow, BCol, BTable, BButton, BIconCheck } from "bootstrap-vue";
+import ModalContainer from "./bricks/ModalContainer.vue";
+import ModalHeader from "./bricks/ModalHeader.vue";
+import ModalBody from "./bricks/ModalBody.vue";
+import ModalFooter from "./bricks/ModalFooter.vue";
+import TableModule from "./bricks/TableModule.vue";
 
 export default {
   name: "UserHeatsModal",
   components: {
-    BModal,
-    BRow,
-    BCol,
-    BTable,
-    BButton,
-    BIconCheck,
+    ModalContainer,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    TableModule,
   },
   props: ["visible"],
   data: function () {
@@ -80,8 +71,6 @@ export default {
       this.$emit("update:visible", false);
     },
     formatCost: function (value) {
-      console.log(value);
-      console.log(this.$store);
       return value + " " + this.getCurrency;
     },
   },

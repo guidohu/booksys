@@ -3,7 +3,7 @@
     <subpage-desktop title="Boat">
       <template v-slot:content>
         <card-module :nobody="true" class="m-1">
-          <BoatTabs />
+          <boat-tabs />
         </card-module>
       </template>
       <template v-slot:bottom>
@@ -15,9 +15,9 @@
     </subpage-desktop>
   </div>
   <div v-else>
-    <NavbarMobile title="Boat" />
+    <navbar-mobile title="Boat" />
     <card-module :nobody="true">
-      <BoatTabs />
+      <boat-tabs />
     </card-module>
   </div>
 </template>
