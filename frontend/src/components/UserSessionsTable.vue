@@ -1,30 +1,20 @@
 <template>
-  <div>
-    <b-table
-      sticky-header
-      striped
-      hover
-      responsive
-      :items="items"
-      :fields="fields"
-    >
-      <template #cell(riders)="data">
-        <b-row v-for="rider in data.item.riders" :key="rider.id">
-          <b-col> {{ rider.first_name }} {{ rider.last_name }} </b-col>
-        </b-row>
-      </template>
-      <template #cell(action)="data">
-        <b-button
-          type="button"
-          size="sm"
-          variant="outline-danger"
-          @click="cancelSession(data.item.id)"
-        >
-          <b-icon-x />Cancel Session
-        </b-button>
-      </template>
-    </b-table>
-  </div>
+  <table-module size="small" :columns="fields" :rows="items">
+    <template #cell(riders)="data">
+      <div class="row" v-for="rider in data.cell" :key="rider.id">
+        <div class="col-12">{{ rider.first_name }} {{ rider.last_name }}</div>
+      </div>
+    </template>
+    <template #cell(action)="data">
+      <button
+        type="button"
+        class="btn btn-outline-danger btn-sm"
+        @click="cancelSession(data.row.id)"
+      >
+        <i class="bi bi-trash"></i>
+      </button>
+    </template>
+  </table-module>
 </template>
 
 <script>
@@ -32,7 +22,7 @@ import { mapActions, mapGetters } from "vuex";
 import * as dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
-import { BTable, BRow, BCol, BButton, BIconX } from "bootstrap-vue";
+import TableModule from "./bricks/TableModule.vue";
 
 dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);
@@ -40,21 +30,18 @@ dayjs.extend(dayjsTimezone);
 export default {
   name: "UserSessionsTable",
   components: {
-    BTable,
-    BRow,
-    BCol,
-    BButton,
-    BIconX,
+    TableModule,
   },
   props: ["userSessions", "showCancel"],
+  emits: ["cancel"],
   data: function () {
     return {
       fields: [
         {
           key: "start",
           label: "Date",
-          formatter: (value, key, item) => {
-            return this.formatTime(item);
+          formatter: (cell, key, row) => {
+            return this.formatTime(row);
           },
         },
         {

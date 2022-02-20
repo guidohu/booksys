@@ -49,9 +49,6 @@ export default {
     MaintenanceLogContainer,
   },
   computed: {
-    isDesktop: function () {
-      return !BooksysBrowser.isMobile();
-    },
     titleClassEngineHours: function () {
       if (BooksysBrowser.isMobile()) {
         return "bc_icon bc_icon_tab bc_icon_tacho align-middle";

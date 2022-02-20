@@ -46,13 +46,19 @@
           :key="c"
           :class="getColumnClass(tColumns[c])"
         >
-          <!-- use either the value directly or the custom formatter -->
-          <div v-if="tColumns[c].formatter == null">
-            {{ r[tColumns[c].key] }}
-          </div>
-          <div v-else>
-            {{ tColumns[c].formatter(r[tColumns[c].key], tColumns[c].key, r) }}
-          </div>
+          <slot :name="getCellSlotName(tColumns[c].key)" :row="r" :cell="r[tColumns[c].key]">
+            <!-- in case we do not have a custom template, we render either
+            the value directly or use the custom text formatter -->
+            <!-- use either the value directly -->
+            <div v-if="tColumns[c].formatter == null && tColumns[c].htmlFormatter == null">
+              {{ r[tColumns[c].key] }}
+            </div>
+            <!-- the custom text formatter -->
+            <div v-if="tColumns[c].formatter != null">
+              {{ tColumns[c].formatter(r[tColumns[c].key], tColumns[c].key, r) }}
+            </div>
+          </slot>
+          
         </td>
       </tr>
     </tbody>
@@ -151,6 +157,9 @@ export default {
     rowClickHandler: function (row) {
       this.$emit("rowclick", row);
     },
+    getCellSlotName: function (columnName) {
+      return "cell(" + columnName + ")";
+    }
   },
   created() {
     this.tColumns = this.columns;
