@@ -19,7 +19,7 @@ const Schedule = () =>
 const Boat = () => import(/* webpackChunkName: "boat" */ "@/views/WSBoat");
 // const Ride = () => import(/* webpackChunkName: "ride" */ "@/views/WSRide");
 // const Watch = () => import(/* webpackChunkName: "watch" */ "@/views/WSWatch");
-// const Admin = () => import(/* webpackChunkName: "admin" */ "@/views/WSAdmin");
+const Admin = () => import(/* webpackChunkName: "admin" */ "@/views/WSAdmin");
 // const Users = () =>
 //   import(/* webpackChunkName: "users" */ "@/views/admin/WSUsersPage");
 // const Accounting = () =>
@@ -181,16 +181,16 @@ const routes = [
   //   },
   //   component: Watch,
   // },
-  // {
-  //   path: "/admin",
-  //   name: "Admin",
-  //   component: Admin,
-  //   beforeEnter: (to, from, next) => {
-  //     if (loginEnforced(to, from, next)) {
-  //       next();
-  //     }
-  //   },
-  // },
+  {
+    path: "/admin",
+    name: "Admin",
+    component: Admin,
+    beforeEnter: (to, from, next) => {
+      if (loginEnforced(to, from, next)) {
+        next();
+      }
+    },
+  },
   // {
   //   path: "/users",
   //   name: "Users",
