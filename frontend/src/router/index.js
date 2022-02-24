@@ -20,8 +20,8 @@ const Boat = () => import(/* webpackChunkName: "boat" */ "@/views/WSBoat");
 // const Ride = () => import(/* webpackChunkName: "ride" */ "@/views/WSRide");
 // const Watch = () => import(/* webpackChunkName: "watch" */ "@/views/WSWatch");
 const Admin = () => import(/* webpackChunkName: "admin" */ "@/views/WSAdmin");
-// const Users = () =>
-//   import(/* webpackChunkName: "users" */ "@/views/admin/WSUsersPage");
+const Users = () =>
+  import(/* webpackChunkName: "users" */ "@/views/admin/WSUsers");
 // const Accounting = () =>
 //   import(/* webpackChunkName: "accounting" */ "@/views/admin/WSAccounting");
 // const Settings = () =>
@@ -191,16 +191,16 @@ const routes = [
       }
     },
   },
-  // {
-  //   path: "/users",
-  //   name: "Users",
-  //   beforeEnter: (to, from, next) => {
-  //     if (loginEnforced(to, from, next)) {
-  //       loadStoreModules(["user", "configuration"], next);
-  //     }
-  //   },
-  //   component: Users,
-  // },
+  {
+    path: "/users",
+    name: "Users",
+    beforeEnter: (to, from, next) => {
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["user", "configuration"], next);
+      }
+    },
+    component: Users,
+  },
   // {
   //   path: "/accounting",
   //   name: "Accounting",

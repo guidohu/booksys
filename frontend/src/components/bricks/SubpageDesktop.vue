@@ -7,7 +7,11 @@
       </div>
     </div>
     <div class="bottom mr-2">
-      <slot name="bottom"></slot>
+      <div class="row">
+        <div class="col-12">
+          <slot name="bottom"></slot>
+        </div>
+      </div>
     </div>
   </div>      
 </template>

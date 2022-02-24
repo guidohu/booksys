@@ -24,7 +24,7 @@ export default {
   mounted() {
     this.modal = new Modal(this.$refs[this.name]);
     if(this.visible){
-    this.modal.show();
+      this.modal.show();
     }
   },
   watch: {

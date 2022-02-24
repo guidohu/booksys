@@ -1,71 +1,59 @@
 <template>
   <div class="text-left">
-    <WarningBox
+    <warning-box
       v-if="errors.length > 0"
       :errors="errors"
       dismissible="true"
       @dismissed="dismissedHandler"
     />
-    <div v-else>
-      <b-row>
-        <b-col cols="12">
-          <b-button
+    <div class="box" style="max-height:430px">
+      <div class="row box-fix-content">
+        <div class="col-12 ms-1">
+          <button
             :disabled="selectedItems.length == 0"
-            size="sm"
-            variant="outline-info"
-            class="mr-1 mb-2"
+            class="btn btn-outline-info btn-sm me-1 mb-2"
             @click="showDetails"
           >
             View
-          </b-button>
-          <b-button
+          </button>
+          <button
             :disabled="selectedItems.length == 0"
-            size="sm"
-            variant="outline-danger"
-            class="mb-2"
+            class="btn btn-outline-danger btn-sm mb-2"
             @click="showDeleteUserDialog"
           >
             Delete
-          </b-button>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="12">
-          <b-table
-            striped
-            hover
-            response
-            small
-            sticky-header
-            borderless
-            sort-by="first_name"
-            :items="items"
-            :fields="fields"
+          </button>
+        </div>
+      </div>
+      <div class="row box-flex-content">
+        <div class="col-12">
+          <table-module
+            :columns="fields"
+            :rows="items"
             :selectable="true"
             select-mode="single"
-            @row-selected="rowSelected"
+            @select-row="rowSelected"
           >
             <template #cell(license)="data">
               <div class="text-center">
-                <b-icon-patch-check
-                  v-if="data.item.license == 1"
-                  variant="success"
-                />
+                <i
+                  class="bi bi-patch-check text-success"
+                  v-if="data.cell == 1"
+                ></i>
               </div>
             </template>
             <template #cell(balance)="data">
-              <div class="text-right">
-                {{ getBalance(data.item) }}
+              <div class="text-end">
+                {{ getBalance(data.row) }}
               </div>
             </template>
             <template #cell(status)="data">
-              <b-form-select
+              <input-select
                 v-if="userGroupList.length > 1"
-                v-model="data.item.status"
+                v-model="data.row.status"
                 :options="userGroupList"
-                size="sm"
-                :data-index="data.item"
-                @change="groupChangeHandler($event, data.item)"
+                size="small"
+                @change="groupChangeHandler(data.row.status, data.row.id)"
               />
               <div v-if="userGroupList.length == 1">
                 {{ userGroupList[0].text }}
@@ -74,23 +62,23 @@
             </template>
             <template #cell(locked)="data">
               <div class="text-center">
-                <b-button size="sm" style="font-size: 0.8em" variant="light">
-                  <b-icon-lock-fill
-                    v-if="data.item.locked == 1"
-                    variant="danger"
-                    @click="unlock(data.item)"
+                <button class="btn btn-light btn-sm" style="font-size: 0.8em">
+                  <i
+                    class="bi bi-lock-fill text-danger"
+                    v-if="data.row.locked == 1"
+                    @click.stop="unlock(data.row)"
                   />
-                  <b-icon-unlock-fill
-                    v-if="data.item.locked == 0"
-                    variant="success"
-                    @click="lock(data.item)"
+                  <i
+                    class="bi bi-unlock-fill text-success"
+                    v-if="data.row.locked == 0"
+                    @click.stop="lock(data.row)"
                   />
-                </b-button>
+                </button>
               </div>
             </template>
-          </b-table>
-        </b-col>
-      </b-row>
+          </table-module>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -99,29 +87,16 @@
 import { mapGetters, mapActions } from "vuex";
 import { sprintf } from "sprintf-js";
 import WarningBox from "@/components/WarningBox";
-import {
-  BRow,
-  BCol,
-  BButton,
-  BTable,
-  BIconPatchCheck,
-  BIconLockFill,
-  BIconUnlockFill,
-  BFormSelect,
-} from "bootstrap-vue";
+import TableModule from "./bricks/TableModule.vue";
+import InputSelect from "./forms/inputs/InputSelect.vue";
+import { confirm, info } from "@/components/bricks/DialogModal";
 
 export default {
   name: "UserTable",
   components: {
     WarningBox,
-    BRow,
-    BCol,
-    BButton,
-    BTable,
-    BIconPatchCheck,
-    BIconLockFill,
-    BIconUnlockFill,
-    BFormSelect,
+    TableModule,
+    InputSelect,
   },
   data() {
     return {
@@ -226,9 +201,10 @@ export default {
     unlock: function (user) {
       this.unlockUser(user.id).catch((errors) => (this.errors = errors));
     },
-    groupChangeHandler: function (userGroupId, user) {
+    groupChangeHandler: function (userGroupId, userId) {
+      console.log("Change to: userGroupId", userGroupId, "for user", userId);
       const userGroupUpdate = {
-        userId: user.id,
+        userId: userId,
         userGroupId: userGroupId,
       };
       this.setUserGroup(userGroupUpdate)
@@ -240,20 +216,12 @@ export default {
         this.selectedItems[0].first_name +
         " " +
         this.selectedItems[0].last_name;
-      this.boxTwo = "";
-      this.$bvModal
-        .msgBoxConfirm("Do you really want to delete user " + name + "?", {
-          title: "Delete User",
-          size: "sm",
-          buttonSize: "sm",
-          okVariant: "danger",
-          okTitle: "Delete",
-          cancelTitle: "Cancel",
-          footerClass: "p-2",
-          hideHeaderClose: false,
-          centered: true,
-        })
+      confirm({
+        title: "Delete User",
+        message: "Do you really want to delete user " + name + "?",
+      })
         .then((value) => {
+          console.log("Returned with", value);
           // delete user
           if (value == true) {
             this.deleteUser(this.selectedItems[0].id).catch(
@@ -261,29 +229,16 @@ export default {
             );
           }
         })
-        .catch((err) => {
-          this.errors = [err];
+        .catch((error) => {
+          console.warn("Dialog returned error", error);
+          this.errors = [error];
         });
     },
     showDetails: function () {
-      console.log("TODO show details of user");
-      this.$bvModal
-        .msgBoxOk("This functionality is still missing.", {
-          title: "Not implemented",
-          size: "sm",
-          buttonSize: "sm",
-          okVariant: "success",
-          headerClass: "p-2 border-bottom-0",
-          footerClass: "p-2 border-top-0",
-          centered: true,
-        })
-        .then((value) => {
-          this.errors = value;
-        })
-        .catch((err) => {
-          // An error occurred
-          this.errors = [err];
-        });
+      info({
+        title: "Not implemented.",
+        message: "This functionality is still missing.",
+      });
     },
     userGroupToList: function (userGroups) {
       if (userGroups == null) {
@@ -322,7 +277,18 @@ export default {
 </script>
 
 <style scoped>
-.b-table-sticky-header {
-  max-height: 340px;
-}
+  .box {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+  }
+
+  .box-fix-content {
+    flex: 0 0 auto;
+  }
+
+  .box-flex-content {
+    flex: 1 1 auto;
+    overflow: scroll;
+  }
 </style>

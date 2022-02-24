@@ -1,7 +1,9 @@
 <template>
   <div class="modal-header">
     <h5 class="modal-title">
-      {{ title }}
+      <slot>
+        {{ title }}
+      </slot>
     </h5>
     <button
       v-if="closable"

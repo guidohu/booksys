@@ -46,19 +46,29 @@
           :key="c"
           :class="getColumnClass(tColumns[c])"
         >
-          <slot :name="getCellSlotName(tColumns[c].key)" :row="r" :cell="r[tColumns[c].key]">
+          <slot
+            :name="getCellSlotName(tColumns[c].key)"
+            :row="r"
+            :cell="r[tColumns[c].key]"
+          >
             <!-- in case we do not have a custom template, we render either
             the value directly or use the custom text formatter -->
             <!-- use either the value directly -->
-            <div v-if="tColumns[c].formatter == null && tColumns[c].htmlFormatter == null">
+            <div
+              v-if="
+                tColumns[c].formatter == null &&
+                tColumns[c].htmlFormatter == null
+              "
+            >
               {{ r[tColumns[c].key] }}
             </div>
             <!-- the custom text formatter -->
             <div v-if="tColumns[c].formatter != null">
-              {{ tColumns[c].formatter(r[tColumns[c].key], tColumns[c].key, r) }}
+              {{
+                tColumns[c].formatter(r[tColumns[c].key], tColumns[c].key, r)
+              }}
             </div>
           </slot>
-          
         </td>
       </tr>
     </tbody>
@@ -71,17 +81,26 @@
 </template>
 
 <script>
-import { sortBy, reverse } from "lodash";
+import { sortBy, reverse, isEqual } from "lodash";
 export default {
   name: "TableModule",
-  props: ["customTableClass", "size", "columns", "rows", "rowClassFunction"],
-  emits: ["rowclick"],
+  props: [
+    "customTableClass",
+    "size",
+    "columns",
+    "rows",
+    "rowClassFunction",
+    "selectable",
+    "selectMode",
+  ],
+  emits: ["rowclick", "select-row"],
   data() {
     return {
       sortCol: null,
       sortOrder: 0,
       tColumns: [],
       tRows: [],
+      selectedRows: [],
     };
   },
   computed: {
@@ -113,6 +132,10 @@ export default {
       this.sortByCol(this.sortCol, false);
     },
     sortByCol: function (col, changeSorting = true) {
+      if (!col.sortable) {
+        return;
+      }
+
       if (
         changeSorting &&
         this.sortCol != null &&
@@ -143,6 +166,7 @@ export default {
       return "";
     },
     getColumnClass: function (col) {
+      // TODO handle sortable or not with underline
       if (col.class != null) {
         return "fw-lighter " + col.class;
       }
@@ -152,14 +176,36 @@ export default {
       if (this.rowClassFunction != null) {
         return this.rowClassFunction(row);
       }
+      if (
+        this.selectable == true &&
+        this.selectMode == "single" &&
+        this.selectedRows.length == 1 &&
+        isEqual(row, this.selectedRows[0])
+      ) {
+        return "selected";
+      }
       return "";
     },
     rowClickHandler: function (row) {
+      console.log("row clicked", row);
+      if (this.selectable == true && this.selectMode == "single") {
+        if (
+          this.selectedRows.length == 1 &&
+          isEqual(row, this.selectedRows[0])
+        ) {
+          this.selectedRows = [];
+          this.$emit("select-row", []);
+        } else {
+          this.selectedRows = [row];
+          this.$emit("select-row", this.selectedRows);
+        }
+        this.$forceUpdate();
+      }
       this.$emit("rowclick", row);
     },
     getCellSlotName: function (columnName) {
       return "cell(" + columnName + ")";
-    }
+    },
   },
   created() {
     this.tColumns = this.columns;
@@ -191,5 +237,9 @@ thead th {
 
 .table > :not(:first-child) {
   border-top: 1.5px solid currentColor;
+}
+
+.selected {
+  background-color: rgb(127, 218, 224);
 }
 </style>
