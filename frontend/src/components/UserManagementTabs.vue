@@ -33,7 +33,7 @@
       </li>
     </ul>
 
-    <!-- Responsive tab content to switch handle different
+    <!-- Responsive tab content to handle different
          height requirements -->
     <div class="tab-content">
       <div class="tab-pane active" id="users" role="tabpanel" aria-labelledby="users-tab">
@@ -47,16 +47,15 @@
         </show-for-mobile>
       </div>
       <div class="tab-pane" id="user-groups" role="tabpanel" aria-labelledby="user-groups-tab">
-        <!-- <show-for-desktop>
+        <show-for-desktop>
           <div class="tab-limited-height">
-            Groups Desktop
             <user-group-table/>
           </div>
         </show-for-desktop>
         <show-for-mobile>
           Groups Mobile
           <user-group-table/>
-        </show-for-mobile> -->
+        </show-for-mobile>
       </div>
     </div>
   </div>
@@ -88,7 +87,7 @@
 
 <script>
 import UserTable from "@/components/UserTable";
-// import UserGroupTable from "@/components/UserGroupTable";
+import UserGroupTable from "@/components/UserGroupTable";
 import ShowForMobile from "@/components/bricks/ShowForMobile.vue";
 import ShowForDesktop from '@/components/bricks/ShowForDesktop.vue';
 
@@ -98,7 +97,7 @@ export default {
     ShowForMobile,
     ShowForDesktop,
     UserTable,
-    // UserGroupTable
+    UserGroupTable
   },
 };
 </script>

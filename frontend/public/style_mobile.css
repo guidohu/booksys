@@ -5,7 +5,7 @@ body {
     padding-right: 2px;
     background-color: rgb(95, 95, 95);
     font-family: Arial, Helvetica, sans-serif;
-	text-align: center;
+	/* text-align: center; */
     background-image: none;
     background-size: 100% auto;
 }

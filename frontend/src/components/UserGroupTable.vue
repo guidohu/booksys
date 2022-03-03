@@ -1,115 +1,88 @@
 <template>
   <div class="text-left">
-    <WarningBox
+    <warning-box
       v-if="errors.length > 0"
       :errors="errors"
       dismissible="true"
       @dismissed="dismissedHandler"
     />
-    <div v-else>
-      <UserGroupModal
+    <div class="box box-fix-height">
+      <div class="row box-fix-content">
+        <div class="col-12 ms-1">
+          <button
+            type="button"
+            class="btn btn-outline-info btn-sm me-1 mb-2"
+            @click="newGroup"
+          >
+            <i class="bi bi-plus"></i>
+            New
+          </button>
+          <button
+            v-if="selectedItems.length > 0"
+            type="button"
+            class="btn btn-outline-info btn-sm me-1 mb-2"
+            @click="showDetails"
+          >
+            <i class="bi bi-eye"></i>
+            View
+          </button>
+          <button
+            v-if="selectedItems.length > 0"
+            type="button"
+            class="btn btn-outline-info btn-sm me-1 mb-2"
+            @click="editGroup"
+          >
+            <i class="bi bi-pencil"></i>
+            Edit
+          </button>
+          <button
+            v-if="selectedItems.length > 0"
+            type="button"
+            class="btn btn-outline-danger btn-sm me-1 mb-2"
+            @click="showDeleteUserGroupDialog"
+          >
+            <i class="bi bi-trash"></i>
+            Delete
+          </button>
+        </div>
+      </div>
+      <div class="row box-flex-content">
+        <div class="col-12">
+          <table-module
+            :columns="fields"
+            :rows="items"
+            :selectable="true"
+            select-mode="single"
+            @select-row="rowSelected"
+          />
+        </div>
+      </div>
+    </div>
+    <div>
+      <user-group-modal
         v-model:visible="showUserGroupModal"
         :user-group="selectedItems[0]"
         :edit-mode="userGroupEditMode"
+        @save="resetSelection()"
       />
-      <b-row>
-        <b-col cols="12">
-          <b-button
-            size="sm"
-            variant="outline-info"
-            class="mr-1 mb-2"
-            @click="newGroup"
-          >
-            <b-icon-plus />
-            New
-          </b-button>
-          <b-button
-            v-if="selectedItems.length > 0"
-            size="sm"
-            variant="outline-info"
-            class="mr-1 mb-2"
-            @click="showDetails"
-          >
-            <b-icon-eye />
-            View
-          </b-button>
-          <b-button
-            v-if="selectedItems.length > 0"
-            size="sm"
-            variant="outline-info"
-            class="mr-1 mb-2"
-            @click="editGroup"
-          >
-            <b-icon-pencil />
-            Edit
-          </b-button>
-          <b-button
-            v-if="selectedItems.length > 0"
-            size="sm"
-            variant="outline-danger"
-            class="mb-2"
-            @click="showDeleteUserGroupDialog"
-          >
-            <b-icon-trash />
-            Delete
-          </b-button>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="12">
-          <b-table
-            striped
-            hover
-            response
-            small
-            sticky-header
-            borderless
-            sort-by="first_name"
-            :items="items"
-            :fields="fields"
-            :selectable="true"
-            select-mode="single"
-            @row-selected="rowSelected"
-          />
-        </b-col>
-      </b-row>
     </div>
   </div>
 </template>
 
 <script>
-import Vue from "vue";
 import { mapGetters, mapActions } from "vuex";
 import { sprintf } from "sprintf-js";
 import WarningBox from "@/components/WarningBox";
+import TableModule from "./bricks/TableModule.vue";
+import { confirm } from "@/components/bricks/DialogModal";
 import UserGroupModal from "@/components/UserGroupModal";
-import {
-  BRow,
-  BButton,
-  BIconPlus,
-  BIconEye,
-  BIconPencil,
-  BIconTrash,
-  BCol,
-  BTable,
-  ModalPlugin,
-} from "bootstrap-vue";
-
-Vue.use(ModalPlugin);
 
 export default {
   name: "UserGroupTable",
   components: {
     WarningBox,
+    TableModule,
     UserGroupModal,
-    BRow,
-    BButton,
-    BIconPlus,
-    BIconEye,
-    BIconPencil,
-    BIconTrash,
-    BCol,
-    BTable,
   },
   data() {
     return {
@@ -158,8 +131,6 @@ export default {
     ...mapActions("user", [
       "queryUserListDetailed",
       "queryUserGroups",
-      "lockUser",
-      "unlockUser",
       "deleteUserGroup",
       "setUserGroup",
     ]),
@@ -170,52 +141,19 @@ export default {
     setRows: function () {
       this.items = this.userGroups;
     },
-    getBalance: function (row) {
-      return sprintf(
-        "%.2f %s",
-        row.total_payment - row.total_heat_cost,
-        this.getCurrency
-      );
-    },
     rowSelected: function (rows) {
       this.selectedItems = rows;
     },
     isSelected: function () {
       return this.selectedItems.length > 0;
     },
-    lock: function (user) {
-      this.lockUser(user.id).catch((errors) => (this.errors = errors));
-    },
-    unlock: function (user) {
-      this.unlockUser(user.id).catch((errors) => (this.errors = errors));
-    },
-    groupChangeHandler: function (userGroupId, user) {
-      const userGroupUpdate = {
-        userId: user.id,
-        userGroupId: userGroupId,
-      };
-      this.setUserGroup(userGroupUpdate)
-        .then(() => (this.errors = []))
-        .catch((errors) => (this.errors = errors));
-    },
     showDeleteUserGroupDialog: function () {
       const name = this.selectedItems[0].user_group_name;
       const id = this.selectedItems[0].user_group_id;
-      this.$bvModal
-        .msgBoxConfirm(
-          "Do you really want to delete user group " + name + "?",
-          {
-            title: "Delete User Group",
-            size: "sm",
-            buttonSize: "sm",
-            okVariant: "danger",
-            okTitle: "Delete",
-            cancelTitle: "Cancel",
-            footerClass: "p-2",
-            hideHeaderClose: false,
-            centered: true,
-          }
-        )
+      confirm({
+        title: "Delete User Group",
+        message: "Do you really want to delete user group " + name + "?",
+      })
         .then((value) => {
           // delete user group
           if (value == true) {
@@ -239,6 +177,9 @@ export default {
       this.selectedItems = [];
       this.showUserGroupModal = true;
     },
+    resetSelection: function () {
+      this.selectedItems = [];
+    },
   },
   created() {
     this.queryConfiguration().catch((errors) => this.errors.push(...errors));
@@ -251,7 +192,28 @@ export default {
 </script>
 
 <style scoped>
-.b-table-sticky-header {
-  max-height: 340px;
+.box {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+.box-fix-height {
+  max-height: 430px;
+}
+
+@media (max-width: 992px) {
+  .box-fix-height {
+    max-height: 90vh;
+  }
+}
+
+.box-fix-content {
+  flex: 0 0 auto;
+}
+
+.box-flex-content {
+  flex: 1 1 auto;
+  overflow: scroll;
 }
 </style>

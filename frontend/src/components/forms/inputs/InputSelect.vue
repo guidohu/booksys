@@ -44,6 +44,11 @@ export default {
       selectedValue: 0
     }
   },
+  watch: {
+    modelValue: function(newValue) {
+      this.selectedValue = newValue;
+    }
+  },
   methods: {
     changeHandler(event) {
       const value = event.target.value;

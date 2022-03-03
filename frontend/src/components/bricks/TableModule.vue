@@ -118,9 +118,12 @@ export default {
   },
   watch: {
     rows: function (newRows) {
-      // sort by col
+      this.selectedRows = [];
+      this.$emit("select-row", []);
+
       if (newRows == null || newRows.length == 0) {
         this.tRows = [];
+        return;
       }
 
       this.tRows = newRows;

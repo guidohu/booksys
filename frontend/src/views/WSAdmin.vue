@@ -1,6 +1,6 @@
 <template>
   <subpage-container title="Administrator Menu">
-    <div class="row mt-5 d-none d-lg-flex">
+    <div class="row mt-5 d-none d-lg-flex text-center">
       <div class="col-1 col-lg-3"></div>
       <div class="col-10 col-lg-6 text-center">
         <div class="row">
@@ -26,7 +26,7 @@
       </div>
       <div class="col-1 col-lg-3" />
     </div>
-    <div class="row d-flex d-lg-none">
+    <div class="row mt-3 d-flex d-lg-none text-center">
       <div class="col-1"/>
       <div class="col-5 text-center">
         <div class="row">

@@ -6,7 +6,7 @@
       dismissible="true"
       @dismissed="dismissedHandler"
     />
-    <div class="box" style="max-height:430px">
+    <div class="box box-fix-height">
       <div class="row box-fix-content">
         <div class="col-12 ms-1">
           <button
@@ -281,6 +281,16 @@ export default {
     display: flex;
     flex-flow: column;
     height: 100%;
+  }
+
+  .box-fix-height {
+    max-height: 430px;
+  }
+
+  @media (max-width: 992px) {
+    .box-fix-height {
+      max-height: 90vh;
+    }
   }
 
   .box-fix-content {

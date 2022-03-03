@@ -4,7 +4,7 @@
       <user-management-tabs/>
     </card-module>
     <template v-slot:bottom>
-      <router-link tag="button" class="btn btn-outline-light" to="/dashboard">
+      <router-link tag="button" class="btn btn-outline-light" to="/admin">
         <i class="bi bi-gear"></i>
         ADMIN
       </router-link>

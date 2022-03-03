@@ -15,12 +15,12 @@ export default defineComponent({
   computed: {
     colClass: function () {
       if (this.colWidth == null) {
-        return "col-12";
+        return "col-12 text-center";
       }
       if (this.colWidth != null && this.offsetWidth == null) {
-        return "col-" + this.colWidth;
+        return "col-" + this.colWidth + " text-center";
       }
-      return "col-" + this.colWidth + " " + "offset-sm-" + this.offsetWidth;
+      return "col-" + this.colWidth + " " + "offset-sm-" + this.offsetWidth + " text-center";
     },
   },
 });
