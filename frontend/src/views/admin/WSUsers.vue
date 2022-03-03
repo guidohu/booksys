@@ -15,7 +15,7 @@
 <script>
 import UserManagementTabs from "@/components/UserManagementTabs";
 import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
-import CardModule from '../../components/bricks/CardModule.vue';
+import CardModule from '@/components/bricks/CardModule.vue';
 
 export default {
   name: "WSUsers",

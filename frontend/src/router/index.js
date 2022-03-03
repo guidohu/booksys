@@ -26,7 +26,7 @@ const Users = () =>
 //   import(/* webpackChunkName: "accounting" */ "@/views/admin/WSAccounting");
 // const Settings = () =>
 //   import(/* webpackChunkName: "settings" */ "@/views/admin/WSSettings");
-// const Logs = () => import(/* webpackChunkName: "logs" */ "@/views/admin/WSLogs");
+const Logs = () => import(/* webpackChunkName: "logs" */ "@/views/admin/WSLogs");
 // const PasswordReset = () =>
 //   import(/* webpackChunkName: "password-reset" */ "@/views/WSPasswordReset");
 // const Setup = () => import(/* webpackChunkName: "setup" */ "@/views/WSSetupPage");
@@ -221,16 +221,16 @@ const routes = [
   //   },
   //   component: Settings,
   // },
-  // {
-  //   path: "/logs",
-  //   name: "Logs",
-  //   beforeEnter: (to, from, next) => {
-  //     if (loginEnforced(to, from, next)) {
-  //       loadStoreModules(["log"], next);
-  //     }
-  //   },
-  //   component: Logs,
-  // },
+  {
+    path: "/logs",
+    name: "Logs",
+    beforeEnter: (to, from, next) => {
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["log"], next);
+      }
+    },
+    component: Logs,
+  },
 ];
 
 const router = createRouter({

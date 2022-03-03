@@ -1,41 +1,29 @@
 <template>
-  <b-card no-body class="text-left">
-    <b-card-body>
-      <b-overlay
-        id="overlay-background"
-        :show="showOverlay"
-        spinner-type="border"
-        spinner-variant="info"
-        rounded="sm"
-      >
-        <b-table
-          v-if="errors.length == 0"
-          striped
-          hover
-          small
-          :fields="columns"
-          :items="getLogLines"
-          empty-text="no log entries to display"
-        />
-        <WarningBox v-if="errors.length > 0" :errors="errors" />
-      </b-overlay>
-    </b-card-body>
-  </b-card>
+  <card-module :nobody="true">
+    <overlay-spinner :active="showOverlay" :full-page="false">
+      <warning-box v-if="errors.length > 0" :errors="errors" />
+      <table-module
+        :columns="columns"
+        :rows="getLogLines"
+      />
+    </overlay-spinner>
+  </card-module>
 </template>
 
 <script>
 import { mapActions, mapGetters } from "vuex";
+import CardModule from '@/components/bricks/CardModule.vue';
+import TableModule from "./bricks/TableModule.vue";
 import WarningBox from "@/components/WarningBox";
-import { BCard, BCardBody, BTable, BOverlay } from "bootstrap-vue";
+import OverlaySpinner from "@/components/styling/OverlaySpinner.vue";
 
 export default {
   name: "LogCard",
   components: {
+    CardModule,
     WarningBox,
-    BCard,
-    BCardBody,
-    BTable,
-    BOverlay,
+    TableModule,
+    OverlaySpinner,
   },
   data() {
     return {
