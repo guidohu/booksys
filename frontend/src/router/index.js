@@ -13,7 +13,7 @@ const Account = () =>
 const Info = () => import(/* webpackChunkName: "info" */ "@/views/WSInfo");
 const Schedule = () =>
   import(/* webpackChunkName: "schedule" */ "@/views/WSSchedule");
-// const Today = () => import(/* webpackChunkName: "today" */ "@/views/WSToday");
+const Today = () => import(/* webpackChunkName: "today" */ "@/views/WSToday");
 // const Calendar = () =>
 //   import(/* webpackChunkName: "calendar" */ "@/views/WSCalendar");
 const Boat = () => import(/* webpackChunkName: "boat" */ "@/views/WSBoat");
@@ -85,16 +85,16 @@ const routes = [
   //   },
   //   component: PasswordReset,
   // },
-  // {
-  //   path: "/today",
-  //   name: "Today",
-  //   beforeEnter: (to, from, next) => {
-  //     if (loginEnforced(to, from, next)) {
-  //       loadStoreModules(["configuration", "sessions", "user"], next);
-  //     }
-  //   },
-  //   component: Today,
-  // },
+  {
+    path: "/today",
+    name: "Today",
+    beforeEnter: (to, from, next) => {
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["configuration", "sessions", "user"], next);
+      }
+    },
+    component: Today,
+  },
   {
     path: "/dashboard",
     name: "Dashboard",

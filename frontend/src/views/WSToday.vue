@@ -1,103 +1,96 @@
 <template>
-  <div>
-    <SessionEditorModal
+  <subpage-container title="Book your Session">
+    <session-editor-modal
       v-model:visible="showSessionEditorModal"
       :default-values="selectedSession"
     />
-    <SessionDeleteModal
+    <session-delete-modal
       v-model:visible="showSessionDeleteModal"
       :session="selectedSession"
       @sessionDeletedHandler="sessionDeletedHandler"
     />
-    <div v-if="isDesktop" class="display">
-      <main-title title-name="Book Your Session" />
-      <b-row class="ml-1 mr-1">
-        <b-col cols="8">
-          <SessionDayCard
+    <show-for-desktop>
+      <div class="row mx-1">
+        <div class="col-8">
+          <session-day-card
             v-if="getSessions != null"
             :session-data="getSessions"
             :selected-session="selectedSession"
-            :is-mobile="isMobile"
+            :is-mobile="false"
             :timezone="getTimezone"
             @prevDay="prevDay"
             @nextDay="nextDay"
             @selectSessionHandler="selectSlot"
           />
-        </b-col>
-        <b-col cols="4">
-          <b-row>
-            <b-col cols="12">
-              <SessionDetailsCard
-                :date="date"
-                :session="selectedSession"
-                @createSessionHandler="showCreateSession"
-                @editSessionHandler="showCreateSession"
-                @deleteSessionHandler="showDeleteSession"
-                @addRidersHandler="addRiders"
-              />
-            </b-col>
-          </b-row>
-          <b-row class="mt-1">
-            <b-col cols="12">
-              <ConditionInfoCard
-                v-if="sunrise != null"
-                :sunrise="sunrise"
-                :sunset="sunset"
-              />
-            </b-col>
-          </b-row>
-        </b-col>
-      </b-row>
-      <div class="bottom mr-2">
-        <b-button class="mr-1" variant="outline-light" to="/calendar">
-          <b-icon-calendar3 />
-          CALENDAR
-        </b-button>
-        <b-button variant="outline-light" to="/dashboard">
-          <b-icon-house />
-          HOME
-        </b-button>
+        </div>
+        <div class="col-4">
+          <session-details-card
+            :date="date"
+            :session="selectedSession"
+            @createSessionHandler="showCreateSession"
+            @editSessionHandler="showCreateSession"
+            @deleteSessionHandler="showDeleteSession"
+          />
+          <condition-info-card
+            v-if="sunrise != null"
+            class="mt-2"
+            :sunrise="sunrise"
+            :sunset="sunset"
+          />
+        </div>
       </div>
-    </div>
-    <div v-else>
-      <NavbarMobile title="Book Your Session" />
-      <SessionDayCard
+    </show-for-desktop>
+    <show-for-mobile>
+      <session-day-card
+        class="mx-1 mt-2"
         v-if="getSessions != null"
-        class="mb-1"
         :session-data="getSessions"
         :selected-session="selectedSession"
-        :is-mobile="isMobile"
+        :is-mobile="true"
         :timezone="getTimezone"
         @prevDay="prevDay"
         @nextDay="nextDay"
         @selectSessionHandler="selectSlot"
       />
-      <SessionDetailsCard
-        class="mb-1"
+      <session-details-card
+        class="mx-1 mt-2"
         :date="date"
         :session="selectedSession"
         @createSessionHandler="showCreateSession"
         @editSessionHandler="showCreateSession"
         @deleteSessionHandler="showDeleteSession"
-        @addRidersHandler="addRiders"
       />
-      <ConditionInfoCard
+      <condition-info-card
+        class="mx-1 mt-2"
         v-if="sunrise != null"
         :sunrise="sunrise"
         :sunset="sunset"
       />
-    </div>
-  </div>
+    </show-for-mobile>
+    <template v-slot:bottom>
+      <router-link tag="button" class="btn btn-outline-light" to="/calendar">
+        <i class="bi bi-calendar"></i>
+        CALENDAR
+      </router-link>
+      <router-link
+        tag="button"
+        class="btn btn-outline-light ms-1"
+        to="/dashboard"
+      >
+        <i class="bi bi-house"></i>
+        ADMIN
+      </router-link>
+    </template>
+  </subpage-container>
 </template>
 
 <script>
+import { defineAsyncComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
 import { BooksysBrowser } from "@/libs/browser";
-import NavbarMobile from "@/components/NavbarMobile";
 import ConditionInfoCard from "@/components/ConditionInfoCard";
 import SessionDayCard from "@/components/SessionDayCard";
 import SessionDetailsCard from "@/components/SessionDetailsCard";
-import MainTitle from "@/components/MainTitle";
 import Session from "@/dataTypes/session";
 import * as dayjs from "dayjs";
 import * as dayjsCustomParseFormat from "dayjs/plugin/customParseFormat";
@@ -105,10 +98,16 @@ import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
 
 import difference from "lodash/difference";
-import { BRow, BCol, BButton, BIconCalendar3, BIconHouse } from "bootstrap-vue";
+import SubpageContainer from "../components/bricks/SubpageContainer.vue";
+import ShowForMobile from "../components/bricks/ShowForMobile.vue";
+import ShowForDesktop from "../components/bricks/ShowForDesktop.vue";
 
-const SessionEditorModal = () => import("@/components/SessionEditorModal");
-const SessionDeleteModal = () => import("@/components/SessionDeleteModal");
+const SessionEditorModal = defineAsyncComponent(() =>
+  import("@/components/SessionEditorModal")
+);
+const SessionDeleteModal = defineAsyncComponent(() =>
+  import("@/components/SessionDeleteModal")
+);
 
 dayjs.extend(dayjsCustomParseFormat);
 dayjs.extend(dayjsUTC);
@@ -117,18 +116,14 @@ dayjs.extend(dayjsTimezone);
 export default {
   name: "WSToday",
   components: {
-    NavbarMobile,
-    MainTitle,
     ConditionInfoCard,
     SessionDayCard,
     SessionDetailsCard,
     SessionEditorModal,
     SessionDeleteModal,
-    BRow,
-    BCol,
-    BButton,
-    BIconCalendar3,
-    BIconHouse,
+    ShowForMobile,
+    ShowForDesktop,
+    SubpageContainer,
   },
   computed: {
     isMobile: function () {
@@ -170,11 +165,8 @@ export default {
       this.querySessionsForDate();
     },
     querySessionsForDate: function () {
-      console.log("the time", this.date);
       const dateStart = dayjs(this.date).startOf("day").format();
       const dateEnd = dayjs(this.date).endOf("day").format();
-      console.log("dateStart:", dateStart);
-      console.log("dateEnd:", dateEnd);
 
       // query get_booking_day
       this.querySessions({
@@ -216,9 +208,6 @@ export default {
     showDeleteSession: function () {
       console.log("showDeleteSession");
       this.showSessionDeleteModal = true;
-    },
-    addRiders: function () {
-      console.log("addRiders");
     },
   },
   watch: {

@@ -59,30 +59,6 @@
       </div>
     </div>
   </div>
-  <!-- <b-tabs content-class="mt-3">
-    <b-tab active>
-      <div slot="title">
-        <p class="h6 mt-2 mb-2">
-          <b-icon-person />
-          Users
-        </p>
-      </div>
-      <div :class="tabClass">
-        <UserTable />
-      </div>
-    </b-tab>
-    <b-tab>
-      <div slot="title">
-        <p class="h6 mt-2 mb-2">
-          <b-icon-people />
-          User Groups
-        </p>
-      </div>
-      <div :class="tabClass">
-        <UserGroupTable />
-      </div>
-    </b-tab>
-  </b-tabs> -->
 </template>
 
 <script>

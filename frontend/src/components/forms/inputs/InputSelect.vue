@@ -10,11 +10,16 @@
           @click.stop
           @change="changeHandler($event)"
           v-model="selectedValue"
+          :size="selectSize"
+          :multiple="selectMode=='multiple'"
         >
           <option v-for="o in options" :key="o.value" :value="o.value">
             {{ o.text }}
           </option>
         </select>
+      </div>
+      <div v-if="description" :id="id+'-description'" class="form-text">
+        {{ description }}
       </div>
     </div>
   </div>
@@ -26,18 +31,23 @@
       @click.stop
       @change="changeHandler($event)"
       v-model="selectedValue"
+      :size="selectSize"
+      :multiple="selectMode=='multiple'"
     >
       <option v-for="o in options" :key="o.value" :value="o.value">
         {{ o.text }}
       </option>
     </select>
+    <div v-if="description" :id="id+'-description'" class="form-text">
+      {{ description }}
+    </div>
   </div>
 </template>
 
 <script>
 export default {
   name: "InputSelect",
-  props: ["id", "label", "modelValue", "options", "disabled", "size"],
+  props: ["id", "label", "modelValue", "options", "disabled", "size", "selectMode", "selectSize", "description"],
   emits: ["update:modelValue"],
   data() {
     return {
@@ -51,9 +61,20 @@ export default {
   },
   methods: {
     changeHandler(event) {
-      const value = event.target.value;
-      console.log("selected value", value);
-      this.$emit("update:modelValue", value);
+      console.log(event);
+      if (this.selectMode != 'multiple') {
+        const value = event.target.value;
+        console.log("selected value", value);
+        this.$emit("update:modelValue", value);
+      } else {
+        let array = [];
+        const options = event.target.selectedOptions;
+        for (let i = 0; i < options.length; i++) { 
+          array.push(options[i].value);
+        }
+        console.log("selected values", array);
+        this.$emit("update:modelValue", array);
+      }
     },
     isSelected: function(option) {
       return option.value == this.modelValue;
