@@ -14,8 +14,8 @@ const Info = () => import(/* webpackChunkName: "info" */ "@/views/WSInfo");
 const Schedule = () =>
   import(/* webpackChunkName: "schedule" */ "@/views/WSSchedule");
 const Today = () => import(/* webpackChunkName: "today" */ "@/views/WSToday");
-// const Calendar = () =>
-//   import(/* webpackChunkName: "calendar" */ "@/views/WSCalendar");
+const Calendar = () =>
+  import(/* webpackChunkName: "calendar" */ "@/views/WSCalendar");
 const Boat = () => import(/* webpackChunkName: "boat" */ "@/views/WSBoat");
 // const Ride = () => import(/* webpackChunkName: "ride" */ "@/views/WSRide");
 // const Watch = () => import(/* webpackChunkName: "watch" */ "@/views/WSWatch");
@@ -135,16 +135,16 @@ const routes = [
     },
     component: Schedule,
   },
-  // {
-  //   path: "/calendar",
-  //   name: "Calendar",
-  //   beforeEnter: (to, from, next) => {
-  //     if (loginEnforced(to, from, next)) {
-  //       loadStoreModules(["sessions", "configuration"], next);
-  //     }
-  //   },
-  //   component: Calendar,
-  // },
+  {
+    path: "/calendar",
+    name: "Calendar",
+    beforeEnter: (to, from, next) => {
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["sessions", "configuration"], next);
+      }
+    },
+    component: Calendar,
+  },
   {
     path: "/boat",
     name: "Boat",

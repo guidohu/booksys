@@ -1,101 +1,96 @@
 <template>
-  <b-card no-body class="text-left">
-    <b-card-header>
-      <b-row>
-        <b-col cols="12"> Sessions </b-col>
-      </b-row>
-    </b-card-header>
-    <b-card-body>
-      <div v-if="sessions != null && sessions.sessions != null">
-        <b-row v-if="sessions.sessions.length == 0">
-          <b-col cols="12"> No sessions for this day. </b-col>
-        </b-row>
-        <b-row
-          v-for="session in sessions.sessions.slice(0, 2)"
+  <sectioned-card-module>
+    <template v-slot:header>
+      <div class="row">
+        <div class="col-8">
+          <h5>Sessions</h5>
+        </div>
+      </div>
+    </template>
+    <template v-slot:body>
+      <div 
+        v-if="sessions == null || sessions.sessions == null"
+        class="row"
+      >
+        <div class="col-12">
+          No day selected
+        </div>
+      </div>
+      <div 
+        v-if="sessions != null && sessions.sessions != null && sessions.sessions.length == 0"
+        class="row"
+      >
+        <div class="col-12">
+          No sessions for this day.
+        </div>
+      </div>
+      <div 
+        v-if="sessions != null && sessions.sessions != null && sessions.sessions.length > 0" 
+      >
+        <div v-for="session in sessions.sessions.slice(0, 2)"
           :key="session.id"
-          class="mt-2 small-text"
+          class="row mt-2 small-text"
         >
-          <b-col cols="12">
-            <b-row>
-              <b-col cols="5">
-                <b-icon-book />
+          <div class="col-12">
+            <div class="row">
+              <div class="col-5">
+                <i class="bi bi-book"/>
                 Title
-              </b-col>
-              <b-col cols="7">
+              </div>
+              <div class="col-7">
                 {{ getTitle(session) }}
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col cols="5">
-                <b-icon-clock />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-5">
+                <i class="bi bi-clock"/>
                 Time
-              </b-col>
-              <b-col cols="7">
+              </div>
+              <div class="col-7">
                 {{ getTime(session) }}
-              </b-col>
-            </b-row>
-            <b-row>
-              <b-col cols="5">
-                <b-icon-person />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-5">
+                <i class="bi bi-person"/>
                 Riders
-              </b-col>
-              <b-col
-                v-if="session.riders != null && session.riders.length > 0"
-                cols="7"
-              >
-                <b-row
-                  v-for="rider in session.riders.slice(0, 3)"
-                  :key="rider.id"
-                >
-                  <b-col cols="12" class="text-truncate">
+              </div>
+              <div v-if="session.rider == null || session.riders.length == 0" class="col-7">
+                -
+              </div>
+              <div v-if="session.rider != null && session.riders.length > 0" class="col-7">
+                <div v-for="rider in session.riders.slice(0,3)" :key="rider.id" class="row">
+                  <div class="col-12 text-truncate">
                     {{ rider.name }}
-                  </b-col>
-                </b-row>
-                <b-row v-if="session.riders.length > 3">
-                  <b-col cols="12" class="text-truncate"> ... </b-col>
-                </b-row>
-              </b-col>
-              <b-col v-else cols="7"> - </b-col>
-            </b-row>
-          </b-col>
-        </b-row>
-        <b-row v-if="sessions.sessions.length > 2" class="mt-4 small-text">
-          <b-col cols="12"> click for more details... </b-col>
-        </b-row>
+                  </div>
+                </div>
+                <div v-if="sessions.riders.length > 3">
+                  <div class="col-12 text-truncate">
+                    ...
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div v-if="sessions == null || sessions.sessions == null">
-        <b-row>
-          <b-col cols="12"> No day selected </b-col>
-        </b-row>
+      <div v-if="sessions != null && sessions.sessions != null && sessions.sessions.length > 2" class="row small-text">
+        <div class="col-12">
+          click for more details...
+        </div>
       </div>
-    </b-card-body>
-  </b-card>
+    </template>
+  </sectioned-card-module>
 </template>
 
 <script>
 import * as dayjs from "dayjs";
-import {
-  BCard,
-  BCardHeader,
-  BCardBody,
-  BRow,
-  BCol,
-  BIconBook,
-  BIconClock,
-  BIconPerson,
-} from "bootstrap-vue";
+import SectionedCardModule from "./bricks/SectionedCardModule.vue";
 
 export default {
   name: "SessionsOverview",
   components: {
-    BCard,
-    BCardHeader,
-    BCardBody,
-    BRow,
-    BCol,
-    BIconBook,
-    BIconClock,
-    BIconPerson,
+    SectionedCardModule,
   },
   props: ["sessions"],
   computed: {

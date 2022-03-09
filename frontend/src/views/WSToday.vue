@@ -42,7 +42,7 @@
     </show-for-desktop>
     <show-for-mobile>
       <session-day-card
-        class="mx-1 mt-2"
+        class="mx-1 mt-1"
         v-if="getSessions != null"
         :session-data="getSessions"
         :selected-session="selectedSession"

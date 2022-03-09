@@ -1,91 +1,79 @@
 <template>
-  <b-card no-body class="text-left">
-    <b-card-header>
-      <b-row>
-        <b-col cols="4" class="text-right">
-          <b-button variant="outline-info" class="btn-xs" @click="prevMonth">
-            <b-icon-arrow-left-short />
-          </b-button>
-        </b-col>
-        <b-col cols="4" class="text-center">
+  <sectioned-card-module>
+    <template v-slot:header>
+      <div class="row">
+        <div class="col-4 text-end">
+          <button type="button" class="btn btn-outline-info btn-xs" 
+            @click="prevMonth">
+            <i class="bi bi-arrow-left-short"/>
+          </button>
+        </div>
+        <div class="col-4 text-center">
           {{ monthString }}
-        </b-col>
-        <b-col cols="4" class="text-left">
-          <b-button variant="outline-info" class="btn-xs" @click="nextMonth">
-            <b-icon-arrow-right-short />
-          </b-button>
-        </b-col>
-      </b-row>
-    </b-card-header>
-    <b-card-body ref="calendarBody">
-      <table>
-        <tr>
-          <th class="table-title-text">Mon</th>
-          <th class="table-title-text">Tue</th>
-          <th class="table-title-text">Wed</th>
-          <th class="table-title-text">Thu</th>
-          <th class="table-title-text">Fri</th>
-          <th class="table-title-text">Sat</th>
-          <th class="table-title-text">Sun</th>
-        </tr>
-        <tr v-for="i in Array.from(Array(6).keys())" :key="i">
-          <td
-            v-for="j in Array.from(Array(7).keys())"
-            :key="j"
-            @click="navigateTo(sessionData[i * 7 + j])"
-            @mouseover="mouseOver(sessionData[i * 7 + j])"
-          >
-            <div :class="getCalendarDayBoxClass(sessionData[i * 7 + j])">
-              <BooksysPie
-                :session-data="sessionData[i * 7 + j]"
-                :properties="properties"
-                :pie-id="i * 7 + j"
-              />
-              <div class="day-number">
-                {{ getDay(sessionData[i * 7 + j].window_start) }}
+        </div>
+        <div class="col-4 text-start">
+          <button type="button" class="btn btn-outline-info btn-xs" 
+            @click="nextMonth">
+            <i class="bi bi-arrow-right-short"/>
+          </button>
+        </div>
+      </div>
+    </template>
+    <template v-slot:body>
+      <div ref="calendarBody">
+        <table>
+          <tr>
+            <th class="table-title-text">Mon</th>
+            <th class="table-title-text">Tue</th>
+            <th class="table-title-text">Wed</th>
+            <th class="table-title-text">Thu</th>
+            <th class="table-title-text">Fri</th>
+            <th class="table-title-text">Sat</th>
+            <th class="table-title-text">Sun</th>
+          </tr>
+          <tr v-for="i in Array.from(Array(6).keys())" :key="i">
+            <td
+              v-for="j in Array.from(Array(7).keys())"
+              :key="j"
+              @click="navigateTo(sessionData[i * 7 + j])"
+              @mouseover="mouseOver(sessionData[i * 7 + j])"
+            >
+              <div :class="getCalendarDayBoxClass(sessionData[i * 7 + j])">
+                <booksys-pie
+                  :session-data="sessionData[i * 7 + j]"
+                  :properties="properties"
+                  :pie-id="i * 7 + j"
+                />
+                <div class="day-number">
+                  {{ getDay(sessionData[i * 7 + j].window_start) }}
+                </div>
               </div>
-            </div>
-          </td>
-        </tr>
-      </table>
-    </b-card-body>
-  </b-card>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </template>
+  </sectioned-card-module>
 </template>
 
 <script>
 import BooksysPie from "./Pie.vue";
 import * as dayjs from "dayjs";
 import { BooksysBrowser } from "@/libs/browser";
-import {
-  BCard,
-  BCardHeader,
-  BCardBody,
-  BRow,
-  BCol,
-  BButton,
-  BIconArrowLeftShort,
-  BIconArrowRightShort,
-} from "bootstrap-vue";
+import SectionedCardModule from "../components/bricks/SectionedCardModule.vue";
 
 export default {
   name: "SessionMonthCard",
   components: {
     BooksysPie,
-    BCard,
-    BCardHeader,
-    BCardBody,
-    BRow,
-    BCol,
-    BButton,
-    BIconArrowLeftShort,
-    BIconArrowRightShort,
+    SectionedCardModule
   },
   props: ["sessionData", "month"],
   data() {
     return {
       properties: {
-        containerWidth: 84,
-        containerHeight: 64,
+        containerWidth: 85,
+        containerHeight: 63,
         circleX: 45,
         circleY: 34,
         circleRadius: 23,
@@ -100,7 +88,8 @@ export default {
     },
   },
   mounted() {
-    const totalWidth = this.$refs.calendarBody.clientWidth - 61;
+    // TODO make this depending on screen size and not isMobile or not
+    const totalWidth = this.$refs.calendarBody.clientWidth - 15;
     const cardWidth = totalWidth / 7;
     let cardHeight = cardWidth * 0.75;
     if (this.isMobile()) {
