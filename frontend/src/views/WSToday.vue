@@ -78,7 +78,7 @@
         to="/dashboard"
       >
         <i class="bi bi-house"></i>
-        ADMIN
+        HOME
       </router-link>
     </template>
   </subpage-container>
