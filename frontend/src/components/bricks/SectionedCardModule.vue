@@ -3,7 +3,7 @@
     <div v-if="$slots.header" class="card-header">
       <slot name="header"></slot>
     </div>
-    <div v-if="$slots.body" class="card-body">
+    <div v-if="$slots.body" class="card-body scrollable margin padding">
       <slot name="body"></slot>
     </div>
     <div v-if="$slots.footer" class="card-footer">
@@ -15,16 +15,19 @@
 <script>
 export default {
   name: "SectionedCardModule",
-  // methods: {
-  //   hasHeader: function() {
-  //     return this.$slots.header() == true;
-  //   },
-  //   hasBody: function() {
-  //     return (this.$slots.body == true);
-  //   },
-  //   hasFooter: function() {
-  //     return (this.$slots.footer == true);
-  //   }
-  // }
 };
 </script>
+
+<style scoped>
+  .scrollable {
+    overflow-y: scroll;
+  }
+
+  .margin {
+    margin: 1rem;
+  }
+
+  .padding {
+    padding: 0rem;
+  }
+</style>

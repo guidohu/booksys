@@ -1,162 +1,81 @@
 <template>
-  <b-modal
-    id="heatEntryModal"
+  <modal-container
+    name="heatEntryModal"
     title="Heat Entry"
     :visible="visible"
     @hide="$emit('update:visible', false)"
     @show="$emit('update:visible', true)"
   >
-    <b-row v-if="errors.length">
-      <b-col cols="1" class="d-none d-sm-block" />
-      <b-col cols="12" sm="10">
-        <WarningBox :errors="errors" />
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block" />
-    </b-row>
-    <b-form @submit="save">
-      <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block" />
-        <b-col cols="12" sm="10">
-          <b-form-group
-            id="date"
-            label="Date"
-            label-for="date-input"
-            description=""
-            label-cols="3"
-          >
-            <b-form-input
-              id="date-input"
-              v-model="form.date"
-              type="text"
-              placeholder=""
-              disabled
-            />
-          </b-form-group>
-          <b-form-group
-            id="rider"
-            label="Rider"
-            label-for="rider-input"
-            description=""
-            label-cols="3"
-          >
-            <b-form-input
-              id="rider-input"
-              v-model="form.rider"
-              type="text"
-              placeholder=""
-              disabled
-            />
-          </b-form-group>
-          <b-form-group
-            id="fare"
-            label="Fare"
-            label-for="fare-input"
-            description=""
-            label-cols="3"
-            disabled
-          >
-            <b-input-group>
-              <b-form-input
-                id="fare-input"
-                v-model="form.fare"
-                type="text"
-                placeholder=""
-                disabled
-              />
-              <b-input-group-append is-text>
-                {{ getCurrency }}/min
-              </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-          <b-form-group
-            id="duration"
-            label="Duration"
-            label-for="duration-input"
-            description=""
-            label-cols="3"
-          >
-            <b-input-group>
-              <b-form-input
-                id="duration-input"
-                v-model="form.duration"
-                type="text"
-                placeholder=""
-                @input="durationChangeHandler"
-              />
-              <b-input-group-append is-text> mm:ss </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-          <b-form-group
-            id="cost"
-            label="Cost"
-            label-for="cost-input"
-            description=""
-            label-cols="3"
-          >
-            <b-input-group>
-              <b-form-input
-                id="cost-input"
-                v-model="form.cost"
-                type="text"
-                placeholder=""
-                disabled
-              />
-              <b-input-group-append is-text>
-                {{ getCurrency }}
-              </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-          <b-form-group
-            id="comment"
-            label="Comment"
-            label-for="comment-input"
-            description=""
-            label-cols="3"
-          >
-            <b-form-textarea
-              id="comment-input"
-              v-model="form.comment"
-              rows="3"
-            />
-          </b-form-group>
-        </b-col>
-        <b-col cols="1" class="d-none d-sm-block" />
-      </b-row>
-    </b-form>
-    <div slot="modal-footer">
-      <div class="text-left d-inline">
-        <b-button
-          class="mr-1"
-          type="button"
-          variant="outline-danger"
-          @click="remove"
-        >
-          <b-icon-trash />
-          Delete
-        </b-button>
+    <modal-header
+      :closable="true"
+      title="Heat Entry"
+      @close="$emit('update:visible', false)"
+    />
+    <modal-body>
+      <warning-box v-if="errors.length > 0" :errors="errors" />
+      <form @submit.stop="save">
+        <input-date-time-local
+          id="date"
+          label="Date"
+          v-model="form.date"
+          disabled
+        />
+        <input-text
+          id="rider"
+          label="Rider"
+          v-model="form.rider"
+          disabled
+        />
+        <input-text
+          id="fare"
+          label="Fare"
+          v-model="form.fare"
+          :suffix="getCurrency + '/min'"
+          disabled
+        />
+        <input-text
+          id="duration"
+          label="Duration"
+          v-model="form.duration"
+          @input="durationChangeHandler"
+          suffix="mm:ss"
+        />
+        <input-text
+          id="cost"
+          label="Cost"
+          v-model="form.cost"
+          disabled
+          :suffix="getCurrency"
+        />
+        <input-text-multiline
+          id="comment"
+          label="Comment"
+          v-model="form.comment"
+          rows="3"
+        />
+      </form>
+    </modal-body>
+    <modal-footer class="block-footer">
+      <div class="row">
+        <div class="col-6 text-start">
+          <button type="button" class="btn btn-outline-danger" @click.stop="remove">
+            <i class="bi bi-trash"></i>
+            Delete
+          </button>
+        </div>
+        <div class="col-6 text-end">
+          <button type="submit" class="btn btn-outline-info me-2" @click.prevent.self="save">
+            <i class="bi bi-check"></i>
+            Save
+          </button>
+          <button type="button" class="btn btn-outline-danger" @click.prevent.self="close">
+            <i class="bi bi-x"></i>
+            Cancel
+          </button>
+        </div>
       </div>
-      <div class="text-right d-inline">
-        <b-button
-          class="ml-4"
-          type="button"
-          variant="outline-info"
-          @click="save"
-        >
-          <b-icon-check />
-          Save
-        </b-button>
-        <b-button
-          class="ml-1"
-          type="button"
-          variant="outline-danger"
-          @click="close"
-        >
-          <b-icon-x />
-          Cancel
-        </b-button>
-      </div>
-    </div>
-  </b-modal>
+    </modal-footer>
+  </modal-container>
 </template>
 
 <script>
@@ -164,39 +83,25 @@ import { mapGetters, mapActions } from "vuex";
 import * as dayjs from "dayjs";
 import { sprintf } from "sprintf-js";
 import WarningBox from "@/components/WarningBox";
-import {
-  BModal,
-  BRow,
-  BCol,
-  BForm,
-  BFormGroup,
-  BFormInput,
-  BInputGroup,
-  BInputGroupAppend,
-  BFormTextarea,
-  BButton,
-  BIconTrash,
-  BIconCheck,
-  BIconX,
-} from "bootstrap-vue";
+import ModalContainer from "@/components/bricks/ModalContainer.vue";
+import ModalHeader from "@/components/bricks/ModalHeader.vue";
+import ModalBody from "@/components/bricks/ModalBody.vue";
+import ModalFooter from "@/components/bricks/ModalFooter.vue";
+import InputText from "./forms/inputs/InputText.vue";
+import InputTextMultiline from "./forms/inputs/InputTextMultiline.vue"
+import InputDateTimeLocal from './forms/inputs/InputDateTimeLocal.vue';
 
 export default {
   name: "HeatEntryModal",
   components: {
     WarningBox,
-    BModal,
-    BRow,
-    BCol,
-    BForm,
-    BFormGroup,
-    BFormInput,
-    BInputGroup,
-    BInputGroupAppend,
-    BFormTextarea,
-    BButton,
-    BIconTrash,
-    BIconCheck,
-    BIconX,
+    ModalContainer,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    InputText,
+    InputTextMultiline,
+    InputDateTimeLocal,
   },
   props: ["heat", "visible"],
   data() {
@@ -219,7 +124,7 @@ export default {
     setFormDefaults: function (heatData) {
       this.form = {
         id: heatData.heat_id,
-        date: dayjs(heatData.timestamp * 1000).format("DD.MM.YYYY HH:mm"),
+        date: dayjs(heatData.timestamp * 1000).format("YYYY-MM-DDTHH:mm"),
         userId: heatData.user_id,
         rider: heatData.first_name + " " + heatData.last_name,
         fare: sprintf("%.2f", heatData.price_per_min),
@@ -299,3 +204,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+  .block-footer {
+    display: block;
+  }
+</style>

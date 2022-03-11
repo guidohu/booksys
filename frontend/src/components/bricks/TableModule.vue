@@ -8,11 +8,12 @@
         role="columnheader"
         :class="getColumnClass(c)"
       >
-        <div @click="sortByCol(c)">
+        <div @click="function() { sortByCol(c) }">
           {{ c.label }}
           <!-- select the right sorting icon -->
           <i
             v-if="
+              c.sortable != null &&
               c.sortable == true &&
               sortCol != null &&
               c.label == sortCol.label &&
@@ -22,6 +23,7 @@
           ></i>
           <i
             v-if="
+              c.sortable != null &&
               c.sortable == true &&
               sortCol != null &&
               c.label == sortCol.label &&
@@ -33,7 +35,7 @@
       </th>
     </thead>
     <!-- table body -->
-    <tbody v-if="tRows.length > 0" role="rowgroup">
+    <tbody v-if="tRows != null && tRows.length > 0" role="rowgroup">
       <tr
         v-for="r in tRows"
         :key="r.id"
@@ -90,6 +92,7 @@ export default {
     "columns",
     "rows",
     "rowClassFunction",
+    "rowClass",
     "selectable",
     "selectMode",
   ],
@@ -118,6 +121,7 @@ export default {
   },
   watch: {
     rows: function (newRows) {
+      console.log("rows changed to:", newRows);
       this.selectedRows = [];
       this.$emit("select-row", []);
 
@@ -129,13 +133,25 @@ export default {
       this.tRows = newRows;
       this.sort();
     },
+    columns: function (newCols) {
+      console.log("columns changed to:", newCols);
+      this.sortCol = null;
+
+      if (newCols == null || newCols.length == 0) {
+        this.tColumns = [];
+        return;
+      }
+
+      this.tColumns = newCols;
+      return;
+    }
   },
   methods: {
     sort: function () {
       this.sortByCol(this.sortCol, false);
     },
     sortByCol: function (col, changeSorting = true) {
-      if (!col.sortable) {
+      if (col == null || col.sortable == null || !col.sortable) {
         return;
       }
 
@@ -176,8 +192,12 @@ export default {
       return "fw-lighter text-start";
     },
     getRowClass: function (row) {
-      if (this.rowClassFunction != null) {
-        return this.rowClassFunction(row);
+      let rowClass = "";
+      if (this.rowClass != null) {
+        rowClass = this.rowClass;
+      }
+      else if (this.rowClassFunction != null) {
+        rowClass = this.rowClassFunction(row);
       }
       if (
         this.selectable == true &&
@@ -185,9 +205,9 @@ export default {
         this.selectedRows.length == 1 &&
         isEqual(row, this.selectedRows[0])
       ) {
-        return "selected";
+        rowClass += " selected";
       }
-      return "";
+      return rowClass;
     },
     rowClickHandler: function (row) {
       console.log("row clicked", row);
@@ -211,10 +231,16 @@ export default {
     },
   },
   created() {
-    this.tColumns = this.columns;
-    this.tRows = this.rows;
-    this.sortCol = this.tColumns[0];
-    this.sort();
+    if(this.columns != null && this.columns.length > 0) {
+      this.tColumns = this.columns;
+      // set default sort column
+      this.sortCol = this.tColumns[0];
+      console.log("TableModule: columns set to", this.columns);
+    }
+    if(this.rows != null && this.rows.lenth > 0) {
+      this.tRows = this.rows;
+      this.sort();
+    }
   },
 };
 </script>

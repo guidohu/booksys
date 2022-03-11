@@ -72,7 +72,6 @@ export default {
       });
     },
     setColumns: function () {
-      // this.$set(this, "columns", [
       this.columns = [
         {
           key: "time",

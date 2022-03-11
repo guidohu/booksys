@@ -9,6 +9,7 @@
           :disabled="disabled"
           :id="id"
           :value="modelValue"
+          :placeholder="placeholder"
           @input="changeHandler($event.target.value)"
         />
         <span v-if="suffix != null" class="input-group-text">{{ suffix }}</span>
@@ -20,12 +21,12 @@
 <script>
 export default {
   name: "InputText",
-  props: ["id", "label", "modelValue", "type", "disabled", "size", "suffix"],
+  props: ["id", "label", "modelValue", "type", "disabled", "size", "suffix", "placeholder"],
   emits: ["update:modelValue"],
   methods: {
     changeHandler(value) {
-      console.log("updateValue to:", value);
       this.$emit("update:modelValue", value);
+      this.$emit("input");
     },
     inputGroupClass() {
       if (this.size == null) {

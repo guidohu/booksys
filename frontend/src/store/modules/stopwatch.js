@@ -9,6 +9,7 @@ const state = () => ({
   isRunning: false,
   isPaused: false,
   displayTime: "00:00",
+  comment: null,
   _startTime: 0,
   _timeOffset: 0,
   _isDisplayUpdaterActive: false,
@@ -31,6 +32,9 @@ const getters = {
   },
   getSessionId: (state) => {
     return state.sessionId;
+  },
+  getComment: (state) => {
+    return state.comment;
   },
 };
 
@@ -133,7 +137,7 @@ const actions = {
               });
               reject(["Heat could not be added to the backend."]);
             } else {
-              commit("setFinish", stoppedTime);
+              commit("setFinish");
               dispatch("heats/queryHeatsForSession", state.sessionId, {
                 root: true,
               });
@@ -154,6 +158,13 @@ const actions = {
         reject(["currently we are not taking time"]);
       }
     });
+  },
+  resetTakingTime: ({ commit }) => {
+    commit("setIsDisplayUpdaterActive", false);
+    commit("setFinish")
+  },
+  setComment: ({ commit }, comment) => {
+    commit("setComment", comment);
   },
   setSessionId: ({ commit }, sessionId) => {
     commit("setSessionId", sessionId);
@@ -208,6 +219,10 @@ const mutations = {
     console.log("setUserId with", userId);
     console.log("current state is", state);
     state.userId = userId;
+    storeState(state);
+  },
+  setComment(state, comment) {
+    state.comment = comment;
     storeState(state);
   },
   setStartTime(state, value) {
