@@ -1,47 +1,90 @@
 <template>
-  <div>
-    <div v-if="isDesktop" class="display">
-      <main-title title-name="Settings" />
-      <b-row class="ml-1 mr-1">
-        <b-col cols="12">
-          <SettingsCard class="content-max-height" />
-        </b-col>
-      </b-row>
-    </div>
-    <div v-else>
-      <NavbarAdminMobile title="Settings" />
-      <SettingsCard />
-    </div>
-  </div>
+  <subpage-container title="Settings">
+    <warning-box v-if="errors.length > 0" :errors="errors"/>
+    <show-for-desktop>
+      <settings-card 
+        class="mx-1"
+        :show-controls="false"
+        @save="save"
+        @change="change"
+      />
+    </show-for-desktop>
+    <show-for-mobile>
+      <settings-card 
+        class="mx-1" 
+        :show-controls="true"
+        @saved="navigateBack"
+        @cancelled="navigateBack"
+      />
+    </show-for-mobile>
+    <template v-slot:bottom>
+      <button
+        tag="button"
+        class="btn btn-outline-light"
+        @click="save"
+      >
+        <i class="bi bi-check"></i>
+        Save
+      </button>
+      <button
+        tag="button"
+        class="btn btn-outline-light ms-1"
+        @click="navigateBack"
+      >
+        <i class="bi bi-x"></i>
+        Cancel
+      </button>
+    </template>
+  </subpage-container>
 </template>
 
 <script>
-import { BooksysBrowser } from "@/libs/browser";
-import NavbarAdminMobile from "@/components/NavbarAdminMobile";
+import { mapActions } from "vuex";
 import SettingsCard from "@/components/SettingsCard";
-import MainTitle from "@/components/MainTitle";
-import { BRow, BCol } from "bootstrap-vue";
+import SubpageContainer from "@/components/bricks/SubpageContainer";
+import ShowForDesktop from "@/components/bricks/ShowForDesktop.vue";
+import ShowForMobile from "@/components/bricks/ShowForMobile.vue";
+import WarningBox from '../../components/WarningBox.vue';
 
 export default {
   name: "WSSettings",
   components: {
-    NavbarAdminMobile,
-    MainTitle,
     SettingsCard,
-    BRow,
-    BCol,
+    SubpageContainer,
+    ShowForDesktop,
+    ShowForMobile,
+    WarningBox,
   },
-  computed: {
-    isDesktop: function () {
-      return !BooksysBrowser.isMobile();
+  data() {
+    return {
+      settings: null,
+      errors: [],
+    };
+  },
+  methods: {
+    ...mapActions("configuration", ["setConfiguration"]),
+    change: function(settings) {
+      this.settings = settings;
     },
-  },
+    save: function() {
+      if(this.settings == null) {
+        this.navigateBack();
+        return;
+      }
+
+      this.setConfiguration(this.settings)
+        .then(() => {
+          this.errors = [];
+          this.navigateBack();
+        })
+        .catch((errors) => (this.errors = errors));
+    },
+    cancel: function() {
+      this.navigateBack();
+    },
+    navigateBack: function() {
+      this.$router.push("/admin");
+    }
+  }
 };
 </script>
-
-<style>
-.content-max-height {
-  max-height: 520px;
-  overflow-y: scroll;
-}
-</style>

@@ -22,10 +22,10 @@ const Watch = () => import(/* webpackChunkName: "watch" */ "@/views/WSWatch");
 const Admin = () => import(/* webpackChunkName: "admin" */ "@/views/WSAdmin");
 const Users = () =>
   import(/* webpackChunkName: "users" */ "@/views/admin/WSUsers");
-// const Accounting = () =>
-//   import(/* webpackChunkName: "accounting" */ "@/views/admin/WSAccounting");
-// const Settings = () =>
-//   import(/* webpackChunkName: "settings" */ "@/views/admin/WSSettings");
+const Accounting = () =>
+  import(/* webpackChunkName: "accounting" */ "@/views/admin/WSAccounting");
+const Settings = () =>
+  import(/* webpackChunkName: "settings" */ "@/views/admin/WSSettings");
 const Logs = () => import(/* webpackChunkName: "logs" */ "@/views/admin/WSLogs");
 // const PasswordReset = () =>
 //   import(/* webpackChunkName: "password-reset" */ "@/views/WSPasswordReset");
@@ -201,26 +201,26 @@ const routes = [
     },
     component: Users,
   },
-  // {
-  //   path: "/accounting",
-  //   name: "Accounting",
-  //   beforeEnter: (to, from, next) => {
-  //     if (loginEnforced(to, from, next)) {
-  //       loadStoreModules(["configuration", "accounting", "user"], next);
-  //     }
-  //   },
-  //   component: Accounting,
-  // },
-  // {
-  //   path: "/settings",
-  //   name: "Settings",
-  //   beforeEnter: (to, from, next) => {
-  //     if (loginEnforced(to, from, next)) {
-  //       loadStoreModules(["configuration"], next);
-  //     }
-  //   },
-  //   component: Settings,
-  // },
+  {
+    path: "/accounting",
+    name: "Accounting",
+    beforeEnter: (to, from, next) => {
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["configuration", "accounting", "user", "boat"], next);
+      }
+    },
+    component: Accounting,
+  },
+  {
+    path: "/settings",
+    name: "Settings",
+    beforeEnter: (to, from, next) => {
+      if (loginEnforced(to, from, next)) {
+        loadStoreModules(["configuration"], next);
+      }
+    },
+    component: Settings,
+  },
   {
     path: "/logs",
     name: "Logs",

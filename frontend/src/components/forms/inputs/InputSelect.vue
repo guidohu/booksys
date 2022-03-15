@@ -48,7 +48,7 @@
 export default {
   name: "InputSelect",
   props: ["id", "label", "modelValue", "options", "disabled", "size", "selectMode", "selectSize", "description"],
-  emits: ["update:modelValue"],
+  emits: ["update:modelValue", "changed"],
   data() {
     return {
       selectedValue: 0
@@ -75,6 +75,7 @@ export default {
         console.log("selected values", array);
         this.$emit("update:modelValue", array);
       }
+      this.$emit("changed");
     },
     isSelected: function(option) {
       return option.value == this.modelValue;

@@ -53,7 +53,6 @@
           </div>
         </show-for-desktop>
         <show-for-mobile>
-          Groups Mobile
           <user-group-table/>
         </show-for-mobile>
       </div>

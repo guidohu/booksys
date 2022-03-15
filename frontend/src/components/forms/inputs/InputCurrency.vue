@@ -9,6 +9,7 @@
           :disabled="disabled"
           :id="id"
           :value="modelValue"
+          :placeholder="placeholder"
           @input="changeHandler($event.target.value)"
         />
         <span class="input-group-text">{{ currency }}</span>
@@ -20,7 +21,7 @@
 <script>
 export default {
   name: "InputCurrency",
-  props: ["id", "label", "modelValue", "disabled", "size", "currency"],
+  props: ["id", "label", "modelValue", "disabled", "size", "currency", "placeholder"],
   emits: ["update:modelValue"],
   methods: {
     changeHandler(value) {

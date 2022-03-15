@@ -1,358 +1,209 @@
 <template>
-  <b-card no-body class="text-left">
-    <b-card-body class="overflow-scroll">
-      <WarningBox v-if="errors.length > 0" :errors="errors" />
+  <sectioned-card-module>
+    <template v-slot:body>
+      <warning-box v-if="errors.length > 0" :errrors="errors" />
       <logo-upload @logoChanged="logoChangeHandler" />
-
-      <b-form @submit="save">
-        <b-alert variant="info" show>
+      <form @submit.stop="save">
+        <div class="alert alert-info">
           Settings related to the boat you are using.
-        </b-alert>
-        <!-- Engine hour format -->
-        <engine-hour-format v-model:selected="form.engineHourFormat" />
-        <b-alert variant="info" show>
+        </div>
+        <input-select
+          :options="engineHourLogFormats"
+          v-model="form.engineHourFormat"
+          label="Engine Hour Format"
+          size="small"
+          description="select the format your engine hour display uses."
+        />
+        <div class="alert alert-info">
           Settings for your daily operations.
-        </b-alert>
-        <!-- Direct Payment vs Billed Payment -->
-        <fuel-payment-type-selector v-model:selected="form.fuelPaymentType" />
-        <b-alert variant="info" show>
+        </div>
+        <input-select
+          :options="fuelPaymentTypes"
+          v-model="form.fuelPaymentType"
+          label="Fuel Payments"
+          size="small"
+          description="choose between direct payments at the time of consumption and credited payment where you add payments for fuel in the payments section separately after paying a bill."
+        />
+        <div class="alert alert-info">
           Timezone and location settings. Users will see the times in the
           timezone defined by these settings, also sunrise and sunset will be
           calculated based on these settings.
-        </b-alert>
-        <!-- Timezone -->
-        <b-form-group
-          id="input-group-timezone"
-          label="Timezone*"
-          label-for="input-timezone"
-          label-cols="3"
-          description="e.g. Europe/Zurich"
-        >
-          <b-input-group size="sm">
-            <b-form-input
-              id="input-timezone"
-              v-model="form.timezone"
-              type="text"
-            />
-          </b-input-group>
-        </b-form-group>
-        <!-- Longitude -->
-        <b-form-group
-          id="input-group-longitude"
-          label="Longitude*"
-          label-for="input-longitude"
-          label-cols="3"
+        </div>
+        <input-text
+          id="timezone"
+          label="Timezone"
+          description="e.g., Europe/Zurich"
+          size="small"
+          v-model="form.timezone"
+        />
+        <input-text
+          id="longitude"
+          label="Longitude"
           description="Define the longitude in degrees (example 8.5432)"
-        >
-          <b-input-group size="sm">
-            <b-form-input
-              id="input-longitude"
-              v-model="form.longitude"
-              type="text"
-            />
-          </b-input-group>
-        </b-form-group>
-        <!-- Latitude -->
-        <b-form-group
-          id="input-group-latitude"
-          label="Latitude*"
-          label-for="input-latitude"
-          label-cols="3"
+          size="small"
+          v-model="form.longitude"
+        />
+        <input-text
+          id="latitude"
+          label="Latitude"
           description="Define the latitude in degrees (example 47.3456)"
-        >
-          <b-input-group size="sm">
-            <b-form-input
-              id="input-latitude"
-              v-model="form.latitude"
-              type="text"
-            />
-          </b-input-group>
-        </b-form-group>
-        <!-- Google Iframe -->
-        <b-form-group
-          id="input-group-map-iframe"
+          size="small"
+          v-model="form.latitude"
+        />
+        <input-text
+          id="map-iframe"
           label="Google Maps Iframe"
-          label-for="input-timezone"
-          label-cols="3"
-          description=""
-        >
-          <b-input-group size="sm">
-            <b-form-input
-              id="input-map-iframe"
-              v-model="form.mapIframe"
-              type="text"
-            />
-          </b-input-group>
-        </b-form-group>
-        <!-- Address -->
-        <b-form-group
-          id="input-group-address"
+          description="Location using an Iframe link from Google Maps."
+          size="small"
+          v-model="form.mapIframe"
+        />
+        <input-text-multiline
+          id="address"
           label="Address"
-          label-for="input-address"
-          label-cols="3"
-          description=""
-        >
-          <b-form-textarea
-            id="input-address"
-            v-model="form.address"
-            size="sm"
-            rows="3"
-            max-rows="3"
-          />
-        </b-form-group>
-
-        <b-alert variant="info" show>
+          size="small"
+          v-model="form.address"
+          rows="3"
+        />
+        <div class="alert alert-info">
           Payment Information. This information is displayed to users in case
           they want to top-up their balance.
-        </b-alert>
-        <!-- Currency -->
-        <b-form-group
-          id="input-group-currency"
+        </div>
+        <input-text
+          id="currency"
           label="Currency"
-          label-for="input-currency"
-          label-cols="3"
-          description=""
-        >
-          <b-input-group size="sm">
-            <b-form-input
-              id="input-currency"
-              v-model="form.currency"
-              type="text"
-            />
-          </b-input-group>
-        </b-form-group>
-        <!-- Payment Account Owner -->
-        <b-form-group
-          id="input-group-account-owner"
+          size="small"
+          v-model="form.currency"
+        />
+        <input-text
+          id="account-owner"
           label="Account Owner"
-          label-for="input-account-owner"
-          label-cols="3"
-          description=""
-        >
-          <b-input-group size="sm">
-            <b-form-input
-              id="input-account-owner"
-              v-model="form.accountOwner"
-              type="text"
-            />
-          </b-input-group>
-        </b-form-group>
-        <!-- Account IBAN -->
-        <b-form-group
-          id="input-group-iban"
+          size="small"
+          v-model="form.accountOwner"
+        />
+        <input-text
+          id="account-iban"
           label="IBAN"
-          label-for="input-iban"
-          label-cols="3"
-          description=""
-        >
-          <b-input-group size="sm">
-            <b-form-input id="input-iban" v-model="form.iban" type="text" />
-          </b-input-group>
-        </b-form-group>
-        <!-- Account BIC -->
-        <b-form-group
-          id="input-group-bic"
+          size="small"
+          v-model="form.iban"
+        />
+        <input-text
+          id="account-bic"
           label="BIC / SWIFT"
-          label-for="input-bic"
-          label-cols="3"
-          description=""
-        >
-          <b-input-group size="sm">
-            <b-form-input id="input-bic" v-model="form.bic" type="text" />
-          </b-input-group>
-        </b-form-group>
-        <!-- Account Comment -->
-        <b-form-group
-          id="input-group-comment"
+          size="small"
+          v-model="form.bic"
+        />
+        <input-text
+          id="account-comment"
           label="Comment"
-          label-for="input-comment"
-          label-cols="3"
-          description=""
-        >
-          <b-input-group size="sm">
-            <b-form-input
-              id="input-comment"
-              v-model="form.comment"
-              type="text"
-            />
-          </b-input-group>
-        </b-form-group>
-
-        <b-alert variant="info" show>
+          size="small"
+          v-model="form.comment"
+          description="Additional advice shown to users as payments instructions."
+        />
+        <div class="alert alert-info">
           Notification Settings. The application will send emails to users,
           therefore it needs to have access to an email account for doing so.
-        </b-alert>
-        <!-- SMTP Sender -->
-        <b-form-group
-          id="input-group-smtp-sender"
+        </div>
+        <input-text
+          id="smtp-sender"
           label="Sender Address"
-          label-for="input-smtp-sender"
-          label-cols="3"
-          description=""
-        >
-          <b-input-group size="sm">
-            <b-form-input
-              id="input-smtp-sender"
-              v-model="form.smtpSender"
-              type="text"
-            />
-          </b-input-group>
-        </b-form-group>
-      </b-form>
-      <!-- SMTP Server -->
-      <b-form-group
-        id="input-group-smtp-server"
-        label="SMTP Server"
-        label-for="input-smtp-server"
-        label-cols="3"
-        description=""
-      >
-        <b-input-group size="sm">
-          <b-form-input
-            id="input-smtp-server"
-            v-model="form.smtpServer"
-            type="text"
-          />
-        </b-input-group>
-      </b-form-group>
-      <!-- SMTP Username -->
-      <b-form-group
-        id="input-group-smtp-username"
-        label="Username"
-        label-for="input-smtp-username"
-        label-cols="3"
-        description=""
-      >
-        <b-input-group size="sm">
-          <b-form-input
-            id="input-smtp-username"
-            v-model="form.smtpUsername"
-            type="text"
-          />
-        </b-input-group>
-      </b-form-group>
-      <!-- SMTP Password -->
-      <b-form-group
-        id="input-group-smtp-password"
-        label="Password"
-        label-for="input-smtp-password"
-        label-cols="3"
-        description=""
-      >
-        <b-input-group size="sm">
-          <b-form-input
-            id="input-smtp-password"
-            v-model="form.smtpPassword"
-            type="password"
-          />
-        </b-input-group>
-      </b-form-group>
-
-      <b-alert variant="info" show>
-        ReCAPTCHA protects the application and its users from SPAMers. Thus it
-        is recommended to use ReCAPTCHA.
-      </b-alert>
-      <!-- ReCAPTCHA private key -->
-      <b-form-group
-        id="input-group-recaptcha-private-key"
-        label="Private Key"
-        label-for="input-recaptcha-private-key"
-        label-cols="3"
-        description=""
-      >
-        <b-input-group size="sm">
-          <b-form-input
-            id="input-recaptcha-private-key"
-            v-model="form.recaptchaPrivateKey"
-            type="text"
-          />
-        </b-input-group>
-      </b-form-group>
-      <!-- ReCAPTCHA Public Key -->
-      <b-form-group
-        id="input-group-recaptcha-public-key"
-        label="Public Key"
-        label-for="input-recaptcha-public-key"
-        label-cols="3"
-        description=""
-      >
-        <b-input-group size="sm">
-          <b-form-input
-            id="input-recaptcha-public-key"
-            v-model="form.recaptchaPublicKey"
-            type="text"
-          />
-        </b-input-group>
-      </b-form-group>
-    </b-card-body>
-    <b-card-footer>
-      <b-row class="text-right">
-        <b-col cols="9" offset="3">
-          <b-button class="mr-2" variant="outline-danger" to="/admin">
-            <b-icon-x />
+          size="small"
+          v-model="form.smtpSender"
+        />
+        <input-text
+          id="smtp-server"
+          label="SMTP Server"
+          size="small"
+          v-model="form.smtpServer"
+        />
+        <input-text
+          id="smtp-username"
+          label="Username"
+          size="small"
+          v-model="form.smtpUsername"
+        />
+        <input-password
+          id="smtp-password"
+          label="Password"
+          size="small"
+          v-model="form.smtpPassword"
+        />
+        <div class="alert alert-info">
+          ReCAPTCHA protects the application and its users from SPAMers. Thus it
+          is recommended to use ReCAPTCHA.
+        </div>
+        <input-text
+          id="recaptcha-private-key"
+          label="Private Key"
+          size="small"
+          v-model="form.recaptchaPrivateKey"
+        />
+        <input-text
+          id="recaptcha-public-key"
+          label="Public Key"
+          size="small"
+          v-model="form.recaptchaPublicKey"
+        />
+      </form>
+    </template>
+    <template v-if="showControls" v-slot:footer>
+      <div class="row">
+        <div class="col-12 text-end">
+          <button
+            class="btn btn-outline-danger" @click="cancel"
+          >
+            <i class="bi bi-x"/>
             Cancel
-          </b-button>
-          <b-button variant="outline-info" @click="save">
-            <b-icon-check />
+          </button>
+          <button
+            class="btn btn-outline-info ms-1" @click="save"
+          >
+            <i class="bi bi-check"/>
             Save
-          </b-button>
-        </b-col>
-      </b-row>
-    </b-card-footer>
-  </b-card>
+          </button>
+        </div>
+      </div>
+    </template>
+  </sectioned-card-module>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
-import EngineHourFormat from "@/components/forms/inputs/EngineHourFormat";
-import FuelPaymentTypeSelector from "@/components/forms/inputs/FuelPaymentTypeSelector";
-import {
-  BCard,
-  BCardBody,
-  BCardFooter,
-  BForm,
-  BAlert,
-  BFormGroup,
-  BInputGroup,
-  BFormInput,
-  BFormTextarea,
-  BRow,
-  BCol,
-  BButton,
-  BIconX,
-  BIconCheck,
-} from "bootstrap-vue";
 import LogoUpload from "@/components/LogoUpload";
+import SectionedCardModule from "@/components/bricks/SectionedCardModule.vue";
+import InputText from './forms/inputs/InputText.vue';
+import InputPassword from './forms/inputs/InputPassword.vue';
+import InputTextMultiline from './forms/inputs/InputTextMultiline.vue';
+import InputSelect from './forms/inputs/InputSelect.vue';
 
 export default {
   name: "SettingsCard",
   components: {
     WarningBox,
-    EngineHourFormat,
-    FuelPaymentTypeSelector,
-    BCard,
-    BCardBody,
-    BCardFooter,
-    BForm,
-    BAlert,
-    BFormGroup,
-    BInputGroup,
-    BFormInput,
-    BFormTextarea,
-    BRow,
-    BCol,
-    BButton,
-    BIconX,
-    BIconCheck,
     LogoUpload,
+    SectionedCardModule,
+    InputText,
+    InputPassword,
+    InputTextMultiline,
+    InputSelect,
   },
+  props: ["showControls"],
+  emits: ["save", "saved", "cancelled", "change"],
   data() {
     return {
       errors: [],
       form: {
         logoFile: null,
+        fuelPaymentType: "instant",
       },
+      fuelPaymentTypes: [
+        { value: "instant", text: "pay directly" },
+        { value: "billed", text: "pay by bill" },
+      ],
+      engineHourLogFormats: [
+        { value: "hh.h", text: "hh.h  - such as 9.7" },
+        { value: "hh:mm", text: "hh:mm - such as 9:42" },
+      ],
     };
   },
   computed: {
@@ -363,7 +214,14 @@ export default {
     logoChangeHandler: function (logoUri) {
       this.form.logoFile = logoUri;
     },
-    save: function () {
+    configChangeHandler: function() {
+      const configuration = this.getSanitizedConfiguration();
+      if(configuration != null){
+        console.log("emit change", configuration);
+        this.$emit("change", configuration);
+      }
+    },
+    getSanitizedConfiguration: function() {
       // extract correct URL from mapIframe
       const v = this.form;
       let mapUrl = [];
@@ -399,12 +257,31 @@ export default {
         recaptcha_publickey: v.recaptchaPublicKey,
       };
 
+      return newConfiguration;
+    },
+    save: function () {
+
+      const newConfiguration = this.getSanitizedConfiguration();
+      if (newConfiguration == null){
+        return;
+      }
+
+      // if not responsible for data controlling -> just emit signal
+      if(this.showControls == false) {
+        this.$emit("save", newConfiguration);
+        return;
+      }
+
+      // handle save otherwise
       this.setConfiguration(newConfiguration)
         .then(() => {
           this.errors = [];
-          this.$router.go(-1);
+          this.$emit("saved", newConfiguration);
         })
         .catch((errors) => (this.errors = errors));
+    },
+    cancel: function () {
+      this.$emit("cancelled");
     },
     setFormDefaults: function (defaultValues) {
       if (defaultValues == null) {
@@ -413,7 +290,7 @@ export default {
       }
 
       console.log("set form to defaults:", defaultValues);
-      this.$set(this, "form", {
+      this.form = {
         logoFile: defaultValues.logo_file,
         engineHourFormat: defaultValues.engine_hour_format,
         fuelPaymentType: defaultValues.fuel_payment_type,
@@ -433,13 +310,20 @@ export default {
         smtpPassword: defaultValues.smtp_password,
         recaptchaPrivateKey: defaultValues.recaptcha_privatekey,
         recaptchaPublicKey: defaultValues.recaptcha_publickey,
-      });
+      };
     },
   },
   watch: {
     getConfiguration: function (newValues) {
       this.setFormDefaults(newValues);
     },
+    form: {
+      deep: true,
+      handler() {
+        console.log("config changed");
+        this.configChangeHandler();
+      }
+    }
   },
   created() {
     this.queryConfiguration();

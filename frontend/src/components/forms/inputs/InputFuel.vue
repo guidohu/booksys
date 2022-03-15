@@ -9,6 +9,7 @@
           :disabled="disabled"
           :id="id"
           :value="modelValue"
+          :placeholder="placeholder"
           @input="changeHandler($event.target.value)"
         />
         <span class="input-group-text">ltr</span>
@@ -20,7 +21,7 @@
 <script>
 export default {
   name: "InputFuel",
-  props: ["id", "label", "modelValue", "disabled", "size"],
+  props: ["id", "label", "modelValue", "disabled", "size", "placeholder"],
   emits: ["update:modelValue"],
   methods: {
     changeHandler(value) {

@@ -4,13 +4,13 @@
     <div class="col-9">
       <div :class="inputGroupClass()">
         <input
-          :type="type"
+          type="file"
           class="form-control"
           :disabled="disabled"
           :id="id"
-          :value="modelValue"
+          :accept="accept"
           :placeholder="placeholder"
-          @input="changeHandler($event.target.value)"
+          @change="changeHandler($event)"
         />
         <span v-if="suffix != null" class="input-group-text">{{ suffix }}</span>
       </div>
@@ -23,23 +23,22 @@
 
 <script>
 export default {
-  name: "InputText",
+  name: "InputFile",
   props: [
     "id",
     "label",
     "modelValue",
-    "type",
     "disabled",
     "size",
     "suffix",
+    "accept",
     "placeholder",
     "description",
   ],
-  emits: ["update:modelValue", "input"],
+  emits: ["update:modelValue"],
   methods: {
-    changeHandler(value) {
-      this.$emit("update:modelValue", value);
-      this.$emit("input");
+    changeHandler(event) {
+      this.$emit("update:modelValue", event.target.files[0]);
     },
     inputGroupClass() {
       if (this.size == null) {

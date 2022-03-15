@@ -1,121 +1,75 @@
 <template>
-  <b-modal
-    id="incomeModal"
-    title="Add New Income"
+  <modal-container
+    name="income-modal"
     :visible="visible"
-    @hide="$emit('update:visible', false)"
-    @show="$emit('update:visible', true)"
   >
-    <b-row v-if="errors.length > 0">
-      <b-col cols="1" class="d-none d-sm-block" />
-      <b-col cols="12" sm="10">
-        <WarningBox :errors="errors" dismissible="true" />
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block" />
-    </b-row>
-    <b-form @submit="save">
-      <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block" />
-        <b-col cols="12" sm="10">
-          <b-form-group
-            id="type-select-group"
-            label="Type"
-            label-for="type-select"
-            description=""
-            label-cols="3"
-          >
-            <b-form-select
-              id="type-select"
-              v-model="form.type"
-              :options="incomeTypes"
-            />
-          </b-form-group>
-          <b-form-group
-            id="date-group"
-            label="Date"
-            label-for="date-select"
-            description=""
-            label-cols="3"
-          >
-            <b-form-input id="date-select" v-model="form.date" type="date" />
-          </b-form-group>
-          <b-form-group
-            v-if="form.type != null"
-            id="user-select-group"
-            :label="userLabel"
-            label-for="user-select"
-            :description="userDescription"
-            label-cols="3"
-          >
-            <b-form-select
-              id="user-select"
-              v-model="form.user"
-              :options="users"
-            />
-          </b-form-group>
-          <b-form-group
-            v-if="form.type != null"
-            id="amount"
-            label="Amount"
-            label-for="amount-input"
-            description=""
-            label-cols="3"
-          >
-            <b-input-group>
-              <b-form-input
-                id="amount-input"
-                v-model="form.amount"
-                type="text"
-                placeholder="0.00"
-              />
-              <b-input-group-append is-text>
-                {{ getCurrency }}
-              </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-          <b-form-group
-            v-if="form.type != null && form.type != 4"
-            id="description"
-            label="Description"
-            label-for="description-input"
-            description=""
-            label-cols="3"
-          >
-            <b-form-textarea
-              id="description-input"
-              v-model="form.comment"
-              type="text"
-              rows="2"
-              placeholder=""
-            />
-          </b-form-group>
-        </b-col>
-      </b-row>
-    </b-form>
-    <div slot="modal-footer">
-      <div class="text-right d-inline">
-        <b-button
+    <modal-header
+      :closable="true"
+      title="Add New Income"
+      @close="$emit('update:visible', false)"
+    />
+    <modal-body>
+      <warning-box v-if="errors.length" :errors="errors" />
+      <form @submit.prevent="save">
+        <input-select
+          id="type-select"
+          label="Type"
+          v-model="form.type"
+          :options="incomeTypes"
+          size="small"
+        />
+        <input-date-time-local
+          id="date"
+          label="Date"
+          v-model="form.date"
+          size="small"
+        />
+        <input-select
           v-if="form.type != null"
-          class="ml-4"
-          type="button"
-          variant="outline-info"
-          @click="add"
-        >
-          <b-icon-check />
-          Add
-        </b-button>
-        <b-button
-          class="ml-1"
-          type="button"
-          variant="outline-danger"
-          @click="close"
-        >
-          <b-icon-x />
-          Cancel
-        </b-button>
-      </div>
-    </div>
-  </b-modal>
+          id="user-select"
+          :label="userLabel"
+          v-model="form.user"
+          :options="users"
+          :description="userDescription"
+          size="small"
+        />
+        <input-currency
+          v-if="form.type != null"
+          id="amount"
+          label="Amount"
+          size="small"
+          v-model="form.amount"
+          placeholder="0.00"
+          :currency="getCurrency"
+        />
+        <input-text-multiline
+          v-if="form.type != null && form.type != 4"
+          id="description"
+          label="Description"
+          rows="2"
+          v-model="form.comment"
+        />
+      </form>
+    </modal-body>
+    <modal-footer>
+      <button
+        type="button"
+        class="btn btn-outline-info mr-1"
+        @click="add"
+      >
+        <i class="bi bi-check"/>
+        Add
+      </button>
+      <button
+        type="button"
+        class="btn btn-outline-danger"
+        @click="close"
+      >
+        <i class="bi bi-x"/>
+        Cancel
+      </button>
+    </modal-footer>
+  </modal-container>
 </template>
 
 <script>
@@ -123,39 +77,27 @@ import { mapGetters, mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
 import * as dayjs from "dayjs";
 import orderBy from "lodash/orderBy";
-import {
-  BModal,
-  BRow,
-  BCol,
-  BForm,
-  BFormGroup,
-  BFormSelect,
-  BFormInput,
-  BInputGroup,
-  BInputGroupAppend,
-  BFormTextarea,
-  BButton,
-  BIconCheck,
-  BIconX,
-} from "bootstrap-vue";
+import ModalContainer from './bricks/ModalContainer.vue';
+import ModalHeader from './bricks/ModalHeader.vue';
+import ModalBody from './bricks/ModalBody.vue';
+import ModalFooter from './bricks/ModalFooter.vue';
+import InputSelect from './forms/inputs/InputSelect.vue';
+import InputTextMultiline from './forms/inputs/InputTextMultiline.vue';
+import InputCurrency from './forms/inputs/InputCurrency.vue';
+import InputDateTimeLocal from './forms/inputs/InputDateTimeLocal.vue';
 
 export default {
   name: "IncomeModal",
   components: {
     WarningBox,
-    BModal,
-    BRow,
-    BCol,
-    BForm,
-    BFormGroup,
-    BFormSelect,
-    BFormInput,
-    BInputGroup,
-    BInputGroupAppend,
-    BFormTextarea,
-    BButton,
-    BIconCheck,
-    BIconX,
+    ModalContainer,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    InputSelect,
+    InputCurrency,
+    InputTextMultiline,
+    InputDateTimeLocal,
   },
   props: ["visible"],
   data() {
@@ -242,7 +184,7 @@ export default {
       this.form = {
         amount: null,
         type: null,
-        date: dayjs().format("YYYY-MM-DD"),
+        date: dayjs().format("YYYY-MM-DDTHH:mm"),
         user: null,
         comment: null,
       };

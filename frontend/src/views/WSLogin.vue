@@ -1,18 +1,14 @@
 <template>
   <div class="d-flex flex-column">
     <div class="container">
-      <div class="row text-center mb-3">
+      <div class="row text-center mb-3 mt-5">
         <div class="col-12">
-          <div class="ratio ratio-21x9">
-            <img
-              class="img-fluid"
-              v-if="getLogoFile != null"
-              :src="getLogoFile"
-              alt="Logo"
-              :height="100"
-              width="auto"
-            />
-          </div>
+          <img
+            class="img-fluid custom-height"
+            v-if="getLogoFile != null"
+            :src="getLogoFile"
+            alt="Logo"
+          />
         </div>
       </div>
       <div class="row">
@@ -114,3 +110,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+  .custom-height {
+    max-height: 100px;
+  }
+</style>

@@ -434,7 +434,7 @@
 		$db->bind_param('iisds',
 		                $post_data->user_id,
 						$post_data->type_id,
-						$post_data->date . ' 08:00:00',
+						$post_data->date,
 						sprintf('%.2f', $post_data->amount),
 						$post_data->comment);
 		if(!$db->execute()){
@@ -498,7 +498,7 @@
 		$db->bind_param('iisds',
 		                $post_data->user_id,
 						$post_data->type_id,
-						$post_data->date . ' 08:00:00',
+						$post_data->date,
 						sprintf('%.2f', $post_data->amount),
 						$post_data->comment);
 		if(!$db->execute()){

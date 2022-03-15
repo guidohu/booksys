@@ -38,7 +38,7 @@
     <tbody v-if="tRows != null && tRows.length > 0" role="rowgroup">
       <tr
         v-for="r in tRows"
-        :key="r.id"
+        :key="calculateRowKey(r)"
         role="row"
         :class="getRowClass(r)"
         @click="rowClickHandler(r)"
@@ -84,6 +84,8 @@
 
 <script>
 import { sortBy, reverse, isEqual } from "lodash";
+import hash from "object-hash";
+
 export default {
   name: "TableModule",
   props: [
@@ -147,6 +149,9 @@ export default {
     }
   },
   methods: {
+    calculateRowKey: function(row) {
+      return hash(row);
+    },
     sort: function () {
       this.sortByCol(this.sortCol, false);
     },

@@ -30,10 +30,10 @@
       </div>
     </div>
     <div class="bottom">
-      <button class="btn btn-outline-light" to="/dashboard">
+      <router-link tag="button" class="btn btn-outline-light" to="/dashboard">
         <i class="bi bi-house" />
         Home
-      </button>
+      </router-link>
     </div>
   </div>
   <div v-else>

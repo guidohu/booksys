@@ -1,112 +1,85 @@
 <template>
-  <b-form @submit="uploadNewLogo">
-    <b-alert variant="info" show>
+  <form @submit.stop="uploadNewLogo">
+    <warning-box v-if="errors.length > 0" :errors="errors" />
+    <div class="alert alert-info">
       This logo will be displayed within the application to customize the look
       to your needs.
-    </b-alert>
-    <warning-box v-if="errors.length > 0" :errors="errors" />
-    <!-- Image Upload -->
-    <b-overlay
-      id="overlay-background"
-      :show="isUploading"
-      spinner-type="border"
-      spinner-variant="info"
-      rounded="sm"
+    </div>
+    <overlay-spinner
+      :active="isUploading"
     >
-      <b-form-group
+      <input-file
         v-if="newLogoUri == null && (getLogoFile == null || showLogo == false)"
-        id="input-group-logo-file"
+        id="logo-file"
         label="Your Logo"
-        label-for="input-logo-file"
-        label-cols="3"
+        v-model="form.logoFile"
+        size="small"
+        accept="image/jpeg, image/png, image/gif"
         description="Supported types are .png or .jpg (maximum 500kB)"
-      >
-        <b-input-group size="sm">
-          <b-form-file
-            id="input-logo-file"
-            v-model="form.logoFile"
-            placeholder="No logo selected. Choose one or drop one here..."
-            drop-placeholder="Drop logo here"
-            accept="image/jpeg, image/png, image/gif"
-          />
-        </b-input-group>
-      </b-form-group>
-      <b-form-group
+      />
+      <div 
+        class="row" 
         v-if="newLogoUri != null || (getLogoFile != null && showLogo == true)"
-        label="Your Logo"
-        label-cols="3"
-      >
-        <b-img
-          v-if="getLogoFile != null && newLogoUri == null"
-          :height="50"
-          :src="getLogoFile"
-        />
-        <b-img v-if="newLogoUri != null" :height="50" :src="newLogoUri" />
-      </b-form-group>
-      <b-row class="text-right mb-3">
-        <b-col offset="3" cols="9">
-          <b-button
+      > 
+        <label class="col-3 col-form-label">Your Logo</label>
+        <div class="col-9">
+          <img 
+            v-if="getLogoFile != null && newLogoUri == null" 
+            :src="getLogoFile" 
+            class="img-fluid custom-height" 
+            alt="The logo for the login screen"
+          />
+          <img 
+            v-if="newLogoUri != null && newLogoUri != getLogoFile" 
+            :src="newLogoUri" 
+            class="img-fluid custom-height" 
+            alt="The logo for the login screen"
+          />
+        </div>
+      </div>
+      <div class="row mb-3 mt-2">
+        <div class="col-9 offset-3">
+          <button
             v-if="
               newLogoUri != null ||
               form.logoFile != null ||
               (getLogoFile != null && showLogo == true)
             "
-            variant="outline-danger"
+            class="btn btn-outline-danger"
             @click="clearLogo"
+            type="button"
           >
-            <b-icon-trash />
-            Clear
-          </b-button>
-          <b-button
+            <i class="bi bi-trash"/>
+            Remove
+          </button>
+          <button
             v-if="form.logoFile != null && newLogoUri == null"
-            class="ml-1"
-            variant="outline-info"
-            @click="uploadNewLogo"
+            type="button"
+            class="btn btn-outline-info ms-1"
+            @click.stop="uploadNewLogo"
           >
-            <b-icon-upload />
+            <i class="bi bi-upload"/>
             Upload
-          </b-button>
-        </b-col>
-      </b-row>
-    </b-overlay>
-  </b-form>
+          </button>
+        </div>
+      </div>
+    </overlay-spinner>
+  </form>
 </template>
 
 <script>
-import {
-  BOverlay,
-  BForm,
-  BAlert,
-  BFormGroup,
-  BInputGroup,
-  BFormFile,
-  BButton,
-  BImg,
-  BIconTrash,
-  BIconUpload,
-  BRow,
-  BCol,
-} from "bootstrap-vue";
 import WarningBox from "@/components/WarningBox";
 import { uploadLogo } from "@/api/resources";
 import { mapGetters, mapActions } from "vuex";
+import InputFile from './forms/inputs/InputFile.vue';
+import OverlaySpinner from './styling/OverlaySpinner.vue';
 
 export default {
   name: "LogoUpload",
   components: {
     WarningBox,
-    BOverlay,
-    BForm,
-    BAlert,
-    BFormGroup,
-    BInputGroup,
-    BFormFile,
-    BButton,
-    BImg,
-    BIconTrash,
-    BIconUpload,
-    BRow,
-    BCol,
+    InputFile,
+    OverlaySpinner
   },
   data() {
     return {
@@ -152,3 +125,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+  .custom-height {
+    max-height: 50px;
+  }
+</style>
