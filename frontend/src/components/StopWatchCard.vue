@@ -6,7 +6,7 @@
       @commentChangeHandler="changeComment"
     />
     <div class="row" v-if="errors.length > 0">
-      <warning-box  :errors="errors" />
+      <warning-box :errors="errors" />
     </div>
     <div class="row mx-1 my-4">
       <div class="col-12">
@@ -22,9 +22,9 @@
     <div class="row mx-1" v-if="comment != null">
       <div class="col-12">
         <div class="input-group">
-          <input type="text" class="form-control" v-model="comment"/>
+          <input type="text" class="form-control" v-model="comment" />
           <button class="btn btn-outline-info" @click="showHeatCommentModal">
-            <i class="bi bi-pencil-square"/>
+            <i class="bi bi-pencil-square" />
           </button>
         </div>
       </div>
@@ -80,23 +80,32 @@
             <i class="bi bi-check-square" />
             Finish
           </button>
-          <button v-if="selectedRiderId != null || getIsRunning" class="btn btn-outline-info btn-lg dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-          </button>
+          <button
+            v-if="selectedRiderId != null || getIsRunning"
+            class="btn btn-outline-info btn-lg dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          ></button>
           <ul class="dropdown-menu">
-            <li
-              v-if="selectedRiderId != null || getIsRunning"
-            >
-              <a class="dropdown-item" href="#" @click.prevent="showHeatCommentModal">
+            <li v-if="selectedRiderId != null || getIsRunning">
+              <a
+                class="dropdown-item"
+                href="#"
+                @click.prevent="showHeatCommentModal"
+              >
                 Add Comment
               </a>
             </li>
             <li v-if="getIsRunning && selectedRiderId != null">
-              <hr class="dropdown-divider">
+              <hr class="dropdown-divider" />
             </li>
-            <li
-              v-if="getIsRunning"
-            >
-              <a class="dropdown-item" href="#" @click.prevent="resetTakingTime">
+            <li v-if="getIsRunning">
+              <a
+                class="dropdown-item"
+                href="#"
+                @click.prevent="resetTakingTime"
+              >
                 Cancel Heat
               </a>
             </li>
@@ -111,8 +120,8 @@
 import { mapGetters, mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
 import HeatCommentModal from "@/components/HeatCommentModal";
-import CardModule from './bricks/CardModule.vue';
-import InputSelect from './forms/inputs/InputSelect.vue';
+import CardModule from "./bricks/CardModule.vue";
+import InputSelect from "./forms/inputs/InputSelect.vue";
 
 export default {
   name: "StopWatchCard",

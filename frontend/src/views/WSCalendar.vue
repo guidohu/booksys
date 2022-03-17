@@ -13,9 +13,7 @@
           />
         </div>
         <div class="col-4">
-          <sessions-overview
-            :sessions="sessionsOverview"
-          />
+          <sessions-overview :sessions="sessionsOverview" />
           <condition-info-card
             class="mt-2"
             :sunrise="sunrise"
@@ -47,10 +45,9 @@ import * as dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
 import * as dayjsCustomParseFormat from "dayjs/plugin/customParseFormat";
-import ShowForMobile from '../components/bricks/ShowForMobile.vue';
-import ShowForDesktop from '../components/bricks/ShowForDesktop.vue';
-import SubpageContainer from '../components/bricks/SubpageContainer.vue';
-
+import ShowForMobile from "../components/bricks/ShowForMobile.vue";
+import ShowForDesktop from "../components/bricks/ShowForDesktop.vue";
+import SubpageContainer from "../components/bricks/SubpageContainer.vue";
 
 dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);

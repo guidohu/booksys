@@ -2,9 +2,9 @@
   <div v-if="isDesktop">
     <subpage-desktop title="Account">
       <template v-slot:content>
-        <user-profile-card class="m-1"/>
-        <user-statistics-card class="m-1"/>
-        <user-balance-card class="m-1"/>
+        <user-profile-card class="m-1" />
+        <user-statistics-card class="m-1" />
+        <user-balance-card class="m-1" />
       </template>
       <template v-slot:bottom>
         <router-link tag="button" class="btn btn-outline-light" to="/dashboard">
@@ -29,8 +29,7 @@ import NavbarMobile from "@/components/NavbarMobile";
 import UserProfileCard from "@/components/UserProfileCard";
 import UserStatisticsCard from "@/components/UserStatisticsCard";
 import UserBalanceCard from "@/components/UserBalanceCard";
-import SubpageDesktop from '@/components/bricks/SubpageDesktop.vue';
-
+import SubpageDesktop from "@/components/bricks/SubpageDesktop.vue";
 
 export default {
   name: "WSAccount",

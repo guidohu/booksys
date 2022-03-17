@@ -147,12 +147,12 @@
 import { mapGetters, mapActions } from "vuex";
 import User from "@/api/user";
 import WarningBox from "@/components/WarningBox";
-import ModalContainer from '../components/bricks/ModalContainer.vue';
-import ModalHeader from '../components/bricks/ModalHeader.vue';
-import ModalBody from '../components/bricks/ModalBody.vue';
-import ModalFooter from '../components/bricks/ModalFooter.vue';
-import InputText from '../components/forms/inputs/InputText.vue';
-import InputPassword from '../components/forms/inputs/InputPassword.vue';
+import ModalContainer from "../components/bricks/ModalContainer.vue";
+import ModalHeader from "../components/bricks/ModalHeader.vue";
+import ModalBody from "../components/bricks/ModalBody.vue";
+import ModalFooter from "../components/bricks/ModalFooter.vue";
+import InputText from "../components/forms/inputs/InputText.vue";
+import InputPassword from "../components/forms/inputs/InputPassword.vue";
 
 const VueRecaptcha = () =>
   import(/* webpackChunkName: "vue-recaptcha" */ "vue-recaptcha");
@@ -170,7 +170,7 @@ export default {
     InputPassword,
   },
   data() {
-   return {
+    return {
       isLoading: false,
       showEmailDialog: true,
       showTokenDialog: false,

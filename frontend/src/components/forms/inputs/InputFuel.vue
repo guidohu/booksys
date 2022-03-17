@@ -29,16 +29,16 @@ export default {
       this.$emit("update:modelValue", value);
     },
     inputGroupClass() {
-      if(this.size == null){
+      if (this.size == null) {
         return "input-group";
       }
-      if(this.size == "small"){
-        return "input-group input-group-sm"
+      if (this.size == "small") {
+        return "input-group input-group-sm";
       }
-      if(this.size == "large"){
-        return "input-group input-group-lg"
+      if (this.size == "large") {
+        return "input-group input-group-lg";
       }
-    }
+    },
   },
 };
 </script>

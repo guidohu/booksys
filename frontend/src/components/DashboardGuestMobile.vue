@@ -1,9 +1,9 @@
 <template>
   <div>
-    <navbar-mobile title="Dashboard" role="guest-home"/>
+    <navbar-mobile title="Dashboard" role="guest-home" />
 
     <div class="row">
-      <div class="col-3"/>
+      <div class="col-3" />
       <div class="col-6 text-center">
         <div class="row mt-3">
           <dashboard-button to="/account">
@@ -18,20 +18,20 @@
           </dashboard-button>
         </div>
       </div>
-      <div class="col-3"/>
+      <div class="col-3" />
     </div>
   </div>
 </template>
 
 <script>
 import NavbarMobile from "@/components/NavbarMobile.vue";
-import DashboardButton from '@/components/bricks/DashboardButton.vue';
+import DashboardButton from "@/components/bricks/DashboardButton.vue";
 
 export default {
   name: "DashboardGuestMobile",
   components: {
     NavbarMobile,
-    DashboardButton
+    DashboardButton,
   },
 };
 </script>

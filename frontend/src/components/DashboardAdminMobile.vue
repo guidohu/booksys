@@ -1,9 +1,9 @@
 <template>
   <div>
-    <navbar-mobile title="Dashboard" role="admin-home"/>
+    <navbar-mobile title="Dashboard" role="admin-home" />
 
     <div class="row">
-      <div class="col-1"/>
+      <div class="col-1" />
       <div class="col-5">
         <div class="row mt-3">
           <dashboard-button to="/boat">
@@ -13,10 +13,7 @@
         </div>
         <div class="row mt-3">
           <dashboard-button to="/today">
-            <BooksysPie
-              :session-data="sessionData"
-              :properties="properties"
-            />
+            <BooksysPie :session-data="sessionData" :properties="properties" />
             TODAY
           </dashboard-button>
         </div>
@@ -66,14 +63,14 @@
 <script>
 import BooksysPie from "./Pie.vue";
 import NavbarMobile from "@/components/NavbarMobile.vue";
-import DashboardButton from '@/components/bricks/DashboardButton.vue';
+import DashboardButton from "@/components/bricks/DashboardButton.vue";
 
 export default {
   name: "DashboardAdminMobile",
   components: {
     BooksysPie,
     NavbarMobile,
-    DashboardButton
+    DashboardButton,
   },
   props: ["sessionData"],
   data() {

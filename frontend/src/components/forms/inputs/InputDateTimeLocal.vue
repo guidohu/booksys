@@ -22,26 +22,26 @@ export default {
   props: ["id", "label", "modelValue", "disabled", "size"],
   data() {
     return {
-      formattedDate: ""
-    }
+      formattedDate: "",
+    };
   },
   emits: ["update:modelValue"],
   methods: {
-    changeHandler: function(value) {
+    changeHandler: function (value) {
       console.log("updateValue to:", value);
       this.$emit("update:modelValue", value);
     },
-    inputGroupClass: function() {
-      if(this.size == null){
+    inputGroupClass: function () {
+      if (this.size == null) {
         return "input-group";
       }
-      if(this.size == "small"){
-        return "input-group input-group-sm"
+      if (this.size == "small") {
+        return "input-group input-group-sm";
       }
-      if(this.size == "large"){
-        return "input-group input-group-lg"
+      if (this.size == "large") {
+        return "input-group input-group-lg";
       }
     },
-  }
+  },
 };
 </script>

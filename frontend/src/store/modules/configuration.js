@@ -61,7 +61,7 @@ const getters = {
   },
   getFuelPaymentType: (state) => {
     return state.fuelPaymentType;
-  }
+  },
 };
 
 const actions = {

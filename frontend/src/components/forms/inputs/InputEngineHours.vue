@@ -55,16 +55,16 @@ export default {
       }
     },
     inputGroupClass() {
-      if(this.size == null){
+      if (this.size == null) {
         return "input-group";
       }
-      if(this.size == "small"){
-        return "input-group input-group-sm"
+      if (this.size == "small") {
+        return "input-group input-group-sm";
       }
-      if(this.size == "large"){
-        return "input-group input-group-lg"
+      if (this.size == "large") {
+        return "input-group input-group-lg";
       }
-    }
+    },
   },
   computed: {
     unitText: function () {
@@ -72,10 +72,10 @@ export default {
     },
   },
   watch: {
-    modelValue: function() {
+    modelValue: function () {
       this.formValue = formatEngineHour(this.modelValue, this.displayFormat);
     },
-    formValue: function() {
+    formValue: function () {
       if (this.formValue == null || this.formValue == "") {
         this.state = null;
       } else if (!isValidEngineHour(this.formValue, this.displayFormat)) {
@@ -83,17 +83,17 @@ export default {
       } else {
         this.state = null;
       }
-    }
+    },
   },
   created() {
     this.formValue = formatEngineHour(this.modelValue, this.displayFormat);
 
-    if(this.placeholder != null){
+    if (this.placeholder != null) {
       this.formPlaceholder = formatEngineHour(
         this.placeholder,
         this.displayFormat
       );
     }
-  }
+  },
 };
 </script>

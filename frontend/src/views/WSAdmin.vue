@@ -27,7 +27,7 @@
       <div class="col-1 col-lg-3" />
     </div>
     <div class="row mt-3 d-flex d-lg-none text-center">
-      <div class="col-1"/>
+      <div class="col-1" />
       <div class="col-5 text-center">
         <div class="row">
           <dashboard-button to="/users" colWidth="12" offsetWidth="0">
@@ -56,7 +56,7 @@
           </dashboard-button>
         </div>
       </div>
-    </div> 
+    </div>
   </subpage-container>
 </template>
 

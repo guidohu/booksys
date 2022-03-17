@@ -20,7 +20,14 @@ export default defineComponent({
       if (this.colWidth != null && this.offsetWidth == null) {
         return "col-" + this.colWidth + " text-center";
       }
-      return "col-" + this.colWidth + " " + "offset-sm-" + this.offsetWidth + " text-center";
+      return (
+        "col-" +
+        this.colWidth +
+        " " +
+        "offset-sm-" +
+        this.offsetWidth +
+        " text-center"
+      );
     },
   },
 });

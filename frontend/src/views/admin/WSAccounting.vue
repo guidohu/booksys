@@ -1,7 +1,7 @@
 <template>
   <subpage-container title="Accounting">
     <card-module :nobody="true" class="mx-1 scroll">
-      <accounting-tabs/>
+      <accounting-tabs />
     </card-module>
     <template v-slot:bottom>
       <router-link tag="button" class="btn btn-outline-light" to="/admin">
@@ -22,18 +22,17 @@ export default {
   components: {
     AccountingTabs,
     CardModule,
-    SubpageContainer
+    SubpageContainer,
   },
 };
 </script>
 
 <style scoped>
-
 /* responsive, for small screens, scrolling */
 @media (max-width: 992px) {
-    .scroll {
-        overflow-x: scroll;
-    }
+  .scroll {
+    overflow-x: scroll;
+  }
 }
 
 .scroll {

@@ -1,8 +1,5 @@
 <template>
-  <modal-container
-    name="expense-modal"
-    :visible="visible"
-  >
+  <modal-container name="expense-modal" :visible="visible">
     <modal-header
       :closable="true"
       title="Add New Expense"
@@ -67,26 +64,23 @@
           rows="2"
           v-model="form.description"
         />
-        <div class="alert alert-warning" v-if="form.type == 0 && getFuelPaymentType == 'billed'">
-          Entry will not be visible in the payment section as it is not a direct expense. According to your settings fuel consumption is 'billed' and thus only 'fuel bill' has an impact on the balance.
+        <div
+          class="alert alert-warning"
+          v-if="form.type == 0 && getFuelPaymentType == 'billed'"
+        >
+          Entry will not be visible in the payment section as it is not a direct
+          expense. According to your settings fuel consumption is 'billed' and
+          thus only 'fuel bill' has an impact on the balance.
         </div>
       </form>
     </modal-body>
     <modal-footer>
-      <button
-        type="button"
-        class="btn btn-outline-info mr-1"
-        @click="add"
-      >
-        <i class="bi bi-check"/>
+      <button type="button" class="btn btn-outline-info mr-1" @click="add">
+        <i class="bi bi-check" />
         Add
       </button>
-      <button
-        type="button"
-        class="btn btn-outline-danger"
-        @click="close"
-      >
-        <i class="bi bi-x"/>
+      <button type="button" class="btn btn-outline-danger" @click="close">
+        <i class="bi bi-x" />
         Cancel
       </button>
     </modal-footer>
@@ -98,16 +92,16 @@ import { mapGetters, mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
 import * as dayjs from "dayjs";
 import orderBy from "lodash/orderBy";
-import ModalContainer from './bricks/ModalContainer.vue';
-import ModalHeader from './bricks/ModalHeader.vue';
-import ModalBody from './bricks/ModalBody.vue';
-import ModalFooter from './bricks/ModalFooter.vue';
-import InputSelect from './forms/inputs/InputSelect.vue';
-import InputTextMultiline from './forms/inputs/InputTextMultiline.vue';
-import InputCurrency from './forms/inputs/InputCurrency.vue';
-import InputDateTimeLocal from './forms/inputs/InputDateTimeLocal.vue';
-import InputFuel from './forms/inputs/InputFuel.vue';
-import InputEngineHours from './forms/inputs/InputEngineHours.vue';
+import ModalContainer from "./bricks/ModalContainer.vue";
+import ModalHeader from "./bricks/ModalHeader.vue";
+import ModalBody from "./bricks/ModalBody.vue";
+import ModalFooter from "./bricks/ModalFooter.vue";
+import InputSelect from "./forms/inputs/InputSelect.vue";
+import InputTextMultiline from "./forms/inputs/InputTextMultiline.vue";
+import InputCurrency from "./forms/inputs/InputCurrency.vue";
+import InputDateTimeLocal from "./forms/inputs/InputDateTimeLocal.vue";
+import InputFuel from "./forms/inputs/InputFuel.vue";
+import InputEngineHours from "./forms/inputs/InputEngineHours.vue";
 
 export default {
   name: "ExpenseModal",
@@ -142,7 +136,11 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("configuration", ["getCurrency", "getEngineHourFormat", "getFuelPaymentType"]),
+    ...mapGetters("configuration", [
+      "getCurrency",
+      "getEngineHourFormat",
+      "getFuelPaymentType",
+    ]),
     ...mapGetters("user", ["userList"]),
     ...mapGetters("accounting", ["getExpenseTypes"]),
   },

@@ -11,11 +11,9 @@
       @close="$emit('update:visible', false)"
     />
     <modal-body>
-      <warning-box v-if="errors.length" :errors="errors"/>
+      <warning-box v-if="errors.length" :errors="errors" />
       <div class="row">
-        <div class="col-12">
-          Do you really want to delete this session?
-        </div>
+        <div class="col-12">Do you really want to delete this session?</div>
       </div>
     </modal-body>
     <modal-footer>
@@ -34,10 +32,10 @@
 <script>
 import { mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
-import ModalContainer from "@/components/bricks/ModalContainer.vue"
-import ModalHeader from "@/components/bricks/ModalHeader.vue"
-import ModalBody from "@/components/bricks/ModalBody.vue"
-import ModalFooter from "@/components/bricks/ModalFooter.vue"
+import ModalContainer from "@/components/bricks/ModalContainer.vue";
+import ModalHeader from "@/components/bricks/ModalHeader.vue";
+import ModalBody from "@/components/bricks/ModalBody.vue";
+import ModalFooter from "@/components/bricks/ModalFooter.vue";
 
 export default {
   name: "SessionDeleteModal",

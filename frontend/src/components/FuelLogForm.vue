@@ -56,7 +56,7 @@ export default {
     InputEngineHours,
     InputCurrency,
     InputFuel,
-    FormButton
+    FormButton,
   },
   data() {
     return {

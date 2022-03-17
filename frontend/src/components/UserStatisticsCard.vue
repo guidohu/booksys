@@ -12,7 +12,7 @@
       <div class="row">
         <div class="col-6">
           <div class="row">
-            <div class="col-12">Riding Time: {{ heatTimeMinutesYTD }} min </div>
+            <div class="col-12">Riding Time: {{ heatTimeMinutesYTD }} min</div>
           </div>
           <div class="row">
             <div class="col-12">
@@ -20,7 +20,7 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-12"> Cost: {{ heatCostYTD }} {{ getCurrency }} </div>
+            <div class="col-12">Cost: {{ heatCostYTD }} {{ getCurrency }}</div>
           </div>
           <div class="row">
             <div class="col-12">
@@ -29,7 +29,11 @@
           </div>
         </div>
         <div class="col-6">
-          <button type="button" class="btn btn-outline-info btn-sm" @click="showLatestHeats">
+          <button
+            type="button"
+            class="btn btn-outline-info btn-sm"
+            @click="showLatestHeats"
+          >
             <i class="bi bi-list-ul"></i>
             Latest Heats
           </button>
@@ -48,7 +52,7 @@ export default {
   name: "UserStatisticsCard",
   components: {
     UserHeatsModal,
-    SectionedCardModule
+    SectionedCardModule,
   },
   data() {
     return {

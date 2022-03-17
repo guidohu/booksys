@@ -2,17 +2,14 @@
   <card-module :nobody="true">
     <overlay-spinner :active="showOverlay" :full-page="false">
       <warning-box v-if="errors.length > 0" :errors="errors" />
-      <table-module
-        :columns="columns"
-        :rows="getLogLines"
-      />
+      <table-module :columns="columns" :rows="getLogLines" />
     </overlay-spinner>
   </card-module>
 </template>
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import CardModule from '@/components/bricks/CardModule.vue';
+import CardModule from "@/components/bricks/CardModule.vue";
 import TableModule from "./bricks/TableModule.vue";
 import WarningBox from "@/components/WarningBox";
 import OverlaySpinner from "@/components/styling/OverlaySpinner.vue";

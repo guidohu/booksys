@@ -3,15 +3,15 @@ import ConfirmDialog from "./dialogTemplates/ConfirmDialog.vue";
 import InfoDialog from "./dialogTemplates/InfoDialog.vue";
 
 const defaultConfirmParams = {
-  title: "", 
-  message: "", 
-  textConfirm: "OK", 
-  textDeny: "Cancel", 
+  title: "",
+  message: "",
+  textConfirm: "OK",
+  textDeny: "Cancel",
   id: "#dialog",
-}
+};
 
 export function confirm(params) {
-  const p = {...defaultConfirmParams, ...params};
+  const p = { ...defaultConfirmParams, ...params };
 
   return new Promise((resolve, reject) => {
     const dialog = createApp({
@@ -41,14 +41,14 @@ export function confirm(params) {
 }
 
 const defaultInfoParams = {
-  title: "", 
-  message: "", 
-  textConfirm: "OK", 
+  title: "",
+  message: "",
+  textConfirm: "OK",
   id: "#dialog",
-}
+};
 
 export function info(params) {
-  const p = {...defaultInfoParams, ...params};
+  const p = { ...defaultInfoParams, ...params };
 
   return new Promise((resolve) => {
     const dialog = createApp({

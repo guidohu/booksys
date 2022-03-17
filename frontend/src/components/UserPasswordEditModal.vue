@@ -1,40 +1,42 @@
 <template>
-  <modal-container
-    name="user-password-edit-modal"
-    :visible="visible"
-  >
+  <modal-container name="user-password-edit-modal" :visible="visible">
     <modal-header
       :closable="true"
       title="Change Password"
       @close="$emit('update:visible', false)"
-      />
-      <modal-body>
-        <div class="row" v-if="errors.length">
-          <warning-box :errors="errors" />
-        </div>
-        <form @submit.prevent.self="save">
-          <input-password
-            id="old-password"
-            label="Current Password"
-            autocomplete="current-password"
-            v-model="form.oldPassword"
-          />
-          <input-password
-            id="new-password"
-            label="New Password"
-            autocomplete="new-password"
-            v-model="form.newPassword"
-          />
-          <input-password
-            id="new-password-confirm"
-            label="Confirm New Password"
-            autocomplete="new-password"
-            v-model="form.newPasswordConfirm"
-          />
-        </form>
-      </modal-body>
-      <modal-footer>
-        <button type="submit" class="btn btn-outline-info" :disabled="isLoading" @click.prevent.self="save">
+    />
+    <modal-body>
+      <div class="row" v-if="errors.length">
+        <warning-box :errors="errors" />
+      </div>
+      <form @submit.prevent.self="save">
+        <input-password
+          id="old-password"
+          label="Current Password"
+          autocomplete="current-password"
+          v-model="form.oldPassword"
+        />
+        <input-password
+          id="new-password"
+          label="New Password"
+          autocomplete="new-password"
+          v-model="form.newPassword"
+        />
+        <input-password
+          id="new-password-confirm"
+          label="Confirm New Password"
+          autocomplete="new-password"
+          v-model="form.newPasswordConfirm"
+        />
+      </form>
+    </modal-body>
+    <modal-footer>
+      <button
+        type="submit"
+        class="btn btn-outline-info"
+        :disabled="isLoading"
+        @click.prevent.self="save"
+      >
         <i class="bi bi-check"></i>
         Save
       </button>
@@ -49,11 +51,11 @@
 <script>
 import { mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
-import ModalContainer from './bricks/ModalContainer.vue';
-import ModalHeader from './bricks/ModalHeader.vue';
-import ModalBody from './bricks/ModalBody.vue';
-import ModalFooter from './bricks/ModalFooter.vue';
-import InputPassword from './forms/inputs/InputPassword.vue';
+import ModalContainer from "./bricks/ModalContainer.vue";
+import ModalHeader from "./bricks/ModalHeader.vue";
+import ModalBody from "./bricks/ModalBody.vue";
+import ModalFooter from "./bricks/ModalFooter.vue";
+import InputPassword from "./forms/inputs/InputPassword.vue";
 
 export default {
   name: "UserPasswordEditModal",
@@ -63,10 +65,10 @@ export default {
     ModalHeader,
     ModalBody,
     ModalFooter,
-    InputPassword
+    InputPassword,
   },
   props: ["visible"],
-    ModalContainer,
+  ModalContainer,
   data() {
     return {
       form: {

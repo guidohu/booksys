@@ -8,7 +8,7 @@
           href="#payments"
           id="payments-tab"
           data-bs-target="#payments"
-          role="tab" 
+          role="tab"
           aria-controls="payments"
           aria-selected="true"
         >
@@ -23,7 +23,7 @@
           href="#statistics"
           id="statistics-tab"
           data-bs-target="#statistics"
-          role="tab" 
+          role="tab"
           aria-controls="statistics"
           aria-selected="false"
         >
@@ -36,24 +36,34 @@
     <!-- Responsive tab content to handle different
          height requirements -->
     <div class="tab-content">
-      <div class="tab-pane active" id="payments" role="tabpanel" aria-labelledby="payments-tab">
+      <div
+        class="tab-pane active"
+        id="payments"
+        role="tabpanel"
+        aria-labelledby="payments-tab"
+      >
         <show-for-desktop>
           <div class="tab-limited-height">
-            <payment-table/>
+            <payment-table />
           </div>
         </show-for-desktop>
         <show-for-mobile>
-          <payment-table/>
+          <payment-table />
         </show-for-mobile>
       </div>
-      <div class="tab-pane" id="statistics" role="tabpanel" aria-labelledby="statistics-tab">
+      <div
+        class="tab-pane"
+        id="statistics"
+        role="tabpanel"
+        aria-labelledby="statistics-tab"
+      >
         <show-for-desktop>
           <div class="tab-limited-height">
-            <payment-statistics/>
+            <payment-statistics />
           </div>
         </show-for-desktop>
         <show-for-mobile>
-          <payment-statistics/>
+          <payment-statistics />
         </show-for-mobile>
       </div>
     </div>

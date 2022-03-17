@@ -11,7 +11,7 @@
       @close="$emit('update:visible', false)"
     />
     <modal-body>
-      <warning-box v-if="errors.length" :erors="errors"/>
+      <warning-box v-if="errors.length" :erors="errors" />
       <form @submit.prevent="save">
         <input-text
           id="session-title"
@@ -72,11 +72,7 @@
         <i class="bi bi-check"></i>
         Save
       </button>
-      <button
-        type="button"
-        class="btn btn-outline-danger ml-1"
-        @click="close"
-      >
+      <button type="button" class="btn btn-outline-danger ml-1" @click="close">
         <i class="bi bi-x"></i>
         Cancel
       </button>
@@ -94,15 +90,15 @@ import Session, {
 import * as dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
-import ModalContainer from './bricks/ModalContainer.vue';
-import ModalHeader from './bricks/ModalHeader.vue';
-import ModalBody from './bricks/ModalBody.vue';
-import ModalFooter from './bricks/ModalFooter.vue';
-import InputText from './forms/inputs/InputText.vue';
-import InputNumber from './forms/inputs/InputNumber.vue';
-import InputToggle from './forms/inputs/InputToggle.vue';
-import InputTextMultiline from './forms/inputs/InputTextMultiline.vue';
-import InputDateTimeLocal from './forms/inputs/InputDateTimeLocal.vue';
+import ModalContainer from "./bricks/ModalContainer.vue";
+import ModalHeader from "./bricks/ModalHeader.vue";
+import ModalBody from "./bricks/ModalBody.vue";
+import ModalFooter from "./bricks/ModalFooter.vue";
+import InputText from "./forms/inputs/InputText.vue";
+import InputNumber from "./forms/inputs/InputNumber.vue";
+import InputToggle from "./forms/inputs/InputToggle.vue";
+import InputTextMultiline from "./forms/inputs/InputTextMultiline.vue";
+import InputDateTimeLocal from "./forms/inputs/InputDateTimeLocal.vue";
 
 dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);
@@ -153,21 +149,15 @@ export default {
       event.preventDefault();
       console.log("SessionEditorModal, save:", this.form);
 
-      const type = 
-        this.form.type == true
-          ? SESSION_TYPE_PRIVATE
-          : SESSION_TYPE_OPEN;
+      const type =
+        this.form.type == true ? SESSION_TYPE_PRIVATE : SESSION_TYPE_OPEN;
 
       const session = new Session(
         this.form.id,
         this.form.title,
         this.form.description,
-        dayjs
-          .tz(this.form.startDate, this.getTimezone)
-          .format(),
-        dayjs
-          .tz(this.form.endDate, this.getTimezone)
-          .format(),
+        dayjs.tz(this.form.startDate, this.getTimezone).format(),
+        dayjs.tz(this.form.endDate, this.getTimezone).format(),
         this.form.maximumRiders,
         type
       );
@@ -225,14 +215,17 @@ export default {
           : null;
 
       // set times
-      this.form.startDate = 
+      this.form.startDate =
         this.defaultValues != null && this.defaultValues.start != null
           ? dayjs(this.defaultValues.start).format("YYYY-MM-DDTHH:mm")
           : dayjs().tz(this.getTimezone).format("YYYY-MM-DDTHH:mm");
       this.form.endDate =
         this.defaultValues != null && this.defaultValues.end != null
           ? dayjs(this.defaultValues.end).format("YYYY-MM-DDTHH:mm")
-          : dayjs().tz(this.getTimezone).add(1, "hour").format("YYYY-MM-DDTHH:mm");
+          : dayjs()
+              .tz(this.getTimezone)
+              .add(1, "hour")
+              .format("YYYY-MM-DDTHH:mm");
 
       // set maximum riders
       this.form.maximumRiders =

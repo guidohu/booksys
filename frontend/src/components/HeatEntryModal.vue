@@ -20,12 +20,7 @@
           v-model="form.date"
           disabled
         />
-        <input-text
-          id="rider"
-          label="Rider"
-          v-model="form.rider"
-          disabled
-        />
+        <input-text id="rider" label="Rider" v-model="form.rider" disabled />
         <input-text
           id="fare"
           label="Fare"
@@ -58,17 +53,29 @@
     <modal-footer class="block-footer">
       <div class="row">
         <div class="col-6 text-start">
-          <button type="button" class="btn btn-outline-danger" @click.stop="remove">
+          <button
+            type="button"
+            class="btn btn-outline-danger"
+            @click.stop="remove"
+          >
             <i class="bi bi-trash"></i>
             Delete
           </button>
         </div>
         <div class="col-6 text-end">
-          <button type="submit" class="btn btn-outline-info me-2" @click.prevent.self="save">
+          <button
+            type="submit"
+            class="btn btn-outline-info me-2"
+            @click.prevent.self="save"
+          >
             <i class="bi bi-check"></i>
             Save
           </button>
-          <button type="button" class="btn btn-outline-danger" @click.prevent.self="close">
+          <button
+            type="button"
+            class="btn btn-outline-danger"
+            @click.prevent.self="close"
+          >
             <i class="bi bi-x"></i>
             Cancel
           </button>
@@ -88,8 +95,8 @@ import ModalHeader from "@/components/bricks/ModalHeader.vue";
 import ModalBody from "@/components/bricks/ModalBody.vue";
 import ModalFooter from "@/components/bricks/ModalFooter.vue";
 import InputText from "./forms/inputs/InputText.vue";
-import InputTextMultiline from "./forms/inputs/InputTextMultiline.vue"
-import InputDateTimeLocal from './forms/inputs/InputDateTimeLocal.vue';
+import InputTextMultiline from "./forms/inputs/InputTextMultiline.vue";
+import InputDateTimeLocal from "./forms/inputs/InputDateTimeLocal.vue";
 
 export default {
   name: "HeatEntryModal",
@@ -206,7 +213,7 @@ export default {
 </script>
 
 <style scoped>
-  .block-footer {
-    display: block;
-  }
+.block-footer {
+  display: block;
+}
 </style>

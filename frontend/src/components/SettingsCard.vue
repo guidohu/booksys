@@ -14,9 +14,7 @@
           size="small"
           description="select the format your engine hour display uses."
         />
-        <div class="alert alert-info">
-          Settings for your daily operations.
-        </div>
+        <div class="alert alert-info">Settings for your daily operations.</div>
         <input-select
           :options="fuelPaymentTypes"
           v-model="form.fuelPaymentType"
@@ -148,16 +146,12 @@
     <template v-if="showControls" v-slot:footer>
       <div class="row">
         <div class="col-12 text-end">
-          <button
-            class="btn btn-outline-danger" @click="cancel"
-          >
-            <i class="bi bi-x"/>
+          <button class="btn btn-outline-danger" @click="cancel">
+            <i class="bi bi-x" />
             Cancel
           </button>
-          <button
-            class="btn btn-outline-info ms-1" @click="save"
-          >
-            <i class="bi bi-check"/>
+          <button class="btn btn-outline-info ms-1" @click="save">
+            <i class="bi bi-check" />
             Save
           </button>
         </div>
@@ -171,10 +165,10 @@ import { mapGetters, mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
 import LogoUpload from "@/components/LogoUpload";
 import SectionedCardModule from "@/components/bricks/SectionedCardModule.vue";
-import InputText from './forms/inputs/InputText.vue';
-import InputPassword from './forms/inputs/InputPassword.vue';
-import InputTextMultiline from './forms/inputs/InputTextMultiline.vue';
-import InputSelect from './forms/inputs/InputSelect.vue';
+import InputText from "./forms/inputs/InputText.vue";
+import InputPassword from "./forms/inputs/InputPassword.vue";
+import InputTextMultiline from "./forms/inputs/InputTextMultiline.vue";
+import InputSelect from "./forms/inputs/InputSelect.vue";
 
 export default {
   name: "SettingsCard",
@@ -214,14 +208,14 @@ export default {
     logoChangeHandler: function (logoUri) {
       this.form.logoFile = logoUri;
     },
-    configChangeHandler: function() {
+    configChangeHandler: function () {
       const configuration = this.getSanitizedConfiguration();
-      if(configuration != null){
+      if (configuration != null) {
         console.log("emit change", configuration);
         this.$emit("change", configuration);
       }
     },
-    getSanitizedConfiguration: function() {
+    getSanitizedConfiguration: function () {
       // extract correct URL from mapIframe
       const v = this.form;
       let mapUrl = [];
@@ -260,14 +254,13 @@ export default {
       return newConfiguration;
     },
     save: function () {
-
       const newConfiguration = this.getSanitizedConfiguration();
-      if (newConfiguration == null){
+      if (newConfiguration == null) {
         return;
       }
 
       // if not responsible for data controlling -> just emit signal
-      if(this.showControls == false) {
+      if (this.showControls == false) {
         this.$emit("save", newConfiguration);
         return;
       }
@@ -322,8 +315,8 @@ export default {
       handler() {
         console.log("config changed");
         this.configChangeHandler();
-      }
-    }
+      },
+    },
   },
   created() {
     this.queryConfiguration();

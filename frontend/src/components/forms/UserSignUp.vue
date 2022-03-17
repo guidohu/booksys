@@ -24,7 +24,7 @@
       autocomplete="new-password"
       @input="update()"
     />
-    <hr/>
+    <hr />
     <input-text
       id="first-name"
       label="First Name"
@@ -97,7 +97,7 @@ export default {
   components: {
     InputToggle,
     InputText,
-    InputPassword
+    InputPassword,
   },
   props: ["userData", "showDisclaimer"],
   data() {

@@ -277,28 +277,28 @@ export default {
 </script>
 
 <style scoped>
-  .box {
-    display: flex;
-    flex-flow: column;
-    height: 100%;
-  }
+.box {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
 
+.box-fix-height {
+  max-height: 430px;
+}
+
+@media (max-width: 992px) {
   .box-fix-height {
-    max-height: 430px;
+    max-height: 90vh;
   }
+}
 
-  @media (max-width: 992px) {
-    .box-fix-height {
-      max-height: 90vh;
-    }
-  }
+.box-fix-content {
+  flex: 0 0 auto;
+}
 
-  .box-fix-content {
-    flex: 0 0 auto;
-  }
-
-  .box-flex-content {
-    flex: 1 1 auto;
-    overflow: scroll;
-  }
+.box-flex-content {
+  flex: 1 1 auto;
+  overflow: scroll;
+}
 </style>

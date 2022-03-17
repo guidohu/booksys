@@ -8,7 +8,7 @@
           href="#users"
           id="user-tab"
           data-bs-target="#users"
-          role="tab" 
+          role="tab"
           aria-controls="users"
           aria-selected="true"
         >
@@ -23,7 +23,7 @@
           href="#user-groups"
           id="user-groups-tab"
           data-bs-target="#user-groups"
-          role="tab" 
+          role="tab"
           aria-controls="user-groups"
           aria-selected="false"
         >
@@ -36,24 +36,34 @@
     <!-- Responsive tab content to handle different
          height requirements -->
     <div class="tab-content">
-      <div class="tab-pane active" id="users" role="tabpanel" aria-labelledby="users-tab">
+      <div
+        class="tab-pane active"
+        id="users"
+        role="tabpanel"
+        aria-labelledby="users-tab"
+      >
         <show-for-desktop>
           <div class="tab-limited-height">
-            <user-table/>
+            <user-table />
           </div>
         </show-for-desktop>
         <show-for-mobile>
-          <user-table/>
+          <user-table />
         </show-for-mobile>
       </div>
-      <div class="tab-pane" id="user-groups" role="tabpanel" aria-labelledby="user-groups-tab">
+      <div
+        class="tab-pane"
+        id="user-groups"
+        role="tabpanel"
+        aria-labelledby="user-groups-tab"
+      >
         <show-for-desktop>
           <div class="tab-limited-height">
-            <user-group-table/>
+            <user-group-table />
           </div>
         </show-for-desktop>
         <show-for-mobile>
-          <user-group-table/>
+          <user-group-table />
         </show-for-mobile>
       </div>
     </div>
@@ -64,7 +74,7 @@
 import UserTable from "@/components/UserTable";
 import UserGroupTable from "@/components/UserGroupTable";
 import ShowForMobile from "@/components/bricks/ShowForMobile.vue";
-import ShowForDesktop from '@/components/bricks/ShowForDesktop.vue';
+import ShowForDesktop from "@/components/bricks/ShowForDesktop.vue";
 
 export default {
   name: "UserManagementTabs",
@@ -72,7 +82,7 @@ export default {
     ShowForMobile,
     ShowForDesktop,
     UserTable,
-    UserGroupTable
+    UserGroupTable,
   },
 };
 </script>

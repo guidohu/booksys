@@ -8,33 +8,35 @@
       </div>
     </template>
     <template v-slot:body>
-      <div 
-        v-if="sessions == null || sessions.sessions == null"
+      <div v-if="sessions == null || sessions.sessions == null" class="row">
+        <div class="col-12">No day selected</div>
+      </div>
+      <div
+        v-if="
+          sessions != null &&
+          sessions.sessions != null &&
+          sessions.sessions.length == 0
+        "
         class="row"
       >
-        <div class="col-12">
-          No day selected
-        </div>
+        <div class="col-12">No sessions for this day.</div>
       </div>
-      <div 
-        v-if="sessions != null && sessions.sessions != null && sessions.sessions.length == 0"
-        class="row"
+      <div
+        v-if="
+          sessions != null &&
+          sessions.sessions != null &&
+          sessions.sessions.length > 0
+        "
       >
-        <div class="col-12">
-          No sessions for this day.
-        </div>
-      </div>
-      <div 
-        v-if="sessions != null && sessions.sessions != null && sessions.sessions.length > 0" 
-      >
-        <div v-for="session in sessions.sessions.slice(0, 2)"
+        <div
+          v-for="session in sessions.sessions.slice(0, 2)"
           :key="session.id"
           class="row mt-2 small-text"
         >
           <div class="col-12">
             <div class="row">
               <div class="col-5">
-                <i class="bi bi-book"/>
+                <i class="bi bi-book" />
                 Title
               </div>
               <div class="col-7">
@@ -43,7 +45,7 @@
             </div>
             <div class="row">
               <div class="col-5">
-                <i class="bi bi-clock"/>
+                <i class="bi bi-clock" />
                 Time
               </div>
               <div class="col-7">
@@ -52,32 +54,45 @@
             </div>
             <div class="row">
               <div class="col-5">
-                <i class="bi bi-person"/>
+                <i class="bi bi-person" />
                 Riders
               </div>
-              <div v-if="session.rider == null || session.riders.length == 0" class="col-7">
+              <div
+                v-if="session.rider == null || session.riders.length == 0"
+                class="col-7"
+              >
                 -
               </div>
-              <div v-if="session.rider != null && session.riders.length > 0" class="col-7">
-                <div v-for="rider in session.riders.slice(0,3)" :key="rider.id" class="row">
+              <div
+                v-if="session.rider != null && session.riders.length > 0"
+                class="col-7"
+              >
+                <div
+                  v-for="rider in session.riders.slice(0, 3)"
+                  :key="rider.id"
+                  class="row"
+                >
                   <div class="col-12 text-truncate">
                     {{ rider.name }}
                   </div>
                 </div>
                 <div v-if="sessions.riders.length > 3">
-                  <div class="col-12 text-truncate">
-                    ...
-                  </div>
+                  <div class="col-12 text-truncate">...</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div v-if="sessions != null && sessions.sessions != null && sessions.sessions.length > 2" class="row small-text">
-        <div class="col-12">
-          click for more details...
-        </div>
+      <div
+        v-if="
+          sessions != null &&
+          sessions.sessions != null &&
+          sessions.sessions.length > 2
+        "
+        class="row small-text"
+      >
+        <div class="col-12">click for more details...</div>
       </div>
     </template>
   </sectioned-card-module>

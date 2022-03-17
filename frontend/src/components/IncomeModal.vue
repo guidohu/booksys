@@ -1,8 +1,5 @@
 <template>
-  <modal-container
-    name="income-modal"
-    :visible="visible"
-  >
+  <modal-container name="income-modal" :visible="visible">
     <modal-header
       :closable="true"
       title="Add New Income"
@@ -52,20 +49,12 @@
       </form>
     </modal-body>
     <modal-footer>
-      <button
-        type="button"
-        class="btn btn-outline-info mr-1"
-        @click="add"
-      >
-        <i class="bi bi-check"/>
+      <button type="button" class="btn btn-outline-info mr-1" @click="add">
+        <i class="bi bi-check" />
         Add
       </button>
-      <button
-        type="button"
-        class="btn btn-outline-danger"
-        @click="close"
-      >
-        <i class="bi bi-x"/>
+      <button type="button" class="btn btn-outline-danger" @click="close">
+        <i class="bi bi-x" />
         Cancel
       </button>
     </modal-footer>
@@ -77,14 +66,14 @@ import { mapGetters, mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
 import * as dayjs from "dayjs";
 import orderBy from "lodash/orderBy";
-import ModalContainer from './bricks/ModalContainer.vue';
-import ModalHeader from './bricks/ModalHeader.vue';
-import ModalBody from './bricks/ModalBody.vue';
-import ModalFooter from './bricks/ModalFooter.vue';
-import InputSelect from './forms/inputs/InputSelect.vue';
-import InputTextMultiline from './forms/inputs/InputTextMultiline.vue';
-import InputCurrency from './forms/inputs/InputCurrency.vue';
-import InputDateTimeLocal from './forms/inputs/InputDateTimeLocal.vue';
+import ModalContainer from "./bricks/ModalContainer.vue";
+import ModalHeader from "./bricks/ModalHeader.vue";
+import ModalBody from "./bricks/ModalBody.vue";
+import ModalFooter from "./bricks/ModalFooter.vue";
+import InputSelect from "./forms/inputs/InputSelect.vue";
+import InputTextMultiline from "./forms/inputs/InputTextMultiline.vue";
+import InputCurrency from "./forms/inputs/InputCurrency.vue";
+import InputDateTimeLocal from "./forms/inputs/InputDateTimeLocal.vue";
 
 export default {
   name: "IncomeModal",

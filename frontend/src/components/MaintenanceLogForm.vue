@@ -47,7 +47,7 @@ export default {
     WarningBox,
     InputEngineHours,
     InputTextMultiline,
-    FormButton
+    FormButton,
   },
   data() {
     return {

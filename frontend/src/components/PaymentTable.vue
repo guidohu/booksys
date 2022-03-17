@@ -15,18 +15,17 @@
             class="btn btn-outline-info btn-sm me-1"
             @click="showAddIncome"
           >
-            <i class="bi bi-plus"/>
+            <i class="bi bi-plus" />
             Income
           </button>
-          <button
-            class="btn btn-outline-info btn-sm"
-            @click="showAddExpense"
-          >
-            <i class="bi bi-dash"/>
+          <button class="btn btn-outline-info btn-sm" @click="showAddExpense">
+            <i class="bi bi-dash" />
             Expense
           </button>
         </div>
-        <div class="col-3 col-sm-3 col-lg-2 offset-3 offset-sm-3 offset-lg-4 text-right pe-1">
+        <div
+          class="col-3 col-sm-3 col-lg-2 offset-3 offset-sm-3 offset-lg-4 text-right pe-1"
+        >
           <input-select
             id="year"
             v-model="form.selectedYear"
@@ -47,7 +46,10 @@
               <template #cell(action)="item">
                 <div class="text-center">
                   <button class="btn btn-light btn-sm" style="font-size: 0.8em">
-                    <i class="bi bi-trash text-alert" @click="deleteEntry(item.row)"/>
+                    <i
+                      class="bi bi-trash text-alert"
+                      @click="deleteEntry(item.row)"
+                    />
                   </button>
                 </div>
               </template>
@@ -68,13 +70,15 @@ import { formatCurrency } from "@/libs/formatters";
 import WarningBox from "@/components/WarningBox";
 import TableModule from "./bricks/TableModule.vue";
 import InputSelect from "./forms/inputs/InputSelect.vue";
-import OverlaySpinner from './styling/OverlaySpinner.vue';
+import OverlaySpinner from "./styling/OverlaySpinner.vue";
 import { confirm } from "@/components/bricks/DialogModal";
 
 const IncomeModal = defineAsyncComponent(() =>
-  import(/* webpackChunkName: "income-modal" */ "@/components/IncomeModal"));
+  import(/* webpackChunkName: "income-modal" */ "@/components/IncomeModal")
+);
 const ExpenseModal = defineAsyncComponent(() =>
-  import(/* webpackChunkName: "expense-modal" */ "@/components/ExpenseModal"));
+  import(/* webpackChunkName: "expense-modal" */ "@/components/ExpenseModal")
+);
 
 export default {
   name: "PaymentTable",
@@ -177,10 +181,9 @@ export default {
     deleteEntry: function (transaction) {
       console.log("Delete transaction:", transaction);
       confirm({
-        title:"Delete Transaction",
-        message: "Do you really want to delete this transaction?"
-      })
-      .then((value) => {
+        title: "Delete Transaction",
+        message: "Do you really want to delete this transaction?",
+      }).then((value) => {
         // delete transaction
         if (value == true) {
           this.isLoading = true;
@@ -188,12 +191,12 @@ export default {
             .then(() => {
               this.errors = [];
             })
-            .catch((errors) => { 
+            .catch((errors) => {
               this.errors = errors;
             })
             .then(() => (this.isLoading = false));
         }
-      })
+      });
     },
     dismissedHandler: function () {
       this.errors = [];
@@ -216,28 +219,28 @@ export default {
 </script>
 
 <style scoped>
-  .box {
-    display: flex;
-    flex-flow: column;
-    height: 100%;
-  }
+.box {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
 
+.box-fix-height {
+  max-height: 430px;
+}
+
+@media (max-width: 992px) {
   .box-fix-height {
-    max-height: 430px;
+    max-height: 90vh;
   }
+}
 
-  @media (max-width: 992px) {
-    .box-fix-height {
-      max-height: 90vh;
-    }
-  }
+.box-fix-content {
+  flex: 0 0 auto;
+}
 
-  .box-fix-content {
-    flex: 0 0 auto;
-  }
-
-  .box-flex-content {
-    flex: 1 1 auto;
-    overflow: scroll;
-  }
+.box-flex-content {
+  flex: 1 1 auto;
+  overflow: scroll;
+}
 </style>

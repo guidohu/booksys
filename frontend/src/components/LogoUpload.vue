@@ -5,9 +5,7 @@
       This logo will be displayed within the application to customize the look
       to your needs.
     </div>
-    <overlay-spinner
-      :active="isUploading"
-    >
+    <overlay-spinner :active="isUploading">
       <input-file
         v-if="newLogoUri == null && (getLogoFile == null || showLogo == false)"
         id="logo-file"
@@ -17,22 +15,22 @@
         accept="image/jpeg, image/png, image/gif"
         description="Supported types are .png or .jpg (maximum 500kB)"
       />
-      <div 
-        class="row" 
+      <div
+        class="row"
         v-if="newLogoUri != null || (getLogoFile != null && showLogo == true)"
-      > 
+      >
         <label class="col-3 col-form-label">Your Logo</label>
         <div class="col-9">
-          <img 
-            v-if="getLogoFile != null && newLogoUri == null" 
-            :src="getLogoFile" 
-            class="img-fluid custom-height" 
+          <img
+            v-if="getLogoFile != null && newLogoUri == null"
+            :src="getLogoFile"
+            class="img-fluid custom-height"
             alt="The logo for the login screen"
           />
-          <img 
-            v-if="newLogoUri != null && newLogoUri != getLogoFile" 
-            :src="newLogoUri" 
-            class="img-fluid custom-height" 
+          <img
+            v-if="newLogoUri != null && newLogoUri != getLogoFile"
+            :src="newLogoUri"
+            class="img-fluid custom-height"
             alt="The logo for the login screen"
           />
         </div>
@@ -49,7 +47,7 @@
             @click="clearLogo"
             type="button"
           >
-            <i class="bi bi-trash"/>
+            <i class="bi bi-trash" />
             Remove
           </button>
           <button
@@ -58,7 +56,7 @@
             class="btn btn-outline-info ms-1"
             @click.stop="uploadNewLogo"
           >
-            <i class="bi bi-upload"/>
+            <i class="bi bi-upload" />
             Upload
           </button>
         </div>
@@ -71,15 +69,15 @@
 import WarningBox from "@/components/WarningBox";
 import { uploadLogo } from "@/api/resources";
 import { mapGetters, mapActions } from "vuex";
-import InputFile from './forms/inputs/InputFile.vue';
-import OverlaySpinner from './styling/OverlaySpinner.vue';
+import InputFile from "./forms/inputs/InputFile.vue";
+import OverlaySpinner from "./styling/OverlaySpinner.vue";
 
 export default {
   name: "LogoUpload",
   components: {
     WarningBox,
     InputFile,
-    OverlaySpinner
+    OverlaySpinner,
   },
   data() {
     return {
@@ -127,7 +125,7 @@ export default {
 </script>
 
 <style scoped>
-  .custom-height {
-    max-height: 50px;
-  }
+.custom-height {
+  max-height: 50px;
+}
 </style>

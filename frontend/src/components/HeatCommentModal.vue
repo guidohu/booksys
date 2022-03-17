@@ -26,15 +26,11 @@
         class="btn btn-outline-danger mr-1"
         @click="removeComment"
       >
-        <i class="bi bi-x"/>
+        <i class="bi bi-x" />
         Delete
       </button>
-      <button
-        type="button"
-        class="btn btn-outline-info"
-        @click="saveComment"
-      >
-        <i class="bi bi-check"/>
+      <button type="button" class="btn btn-outline-info" @click="saveComment">
+        <i class="bi bi-check" />
         Save
       </button>
     </modal-footer>
@@ -43,11 +39,11 @@
 
 <script>
 import WarningBox from "@/components/WarningBox";
-import ModalContainer from './bricks/ModalContainer.vue';
-import ModalHeader from './bricks/ModalHeader.vue';
-import ModalBody from './bricks/ModalBody.vue';
-import ModalFooter from './bricks/ModalFooter.vue';
-import InputText from './forms/inputs/InputText.vue';
+import ModalContainer from "./bricks/ModalContainer.vue";
+import ModalHeader from "./bricks/ModalHeader.vue";
+import ModalBody from "./bricks/ModalBody.vue";
+import ModalFooter from "./bricks/ModalFooter.vue";
+import InputText from "./forms/inputs/InputText.vue";
 
 export default {
   name: "HeatCommentModal",

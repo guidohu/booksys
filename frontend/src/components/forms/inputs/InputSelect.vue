@@ -11,14 +11,14 @@
           @change="changeHandler($event)"
           v-model="selectedValue"
           :size="selectSize"
-          :multiple="selectMode=='multiple'"
+          :multiple="selectMode == 'multiple'"
         >
           <option v-for="o in options" :key="o.value" :value="o.value">
             {{ o.text }}
           </option>
         </select>
       </div>
-      <div v-if="description" :id="id+'-description'" class="form-text">
+      <div v-if="description" :id="id + '-description'" class="form-text">
         {{ description }}
       </div>
     </div>
@@ -32,13 +32,13 @@
       @change="changeHandler($event)"
       v-model="selectedValue"
       :size="selectSize"
-      :multiple="selectMode=='multiple'"
+      :multiple="selectMode == 'multiple'"
     >
       <option v-for="o in options" :key="o.value" :value="o.value">
         {{ o.text }}
       </option>
     </select>
-    <div v-if="description" :id="id+'-description'" class="form-text">
+    <div v-if="description" :id="id + '-description'" class="form-text">
       {{ description }}
     </div>
   </div>
@@ -47,29 +47,39 @@
 <script>
 export default {
   name: "InputSelect",
-  props: ["id", "label", "modelValue", "options", "disabled", "size", "selectMode", "selectSize", "description"],
+  props: [
+    "id",
+    "label",
+    "modelValue",
+    "options",
+    "disabled",
+    "size",
+    "selectMode",
+    "selectSize",
+    "description",
+  ],
   emits: ["update:modelValue", "changed"],
   data() {
     return {
-      selectedValue: 0
-    }
+      selectedValue: 0,
+    };
   },
   watch: {
-    modelValue: function(newValue) {
+    modelValue: function (newValue) {
       this.selectedValue = newValue;
-    }
+    },
   },
   methods: {
     changeHandler(event) {
       console.log(event);
-      if (this.selectMode != 'multiple') {
+      if (this.selectMode != "multiple") {
         const value = event.target.value;
         console.log("selected value", value);
         this.$emit("update:modelValue", value);
       } else {
         let array = [];
         const options = event.target.selectedOptions;
-        for (let i = 0; i < options.length; i++) { 
+        for (let i = 0; i < options.length; i++) {
           array.push(options[i].value);
         }
         console.log("selected values", array);
@@ -77,34 +87,34 @@ export default {
       }
       this.$emit("changed");
     },
-    isSelected: function(option) {
+    isSelected: function (option) {
       return option.value == this.modelValue;
     },
     inputGroupClass() {
-      if(this.size == null){
+      if (this.size == null) {
         return "input-group";
       }
-      if(this.size == "small"){
-        return "input-group input-group-sm"
+      if (this.size == "small") {
+        return "input-group input-group-sm";
       }
-      if(this.size == "large"){
-        return "input-group input-group-lg"
+      if (this.size == "large") {
+        return "input-group input-group-lg";
       }
     },
     formSelectClass() {
-      if(this.size == null){
+      if (this.size == null) {
         return "form-select";
       }
-      if(this.size == "small"){
-        return "form-select form-select-sm"
+      if (this.size == "small") {
+        return "form-select form-select-sm";
       }
-      if(this.size == "large"){
-        return "form-select form-select-lg"
+      if (this.size == "large") {
+        return "form-select form-select-lg";
       }
-    }
+    },
   },
   created() {
     this.selectedValue = this.modelValue;
-  }
+  },
 };
 </script>

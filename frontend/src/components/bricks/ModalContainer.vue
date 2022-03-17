@@ -23,7 +23,7 @@ export default {
   props: ["visible", "name"],
   mounted() {
     this.modal = new Modal(this.$refs[this.name]);
-    if(this.visible){
+    if (this.visible) {
       this.modal.show();
     }
   },

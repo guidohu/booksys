@@ -20,11 +20,19 @@ export default {
   props: ["type", "btnStyle", "btnSize"],
   emits: ["click"],
   computed: {
-    getClass: function() {
-      const style = (this.btnStyle == null) ? "btn-outline-info" : "btn-outline-" + this.btnStyle;
-      const size = (this.btnSize == "small") ? "btn-sm" : (this.btnSize == "large") ? "btn-lg" : ""; 
+    getClass: function () {
+      const style =
+        this.btnStyle == null
+          ? "btn-outline-info"
+          : "btn-outline-" + this.btnStyle;
+      const size =
+        this.btnSize == "small"
+          ? "btn-sm"
+          : this.btnSize == "large"
+          ? "btn-lg"
+          : "";
       return "btn " + style + " " + size;
-    }
-  }
-}
+    },
+  },
+};
 </script>

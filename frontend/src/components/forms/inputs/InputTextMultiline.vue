@@ -3,7 +3,7 @@
     <label :for="id" class="col-3 col-form-label">{{ label }}</label>
     <div class="col-9">
       <div :class="inputGroupClass()">
-        <textarea  
+        <textarea
           :id="id"
           class="form-control"
           :rows="rows"
@@ -20,7 +20,15 @@
 <script>
 export default {
   name: "InputText",
-  props: ["id", "label", "modelValue", "disabled", "size", "placeholder", "rows"],
+  props: [
+    "id",
+    "label",
+    "modelValue",
+    "disabled",
+    "size",
+    "placeholder",
+    "rows",
+  ],
   emits: ["update:modelValue"],
   methods: {
     changeHandler(value) {

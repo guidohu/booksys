@@ -50,9 +50,9 @@ import WarningBox from "@/components/WarningBox";
 import StopWatchCard from "@/components/StopWatchCard";
 import SessionHeatListCard from "@/components/SessionHeatListCard";
 import ConditionInfoCard from "@/components/ConditionInfoCard";
-import ShowForMobile from '../components/bricks/ShowForMobile.vue';
-import ShowForDesktop from '../components/bricks/ShowForDesktop.vue';
-import SubpageContainer from '../components/bricks/SubpageContainer.vue';
+import ShowForMobile from "../components/bricks/ShowForMobile.vue";
+import ShowForDesktop from "../components/bricks/ShowForDesktop.vue";
+import SubpageContainer from "../components/bricks/SubpageContainer.vue";
 
 export default {
   name: "WSWatch",

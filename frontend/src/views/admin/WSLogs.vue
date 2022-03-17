@@ -1,6 +1,6 @@
 <template>
   <subpage-container title="Logs">
-    <log-card class="mx-1 scroll"/>
+    <log-card class="mx-1 scroll" />
     <template v-slot:bottom>
       <router-link tag="button" class="btn btn-outline-light" to="/admin">
         <i class="bi bi-gear"></i>
@@ -12,7 +12,7 @@
 
 <script>
 import LogCard from "@/components/LogCard";
-import SubpageContainer from '@/components/bricks/SubpageContainer.vue';
+import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
 
 export default {
   name: "WSLogs",
@@ -24,12 +24,11 @@ export default {
 </script>
 
 <style scoped>
-
 /* responsive, for small screens, scrolling */
 @media (max-width: 992px) {
-    .scroll {
-        overflow-x: scroll;
-    }
+  .scroll {
+    overflow-x: scroll;
+  }
 }
 
 .scroll {

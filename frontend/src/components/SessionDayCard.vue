@@ -3,18 +3,26 @@
     <template v-slot:header>
       <div class="row">
         <div class="col-4 text-end">
-          <button v-if="!disableDayBrowsing" type="button" class="btn btn-outline-info btn-xs" 
-            @click="prevDay">
-            <i class="bi bi-arrow-left-short"/>
+          <button
+            v-if="!disableDayBrowsing"
+            type="button"
+            class="btn btn-outline-info btn-xs"
+            @click="prevDay"
+          >
+            <i class="bi bi-arrow-left-short" />
           </button>
         </div>
         <div class="col-4 text-center">
           {{ dateString }}
         </div>
         <div class="col-4 text-start">
-          <button v-if="!disableDayBrowsing" type="button" class="btn btn-outline-info btn-xs" 
-            @click="nextDay">
-            <i class="bi bi-arrow-right-short"/>
+          <button
+            v-if="!disableDayBrowsing"
+            type="button"
+            class="btn btn-outline-info btn-xs"
+            @click="nextDay"
+          >
+            <i class="bi bi-arrow-right-short" />
           </button>
         </div>
       </div>
@@ -28,15 +36,21 @@
           @selectHandler="selectSession"
         />
       </div>
-      <div v-if="
+      <div
+        v-if="
           isToday &&
           selectedSession != null &&
           selectedSession.id != null &&
-          selectedSession.riders.length > 0"
+          selectedSession.riders.length > 0
+        "
         class="row text-center"
       >
         <div class="col-12 text-center">
-          <button type="button" class="btn btn-outline-success" @click="navigateSessionStart">
+          <button
+            type="button"
+            class="btn btn-outline-success"
+            @click="navigateSessionStart"
+          >
             Start Session
           </button>
         </div>

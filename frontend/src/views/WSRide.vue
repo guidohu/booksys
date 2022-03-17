@@ -92,18 +92,20 @@ import * as dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
 import difference from "lodash/difference";
-import SubpageContainer from '../components/bricks/SubpageContainer.vue';
-import ShowForDesktop from '../components/bricks/ShowForDesktop.vue';
-import ShowForMobile from '../components/bricks/ShowForMobile.vue';
+import SubpageContainer from "../components/bricks/SubpageContainer.vue";
+import ShowForDesktop from "../components/bricks/ShowForDesktop.vue";
+import ShowForMobile from "../components/bricks/ShowForMobile.vue";
 
 const SessionEditorModal = defineAsyncComponent(() =>
   import(
     /* webpackChunkName: "session-editor-modal" */ "@/components/SessionEditorModal"
-  ));
+  )
+);
 const SessionDeleteModal = defineAsyncComponent(() =>
   import(
     /* webpackChunkName: "session-delete-modal" */ "@/components/SessionDeleteModal"
-  ));
+  )
+);
 
 dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);

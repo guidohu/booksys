@@ -37,8 +37,8 @@
 <script>
 import SubpageDesktop from "@/components/bricks/SubpageDesktop.vue";
 import NavbarMobile from "@/components/NavbarMobile.vue";
-import ShowForDesktop from '@/components/bricks/ShowForDesktop.vue';
-import ShowForMobile from '@/components/bricks/ShowForMobile.vue';
+import ShowForDesktop from "@/components/bricks/ShowForDesktop.vue";
+import ShowForMobile from "@/components/bricks/ShowForMobile.vue";
 
 export default {
   name: "SubpageContainer",

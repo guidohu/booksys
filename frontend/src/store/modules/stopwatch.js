@@ -161,7 +161,7 @@ const actions = {
   },
   resetTakingTime: ({ commit }) => {
     commit("setIsDisplayUpdaterActive", false);
-    commit("setFinish")
+    commit("setFinish");
   },
   setComment: ({ commit }, comment) => {
     commit("setComment", comment);

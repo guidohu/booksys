@@ -1,7 +1,7 @@
 <template>
   <subpage-container title="User Management">
     <card-module :nobody="true" class="mx-1 scroll">
-      <user-management-tabs/>
+      <user-management-tabs />
     </card-module>
     <template v-slot:bottom>
       <router-link tag="button" class="btn btn-outline-light" to="/admin">
@@ -15,7 +15,7 @@
 <script>
 import UserManagementTabs from "@/components/UserManagementTabs";
 import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
-import CardModule from '@/components/bricks/CardModule.vue';
+import CardModule from "@/components/bricks/CardModule.vue";
 
 export default {
   name: "WSUsers",
@@ -28,12 +28,11 @@ export default {
 </script>
 
 <style scoped>
-
 /* responsive, for small screens, scrolling */
 @media (max-width: 992px) {
-    .scroll {
-        overflow-x: scroll;
-    }
+  .scroll {
+    overflow-x: scroll;
+  }
 }
 
 .scroll {

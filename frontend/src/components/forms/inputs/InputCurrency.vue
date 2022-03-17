@@ -21,7 +21,15 @@
 <script>
 export default {
   name: "InputCurrency",
-  props: ["id", "label", "modelValue", "disabled", "size", "currency", "placeholder"],
+  props: [
+    "id",
+    "label",
+    "modelValue",
+    "disabled",
+    "size",
+    "currency",
+    "placeholder",
+  ],
   emits: ["update:modelValue"],
   methods: {
     changeHandler(value) {
@@ -29,16 +37,16 @@ export default {
       this.$emit("update:modelValue", value);
     },
     inputGroupClass() {
-      if(this.size == null){
+      if (this.size == null) {
         return "input-group";
       }
-      if(this.size == "small"){
-        return "input-group input-group-sm"
+      if (this.size == "small") {
+        return "input-group input-group-sm";
       }
-      if(this.size == "large"){
-        return "input-group input-group-lg"
+      if (this.size == "large") {
+        return "input-group input-group-lg";
       }
-    }
+    },
   },
 };
 </script>

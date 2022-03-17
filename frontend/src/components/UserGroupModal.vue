@@ -1,8 +1,5 @@
 <template>
-  <modal-container
-    name="user-group-modal"
-    :visible="visible"
-    >
+  <modal-container name="user-group-modal" :visible="visible">
     <modal-header
       :closable="true"
       :title="title"
@@ -65,21 +62,40 @@
     <modal-footer class="block-footer">
       <div class="row">
         <div class="col-6 text-start">
-          <button v-if="isEditMode && form.user_group_id != null" type="button" class="btn btn-outline-danger" @click.stop="remove">
+          <button
+            v-if="isEditMode && form.user_group_id != null"
+            type="button"
+            class="btn btn-outline-danger"
+            @click.stop="remove"
+          >
             <i class="bi bi-trash"></i>
             Delete
           </button>
         </div>
         <div class="col-6 text-end">
-          <button v-if="isEditMode == true" type="submit" class="btn btn-outline-info ms-2" @click.prevent.self="save">
+          <button
+            v-if="isEditMode == true"
+            type="submit"
+            class="btn btn-outline-info ms-2"
+            @click.prevent.self="save"
+          >
             <i class="bi bi-check"></i>
             Save
           </button>
-          <button v-if="isEditMode == false" type="submit" class="btn btn-outline-info ms-2" @click.prevent.self="enableEditMode">
+          <button
+            v-if="isEditMode == false"
+            type="submit"
+            class="btn btn-outline-info ms-2"
+            @click.prevent.self="enableEditMode"
+          >
             <i class="bi bi-pencil"></i>
             Edit
           </button>
-          <button type="button" class="btn btn-outline-danger ms-2" @click.prevent.self="close">
+          <button
+            type="button"
+            class="btn btn-outline-danger ms-2"
+            @click.prevent.self="close"
+          >
             <i class="bi bi-x"></i>
             Cancel
           </button>
@@ -93,13 +109,13 @@
 import { mapGetters, mapActions } from "vuex";
 import { sprintf } from "sprintf-js";
 import WarningBox from "@/components/WarningBox";
-import InputText from './forms/inputs/InputText.vue';
-import InputSelect from './forms/inputs/InputSelect.vue';
-import ModalContainer from './bricks/ModalContainer.vue';
-import ModalHeader from './bricks/ModalHeader.vue';
-import ModalBody from './bricks/ModalBody.vue';
-import InputCurrency from './forms/inputs/InputCurrency.vue';
-import ModalFooter from './bricks/ModalFooter.vue';
+import InputText from "./forms/inputs/InputText.vue";
+import InputSelect from "./forms/inputs/InputSelect.vue";
+import ModalContainer from "./bricks/ModalContainer.vue";
+import ModalHeader from "./bricks/ModalHeader.vue";
+import ModalBody from "./bricks/ModalBody.vue";
+import InputCurrency from "./forms/inputs/InputCurrency.vue";
+import ModalFooter from "./bricks/ModalFooter.vue";
 import { confirm } from "@/components/bricks/DialogModal";
 
 export default {
@@ -128,13 +144,15 @@ export default {
   computed: {
     ...mapGetters("configuration", ["getCurrency"]),
     ...mapGetters("user", ["userRoles"]),
-    userRoleDescription: function() {
-      if(this.form.user_role_id == null){
-        return ""
+    userRoleDescription: function () {
+      if (this.form.user_role_id == null) {
+        return "";
       }
-      const role = this.userRoles.find((ur) => ur.user_role_id == this.form.user_role_id);
+      const role = this.userRoles.find(
+        (ur) => ur.user_role_id == this.form.user_role_id
+      );
       return role.user_role_description;
-    }
+    },
   },
   watch: {
     userGroup: function () {
@@ -147,14 +165,14 @@ export default {
     userRoles: function (newValue) {
       this.userRolesToList(newValue);
     },
-    visible: function() {
+    visible: function () {
       this.reloadProps();
-    }
+    },
   },
   methods: {
-    reloadProps: function() {
+    reloadProps: function () {
       this.isEditMode = this.editMode;
-      if ( this.userGroup != null ){
+      if (this.userGroup != null) {
         this.form = { ...this.userGroup };
         this.form.price_min = sprintf("%.2f", this.userGroup.price_min);
       } else {
@@ -182,15 +200,17 @@ export default {
         title: "Delete User Group",
         message: "Do you really want to delete user group " + name + "?",
       })
-      .then((value) => {
-        // delete user group
-        if (value == true) {
-          this.deleteUserGroup(id).then(() => this.close()).catch((errors) => this.errors = errors);
-        }
-      })
-      .catch((err) => {
-        this.errors = [err];
-      })
+        .then((value) => {
+          // delete user group
+          if (value == true) {
+            this.deleteUserGroup(id)
+              .then(() => this.close())
+              .catch((errors) => (this.errors = errors));
+          }
+        })
+        .catch((err) => {
+          this.errors = [err];
+        });
     },
     ...mapActions("configuration", ["queryConfiguration"]),
     ...mapActions("user", [
@@ -236,7 +256,7 @@ export default {
 </script>
 
 <style scoped>
-  .block-footer {
-    display: block;
-  }
+.block-footer {
+  display: block;
+}
 </style>

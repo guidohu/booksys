@@ -8,13 +8,13 @@
             class="form-check-input"
             type="checkbox"
             role="switch"
-            :id="'flex-switch-'+id"
+            :id="'flex-switch-' + id"
             :checked="formValue"
             @change="update()"
           />
         </div>
         <span class="ps-2 mt-2">
-          <label class="form-check-label" :for="'flex-switch-'+id">{{
+          <label class="form-check-label" :for="'flex-switch-' + id">{{
             formSelectedLabel
           }}</label>
         </span>

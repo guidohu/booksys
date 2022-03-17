@@ -1,8 +1,5 @@
 <template>
-  <modal-container
-    name="user-edit-modal"
-    :visible="visible"
-  >
+  <modal-container name="user-edit-modal" :visible="visible">
     <modal-header
       :closable="true"
       title="Profile"
@@ -18,38 +15,17 @@
           label="First Name"
           v-model="form.firstName"
         />
-        <input-text
-          id="last-name"
-          label="Last Name"
-          v-model="form.lastName"
-        />
-        <input-text
-          id="street-nr"
-          label="Street / Nr"
-          v-model="form.street"
-        />
-        <input-text
-          id="zip"
-          label="Zip Code"
-          v-model="form.zip"
-        />
-        <input-text
-          id="city"
-          label="City"
-          v-model="form.city"
-        />
+        <input-text id="last-name" label="Last Name" v-model="form.lastName" />
+        <input-text id="street-nr" label="Street / Nr" v-model="form.street" />
+        <input-text id="zip" label="Zip Code" v-model="form.zip" />
+        <input-text id="city" label="City" v-model="form.city" />
         <input-text
           id="email"
           label="Email"
           type="email"
           v-model="form.email"
         />
-        <input-text
-          id="tel"
-          label="Phone Nr"
-          type="tel"
-          v-model="form.phone"
-        />
+        <input-text id="tel" label="Phone Nr" type="tel" v-model="form.phone" />
         <input-toggle
           id="license"
           label="Driving License"
@@ -60,7 +36,11 @@
       </form>
     </modal-body>
     <modal-footer>
-      <button type="submit" class="btn btn-outline-info" @click.prevent.self="save">
+      <button
+        type="submit"
+        class="btn btn-outline-info"
+        @click.prevent.self="save"
+      >
         <i class="bi bi-check"></i>
         Save
       </button>
@@ -75,12 +55,12 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
-import ModalContainer from './bricks/ModalContainer.vue';
-import ModalHeader from './bricks/ModalHeader.vue';
-import ModalBody from './bricks/ModalBody.vue';
-import ModalFooter from './bricks/ModalFooter.vue';
-import InputText from './forms/inputs/InputText.vue';
-import InputToggle from './forms/inputs/InputToggle.vue';
+import ModalContainer from "./bricks/ModalContainer.vue";
+import ModalHeader from "./bricks/ModalHeader.vue";
+import ModalBody from "./bricks/ModalBody.vue";
+import ModalFooter from "./bricks/ModalFooter.vue";
+import InputText from "./forms/inputs/InputText.vue";
+import InputToggle from "./forms/inputs/InputToggle.vue";
 
 export default {
   name: "UserEditModal",
@@ -91,7 +71,7 @@ export default {
     ModalBody,
     ModalFooter,
     InputText,
-    InputToggle
+    InputToggle,
   },
   props: ["visible"],
   data() {
@@ -110,7 +90,6 @@ export default {
       this.$emit("update:visible", false);
     },
     save: function () {
-
       this.changeUserProfile({
         first_name: this.form.firstName,
         last_name: this.form.lastName,
@@ -129,11 +108,8 @@ export default {
           this.errors = errors;
         });
     },
-    setFormData: function(data){
-      const license =
-        data.license != null && data.license == 1
-          ? true
-          : false;
+    setFormData: function (data) {
+      const license = data.license != null && data.license == 1 ? true : false;
       this.form = {
         firstName: data.first_name,
         lastName: data.last_name,
@@ -148,13 +124,13 @@ export default {
     ...mapActions("user", ["changeUserProfile"]),
   },
   watch: {
-    userInfo: function(newUserInfo){
+    userInfo: function (newUserInfo) {
       console.log("userInfo changed, new value", newUserInfo);
       this.setFormData(newUserInfo);
-    }
+    },
   },
   created() {
-    if(this.userInfo != null){
+    if (this.userInfo != null) {
       console.log("Created with userInfo");
       this.setFormData(this.userInfo);
       return;

@@ -5,7 +5,8 @@ import { loadStoreModules, store } from "@/store";
 const Login = () => import(/* webpackChunkName: "login" */ "@/views/WSLogin");
 const Logout = () =>
   import(/* webpackChunkName: "logout" */ "@/views/WSLogout");
-const SignUp = () => import(/* webpackChunkName: "signup" */ "@/views/WSSignUp");
+const SignUp = () =>
+  import(/* webpackChunkName: "signup" */ "@/views/WSSignUp");
 const Dashboard = () =>
   import(/* webpackChunkName: "dashboard" */ "@/views/WSDashboard");
 const Account = () =>
@@ -26,7 +27,8 @@ const Accounting = () =>
   import(/* webpackChunkName: "accounting" */ "@/views/admin/WSAccounting");
 const Settings = () =>
   import(/* webpackChunkName: "settings" */ "@/views/admin/WSSettings");
-const Logs = () => import(/* webpackChunkName: "logs" */ "@/views/admin/WSLogs");
+const Logs = () =>
+  import(/* webpackChunkName: "logs" */ "@/views/admin/WSLogs");
 const PasswordReset = () =>
   import(/* webpackChunkName: "password-reset" */ "@/views/WSPasswordReset");
 // const Setup = () => import(/* webpackChunkName: "setup" */ "@/views/WSSetupPage");

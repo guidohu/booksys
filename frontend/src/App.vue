@@ -4,18 +4,18 @@
       <div class="row display noborder nobackground">
         <div class="vcenter_placeholder">
           <div class="vcenter_content"> -->
-            <alert-message
-              v-if="backendReachable == false"
-              :alert-message="backendNotReachableAlertMsg"
-            />
-            <router-view id="router-view" v-else />
-          <!-- </div>
+    <alert-message
+      v-if="backendReachable == false"
+      :alert-message="backendNotReachableAlertMsg"
+    />
+    <router-view id="router-view" v-else />
+    <!-- </div>
         </div>
       </div> -->
-      <footer class="legal-footer d-none d-lg-block">
-        Copyright 2013-2022 by Guido Hungerbuehler
-        <a href="https://github.com/guidohu/booksys">Find me on Github</a>
-      </footer>
+    <footer class="legal-footer d-none d-lg-block">
+      Copyright 2013-2022 by Guido Hungerbuehler
+      <a href="https://github.com/guidohu/booksys">Find me on Github</a>
+    </footer>
     <!-- </div> -->
     <!-- <div v-if="isMobile" class="container-fluid">
       <alert-message

@@ -1,8 +1,16 @@
 <template>
   <nav class="navbar fixed-top navbar-light bg-light">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">{{title}}</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+      <a class="navbar-brand" href="#">{{ title }}</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarToggler"
+        aria-controls="navbarToggler"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
         <span class="navbar-toggler-icon"></span>
       </button>
 
@@ -33,17 +41,15 @@
             </router-link>
           </li>
         </ul>
-      </div> 
+      </div>
     </div>
   </nav>
 </template>
 
 <script>
-
 export default {
   name: "NavbarMobile",
-  components: {
-  },
+  components: {},
   props: ["title", "role"],
 };
 </script>

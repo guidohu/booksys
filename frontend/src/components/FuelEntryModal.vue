@@ -43,54 +43,62 @@
           size="small"
         />
         <input-fuel
-            id="fuel"
-            label="Fuel"
-            v-model="form.fuel"
-            placeholder="0"
-            size="small"
-          />
-          <input-currency
-            v-if="!form.isDiscounted"
-            id="cost"
-            label="Cost"
-            :currency="getCurrency"
-            v-model="form.cost"
-            placeholder="0"
-            size="small"
-          />
-          <input-currency
-            v-if="form.isDiscounted"
-            id="cost-gross"
-            label="Cost (Gross)"
-            :currency="getCurrency"
-            v-model="form.costGross"
-            placeholder="0"
-            size="small"
-          />
-          <input-toggle
-            id="discount"
-            label="Discount"
-            v-model="form.isDiscounted"
-            offLabel="No Discount"
-            onLabel="Discounted"
-          />
-          <input-currency
-            v-if="form.isDiscounted"
-            id="cost-net"
-            label="Cost (Net)"
-            :currency="getCurrency"
-            v-model="form.costNet"
-            placeholder="0"
-            size="small"
-          />
+          id="fuel"
+          label="Fuel"
+          v-model="form.fuel"
+          placeholder="0"
+          size="small"
+        />
+        <input-currency
+          v-if="!form.isDiscounted"
+          id="cost"
+          label="Cost"
+          :currency="getCurrency"
+          v-model="form.cost"
+          placeholder="0"
+          size="small"
+        />
+        <input-currency
+          v-if="form.isDiscounted"
+          id="cost-gross"
+          label="Cost (Gross)"
+          :currency="getCurrency"
+          v-model="form.costGross"
+          placeholder="0"
+          size="small"
+        />
+        <input-toggle
+          id="discount"
+          label="Discount"
+          v-model="form.isDiscounted"
+          offLabel="No Discount"
+          onLabel="Discounted"
+        />
+        <input-currency
+          v-if="form.isDiscounted"
+          id="cost-net"
+          label="Cost (Net)"
+          :currency="getCurrency"
+          v-model="form.costNet"
+          placeholder="0"
+          size="small"
+        />
       </form>
     </modal-body>
-    <modal-footer> 
-      <button type="submit" class="btn btn-outline-info" @click.prevent.self="save">
+    <modal-footer>
+      <button
+        type="submit"
+        class="btn btn-outline-info"
+        @click.prevent.self="save"
+      >
         <i class="bi bi-check"></i>
         Save
       </button>
-      <button type="button" class="btn btn-outline-danger" @click.prevent.self="close">
+      <button
+        type="button"
+        class="btn btn-outline-danger"
+        @click.prevent.self="close"
+      >
         <i class="bi bi-x"></i>
         Cancel
       </button>
@@ -118,7 +126,6 @@ import InputFuel from "@/components/forms/inputs/InputFuel.vue";
 import InputCurrency from "@/components/forms/inputs/InputCurrency.vue";
 import InputToggle from "@/components/forms/inputs/InputToggle.vue";
 
-
 export default {
   name: "FuelEntryModal",
   components: {
@@ -132,7 +139,7 @@ export default {
     InputEngineHours,
     InputFuel,
     InputCurrency,
-    InputToggle
+    InputToggle,
   },
   props: ["fuelEntry", "visible"],
   data() {

@@ -4,7 +4,7 @@ module.exports = {
   outputDir: "dist",
   publicPath: "/",
   devServer: {
-    proxy: 'http://localhost:80'
+    proxy: "http://localhost:80",
   },
   configureWebpack: {
     mode: "production",

@@ -112,7 +112,7 @@ export default {
 </script>
 
 <style scoped>
-  .custom-height {
-    max-height: 100px;
-  }
+.custom-height {
+  max-height: 100px;
+}
 </style>

@@ -3,18 +3,24 @@
     <template v-slot:header>
       <div class="row">
         <div class="col-4 text-end">
-          <button type="button" class="btn btn-outline-info btn-xs" 
-            @click="prevMonth">
-            <i class="bi bi-arrow-left-short"/>
+          <button
+            type="button"
+            class="btn btn-outline-info btn-xs"
+            @click="prevMonth"
+          >
+            <i class="bi bi-arrow-left-short" />
           </button>
         </div>
         <div class="col-4 text-center">
           {{ monthString }}
         </div>
         <div class="col-4 text-start">
-          <button type="button" class="btn btn-outline-info btn-xs" 
-            @click="nextMonth">
-            <i class="bi bi-arrow-right-short"/>
+          <button
+            type="button"
+            class="btn btn-outline-info btn-xs"
+            @click="nextMonth"
+          >
+            <i class="bi bi-arrow-right-short" />
           </button>
         </div>
       </div>
@@ -66,7 +72,7 @@ export default {
   name: "SessionMonthCard",
   components: {
     BooksysPie,
-    SectionedCardModule
+    SectionedCardModule,
   },
   props: ["sessionData", "month"],
   data() {

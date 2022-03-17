@@ -1,8 +1,8 @@
 <template>
   <subpage-container title="Settings">
-    <warning-box v-if="errors.length > 0" :errors="errors"/>
+    <warning-box v-if="errors.length > 0" :errors="errors" />
     <show-for-desktop>
-      <settings-card 
+      <settings-card
         class="mx-1"
         :show-controls="false"
         @save="save"
@@ -10,19 +10,15 @@
       />
     </show-for-desktop>
     <show-for-mobile>
-      <settings-card 
-        class="mx-1" 
+      <settings-card
+        class="mx-1"
         :show-controls="true"
         @saved="navigateBack"
         @cancelled="navigateBack"
       />
     </show-for-mobile>
     <template v-slot:bottom>
-      <button
-        tag="button"
-        class="btn btn-outline-light"
-        @click="save"
-      >
+      <button tag="button" class="btn btn-outline-light" @click="save">
         <i class="bi bi-check"></i>
         Save
       </button>
@@ -44,7 +40,7 @@ import SettingsCard from "@/components/SettingsCard";
 import SubpageContainer from "@/components/bricks/SubpageContainer";
 import ShowForDesktop from "@/components/bricks/ShowForDesktop.vue";
 import ShowForMobile from "@/components/bricks/ShowForMobile.vue";
-import WarningBox from '../../components/WarningBox.vue';
+import WarningBox from "../../components/WarningBox.vue";
 
 export default {
   name: "WSSettings",
@@ -63,11 +59,11 @@ export default {
   },
   methods: {
     ...mapActions("configuration", ["setConfiguration"]),
-    change: function(settings) {
+    change: function (settings) {
       this.settings = settings;
     },
-    save: function() {
-      if(this.settings == null) {
+    save: function () {
+      if (this.settings == null) {
         this.navigateBack();
         return;
       }
@@ -79,12 +75,12 @@ export default {
         })
         .catch((errors) => (this.errors = errors));
     },
-    cancel: function() {
+    cancel: function () {
       this.navigateBack();
     },
-    navigateBack: function() {
+    navigateBack: function () {
       this.$router.push("/admin");
-    }
-  }
+    },
+  },
 };
 </script>

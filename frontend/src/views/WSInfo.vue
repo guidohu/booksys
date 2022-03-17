@@ -56,7 +56,7 @@
             :src="getLocationMap"
             frameborder="0"
             style="
-                {
+               {
                 border: 0;
               }
             "

@@ -8,7 +8,13 @@
         role="columnheader"
         :class="getColumnClass(c)"
       >
-        <div @click="function() { sortByCol(c) }">
+        <div
+          @click="
+            function () {
+              sortByCol(c);
+            }
+          "
+        >
           {{ c.label }}
           <!-- select the right sorting icon -->
           <i
@@ -146,10 +152,10 @@ export default {
 
       this.tColumns = newCols;
       return;
-    }
+    },
   },
   methods: {
-    calculateRowKey: function(row) {
+    calculateRowKey: function (row) {
       return hash(row);
     },
     sort: function () {
@@ -200,8 +206,7 @@ export default {
       let rowClass = "";
       if (this.rowClass != null) {
         rowClass = this.rowClass;
-      }
-      else if (this.rowClassFunction != null) {
+      } else if (this.rowClassFunction != null) {
         rowClass = this.rowClassFunction(row);
       }
       if (
@@ -236,13 +241,13 @@ export default {
     },
   },
   created() {
-    if(this.columns != null && this.columns.length > 0) {
+    if (this.columns != null && this.columns.length > 0) {
       this.tColumns = this.columns;
       // set default sort column
       this.sortCol = this.tColumns[0];
       console.log("TableModule: columns set to", this.columns);
     }
-    if(this.rows != null && this.rows.lenth > 0) {
+    if (this.rows != null && this.rows.lenth > 0) {
       this.tRows = this.rows;
       this.sort();
     }

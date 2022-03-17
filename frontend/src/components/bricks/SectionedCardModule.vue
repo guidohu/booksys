@@ -19,15 +19,15 @@ export default {
 </script>
 
 <style scoped>
-  .scrollable {
-    overflow-y: scroll;
-  }
+.scrollable {
+  overflow-y: scroll;
+}
 
-  .margin {
-    margin: 1rem;
-  }
+.margin {
+  margin: 1rem;
+}
 
-  .padding {
-    padding: 0rem;
-  }
+.padding {
+  padding: 0rem;
+}
 </style>

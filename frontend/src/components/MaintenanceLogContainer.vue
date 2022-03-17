@@ -13,7 +13,7 @@ export default {
   name: "MaintenanceLogContainer",
   components: {
     MaintenanceLogForm,
-    MaintenanceLogList
+    MaintenanceLogList,
   },
 };
 </script>
