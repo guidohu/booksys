@@ -1,231 +1,158 @@
 <template>
-  <b-modal
-    id="passwordResetModal"
-    title="Password Reset"
-    no-close-on-backdrop
-    no-close-on-esc
-    hide-header-close
-    visible
-  >
-    <b-overlay
-      id="overlay-background"
-      :show="isLoading"
-      opacity="0.5"
-      spinner-type="border"
-      spinner-variant="info"
-      rounded="sm"
-    >
+  <modal-container name="password-reset-modal" :visible="true">
+    <modal-header title="Password Reset" />
+    <modal-body>
       <div v-if="showEmailDialog == true">
-        <b-row class="text-left mb-4">
-          <b-col cols="1" class="d-none d-sm-block" />
-          <b-col cols="12" sm="10">
+        <div class="row text-left mb-4">
+          <div class="col-12">
             Please enter your email address to get the password reset
             information sent to you by email.
-          </b-col>
-          <b-col cols="1" class="d-none d-sm-block" />
-        </b-row>
-        <b-form @submit="requestToken">
-          <b-row class="text-left">
-            <b-col cols="1" class="d-none d-sm-block" />
-            <b-col cols="12" sm="10">
+          </div>
+        </div>
+        <form @submit.prevent="requestToken">
+          <div class="row text-left">
+            <div class="col-12">
               <!-- Email -->
-              <b-form-group
+              <input-text
                 id="email"
                 label="Email"
-                label-for="email-input"
-                description=""
-                label-cols="3"
-              >
-                <b-form-input
-                  id="email-input"
-                  v-model="form.email"
-                  type="text"
-                />
-              </b-form-group>
+                v-model="form.email"
+                size="small"
+                autocomplete="username"
+              />
               <!-- Captcha -->
-              <b-row v-if="getRecaptchaKey != null" class="mt-3">
-                <b-col cols="9" offset="3">
+              <div v-if="getRecaptchaKey != null" class="row mt-3">
+                <div class="col-12">
                   <vue-recaptcha
                     :sitekey="getRecaptchaKey"
                     :load-recaptcha-script="true"
                     size="compact"
                     @verify="verifiedHandler"
                   />
-                </b-col>
-              </b-row>
-            </b-col>
-            <b-col cols="1" class="d-none d-sm-block" />
-          </b-row>
-        </b-form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
       </div>
       <div v-if="showTokenDialog == true">
-        <b-row class="text-left mb-4">
-          <b-col cols="1" class="d-none d-sm-block" />
-          <b-col cols="12" sm="10">
+        <div class="row text-left mb-4">
+          <div class="col-12">
             Please enter the token that has been sent to your email address and
             choose new password.
-          </b-col>
-          <b-col cols="1" class="d-none d-sm-block" />
-        </b-row>
-        <b-form @submit="setPassword">
-          <b-row class="text-left">
-            <b-col cols="1" class="d-none d-sm-block" />
-            <b-col cols="12" sm="10">
+          </div>
+        </div>
+        <form @submit.prevent="setPassword">
+          <div class="row text-left">
+            <div class="col-12">
               <!-- Email -->
-              <b-form-group
+              <input-text
                 id="email"
                 label="Email"
-                label-for="email-input"
-                description=""
-                label-cols="3"
-              >
-                <b-form-input
-                  id="email-input"
-                  v-model="form.email"
-                  type="text"
-                  disabled
-                />
-              </b-form-group>
+                v-model="form.email"
+                size="small"
+                autocomplete="username"
+              />
               <!-- Token -->
-              <b-form-group
+              <input-text
                 id="token"
                 label="Token"
-                label-for="token-input"
-                description=""
-                label-cols="3"
-              >
-                <b-form-input
-                  id="token-input"
-                  v-model="form.token"
-                  type="text"
-                />
-              </b-form-group>
+                v-model="form.token"
+                size="small"
+              />
               <!-- Password -->
-              <b-form-group
+              <input-password
                 id="password"
                 label="Password"
-                label-for="password-input"
-                description=""
-                label-cols="3"
-              >
-                <b-form-input
-                  id="password-input"
-                  v-model="form.password"
-                  type="password"
-                />
-              </b-form-group>
-              <!-- Password Confirm -->
-              <b-form-group
+                v-model="form.password"
+                size="small"
+                autocomplete="new-password"
+              />
+              <input-password
                 id="password-confirm"
                 label="Confirm"
-                label-for="password-confirm-input"
-                description=""
-                label-cols="3"
-              >
-                <b-form-input
-                  id="password-confirm-input"
-                  v-model="form.passwordConfirm"
-                  type="password"
-                />
-              </b-form-group>
-            </b-col>
-            <b-col cols="1" class="d-none d-sm-block" />
-          </b-row>
-        </b-form>
+                v-model="form.passwordConfirm"
+                size="small"
+                autocomplete="new-password"
+              />
+            </div>
+          </div>
+        </form>
       </div>
-      <b-row v-if="showSuccessInfo" class="text-center">
-        <b-col cols="1" class="d-none d-sm-block" />
-        <b-col cols="12" sm="10">
+      <div v-if="showSuccessInfo" class="row text-center">
+        <div class="col-12">
           <p class="h4 mb-2">
-            <b-icon-check-circle variant="success" />
+            <i class="bi bi-check-circle text-success" />
             <br />
             Password has been changed successfully.
           </p>
           <p>Please login with your new password.</p>
-        </b-col>
-        <b-col cols="1" class="d-none d-sm-block" />
-      </b-row>
-    </b-overlay>
-    <b-row v-if="errors.length > 0" class="mt-4">
-      <b-col cols="1" class="d-none d-sm-block" />
-      <b-col cols="12" sm="10">
-        <warning-box :errors="errors" />
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block" />
-    </b-row>
-    <div slot="modal-footer">
-      <b-button
+        </div>
+      </div>
+      <warning-box v-if="errors.length > 0" :errors="errors" />
+    </modal-body>
+    <modal-footer>
+      <button
         v-if="showEmailDialog"
-        class="mr-1"
+        class="btn btn-outline-danger me-1"
         type="button"
-        variant="outline-danger"
         @click="close"
       >
-        <b-icon-x />
+        <i class="bi bi-x" />
         Cancel
-      </b-button>
-      <b-button
+      </button>
+      <button
         v-if="showEmailDialog"
         type="button"
-        variant="outline-info"
+        class="btn btn-outline-info"
         :disabled="isLoading"
         @click="requestToken"
       >
-        <b-icon-arrow-right />
+        <i class="bi bi-arrow-right" />
         Next
-      </b-button>
-      <b-button
+      </button>
+      <button
         v-if="showTokenDialog"
-        class="mr-1"
+        class="btn btn-outline-danger me-1"
         type="button"
-        variant="outline-danger"
         @click="showEmail"
       >
-        <b-icon-arrow-left />
+        <i class="bi bi-arrow-left" />
         Back
-      </b-button>
-      <b-button
+      </button>
+      <button
         v-if="showTokenDialog"
         type="button"
-        variant="outline-info"
+        class="btn btn-outline-info"
         :disabled="isLoading"
         @click="setPassword"
       >
-        <b-icon-check />
+        <i class="bi bi-arrow-check" />
         Set Password
-      </b-button>
-      <b-button
+      </button>
+      <button
         v-if="showSuccessInfo"
         type="button"
-        variant="outline-info"
+        class="btn btn-outline-info"
         @click="close"
       >
-        <b-icon-check />
+        <i class="bi bi-arrow-check" />
         Done
-      </b-button>
-    </div>
-  </b-modal>
+      </button>
+    </modal-footer>
+  </modal-container>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
 import User from "@/api/user";
 import WarningBox from "@/components/WarningBox";
-import {
-  BModal,
-  BOverlay,
-  BRow,
-  BCol,
-  BForm,
-  BFormGroup,
-  BFormInput,
-  BButton,
-  BIconCheckCircle,
-  BIconX,
-  BIconArrowRight,
-  BIconArrowLeft,
-  BIconCheck,
-} from "bootstrap-vue";
+import ModalContainer from '../components/bricks/ModalContainer.vue';
+import ModalHeader from '../components/bricks/ModalHeader.vue';
+import ModalBody from '../components/bricks/ModalBody.vue';
+import ModalFooter from '../components/bricks/ModalFooter.vue';
+import InputText from '../components/forms/inputs/InputText.vue';
+import InputPassword from '../components/forms/inputs/InputPassword.vue';
 
 const VueRecaptcha = () =>
   import(/* webpackChunkName: "vue-recaptcha" */ "vue-recaptcha");
@@ -235,22 +162,15 @@ export default {
   components: {
     VueRecaptcha,
     WarningBox,
-    BModal,
-    BOverlay,
-    BRow,
-    BCol,
-    BForm,
-    BFormGroup,
-    BFormInput,
-    BButton,
-    BIconCheckCircle,
-    BIconX,
-    BIconArrowRight,
-    BIconArrowLeft,
-    BIconCheck,
+    ModalContainer,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    InputText,
+    InputPassword,
   },
   data() {
-    return {
+   return {
       isLoading: false,
       showEmailDialog: true,
       showTokenDialog: false,

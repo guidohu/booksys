@@ -27,8 +27,8 @@ const Accounting = () =>
 const Settings = () =>
   import(/* webpackChunkName: "settings" */ "@/views/admin/WSSettings");
 const Logs = () => import(/* webpackChunkName: "logs" */ "@/views/admin/WSLogs");
-// const PasswordReset = () =>
-//   import(/* webpackChunkName: "password-reset" */ "@/views/WSPasswordReset");
+const PasswordReset = () =>
+  import(/* webpackChunkName: "password-reset" */ "@/views/WSPasswordReset");
 // const Setup = () => import(/* webpackChunkName: "setup" */ "@/views/WSSetupPage");
 
 const loginEnforced = (to, from, next) => {
@@ -77,14 +77,14 @@ const routes = [
     },
     component: SignUp,
   },
-  // {
-  //   path: "/password/reset",
-  //   name: "PasswordReset",
-  //   beforeEnter: (to, from, next) => {
-  //     loadStoreModules(["configuration"], next);
-  //   },
-  //   component: PasswordReset,
-  // },
+  {
+    path: "/password/reset",
+    name: "PasswordReset",
+    beforeEnter: (to, from, next) => {
+      loadStoreModules(["configuration"], next);
+    },
+    component: PasswordReset,
+  },
   {
     path: "/today",
     name: "Today",
