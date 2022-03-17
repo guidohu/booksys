@@ -2,21 +2,21 @@
   <div class="row mb-2">
     <label :for="id" class="col-3 col-form-label">{{ label }}</label>
     <div class="col-9">
-      <div class="form-check form-switch align-middle">
-        <input
-          class="form-check-input"
-          type="checkbox"
-          role="switch"
-          id="flexSwitchCheckDefault"
-          :checked="formValue"
-          @change="update()"
-        />
-        <span class="align-middle mt-4">
-          <label
-            class="form-check-label ms-3 mt-2"
-            for="flexSwitchCheckDefault"
-            >{{ formSelectedLabel }}</label
-          >
+      <div class="d-inline-flex align-items-stretch">
+        <div class="form-check form-switch">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            :id="'flex-switch-'+id"
+            :checked="formValue"
+            @change="update()"
+          />
+        </div>
+        <span class="ps-2 mt-2">
+          <label class="form-check-label" :for="'flex-switch-'+id">{{
+            formSelectedLabel
+          }}</label>
         </span>
       </div>
     </div>
@@ -34,11 +34,12 @@ export default {
     };
   },
   props: ["id", "label", "offLabel", "onLabel", "modelValue"],
-  emits: ["update:modelValue"],
+  emits: ["update:modelValue", "change"],
   methods: {
     update() {
       this.formValue = !this.formValue;
       this.$emit("update:modelValue", this.formValue);
+      this.$emit("change");
     },
   },
   watch: {

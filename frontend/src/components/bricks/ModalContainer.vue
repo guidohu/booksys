@@ -27,6 +27,9 @@ export default {
       this.modal.show();
     }
   },
+  unmounted() {
+    this.modal.hide();
+  },
   watch: {
     visible: function (newValue) {
       if (newValue) {

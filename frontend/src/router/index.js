@@ -5,7 +5,7 @@ import { loadStoreModules, store } from "@/store";
 const Login = () => import(/* webpackChunkName: "login" */ "@/views/WSLogin");
 const Logout = () =>
   import(/* webpackChunkName: "logout" */ "@/views/WSLogout");
-// const SignUp = () => import(/* webpackChunkName: "signup" */ "@/views/WSSignUp");
+const SignUp = () => import(/* webpackChunkName: "signup" */ "@/views/WSSignUp");
 const Dashboard = () =>
   import(/* webpackChunkName: "dashboard" */ "@/views/WSDashboard");
 const Account = () =>
@@ -69,14 +69,14 @@ const routes = [
     },
     component: Logout,
   },
-  // {
-  //   path: "/signup",
-  //   name: "SignUp",
-  //   beforeEnter: (to, from, next) => {
-  //     loadStoreModules(["configuration"], next);
-  //   },
-  //   component: SignUp,
-  // },
+  {
+    path: "/signup",
+    name: "SignUp",
+    beforeEnter: (to, from, next) => {
+      loadStoreModules(["configuration"], next);
+    },
+    component: SignUp,
+  },
   // {
   //   path: "/password/reset",
   //   name: "PasswordReset",

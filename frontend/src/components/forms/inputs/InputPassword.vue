@@ -31,10 +31,11 @@ export default {
     "suffix",
     "autocomplete",
   ],
-  emits: ["update:modelValue"],
+  emits: ["update:modelValue", "input"],
   methods: {
     changeHandler(value) {
       this.$emit("update:modelValue", value);
+      this.$emit("input");
     },
     inputGroupClass() {
       if (this.size == null) {

@@ -11,6 +11,7 @@
             id="username"
             ref="username"
             placeholder="name@example.com"
+            autocomplete="username"
           />
           <label for="floatingInput">Email address</label>
         </div>
@@ -44,20 +45,20 @@
       <div class="card-footer">
         <div class="row">
           <div class="col-12">
-            <button
-              type="button"
+            <router-link
+              tag="button"
               class="btn btn-outline-dark btn-sm"
               to="/password/reset"
             >
               Forgot password
-            </button>
-            <button
-              type="button"
+            </router-link>
+            <router-link
+              tag="button"
               class="btn btn-outline-dark btn-sm ms-1"
               to="/signup"
             >
               Register
-            </button>
+            </router-link>
           </div>
         </div>
       </div>

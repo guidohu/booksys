@@ -10,6 +10,7 @@
           :id="id"
           :value="modelValue"
           :placeholder="placeholder"
+          :autocomplete="autocomplete"
           @input="changeHandler($event.target.value)"
         />
         <span v-if="suffix != null" class="input-group-text">{{ suffix }}</span>
@@ -34,6 +35,7 @@ export default {
     "suffix",
     "placeholder",
     "description",
+    "autocomplete",
   ],
   emits: ["update:modelValue", "input"],
   methods: {

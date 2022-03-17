@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-column">
+  <div class="d-flex flex-column justify-content-center">
     <div class="container">
       <div class="row text-center mb-3 mt-5">
         <div class="col-12">
@@ -12,8 +12,8 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-3 d-none d-sm-block" />
-        <div class="col-12 col-sm-6">
+        <div class="col-4 d-none d-sm-block" />
+        <div class="col-12 col-sm-4">
           <overlay-spinner v-model:active="isLoading" :fullPage="false">
             <login-form
               v-if="showLogin"
@@ -22,7 +22,7 @@
               @login="handleLogin"
             />
           </overlay-spinner>
-          <div class="col-3 d-none d-sm-block" />
+          <div class="col-4 d-none d-sm-block" />
         </div>
       </div>
     </div>
