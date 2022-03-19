@@ -7,6 +7,7 @@ import { store } from "./store";
 // Bootstrap
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.esm";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 // Override bootstrap styling
 import "@/assets/bootstrap/css/bootstrap-theme-bc.css";
