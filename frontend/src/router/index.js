@@ -31,7 +31,7 @@ const Logs = () =>
   import(/* webpackChunkName: "logs" */ "@/views/admin/WSLogs");
 const PasswordReset = () =>
   import(/* webpackChunkName: "password-reset" */ "@/views/WSPasswordReset");
-// const Setup = () => import(/* webpackChunkName: "setup" */ "@/views/WSSetupPage");
+const Setup = () => import(/* webpackChunkName: "setup" */ "@/views/WSSetupPage");
 
 const loginEnforced = (to, from, next) => {
   if (!store.state.loginStatus.isLoggedIn) {
@@ -50,11 +50,11 @@ const routes = [
     path: "/",
     redirect: "/login",
   },
-  // {
-  //   path: "/setup",
-  //   name: "Setup",
-  //   component: Setup,
-  // },
+  {
+    path: "/setup",
+    name: "Setup",
+    component: Setup,
+  },
   {
     path: "/login",
     name: "Login",

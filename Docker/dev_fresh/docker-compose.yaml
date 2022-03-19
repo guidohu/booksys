@@ -41,17 +41,17 @@ services:
             - ${PWD}/../../backend/api:/var/www/html/api
             - ${PWD}/../../backend/classes:/var/www/html/classes
             - ${PWD}/../../backend/config/db:/var/www/html/config/db
-    frontend:
-        build: "./frontend"
-        container_name: "frontend_fresh"
-        user: "node"
-        working_dir: /home/node/app
-        environment:
-            - NODE_ENV=development
-        volumes:
-            - ../../frontend:/home/node/app
-        labels:
-            - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
-            - "traefik.http.services.frontend.loadbalancer.server.port=8080"
-        command: "npm run serve"
+    # frontend:
+    #     build: "./frontend"
+    #     container_name: "frontend_fresh"
+    #     user: "node"
+    #     working_dir: /home/node/app
+    #     environment:
+    #         - NODE_ENV=development
+    #     volumes:
+    #         - ../../frontend:/home/node/app
+    #     labels:
+    #         - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+    #         - "traefik.http.services.frontend.loadbalancer.server.port=8080"
+    #     command: "npm run serve"
     
