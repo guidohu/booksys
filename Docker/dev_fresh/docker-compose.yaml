@@ -3,6 +3,7 @@ version: '3.3'
 services:
     traefik:
         image: "traefik:latest"
+        container_name: "traefik_fresh"
         command:
           - "--api.insecure=true"
           - "--providers.docker=true"
@@ -15,7 +16,7 @@ services:
           - "/var/run/docker.sock:/var/run/docker.sock:ro"
     db:
         build: "./database"
-        user: "mysql"
+        container_name: "db_fresh"
         environment:
             MYSQL_DATABASE: 'booksys'
             MYSQL_USER: 'user'
@@ -26,14 +27,15 @@ services:
         expose:
             - '3306'
     backend:
-        image: booksys_api:latest
+        build: ../../backend
+        container_name: "backend_fresh"
         environment:
             DB_SERVER: 'db:3306'
             DB_NAME: 'booksys'
             DB_USER: 'user'
             DB_PASSWORD: 'userpassword'
         labels:
-            - "traefik.http.routers.backend.rule=PathPrefix(`/api/`) || PathPrefix(`/api`)"
+            - "traefik.http.routers.backend.rule=PathPrefix(`/api/`) || PathPrefix(`/api`) || PathPrefix(`/uploads/`) || PathPrefix(`/uploads`)"
             - "traefik.http.services.backend.loadbalancer.server.port=80"
         volumes:
             - ${PWD}/../../backend/api:/var/www/html/api
@@ -41,6 +43,7 @@ services:
             - ${PWD}/../../backend/config/db:/var/www/html/config/db
     frontend:
         build: "./frontend"
+        container_name: "frontend_fresh"
         user: "node"
         working_dir: /home/node/app
         environment:
