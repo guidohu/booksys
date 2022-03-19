@@ -9,11 +9,7 @@
         :class="getColumnClass(c)"
       >
         <div
-          @click="
-            function () {
-              sortByCol(c);
-            }
-          "
+          @click="sortByCol(c)"
         >
           {{ c.label }}
           <!-- select the right sorting icon -->
