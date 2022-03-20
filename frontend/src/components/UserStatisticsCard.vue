@@ -1,12 +1,5 @@
 <template>
-  <sectioned-card-module>
-    <template v-slot:header>
-      <div class="row">
-        <div class="col-6">
-          <h5>Statistics</h5>
-        </div>
-      </div>
-    </template>
+  <sectioned-card-module title="Statistics">
     <template v-slot:body>
       <user-heats-modal v-model:visible="showUserHeatsModal" />
       <div class="row">

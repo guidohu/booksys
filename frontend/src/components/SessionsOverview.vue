@@ -1,12 +1,5 @@
 <template>
-  <sectioned-card-module>
-    <template v-slot:header>
-      <div class="row">
-        <div class="col-8">
-          <h5>Sessions</h5>
-        </div>
-      </div>
-    </template>
+  <sectioned-card-module title="Sessions">
     <template v-slot:body>
       <div v-if="sessions == null || sessions.sessions == null" class="row">
         <div class="col-12">No day selected</div>

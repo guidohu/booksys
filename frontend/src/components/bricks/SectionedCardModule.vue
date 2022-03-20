@@ -1,6 +1,9 @@
 <template>
   <div class="card">
-    <div v-if="$slots.header" class="card-header">
+    <div v-if="title && !$slots.header" class="card-header px-2">
+      <h5 class="card-title pt-1"> {{ title }}</h5>
+    </div>
+    <div v-if="$slots.header" class="card-header px-2">
       <slot name="header"></slot>
     </div>
     <div v-if="$slots.body" :class="getBodyClass()">
@@ -15,7 +18,7 @@
 <script>
 export default {
   name: "SectionedCardModule",
-  props: [ "scrollable" ],
+  props: [ "scrollable", "title" ],
   methods: {
     getBodyClass: function() {
       let style = "card-body margin padding";

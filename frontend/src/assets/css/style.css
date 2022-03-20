@@ -20,7 +20,9 @@ body {
   }
 }
 
-
+h5 {
+  font-weight: lighter;
+}
 
 a.header-desktop {
   color: #dddddd !important;

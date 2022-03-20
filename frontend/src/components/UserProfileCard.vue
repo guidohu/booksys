@@ -3,7 +3,7 @@
     <template v-slot:header>
       <div class="row">
         <div class="col-6">
-          <h5>Profile</h5>
+          <h5 class="card-title pt-1">Profile</h5>
         </div>
         <div class="col-6 text-end">
           <div class="dropdown">

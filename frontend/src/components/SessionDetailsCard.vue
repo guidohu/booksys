@@ -3,7 +3,7 @@
     <template v-slot:header>
       <div class="row">
         <div class="col-8">
-          <h5>Session Details</h5>
+          <h5 class="card-title pt-1">Session Details</h5>
         </div>
         <div class="col-4 text-end">
           <div v-if="showAddRiders || showDeleteSession" class="dropdown">

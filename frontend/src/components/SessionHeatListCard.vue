@@ -1,12 +1,5 @@
 <template>
-  <sectioned-card-module>
-    <template v-slot:header>
-      <div class="row">
-        <div class="col-8">
-          <h5>Heats</h5>
-        </div>
-      </div>
-    </template>
+  <sectioned-card-module title="Heats">
     <template v-slot:body>
       <warning-box v-if="errors.length > 0" :errors="errors" />
       <heat-entry-modal

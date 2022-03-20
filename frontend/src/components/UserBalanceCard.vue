@@ -1,12 +1,5 @@
 <template>
-  <sectioned-card-module>
-    <template v-slot:header>
-      <div class="row">
-        <div class="col-6">
-          <h5>Balance</h5>
-        </div>
-      </div>
-    </template>
+  <sectioned-card-module title="Balance">
     <template v-slot:body>
       <payment-info-modal v-model:visible="showPaymentInfoModal" />
       <div class="row">

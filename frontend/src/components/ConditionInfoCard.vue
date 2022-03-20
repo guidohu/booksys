@@ -1,12 +1,5 @@
 <template>
-  <sectioned-card-module>
-    <template v-slot:header>
-      <div class="row">
-        <div class="col-8">
-          <h5>Condition Info</h5>
-        </div>
-      </div>
-    </template>
+  <sectioned-card-module title="Condition Info">
     <template v-slot:body>
       <div class="row">
         <div class="col-5">
