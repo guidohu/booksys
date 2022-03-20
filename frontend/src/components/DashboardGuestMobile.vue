@@ -1,8 +1,7 @@
 <template>
   <div>
     <navbar-mobile title="Dashboard" role="guest-home" />
-
-    <div class="row">
+    <div class="row navbar-padding">
       <div class="col-3" />
       <div class="col-6 text-center">
         <div class="row mt-3">
@@ -35,3 +34,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.navbar-padding {
+  padding-top: 60px;
+}
+</style>

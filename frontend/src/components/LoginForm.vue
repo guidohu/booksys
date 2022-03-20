@@ -47,17 +47,15 @@
           <div class="col-12">
             <router-link
               tag="button"
-              class="btn btn-outline-dark btn-sm"
               to="/password/reset"
             >
               Forgot password
             </router-link>
             <router-link
-              tag="button"
-              class="btn btn-outline-dark btn-sm ms-1"
+              class="ms-2"
               to="/signup"
             >
-              Register
+              Sign-Up
             </router-link>
           </div>
         </div>
@@ -94,3 +92,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+  a {
+    color: rgb(39, 39, 39);
+  }
+</style>

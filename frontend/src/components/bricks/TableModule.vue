@@ -243,7 +243,7 @@ export default {
       this.sortCol = this.tColumns[0];
       console.log("TableModule: columns set to", this.columns);
     }
-    if (this.rows != null && this.rows.lenth > 0) {
+    if (this.rows != null && this.rows.length > 0) {
       this.tRows = this.rows;
       this.sort();
     }

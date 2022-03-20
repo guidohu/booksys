@@ -2,7 +2,7 @@
   <div class="position-absolute top-50 start-50 translate-middle">
     <div class="row">
       <div class="col-12 text-center">
-        <card-module title="Goodbye" class="mx-5 my-5">
+        <card-module title="Goodbye">
           You have been logged out. To sign back in, please click
           <router-link to="/login">here</router-link>.
         </card-module>

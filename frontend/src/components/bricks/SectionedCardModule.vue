@@ -3,7 +3,7 @@
     <div v-if="$slots.header" class="card-header">
       <slot name="header"></slot>
     </div>
-    <div v-if="$slots.body" class="card-body scrollable margin padding">
+    <div v-if="$slots.body" :class="getBodyClass()">
       <slot name="body"></slot>
     </div>
     <div v-if="$slots.footer" class="card-footer">
@@ -15,6 +15,16 @@
 <script>
 export default {
   name: "SectionedCardModule",
+  props: [ "scrollable" ],
+  methods: {
+    getBodyClass: function() {
+      let style = "card-body margin padding";
+      if(this.scrollable) {
+        style += " scrollable";
+      }
+      return style;
+    }
+  }
 };
 </script>
 
