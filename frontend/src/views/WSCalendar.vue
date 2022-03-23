@@ -1,65 +1,53 @@
 <template>
-  <div>
-    <div v-if="isDesktop" class="display">
-      <main-title title-name="Calendar" />
-      <b-row class="ml-1 mr-1">
-        <b-col cols="8">
-          <SessionMonthCard
+  <subpage-container title="Calendar">
+    <show-for-desktop>
+      <div class="row mx-1">
+        <div class="col-8">
+          <session-month-card
             v-if="getSessionsCalendar != null"
-            :sessionData="getSessionsCalendar"
+            :session-data="getSessionsCalendar"
             :month="month"
             @prevMonth="prevMonth"
             @nextMonth="nextMonth"
             @mouseOverHandler="mouseOverDayHandler"
           />
-        </b-col>
-        <b-col cols="4">
-          <b-row>
-            <b-col cols="12">
-              <SessionsOverview :sessions="sessionsOverview" />
-            </b-col>
-          </b-row>
-          <b-row class="mt-2">
-            <b-col cols="12">
-              <ConditionInfoCard :sunrise="sunrise" :sunset="sunset" />
-            </b-col>
-          </b-row>
-        </b-col>
-      </b-row>
-      <div class="bottom mr-2">
-        <b-button variant="outline-light" to="/dashboard">
-          <b-icon-house />
-          HOME
-        </b-button>
+        </div>
+        <div class="col-4">
+          <sessions-overview :sessions="sessionsOverview" />
+          <condition-info-card
+            class="mt-2"
+            :sunrise="sunrise"
+            :sunset="sunset"
+          />
+        </div>
       </div>
-    </div>
-    <div v-else>
-      <NavbarMobile title="Calendar" />
-      <SessionMonthCard
+    </show-for-desktop>
+    <show-for-mobile>
+      <session-month-card
+        class="mx-1 mt-1"
         v-if="getSessionsCalendar != null"
-        :sessionData="getSessionsCalendar"
+        :session-data="getSessionsCalendar"
         :month="month"
         @prevMonth="prevMonth"
         @nextMonth="nextMonth"
       />
-    </div>
-  </div>
+    </show-for-mobile>
+  </subpage-container>
 </template>
 
 <script>
 import { mapActions, mapGetters } from "vuex";
 import { BooksysBrowser } from "@/libs/browser";
-import NavbarMobile from "@/components/NavbarMobile";
 import ConditionInfoCard from "@/components/ConditionInfoCard";
 import SessionMonthCard from "@/components/SessionMonthCard";
 import SessionsOverview from "@/components/SessionsOverview";
-import MainTitle from "@/components/MainTitle";
 import * as dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
 import * as dayjsCustomParseFormat from "dayjs/plugin/customParseFormat";
-
-import { BRow, BCol, BButton, BIconHouse } from "bootstrap-vue";
+import ShowForMobile from "../components/bricks/ShowForMobile.vue";
+import ShowForDesktop from "../components/bricks/ShowForDesktop.vue";
+import SubpageContainer from "../components/bricks/SubpageContainer.vue";
 
 dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);
@@ -68,15 +56,22 @@ dayjs.extend(dayjsCustomParseFormat);
 export default {
   name: "WSCalendar",
   components: {
-    NavbarMobile,
-    MainTitle,
     ConditionInfoCard,
     SessionMonthCard,
     SessionsOverview,
-    BRow,
-    BCol,
-    BButton,
-    BIconHouse,
+    ShowForMobile,
+    ShowForDesktop,
+    SubpageContainer,
+  },
+  data() {
+    return {
+      month: null,
+      errors: [],
+      sunrise: null,
+      sunset: null,
+      sessionsOverview: null,
+      // selectedSession: null
+    };
   },
   computed: {
     isMobile: function () {
@@ -94,10 +89,12 @@ export default {
     prevMonth: function () {
       this.month = dayjs(this.month).add(-1, "month").format();
       this.querySessionsForMonth();
+      console.log("month changed to", this.month);
     },
     nextMonth: function () {
       this.month = dayjs(this.month).add(1, "month").format();
       this.querySessionsForMonth();
+      console.log("month changed to", this.month);
     },
     querySessionsForMonth: function () {
       // query get_booking_day
@@ -113,16 +110,6 @@ export default {
 
       this.sessionsOverview = day;
     },
-  },
-  data() {
-    return {
-      month: null,
-      errors: [],
-      sunrise: null,
-      sunset: null,
-      sessionsOverview: null,
-      // selectedSession: null
-    };
   },
   created() {
     // needed to know the timezone

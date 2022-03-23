@@ -1,69 +1,69 @@
 <template>
-  <div v-if="isDesktop" class="display">
-    <main-title title-name="Stop Watch" />
-    <b-row class="ml-1 mr-1">
-      <b-col cols="8">
-        <WarningBox v-if="errors.length > 0" :errors="errors" />
-        <StopWatchCard :sessionId="sessionId" />
-      </b-col>
-      <b-col cols="4">
-        <SessionHeatListCard
-          :sessionId="sessionId"
-          class="side-bar-heats-component"
-        />
-        <ConditionInfoCard
-          class="mt-2"
-          v-if="getSessionConditionInfo != null"
-          :sunrise="getSessionConditionInfo.sunrise"
-          :sunset="getSessionConditionInfo.sunset"
-        />
-      </b-col>
-    </b-row>
-    <div class="bottom mr-2">
-      <b-button variant="outline-light" to="/dashboard">
-        <b-icon-house></b-icon-house>
+  <subpage-container title="Stop Watch">
+    <show-for-desktop>
+      <div class="row mx-1">
+        <div class="col-8">
+          <warning-box v-if="errors.length > 0" :errors="errors" />
+          <stop-watch-card :session-id="sessionId" />
+        </div>
+        <div class="col-4">
+          <session-heat-list-card
+            :session-id="sessionId"
+            class="side-bar-heats-component"
+          />
+          <condition-info-card
+            v-if="getSessionConditionInfo != null"
+            class="mt-2"
+            :sunrise="getSessionConditionInfo.sunrise"
+            :sunset="getSessionConditionInfo.sunset"
+          />
+        </div>
+      </div>
+    </show-for-desktop>
+    <show-for-mobile>
+      <warrning-box v-if="errors.length > 0" :errors="errors" />
+      <stop-watch-card :session-id="sessionId" />
+      <session-heat-list-card :session-id="sessionId" class="mt-2" />
+      <condition-info-card
+        v-if="getSessionConditionInfo != null"
+        class="mt-2"
+        :sunrise="getSessionConditionInfo.sunrise"
+        :sunset="getSessionConditionInfo.sunset"
+      />
+    </show-for-mobile>
+    <template v-slot:bottom>
+      <router-link
+        tag="button"
+        class="btn btn-outline-light ms-1"
+        to="/dashboard"
+      >
+        <i class="bi bi-house"></i>
         HOME
-      </b-button>
-    </div>
-  </div>
-  <div v-else>
-    <NavbarMobile title="Stop Watch" />
-    <WarningBox v-if="errors.length > 0" :errors="errors" />
-    <StopWatchCard :sessionId="sessionId" />
-    <SessionHeatListCard :sessionId="sessionId" class="mt-2" />
-    <ConditionInfoCard
-      class="mt-2"
-      v-if="getSessionConditionInfo != null"
-      :sunrise="getSessionConditionInfo.sunrise"
-      :sunset="getSessionConditionInfo.sunset"
-    />
-  </div>
+      </router-link>
+    </template>
+  </subpage-container>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
-import { BooksysBrowser } from "@/libs/browser";
-import NavbarMobile from "@/components/NavbarMobile";
 import WarningBox from "@/components/WarningBox";
 import StopWatchCard from "@/components/StopWatchCard";
 import SessionHeatListCard from "@/components/SessionHeatListCard";
 import ConditionInfoCard from "@/components/ConditionInfoCard";
-import MainTitle from "@/components/MainTitle";
-import { BRow, BCol, BButton, BIconHouse } from "bootstrap-vue";
+import ShowForMobile from "../components/bricks/ShowForMobile.vue";
+import ShowForDesktop from "../components/bricks/ShowForDesktop.vue";
+import SubpageContainer from "../components/bricks/SubpageContainer.vue";
 
 export default {
   name: "WSWatch",
   components: {
-    NavbarMobile,
-    MainTitle,
     WarningBox,
     StopWatchCard,
     SessionHeatListCard,
     ConditionInfoCard,
-    BRow,
-    BCol,
-    BButton,
-    BIconHouse,
+    ShowForMobile,
+    ShowForDesktop,
+    SubpageContainer,
   },
   data() {
     return {
@@ -72,9 +72,6 @@ export default {
     };
   },
   computed: {
-    isDesktop: function () {
-      return !BooksysBrowser.isMobile();
-    },
     ...mapGetters("sessions", ["getSessionConditionInfo"]),
   },
   created() {
@@ -92,6 +89,5 @@ export default {
 <style>
 .side-bar-heats-component {
   max-height: 300px;
-  overflow-y: scroll;
 }
 </style>

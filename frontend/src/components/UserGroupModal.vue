@@ -1,225 +1,142 @@
 <template>
-  <b-modal
-    id="userGroupModal"
-    :title="title"
-    :visible="visible"
-    @hide="$emit('update:visible', false)"
-    @show="$emit('update:visible', true)"
-  >
-    <b-form @submit="save">
-      <b-row v-if="errors.length > 0">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
-          <WarningBox :errors="errors" />
-        </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-      </b-row>
-      <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
-          <!-- User Group -->
-          <h6 class="mt-2 mb-3">User Group</h6>
-          <b-form-group
-            id="user-group-name"
-            label="Name"
-            label-for="user-group-name"
-            description=""
-            label-cols="3"
+  <modal-container name="user-group-modal" :visible="visible">
+    <modal-header
+      :closable="true"
+      :title="title"
+      @close="$emit('update:visible', false)"
+    />
+    <modal-body>
+      <warning-box v-if="errors.length" :errors="errors" />
+      <form @submit.prevent="save">
+        <h6 class="mt-2 mb-3">User Group</h6>
+        <input-text
+          id="user-group-name"
+          label="Name"
+          v-model="form.user_group_name"
+          size="small"
+          :disabled="!isEditMode"
+        />
+        <input-text
+          id="user-group-description"
+          label="Description"
+          v-model="form.user_group_description"
+          size="small"
+          :disabled="!isEditMode"
+        />
+        <!-- User Role -->
+        <h6 class="mt-5 mb-3">User Role and Permissions</h6>
+        <input-select
+          id="user-role-name"
+          label="Role"
+          :options="userRoleList"
+          v-model="form.user_role_id"
+          :disabled="!isEditMode"
+          size="small"
+        />
+        <input-text
+          id="user-role-description"
+          label="Description"
+          v-model="userRoleDescription"
+          size="small"
+          :disabled="true"
+        />
+        <!-- Pricing -->
+        <h6 class="mt-5 mb-3">Pricing</h6>
+        <input-currency
+          id="price"
+          label="Price"
+          v-model="form.price_min"
+          :disabled="!isEditMode"
+          size="small"
+          :currency="getCurrency + '/min'"
+        />
+        <input-text
+          id="price-description"
+          label="Description"
+          v-model="form.price_description"
+          size="small"
+          :disabled="!isEditMode"
+        />
+      </form>
+    </modal-body>
+    <modal-footer class="block-footer">
+      <div class="row">
+        <div class="col-6 text-start">
+          <button
+            v-if="isEditMode && form.user_group_id != null"
+            type="button"
+            class="btn btn-outline-danger"
+            @click.stop="remove"
           >
-            <b-form-input
-              id="user-group-name"
-              v-model="form.user_group_name"
-              type="text"
-              placeholder=""
-              :disabled="!isEditMode"
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="user-group-description"
-            label="Description"
-            label-for="user-group-description"
-            description=""
-            label-cols="3"
+            <i class="bi bi-trash"></i>
+            Delete
+          </button>
+        </div>
+        <div class="col-6 text-end">
+          <button
+            v-if="isEditMode == true"
+            type="submit"
+            class="btn btn-outline-info ms-2"
+            @click.prevent.self="save"
           >
-            <b-form-input
-              id="user-group-description"
-              v-model="form.user_group_description"
-              type="text"
-              placeholder=""
-              :disabled="!isEditMode"
-            ></b-form-input>
-          </b-form-group>
-          <!-- User Role -->
-          <h6 class="mt-5 mb-3">User Role and Permissions</h6>
-          <b-form-group
-            id="user-role-name"
-            label="Role"
-            label-for="user-role-name-select"
-            description=""
-            label-cols="3"
+            <i class="bi bi-check"></i>
+            Save
+          </button>
+          <button
+            v-if="isEditMode == false"
+            type="submit"
+            class="btn btn-outline-info ms-2"
+            @click.prevent.self="enableEditMode"
           >
-            <b-form-select
-              id="user-role-name-select"
-              v-model="form.user_role_id"
-              @change="roleChangeHandler($event)"
-              :options="userRoleList"
-              :disabled="!isEditMode"
-            ></b-form-select>
-          </b-form-group>
-          <b-form-group
-            id="user-role-description"
-            label="Description"
-            label-for="user-role-description-input"
-            description=""
-            label-cols="3"
+            <i class="bi bi-pencil"></i>
+            Edit
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-danger ms-2"
+            @click.prevent.self="close"
           >
-            <b-form-input
-              id="user-role-description-input"
-              v-model="form.user_role_description"
-              type="text"
-              placeholder=""
-              disabled
-            ></b-form-input>
-          </b-form-group>
-          <!-- Pricing -->
-          <h6 class="mt-5 mb-3">Pricing</h6>
-          <b-form-group
-            id="price"
-            label="Price"
-            label-for="price-input"
-            description=""
-            label-cols="3"
-          >
-            <b-input-group>
-              <b-form-input
-                id="price-input"
-                v-model="form.price_min"
-                type="text"
-                placeholder=""
-                :disabled="!isEditMode"
-              ></b-form-input>
-              <b-input-group-append is-text>
-                {{ getCurrency }}/min
-              </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-          <b-form-group
-            id="price-description"
-            label="Description"
-            label-for="price-description-input"
-            description=""
-            label-cols="3"
-          >
-            <b-form-input
-              id="price-description-input"
-              v-model="form.price_description"
-              type="text"
-              placeholder=""
-              :disabled="!isEditMode"
-            ></b-form-input>
-          </b-form-group>
-        </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-      </b-row>
-    </b-form>
-    <div slot="modal-footer">
-      <div class="text-left d-inline">
-        <b-button
-          v-if="isEditMode == true"
-          class="mr-1"
-          type="button"
-          variant="outline-danger"
-          v-on:click="remove"
-        >
-          <b-icon-trash />
-          Delete
-        </b-button>
+            <i class="bi bi-x"></i>
+            Cancel
+          </button>
+        </div>
       </div>
-      <div class="text-right d-inline">
-        <b-button
-          v-if="isEditMode == true"
-          class="ml-4"
-          type="button"
-          variant="outline-info"
-          v-on:click="save"
-        >
-          <b-icon-check />
-          Save
-        </b-button>
-        <b-button
-          v-if="isEditMode == false"
-          class="ml-1"
-          type="button"
-          variant="outline-info"
-          v-on:click="enableEditMode"
-        >
-          <b-icon-pencil />
-          Edit
-        </b-button>
-        <b-button
-          class="ml-1"
-          type="button"
-          variant="outline-danger"
-          v-on:click="close"
-        >
-          <b-icon-x />
-          Cancel
-        </b-button>
-      </div>
-    </div>
-  </b-modal>
+    </modal-footer>
+  </modal-container>
 </template>
 
 <script>
-import Vue from "vue";
 import { mapGetters, mapActions } from "vuex";
 import { sprintf } from "sprintf-js";
 import WarningBox from "@/components/WarningBox";
-import {
-  BForm,
-  BRow,
-  BCol,
-  BFormGroup,
-  BFormInput,
-  BFormSelect,
-  BInputGroup,
-  BInputGroupAppend,
-  BButton,
-  BIconTrash,
-  BIconCheck,
-  BIconPencil,
-  BIconX,
-  ModalPlugin,
-} from "bootstrap-vue";
-
-Vue.use(ModalPlugin);
+import InputText from "./forms/inputs/InputText.vue";
+import InputSelect from "./forms/inputs/InputSelect.vue";
+import ModalContainer from "./bricks/ModalContainer.vue";
+import ModalHeader from "./bricks/ModalHeader.vue";
+import ModalBody from "./bricks/ModalBody.vue";
+import InputCurrency from "./forms/inputs/InputCurrency.vue";
+import ModalFooter from "./bricks/ModalFooter.vue";
+import { confirm } from "@/components/bricks/DialogModal";
 
 export default {
   name: "UserGroupModal",
-  props: ["userGroup", "editMode", "visible"],
   components: {
     WarningBox,
-    BForm,
-    BRow,
-    BCol,
-    BFormGroup,
-    BFormInput,
-    BFormSelect,
-    BInputGroup,
-    BInputGroupAppend,
-    BButton,
-    BIconTrash,
-    BIconCheck,
-    BIconPencil,
-    BIconX,
+    InputText,
+    InputSelect,
+    ModalContainer,
+    ModalHeader,
+    ModalBody,
+    InputCurrency,
+    ModalFooter,
   },
+  props: ["userGroup", "editMode", "visible"],
+  emits: ["update:visible", "save"],
   data() {
     return {
       errors: [],
       userRoleList: [],
-      form: {
-        user_role_description: "",
-      },
+      form: {},
       isEditMode: false,
       title: "User Group",
     };
@@ -227,57 +144,62 @@ export default {
   computed: {
     ...mapGetters("configuration", ["getCurrency"]),
     ...mapGetters("user", ["userRoles"]),
+    userRoleDescription: function () {
+      if (this.form.user_role_id == null) {
+        return "";
+      }
+      const role = this.userRoles.find(
+        (ur) => ur.user_role_id == this.form.user_role_id
+      );
+      return role.user_role_description;
+    },
   },
   watch: {
-    userGroup: function (newValue) {
-      if (newValue != null) {
-        this.form = { ...newValue };
-        this.form.price_min = sprintf("%.2f", newValue.price_min);
-        console.log("price_min", this.form);
-      } else {
-        this.form = {};
-      }
+    userGroup: function () {
+      this.reloadProps();
     },
     editMode: function (newValue) {
-      console.log("editMode changed to:", newValue);
       this.isEditMode = newValue;
       this.setTitle();
     },
     userRoles: function (newValue) {
       this.userRolesToList(newValue);
     },
+    visible: function () {
+      this.reloadProps();
+    },
   },
   methods: {
+    reloadProps: function () {
+      this.isEditMode = this.editMode;
+      if (this.userGroup != null) {
+        this.form = { ...this.userGroup };
+        this.form.price_min = sprintf("%.2f", this.userGroup.price_min);
+      } else {
+        this.form = {};
+      }
+      this.setTitle();
+    },
     save: function () {
       this.saveUserGroup(this.form)
         .then(() => {
           this.errors = [];
+          this.$emit("save", this.form);
+          this.form = {};
           this.close();
         })
         .catch((errors) => (this.errors = errors));
     },
     close: function () {
-      this.setTitle();
       this.$emit("update:visible", false);
     },
     remove: function () {
       const name = this.form.user_group_name;
       const id = this.form.user_group_id;
-      this.$bvModal
-        .msgBoxConfirm(
-          "Do you really want to delete user group " + name + "?",
-          {
-            title: "Delete User Group",
-            size: "sm",
-            buttonSize: "sm",
-            okVariant: "danger",
-            okTitle: "Delete",
-            cancelTitle: "Cancel",
-            footerClass: "p-2",
-            hideHeaderClose: false,
-            centered: true,
-          }
-        )
+      confirm({
+        title: "Delete User Group",
+        message: "Do you really want to delete user group " + name + "?",
+      })
         .then((value) => {
           // delete user group
           if (value == true) {
@@ -297,12 +219,10 @@ export default {
       "deleteUserGroup",
     ]),
     enableEditMode: function () {
-      console.log("Enable edit mode");
       this.isEditMode = true;
       this.setTitle();
     },
     setTitle: function () {
-      console.log("Set title with:", this.isEditMode);
       if (this.isEditMode == true && this.form.user_group_id == null) {
         this.title = "New User Group";
       } else if (this.isEditMode == true) {
@@ -322,11 +242,6 @@ export default {
         };
       });
     },
-    roleChangeHandler: function (user_role_id) {
-      const role = this.userRoles.find((ur) => ur.user_role_id == user_role_id);
-      this.form.user_role_name = role.user_role_name;
-      this.form.user_role_description = role.user_role_description;
-    },
   },
   created() {
     this.queryConfiguration();
@@ -335,18 +250,13 @@ export default {
       .then(() => this.userRolesToList())
       .catch((errors) => this.errors.append(...errors));
 
-    if (this.userGroup != null) {
-      this.form = { ...this.userGroup };
-    }
-
-    this.isEditMode = this.editMode;
-    this.setTitle();
-  },
-  mounted() {
-    this.$root.$on("bv::modal::show", () => {
-      this.isEditMode = this.editMode;
-      this.setTitle();
-    });
+    this.reloadProps();
   },
 };
 </script>
+
+<style scoped>
+.block-footer {
+  display: block;
+}
+</style>

@@ -1,149 +1,114 @@
 <template>
-  <b-modal
-    id="riderSelectionModal"
-    title="Add Riders"
+  <modal-container
+    name="rider-selection-modal"
     :visible="visible"
     @hide="$emit('update:visible', false)"
     @show="$emit('update:visible', true)"
   >
-    <b-row v-if="errors.length">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
-        <WarningBox :errors="errors" />
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-    </b-row>
-    <b-form @submit="add">
-      <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
-          <b-form-group
-            v-if="isMobile != true"
-            id="search"
-            label="Search"
-            label-for="rider-search"
-            description=""
-          >
-            <b-form-input id="rider-search" v-model="search" type="text" />
-          </b-form-group>
-          <b-form-group
-            id="rider"
-            label="Rider"
-            label-for="rider-select"
-            description="use ctrl+click to select multiple users"
-          >
-            <b-form-select
-              id="rider-select"
-              v-model="selected"
-              :options="filteredOptions"
-              multiple
-              :select-size="5"
-            ></b-form-select>
-          </b-form-group>
-          <b-button
-            v-if="isMobile != true"
-            type="button"
-            variant="outline-success"
-            v-on:click="add"
-            block
-          >
-            <b-icon-person-plus />{{ " " }}Select
-          </b-button>
-          <hr />
-          <b-form-group
-            v-if="isMobile != true"
-            id="selected"
-            label="Selected Riders"
-            label-for="riders-selected"
-            description=""
-          >
-            <ul v-if="usersToAdd.length > 0">
-              <li v-for="u in usersToAdd" :key="u.id">
-                {{ u.firstName + " " + u.lastName + "  " }}
-                <a href="#" v-on:click.prevent="remove(u.id)"
-                  ><b-icon-person-dash
-                /></a>
-              </li>
-            </ul>
-            <ul v-else>
-              <li>Please select riders to be added</li>
-            </ul>
-          </b-form-group>
-        </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-      </b-row>
-    </b-form>
-    <div slot="modal-footer">
-      <b-button
-        v-if="isMobile != true"
-        type="button"
-        variant="outline-info"
-        v-on:click="save"
-      >
-        <b-icon-check />
-        Add
-      </b-button>
-      <b-button
-        v-if="isMobile == true"
-        type="button"
-        variant="outline-info"
-        v-on:click="saveMobile"
-      >
-        <b-icon-check />
-        Add
-      </b-button>
-      <b-button
-        class="ml-1"
-        type="button"
-        variant="outline-danger"
-        v-on:click="close"
-      >
-        <b-icon-x />
+    <modal-header
+      :closable="true"
+      title="Add Riders"
+      @close="$emit('update:visible', false)"
+    />
+    <modal-body>
+      <warning-box v-if="errors.length" :errors="errors" />
+      <form @submit.prevent="add">
+        <show-for-desktop>
+          <input-text id="rider-search" label="Search" v-model="search" />
+        </show-for-desktop>
+        <input-select
+          id="rider-selection"
+          label="Rider"
+          v-model="selected"
+          :options="filteredOptions"
+          size="small"
+          :select-size="5"
+          select-mode="multiple"
+          description="use ctrl+click to select multiple users"
+        />
+        <show-for-desktop>
+          <div class="row">
+            <div class="col-9 offset-3">
+              <button
+                type="button"
+                class="btn btn-outline-success block"
+                @click="add"
+              >
+                <i class="bi bi-person-plus"></i>{{ " " }}Select
+              </button>
+            </div>
+          </div>
+          <div class="row my-2">
+            <hr />
+          </div>
+          <div class="row">
+            <label class="col-3 col-form-label">Selected Riders</label>
+            <div class="col-9 align-middle">
+              <ul v-if="usersToAdd.length > 0">
+                <li v-for="u in usersToAdd" :key="u.id">
+                  {{ u.firstName + " " + u.lastName + "  " }}
+                  <a href="#" @click.prevent="remove(u.id)">
+                    <i class="bi bi-person-dash"></i>
+                  </a>
+                </li>
+              </ul>
+              <ul v-else>
+                <li>Please select riders to be added</li>
+              </ul>
+            </div>
+          </div>
+        </show-for-desktop>
+      </form>
+    </modal-body>
+    <modal-footer>
+      <show-for-desktop>
+        <button type="button" class="btn btn-outline-info" @click="save">
+          <i class="bi bi-check" />
+          Add
+        </button>
+      </show-for-desktop>
+      <show-for-mobile>
+        <button type="button" class="btn btn-outline-info" @click="saveMobile">
+          <i class="bi bi-check" />
+          Add
+        </button>
+      </show-for-mobile>
+      <button type="button" class="btn btn-outline-danger mb-1" @click="close">
+        <i class="bi bi-x" />
         Cancel
-      </b-button>
-    </div>
-  </b-modal>
+      </button>
+    </modal-footer>
+  </modal-container>
 </template>
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import { BooksysBrowser } from "@/libs/browser";
 import uniq from "lodash/uniq";
 import WarningBox from "@/components/WarningBox";
 import { UserPointer } from "@/dataTypes/user";
-import {
-  BModal,
-  BRow,
-  BCol,
-  BForm,
-  BFormGroup,
-  BFormInput,
-  BFormSelect,
-  BButton,
-  BIconPersonPlus,
-  BIconPersonDash,
-  BIconCheck,
-  BIconX,
-} from "bootstrap-vue";
+import ModalContainer from "./bricks/ModalContainer.vue";
+import ModalHeader from "./bricks/ModalHeader.vue";
+import ModalBody from "./bricks/ModalBody.vue";
+import ModalFooter from "./bricks/ModalFooter.vue";
+import InputText from "./forms/inputs/InputText.vue";
+import InputSelect from "./forms/inputs/InputSelect.vue";
+import ShowForDesktop from "./bricks/ShowForDesktop.vue";
+import ShowForMobile from "./bricks/ShowForMobile.vue";
 
 export default {
   name: "RiderSelectionModal",
-  props: ["session", "visible"],
   components: {
     WarningBox,
-    BModal,
-    BRow,
-    BCol,
-    BForm,
-    BFormGroup,
-    BFormInput,
-    BFormSelect,
-    BButton,
-    BIconPersonPlus,
-    BIconPersonDash,
-    BIconCheck,
-    BIconX,
+    ModalContainer,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    InputText,
+    InputSelect,
+    ShowForDesktop,
+    ShowForMobile,
   },
+  props: ["session", "visible"],
   data() {
     return {
       errors: [],
@@ -171,9 +136,6 @@ export default {
       );
       return users;
     },
-    isMobile: function () {
-      return BooksysBrowser.isMobile();
-    },
   },
   watch: {
     search: function (newSearch) {
@@ -195,9 +157,7 @@ export default {
   methods: {
     ...mapActions("user", ["queryUserList"]),
     ...mapActions("sessions", ["addUsersToSession"]),
-    add: function (event) {
-      event.preventDefault();
-
+    add: function () {
       console.log("add Called");
       console.log("selected", this.selected);
 

@@ -1,11 +1,7 @@
-import Vue from "vue";
-import Vuex from "vuex";
-
+import { createStore } from "vuex";
 import loginStatus from "@/store/modules/loginStatus";
 
-Vue.use(Vuex);
-
-export const store = new Vuex.Store({
+export const store = createStore({
   modules: {
     // will be added dynamically in depending on the route in router
     loginStatus: loginStatus,

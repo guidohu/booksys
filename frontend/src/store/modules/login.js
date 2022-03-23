@@ -51,6 +51,7 @@ const actions = {
       commit("setUserInfo", null);
       commit("setIsLoggedIn", false);
       dispatch("loginStatus/setIsLoggedIn", false, { root: true });
+      console.log("Logout successful");
     };
     let failCb = (data) => {
       console.error("Logout failed:", data);

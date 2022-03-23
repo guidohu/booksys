@@ -1,20 +1,21 @@
 <template>
-  <b-card no-body class="text-left">
-    <b-card-body>
-      <HeatEntryModal :heat="selectedHeat" :visible.sync="showHeatEntryModal" />
-      <b-table
-        v-if="errors.length == 0"
-        striped
-        hover
-        small
-        :fields="columns"
-        :items="getHeatsForSession"
-        @row-clicked="rowClick"
-        tbody-tr-class="clickable"
+  <sectioned-card-module title="Heats">
+    <template v-slot:body>
+      <warning-box v-if="errors.length > 0" :errors="errors" />
+      <heat-entry-modal
+        v-model:visible="showHeatEntryModal"
+        :heat="selectedHeat"
       />
-      <WarningBox v-if="errors.length > 0" :errors="errors" />
-    </b-card-body>
-  </b-card>
+      <table-module
+        v-if="errors.length == 0"
+        :columns="columns"
+        :rows="getHeatsForSession"
+        row-class="clickable"
+        size="small"
+        @rowclick="rowClick"
+      />
+    </template>
+  </sectioned-card-module>
 </template>
 
 <script>
@@ -22,16 +23,16 @@ import { mapActions, mapGetters } from "vuex";
 import { sprintf } from "sprintf-js";
 import WarningBox from "@/components/WarningBox";
 import HeatEntryModal from "@/components/HeatEntryModal";
-import { BCard, BCardBody, BTable } from "bootstrap-vue";
+import SectionedCardModule from "./bricks/SectionedCardModule.vue";
+import TableModule from "./bricks/TableModule.vue";
 
 export default {
   name: "SessionHeatListCard",
   components: {
     WarningBox,
     HeatEntryModal,
-    BCard,
-    BCardBody,
-    BTable,
+    SectionedCardModule,
+    TableModule,
   },
   props: ["sessionId"],
   data() {
@@ -108,6 +109,7 @@ export default {
           label: "Comment",
         });
       }
+      console.log("Columns:", this.columns);
     },
     rowClick: function (item) {
       console.log("clicked on item", item);
@@ -134,5 +136,9 @@ export default {
 <style>
 tr.clickable {
   cursor: pointer;
+}
+
+.scrollable {
+  overflow-y: scroll;
 }
 </style>

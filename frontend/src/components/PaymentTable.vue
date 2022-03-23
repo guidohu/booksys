@@ -1,152 +1,94 @@
 <template>
   <div class="text-left">
-    <WarningBox
+    <warning-box
       v-if="errors.length > 0"
       :errors="errors"
       dismissible="true"
       @dismissed="dismissedHandler"
     />
-    <div v-else>
-      <IncomeModal :visible.sync="showIncomeModal" />
-      <ExpenseModal :visible.sync="showExpenseModal" />
-      <b-row v-if="form.years.length > 0" class="text-right">
-        <b-col offset="6" cols="6" class="d-sm-none mr-1">
-          <b-form-group
+    <div v-if="errors.length == 0" class="box box-fix-height">
+      <income-modal v-model:visible="showIncomeModal" />
+      <expense-modal v-model:visible="showExpenseModal" />
+      <div class="row box-fix-content mb-2 mx-1">
+        <div class="col-6 text-left ps-1">
+          <button
+            class="btn btn-outline-info btn-sm me-1"
+            @click="showAddIncome"
+          >
+            <i class="bi bi-plus" />
+            Income
+          </button>
+          <button class="btn btn-outline-info btn-sm" @click="showAddExpense">
+            <i class="bi bi-dash" />
+            Expense
+          </button>
+        </div>
+        <div
+          class="col-3 col-sm-3 col-lg-2 offset-3 offset-sm-3 offset-lg-4 text-right pe-1"
+        >
+          <input-select
             id="year"
-            label="Year"
-            label-for="year-select"
-            description=""
-            label-cols="3"
-          >
-            <b-form-select
-              id="year-select"
-              v-model="form.selectedYear"
-              :options="form.years"
-              @change="yearSelectionChangeHandler($event)"
-            />
-          </b-form-group>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="8">
-          <b-button
-            v-on:click="showAddIncome"
-            size="sm"
-            variant="outline-info"
-            class="mr-1 mb-2"
-            ><b-icon-plus />Income</b-button
-          >
-          <b-button
-            v-on:click="showAddExpense"
-            size="sm"
-            variant="outline-info"
-            class="mb-2"
-            ><b-icon-dash />Expense</b-button
-          >
-        </b-col>
-        <b-col cols="4" class="d-none d-sm-block">
-          <b-form-group
-            id="year"
-            label="Year"
-            label-for="year-select"
-            description=""
-            label-cols="3"
-          >
-            <b-form-select
-              id="year-select"
-              v-model="form.selectedYear"
-              :options="form.years"
-              @change="yearSelectionChangeHandler($event)"
-            />
-          </b-form-group>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="12">
-          <b-overlay
-            id="overlay-background"
-            :show="isLoading"
-            spinner-type="border"
-            spinner-variant="info"
-            rounded="sm"
-          >
-            <b-table
-              striped
-              hover
-              small
-              sticky-header
-              borderless
-              sort-by="date"
-              :items="getTransactions"
-              :fields="fields"
-              :selectable="false"
-              table-class="payment-table"
-              tbody-class="payment-table"
-              show-empty
-              empty-text="No records to show"
+            v-model="form.selectedYear"
+            size="small"
+            :options="form.years"
+            @changed="yearSelectionChangeHandler"
+          />
+        </div>
+      </div>
+      <div class="row box-flex-content">
+        <div class="col-12">
+          <overlay-spinner :active="isLoading">
+            <table-module
+              :columns="fields"
+              :rows="getTransactions"
+              size="small"
             >
-              <template #cell(action)="data">
+              <template #cell(action)="item">
                 <div class="text-center">
-                  <b-button size="sm" style="font-size: 0.8em" variant="light">
-                    <b-icon-trash
-                      v-on:click="deleteEntry(data.item)"
-                      variant="danger"
+                  <button class="btn btn-light btn-sm" style="font-size: 0.8em">
+                    <i
+                      class="bi bi-trash text-alert"
+                      @click="deleteEntry(item.row)"
                     />
-                  </b-button>
+                  </button>
                 </div>
               </template>
-            </b-table>
-          </b-overlay>
-        </b-col>
-      </b-row>
+            </table-module>
+          </overlay-spinner>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import Vue from "vue";
+import { defineAsyncComponent } from "vue";
 import { mapGetters, mapActions } from "vuex";
 import reverse from "lodash/reverse";
 import * as dayjs from "dayjs";
 import { formatCurrency } from "@/libs/formatters";
 import WarningBox from "@/components/WarningBox";
-import {
-  BRow,
-  BCol,
-  BFormGroup,
-  BFormSelect,
-  BButton,
-  BIconPlus,
-  BIconDash,
-  BIconTrash,
-  BOverlay,
-  BTable,
-  ModalPlugin,
-} from "bootstrap-vue";
+import TableModule from "./bricks/TableModule.vue";
+import InputSelect from "./forms/inputs/InputSelect.vue";
+import OverlaySpinner from "./styling/OverlaySpinner.vue";
+import { confirm } from "@/components/bricks/DialogModal";
 
-const IncomeModal = () =>
-  import(/* webpackChunkName: "income-modal" */ "@/components/IncomeModal");
-const ExpenseModal = () =>
-  import(/* webpackChunkName: "expense-modal" */ "@/components/ExpenseModal");
-
-Vue.use(ModalPlugin);
+const IncomeModal = defineAsyncComponent(() =>
+  import(/* webpackChunkName: "income-modal" */ "@/components/IncomeModal")
+);
+const ExpenseModal = defineAsyncComponent(() =>
+  import(/* webpackChunkName: "expense-modal" */ "@/components/ExpenseModal")
+);
 
 export default {
   name: "PaymentTable",
   components: {
     WarningBox,
+    TableModule,
+    InputSelect,
+    OverlaySpinner,
     IncomeModal,
     ExpenseModal,
-    BRow,
-    BCol,
-    BFormGroup,
-    BFormSelect,
-    BButton,
-    BIconPlus,
-    BIconDash,
-    BIconTrash,
-    BOverlay,
-    BTable,
   },
   data() {
     return {
@@ -227,43 +169,34 @@ export default {
     showAddExpense: function () {
       this.showExpenseModal = true;
     },
-    yearSelectionChangeHandler: function (selection) {
+    yearSelectionChangeHandler: function () {
+      console.log("year selection has changed to:", this.form.selectedYear);
       this.isLoading = true;
 
-      this.queryTransactions(selection)
+      this.queryTransactions(this.form.selectedYear)
         .then(() => (this.errors = []))
         .catch((errors) => (this.errors = errors))
         .then(() => (this.isLoading = false));
     },
     deleteEntry: function (transaction) {
-      const message = "Do you really want to delete this transaction?";
-      this.$bvModal
-        .msgBoxConfirm(message, {
-          title: "Delete Transaction",
-          size: "sm",
-          buttonSize: "sm",
-          okVariant: "danger",
-          okTitle: "Delete",
-          cancelTitle: "Cancel",
-          footerClass: "p-2",
-          hideHeaderClose: false,
-          centered: true,
-        })
-        .then((value) => {
-          // delete transaction
-          if (value == true) {
-            this.isLoading = true;
-            this.deleteTransaction(transaction)
-              .then(() => {
-                this.errors = [];
-              })
-              .catch((errors) => (this.errors = errors));
-          }
-        })
-        .catch((err) => {
-          this.errors = [err];
-        })
-        .then(() => (this.isLoading = false));
+      console.log("Delete transaction:", transaction);
+      confirm({
+        title: "Delete Transaction",
+        message: "Do you really want to delete this transaction?",
+      }).then((value) => {
+        // delete transaction
+        if (value == true) {
+          this.isLoading = true;
+          this.deleteTransaction(transaction)
+            .then(() => {
+              this.errors = [];
+            })
+            .catch((errors) => {
+              this.errors = errors;
+            })
+            .then(() => (this.isLoading = false));
+        }
+      });
     },
     dismissedHandler: function () {
       this.errors = [];
@@ -286,19 +219,28 @@ export default {
 </script>
 
 <style scoped>
-@media (min-width: 450px) {
-  .b-table-sticky-header {
-    min-height: 330px;
-    max-height: 330px;
-    height: 330px;
+.box {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+.box-fix-height {
+  max-height: 430px;
+}
+
+@media (max-width: 992px) {
+  .box-fix-height {
+    max-height: 90vh;
   }
 }
 
-@media (max-width: 450px) {
-  .b-table-sticky-header {
-    min-height: 540px;
-    max-height: 540px;
-    height: 540px;
-  }
+.box-fix-content {
+  flex: 0 0 auto;
+}
+
+.box-flex-content {
+  flex: 1 1 auto;
+  overflow: scroll;
 }
 </style>

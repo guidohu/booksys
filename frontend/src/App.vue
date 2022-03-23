@@ -1,43 +1,48 @@
 <template>
-  <div id="app">
-    <b-container v-if="isDesktop">
-      <b-row class="display noborder nobackground">
+  <div id="app-content">
+    <!-- <div v-if="isDesktop" class="container">
+      <div class="row display noborder nobackground">
         <div class="vcenter_placeholder">
-          <div class="vcenter_content">
-            <alert-message
-              v-if="backendReachable == false"
-              :alertMessage="backendNotReachableAlertMsg"
-            />
-            <router-view v-else />
-          </div>
+          <div class="vcenter_content"> -->
+    <alert-message
+      v-if="backendReachable == false"
+      :alert-message="backendNotReachableAlertMsg"
+    />
+    <router-view id="router-view" v-else />
+    <!-- </div>
         </div>
-      </b-row>
-      <footer class="legal-footer">
-        Copyright 2013-2022 by Guido Hungerbuehler
-        <a href="https://github.com/guidohu/booksys">Find me on Github</a>
-      </footer>
-    </b-container>
-    <b-container v-if="isMobile" fluid="true">
+      </div> -->
+    <footer class="legal-footer d-none d-lg-block">
+      Copyright 2013-2022 by Guido Hungerbuehler
+      <a href="https://github.com/guidohu/booksys">Find me on Github</a>
+    </footer>
+    <!-- </div> -->
+    <!-- <div v-if="isMobile" class="container-fluid">
       <alert-message
         v-if="backendReachable == false"
-        :alertMessage="backendNotReachableAlertMsg"
+        :alert-message="backendNotReachableAlertMsg"
       />
       <router-view v-else />
-    </b-container>
+    </div> -->
   </div>
 </template>
 
 <script>
+import { defineAsyncComponent } from "vue";
 import { BooksysBrowser } from "@/libs/browser";
 import { getBackendStatus } from "@/api/backend";
 import { mapGetters } from "vuex";
-import { BContainer, BRow } from "bootstrap-vue";
 
 // Lazy imports
-const AlertMessage = () => import("@/components/AlertMessage");
+const AlertMessage = defineAsyncComponent(() =>
+  import("@/components/AlertMessage")
+);
 
 export default {
   name: "App",
+  components: {
+    AlertMessage,
+  },
   data: function () {
     return {
       errors: [],
@@ -45,11 +50,6 @@ export default {
       backendNotReachableAlertMsg:
         "The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible. You might try to simply refresh the page if you feel lucky.",
     };
-  },
-  components: {
-    AlertMessage,
-    BContainer,
-    BRow,
   },
   computed: {
     isMobile: function () {
@@ -110,7 +110,8 @@ export default {
         if (this.errors.length > 0) {
           this.backendNotReachableAlertMsg = this.errors[0];
         } else {
-          this.backendNotReachableAlertMsg = "Unknown error when connecting to the backend.";
+          this.backendNotReachableAlertMsg =
+            "Unknown error when connecting to the backend.";
         }
       });
   },

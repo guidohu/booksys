@@ -1,16 +1,16 @@
 <template>
-  <div class="row" id="status_panel">
-    <div class="col-sm-3"></div>
+  <div id="status_panel" class="row">
+    <div class="col-sm-3" />
     <div class="col-sm-6">
       <div class="panel panel-default">
         <div class="panel-heading">Notification</div>
-        <div class="panel-body" id="status_body">
+        <div id="status_body" class="panel-body">
           <!-- status messages go here -->
           {{ msg }}
         </div>
       </div>
     </div>
-    <div class="col-sm-3"></div>
+    <div class="col-sm-3" />
   </div>
 </template>
 

@@ -1,5 +1,5 @@
 <template>
-  <div :id="pieElementId" class="text-center full-width"></div>
+  <div :id="pieElementId" class="text-center full-width" />
 </template>
 
 <script>
@@ -8,30 +8,20 @@ import * as dayjs from "dayjs";
 
 export default {
   name: "BooksysPie",
-  mounted() {
-    let el = document.getElementById(this.pieElementId);
-    const pie = new BooksysPie();
-    this.pie = pie;
-    this.pieSessions = pie.drawPie(
-      el,
-      this.sessionData,
-      this.selectHandler,
-      this.properties
-    );
+  props: ["sessionData", "selectedSession", "properties", "pieId"],
+  data() {
+    return {
+      pieSessions: [],
+      pieElementId: "someId",
+    };
   },
-  methods: {
-    selectHandler: function (selectedId) {
-      this.$emit("selectHandler", this.pieSessions[selectedId]);
-    },
-    repaint: function () {
-      let el = document.getElementById(this.pieElementId);
-      el.innerHTML = "";
-      this.pieSessions = this.pie.drawPie(
-        el,
-        this.sessionData,
-        this.selectHandler,
-        this.properties
-      );
+  computed: {
+    date: function () {
+      if (this.sessionData != null) {
+        return dayjs(this.sessionData.window_start).format("YYYY-MM-DD");
+      } else {
+        return "unknown";
+      }
     },
   },
   watch: {
@@ -58,26 +48,36 @@ export default {
       this.repaint();
     },
   },
-  props: ["sessionData", "selectedSession", "properties", "pieId"],
-  data() {
-    return {
-      pieSessions: [],
-      pieElementId: "someId",
-    };
-  },
-  computed: {
-    date: function () {
-      if (this.sessionData != null) {
-        return dayjs(this.sessionData.window_start).format("YYYY-MM-DD");
-      } else {
-        return "unknown";
-      }
-    },
+  mounted() {
+    let el = document.getElementById(this.pieElementId);
+    const pie = new BooksysPie();
+    this.pie = pie;
+    this.pieSessions = pie.drawPie(
+      el,
+      this.sessionData,
+      this.selectHandler,
+      this.properties
+    );
   },
   created() {
     if (this.pieId != null) {
       this.pieElementId = "pie" + this.pieId;
     }
+  },
+  methods: {
+    selectHandler: function (selectedId) {
+      this.$emit("selectHandler", this.pieSessions[selectedId]);
+    },
+    repaint: function () {
+      let el = document.getElementById(this.pieElementId);
+      el.innerHTML = "";
+      this.pieSessions = this.pie.drawPie(
+        el,
+        this.sessionData,
+        this.selectHandler,
+        this.properties
+      );
+    },
   },
 };
 </script>

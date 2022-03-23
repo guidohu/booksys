@@ -476,7 +476,7 @@ export default class Sessions {
    * Deletes a user from a specific session.
    * @param {*} sessionId ID of the session
    * @param {*} user ID of the user
-   * @returns 
+   * @returns
    */
   static deleteUserFromSession(sessionId, user) {
     return new Promise((resolve, reject) => {

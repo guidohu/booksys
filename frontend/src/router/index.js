@@ -1,11 +1,12 @@
-import Vue from "vue";
-import VueRouter from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 import { loadStoreModules, store } from "@/store";
 
 // Lazy import of all the Views used by the router
 const Login = () => import(/* webpackChunkName: "login" */ "@/views/WSLogin");
-const Logout = () => import(/* webpackChunkName: "logout" */ "@/views/WSLogout");
-const SignUp = () => import(/* webpackChunkName: "signup" */ "@/views/WSSignUp");
+const Logout = () =>
+  import(/* webpackChunkName: "logout" */ "@/views/WSLogout");
+const SignUp = () =>
+  import(/* webpackChunkName: "signup" */ "@/views/WSSignUp");
 const Dashboard = () =>
   import(/* webpackChunkName: "dashboard" */ "@/views/WSDashboard");
 const Account = () =>
@@ -21,17 +22,16 @@ const Ride = () => import(/* webpackChunkName: "ride" */ "@/views/WSRide");
 const Watch = () => import(/* webpackChunkName: "watch" */ "@/views/WSWatch");
 const Admin = () => import(/* webpackChunkName: "admin" */ "@/views/WSAdmin");
 const Users = () =>
-  import(/* webpackChunkName: "users" */ "@/views/admin/WSUsersPage");
+  import(/* webpackChunkName: "users" */ "@/views/admin/WSUsers");
 const Accounting = () =>
   import(/* webpackChunkName: "accounting" */ "@/views/admin/WSAccounting");
 const Settings = () =>
   import(/* webpackChunkName: "settings" */ "@/views/admin/WSSettings");
-const Logs = () => import(/* webpackChunkName: "logs" */ "@/views/admin/WSLogs");
+const Logs = () =>
+  import(/* webpackChunkName: "logs" */ "@/views/admin/WSLogs");
 const PasswordReset = () =>
   import(/* webpackChunkName: "password-reset" */ "@/views/WSPasswordReset");
 const Setup = () => import(/* webpackChunkName: "setup" */ "@/views/WSSetupPage");
-
-Vue.use(VueRouter);
 
 const loginEnforced = (to, from, next) => {
   if (!store.state.loginStatus.isLoggedIn) {
@@ -40,6 +40,7 @@ const loginEnforced = (to, from, next) => {
     next({ name: "Login", query: { target: to.fullPath } });
     return false;
   } else {
+    console.log("Login required to access:", to.fullPath, "User is logged in.");
     return true;
   }
 };
@@ -207,7 +208,7 @@ const routes = [
     name: "Accounting",
     beforeEnter: (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        loadStoreModules(["configuration", "accounting", "user"], next);
+        loadStoreModules(["configuration", "accounting", "user", "boat"], next);
       }
     },
     component: Accounting,
@@ -234,8 +235,8 @@ const routes = [
   },
 ];
 
-const router = new VueRouter({
-  mode: "history",
+const router = createRouter({
+  history: createWebHistory(),
   base: process.env.BASE_URL,
   routes,
 });

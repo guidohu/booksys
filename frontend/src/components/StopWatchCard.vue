@@ -1,169 +1,135 @@
 <template>
-  <b-card no-body>
-    <HeatCommentModal
-      :defaultComment="comment"
+  <card-module nobody>
+    <heat-comment-modal
+      v-model:visible="isVisibleHeatCommentModal"
+      :default-comment="comment"
       @commentChangeHandler="changeComment"
-      :visible.sync="isVisibleHeatCommentModal"
     />
-    <b-row v-if="errors.length > 0">
-      <b-col cols="12">
-        <WarningBox :errors="errors" />
-      </b-col>
-    </b-row>
-    <b-row class="mt-4 ml-1 mr-1 mb-4">
-      <b-col cols="12">
-        <b-card bg-variant="light">
-          <b-row class="stopwatch-text text-center">
-            <b-col cols="12">
+    <div class="row" v-if="errors.length > 0">
+      <warning-box :errors="errors" />
+    </div>
+    <div class="row mx-1 my-4">
+      <div class="col-12">
+        <card-module nobody>
+          <div class="row stopwatch-text text-center">
+            <div class="col-12">
               {{ getDisplayTime }}
-            </b-col>
-          </b-row>
-        </b-card>
-      </b-col>
-    </b-row>
-    <b-row v-if="comment != null" class="ml-1 mr-1">
-      <b-col cols="12">
-        <b-form-group>
-          <b-input-group>
-            <b-form-input v-model="comment" />
-            <template #append>
-              <b-button v-on:click="showHeatCommentModal">
-                <b-icon-pencil-square />
-                <!-- Edit -->
-              </b-button>
-            </template>
-          </b-input-group>
-        </b-form-group>
-      </b-col>
-    </b-row>
-    <b-row class="ml-1 mr-1">
-      <b-col cols="12">
-        <b-form-group>
-          <b-form-select
-            v-model="selectedRiderId"
-            :options="selectableRiders"
-            :disabled="getIsRunning || sessionId == null"
-          />
-        </b-form-group>
-      </b-col>
-    </b-row>
-    <b-row class="ml-1 mr-1 mb-2 text-center">
-      <b-col cols="12">
-        <b-button-group v-if="selectedRiderId != null">
-          <b-button
-            size="lg"
-            variant="outline-info"
+            </div>
+          </div>
+        </card-module>
+      </div>
+    </div>
+    <div class="row mx-1" v-if="comment != null">
+      <div class="col-12">
+        <div class="input-group">
+          <input type="text" class="form-control" v-model="comment" />
+          <button class="btn btn-outline-info" @click="showHeatCommentModal">
+            <i class="bi bi-pencil-square" />
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="row mx-1">
+      <input-select
+        id="rider-select"
+        v-model="selectedRiderId"
+        :options="selectableRiders"
+        :disabled="getIsRunning || sessionId == null"
+      />
+    </div>
+    <div class="row mx-1 mt-2 mb-2 text-center" v-if="selectedRiderId != null">
+      <div class="col-12">
+        <div class="btn-group" role="group" aria-label="btn group">
+          <button
             v-if="!getIsRunning"
-            v-on:click="navigateBack"
+            class="btn btn-outline-info btn-lg"
+            @click="navigateBack"
           >
-            <b-icon-arrow-left />
+            <i class="bi bi-arrow-left" />
             Back
-          </b-button>
-          <b-button
-            size="lg"
-            variant="outline-info"
+          </button>
+          <button
             v-if="!getIsRunning"
-            v-on:click="startTakingTime"
+            class="btn btn-outline-info btn-lg"
+            @click="startTakingTime"
           >
-            <b-icon-play />
+            <i class="bi bi-play" />
             Start
-          </b-button>
-          <b-button
-            size="lg"
-            variant="outline-info"
+          </button>
+          <button
             v-if="getIsRunning && !getIsPaused"
-            v-on:click="pauseTakingTime"
+            class="btn btn-outline-info btn-lg"
+            @click="pauseTakingTime"
           >
-            <b-icon-pause />
+            <i class="bi bi-pause" />
             Pause
-          </b-button>
-          <b-button
-            size="lg"
-            variant="outline-info"
+          </button>
+          <button
             v-if="getIsPaused"
-            v-on:click="resumeTakingTime"
+            class="btn btn-outline-info btn-lg"
+            @click="resumeTakingTime"
           >
-            <b-icon-eject rotate="90" />
+            <i class="bi bi-play" />
             Resume
-          </b-button>
-          <b-button
-            size="lg"
-            variant="outline-info"
+          </button>
+          <button
             v-if="getIsRunning"
-            v-on:click="finish"
+            class="btn btn-outline-info btn-lg"
+            @click="finish"
           >
-            <b-icon-check-square />
+            <i class="bi bi-check-square" />
             Finish
-          </b-button>
-          <b-dropdown
-            right
-            variant="outline-info"
+          </button>
+          <button
             v-if="selectedRiderId != null || getIsRunning"
-          >
-            <b-dropdown-item
-              v-if="selectedRiderId != null"
-              v-on:click="showHeatCommentModal"
-              >Add Comment</b-dropdown-item
-            >
-            <b-dropdown-divider
-              v-if="getIsRunning && selectedRiderId != null"
-            />
-            <b-dropdown-item v-if="getIsRunning">Cancel Heat</b-dropdown-item>
-          </b-dropdown>
-        </b-button-group>
-      </b-col>
-    </b-row>
-  </b-card>
+            class="btn btn-outline-info btn-lg dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          ></button>
+          <ul class="dropdown-menu">
+            <li v-if="selectedRiderId != null || getIsRunning">
+              <a
+                class="dropdown-item"
+                href="#"
+                @click.prevent="showHeatCommentModal"
+              >
+                Add Comment
+              </a>
+            </li>
+            <li v-if="getIsRunning && selectedRiderId != null">
+              <hr class="dropdown-divider" />
+            </li>
+            <li v-if="getIsRunning">
+              <a
+                class="dropdown-item"
+                href="#"
+                @click.prevent="resetTakingTime"
+              >
+                Cancel Heat
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </card-module>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
 import HeatCommentModal from "@/components/HeatCommentModal";
-import {
-  BCard,
-  BRow,
-  BCol,
-  BFormGroup,
-  BInputGroup,
-  BFormInput,
-  BFormSelect,
-  BButton,
-  BButtonGroup,
-  BIconPencilSquare,
-  BIconArrowLeft,
-  BIconPlay,
-  BIconPause,
-  BIconEject,
-  BIconCheckSquare,
-  BDropdown,
-  BDropdownItem,
-  BDropdownDivider,
-} from "bootstrap-vue";
+import CardModule from "./bricks/CardModule.vue";
+import InputSelect from "./forms/inputs/InputSelect.vue";
 
 export default {
   name: "StopWatchCard",
   components: {
     WarningBox,
     HeatCommentModal,
-    BCard,
-    BRow,
-    BCol,
-    BFormGroup,
-    BInputGroup,
-    BFormInput,
-    BFormSelect,
-    BButton,
-    BButtonGroup,
-    BIconPencilSquare,
-    BIconArrowLeft,
-    BIconPlay,
-    BIconPause,
-    BIconEject,
-    BIconCheckSquare,
-    BDropdown,
-    BDropdownItem,
-    BDropdownDivider,
+    InputSelect,
+    CardModule,
   },
   props: ["sessionId", "visible"],
   data() {
@@ -227,6 +193,7 @@ export default {
     },
     changeComment: function (newComment) {
       this.comment = newComment;
+      this.setComment(this.comment);
     },
     finish: function () {
       this.finishTakingTime().catch((errors) => (this.errors = errors));
@@ -236,8 +203,10 @@ export default {
       "pauseTakingTime",
       "resumeTakingTime",
       "finishTakingTime",
+      "resetTakingTime",
       "setSessionId",
       "setUserId",
+      "setComment",
     ]),
     ...mapActions("sessions", ["querySession"]),
     navigateBack: function () {

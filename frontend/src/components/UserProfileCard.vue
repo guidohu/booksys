@@ -1,80 +1,83 @@
 <template>
-  <b-card no-body class="text-left">
-    <b-card-header>
-      <b-row>
-        <b-col cols="6"> Profile </b-col>
-        <b-col cols="6" class="text-right">
-          <b-dropdown variant="outline-info" size="sm" no-caret dropleft>
-            <template v-slot:button-content>
-              <b-icon-pencil-square /><span class="sr-only">Search</span>
-            </template>
-            <b-dropdown-item href="#" v-on:click="showUserEdit">
-              Edit Profile
-            </b-dropdown-item>
-            <b-dropdown-item href="#" v-on:click="showPasswordEdit">
-              Change Password
-            </b-dropdown-item>
-          </b-dropdown>
-        </b-col>
-      </b-row>
-    </b-card-header>
-    <b-card-body>
-      <UserEditModal :visible.sync="showUserEditModal" />
-      <UserPasswordEditModal :visible.sync="showPasswordEditModal" />
-      <b-row>
-        <b-col cols="6">
-          {{ userInfo.first_name }} {{ userInfo.last_name }}
-        </b-col>
-        <b-col cols="6">
-          {{ userInfo.email }}
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="6">
-          {{ userInfo.address }}
-        </b-col>
-        <b-col cols="6">
-          {{ userInfo.mobile }}
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="6"> {{ userInfo.plz }} {{ userInfo.city }} </b-col>
-        <b-col cols="6">
-          Driving License {{ userInfo.license == true ? "Yes" : "No" }}
-        </b-col>
-      </b-row>
-    </b-card-body>
-  </b-card>
+  <sectioned-card-module>
+    <template v-slot:header>
+      <div class="row">
+        <div class="col-6">
+          <h5 class="card-title pt-1">Profile</h5>
+        </div>
+        <div class="col-6 text-end">
+          <div class="dropdown">
+            <button
+              class="btn btn-outline-info btn-sm dropdown-toggle"
+              type="button"
+              id="dropdownMenuButton1"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <i class="bi bi-pencil-square"></i>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li>
+                <a class="dropdown-item" href="#" @click.prevent="showUserEdit"
+                  >Edit Profile</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  @click.prevent="showPasswordEdit"
+                  >Change Password</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </template>
+    <template v-slot:body>
+      <user-edit-modal v-model:visible="showUserEditModal" />
+      <user-password-edit-modal v-model:visible="showPasswordEditModal" />
+      <div v-if="userInfo">
+        <div class="row">
+          <div class="col-6">
+            {{ userInfo.first_name }} {{ userInfo.last_name }}
+          </div>
+          <div class="col-6">
+            {{ userInfo.email }}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6">
+            {{ userInfo.address }}
+          </div>
+          <div class="col-6">
+            {{ userInfo.mobile }}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6">{{ userInfo.plz }} {{ userInfo.city }}</div>
+          <div class="col-6">
+            Driving License {{ userInfo.license == true ? "Yes" : "No" }}
+          </div>
+        </div>
+      </div>
+    </template>
+  </sectioned-card-module>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
 import UserEditModal from "./UserEditModal";
 import UserPasswordEditModal from "./UserPasswordEditModal";
-import {
-  BCard,
-  BCardHeader,
-  BCardBody,
-  BRow,
-  BCol,
-  BDropdown,
-  BDropdownItem,
-  BIconPencilSquare,
-} from "bootstrap-vue";
+import SectionedCardModule from "./bricks/SectionedCardModule.vue";
 
 export default {
   name: "UserProfileCard",
   components: {
     UserEditModal,
     UserPasswordEditModal,
-    BCard,
-    BCardHeader,
-    BCardBody,
-    BRow,
-    BCol,
-    BDropdown,
-    BDropdownItem,
-    BIconPencilSquare,
+    SectionedCardModule,
   },
   data() {
     return {
@@ -92,6 +95,9 @@ export default {
     showPasswordEdit: function () {
       this.showPasswordEditModal = true;
     },
+  },
+  created() {
+    console.log("created: ", this.userInfo);
   },
 };
 </script>

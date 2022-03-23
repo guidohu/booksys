@@ -246,7 +246,19 @@ class Login{
 	static public function logout($configuration){
 		// check that we have a session cookie
 		if(!isset($_COOKIE['SESSION'])){
-			return FALSE;
+			setcookie(
+				'SESSION', 
+				'',  
+				[   
+					'expires' => time()-3600, 
+					'path'    => '/', 
+					'domain'  => '', 
+					'secure'  => FALSE,
+					'httponly' => TRUE,
+					'samesite'=> "lax"
+				]
+			);
+			return TRUE;
 		}
 
 		// DB Connection

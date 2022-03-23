@@ -1,51 +1,36 @@
 <template>
-  <b-card no-body class="text-left">
-    <b-card-header> Condition Info </b-card-header>
-    <b-card-body>
-      <b-row>
-        <b-col cols="5">
-          <b-icon-brightness-alt-high></b-icon-brightness-alt-high>
+  <sectioned-card-module title="Condition Info">
+    <template v-slot:body>
+      <div class="row">
+        <div class="col-5">
+          <i class="bi bi-sunrise"></i>
           Sunrise
-        </b-col>
-        <b-col cols="7">
+        </div>
+        <div class="col-7">
           {{ sunriseString }}
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="5">
-          <b-icon-brightness-alt-low-fill></b-icon-brightness-alt-low-fill>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-5">
+          <i class="bi bi-sunset-fill"></i>
           Sunset
-        </b-col>
-        <b-col cols="7">
+        </div>
+        <div class="col-7">
           {{ sunsetString }}
-        </b-col>
-      </b-row>
-    </b-card-body>
-  </b-card>
+        </div>
+      </div>
+    </template>
+  </sectioned-card-module>
 </template>
 
 <script>
 import * as dayjs from "dayjs";
-import {
-  BCard,
-  BCardHeader,
-  BCardBody,
-  BRow,
-  BIconBrightnessAltLowFill,
-  BIconBrightnessAltHigh,
-  BCol,
-} from "bootstrap-vue";
+import SectionedCardModule from "@/components/bricks/SectionedCardModule.vue";
 
 export default {
   name: "ConditionInfoCard",
   components: {
-    BCard,
-    BCardHeader,
-    BCardBody,
-    BRow,
-    BCol,
-    BIconBrightnessAltLowFill,
-    BIconBrightnessAltHigh,
+    SectionedCardModule,
   },
   props: ["sunrise", "sunset"],
   computed: {

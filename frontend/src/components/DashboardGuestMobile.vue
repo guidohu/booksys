@@ -1,69 +1,42 @@
 <template>
   <div>
-    <b-navbar fixed="top" toggleable="lg" type="light" variant="light">
-      <b-navbar-brand href="#">Dashboard</b-navbar-brand>
-
-      <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
-
-      <b-collapse id="nav-collapse" is-nav>
-        <b-navbar-nav>
-          <b-nav-item href="#">
-            <router-link to="/logout">
-              <b-icon-box-arrow-right />
-              Logout
-            </router-link>
-          </b-nav-item>
-        </b-navbar-nav>
-      </b-collapse>
-    </b-navbar>
-
-    <b-row class="mt-3">
-      <b-col cols="1"></b-col>
-      <b-col cols="10">
-        <b-row class="mt-3">
-          <b-col offset="3" cols="6">
-            <b-button
-              to="/info"
-              variant="light"
-              class="btn btn-default btn-dashboard"
-            >
-              <div class="bc_icon bc_icon_dashboard bc_icon_info"></div>
-              INFO
-            </b-button>
-          </b-col>
-        </b-row>
-      </b-col>
-    </b-row>
+    <navbar-mobile title="Dashboard" role="guest-home" />
+    <div class="row navbar-padding">
+      <div class="col-3" />
+      <div class="col-6 text-center">
+        <div class="row mt-3">
+          <dashboard-button to="/account">
+            <div class="bc_icon bc_icon_dashboard bc_icon_user" />
+            ACCOUNT
+          </dashboard-button>
+        </div>
+        <div class="row mt-3">
+          <dashboard-button to="/info">
+            <div class="bc_icon bc_icon_dashboard bc_icon_info" />
+            INFO
+          </dashboard-button>
+        </div>
+      </div>
+      <div class="col-3" />
+    </div>
   </div>
 </template>
 
 <script>
-import {
-  BNavbar,
-  BNavbarBrand,
-  BNavbarToggle,
-  BCollapse,
-  BNavbarNav,
-  BNavItem,
-  BIconBoxArrowRight,
-  BRow,
-  BCol,
-  BButton,
-} from "bootstrap-vue";
+import NavbarMobile from "@/components/NavbarMobile.vue";
+import DashboardButton from "@/components/bricks/DashboardButton.vue";
 
 export default {
   name: "DashboardGuestMobile",
   components: {
-    BNavbar,
-    BNavbarBrand,
-    BNavbarToggle,
-    BCollapse,
-    BNavbarNav,
-    BNavItem,
-    BIconBoxArrowRight,
-    BRow,
-    BCol,
-    BButton,
+    NavbarMobile,
+    DashboardButton,
   },
 };
 </script>
+
+<style scoped>
+.navbar-padding {
+  padding-top: 60px;
+}
+</style>

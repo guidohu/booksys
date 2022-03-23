@@ -1,122 +1,74 @@
 <template>
-  <b-modal
-    id="userPasswordEditModal"
-    title="Change Password"
-    :visible="visible"
-    @hide="$emit('update:visible', false)"
-    @show="$emit('update:visible', true)"
-  >
-    <b-row class="text-left">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
-        <b-form @submit="save">
-          <b-row v-if="errors.length">
-            <b-col cols="12">
-              <WarningBox :error="errors" />
-            </b-col>
-          </b-row>
-          <b-form-group
-            id="old-password"
-            label="Current Password"
-            label-for="old-password-input"
-            description=""
-          >
-            <b-form-input
-              id="old-password-input"
-              v-model="form.oldPassword"
-              type="password"
-              required
-              placeholder=""
-              autocomplete="current-password"
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="new-password"
-            label="New Password"
-            label-for="new-password-input"
-            description=""
-          >
-            <b-form-input
-              id="new-password-input"
-              v-model="form.newPassword"
-              type="password"
-              required
-              placeholder=""
-              autocomplete="new-password"
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="new-password-confirm"
-            label="Confirm New Password"
-            label-for="new-password-confirm-input"
-            description=""
-          >
-            <b-form-input
-              id="new-password-confirm-input"
-              v-model="form.newPasswordConfirm"
-              type="password"
-              required
-              placeholder=""
-              autocomplete="new-password"
-            ></b-form-input>
-          </b-form-group>
-        </b-form>
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block"> </b-col>
-    </b-row>
-    <div slot="modal-footer">
-      <b-button
-        type="button"
-        variant="outline-info"
+  <modal-container name="user-password-edit-modal" :visible="visible">
+    <modal-header
+      :closable="true"
+      title="Change Password"
+      @close="$emit('update:visible', false)"
+    />
+    <modal-body>
+      <div class="row" v-if="errors.length">
+        <warning-box :errors="errors" />
+      </div>
+      <form @submit.prevent.self="save">
+        <input-password
+          id="old-password"
+          label="Current Password"
+          autocomplete="current-password"
+          v-model="form.oldPassword"
+        />
+        <input-password
+          id="new-password"
+          label="New Password"
+          autocomplete="new-password"
+          v-model="form.newPassword"
+        />
+        <input-password
+          id="new-password-confirm"
+          label="Confirm New Password"
+          autocomplete="new-password"
+          v-model="form.newPasswordConfirm"
+        />
+      </form>
+    </modal-body>
+    <modal-footer>
+      <button
+        type="submit"
+        class="btn btn-outline-info"
         :disabled="isLoading"
-        v-on:click="save"
+        @click.prevent.self="save"
       >
-        <b-icon-person-check />
+        <i class="bi bi-check"></i>
         Save
-      </b-button>
-      <b-button
-        class="ml-1"
-        type="button"
-        variant="outline-danger"
-        v-on:click="close"
-      >
-        <b-icon-x />
+      </button>
+      <button type="button" class="btn btn-outline-danger" @click="close">
+        <i class="bi bi-x"></i>
         Cancel
-      </b-button>
-    </div>
-  </b-modal>
+      </button>
+    </modal-footer>
+  </modal-container>
 </template>
 
 <script>
 import { mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
-import {
-  BModal,
-  BRow,
-  BCol,
-  BForm,
-  BFormGroup,
-  BFormInput,
-  BButton,
-  BIconPersonCheck,
-  BIconX,
-} from "bootstrap-vue";
+import ModalContainer from "./bricks/ModalContainer.vue";
+import ModalHeader from "./bricks/ModalHeader.vue";
+import ModalBody from "./bricks/ModalBody.vue";
+import ModalFooter from "./bricks/ModalFooter.vue";
+import InputPassword from "./forms/inputs/InputPassword.vue";
 
 export default {
   name: "UserPasswordEditModal",
   components: {
     WarningBox,
-    BModal,
-    BRow,
-    BCol,
-    BForm,
-    BFormGroup,
-    BFormInput,
-    BButton,
-    BIconPersonCheck,
-    BIconX,
+    ModalContainer,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    InputPassword,
   },
   props: ["visible"],
+  ModalContainer,
   data() {
     return {
       form: {

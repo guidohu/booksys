@@ -1,25 +1,19 @@
 <template>
-  <b-row>
-    <b-col>
+  <div class="row">
+    <div class="col-12">
       <div class="main-title">
         <h3>
           {{ titleName }}
         </h3>
       </div>
-    </b-col>
-  </b-row>
+    </div>
+  </div>
 </template>
 
 <script>
-import { BRow, BCol } from "bootstrap-vue";
-
 export default {
   name: "MainTitle",
   props: ["titleName"],
-  components: {
-    BRow,
-    BCol,
-  },
 };
 </script>
 
