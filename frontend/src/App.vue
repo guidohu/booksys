@@ -6,7 +6,7 @@
     />
     <router-view id="router-view" v-else />
     <footer class="legal-footer d-none d-lg-block">
-      Copyright 2013-2022 by Guido Hungerbuehler
+      developed 2013-2022 by Guido Hungerbuehler
       <a href="https://github.com/guidohu/booksys">Find me on Github</a>
     </footer>
   </div>
@@ -39,9 +39,6 @@ export default {
   computed: {
     isMobile: function () {
       return BooksysBrowser.isMobile();
-    },
-    isDesktop: function () {
-      return !BooksysBrowser.isMobile();
     },
     ...mapGetters("loginStatus", ["isLoggedIn"]),
   },
