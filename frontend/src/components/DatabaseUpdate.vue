@@ -1,14 +1,6 @@
 <template>
   <modal-container name="dbUpdateModal" :visible="visible">
-    <modal-header title="Database Update" closable="true" @close="cancel">
-      <h5 class="modal-title">Database Update</h5>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="modal"
-        aria-label="Close"
-      ></button>
-    </modal-header>
+    <modal-header title="Database Update" closable="true" @close="cancel" />
     <modal-body>
       <div v-if="getDbVersionInfo == null" class="text-center">
         <div class="spinner-border text-primary" role="status">
@@ -17,18 +9,7 @@
       </div>
       <div v-else>
         <form>
-          <div class="row" v-if="errors.length">
-            <div class="col-10 offset-sm-1">
-              <div class="alert alert-warning">
-                <b>Please correct the following error(s):</b>
-                <ul>
-                  <li v-for="error in errors" :key="error">
-                    {{ error }}
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
+          <warning-box v-if="errors.length > 0" :errors="errors"/>
           <div class="row" v-if="getDbVersionInfo != null">
             <div class="col-4 offset-sm-1 font-weight-bold">App Version</div>
             <div class="col-6">v{{ getDbVersionInfo.appVersion }}</div>
@@ -50,7 +31,7 @@
                 "
               >
                 The database version is outdated and needs to be upgraded. If
-                the upgrade is not done, there might occur data inconsisstencies
+                the upgrade is not done, there might occur data inconsistencies
                 and the app will stop working properly. Thus it is highly
                 recommended to upgrade now.
               </div>
@@ -105,13 +86,13 @@
                 :key="query.query"
               >
                 <div class="col-sm-12 col-xs-12">
-                  <span
+                  <i
                     v-if="query.ok == true"
-                    class="glyphicon glyphicon-ok"
+                    class="bi bi-check"
                   />
-                  <span
+                  <i
                     v-if="query.ok == false"
-                    class="glyphicon glyphicon-remove"
+                    class="bi bi-x"
                   />
                   {{ query.query }}
                 </div>
@@ -184,6 +165,7 @@ import ModalContainer from "@/components/bricks/ModalContainer.vue";
 import ModalHeader from "@/components/bricks/ModalHeader.vue";
 import ModalBody from "@/components/bricks/ModalBody.vue";
 import ModalFooter from "@/components/bricks/ModalFooter.vue";
+import WarningBox from '@/components/WarningBox.vue';
 
 export default {
   name: "DatabaseUpdateModal",
@@ -192,6 +174,7 @@ export default {
     ModalHeader,
     ModalBody,
     ModalFooter,
+    WarningBox,
   },
   data() {
     return {

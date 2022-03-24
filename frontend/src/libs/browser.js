@@ -49,12 +49,4 @@ export class BooksysBrowser {
     metaTag.content = "black";
     document.getElementsByTagName("head")[0].appendChild(metaTag);
   }
-
-  static addMobileCSS() {
-    const linkTag = document.createElement("link");
-    linkTag.rel = "stylesheet";
-    linkTag.type = "text/css";
-    linkTag.href = "style_mobile.css";
-    document.getElementsByTagName("head")[0].appendChild(linkTag);
-  }
 }
