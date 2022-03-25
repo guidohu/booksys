@@ -1,61 +1,62 @@
 <template>
-  <b-card no-body class="text-left">
-    <b-card-header>
-      <b-row>
-        <b-col cols="4" class="text-right">
-          <b-button
+  <sectioned-card-module>
+    <template v-slot:header>
+      <div class="row">
+        <div class="col-4 text-end">
+          <button
             v-if="!disableDayBrowsing"
-            variant="outline-info"
-            class="btn-xs"
-            v-on:click="prevDay"
+            type="button"
+            class="btn btn-outline-info btn-xs"
+            @click="prevDay"
           >
-            <b-icon-arrow-left-short />
-          </b-button>
-        </b-col>
-        <b-col cols="4" class="text-center">
+            <i class="bi bi-arrow-left-short" />
+          </button>
+        </div>
+        <div class="col-4 text-center">
           {{ dateString }}
-        </b-col>
-        <b-col cols="4" class="text-left">
-          <b-button
+        </div>
+        <div class="col-4 text-start">
+          <button
             v-if="!disableDayBrowsing"
-            variant="outline-info"
-            class="btn-xs"
-            v-on:click="nextDay"
+            type="button"
+            class="btn btn-outline-info btn-xs"
+            @click="nextDay"
           >
-            <b-icon-arrow-right-short />
-          </b-button>
-        </b-col>
-      </b-row>
-    </b-card-header>
-    <b-card-body>
-      <b-row>
-        <BooksysPie
-          :sessionData="sessionData"
-          :selectedSession="selectedSession"
+            <i class="bi bi-arrow-right-short" />
+          </button>
+        </div>
+      </div>
+    </template>
+    <template v-slot:body>
+      <div class="row">
+        <booksys-pie
+          :session-data="sessionData"
+          :selected-session="selectedSession"
           :properties="properties"
           @selectHandler="selectSession"
         />
-      </b-row>
-      <b-row
+      </div>
+      <div
         v-if="
           isToday &&
           selectedSession != null &&
           selectedSession.id != null &&
           selectedSession.riders.length > 0
         "
-        class="text-center"
+        class="row text-center"
       >
-        <b-col cols="12" class="text-center">
-          <b-button
-            v-on:click="navigateSessionStart"
+        <div class="col-12 text-center">
+          <button
             type="button"
-            variant="outline-success"
-            >Start Session</b-button
+            class="btn btn-outline-success"
+            @click="navigateSessionStart"
           >
-        </b-col>
-      </b-row>
-    </b-card-body>
-  </b-card>
+            Start Session
+          </button>
+        </div>
+      </div>
+    </template>
+  </sectioned-card-module>
 </template>
 
 <script>
@@ -64,20 +65,10 @@ import BooksysPie from "./Pie.vue";
 import * as dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
+import SectionedCardModule from "@/components/bricks/SectionedCardModule.vue";
 
 dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);
-
-import {
-  BCard,
-  BCardHeader,
-  BRow,
-  BCol,
-  BButton,
-  BIconArrowLeftShort,
-  BIconArrowRightShort,
-  BCardBody,
-} from "bootstrap-vue";
 
 export default {
   name: "SessionDayCard",
@@ -113,38 +104,6 @@ export default {
       return false;
     },
   },
-  methods: {
-    prevDay: function () {
-      this.$emit("prevDay");
-    },
-    nextDay: function () {
-      this.$emit("nextDay");
-    },
-    selectSession: function (slot) {
-      this.$emit("selectSessionHandler", slot);
-    },
-    navigateSessionStart: function () {
-      window.location.href = "/watch?sessionId=" + this.selectedSession.id;
-    },
-  },
-  components: {
-    BooksysPie,
-    BCard,
-    BCardHeader,
-    BRow,
-    BCol,
-    BButton,
-    BIconArrowLeftShort,
-    BIconArrowRightShort,
-    BCardBody,
-  },
-  props: [
-    "isMobile",
-    "sessionData",
-    "selectedSession",
-    "timezone",
-    "disableDayBrowsing",
-  ],
   created() {
     if (this.isMobile != null && this.isMobile == true) {
       this.properties = {
@@ -163,6 +122,31 @@ export default {
       this.properties.timezone = "UTC";
     }
   },
+  methods: {
+    prevDay: function () {
+      this.$emit("prevDay");
+    },
+    nextDay: function () {
+      this.$emit("nextDay");
+    },
+    selectSession: function (slot) {
+      this.$emit("selectSessionHandler", slot);
+    },
+    navigateSessionStart: function () {
+      window.location.href = "/watch?sessionId=" + this.selectedSession.id;
+    },
+  },
+  components: {
+    BooksysPie,
+    SectionedCardModule,
+  },
+  props: [
+    "isMobile",
+    "sessionData",
+    "selectedSession",
+    "timezone",
+    "disableDayBrowsing",
+  ],
 };
 </script>
 

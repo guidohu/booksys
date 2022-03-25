@@ -1,78 +1,59 @@
 <template>
-  <b-modal
-    id="heatCommentModal"
-    title="Heat Comment"
+  <modal-container
+    name="heatCommentModal"
     :visible="visible"
     @hide="$emit('update:visible', false)"
     @show="$emit('update:visible', true)"
   >
-    <b-row v-if="errors.length">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
-        <WarningBox :errors="errors" />
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-    </b-row>
-    <b-form @submit="saveComment">
-      <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
-          <b-form-group id="comment" label="" label-for="" description="">
-            <b-form-input
-              id="comment-input"
-              v-model="comment"
-              type="text"
-              placeholder="add your comment here..."
-            />
-          </b-form-group>
-        </b-col>
-      </b-row>
-    </b-form>
-    <div slot="modal-footer">
-      <b-button
+    <modal-header
+      :closable="true"
+      title="Edit Comment"
+      @close="$emit('update:visible', false)"
+    />
+    <modal-body>
+      <warning-box v-if="errors.length > 0" :errors="errors" />
+      <form @submit.stop="saveComment">
+        <input-text
+          id="comment-input"
+          v-model="comment"
+          placeholder="add your comment here..."
+        />
+      </form>
+    </modal-body>
+    <modal-footer>
+      <button
         type="button"
-        variant="outline-danger"
-        v-on:click="removeComment"
-        class="mr-1"
+        class="btn btn-outline-danger mr-1"
+        @click="removeComment"
       >
-        <b-icon-x />
+        <i class="bi bi-x" />
         Delete
-      </b-button>
-      <b-button type="button" variant="outline-info" v-on:click="saveComment">
-        <b-icon-check />
+      </button>
+      <button type="button" class="btn btn-outline-info" @click="saveComment">
+        <i class="bi bi-check" />
         Save
-      </b-button>
-    </div>
-  </b-modal>
+      </button>
+    </modal-footer>
+  </modal-container>
 </template>
 
 <script>
 import WarningBox from "@/components/WarningBox";
-import {
-  BModal,
-  BRow,
-  BCol,
-  BForm,
-  BFormGroup,
-  BFormInput,
-  BButton,
-  BIconX,
-  BIconCheck,
-} from "bootstrap-vue";
+import ModalContainer from "./bricks/ModalContainer.vue";
+import ModalHeader from "./bricks/ModalHeader.vue";
+import ModalBody from "./bricks/ModalBody.vue";
+import ModalFooter from "./bricks/ModalFooter.vue";
+import InputText from "./forms/inputs/InputText.vue";
 
 export default {
   name: "HeatCommentModal",
   components: {
     WarningBox,
-    BModal,
-    BRow,
-    BCol,
-    BForm,
-    BFormGroup,
-    BFormInput,
-    BButton,
-    BIconX,
-    BIconCheck,
+    ModalContainer,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    InputText,
   },
   props: ["defaultComment", "visible"],
   data() {
@@ -80,6 +61,14 @@ export default {
       errors: [],
       comment: null,
     };
+  },
+  watch: {
+    defaultComment: function (newComment) {
+      this.comment = newComment;
+    },
+  },
+  mounted() {
+    this.comment = this.defaultComment;
   },
   methods: {
     saveComment: function () {
@@ -94,14 +83,6 @@ export default {
       this.comment = null;
       this.$emit("update:visible", false);
     },
-  },
-  watch: {
-    defaultComment: function (newComment) {
-      this.comment = newComment;
-    },
-  },
-  mounted() {
-    this.comment = this.defaultComment;
   },
 };
 </script>

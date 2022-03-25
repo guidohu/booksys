@@ -1,6 +1,6 @@
 <template>
   <div>
-    <canvas id="fuelChart" width="400" height="200"></canvas>
+    <canvas id="fuelChart" width="400" height="200" />
   </div>
 </template>
 
@@ -91,6 +91,16 @@ export default {
   },
   computed: {
     ...mapGetters("boat", ["getFuelLog"]),
+  },
+  watch: {
+    getFuelLog: function (newValues) {
+      this.setDatasets(newValues);
+      this.drawChart();
+    },
+  },
+  mounted() {
+    this.setDatasets(this.getFuelLog);
+    this.drawChart();
   },
   methods: {
     setDatasets: function (fuelLog) {
@@ -191,16 +201,6 @@ export default {
         options: options,
       });
     },
-  },
-  watch: {
-    getFuelLog: function (newValues) {
-      this.setDatasets(newValues);
-      this.drawChart();
-    },
-  },
-  mounted() {
-    this.setDatasets(this.getFuelLog);
-    this.drawChart();
   },
 };
 </script>

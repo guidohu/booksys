@@ -1,107 +1,87 @@
 <template>
-  <b-modal
-    id="signUpModal"
-    title="Sign Up"
-    no-close-on-backdrop
-    no-close-on-esc
-    hide-header-close
-    visible
-  >
-    <!-- User sign up form -->
-    <div v-if="isSignedUp == false">
-      <b-row class="text-left mb-4">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
-          Please fill the form below to create your own personal account.
-        </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-      </b-row>
-      <user-sign-up :user-data="form" :show-disclaimer="true" v-on:update:user="handleUserUpdate" />
-      <b-row v-if="getRecaptchaKey != null" class="mt-3">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
+  <modal-container name="sign-up-modal" :visible="true">
+    <modal-header title="Sign Up" />
+    <modal-body>
+      <div v-if="isSignedUp == false">
+        <div class="row">
+          <div class="col-12">
+            Please fill the form below to create your own personal account.
+          </div>
+        </div>
+        <user-sign-up
+          class="mt-2"
+          :user-data="form"
+          :show-disclaimer="true"
+          @update:user="handleUserUpdate"
+        />
+        <div class="row mt-3" v-if="getRecaptchaKey != null">
           <vue-recaptcha
             :sitekey="getRecaptchaKey"
-            :loadRecaptchaScript="true"
+            :load-recaptcha-script="true"
             @verify="recaptchaVerifiedHandler"
-          ></vue-recaptcha>
-        </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-      </b-row>
-    </div>
-    <!-- Sign up confirmation -->
-    <b-row v-if="isSignedUp == true" class="text-center">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
-        <p class="h4 mb-2">
-          <b-icon-check-circle variant="success" />
-          <br />
-          You have been signed up successfully.
-        </p>
-        <p>Please wait until we activate your new account.</p>
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-    </b-row>
-    <b-row v-if="errors.length > 0" class="mt-4">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
-        <warning-box :errors="errors" />
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-    </b-row>
-    <div slot="modal-footer">
-      <b-button
+          />
+        </div>
+      </div>
+      <div class="row text-center" v-if="isSignedUp == true">
+        <div class="col-12">
+          <p class="h4 mb-2">
+            <i class="bi bi-check-circle text-success" />
+            <br />
+            You have been signed up successfully.
+          </p>
+          <p>Please wait until we activate your new account.</p>
+        </div>
+      </div>
+      <warning-box v-if="errors.length > 0" :errors="errors" />
+    </modal-body>
+    <modal-footer>
+      <button
         v-if="isSignedUp == true"
         type="button"
-        variant="outline-info"
-        v-on:click="close"
+        class="btn btn-outline-info"
+        @click="close"
       >
-        <b-icon-person-check />
+        <i class="bi bi-person-check" />
         Done
-      </b-button>
-      <b-button
+      </button>
+      <button
         v-if="isSignedUp == false"
         type="button"
-        variant="outline-info"
-        v-on:click="save"
+        class="btn btn-outline-info"
+        @click="save"
       >
-        <b-icon-person-check />
+        <i class="bi bi-person-check" />
         Sign-Up
-      </b-button>
-      <b-button
+      </button>
+      <button
         v-if="isSignedUp == false"
-        class="ml-1"
         type="button"
-        variant="outline-danger"
-        v-on:click="close"
+        class="btn btn-outline-dark ml-1"
+        @click="close"
       >
-        <b-icon-x />
+        <i class="bi bi-x" />
         Cancel
-      </b-button>
-    </div>
-  </b-modal>
+      </button>
+    </modal-footer>
+  </modal-container>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
 import User from "@/api/user";
-import {
-  BModal,
-  BRow,
-  BCol,
-  BIconCheckCircle,
-  BIconPersonCheck,
-  BIconX,
-  BButton,
-} from "bootstrap-vue";
+import { defineAsyncComponent } from "vue";
+import ModalContainer from "@/components/bricks/ModalContainer.vue";
+import ModalHeader from "@/components/bricks/ModalHeader.vue";
+import ModalBody from "@/components/bricks/ModalBody.vue";
+import ModalFooter from "@/components/bricks/ModalFooter.vue";
 
-const VueRecaptcha = () =>
-  import(/* webpackChunkName: "vue-recaptcha" */ "vue-recaptcha");
-const UserSignUp = () =>
-  import(
-    /* webpackChunkName: "user-sign-up" */ "@/components/forms/UserSignUp"
-  );
+const VueRecaptcha = defineAsyncComponent(() =>
+  import(/* webpackChunkName: "vue-recaptcha" */ "vue-recaptcha")
+);
+const UserSignUp = defineAsyncComponent(() =>
+  import(/* webpackChunkName: "user-sign-up" */ "@/components/forms/UserSignUp")
+);
 
 export default {
   name: "WSSignUp",
@@ -109,24 +89,21 @@ export default {
     WarningBox,
     UserSignUp,
     VueRecaptcha,
-    BModal,
-    BRow,
-    BCol,
-    BIconCheckCircle,
-    BIconPersonCheck,
-    BIconX,
-    BButton,
+    ModalContainer,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
   },
   data() {
     return {
       errors: [],
       isSignedUp: false,
-      toggleWidth: 50,
       form: {
         license: false,
         ownRisk: false,
         recaptchaResponse: null,
       },
+      visible: true,
     };
   },
   computed: {
@@ -137,7 +114,7 @@ export default {
     recaptchaVerifiedHandler: function (response) {
       this.form.recaptchaResponse = response;
     },
-    handleUserUpdate: function(userData) {
+    handleUserUpdate: function (userData) {
       this.form.email = userData.email;
       this.form.password = userData.password;
       this.form.passwordConfirm = userData.passwordConfirm;
@@ -188,12 +165,7 @@ export default {
 
       return errors;
     },
-    save: function (event) {
-      // prevent default submit event
-      if (event != null) {
-        event.preventDefault();
-      }
-
+    save: function () {
       this.errors = this.validateForm();
       if (this.errors.length > 0) {
         return;

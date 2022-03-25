@@ -1,2 +1,3 @@
 docker/booksys_dummy_db/testdata.sql
 ISSUES
+linecounter.txt

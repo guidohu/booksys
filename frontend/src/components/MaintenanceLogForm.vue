@@ -1,72 +1,53 @@
 <template>
-  <b-container float class="text-left">
-    <b-row>
-      <b-col cols="12">
-        <WarningBox v-if="errors.length > 0" :errors="errors" />
-        <b-form @submit="add">
-          <engine-hours
+  <div class="container text-left">
+    <div class="row">
+      <div class="col-12">
+        <warning-box v-if="errors.length > 0" :errors="errors" />
+        <form @submit.prevent="add">
+          <input-engine-hours
+            id="engine-hours"
             label="Engine Hrs"
-            v-model="form.engineHours"
             :display-format="getEngineHourFormat"
+            v-model="form.engineHours"
+            placeholder="0"
+            size="small"
           />
-          <b-form-group
-            id="input-group-description"
+          <input-text-multiline
+            id="description"
             label="Description"
-            label-for="input-description"
-            label-cols="3"
+            v-model="form.description"
+            rows="3"
+            placeholder="Add your notes here..."
+            size="small"
+          />
+          <form-button
+            type="submit"
+            btn-style="info"
+            btn-size="small"
+            @click.prevent="add"
           >
-            <b-input-group size="sm">
-              <b-form-textarea
-                id="input-description"
-                v-model="form.description"
-                type="text"
-                placeholder="Add your maintenance notes here..."
-                rows="3"
-                max-rows="3"
-              />
-            </b-input-group>
-          </b-form-group>
-          <b-row class="text-right">
-            <b-col cols="9" offset="3">
-              <b-button block variant="outline-info" size="sm" v-on:click="add"
-                >Add</b-button
-              >
-            </b-col>
-          </b-row>
-        </b-form>
-      </b-col>
-    </b-row>
-  </b-container>
+            Add
+          </form-button>
+        </form>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from "vuex";
 import WarningBox from "@/components/WarningBox";
-import EngineHours from "@/components/forms/inputs/EngineHours";
-import {
-  BContainer,
-  BRow,
-  BCol,
-  BForm,
-  BFormGroup,
-  BInputGroup,
-  BFormTextarea,
-  BButton,
-} from "bootstrap-vue";
+import InputEngineHours from "@/components/forms/inputs/InputEngineHours";
+import InputTextMultiline from "@/components/forms/inputs/InputTextMultiline";
+import FormButton from "@/components/forms/FormButton.vue";
 
 export default {
   name: "MaintenanceLogForm",
   components: {
     WarningBox,
-    EngineHours,
-    BContainer,
-    BRow,
-    BCol,
-    BForm,
-    BFormGroup,
-    BInputGroup,
-    BFormTextarea,
-    BButton,
+    InputEngineHours,
+    InputTextMultiline,
+    FormButton,
   },
   data() {
     return {

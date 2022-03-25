@@ -1,134 +1,108 @@
 <template>
-  <b-modal
-    id="setupModal"
-    ref="setupModal"
-    :title="title"
-    no-close-on-backdrop
-    no-close-on-esc
-    hide-header-close
-    visible
-  >
-    <b-overlay
-      id="overlay-background"
-      :show="isLoading"
-      spinner-type="border"
-      spinner-variant="info"
-      rounded="sm"
-    >
-      <b-row v-if="errors.length > 0" class="mt-4">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
-          <warning-box :errors="errors" />
-        </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-      </b-row>
+  <modal-container name="setup-modal" :visible="true">
+    <modal-header :title="title"/>
+    <modal-body>
+      <warning-box v-if="errors.length > 0" class="mt-4" :errors="errors"/>
       <!-- Database setup -->
       <database-configuration
         v-if="showDbSetup"
-        :dbConfig="dbConfig"
+        :dbconfig="dbConfig"
+        @config-change="dbConfigInputHandler"
         @save="setDbSettings"
       />
-      <!-- Administrator setup -->
+      <!-- Administrator Account Setup -->
       <div v-if="showUserSetup">
-        <b-row class="mb-4">
-          <b-col cols="1" class="d-none d-sm-block"></b-col>
-          <b-col cols="12" sm="10"> Setup the Administrator Account </b-col>
-          <b-col cols="1" class="d-none d-sm-block"></b-col>
-        </b-row>
+        <div class="row mb-4">
+          <div class="col-12">
+            Setup the Administrato Account
+          </div>
+        </div>
         <user-sign-up
-          :userData="adminUserConfig"
-          :showDisclaimer="false"
+          :user-data="adminUserConfig"
+          :show-disclaimer="false"
           @save="addAdminUser"
-          v-on:update:user="handleUserUpdate"
+          @update:user="handleUserUpdate"
         />
       </div>
       <!-- Setup Done -->
-      <b-row v-if="showSetupDone" class="text-center">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
+      <div v-if="showSetupDone" class="row text-center">
+        <div class="col-12">
           <p class="h4 mb-2">
-            <b-icon-check-circle variant="success" />
+            <i class="bi bi-check-circle text-success" />
             Setup Done.
           </p>
           <p>Please go back to the login page and login.</p>
-        </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-      </b-row>
-    </b-overlay>
-    <!-- Footer -->
-    <div slot="modal-footer">
-      <b-button
+        </div>
+      </div>
+    </modal-body>
+    <modal-footer>
+      <button
         v-if="showDbSetup || showUserSetup"
-        class="mr-1"
+        class="btn btn-outline-danger me-1"
         type="button"
-        variant="outline-danger"
-        v-on:click="close"
+        @click="close"
       >
-        <b-icon-x />
+        <i class="bi bi-x" />
         Cancel
-      </b-button>
-      <b-button
+      </button>
+      <button
         v-if="showDbSetup"
+        class="btn btn-outline-info"
         type="button"
-        variant="outline-info"
-        v-on:click="setDbSettings"
         :disabled="isLoading"
+        @click="setDbSettings"
       >
-        <b-icon-arrow-right />
+        <i class="bi bi-arrow-right" />
         Next
-      </b-button>
-      <b-button
+      </button>
+      <button
         v-if="showUserSetup"
         type="button"
-        variant="outline-info"
-        v-on:click="addAdminUser"
+        class="btn btn-outline-info"
         :disabled="isLoading"
+        @click="addAdminUser"
       >
-        <b-icon-arrow-right />
+        <i class="bi bi-arrow-right" />
         Next
-      </b-button>
-      <b-button
+      </button>
+      <button
         v-if="showSetupDone"
-        class="mr-1"
+        class="btn btn-outline-info me-1"
         type="button"
         variant="outline-info"
-        v-on:click="close"
+        @click="close"
       >
-        <b-icon-check />
+        <i class="bi bi-check" />
         Done
-      </b-button>
-    </div>
-  </b-modal>
+      </button>
+    </modal-footer>
+  </modal-container>
 </template>
 
 <script>
+import { defineAsyncComponent } from "vue"; 
 import { getBackendStatus } from "@/api/backend";
 import Configuration from "@/api/configuration";
 import User from "@/api/user";
+import ModalContainer from "../components/bricks/ModalContainer.vue";
+import ModalHeader from "../components/bricks/ModalHeader.vue";
+import ModalBody from "../components/bricks/ModalBody.vue";
+import ModalFooter from "../components/bricks/ModalFooter.vue";
 
 // Lazy loaded components
-const DatabaseConfiguration = () =>
+const DatabaseConfiguration = defineAsyncComponent(() =>
   import(
     /* webpackChunkName: "database-configuration" */ "@/components/DatabaseConfiguration"
-  );
-const UserSignUp = () =>
+  )
+);
+const UserSignUp = defineAsyncComponent(() =>
   import(
     /* webpackChunkName: "user-sign-up" */ "@/components/forms/UserSignUp"
-  );
-const WarningBox = () =>
-  import(/* webpackChunkName: "warning-box" */ "@/components/WarningBox");
-
-import {
-  BModal,
-  BOverlay,
-  BRow,
-  BCol,
-  BIconCheckCircle,
-  BIconX,
-  BIconArrowRight,
-  BIconCheck,
-  BButton,
-} from "bootstrap-vue";
+  )
+);
+const WarningBox = defineAsyncComponent(() =>
+  import(/* webpackChunkName: "warning-box" */ "@/components/WarningBox")
+);
 
 export default {
   name: "WSSetupPage",
@@ -136,15 +110,10 @@ export default {
     DatabaseConfiguration,
     WarningBox,
     UserSignUp,
-    BModal,
-    BOverlay,
-    BRow,
-    BCol,
-    BIconCheckCircle,
-    BIconX,
-    BIconArrowRight,
-    BIconCheck,
-    BButton,
+    ModalContainer,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
   },
   data() {
     return {
@@ -161,8 +130,16 @@ export default {
       setupDoneTitle: "Setup Done",
     };
   },
+  mounted() {
+    this.isLoading = true;
+    this.getBackendStatus();
+  },
   methods: {
+    dbConfigInputHandler: function(config) {
+      this.dbConfig = config;
+    },
     setDbSettings: function () {
+      console.log("setDB called:", this.dbConfig);
       this.isLoading = true;
 
       Configuration.setDbConfig(this.dbConfig)
@@ -224,7 +201,8 @@ export default {
         });
     },
     close: function () {
-      this.$refs["setupModal"].hide();
+      console.log("Navigate to login");
+      console.log(this.$router);
       this.$router.push("/login");
     },
     validateAdminUser: function () {
@@ -306,10 +284,6 @@ export default {
           this.isLoading = false;
         });
     },
-  },
-  mounted() {
-    this.isLoading = true;
-    this.getBackendStatus();
   },
 };
 </script>

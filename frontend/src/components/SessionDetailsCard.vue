@@ -1,143 +1,123 @@
 <template>
-  <b-card no-body class="text-left">
-    <b-card-header>
-      <b-row>
-        <b-col cols="8" class="align-middle"> Session Details </b-col>
-        <b-col cols="4" class="text-right">
-          <b-dropdown
-            v-if="showAddRiders || showDeleteSession"
-            id="dropdown-1"
-            variant="light"
-            text="Dropdown Button"
-            toggle-class="btn-xs"
-            right
-            no-caret
-          >
-            <template v-slot:button-content>
-              <b-icon-list />
-            </template>
-            <b-dropdown-item v-if="showAddRiders" v-on:click="addRiders">
-              <b-icon-person-plus />
-              {{ "  " }} Add Rider
-            </b-dropdown-item>
-            <b-dropdown-item v-if="showAddRiders" v-on:click="editSession">
-              <b-icon-pencil-square />
-              {{ "  " }} Edit Session
-            </b-dropdown-item>
-            <b-dropdown-divider></b-dropdown-divider>
-            <b-dropdown-item
-              v-if="showDeleteSession"
-              v-on:click="deleteSession"
+  <sectioned-card-module>
+    <template v-slot:header>
+      <div class="row">
+        <div class="col-8">
+          <h5 class="card-title pt-1">Session Details</h5>
+        </div>
+        <div class="col-4 text-end">
+          <div v-if="showAddRiders || showDeleteSession" class="dropdown">
+            <button
+              class="btn btn-outline-info btn-sm dropdown-toggle"
+              type="button"
+              id="dropdownMenuButton1"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
             >
-              <b-icon-trash />
-              {{ "  " }} Delete Session
-            </b-dropdown-item>
-          </b-dropdown>
-        </b-col>
-      </b-row>
-    </b-card-header>
-    <b-card-body>
-      <RiderSelectionModal
+              <i class="bi bi-list"></i>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li v-if="showAddRiders">
+                <a class="dropdown-item" href="#" @click.prevent="addRiders">
+                  <i class="bi bi-person-plus"></i> {{ " " }} Add Rider
+                </a>
+              </li>
+              <li v-if="showAddRiders">
+                <a class="dropdown-item" href="#" @click.prevent="editSession">
+                  <i class="bi bi-pencil-square"></i> {{ " " }} Edit Session
+                </a>
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li v-if="showDeleteSession">
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  @click.prevent="deleteSession"
+                >
+                  <i class="bi bi-trash"></i> {{ " " }} Delete Session
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </template>
+    <template v-slot:body>
+      <rider-selection-modal
+        v-model:visible="showRiderSelectionModal"
         :session="session"
-        :visible.sync="showRiderSelectionModal"
       />
-      <b-row
-        v-if="session != null && session.title != null"
-        class="font-weight-bold"
-      >
-        <b-col cols="4"> Title </b-col>
-        <b-col cols="8">
+      <div v-if="session != null && session.title != null" class="row">
+        <div class="col-4">Title</div>
+        <div class="col-8">
           {{ session.title }}
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="4"> Date </b-col>
-        <b-col cols="8">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4">Date</div>
+        <div class="col-8">
           {{ dateString }}
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="4"> Session </b-col>
-        <b-col cols="8">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4">Session</div>
+        <div class="col-8">
           {{ timeString }}
-        </b-col>
-      </b-row>
-      <b-row v-if="showRiders" class="mt-2">
-        <b-col cols="4"> Riders </b-col>
-        <b-col cols="8">
-          <b-row v-for="rider in session.riders" :key="rider.id">
-            <b-col cols="10" class="text-truncate">
+        </div>
+      </div>
+      <div v-if="showRiders" class="row">
+        <div class="col-4">Riders</div>
+        <div class="col-8">
+          <div v-for="rider in session.riders" :key="rider.id" class="row">
+            <div class="col-10 text-truncate">
               {{ rider.name }}
-            </b-col>
-            <b-col cols="2">
-              <b-link href="#" v-on:click="removeRider(rider.id)">
-                <b-icon-person-dash />
-              </b-link>
-            </b-col>
-          </b-row>
-        </b-col>
-      </b-row>
-      <b-row v-if="showCreateSession" class="mt-3">
-        <b-col offset="4" cols="8">
-          <b-button v-on:click="createSession" size="sm" variant="success" block
-            >Create Session</b-button
+            </div>
+            <div class="col-2">
+              <a href="#" @click.prevent="removeRider(rider.id)">
+                <i class="bi bi-person-dash"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-if="showCreateSession" class="row">
+        <div class="col-8 offset-4">
+          <button
+            type="button"
+            class="btn btn-success btn-sm block"
+            @click.stop="createSession"
           >
-        </b-col>
-      </b-row>
-      <b-row v-if="showAddRiders" class="mt-3">
-        <b-col offset="4" cols="8">
-          <b-button v-on:click="addRiders" size="sm" variant="success" block
-            >Add Riders</b-button
+            Create Session
+          </button>
+        </div>
+      </div>
+      <div v-if="showAddRiders" class="row">
+        <div class="col-8 offset-4">
+          <button
+            type="button"
+            class="btn btn-success btn-sm block"
+            @click.stop="addRiders"
           >
-        </b-col>
-      </b-row>
-    </b-card-body>
-  </b-card>
+            Add Riders
+          </button>
+        </div>
+      </div>
+    </template>
+  </sectioned-card-module>
 </template>
 
 <script>
 import { mapActions } from "vuex";
 import * as dayjs from "dayjs";
-import { BooksysBrowser } from "@/libs/browser";
 import { UserPointer } from "@/dataTypes/user";
 import RiderSelectionModal from "@/components/RiderSelectionModal";
-import {
-  BCard,
-  BCardHeader,
-  BCardBody,
-  BRow,
-  BCol,
-  BDropdown,
-  BDropdownItem,
-  BDropdownDivider,
-  BIconList,
-  BIconPersonPlus,
-  BIconPersonDash,
-  BIconPencilSquare,
-  BIconTrash,
-  BButton,
-  BLink,
-} from "bootstrap-vue";
+import SectionedCardModule from "@/components/bricks/SectionedCardModule.vue";
 
 export default {
   name: "SessionDetailsCard",
   components: {
+    SectionedCardModule,
     RiderSelectionModal,
-    BCard,
-    BCardHeader,
-    BCardBody,
-    BRow,
-    BCol,
-    BDropdown,
-    BDropdownItem,
-    BDropdownDivider,
-    BIconList,
-    BIconPersonPlus,
-    BIconPersonDash,
-    BIconPencilSquare,
-    BIconTrash,
-    BButton,
-    BLink,
   },
   props: ["date", "session"],
   data() {
@@ -188,9 +168,6 @@ export default {
       }
       return false;
     },
-    isMobile: function () {
-      return BooksysBrowser.isMobile();
-    },
   },
   watch: {
     timeString: function () {
@@ -219,9 +196,8 @@ export default {
       this.deleteUserFromSession({
         sessionId: this.session.id,
         user: new UserPointer(id),
-      })
-      .catch((errors) => {
-        console.error("Cannot delete user:", errors)
+      }).catch((errors) => {
+        console.error("Cannot delete user:", errors);
       });
     },
   },

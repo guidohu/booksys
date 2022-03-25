@@ -15,6 +15,7 @@ const state = () => ({
   maxRiders: 12,
   logoFile: null,
   engineHourFormat: "hh.h",
+  fuelPaymentType: null,
 });
 
 const getters = {
@@ -57,6 +58,9 @@ const getters = {
   },
   getEngineHourFormat: (state) => {
     return state.engineHourFormat;
+  },
+  getFuelPaymentType: (state) => {
+    return state.fuelPaymentType;
   },
 };
 
@@ -175,6 +179,7 @@ const mutations = {
     state.currency = value.currency;
     state.logoFile = value.logo_file;
     state.engineHourFormat = value.engine_hour_format;
+    state.fuelPaymentType = value.fuel_payment_type;
 
     state.CONFIG_LOADED = true;
     console.log("configuration set to", value);

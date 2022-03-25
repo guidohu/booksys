@@ -1,217 +1,95 @@
 <template>
-  <b-modal
-    id="userEditModal"
-    title="Profile"
-    :visible="visible"
-    @hide="$emit('update:visible', false)"
-    @show="$emit('update:visible', true)"
-  >
-    <b-row class="text-left">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
-        <b-form @submit="save">
-          <b-row v-if="errors.length">
-            <b-col cols="12">
-              <WarningBox :error="errors" />
-            </b-col>
-          </b-row>
-          <b-form-group
-            id="first-name"
-            label="First Name"
-            label-for="first-name-input"
-            description=""
-          >
-            <b-form-input
-              id="first-name-input"
-              v-model="form.firstName"
-              type="text"
-              required
-              placeholder=""
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="last-name"
-            label="Last Name"
-            label-for="last-name-input"
-            description=""
-          >
-            <b-form-input
-              id="last-name-input"
-              v-model="form.lastName"
-              type="text"
-              required
-              placeholder=""
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="street-nr"
-            label="Street / Nr"
-            label-for="street-nr-input"
-            description=""
-          >
-            <b-form-input
-              id="street-nr-input"
-              v-model="form.street"
-              type="text"
-              required
-              placeholder=""
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="plz"
-            label="Zip Code"
-            label-for="zip-input"
-            description=""
-          >
-            <b-form-input
-              id="zip-input"
-              v-model="form.zip"
-              type="text"
-              required
-              placeholder=""
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="city"
-            label="City"
-            label-for="city-input"
-            description=""
-          >
-            <b-form-input
-              id="city-input"
-              v-model="form.city"
-              type="text"
-              required
-              placeholder=""
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="email"
-            label="Email"
-            label-for="email-input"
-            description=""
-          >
-            <b-form-input
-              id="email-input"
-              v-model="form.email"
-              type="email"
-              required
-              placeholder=""
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="tel"
-            label="Phone Nr"
-            label-for="tel-input"
-            description=""
-          >
-            <b-form-input
-              id="tel-input"
-              v-model="form.phone"
-              type="tel"
-              required
-              placeholder=""
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="license"
-            label="Driving License"
-            label-for="license-input"
-            description=""
-          >
-            <b-form-checkbox
-              v-model="form.license"
-              name="license-switch"
-              switch
-            >
-              {{ boatLicenseText }}
-            </b-form-checkbox>
-          </b-form-group>
-        </b-form>
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block"> </b-col>
-    </b-row>
-    <div slot="modal-footer">
-      <b-button
-        type="button"
-        variant="outline-info"
-        :disabled="isLoading"
-        v-on:click="save"
+  <modal-container name="user-edit-modal" :visible="visible">
+    <modal-header
+      :closable="true"
+      title="Profile"
+      @close="$emit('update:visible', false)"
+    />
+    <modal-body>
+      <div class="row" v-if="errors.length">
+        <warning-box :errors="errors" />
+      </div>
+      <form @submit.prevent.self="save">
+        <input-text
+          id="first-name"
+          label="First Name"
+          v-model="form.firstName"
+        />
+        <input-text id="last-name" label="Last Name" v-model="form.lastName" />
+        <input-text id="street-nr" label="Street / Nr" v-model="form.street" />
+        <input-text id="zip" label="Zip Code" v-model="form.zip" />
+        <input-text id="city" label="City" v-model="form.city" />
+        <input-text
+          id="email"
+          label="Email"
+          type="email"
+          v-model="form.email"
+        />
+        <input-text id="tel" label="Phone Nr" type="tel" v-model="form.phone" />
+        <input-toggle
+          id="license"
+          label="Driving License"
+          v-model="form.license"
+          offLabel="I'm NOT authorized to drive boats"
+          onLabel="I'm authorized to drive boats"
+        />
+      </form>
+    </modal-body>
+    <modal-footer>
+      <button
+        type="submit"
+        class="btn btn-outline-info"
+        @click.prevent.self="save"
       >
-        <b-icon-person-check />
+        <i class="bi bi-check"></i>
         Save
-      </b-button>
-      <b-button
-        class="ml-1"
-        type="button"
-        variant="outline-danger"
-        v-on:click="close"
-      >
-        <b-icon-x />
+      </button>
+      <button type="button" class="btn btn-outline-danger" @click="close">
+        <i class="bi bi-x"></i>
         Cancel
-      </b-button>
-    </div>
-  </b-modal>
+      </button>
+    </modal-footer>
+  </modal-container>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
-import {
-  BModal,
-  BRow,
-  BCol,
-  BForm,
-  BFormGroup,
-  BFormInput,
-  BFormCheckbox,
-  BButton,
-  BIconPersonCheck,
-  BIconX,
-} from "bootstrap-vue";
+import ModalContainer from "./bricks/ModalContainer.vue";
+import ModalHeader from "./bricks/ModalHeader.vue";
+import ModalBody from "./bricks/ModalBody.vue";
+import ModalFooter from "./bricks/ModalFooter.vue";
+import InputText from "./forms/inputs/InputText.vue";
+import InputToggle from "./forms/inputs/InputToggle.vue";
 
 export default {
   name: "UserEditModal",
   components: {
     WarningBox,
-    BModal,
-    BRow,
-    BCol,
-    BForm,
-    BFormGroup,
-    BFormInput,
-    BFormCheckbox,
-    BButton,
-    BIconPersonCheck,
-    BIconX,
+    ModalContainer,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    InputText,
+    InputToggle,
   },
   props: ["visible"],
   data() {
     return {
-      form: {},
+      form: {
+        license: null,
+      },
       errors: [],
-      isLoading: false,
     };
   },
   computed: {
     ...mapGetters("login", ["userInfo"]),
-    boatLicenseText: function () {
-      if (this.form.license != null && this.form.license == true) {
-        return "I have a driving license for boats";
-      } else {
-        return "I do NOT have a driving license for boats";
-      }
-    },
   },
   methods: {
     close: function () {
       this.$emit("update:visible", false);
     },
-    save: function (event) {
-      event.preventDefault();
-
-      this.isLoading = true;
-
+    save: function () {
       this.changeUserProfile({
         first_name: this.form.firstName,
         last_name: this.form.lastName,
@@ -223,32 +101,42 @@ export default {
         license: this.form.license == true ? 1 : 0,
       })
         .then(() => {
-          this.isLoading = false;
           this.errors = [];
           this.close();
         })
         .catch((errors) => {
-          this.isLoading = false;
           this.errors = errors;
         });
     },
+    setFormData: function (data) {
+      const license = data.license != null && data.license == 1 ? true : false;
+      this.form = {
+        firstName: data.first_name,
+        lastName: data.last_name,
+        street: data.address,
+        zip: data.plz,
+        city: data.city,
+        email: data.email,
+        phone: data.mobile,
+        license: license,
+      };
+    },
     ...mapActions("user", ["changeUserProfile"]),
   },
-  beforeMount() {
-    const license =
-      this.userInfo.license != null && this.userInfo.license == 1
-        ? true
-        : false;
-    this.form = {
-      firstName: this.userInfo.first_name,
-      lastName: this.userInfo.last_name,
-      street: this.userInfo.address,
-      zip: this.userInfo.plz,
-      city: this.userInfo.city,
-      email: this.userInfo.email,
-      phone: this.userInfo.mobile,
-      license: license,
-    };
+  watch: {
+    userInfo: function (newUserInfo) {
+      console.log("userInfo changed, new value", newUserInfo);
+      this.setFormData(newUserInfo);
+    },
+  },
+  created() {
+    if (this.userInfo != null) {
+      console.log("Created with userInfo");
+      this.setFormData(this.userInfo);
+      return;
+    }
+    console.log("Created without userInfo");
+    return;
   },
 };
 </script>

@@ -1,72 +1,56 @@
 <template>
-  <b-card no-body class="text-left">
-    <b-card-header> Statistics </b-card-header>
-    <b-card-body>
-      <b-row>
-        <b-col cols="6">
-          <b-row>
-            <b-col cols="12"> Riding Time: {{ heatTimeMinutesYTD }} min </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="12">
+  <sectioned-card-module title="Statistics">
+    <template v-slot:body>
+      <user-heats-modal v-model:visible="showUserHeatsModal" />
+      <div class="row">
+        <div class="col-6">
+          <div class="row">
+            <div class="col-12">Riding Time: {{ heatTimeMinutesYTD }} min</div>
+          </div>
+          <div class="row">
+            <div class="col-12">
               Riding Time (all-time): {{ heatTimeMinutes }} min
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="12"> Cost: {{ heatCostYTD }} {{ getCurrency }} </b-col>
-          </b-row>
-          <b-row>
-            <b-col cols="12">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">Cost: {{ heatCostYTD }} {{ getCurrency }}</div>
+          </div>
+          <div class="row">
+            <div class="col-12">
               Cost (all-time): {{ heatCost }} {{ getCurrency }}
-            </b-col>
-          </b-row>
-        </b-col>
-        <b-col cols="6">
-          <b-button
-            size="sm"
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <button
             type="button"
-            variant="outline-info"
-            v-on:click="showLatestHeats"
+            class="btn btn-outline-info btn-sm"
+            @click="showLatestHeats"
           >
-            <b-icon-list-ul />
+            <i class="bi bi-list-ul"></i>
             Latest Heats
-          </b-button>
-        </b-col>
-      </b-row>
-    </b-card-body>
-    <UserHeatsModal :visible.sync="showUserHeatsModal" />
-  </b-card>
+          </button>
+        </div>
+      </div>
+    </template>
+  </sectioned-card-module>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
+import SectionedCardModule from "./bricks/SectionedCardModule.vue";
 import UserHeatsModal from "./UserHeatsModal";
-import {
-  BCard,
-  BCardHeader,
-  BCardBody,
-  BRow,
-  BCol,
-  BButton,
-  BIconListUl,
-} from "bootstrap-vue";
 
 export default {
   name: "UserStatisticsCard",
+  components: {
+    UserHeatsModal,
+    SectionedCardModule,
+  },
   data() {
     return {
       showUserHeatsModal: false,
     };
-  },
-  components: {
-    UserHeatsModal,
-    BCard,
-    BCardHeader,
-    BCardBody,
-    BRow,
-    BCol,
-    BButton,
-    BIconListUl,
   },
   computed: {
     ...mapGetters("login", ["userInfo"]),

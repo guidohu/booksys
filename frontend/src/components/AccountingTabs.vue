@@ -1,64 +1,104 @@
 <template>
-  <b-tabs content-class="mt-3">
-    <b-tab active>
-      <div slot="title">
-        <p class="h6 mt-2 mb-2">
-          <b-icon-cash-stack class="mr-1" />
+  <div>
+    <ul class="nav nav-tabs" id="accounting-tab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <a
+          class="nav-link active"
+          data-bs-toggle="tab"
+          href="#payments"
+          id="payments-tab"
+          data-bs-target="#payments"
+          role="tab"
+          aria-controls="payments"
+          aria-selected="true"
+        >
+          <i class="bi bi-cash-stack"></i>
           Payments
-        </p>
-      </div>
-      <div :class="tabClass">
-        <PaymentTable />
-      </div>
-    </b-tab>
-    <b-tab>
-      <div slot="title">
-        <p class="h6 mt-2 mb-2">
-          <b-icon-kanban rotate="180" class="mr-1" />
+        </a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a
+          class="nav-link"
+          data-bs-toggle="tab"
+          href="#statistics"
+          id="statistics-tab"
+          data-bs-target="#statistics"
+          role="tab"
+          aria-controls="statistics"
+          aria-selected="false"
+        >
+          <i class="bi bi-graph-up"></i>
           Statistics
-        </p>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Responsive tab content to handle different
+         height requirements -->
+    <div class="tab-content">
+      <div
+        class="tab-pane active"
+        id="payments"
+        role="tabpanel"
+        aria-labelledby="payments-tab"
+      >
+        <show-for-desktop>
+          <div class="tab-limited-height">
+            <payment-table />
+          </div>
+        </show-for-desktop>
+        <show-for-mobile>
+          <payment-table />
+        </show-for-mobile>
       </div>
-      <div :class="tabClass">
-        <PaymentStatistics />
+      <div
+        class="tab-pane"
+        id="statistics"
+        role="tabpanel"
+        aria-labelledby="statistics-tab"
+      >
+        <show-for-desktop>
+          <div class="tab-limited-height">
+            <payment-statistics />
+          </div>
+        </show-for-desktop>
+        <show-for-mobile>
+          <payment-statistics />
+        </show-for-mobile>
       </div>
-    </b-tab>
-  </b-tabs>
+    </div>
+  </div>
 </template>
 
 <script>
-import { BooksysBrowser } from "@/libs/browser";
 import PaymentTable from "@/components/PaymentTable";
+import ShowForMobile from "@/components/bricks/ShowForMobile.vue";
+import ShowForDesktop from "@/components/bricks/ShowForDesktop.vue";
 import PaymentStatistics from "@/components/PaymentStatistics";
-import { BTabs, BTab, BIconKanban, BIconCashStack } from "bootstrap-vue";
 
 export default {
   name: "AccountingTabs",
   components: {
     PaymentStatistics,
     PaymentTable,
-    BTabs,
-    BTab,
-    BIconKanban,
-    BIconCashStack,
-  },
-  computed: {
-    isDesktop: function () {
-      return !BooksysBrowser.isMobile();
-    },
-    tabClass: function () {
-      if (!BooksysBrowser.isMobile()) {
-        return "accounting-tab-limited-height";
-      } else {
-        return "";
-      }
-    },
+    ShowForMobile,
+    ShowForDesktop,
   },
 };
 </script>
 
 <style scoped>
-.accounting-tab-limited-height {
-  max-height: 400px;
-  overflow: scroll;
+.tab-limited-height {
+  max-height: 420px;
+  height: 420px;
+  overflow-y: scroll;
+}
+
+.nav-link {
+  color: #bdbdbd;
+}
+
+a {
+  color: #bdbdbd;
 }
 </style>

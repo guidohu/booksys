@@ -1,44 +1,43 @@
 <template>
   <div v-if="errors != null && errors.length > 0" class="text-left">
-    <b-alert
-      variant="warning"
-      show
-      :dismissible="isDismissible"
-      @dismissed="dismissedHandler"
-    >
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <button
+        v-if="dismissible"
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Close"
+      ></button>
       <b>Please correct the following error(s):</b>
       <ul>
-        <li v-for="err in errors" :key="err">{{ err }}</li>
+        <li v-for="err in errors" :key="err">
+          {{ err }}
+        </li>
       </ul>
-    </b-alert>
+    </div>
   </div>
   <div v-else>
-    <b-alert variant="success" show> No issues found. </b-alert>
+    <div class="alert alert-success show">No issues found.</div>
   </div>
 </template>
 
 <script>
-import { BAlert } from "bootstrap-vue";
-
 export default {
   name: "WarningBox",
-  components: {
-    BAlert,
-  },
+
   props: ["errors", "dismissible"],
-  mounted() {
-    console.log("WarningBox just mounted");
-    console.log("warningbox:", this.errors);
-  },
   computed: {
     isDismissible: function () {
       return this.dismissible != null && this.dismissible == "true";
     },
   },
-  methods: {
-    dismissedHandler: function () {
-      this.$emit("dismissed");
-    },
+  mounted() {
+    console.log("warningbox:", this.errors);
   },
+  // methods: {
+  //   dismissedHandler: function () {
+  //     this.$emit("dismissed");
+  //   },
+  // },
 };
 </script>

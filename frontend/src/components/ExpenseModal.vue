@@ -1,199 +1,122 @@
 <template>
-  <b-modal
-    id="expenseModal"
-    title="Add New Expense"
-    :visible="visible"
-    @hide="$emit('update:visible', false)"
-    @show="$emit('update:visible', true)"
-  >
-    <b-row v-if="errors.length > 0">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
-        <WarningBox :errors="errors" dismissible="true" />
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-    </b-row>
-    <b-form @submit="save">
-      <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
-          <b-form-group
-            id="type-select-group"
-            label="Type"
-            label-for="type-select"
-            :description="typeDescription"
-            label-cols="3"
-          >
-            <b-form-select
-              id="type-select"
-              v-model="form.type"
-              :options="expenseTypes"
-            />
-          </b-form-group>
-          <b-form-group
-            id="date-group"
-            label="Date"
-            label-for="date-select"
-            description=""
-            label-cols="3"
-          >
-            <b-form-input id="date-select" type="date" v-model="form.date" />
-          </b-form-group>
-          <b-form-group
-            v-if="form.type != null"
-            id="user-select-group"
-            :label="userLabel"
-            label-for="user-select"
-            :description="userDescription"
-            label-cols="3"
-          >
-            <b-form-select
-              id="user-select"
-              v-model="form.user"
-              :options="users"
-            />
-          </b-form-group>
-          <b-form-group
-            v-if="form.type != null"
-            id="amount"
-            label="Cost"
-            label-for="amount-input"
-            description=""
-            label-cols="3"
-          >
-            <b-input-group>
-              <b-form-input
-                id="amount-input"
-                v-model="form.amount"
-                type="text"
-                placeholder="0.00"
-              ></b-form-input>
-              <b-input-group-append is-text>
-                {{ getCurrency }}
-              </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-          <b-form-group
-            v-if="form.type != null && form.type == 0"
-            id="fuel-liters"
-            label="Fuel"
-            label-for="fuel-liters-input"
-            description=""
-            label-cols="3"
-          >
-            <b-input-group>
-              <b-form-input
-                id="fuel-liters-input"
-                v-model="form.fuelLiters"
-                type="text"
-                placeholder="0.00"
-              ></b-form-input>
-              <b-input-group-append is-text> ltrs </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-          <engine-hours
-            v-if="form.type != null && form.type == 0"
-            label="Engine Hours"
-            v-model="form.engineHours"
-            :display-format="getEngineHourFormat"
-            size="md"
-            placeholder="0"
-          />
-          <b-form-group
-            v-if="form.type != null && form.type != 0"
-            id="description"
-            label="Description"
-            label-for="description-input"
-            description=""
-            label-cols="3"
-          >
-            <b-form-textarea
-              id="description-input"
-              v-model="form.description"
-              type="text"
-              rows="2"
-              placeholder=""
-            />
-          </b-form-group>
-        </b-col>
-      </b-row>
-    </b-form>
-    <div slot="modal-footer">
-      <b-overlay
-        id="overlay-background"
-        :show="isLoading"
-        spinner-type="border"
-        spinner-variant="info"
-        rounded="sm"
-      >
-        <div class="text-right d-inline">
-          <b-button
-            v-if="this.form.type != null"
-            class="ml-4"
-            type="button"
-            variant="outline-info"
-            v-on:click="add"
-          >
-            <b-icon-check />
-            Add
-          </b-button>
-          <b-button
-            class="ml-1"
-            type="button"
-            variant="outline-danger"
-            v-on:click="close"
-          >
-            <b-icon-x />
-            Cancel
-          </b-button>
+  <modal-container name="expense-modal" :visible="visible">
+    <modal-header
+      :closable="true"
+      title="Add New Expense"
+      @close="$emit('update:visible', false)"
+    />
+    <modal-body>
+      <warning-box v-if="errors.length" :errors="errors" />
+      <form @submit.prevent="save">
+        <input-select
+          id="type-select"
+          label="Type"
+          v-model="form.type"
+          :options="expenseTypes"
+          :description="typeDescription"
+          size="small"
+        />
+        <input-date-time-local
+          id="date"
+          label="Date"
+          v-model="form.date"
+          size="small"
+        />
+        <input-select
+          v-if="form.type != null"
+          id="user-select"
+          :label="userLabel"
+          v-model="form.user"
+          :options="users"
+          :description="userDescription"
+          size="small"
+        />
+        <input-currency
+          v-if="form.type != null"
+          id="amount"
+          label="Cost"
+          size="small"
+          v-model="form.amount"
+          placeholder="0.00"
+          :currency="getCurrency"
+        />
+        <input-fuel
+          v-if="form.type != null && form.type == 0"
+          id="fuel-liters"
+          label="Fuel"
+          size="small"
+          placeholder="0.00"
+          v-model="form.fuelLiters"
+        />
+        <input-engine-hours
+          v-if="form.type != null && form.type == 0"
+          id="engine-hours"
+          label="Engine Hours"
+          size="small"
+          placeholder="0"
+          v-model="form.engineHours"
+          :display-format="getEngineHourFormat"
+        />
+        <input-text-multiline
+          v-if="form.type != null && form.type != 0"
+          id="description"
+          label="Description"
+          rows="2"
+          v-model="form.description"
+        />
+        <div
+          class="alert alert-warning"
+          v-if="form.type == 0 && getFuelPaymentType == 'billed'"
+        >
+          Entry will not be visible in the payment section as it is not a direct
+          expense. According to your settings fuel consumption is 'billed' and
+          thus only 'fuel bill' has an impact on the balance.
         </div>
-      </b-overlay>
-    </div>
-  </b-modal>
+      </form>
+    </modal-body>
+    <modal-footer>
+      <button type="button" class="btn btn-outline-info mr-1" @click="add">
+        <i class="bi bi-check" />
+        Add
+      </button>
+      <button type="button" class="btn btn-outline-danger" @click="close">
+        <i class="bi bi-x" />
+        Cancel
+      </button>
+    </modal-footer>
+  </modal-container>
 </template>
 
 <script>
 import { mapGetters, mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
-import EngineHours from "@/components/forms/inputs/EngineHours";
 import * as dayjs from "dayjs";
 import orderBy from "lodash/orderBy";
-import {
-  BModal,
-  BRow,
-  BCol,
-  BForm,
-  BFormGroup,
-  BFormSelect,
-  BFormInput,
-  BInputGroup,
-  BInputGroupAppend,
-  BFormTextarea,
-  BOverlay,
-  BButton,
-  BIconCheck,
-  BIconX,
-} from "bootstrap-vue";
+import ModalContainer from "./bricks/ModalContainer.vue";
+import ModalHeader from "./bricks/ModalHeader.vue";
+import ModalBody from "./bricks/ModalBody.vue";
+import ModalFooter from "./bricks/ModalFooter.vue";
+import InputSelect from "./forms/inputs/InputSelect.vue";
+import InputTextMultiline from "./forms/inputs/InputTextMultiline.vue";
+import InputCurrency from "./forms/inputs/InputCurrency.vue";
+import InputDateTimeLocal from "./forms/inputs/InputDateTimeLocal.vue";
+import InputFuel from "./forms/inputs/InputFuel.vue";
+import InputEngineHours from "./forms/inputs/InputEngineHours.vue";
 
 export default {
   name: "ExpenseModal",
   components: {
     WarningBox,
-    BModal,
-    BRow,
-    BCol,
-    BForm,
-    BFormGroup,
-    BFormSelect,
-    BFormInput,
-    BInputGroup,
-    BInputGroupAppend,
-    BFormTextarea,
-    BOverlay,
-    BButton,
-    BIconCheck,
-    BIconX,
-    EngineHours,
+    ModalContainer,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    InputSelect,
+    InputCurrency,
+    InputTextMultiline,
+    InputDateTimeLocal,
+    InputFuel,
+    InputEngineHours,
   },
   props: ["visible"],
   data() {
@@ -213,7 +136,11 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("configuration", ["getCurrency", "getEngineHourFormat"]),
+    ...mapGetters("configuration", [
+      "getCurrency",
+      "getEngineHourFormat",
+      "getFuelPaymentType",
+    ]),
     ...mapGetters("user", ["userList"]),
     ...mapGetters("accounting", ["getExpenseTypes"]),
   },

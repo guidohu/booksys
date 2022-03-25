@@ -1,152 +1,83 @@
 <template>
-  <b-modal
-    id="sessionEditorModal"
-    ref="sessionEditorModal"
-    :title="title"
+  <modal-container
+    name="session-editor-modal"
     :visible="visible"
     @hide="$emit('update:visible', false)"
     @show="$emit('update:visible', true)"
   >
-    <b-row v-if="errors.length">
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-      <b-col cols="12" sm="10">
-        <WarningBox :errors="errors" />
-      </b-col>
-      <b-col cols="1" class="d-none d-sm-block"></b-col>
-    </b-row>
-    <b-form @submit="save">
-      <b-row class="text-left">
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-        <b-col cols="12" sm="10">
-          <b-form-group
-            id="title"
-            label="Title"
-            label-for="title-input"
-            description=""
-          >
-            <b-form-input
-              id="title-input"
-              v-model="form.title"
-              type="text"
-              placeholder=""
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group
-            id="description"
-            label="Description"
-            label-for="description-input"
-            description=""
-          >
-            <b-form-textarea
-              id="description-input"
-              v-model="form.description"
-              type="text"
-              rows="2"
-              placeholder=""
-            />
-          </b-form-group>
-          <b-form-group
-            id="start"
-            label="Start"
-            label-for="start-date-input"
-            description=""
-          >
-            <b-row>
-              <b-col cols="6">
-                <b-form-input
-                  id="start-date-input"
-                  type="date"
-                  v-model="form.startDate"
-                  placeholder=""
-                />
-              </b-col>
-              <b-col cols="6">
-                <b-form-input
-                  id="start-time-input"
-                  type="time"
-                  v-model="form.startTime"
-                  placeholder=""
-                />
-              </b-col>
-            </b-row>
-          </b-form-group>
-          <b-form-group
-            id="end"
-            label="End"
-            label-for="end-date-input"
-            description=""
-          >
-            <b-row>
-              <b-col cols="6">
-                <b-form-input
-                  id="end-date-input"
-                  type="date"
-                  v-model="form.endDate"
-                  placeholder=""
-                />
-              </b-col>
-              <b-col cols="6">
-                <b-form-input
-                  id="end-time-input"
-                  type="time"
-                  v-model="form.endTime"
-                  placeholder=""
-                />
-              </b-col>
-            </b-row>
-          </b-form-group>
-          <b-form-group
-            id="capacity"
-            v-bind:label="getMaximumRidersLabel"
-            label-for="capacity-input"
-            description=""
-          >
-            <b-form-input type="number" v-model="form.maximumRiders" />
-          </b-form-group>
-          <b-form-group
-            id="type"
-            label="Type"
-            label-for="type-input"
-            description="Choose whether this session is open to others or a closed group"
-          >
-            <b-form-checkbox v-model="form.type" switch>
-              {{ getTypeText }}
-            </b-form-checkbox>
-          </b-form-group>
-        </b-col>
-        <b-col cols="1" class="d-none d-sm-block"></b-col>
-      </b-row>
-    </b-form>
-    <div slot="modal-footer">
-      <b-button
+    <modal-header
+      :closable="true"
+      :title="title"
+      @close="$emit('update:visible', false)"
+    />
+    <modal-body>
+      <warning-box v-if="errors.length" :erors="errors" />
+      <form @submit.prevent="save">
+        <input-text
+          id="session-title"
+          label="Title"
+          v-model="form.title"
+          size="small"
+        />
+        <input-text-multiline
+          id="session-description"
+          label="Description"
+          rows="2"
+          v-model="form.description"
+          size="small"
+        />
+        <input-date-time-local
+          id="session-start"
+          label="Start"
+          v-model="form.startDate"
+          size="small"
+        />
+        <input-date-time-local
+          id="session-end"
+          label="End"
+          v-model="form.endDate"
+          size="small"
+        />
+        <input-number
+          id="session-capacity"
+          :label="getMaximumRidersLabel"
+          v-model="form.maximumRiders"
+          size="small"
+        />
+        <input-toggle
+          id="session-type"
+          label="Type"
+          off-label="Public"
+          on-label="Private"
+          v-model="form.type"
+        />
+      </form>
+    </modal-body>
+    <modal-footer>
+      <button
         v-if="form.id == null"
         type="button"
-        variant="outline-info"
-        v-on:click="save"
+        class="btn btn-outline-info"
+        @click="save"
       >
-        <b-icon-check />
+        <i class="bi bi-check"></i>
         Create
-      </b-button>
-      <b-button
+      </button>
+      <button
         v-if="form.id != null"
         type="button"
-        variant="outline-info"
-        v-on:click="save"
+        class="btn btn-outline-info"
+        @click="save"
       >
-        <b-icon-check />
+        <i class="bi bi-check"></i>
         Save
-      </b-button>
-      <b-button
-        class="ml-1"
-        type="button"
-        variant="outline-danger"
-        v-on:click="close"
-      >
-        <b-icon-x />
+      </button>
+      <button type="button" class="btn btn-outline-danger ml-1" @click="close">
+        <i class="bi bi-x"></i>
         Cancel
-      </b-button>
-    </div>
-  </b-modal>
+      </button>
+    </modal-footer>
+  </modal-container>
 </template>
 
 <script>
@@ -159,19 +90,15 @@ import Session, {
 import * as dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
-import {
-  BModal,
-  BRow,
-  BCol,
-  BForm,
-  BFormGroup,
-  BFormInput,
-  BFormTextarea,
-  BFormCheckbox,
-  BButton,
-  BIconCheck,
-  BIconX,
-} from "bootstrap-vue";
+import ModalContainer from "./bricks/ModalContainer.vue";
+import ModalHeader from "./bricks/ModalHeader.vue";
+import ModalBody from "./bricks/ModalBody.vue";
+import ModalFooter from "./bricks/ModalFooter.vue";
+import InputText from "./forms/inputs/InputText.vue";
+import InputNumber from "./forms/inputs/InputNumber.vue";
+import InputToggle from "./forms/inputs/InputToggle.vue";
+import InputTextMultiline from "./forms/inputs/InputTextMultiline.vue";
+import InputDateTimeLocal from "./forms/inputs/InputDateTimeLocal.vue";
 
 dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);
@@ -180,17 +107,15 @@ export default {
   name: "SessionEditorModal",
   components: {
     WarningBox,
-    BModal,
-    BRow,
-    BCol,
-    BForm,
-    BFormGroup,
-    BFormInput,
-    BFormTextarea,
-    BFormCheckbox,
-    BButton,
-    BIconCheck,
-    BIconX,
+    ModalContainer,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    InputDateTimeLocal,
+    InputText,
+    InputTextMultiline,
+    InputNumber,
+    InputToggle,
   },
   props: ["defaultValues", "visible"],
   data() {
@@ -202,22 +127,13 @@ export default {
         title: null,
         description: null,
         startDate: null,
-        startTime: null,
         endDate: null,
-        endTime: null,
         maximumRiders: null,
         type: null,
       },
     };
   },
   computed: {
-    getTypeText: function () {
-      if (this.form.type == true) {
-        return "Private Session";
-      } else {
-        return "Open Session";
-      }
-    },
     getMaximumRidersLabel: function () {
       if (this.form.id == null) {
         return "Maximum Riders";
@@ -234,35 +150,14 @@ export default {
       console.log("SessionEditorModal, save:", this.form);
 
       const type =
-        this.form.type == SESSION_TYPE_PRIVATE
-          ? SESSION_TYPE_PRIVATE
-          : SESSION_TYPE_OPEN;
-
-      const startString = this.form.startDate + " " + this.form.startTime;
-      // const endString = this.form.endDate + " " + this.form.endTime;
-      console.log(
-        "SessionEditorModal: startString moment:",
-        dayjs(startString)
-      );
-      console.log(
-        "SessionEditorModal: startString moment.tz(timezone):",
-        dayjs.tz(startString, this.getTimezone)
-      );
-      console.log(
-        "SessionEditorModal: startString format:",
-        dayjs.tz(startString, this.getTimezone).format()
-      );
+        this.form.type == true ? SESSION_TYPE_PRIVATE : SESSION_TYPE_OPEN;
 
       const session = new Session(
         this.form.id,
         this.form.title,
         this.form.description,
-        dayjs
-          .tz(this.form.startDate + " " + this.form.startTime, this.getTimezone)
-          .format(),
-        dayjs
-          .tz(this.form.endDate + " " + this.form.endTime, this.getTimezone)
-          .format(),
+        dayjs.tz(this.form.startDate, this.getTimezone).format(),
+        dayjs.tz(this.form.endDate, this.getTimezone).format(),
         this.form.maximumRiders,
         type
       );
@@ -322,20 +217,15 @@ export default {
       // set times
       this.form.startDate =
         this.defaultValues != null && this.defaultValues.start != null
-          ? dayjs(this.defaultValues.start).format("YYYY-MM-DD")
-          : dayjs().tz(this.getTimezone).format("YYYY-MM-DD");
-      this.form.startTime =
-        this.defaultValues != null && this.defaultValues.start != null
-          ? dayjs(this.defaultValues.start).format("HH:mm")
-          : dayjs().tz(this.getTimezone).format("HH:mm");
+          ? dayjs(this.defaultValues.start).format("YYYY-MM-DDTHH:mm")
+          : dayjs().tz(this.getTimezone).format("YYYY-MM-DDTHH:mm");
       this.form.endDate =
         this.defaultValues != null && this.defaultValues.end != null
-          ? dayjs(this.defaultValues.end).format("YYYY-MM-DD")
-          : dayjs().tz(this.getTimezone).add(1, "hour").format("YYYY-MM-DD");
-      this.form.endTime =
-        this.defaultValues != null && this.defaultValues.end != null
-          ? dayjs(this.defaultValues.end).format("HH:mm")
-          : dayjs().tz(this.getTimezone).add(1, "hour").format("HH:mm");
+          ? dayjs(this.defaultValues.end).format("YYYY-MM-DDTHH:mm")
+          : dayjs()
+              .tz(this.getTimezone)
+              .add(1, "hour")
+              .format("YYYY-MM-DDTHH:mm");
 
       // set maximum riders
       this.form.maximumRiders =
@@ -352,17 +242,15 @@ export default {
       console.log("SessionEditorModal: Form values are now:", this.form);
     },
   },
-  created() {
-    // set form content based on props
-    this.setFormContent();
-  },
   watch: {
     defaultValues: function () {
       // set form content whenever the default props change
       this.setFormContent();
     },
   },
+  created() {
+    // set form content based on props
+    this.setFormContent();
+  },
 };
 </script>
-
-<style scoped></style>

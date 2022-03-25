@@ -1,30 +1,26 @@
 <template>
   <div>
-    <div v-if="errors.length > 0">
-      <WarningBox :errors="errors" />
-    </div>
-    <div v-else>
-      <FuelEntryModal
-        :fuelEntry="selectedFuelEntry"
-        :visible.sync="showFuelEntryModal"
-      />
-      <b-table
-        hover
-        small
-        :items="items"
-        :fields="columns"
-        @row-clicked="rowClick"
-        :tbody-tr-class="rowClass"
-        class="text-left"
-      />
-    </div>
+    <warning-box v-if="errors.length > 0" :errors="errors" />
+    <fuel-entry-modal
+      v-model:visible="showFuelEntryModal"
+      :fuel-entry="selectedFuelEntry"
+    />
+    <table-module
+      v-if="errors.length == 0"
+      :rows="items"
+      :columns="columns"
+      :rowClassFunction="rowClass"
+      size="small"
+      @rowclick="rowClick"
+    />
   </div>
 </template>
 
 <script>
+import { defineAsyncComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
 import WarningBox from "@/components/WarningBox";
-import FuelEntryModal from "@/components/FuelEntryModal";
+// import FuelEntryModal from "@/components/FuelEntryModal";
 import { BooksysBrowser } from "@/libs/browser";
 import remove from "lodash/remove";
 import {
@@ -34,14 +30,20 @@ import {
   formatFuelConsumption,
 } from "@/libs/formatters";
 import * as dayjs from "dayjs";
-import { BTable } from "bootstrap-vue";
+import TableModule from "@/components/bricks/TableModule.vue";
+
+const FuelEntryModal = defineAsyncComponent(() =>
+  import(
+    /* webpackChunkName: "fuel-entry-modal" */ "@/components/FuelEntryModal"
+  )
+);
 
 export default {
   name: "FuelLogList",
   components: {
     WarningBox,
     FuelEntryModal,
-    BTable,
+    TableModule,
   },
   data() {
     return {
@@ -91,7 +93,7 @@ export default {
           key: "engine_hours",
           label: "EngineHrs",
           sortable: true,
-          class: "text-right",
+          class: "text-end",
           formatter: (value) => {
             return formatEngineHour(value, this.getEngineHourFormat);
           },
@@ -100,21 +102,21 @@ export default {
           key: "liters",
           label: "Fuel",
           sortable: true,
-          class: "text-right",
+          class: "text-end",
           formatter: (value) => formatFuel(value),
         },
         {
           key: "avg_liters_per_hour",
           label: "L/hr",
           sortable: true,
-          class: "text-right",
+          class: "text-end",
           formatter: (value) => formatFuelConsumption(value),
         },
         {
           key: "cost",
           label: "Cost",
           sortable: true,
-          class: "text-right",
+          class: "text-end",
           formatter: (value, key, item) => {
             return this.getFuelCost(item);
           },
@@ -125,8 +127,7 @@ export default {
           return idx == 4;
         });
       }
-
-      this.$set(this, "columns", columns);
+      this.columns = columns;
     },
     getFuelCost: function (entry) {
       // returns either net or gross values for the cost

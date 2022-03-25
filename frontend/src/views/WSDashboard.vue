@@ -13,79 +13,86 @@
     <div v-if="isDesktop" class="display">
       <header v-if="userInfo != null" class="welcome">
         Welcome,
-        <b-link to="/account" class="header-desktop">
+        <router-link to="/account" class="header-desktop">
           {{ userInfo.first_name }} {{ userInfo.last_name }}
-        </b-link>
+        </router-link>
       </header>
-      <DashboardAdmin
+      <dashboard-admin
         v-if="role && role == 'admin' && getSessions != null"
-        v-bind:sessionData="getSessions"
+        :session-data="getSessions"
       />
-      <DashboardMember
+      <dashboard-member
         v-if="role && role == 'member' && getSessions != null"
-        v-bind:sessionData="getSessions"
+        :session-data="getSessions"
       />
-      <DashboardGuest
+      <dashboard-guest
         v-if="role && role == 'guest' && getSessions != null"
-        v-bind:sessionData="getSessions"
+        :session-data="getSessions"
       />
     </div>
     <div v-else>
-      <DashboardAdminMobile
+      <dashboard-admin-mobile
         v-if="role && role == 'admin' && getSessions != null"
-        v-bind:sessionData="getSessions"
+        :session-data="getSessions"
       />
-      <DashboardMemberMobile
+      <dashboard-member-mobile
         v-if="role && role == 'member' && getSessions != null"
-        v-bind:sessionData="getSessions"
+        :session-data="getSessions"
       />
-      <DashboardGuestMobile
+      <dashboard-guest-mobile
         v-if="role && role == 'guest' && getSessions != null"
-        v-bind:sessionData="getSessions"
+        :session-data="getSessions"
       />
     </div>
   </div>
 </template>
 
 <script>
+import { defineAsyncComponent } from "vue";
 import { mapGetters, mapActions } from "vuex";
 import { BooksysBrowser } from "@/libs/browser";
 import * as dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
-import { BLink } from "bootstrap-vue";
 
 dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);
 
-const DashboardAdmin = () =>
+const DashboardAdmin = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-admin" */ "@/components/DashboardAdmin"
-  );
-const DashboardMember = () =>
+    /* webpackChunkName: "dashboard-admin" */ "@/components/DashboardAdmin.vue"
+  )
+);
+const DashboardMember = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-member" */ "@/components/DashboardMember"
-  );
-const DashboardGuest = () =>
+    /* webpackChunkName: "dashboard-member" */ "@/components/DashboardMember.vue"
+  )
+);
+const DashboardGuest = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-guest" */ "@/components/DashboardGuest"
-  );
-const DashboardAdminMobile = () =>
+    /* webpackChunkName: "dashboard-guest" */ "@/components/DashboardGuest.vue"
+  )
+);
+const DashboardAdminMobile = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-admin-mobile" */ "@/components/DashboardAdminMobile"
-  );
-const DashboardMemberMobile = () =>
+    /* webpackChunkName: "dashboard-admin-mobile" */ "@/components/DashboardAdminMobile.vue"
+  )
+);
+const DashboardMemberMobile = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-member-mobile" */ "@/components/DashboardMemberMobile"
-  );
-const DashboardGuestMobile = () =>
+    /* webpackChunkName: "dashboard-member-mobile" */ "@/components/DashboardMemberMobile.vue"
+  )
+);
+const DashboardGuestMobile = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-guest-mobile" */ "@/components/DashboardGuestMobile"
-  );
-const DatabaseUpdateModal = () =>
+    /* webpackChunkName: "dashboard-guest-mobile" */ "@/components/DashboardGuestMobile.vue"
+  )
+);
+const DatabaseUpdateModal = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "database-update" */ "@/components/DatabaseUpdate"
-  );
+    /* webpackChunkName: "database-update" */ "@/components/DatabaseUpdate.vue"
+  )
+);
 
 export default {
   name: "WSDashboard",
@@ -97,7 +104,6 @@ export default {
     DashboardMemberMobile,
     DashboardGuestMobile,
     DatabaseUpdateModal,
-    BLink,
   },
   computed: {
     ...mapGetters("login", ["userInfo", "role"]),

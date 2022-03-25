@@ -231,13 +231,13 @@
     // 1. new user group
     // 2. update to an existing user group
     if(! isset($user_group->user_group_id)){
-        return create_user_group($configuration, $user_group);
+        return create_user_group($configuration, $user_group, $lc);
     }else{
-        return update_user_group($configuration, $user_group);
+        return update_user_group($configuration, $user_group, $lc);
     }
   }
 
-  function create_user_group($configuration, $data){
+  function create_user_group($configuration, $data, $lc){
     // only admins are allowed to call this function
     if(!$lc->isAdmin()){
         return Status::errorStatus("insufficient permissions");
@@ -254,8 +254,8 @@
     if(!$data->user_role_id or !$sanitizer->isUserRoleId($data->user_role_id)){
         return Status::errorStatus("No valid user_role_id selected");
     }
-    if(!$data->price_min or !$sanitizer->isFloat($data->price_min)){
-        return Status::errorStatus("No valid user_role_id selected");
+    if(!isset($data->price_min) or !$sanitizer->isFloat($data->price_min)){
+        return Status::errorStatus("No valid price value provided: '$data->price_min'");
     }
     if(! isset($data->price_description)){
         return Status::errorStatus("No valid price_description");
@@ -306,13 +306,13 @@
     return Status::successStatus("User group created");
   }
 
-  function update_user_group($configuration, $data){
+  function update_user_group($configuration, $data, $lc){
     // only admins are allowed to call this function
     if(!$lc->isAdmin()){
         return Status::errorStatus("insufficient permissions");
     }
 
-    $user_group_price_update_status = update_user_group_price($configuration, $data);
+    $user_group_price_update_status = update_user_group_price($configuration, $data, $lc);
     if($user_group_price_update_status['ok'] != TRUE){
         return $user_group_price_update_status;
     }
@@ -353,7 +353,7 @@
     return Status::errorStatus("could not update user group");
   }
 
-  function update_user_group_price($configuration, $data){
+  function update_user_group_price($configuration, $data, $lc){
     // only admins are allowed to call this function
     if(!$lc->isAdmin()){
         return Status::errorStatus("insufficient permissions");

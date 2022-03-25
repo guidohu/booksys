@@ -1,52 +1,45 @@
 <template>
-  <b-overlay
-    id="overlay-background"
-    :show="isLoading"
-    spinner-type="border"
-    spinner-variant="info"
-    rounded="sm"
-  >
-    <b-container>
-      <b-row class="text-center mb-3">
-        <b-col cols="12">
-          <b-aspect aspect="6:1">
-            <b-img
-              v-if="getLogoFile != null"
-              :src="getLogoFile"
-              alt="Logo"
-              fluid
-              :height="100"
-              width="auto"
+  <div class="d-flex flex-column justify-content-center">
+    <div class="container">
+      <div class="row text-center mb-3 mt-5">
+        <div class="col-12">
+          <img
+            class="img-fluid custom-height"
+            v-if="getLogoFile != null"
+            :src="getLogoFile"
+            alt="Logo"
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4 d-none d-sm-block" />
+        <div class="col-12 col-sm-4">
+          <overlay-spinner v-model:active="isLoading" :fullPage="false">
+            <login-form
+              v-if="showLogin"
+              :statusMessage="status"
+              :initialUsername="username"
+              @login="handleLogin"
             />
-          </b-aspect>
-        </b-col>
-      </b-row>
-      <login-modal
-        v-if="showLogin"
-        :statusMessage="status"
-        :initialUsername="username"
-        @login="handleLogin"
-      />
-    </b-container>
-  </b-overlay>
+          </overlay-spinner>
+          <div class="col-4 d-none d-sm-block" />
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import LoginModal from "@/components/LoginModal.vue";
+import LoginForm from "@/components/LoginForm.vue";
 import { BooksysBrowser } from "@/libs/browser";
-import { BAspect, BContainer, BOverlay, BImg, BRow, BCol } from "bootstrap-vue";
+import OverlaySpinner from "@/components/styling/OverlaySpinner.vue";
 
 export default {
   name: "WSLogin",
   components: {
-    LoginModal,
-    BAspect,
-    BContainer,
-    BOverlay,
-    BImg,
-    BRow,
-    BCol,
+    LoginForm,
+    OverlaySpinner,
   },
   data() {
     return {
@@ -59,9 +52,6 @@ export default {
     isMobile: function () {
       return BooksysBrowser.isMobile();
     },
-    isDesktop: function () {
-      return !BooksysBrowser.isMobile();
-    },
     ...mapGetters("login", ["username"]),
     ...mapGetters("configuration", ["getLogoFile"]),
   },
@@ -69,6 +59,7 @@ export default {
     ...mapActions("login", ["getIsLoggedIn", "login"]),
     ...mapActions("configuration", ["queryLogoFile"]),
     handleLogin: function (username, password) {
+      this.isLoading = true;
       this.login({
         username: username,
         password: password,
@@ -77,13 +68,15 @@ export default {
           if (this.$route.query != null && this.$route.query.target != null) {
             this.$router.push(this.$route.query.target);
           } else {
-            this.$router.push("/dashboard");
+            this.$router.push({ name: "Dashboard" });
           }
+          this.isLoading = false;
         })
         .catch((errors) => {
           if (errors.length > 0) {
             this.status = errors[0];
           }
+          this.isLoading = false;
         });
     },
   },
@@ -96,9 +89,12 @@ export default {
       .then((loggedIn) => {
         if (loggedIn == true) {
           console.log("User is logged in: redirect to content");
+          console.log(this.$route);
           if (this.$route.query != null && this.$route.query.target != null) {
+            console.log("Redirect to:", this.$route.query.target);
             this.$router.push(this.$route.query.target);
           } else {
+            console.log("Redirect to: /dashboard");
             this.$router.push("/dashboard");
           }
         } else {
@@ -114,3 +110,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.custom-height {
+  max-height: 100px;
+}
+</style>

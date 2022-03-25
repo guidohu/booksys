@@ -1,81 +1,78 @@
 <template>
-  <div>
-    <WarningBox v-if="errors.length > 0" :errors="errors" dismissible="true" />
-    <b-row v-if="form.years.length > 0" class="text-right">
-      <b-col cols="12">
-        <b-form-group
-          id="year"
-          label="Year"
-          label-for="year-select"
-          description=""
-          label-cols="8"
-        >
-          <b-form-select
-            id="year-select"
+  <div class="text-begin">
+    <warning-box v-if="errors.length > 0" :errors="errors" dismissible="true" />
+    <div v-if="errors.length == 0" class="box box-fix-height">
+      <div class="row box-fix-content mb-2 mx-1">
+        <div class="col-3 col-lg-2 offset-9 offset-lg-10 text-right pe-1">
+          <input-select
+            v-if="form.years.length > 0"
+            id="year"
             v-model="form.selectedYear"
+            size="small"
             :options="form.years"
-            @change="yearSelectionChangeHandler($event)"
+            @changed="yearSelectionChangeHandler"
           />
-        </b-form-group>
-      </b-col>
-    </b-row>
-    <b-row class="text-right">
-      <b-col cols="6" md="4">
-        <b-card border-variant="info" class="m-1">
-          <span class="lead">{{ getTotalPayments }}</span> {{ getCurrency }}
-          <br />
-          Income
-          <span v-if="form.selectedYear != 'any'"
-            >({{ form.selectedYear }})</span
-          >
-        </b-card>
-      </b-col>
-      <b-col cols="6" md="4">
-        <b-card border-variant="info" class="m-1">
-          <span class="lead">{{ getTotalExpenditures }}</span> {{ getCurrency }}
-          <br />
-          Expenses
-          <span v-if="form.selectedYear != 'any'"
-            >({{ form.selectedYear }})</span
-          >
-        </b-card>
-      </b-col>
-      <b-col cols="6" md="4">
-        <b-card border-variant="info" class="m-1">
-          <span class="lead">{{ getTotalSessionPayments }}</span>
-          {{ getCurrency }}
-          <br />
-          Sessions Income
-          <span v-if="form.selectedYear != 'any'"
-            >({{ form.selectedYear }})</span
-          >
-        </b-card>
-      </b-col>
-      <b-col cols="6" md="4">
-        <b-card border-variant="info" class="m-1">
-          <span class="lead">{{ getSessionsBalance }}</span> {{ getCurrency }}
-          <br />
-          Sessions Credits
-        </b-card>
-      </b-col>
-      <b-col cols="6" md="4">
-        <b-card border-variant="info" class="m-1">
-          <span class="lead">{{ getBalance }}</span> {{ getCurrency }}
-          <br />
-          Balance
-        </b-card>
-      </b-col>
-      <b-col cols="6" md="4">
-        <b-card border-variant="info" class="m-1">
-          <span class="lead">{{ getSessionProfit }}</span> {{ getCurrency }}
-          <br />
-          Session Profit
-          <span v-if="form.selectedYear != 'any'"
-            >({{ form.selectedYear }})</span
-          >
-        </b-card>
-      </b-col>
-    </b-row>
+        </div>
+      </div>
+      <div class="row box-flex-content text-end">
+        <div class="col-6 col-md-4">
+          <card-module nobody class="mx-1 my-1 pt-3">
+            <span class="lead">{{ getTotalPayments }}</span> {{ getCurrency }}
+            <br />
+            Income
+            <span v-if="form.selectedYear != 'any'"
+              >({{ form.selectedYear }})</span
+            >
+          </card-module>
+        </div>
+        <div class="col-6 col-md-4">
+          <card-module nobody class="mx-1 my-1 pt-3">
+            <span class="lead">{{ getTotalExpenditures }}</span>
+            {{ getCurrency }}
+            <br />
+            Expenses
+            <span v-if="form.selectedYear != 'any'"
+              >({{ form.selectedYear }})</span
+            >
+          </card-module>
+        </div>
+        <div class="col-6 col-md-4">
+          <card-module nobody class="mx-1 my-1 pt-3">
+            <span class="lead">{{ getTotalSessionPayments }}</span>
+            {{ getCurrency }}
+            <br />
+            Sessions Income
+            <span v-if="form.selectedYear != 'any'"
+              >({{ form.selectedYear }})</span
+            >
+          </card-module>
+        </div>
+        <div class="col-6 col-md-4">
+          <card-module nobody class="mx-1 my-1 pt-3">
+            <span class="lead">{{ getSessionsBalance }}</span> {{ getCurrency }}
+            <br />
+            Sessions Credits
+          </card-module>
+        </div>
+        <div class="col-6 col-md-4">
+          <card-module nobody class="mx-1 my-1 pt-3">
+            <span class="lead">{{ getBalance }}</span> {{ getCurrency }}
+            <br />
+            Balance
+          </card-module>
+        </div>
+        <div class="col-6 col-md-4">
+          <card-module nobody class="mx-1 my-1 pt-3">
+            <span class="lead">{{ getSessionProfit }}</span> {{ getCurrency }}
+            <br />
+            Session Profit
+            <span v-if="form.selectedYear != 'any'"
+              >({{ form.selectedYear }})</span
+            >
+          </card-module>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -84,17 +81,15 @@ import { mapGetters, mapActions } from "vuex";
 import reverse from "lodash/reverse";
 import * as dayjs from "dayjs";
 import WarningBox from "@/components/WarningBox";
-import { BRow, BCol, BFormGroup, BFormSelect, BCard } from "bootstrap-vue";
+import CardModule from "@/components/bricks/CardModule";
+import InputSelect from "@/components/forms/inputs/InputSelect.vue";
 
 export default {
   name: "PaymentDetails",
   components: {
     WarningBox,
-    BRow,
-    BCol,
-    BFormGroup,
-    BFormSelect,
-    BCard,
+    CardModule,
+    InputSelect,
   },
   data() {
     return {
@@ -149,3 +144,30 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.box {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+.box-fix-height {
+  max-height: 430px;
+}
+
+@media (max-width: 992px) {
+  .box-fix-height {
+    max-height: 90vh;
+  }
+}
+
+.box-fix-content {
+  flex: 0 0 auto;
+}
+
+.box-flex-content {
+  flex: 1 1 auto;
+  overflow: scroll;
+}
+</style>
