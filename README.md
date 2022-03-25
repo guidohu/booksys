@@ -2,7 +2,7 @@
 
 ![Build](https://github.com/guidohu/booksys/workflows/Docker%20Image%20CI/badge.svg) ![CodeQL](https://github.com/guidohu/booksys/workflows/CodeQL/badge.svg)
 
-A booking and management tool small boat communities to schedule boat usage and simplify maintenance as well as accounting.
+A booking and management tool small boat communities can use to schedule boat usage and simplify maintenance as well as accounting.
 
 ![dashboard view](https://raw.githubusercontent.com/guidohu/booksys/master/docs/img/dashboard.png)
 
@@ -49,3 +49,4 @@ Go to [http://localhost](http://localhost). You will be guided through the setup
 - Some minor configuration parameters can only be updated in the database directly (see configuration table).
 - The setup should also work with mariaDB but this has not been tested.
 - So far, no official payment system (paypal, ...) is integrated. Please get in contact with me in case this is required or feel free to submit a pull request.
+- It is optimized for the use within a non commercial boat community. To allow guests to reserve slots, adjustments would be needed.
