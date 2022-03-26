@@ -37,7 +37,7 @@
         />
         <input-engine-hours
           id="engine-hours"
-          label="Engine Hours"
+          label="Engine"
           v-model="form.engineHours"
           :displayFormat="getEngineHourFormat"
           size="small"
