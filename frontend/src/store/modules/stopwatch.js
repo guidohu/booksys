@@ -239,7 +239,7 @@ const mutations = {
 
     const seconds = timePassed % 60;
     const minutes = Math.floor(((timePassed - seconds) % 3600) / 60);
-    const hours = Math.floor((timePassed - seconds * 60 - hours * 3600) / 3600);
+    const hours = Math.floor((timePassed - seconds * 60) / 3600);
 
     if (hours > 0) {
       state.displayTime = sprintf("%02d:%02d:%02d", hours, minutes, seconds);
