@@ -1,3 +1,6 @@
+v3.0.1
+ - fix stop watch display
+
 v3.0.0
  - port app to VueJS 3
  - port to Bootstrap 5
