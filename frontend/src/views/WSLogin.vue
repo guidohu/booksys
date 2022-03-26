@@ -12,8 +12,8 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-4 d-none d-sm-block" />
-        <div class="col-12 col-sm-4">
+        <div class="col-4 d-none d-lg-block" />
+        <div class="col-12 col-lg-4">
           <overlay-spinner v-model:active="isLoading" :fullPage="false">
             <login-form
               v-if="showLogin"
@@ -22,7 +22,7 @@
               @login="handleLogin"
             />
           </overlay-spinner>
-          <div class="col-4 d-none d-sm-block" />
+          <div class="col-4 d-none d-lg-block" />
         </div>
       </div>
     </div>

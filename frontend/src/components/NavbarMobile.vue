@@ -15,26 +15,38 @@
       </button>
 
       <div class="collapse navbar-collapse" id="navbarToggler">
-        <ul class="navbar-nav">
-          <li class="nav-item mt-2">
+        <ul class="navbar-nav text-center">
+          <li class="nav-item mt-3">
             <router-link to="/dashboard" tag="button" class="btn btn-light">
               <i class="bi bi-house"></i>
               Dashboard
             </router-link>
           </li>
-          <li class="nav-item mt-2">
+          <li class="nav-item mt-3">
+            <router-link to="/boat" tag="button" class="btn btn-light">
+              <i class="bi bi-speedometer2"></i>
+              Boat
+            </router-link>
+          </li>
+          <li class="nav-item mt-3">
+            <router-link to="/ride" tag="button" class="btn btn-light">
+              <i class="bi bi-stopwatch"></i>
+              Ride
+            </router-link>
+          </li>
+          <li class="nav-item mt-3">
             <router-link to="/account" tag="button" class="btn btn-light">
               <i class="bi bi-person-circle"></i>
               Account
             </router-link>
           </li>
-          <li class="nav-item mt-2">
+          <li class="nav-item mt-3">
             <router-link to="/info" tag="button" class="btn btn-light">
               <i class="bi bi-info-circle"></i>
               Info
             </router-link>
           </li>
-          <li class="nav-item mt-2">
+          <li class="nav-item mt-3">
             <router-link to="/logout" tag="button" class="btn btn-light">
               <i class="bi bi-box-arrow-right"></i>
               Logout
