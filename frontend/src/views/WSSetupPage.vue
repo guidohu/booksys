@@ -1,20 +1,23 @@
 <template>
   <modal-container name="setup-modal" :visible="true">
-    <modal-header :title="title"/>
+    <modal-header :title="setupSteps[setupStep].title"/>
     <modal-body>
+      <div class="progress mb-3" style="height: 2px;">
+        <div class="progress-bar bg-info" role="progressbar" :style="progress"></div>
+      </div>
       <warning-box v-if="errors.length > 0" class="mt-4" :errors="errors"/>
       <!-- Database setup -->
       <database-configuration
-        v-if="showDbSetup"
+        v-if="setupSteps[setupStep].name == 'db'"
         :dbconfig="dbConfig"
         @config-change="dbConfigInputHandler"
         @save="setDbSettings"
       />
       <!-- Administrator Account Setup -->
-      <div v-if="showUserSetup">
+      <div v-if="setupSteps[setupStep].name == 'administrator'">
         <div class="row mb-4">
           <div class="col-12">
-            Setup the Administrato Account
+            Setup the Administrator Account
           </div>
         </div>
         <user-sign-up
@@ -24,8 +27,15 @@
           @update:user="handleUserUpdate"
         />
       </div>
+      <!-- myNautique Setup -->
+      <my-nautique-configuration
+        v-if="setupSteps[setupStep].name == 'mynautique'"
+        :settings-data="myNautiqueConfig"
+        @save="setMyNautiqueSettings"
+        @update:settings="handleMyNautiqueUpdate"
+      />
       <!-- Setup Done -->
-      <div v-if="showSetupDone" class="row text-center">
+      <div v-if="setupSteps[setupStep].name == 'done'" class="row text-center">
         <div class="col-12">
           <p class="h4 mb-2">
             <i class="bi bi-check-circle text-success" />
@@ -37,7 +47,7 @@
     </modal-body>
     <modal-footer>
       <button
-        v-if="showDbSetup || showUserSetup"
+        v-if="setupSteps[setupStep].name != 'done'"
         class="btn btn-outline-danger me-1"
         type="button"
         @click="close"
@@ -46,7 +56,7 @@
         Cancel
       </button>
       <button
-        v-if="showDbSetup"
+        v-if="setupSteps[setupStep].name == 'db'"
         class="btn btn-outline-info"
         type="button"
         :disabled="isLoading"
@@ -56,11 +66,21 @@
         Next
       </button>
       <button
-        v-if="showUserSetup"
+        v-if="setupSteps[setupStep].name == 'administrator'"
         type="button"
         class="btn btn-outline-info"
         :disabled="isLoading"
         @click="addAdminUser"
+      >
+        <i class="bi bi-arrow-right" />
+        Next
+      </button>
+      <button
+        v-if="setupSteps[setupStep].name == 'mynautique'"
+        type="button"
+        class="btn btn-outline-info"
+        :disabled="isLoading"
+        @click="setMyNautiqueSettings"
       >
         <i class="bi bi-arrow-right" />
         Next
@@ -100,6 +120,11 @@ const UserSignUp = defineAsyncComponent(() =>
     /* webpackChunkName: "user-sign-up" */ "@/components/forms/UserSignUp"
   )
 );
+const MyNautiqueConfiguration = defineAsyncComponent(() =>
+  import(
+    /* webpackChunkName: "my-nautique-set-up" */ "@/components/forms/MyNautiqueConfiguration"
+  )
+);
 const WarningBox = defineAsyncComponent(() =>
   import(/* webpackChunkName: "warning-box" */ "@/components/WarningBox")
 );
@@ -108,6 +133,7 @@ export default {
   name: "WSSetupPage",
   components: {
     DatabaseConfiguration,
+    MyNautiqueConfiguration,
     WarningBox,
     UserSignUp,
     ModalContainer,
@@ -125,10 +151,43 @@ export default {
       isLoading: false,
       dbConfig: {},
       adminUserConfig: {},
-      dbSetupTitle: "Setup 1/2",
-      userSetupTitle: "Setup 2/2",
+      myNautiqueConfig: {},
+      dbSetupTitle: "Setup Database 1/3",
+      mynautiqueSetupTitle: "Setup myNautique 2/3",
+      userSetupTitle: "Setup User 3/3",
       setupDoneTitle: "Setup Done",
+      setupStep: 0,
+      setupSteps: [
+        {
+          id: 0,
+          name: "db",
+          title: "Setup Database",
+        },
+        {
+          id: 1,
+          name: "administrator",
+          title: "Setup User",
+        },
+        {
+          id: 2,
+          name: "mynautique",
+          title: "Setup myNautique",
+        },
+        {
+          id: 3,
+          name: "done",
+          title: "Setup Done",
+        },
+      ]
     };
+  },
+  computed: {
+    progress: function() {
+      let value = "width: ";
+      value += parseInt(((this.setupStep + 1) / this.setupSteps.length) * 100);
+      value += "%";
+      return value;
+    }
   },
   mounted() {
     this.isLoading = true;
@@ -165,6 +224,9 @@ export default {
       this.adminUserConfig.ownRisk = u.ownRisk;
       this.adminUserConfig.license = u.license;
     },
+    handleMyNautiqueUpdate: function(data) {
+      console.log("update", data);
+    },
     addAdminUser: function () {
       // check for obvious validation errors
       const errors = this.validateAdminUser();
@@ -199,6 +261,9 @@ export default {
           this.errors = errors;
           this.isLoading = false;
         });
+    },
+    setMyNautiqueSettings: function() {
+
     },
     close: function () {
       console.log("Navigate to login");
@@ -251,31 +316,22 @@ export default {
         .then((status) => {
           if (status.configFile == false) {
             // no configuration at all yet
-            this.showDbSetup = true;
-            this.showUserSetup = false;
-            this.title = this.dbSetupTitle;
+            this.setupStep = 0;
           } else if (status.configDb == false) {
             // no database configuration
-            this.showDbSetup = true;
-            this.showUserSetup = false;
-            this.title = this.dbSetupTitle;
+            this.setupStep = 0;
           } else if (status.dbReachable == false) {
             // cannot reach database, thus allow to change settings
-            this.showDbSetup = true;
-            this.showUserSetup = false;
-            this.title = this.dbSetupTitle;
+            this.setupStep = 0;
           } else if (status.adminExists == false) {
             // database is up, but there is no admin user yet
-            this.showDbSetup = false;
-            this.showUserSetup = false;
-            this.showUserSetup = true;
-            this.title = this.userSetupTitle;
+            this.setupStep = 1;
+          } else if (status.myNautiqueConfigured == false) {
+            // all good but myNautique has not been setup
+            this.setupStep = 2;
           } else {
             // setup is done
-
-            this.showDbSetup = false;
-            this.showSetupDone = true;
-            this.title = this.setupDoneTitle;
+            this.setupStep = 3;
           }
           this.isLoading = false;
         })
