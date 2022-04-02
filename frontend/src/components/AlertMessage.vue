@@ -1,5 +1,5 @@
 <template>
-  <div class="card">
+  <div class="card m-5 p-5">
     <div class="alert alert-danger" role="alert">
       {{ alertMessage }}
     </div>

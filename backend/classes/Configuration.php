@@ -137,9 +137,11 @@ class Configuration{
 		$this->db_user     = $config['db_user'];
 		$this->db_password = $config['db_password'];
 
-		$this->mynautique_enabled = $config['mynautique_enabled'];
-		$this->mynautique_user = $config['mynautique_user'];
-		$this->mynautique_password = $config['mynautique_password'];
+		if(isset($config['mynautique_enabled'])){
+			$this->mynautique_enabled = $config['mynautique_enabled'];
+			$this->mynautique_user = $config['mynautique_user'];
+			$this->mynautique_password = $config['mynautique_password'];
+		}
 	}
 	
 	// Returns a hash with the user's profile
