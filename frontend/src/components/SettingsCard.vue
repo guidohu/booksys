@@ -218,6 +218,7 @@ export default {
     WarningBox,
     LogoUpload,
     SectionedCardModule,
+    InputToggle,
     InputText,
     InputPassword,
     InputTextMultiline,
