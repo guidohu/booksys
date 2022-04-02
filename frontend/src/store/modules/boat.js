@@ -13,7 +13,7 @@ const state = () => ({
     boat: {
       fuelLevel: 0,
       fuelCapacity: 1,
-      engineHours: 0,
+      engineHours: null,
     }
   }
 });
