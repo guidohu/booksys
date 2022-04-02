@@ -13,7 +13,7 @@
       <form @submit.stop="saveFuel">
         <input-engine-hours
           id="engine-hours"
-          label="Engine Hrs"
+          label="Engine"
           :display-format="getEngineHourFormat"
           v-model="form.engineHours"
           :description="engineHourDescription"

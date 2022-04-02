@@ -1,6 +1,8 @@
 import Boat from "@/api/boat";
+import { sortBy, reverse, forEach, round } from 'lodash';
 
 const state = () => ({
+  avgFuelConsumption: null,
   engineHourLog: [],
   engineHourLogLatest: null,
   fuelLog: [],
@@ -17,6 +19,9 @@ const state = () => ({
 });
 
 const getters = {
+  getAvgFuelConsumption: (state) => {
+    return state.avgFuelConsumption;
+  },
   getEngineHourLog: (state) => {
     return state.engineHourLog;
   },
@@ -183,6 +188,36 @@ const mutations = {
   },
   setFuelLog(state, value) {
     state.fuelLog = value;
+
+    // calculate the average fuel consumption
+    // of the last 5 pitstops as a reference
+    const sortedLog = reverse(
+      sortBy(
+        value, 
+        function(v){ return v.timestamp }
+      )
+    );
+    
+    let i = 0;
+    let totalDiffHours = 0;
+    let totalFuel = 0;
+    forEach(sortedLog, function(v){
+      if(i < 5 && v.avg_liters_per_hour != null && v.diff_hours != null){
+        if(v.diff_hours > 0 && v.avg_liters_per_hour > 0){
+          totalFuel += v.diff_hours * v.avg_liters_per_hour;
+          totalDiffHours += v.diff_hours;
+          i++;
+        }
+      }
+    });
+
+    // calculate average fuel consumption per hour
+    if(totalDiffHours > 0){
+      state.avgFuelConsumption = round(
+        totalFuel / totalDiffHours,
+        1
+      );
+    }
   },
   setMaintenanceLog(state, value) {
     state.maintenanceLog = value;
