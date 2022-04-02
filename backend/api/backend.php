@@ -292,7 +292,7 @@
             return FALSE;
         }
         // check if password is set
-        if(!isset($configuration->mynautique_password) or $connfiguration->mynautique_password == ''){
+        if(!isset($configuration->mynautique_password) or $configuration->mynautique_password == ''){
             return FALSE;
         }
 

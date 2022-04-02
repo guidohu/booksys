@@ -86,7 +86,7 @@
         Next
       </button>
       <button
-        v-if="showSetupDone"
+        v-if="setupSteps[setupStep].name == 'done'"
         class="btn btn-outline-info me-1"
         type="button"
         variant="outline-info"
@@ -145,17 +145,12 @@ export default {
     return {
       errors: [],
       title: "Setup",
-      showDbSetup: false,
-      showUserSetup: false,
-      showSetupDone: false,
       isLoading: false,
       dbConfig: {},
       adminUserConfig: {},
-      myNautiqueConfig: {},
-      dbSetupTitle: "Setup Database 1/3",
-      mynautiqueSetupTitle: "Setup myNautique 2/3",
-      userSetupTitle: "Setup User 3/3",
-      setupDoneTitle: "Setup Done",
+      myNautiqueConfig: {
+        enabled: false,
+      },
       setupStep: 0,
       setupSteps: [
         {
@@ -225,7 +220,9 @@ export default {
       this.adminUserConfig.license = u.license;
     },
     handleMyNautiqueUpdate: function(data) {
-      console.log("update", data);
+      this.myNautiqueConfig.enabled = data.enabled;
+      this.myNautiqueConfig.user = data.user;
+      this.myNautiqueConfig.password = data.password;
     },
     addAdminUser: function () {
       // check for obvious validation errors
@@ -251,11 +248,8 @@ export default {
       User.makeAdmin(userId)
         .then(() => {
           this.errors = [];
-          this.showDbSetup = false;
-          this.showUserSetup = false;
-          this.showSetupDone = true;
-          this.title = this.setupDoneTitle;
           this.isLoading = false;
+          this.getBackendStatus();
         })
         .catch((errors) => {
           this.errors = errors;
@@ -263,7 +257,21 @@ export default {
         });
     },
     setMyNautiqueSettings: function() {
-
+      this.isLoading = true;
+      console.log("myNautiqueConfig", this.myNautiqueConfig);
+      Configuration.setMyNautiqueConfig({
+        enabled: this.myNautiqueConfig.enabled,
+        mynautiqueUser: this.myNautiqueConfig.user,
+        mynautiquePassword: this.myNautiqueConfig.password,
+      })
+      .then(() => {
+        this.isLoading = false;
+        this.getBackendStatus();
+      })
+      .catch((errors) => {
+        this.errors = errors;
+        this.isLoading = false;
+      })
     },
     close: function () {
       console.log("Navigate to login");

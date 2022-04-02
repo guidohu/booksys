@@ -5,6 +5,15 @@ const state = () => ({
   engineHourLogLatest: null,
   fuelLog: [],
   maintenanceLog: [],
+  myNautique: {
+    token: "",
+    tokenExpiry: 0,
+    boat: {
+      fuelLevel: 0,
+      fuelCapacity: 1,
+      engineHours: 0,
+    }
+  }
 });
 
 const getters = {
@@ -20,6 +29,15 @@ const getters = {
   getMaintenanceLog: (state) => {
     return state.maintenanceLog;
   },
+  getMyNautiqueFuelLevel: (state) => {
+    return state.myNautique.boat.fuelLevel;
+  },
+  getMyNautiqueFuelCapacity: (state) => {
+    return state.myNautique.boat.fuelCapacity;
+  },
+  getMyNautiqueEngineHours: (state) => {
+    return state.myNautique.boat.engineHours;
+  }
 };
 
 const actions = {
@@ -74,6 +92,19 @@ const actions = {
           reject(error);
         });
     });
+  },
+  queryMyNautiqueInfo({ commit, state }, boatId) {
+    console.log("Trigger queryMyNautiqueInfo");
+    return new Promise((resolve, reject) => {
+      Boat.getMyNautiqueInfo(boatId, state.myNautique.token, state.myNautique.tokenExpiry)
+        .then((response) => {
+          commit("setMyNautiqueInfo", response);
+          resolve();
+        })
+        .catch((error) => {
+          reject(error);
+        })
+    })
   },
   addEngineHours({ dispatch }, engineHourEntry) {
     console.log("Trigger addEngineHourLogEntry");
@@ -156,6 +187,13 @@ const mutations = {
   setMaintenanceLog(state, value) {
     state.maintenanceLog = value;
   },
+  setMyNautiqueInfo(state, value) {
+    state.myNautique.token = value.token;
+    state.myNautique.tokenExpiry = value.token_expiry;
+    state.myNautique.boat.fuelLevel = value.boat.telemetry.FUEL_LEVEL_LINC;
+    state.myNautique.boat.fuelCapacity = value.boat.metainfo.fuel_capacity;
+    state.myNautique.boat.engineHours = value.boat.telemetry.EngineTotalHoursOfOperation;
+  }
 };
 
 export default {
