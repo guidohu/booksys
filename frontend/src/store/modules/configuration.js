@@ -16,6 +16,9 @@ const state = () => ({
   logoFile: null,
   engineHourFormat: "hh.h",
   fuelPaymentType: null,
+  myNautiqueEnabled: null,
+  myNautiqueUser: null,
+  myNautiquePassword: null,
 });
 
 const getters = {
@@ -62,6 +65,12 @@ const getters = {
   getFuelPaymentType: (state) => {
     return state.fuelPaymentType;
   },
+  getMyNautiqueEnabled: (state) => {
+    return state.myNautiqueEnabled;
+  },
+  getMyNautiqueBoatId: (state) => {
+    return state.myNautiqueBoatId;
+  }
 };
 
 const actions = {
@@ -180,6 +189,8 @@ const mutations = {
     state.logoFile = value.logo_file;
     state.engineHourFormat = value.engine_hour_format;
     state.fuelPaymentType = value.fuel_payment_type;
+    state.myNautiqueEnabled = value.mynautique_enabled;
+    state.myNautiqueBoatId = value.mynautique_boat_id;
 
     state.CONFIG_LOADED = true;
     console.log("configuration set to", value);

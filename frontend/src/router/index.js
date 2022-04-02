@@ -56,6 +56,11 @@ const routes = [
     component: Setup,
   },
   {
+    path: "/setup/database",
+    name: "Setup Database",
+    component: Setup,
+  },
+  {
     path: "/login",
     name: "Login",
     beforeEnter: (to, from, next) => {

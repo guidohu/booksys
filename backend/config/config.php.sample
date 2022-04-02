@@ -9,4 +9,14 @@ $config['db_name']     = "booksys";
 $config['db_user']     = "user";
 // database user password
 $config['db_password'] = "userpassword";
+
+// MyNautique Configuration
+//===================================================
+// mynautique enabled
+$config['mynautique_enabled'] = FALSE;
+// mynautique user
+$config['mynautique_user'] = "user";
+// mynauqitue password
+$config['mynautique_password'] = "userpassword";
+
 ?>

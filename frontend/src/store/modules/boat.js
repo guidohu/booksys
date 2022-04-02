@@ -1,13 +1,27 @@
 import Boat from "@/api/boat";
+import { sortBy, reverse, forEach, round } from 'lodash';
 
 const state = () => ({
+  avgFuelConsumption: null,
   engineHourLog: [],
   engineHourLogLatest: null,
   fuelLog: [],
   maintenanceLog: [],
+  myNautique: {
+    token: "",
+    tokenExpiry: 0,
+    boat: {
+      fuelLevel: 0,
+      fuelCapacity: 1,
+      engineHours: null,
+    }
+  }
 });
 
 const getters = {
+  getAvgFuelConsumption: (state) => {
+    return state.avgFuelConsumption;
+  },
   getEngineHourLog: (state) => {
     return state.engineHourLog;
   },
@@ -20,6 +34,15 @@ const getters = {
   getMaintenanceLog: (state) => {
     return state.maintenanceLog;
   },
+  getMyNautiqueFuelLevel: (state) => {
+    return state.myNautique.boat.fuelLevel;
+  },
+  getMyNautiqueFuelCapacity: (state) => {
+    return state.myNautique.boat.fuelCapacity;
+  },
+  getMyNautiqueEngineHours: (state) => {
+    return state.myNautique.boat.engineHours;
+  }
 };
 
 const actions = {
@@ -74,6 +97,19 @@ const actions = {
           reject(error);
         });
     });
+  },
+  queryMyNautiqueInfo({ commit, state }, boatId) {
+    console.log("Trigger queryMyNautiqueInfo");
+    return new Promise((resolve, reject) => {
+      Boat.getMyNautiqueInfo(boatId, state.myNautique.token, state.myNautique.tokenExpiry)
+        .then((response) => {
+          commit("setMyNautiqueInfo", response);
+          resolve();
+        })
+        .catch((error) => {
+          reject(error);
+        })
+    })
   },
   addEngineHours({ dispatch }, engineHourEntry) {
     console.log("Trigger addEngineHourLogEntry");
@@ -152,10 +188,47 @@ const mutations = {
   },
   setFuelLog(state, value) {
     state.fuelLog = value;
+
+    // calculate the average fuel consumption
+    // of the last 5 pitstops as a reference
+    const sortedLog = reverse(
+      sortBy(
+        value, 
+        function(v){ return v.timestamp }
+      )
+    );
+    
+    let i = 0;
+    let totalDiffHours = 0;
+    let totalFuel = 0;
+    forEach(sortedLog, function(v){
+      if(i < 5 && v.avg_liters_per_hour != null && v.diff_hours != null){
+        if(v.diff_hours > 0 && v.avg_liters_per_hour > 0){
+          totalFuel += v.diff_hours * v.avg_liters_per_hour;
+          totalDiffHours += v.diff_hours;
+          i++;
+        }
+      }
+    });
+
+    // calculate average fuel consumption per hour
+    if(totalDiffHours > 0){
+      state.avgFuelConsumption = round(
+        totalFuel / totalDiffHours,
+        1
+      );
+    }
   },
   setMaintenanceLog(state, value) {
     state.maintenanceLog = value;
   },
+  setMyNautiqueInfo(state, value) {
+    state.myNautique.token = value.token;
+    state.myNautique.tokenExpiry = value.token_expiry;
+    state.myNautique.boat.fuelLevel = value.boat.telemetry.FUEL_LEVEL_LINC;
+    state.myNautique.boat.fuelCapacity = value.boat.metainfo.fuel_capacity;
+    state.myNautique.boat.engineHours = value.boat.telemetry.EngineTotalHoursOfOperation;
+  }
 };
 
 export default {

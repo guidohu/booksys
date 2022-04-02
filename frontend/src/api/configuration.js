@@ -203,11 +203,19 @@ export default class Configuration {
         smtp_username: params.smtp_username,
         recaptcha_privatekey: params.recaptcha_privatekey,
         recaptcha_publickey: params.recaptcha_publickey,
+        mynautique_enabled: params.mynautique_enabled,
+        mynautique_user: params.mynautique_user,
+        mynautique_boat_id: params.mynautique_boat_id,
+        mynautique_fuel_capacity: params.mynautique_fuel_capacity,
       };
 
       // only set password in case it is really given
       if (params.smtp_password != "hidden") {
         request.smtp_password = params.smtp_password;
+      }
+      // only set the myNautique password in case it is given
+      if(params.mynautique_password != "hidden") {
+        request.mynautique_password = params.mynautique_password;
       }
 
       fetch("/api/configuration.php?action=set_configuration", {
@@ -240,6 +248,50 @@ export default class Configuration {
         })
         .catch((error) => {
           console.error("configuration/setCustomizationParameters", error);
+          reject([error]);
+        });
+    });
+  }
+
+  static setMyNautiqueConfig(config) {
+    console.log("configuration/setMyNautiqueConfig called with:", config);
+    return new Promise((resolve, reject) => {
+      const requestData = {
+        mynautique_enabled: config.enabled,
+        mynautique_user: config.mynautiqueUser,
+        mynautique_password: config.mynautiquePassword,
+      };
+
+      fetch("/api/configuration.php?action=setup_mynautique_config", {
+        method: "POST",
+        cache: "no-cache",
+        body: JSON.stringify(requestData),
+      })
+        .then((response) => {
+          response
+            .json()
+            .then((data) => {
+              console.log("configuration/setMyNautiqueConfig response data:", data);
+              if (data.ok) {
+                resolve();
+              } else {
+                console.log(
+                  "configuration/setMyNautiqueConfig: Cannot set db myNautique, due to:",
+                  data.msg
+                );
+                reject([data.msg]);
+              }
+            })
+            .catch((error) => {
+              console.error(
+                "configuration/setMyNautiqueConfig: Cannot parse server response",
+                error
+              );
+              reject([error]);
+            });
+        })
+        .catch((error) => {
+          console.error("configuration/setMyNautiqueConfig", error);
           reject([error]);
         });
     });
