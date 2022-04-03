@@ -13,9 +13,9 @@ $config['db_password'] = "userpassword";
 // MyNautique Configuration
 //===================================================
 // myNautique enabled
-$config['mynautique_enabled'] = TRUE;
+$config['mynautique_enabled'] = FALSE;
 // myNautique user
-$config['mynautique_user']     = "remo.frick@gmail.com";
+$config['mynautique_user']     = "";
 // myNautique password
-$config['mynautique_password']     = "g23blackbiest";
+$config['mynautique_password']     = "";
 ?>
