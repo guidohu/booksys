@@ -21,7 +21,7 @@ export const getBackendStatus = () => {
               error
             );
             const error_msg =
-              "There is an issue with the response from the server. A status report was expected but something else go received. Full details: " +
+              "There is an issue with the response from the server. A status report was expected but something else got received. This is most probably an issue with the application backend. Full details: " +
               error;
             reject([error_msg]);
           });

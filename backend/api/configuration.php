@@ -44,6 +44,10 @@
             $response = setup_db_config($configuration);
             echo json_encode($response);
             exit;
+        case 'setup_mynautique_config':
+            $response = setup_mynautique_config($configuration);
+            echo json_encode($response);
+            exit;
         case 'is_admin_user_configured':
             is_admin_user_configured($configuration);
             exit;
@@ -148,10 +152,15 @@
             $response["smtp_sender"]          = $configuration->smtp_sender;
             $response["smtp_server"]          = $configuration->smtp_server;
             $response["smtp_username"]        = $configuration->smtp_username;
-            $response["smtp_password"]        = "hidden"; // the proper value is hidden, $configuration->smtp_password,
+            $response["smtp_password"]        = "hidden"; // the proper value is hidden, $configuration->smtp_password
             $response["recaptcha_privatekey"] = $configuration->recaptcha_privatekey;
             $response["engine_hour_format"]   = $configuration->engine_hour_format;
             $response["fuel_payment_type"]    = $configuration->fuel_payment_type;
+            $response["mynautique_enabled"]   = $configuration->mynautique_enabled;
+            $response["mynautique_user"]      = $configuration->mynautique_user;
+            $response["mynautique_password"]  = "hidden"; // the proper value is hidden, $configuration->mynautique_password
+            $response["mynautique_boat_id"]   = $configuration->mynautique_boat_id;
+            $response["mynautique_fuel_capacity"] = $configuration->mynautique_fuel_capacity;
         }
         
         return Status::successDataResponse('success', $response);
@@ -243,6 +252,8 @@
             'smtp_sender',
             'smtp_server',
             'smtp_username',
+            'mynautique_boat_id',
+            'mynautique_fuel_capacity',
         );
         foreach ($keys as $key) {
             // if the key is not defined, we do not store anything
@@ -261,6 +272,13 @@
                 error_log("Cannot update property $key with value " . $data->$key);
                 return Status::errorStatus("Cannot save property $key with value " . $data->$key);
             }
+        }
+
+        // change non database configuration
+        error_log("set mynautique config");
+        $status = _set_mynautique_config($configuration, $data);
+        if(Status::isError($status)){
+            return $status;
         }
 
         return Status::successStatus("successfully updated");
@@ -320,22 +338,59 @@
         }
 
         // write configuration file (only after schema is applied)// build the configuration for the configuration file
-        $config_string =  '<?php'."\n";
-        $config_string .= '// Database Configuration'."\n";
-        $config_string .= '//==================================================='."\n";
-        $config_string .= '// database server'."\n";
-        $config_string .= '$config[\'db_server\']   = "'. $data->db_server .'";'."\n";
-        $config_string .= '// database'."\n";
-        $config_string .= '$config[\'db_name\']     = "'. $data->db_name .'";'."\n";
-        $config_string .= '// database user'."\n";
-        $config_string .= '$config[\'db_user\']     = "'. $data->db_user .'";'."\n";
-        $config_string .= '// database user password'."\n";
-        $config_string .= '$config[\'db_password\'] = "'. $data->db_password .'";'."\n";
-        $config_string .=  '?>'."\n";
-        file_put_contents ("../config/config.php", $config_string);
+        $configuration->config_file_variables['db_server'] = $data->db_server;
+        $configuration->config_file_variables['db_name'] = $data->db_name;
+        $configuration->config_file_variables['db_user'] = $data->db_user;
+        $configuration->config_file_variables['db_password'] = $data->db_password;
+        if(_write_config_file($configuration->config_file_variables)){
+            return Status::successStatus("configuration applied and database setup");
+        }
+        return Status::errorStatus("db could not be configured");
+    }
 
-        // return status
-        return Status::successStatus("configuration applied and database setup");
+    function setup_mynautique_config($configuration){
+        // basic db setup needs to be in place and
+        // we need to be admin to configure myNautique
+        if(_is_mynautique_configured($configuration)){
+            _is_admin_or_return($configuration);
+        }
+
+        // get and validate user input
+        $data = json_decode(file_get_contents('php://input'));
+        return _set_mynautique_config($configuration, $data);
+    }
+
+    function _set_mynautique_config($configuration, $values){
+        if(!isset($values->mynautique_enabled) || !($values->mynautique_enabled == FALSE || $values->mynautique_enabled == TRUE)){
+            return Status::errorStatus('mynautique_enabled must be TRUE/FALSE');
+        }
+        if(!isset($values->mynautique_user) || !preg_match('/^[a-zA-Z0-9-_@\.]*$/', $values->mynautique_user )){
+            return Status::errorStatus('mynautique_user must be a valid username');
+        }
+
+        // handle new account and password change
+        $set_password = TRUE;
+        if(_is_mynautique_configured($configuration) && !isset($values->mynautique_password)){
+            // if mynautique is already configured and we do not change the password
+            $set_password = FALSE;
+        }
+        else if(!isset($values->mynautique_password) || !preg_match('/^[a-zA-Z0-9-_@]*$/', $values->mynautique_password )){
+            return Status::errorStatus('mynautique_password must be a valid password');
+        }
+
+        // update configuration file
+        $configuration->config_file_variables['mynautique_enabled'] = $values->mynautique_enabled == TRUE ? TRUE : FALSE;
+        $configuration->config_file_variables['mynautique_user'] = $values->mynautique_user;
+        if($set_password == TRUE){
+            $configuration->config_file_variables['mynautique_password'] = $values->mynautique_password;
+        }else{
+            $configuration->config_file_variables['mynautique_password'] = $configuration->mynautique_password;
+        }
+
+        if(_write_config_file($configuration->config_file_variables)){
+            return Status::successStatus("mynautique configured");
+        }
+        return Status::errorStatus("myNautique could not be configured, an error occurred");
     }
 
     // Tests whether there is at least one admin present in the database
@@ -437,6 +492,13 @@
         return $configuration->is_db_configured();
     }
 
+    function _is_mynautique_configured($configuration){
+        if(is_null($configuration)){
+            return FALSE;
+        }
+        return $configuration->is_mynautique_configured();
+    }
+
     // returns http status permission denied in case the user is not an admin
     function _is_admin_or_return($configuration){
         $lc = new Login($configuration);
@@ -457,6 +519,51 @@
             echo json_encode(Status::errorStatus("not logged in"));
             exit;
         }
+    }
+
+    function _write_config_file($values){
+        // set some defaults in cause $values are not defined
+        $db_server = $values['db_server'] ?: "";
+        $db_name   = $values['db_name']   ?: "";
+        $db_user   = $values['db_user']   ?: "";
+        $db_password = $values['db_password'] ?: "";
+        $mynautique_enabled = (isset($values['mynautique_enabled']) && $values['mynautique_enabled'] == TRUE) ? "TRUE" : "FALSE";
+        $mynautique_user = isset($values['mynautique_user']) && $mynautique_enabled == "TRUE" ? $values['mynautique_user'] : "";
+        $mynautique_password = isset($values['mynautique_password']) && $mynautique_enabled == "TRUE" ? $values['mynautique_password'] : "";
+
+        // write configuration file (only after schema is applied)// build the configuration for the configuration file
+        $config_string =  '<?php'."\n";
+        $config_string .= '// Database Configuration'."\n";
+        $config_string .= '//==================================================='."\n";
+        $config_string .= '// database server'."\n";
+        $config_string .= '$config[\'db_server\']   = "'. $db_server .'";'."\n";
+        $config_string .= '// database'."\n";
+        $config_string .= '$config[\'db_name\']     = "'. $db_name .'";'."\n";
+        $config_string .= '// database user'."\n";
+        $config_string .= '$config[\'db_user\']     = "'. $db_user .'";'."\n";
+        $config_string .= '// database user password'."\n";
+        $config_string .= '$config[\'db_password\'] = "'. $db_password .'";'."\n";
+        $config_string .= "\n";
+
+        if ( isset($values['mynautique_enabled'])) {
+            $config_string .= '// MyNautique Configuration'."\n";
+            $config_string .= '//==================================================='."\n";
+            $config_string .= '// myNautique enabled'."\n";
+            $config_string .= '$config[\'mynautique_enabled\'] = '.$mynautique_enabled .';'."\n";
+            $config_string .= '// myNautique user'."\n";
+            $config_string .= '$config[\'mynautique_user\']     = "'. $mynautique_user .'";'."\n";
+            $config_string .= '// myNautique password'."\n";
+            $config_string .= '$config[\'mynautique_password\']     = "'. $mynautique_password .'";'."\n";
+        }
+
+        $config_string .=  '?>'."\n";
+
+        $bytes_written = file_put_contents ("../config/config.php", $config_string);
+
+        if($bytes_written == FALSE) {
+            return $bytes_written;
+        }
+        return TRUE;
     }
 
 

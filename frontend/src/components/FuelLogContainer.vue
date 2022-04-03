@@ -1,5 +1,6 @@
 <template>
   <div class="box">
+    <fuel-log-status class="mb-2"/>
     <fuel-log-form class="mb-4" />
     <div class="d-grid gap-2 ms-1 me-1 mb-2">
       <button
@@ -24,6 +25,7 @@
 
 <script>
 import { defineAsyncComponent } from "vue";
+import FuelLogStatus from "@/components/FuelLogStatus";
 import FuelLogForm from "@/components/FuelLogForm";
 import FuelLogList from "@/components/FuelLogList";
 
@@ -34,6 +36,7 @@ const FuelLogChart = defineAsyncComponent(() =>
 export default {
   name: "FuelLogContainer",
   components: {
+    FuelLogStatus,
     FuelLogForm,
     FuelLogChart,
     FuelLogList,

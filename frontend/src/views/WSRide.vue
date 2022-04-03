@@ -59,6 +59,7 @@
         @deleteSessionHandler="showDeleteSession"
       />
       <condition-info-card
+        class="mx-1 mt-2 mb-2"
         v-if="sunrise != null"
         :sunrise="sunrise"
         :sunset="sunset"

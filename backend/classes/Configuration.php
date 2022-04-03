@@ -11,6 +11,13 @@ class Configuration{
 	public $db_user;
 	public $db_password;
 
+	// mynautique config
+	public $mynautique_enabled;
+	public $mynautique_user;
+	public $mynautique_password;
+	public $mynautique_boat_id;
+	public $mynautique_fuel_capacity;
+
 	// default user status / the ones that are shipped with the installation by default
 	// Note: they have to match the IDs in the default
 	//       schema definition
@@ -69,7 +76,7 @@ class Configuration{
 			include dirname(__DIR__).'/config/config.php';
 			$this->config_file_variables = $config;
 		}else{
-			//throw new Exception("config file does not exist");
+			// throw new Exception("config file does not exist");
 			error_log("No config file found, return empty config");
 			return NULL;
 		}
@@ -88,7 +95,7 @@ class Configuration{
 
 		// set hard defaults
 		$this->login_page          = '/index.html';
-		$this->version             = "3.0.1";
+		$this->version             = "3.1.0";
 		$this->required_db_version = "1.16";
 	}
 
@@ -109,6 +116,19 @@ class Configuration{
         return TRUE;
 	}
 
+	public function is_mynautique_configured(){
+		if(!isset($this->mynautique_enabled)){
+			return FALSE;
+		}
+		if(!isset($this->mynautique_user)){
+			return FALSE;
+		}
+		if(!isset($this->mynautique_password)){
+			return FALSE;
+		}
+		return TRUE;
+	}
+
 	// Gets the content from the configuration file into
 	// the public variables of this class
 	private function get_configuration_file($config){
@@ -116,6 +136,12 @@ class Configuration{
 		$this->db_name     = $config['db_name'];
 		$this->db_user     = $config['db_user'];
 		$this->db_password = $config['db_password'];
+
+		if(isset($config['mynautique_enabled'])){
+			$this->mynautique_enabled = $config['mynautique_enabled'];
+			$this->mynautique_user = $config['mynautique_user'];
+			$this->mynautique_password = $config['mynautique_password'];
+		}
 	}
 	
 	// Returns a hash with the user's profile
@@ -249,6 +275,13 @@ class Configuration{
 					break;
 				case 'fuel.payment.type':
 					$this->fuel_payment_type = $property['value'];
+					break;
+				case 'mynautique.boat.id':
+					$this->mynautique_boat_id = $property['value'];
+					break;
+				case 'mynautique.fuel.capacity':
+					$this->mynautique_fuel_capacity = $property['value'];
+					break;
 			}
 		}
 
@@ -345,6 +378,12 @@ class Configuration{
 				break;
 			case 'recaptcha_publickey':
 				$db_key = "recaptcha.publickey";
+				break;
+			case 'mynautique_boat_id':
+				$db_key = "mynautique.boat.id";
+				break;
+			case 'mynautique_fuel_capacity':
+				$db_key = "mynautique.fuel.capacity";
 				break;
 			default:
 				return FALSE;

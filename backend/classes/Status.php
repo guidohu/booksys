@@ -11,6 +11,10 @@ class Status{
     public function __construct(){
 		// nothing to do
 	}
+
+	public static function isError($status){
+		return ($status['ok'] == FALSE);
+	}
     
     public static function errorStatus($error){
         return Status::status(FALSE, $error);

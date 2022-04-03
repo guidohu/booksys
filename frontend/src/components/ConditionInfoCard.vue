@@ -2,20 +2,20 @@
   <sectioned-card-module title="Condition Info">
     <template v-slot:body>
       <div class="row">
-        <div class="col-5">
+        <div class="col-4">
           <i class="bi bi-sunrise"></i>
           Sunrise
         </div>
-        <div class="col-7">
+        <div class="col-8">
           {{ sunriseString }}
         </div>
       </div>
       <div class="row">
-        <div class="col-5">
+        <div class="col-4">
           <i class="bi bi-sunset-fill"></i>
           Sunset
         </div>
-        <div class="col-7">
+        <div class="col-8">
           {{ sunsetString }}
         </div>
       </div>

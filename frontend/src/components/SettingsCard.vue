@@ -126,6 +126,46 @@
           v-model="form.smtpPassword"
         />
         <div class="alert alert-info">
+          This application supports myNautique and can integrate information such as
+          fuel level or engine hours from myNautique directly into this app.
+        </div>
+        <input-toggle
+          id="my-nautique-toggle"
+          label="myNautique"
+          on-label="On"
+          off-label="Off"
+          v-model="form.myNautiqueEnabled"
+        />
+        <input-text
+          v-if="form.myNautiqueEnabled"
+          id="my-nautique-user"
+          label="User"
+          size="small"
+          v-model="form.myNautiqueUser"
+        />
+        <input-password
+          v-if="form.myNautiqueEnabled"
+          id="my-nautique-password"
+          label="Password"
+          size="small"
+          v-model="form.myNautiquePassword"
+        />
+        <input-text
+          v-if="form.myNautiqueEnabled"
+          id="my-nautique-boat-id"
+          label="Boat ID"
+          size="small"
+          description="The ID you can find in the myNautique app settings. Typically a 5-6 digit number."
+          v-model="form.myNautiqueBoatId"
+        />
+        <input-fuel
+          v-if="form.myNautiqueEnabled"
+          id="my-nautique-fuel-capacity"
+          label="Fuel Capacity"
+          size="small"
+          v-model="form.myNautiqueFuelCapacity"
+        />
+        <div class="alert alert-info">
           ReCAPTCHA protects the application and its users from SPAMers. Thus it
           is recommended to use ReCAPTCHA.
         </div>
@@ -169,6 +209,8 @@ import InputText from "./forms/inputs/InputText.vue";
 import InputPassword from "./forms/inputs/InputPassword.vue";
 import InputTextMultiline from "./forms/inputs/InputTextMultiline.vue";
 import InputSelect from "./forms/inputs/InputSelect.vue";
+import InputToggle from "./forms/inputs/InputToggle.vue";
+import InputFuel from "./forms/inputs/InputFuel.vue";
 
 export default {
   name: "SettingsCard",
@@ -176,10 +218,12 @@ export default {
     WarningBox,
     LogoUpload,
     SectionedCardModule,
+    InputToggle,
     InputText,
     InputPassword,
     InputTextMultiline,
     InputSelect,
+    InputFuel,
   },
   props: ["showControls"],
   emits: ["save", "saved", "cancelled", "change"],
@@ -249,6 +293,11 @@ export default {
         smtp_password: v.smtpPassword,
         recaptcha_privatekey: v.recaptchaPrivateKey,
         recaptcha_publickey: v.recaptchaPublicKey,
+        mynautique_enabled: v.myNautiqueEnabled,
+        mynautique_user: v.myNautiqueUser,
+        mynautique_password: v.myNautiquePassword,
+        mynautique_boat_id: v.myNautiqueBoatId,
+        mynautique_fuel_capacity: v.myNautiqueFuelCapacity,
       };
 
       return newConfiguration;
@@ -303,6 +352,11 @@ export default {
         smtpPassword: defaultValues.smtp_password,
         recaptchaPrivateKey: defaultValues.recaptcha_privatekey,
         recaptchaPublicKey: defaultValues.recaptcha_publickey,
+        myNautiqueEnabled: defaultValues.mynautique_enabled,
+        myNautiqueUser: defaultValues.mynautique_user,
+        myNautiquePassword: defaultValues.mynautique_password,
+        myNautiqueBoatId: defaultValues.mynautique_boat_id,
+        myNautiqueFuelCapacity: defaultValues.mynautique_fuel_capacity,
       };
     },
   },

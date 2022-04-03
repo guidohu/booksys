@@ -72,6 +72,7 @@
      * - "no database configured"
      * - "database connection is not working"
      * - "no user configured"
+     * - "no mynautique configured"
      */
     function get_status($configuration){
         
@@ -79,7 +80,8 @@
             "configFile"  => TRUE,
             "configDb"    => FALSE,
             "dbReachable" => FALSE,
-            "adminExists" => FALSE
+            "adminExists" => FALSE,
+            "myNautiqueConfigured" => FALSE,
         );
 
         // check if db is configured
@@ -107,6 +109,14 @@
             return Status::successDataResponse('no user configured', $statusResponse);
         }else{
             $statusResponse['adminExists'] = TRUE;
+        }
+
+        // check if myNautique is configured
+        if(! _is_my_nautique_configured($configuration)){
+            error_log('api/backend: No myNautique configured');
+            return Status::successDataResponse('no mynautique configured', $statusResponse);
+        }else{
+            $statusResponse['myNautiqueConfigured'] = TRUE;
         }
 
         return Status::successDataResponse("all backend components are good", $statusResponse);
@@ -265,6 +275,24 @@
         }
         // check if db_user is set
         if(!isset($configuration->db_user) or $configuration->db_user == ''){
+            return FALSE;
+        }
+
+        return TRUE;
+    }
+
+    // returns whether myNautique is configured currently
+    function _is_my_nautique_configured($configuration){
+        // check if myNautique "enabled" is present
+        if(!isset($configuration->mynautique_enabled)){
+            return FALSE;
+        }
+        // check if user is set
+        if(!isset($configuration->mynautique_user) or $configuration->mynautique_user == ''){
+            return FALSE;
+        }
+        // check if password is set
+        if(!isset($configuration->mynautique_password) or $configuration->mynautique_password == ''){
             return FALSE;
         }
 

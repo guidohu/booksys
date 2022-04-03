@@ -6,7 +6,7 @@
         <form @submit.prevent="add">
           <input-engine-hours
             id="engine-hours"
-            label="Engine Hrs"
+            label="Engine"
             :display-format="getEngineHourFormat"
             v-model="form.engineHours"
             placeholder="0"

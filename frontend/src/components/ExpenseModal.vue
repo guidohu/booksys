@@ -51,7 +51,7 @@
         <input-engine-hours
           v-if="form.type != null && form.type == 0"
           id="engine-hours"
-          label="Engine Hours"
+          label="Engine"
           size="small"
           placeholder="0"
           v-model="form.engineHours"

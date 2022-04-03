@@ -123,11 +123,14 @@
 
             $diff_hours = $res[$i]["engine_hours"] - $last_engine_hour;
             if($diff_hours <= 0){
+                // covers the case of:
+                // - having a new boat with less engine hours
                 $last_engine_hour = $res[$i]["engine_hours"];
                 continue;
             }
 
             $avg_fuel_p_hour = $res[$i]["liters"] / $diff_hours;
+            $res[$i]["diff_hours"] = $diff_hours;
             $res[$i]["avg_liters_per_hour"] = $avg_fuel_p_hour;
             $last_engine_hour = $res[$i]["engine_hours"];
         }

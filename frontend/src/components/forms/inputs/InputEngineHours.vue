@@ -15,6 +15,9 @@
         />
         <span class="input-group-text">{{ unitText }}</span>
       </div>
+      <div v-if="description" :id="id + '-description'" class="form-text">
+        {{ description }}
+      </div>
     </div>
   </div>
 </template>
@@ -33,6 +36,7 @@ export default {
     "id",
     "label",
     "modelValue",
+    "description",
     "disabled",
     "displayFormat",
     "placeholder",

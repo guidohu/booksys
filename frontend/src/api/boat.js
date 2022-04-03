@@ -390,4 +390,47 @@ export default class Boat {
         });
     });
   }
+
+  static getMyNautiqueInfo(boatId, token, tokenExpiry) {
+    console.log("api/getMyNautiqueInfo called");
+    const request = {
+      boat_id: boatId,
+      token: token,
+      token_expiry: tokenExpiry,
+    };
+    return new Promise((resolve, reject) => {
+      fetch("/api/mynautique.php?action=get_boat_info", {
+        method: "POST",
+        cache: "no-cache",
+        body: JSON.stringify(request),
+      })
+        .then((response) => {
+          response
+            .json()
+            .then((data) => {
+              console.log("Boat/getMyNautiqueInfo response data:", data);
+              if (data.ok) {
+                resolve(data.data);
+              } else {
+                console.error(
+                  "Boat/getMyNautiqueInfo: Cannot retrieve maintenance logs, due to:",
+                  data.msg
+                );
+                reject([data.msg]);
+              }
+            })
+            .catch((error) => {
+              console.error(
+                "Boat/getMyNautiqueInfo: Cannot parse server response",
+                error
+              );
+              reject([error]);
+            });
+        })
+        .catch((error) => {
+          console.error("Boat/getMyNautiqueInfo", error);
+          reject([error]);
+        });
+    });
+  }
 }

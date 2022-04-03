@@ -52,7 +52,7 @@
     </modal-body>
     <modal-footer class="block-footer">
       <div class="row">
-        <div class="col-6 text-start">
+        <div class="col-4 text-start">
           <button
             type="button"
             class="btn btn-outline-danger"
@@ -62,7 +62,7 @@
             Delete
           </button>
         </div>
-        <div class="col-6 text-end">
+        <div class="col-8 text-end">
           <button
             type="submit"
             class="btn btn-outline-info me-2"
