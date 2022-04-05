@@ -22,6 +22,15 @@
         exit;
     }
 
+    // check that myNautique is configured
+    if(!$configuration->mynautique_enabled){
+        $status = array();
+        $status['ok'] = TRUE;
+        $status['message'] = 'myNautique not configured';
+        echo json_encode($status);
+        return;
+    }
+
     switch($_GET['action']){
         case 'get_boat_info':
             $response = get_boat_info($configuration, $api_info);
@@ -114,6 +123,8 @@
         curl_setopt( $call, CURLOPT_RETURNTRANSFER, true );
         $result_json = curl_exec($call);
         curl_close($call);
+
+        error_log($result_json);
 
         $result = json_decode($result_json);
         $token = [

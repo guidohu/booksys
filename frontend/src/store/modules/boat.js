@@ -223,6 +223,11 @@ const mutations = {
     state.maintenanceLog = value;
   },
   setMyNautiqueInfo(state, value) {
+    if(value == null){
+      console.log("myNautique not available");
+      return;
+    }
+    
     state.myNautique.token = value.token;
     state.myNautique.tokenExpiry = value.token_expiry;
     state.myNautique.boat.fuelLevel = value.boat.telemetry.FUEL_LEVEL_LINC;
