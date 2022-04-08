@@ -70,7 +70,7 @@ const getters = {
   },
   getMyNautiqueBoatId: (state) => {
     return state.myNautiqueBoatId;
-  }
+  },
 };
 
 const actions = {

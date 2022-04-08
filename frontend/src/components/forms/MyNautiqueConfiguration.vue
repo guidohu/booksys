@@ -3,8 +3,9 @@
     <div class="row">
       <div class="col-12">
         <p>
-          This application is compatible with myNautique, which allows to automatically
-          get data from your Nautique boat via myNautique App API to simplify many processes in this App.
+          This application is compatible with myNautique, which allows to
+          automatically get data from your Nautique boat via myNautique App API
+          to simplify many processes in this App.
         </p>
       </div>
     </div>
@@ -63,8 +64,8 @@ export default {
         enabled: false,
         user: "",
         password: "",
-      }
-    }
+      },
+    };
   },
   methods: {
     save: function () {
@@ -72,10 +73,10 @@ export default {
     },
     update: function () {
       this.$emit("update:settings", this.form);
-    }
+    },
   },
   created() {
     this.form = this.$props.settingsData;
-  }
-}
+  },
+};
 </script>

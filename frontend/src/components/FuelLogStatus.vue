@@ -4,22 +4,38 @@
     <div v-if="getMyNautiqueEnabled" class="row">
       <label class="col-3 col-form-label">Level</label>
       <div class="col-9">
-        <div  class="text-end">
-          {{ getMyNautiqueFuelLevel }}% {{ " " }} ( {{ parseInt(getMyNautiqueFuelCapacity * getMyNautiqueFuelLevel / 100) }} L)
+        <div class="text-end">
+          {{ getMyNautiqueFuelLevel }}% {{ " " }} (
+          {{
+            parseInt((getMyNautiqueFuelCapacity * getMyNautiqueFuelLevel) / 100)
+          }}
+          L)
         </div>
-        <div class="progress" style="height: 3px;">
-          <div class="progress-bar bg-info" role="progressbar" :style="fuelLevelStyle" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+        <div class="progress" style="height: 3px">
+          <div
+            class="progress-bar bg-info"
+            role="progressbar"
+            :style="fuelLevelStyle"
+            aria-valuenow="25"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          ></div>
         </div>
       </div>
     </div>
     <div class="row">
       <label class="col-3 col-form-label">Consumption</label>
       <div class="col-9">
-        <div class="text-end">
-          {{ getAvgFuelConsumption }} {{ " " }} L/hour
-        </div>
-        <div class="progress" style="height: 3px;">
-          <div class="progress-bar bg-info" role="progressbar" :style="fuelConsumptionStyle" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+        <div class="text-end">{{ getAvgFuelConsumption }} {{ " " }} L/hour</div>
+        <div class="progress" style="height: 3px">
+          <div
+            class="progress-bar bg-info"
+            role="progressbar"
+            :style="fuelConsumptionStyle"
+            aria-valuenow="25"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          ></div>
         </div>
       </div>
     </div>
@@ -29,8 +45,15 @@
         <div class="text-end">
           {{ timeTillEmpty }}
         </div>
-        <div class="progress" style="height: 3px;">
-          <div class="progress-bar bg-info" role="progressbar" :style="fuelLevelStyle" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+        <div class="progress" style="height: 3px">
+          <div
+            class="progress-bar bg-info"
+            role="progressbar"
+            :style="fuelLevelStyle"
+            aria-valuenow="25"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          ></div>
         </div>
       </div>
     </div>
@@ -57,29 +80,43 @@ export default {
   },
   computed: {
     ...mapGetters("login", ["userInfo"]),
-    ...mapGetters("configuration", ["getCurrency", "getEngineHourFormat", "getMyNautiqueEnabled", "getMyNautiqueBoatId"]),
-    ...mapGetters("boat", ["getAvgFuelConsumption", "getMyNautiqueFuelLevel", "getMyNautiqueFuelCapacity"]),
-    fuelLevelStyle: function() {
+    ...mapGetters("configuration", [
+      "getCurrency",
+      "getEngineHourFormat",
+      "getMyNautiqueEnabled",
+      "getMyNautiqueBoatId",
+    ]),
+    ...mapGetters("boat", [
+      "getAvgFuelConsumption",
+      "getMyNautiqueFuelLevel",
+      "getMyNautiqueFuelCapacity",
+    ]),
+    fuelLevelStyle: function () {
       return "width: " + this.getMyNautiqueFuelLevel + "%";
     },
-    fuelConsumptionStyle: function() {
-      if(this.getAvgFuelConsumption == null){
+    fuelConsumptionStyle: function () {
+      if (this.getAvgFuelConsumption == null) {
         return "width: 0%";
       }
-      return "width: " + min([this.getAvgFuelConsumption / 35 * 100, 100]) + "%";
+      return (
+        "width: " + min([(this.getAvgFuelConsumption / 35) * 100, 100]) + "%"
+      );
     },
-    timeTillEmpty: function() {
-      if(this.getAvgFuelConsumption == null){
+    timeTillEmpty: function () {
+      if (this.getAvgFuelConsumption == null) {
         return "N/A hours";
       }
-      if(this.getMyNautiqueEnabled == true){
-        const hours = this.getMyNautiqueFuelLevel / 100 * this.getMyNautiqueFuelCapacity / this.getAvgFuelConsumption;
+      if (this.getMyNautiqueEnabled == true) {
+        const hours =
+          ((this.getMyNautiqueFuelLevel / 100) *
+            this.getMyNautiqueFuelCapacity) /
+          this.getAvgFuelConsumption;
         const hoursFloor = parseInt(hours);
         const minutes = parseInt((hours - hoursFloor) * 60);
         return sprintf("up to %d h %02d min left", hoursFloor, minutes);
       }
       return "N/A hours";
-    }
+    },
   },
   methods: {
     add: function () {
@@ -103,20 +140,20 @@ export default {
       };
       this.errors = [];
     },
-    ...mapActions("boat", ["addFuelEntry","queryMyNautiqueInfo"]),
+    ...mapActions("boat", ["addFuelEntry", "queryMyNautiqueInfo"]),
     ...mapActions("configuration", ["queryConfiguration"]),
   },
   watch: {
-    "getMyNautiqueEnabled": function(enabled) {
-      if(enabled){
+    getMyNautiqueEnabled: function (enabled) {
+      if (enabled) {
         this.queryMyNautiqueInfo(this.getMyNautiqueBoatId)
-        .then(() => {
-          console.log("queried my nautique info");
-          // this.enabled = true;
-        })
-        .catch((error) => {
-          this.errors = [error];
-        })
+          .then(() => {
+            console.log("queried my nautique info");
+            // this.enabled = true;
+          })
+          .catch((error) => {
+            this.errors = [error];
+          });
       }
       console.log("myNautiqueEnabled value changed to", enabled);
     },
@@ -127,7 +164,7 @@ export default {
   },
   created() {
     this.queryConfiguration();
-    if(this.getMyNautiqueEnabled && this.getMyNautiqueBoatId){
+    if (this.getMyNautiqueEnabled && this.getMyNautiqueBoatId) {
       this.queryMyNautiqueInfo(this.getMyNautiqueBoatId);
     }
   },

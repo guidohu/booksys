@@ -19,7 +19,7 @@
             :src="getLocationMap"
             frameborder="0"
             style="
-              {
+               {
                 border: 0;
               }
             "
@@ -49,7 +49,7 @@ export default {
   name: "WSInfo",
   components: {
     CardModule,
-    SubpageContainer
+    SubpageContainer,
   },
   computed: {
     ...mapGetters("configuration", ["getLocationAddress", "getLocationMap"]),
@@ -82,7 +82,6 @@ export default {
 </script>
 
 <style scoped>
-
 .card-height {
   max-height: 500px;
   min-height: 500px;

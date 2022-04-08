@@ -18,6 +18,7 @@ if (process.env.NODE_ENV === "production") {
   console.log = function () {};
 }
 
+// Setup App
 const app = createApp(App);
 app.use(router);
 app.use(store);

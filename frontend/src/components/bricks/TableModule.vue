@@ -8,9 +8,7 @@
         role="columnheader"
         :class="getColumnClass(c)"
       >
-        <div
-          @click="sortByCol(c)"
-        >
+        <div @click="sortByCol(c)">
           {{ c.label }}
           <!-- select the right sorting icon -->
           <i

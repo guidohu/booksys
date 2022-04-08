@@ -1,6 +1,6 @@
 <template>
   <div class="container text-left">
-    <fuel-refuel-modal v-model:visible="visibleRefuelModal"/>
+    <fuel-refuel-modal v-model:visible="visibleRefuelModal" />
     <form-button
       type="button"
       btn-style="info"
@@ -38,7 +38,7 @@ export default {
     ...mapGetters("configuration", ["getCurrency", "getEngineHourFormat"]),
   },
   methods: {
-    showRefuelModal: function(){
+    showRefuelModal: function () {
       this.visibleRefuelModal = true;
     },
   },

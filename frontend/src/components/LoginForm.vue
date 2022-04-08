@@ -45,18 +45,10 @@
       <div class="card-footer">
         <div class="row">
           <div class="col-12">
-            <router-link
-              tag="button"
-              to="/password/reset"
-            >
+            <router-link tag="button" to="/password/reset">
               Forgot password
             </router-link>
-            <router-link
-              class="ms-2"
-              to="/signup"
-            >
-              Sign-Up
-            </router-link>
+            <router-link class="ms-2" to="/signup"> Sign-Up </router-link>
           </div>
         </div>
       </div>
@@ -94,7 +86,7 @@ export default {
 </script>
 
 <style scoped>
-  a {
-    color: rgb(39, 39, 39);
-  }
+a {
+  color: rgb(39, 39, 39);
+}
 </style>

@@ -126,8 +126,9 @@
           v-model="form.smtpPassword"
         />
         <div class="alert alert-info">
-          This application supports myNautique and can integrate information such as
-          fuel level or engine hours from myNautique directly into this app.
+          This application supports myNautique and can integrate information
+          such as fuel level or engine hours from myNautique directly into this
+          app.
         </div>
         <input-toggle
           id="my-nautique-toggle"

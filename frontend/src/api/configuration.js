@@ -214,7 +214,7 @@ export default class Configuration {
         request.smtp_password = params.smtp_password;
       }
       // only set the myNautique password in case it is given
-      if(params.mynautique_password != "hidden") {
+      if (params.mynautique_password != "hidden") {
         request.mynautique_password = params.mynautique_password;
       }
 
@@ -271,7 +271,10 @@ export default class Configuration {
           response
             .json()
             .then((data) => {
-              console.log("configuration/setMyNautiqueConfig response data:", data);
+              console.log(
+                "configuration/setMyNautiqueConfig response data:",
+                data
+              );
               if (data.ok) {
                 resolve();
               } else {

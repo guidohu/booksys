@@ -1,8 +1,5 @@
 <template>
-  <modal-container
-    name="refuelModal"
-    :visible="visible"
-  >
+  <modal-container name="refuelModal" :visible="visible">
     <modal-header
       :closable="true"
       title="Refuel"
@@ -65,7 +62,7 @@ import InputEngineHours from "@/components/forms/inputs/InputEngineHours";
 import InputCurrency from "@/components/forms/inputs/InputCurrency.vue";
 import InputFuel from "@/components/forms/inputs/InputFuel.vue";
 
-export default{
+export default {
   name: "FuelRefuelModal",
   components: {
     WarningBox,
@@ -86,7 +83,7 @@ export default{
         liters: 0,
       },
       engineHourDescription: null,
-    }
+    };
   },
   props: ["visible"],
   emits: ["saved", "update:visible"],
@@ -96,15 +93,15 @@ export default{
     ...mapGetters("configuration", ["getCurrency", "getEngineHourFormat"]),
   },
   watch: {
-    getMyNautiqueEngineHours: function(newValue) {
-      if(this.form.engineHours == null || this.form.engineHours == ""){
+    getMyNautiqueEngineHours: function (newValue) {
+      if (this.form.engineHours == null || this.form.engineHours == "") {
         this.form.engineHours = newValue;
         this.engineHourDescription = "prefilled by myNautique";
       }
-    }
+    },
   },
   methods: {
-    saveFuel: function(){
+    saveFuel: function () {
       const entry = {
         user_id: this.userInfo.id,
         engine_hours: this.form.engineHours,
@@ -118,13 +115,13 @@ export default{
         })
         .catch((errors) => (this.errors = errors));
     },
-    resetForm: function() {
+    resetForm: function () {
       this.form.engineHours = "";
       this.form.cost = "";
       this.form.liters = "";
     },
-    close: function(){
-      this.$emit('update:visible', false);
+    close: function () {
+      this.$emit("update:visible", false);
     },
     ...mapActions("boat", ["addFuelEntry"]),
     ...mapActions("configuration", ["queryConfiguration"]),
@@ -133,10 +130,13 @@ export default{
     this.queryConfiguration();
 
     // set engine hours if known through myNautique
-    if(this.getMyNautiqueEngineHours != null && this.getMyNautiqueEngineHours > 0){
+    if (
+      this.getMyNautiqueEngineHours != null &&
+      this.getMyNautiqueEngineHours > 0
+    ) {
       this.form.engineHours = this.getMyNautiqueEngineHours;
       this.engineHourDescription = "prefilled by myNautique";
     }
   },
-}
+};
 </script>

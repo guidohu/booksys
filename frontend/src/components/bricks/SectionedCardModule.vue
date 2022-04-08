@@ -1,7 +1,7 @@
 <template>
   <div class="card">
     <div v-if="title && !$slots.header" class="card-header px-2">
-      <h5 class="card-title pt-1"> {{ title }}</h5>
+      <h5 class="card-title pt-1">{{ title }}</h5>
     </div>
     <div v-if="$slots.header" class="card-header px-2">
       <slot name="header"></slot>
@@ -18,16 +18,16 @@
 <script>
 export default {
   name: "SectionedCardModule",
-  props: [ "scrollable", "title" ],
+  props: ["scrollable", "title"],
   methods: {
-    getBodyClass: function() {
+    getBodyClass: function () {
       let style = "card-body margin padding";
-      if(this.scrollable) {
+      if (this.scrollable) {
         style += " scrollable";
       }
       return style;
-    }
-  }
+    },
+  },
 };
 </script>
 
