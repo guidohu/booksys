@@ -87,7 +87,6 @@
 <script>
 import { defineAsyncComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
-import { BooksysBrowser } from "@/libs/browser";
 import ConditionInfoCard from "@/components/ConditionInfoCard";
 import SessionDayCard from "@/components/SessionDayCard";
 import SessionDetailsCard from "@/components/SessionDetailsCard";
@@ -126,12 +125,6 @@ export default {
     SubpageContainer,
   },
   computed: {
-    isMobile: function () {
-      return BooksysBrowser.isMobile();
-    },
-    isDesktop: function () {
-      return !BooksysBrowser.isMobile();
-    },
     ...mapGetters("configuration", ["getTimezone"]),
     ...mapGetters("sessions", ["getSessions"]),
     sunrise: function () {

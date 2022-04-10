@@ -20,7 +20,7 @@
     </ul>
 
     <div class="tab-content">
-      <div :class="'tab-pane ' + tabClass + ' active'" id="upcoming-sessions">
+      <div class="tab-pane tab-limited-height active" id="upcoming-sessions">
         <user-sessions-table
           v-if="upcomingSessions.length > 0"
           :user-sessions="upcomingSessions"
@@ -54,7 +54,6 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import { BooksysBrowser } from "@/libs/browser";
 import UserSessionsTable from "@/components/UserSessionsTable.vue";
 
 export default {
@@ -75,13 +74,6 @@ export default {
         return this.userSchedule.sessions_old;
       }
       return [];
-    },
-    tabClass: function () {
-      if (!BooksysBrowser.isMobile()) {
-        return "tab-limited-height";
-      } else {
-        return "";
-      }
     },
   },
   methods: {
@@ -105,10 +97,18 @@ export default {
 </script>
 
 <style scoped>
+
 .tab-limited-height {
   max-height: 400px;
   height: 400px;
   overflow-y: scroll;
+}
+
+@media (max-width: 992px) {
+  .tab-limited-height {
+    height: 100%;
+    overflow-y: hide;
+  }
 }
 
 .nav-link {

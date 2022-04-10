@@ -13,7 +13,6 @@
 </template>
 
 <script>
-import { BooksysBrowser } from "@/libs/browser";
 import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
 import CardModule from "@/components/bricks/CardModule.vue";
 import UserSessionTabs from "@/components/UserSessionTabs.vue";
@@ -24,11 +23,6 @@ export default {
     SubpageContainer,
     UserSessionTabs,
     CardModule,
-  },
-  computed: {
-    isDesktop: function () {
-      return !BooksysBrowser.isMobile();
-    },
   },
 };
 </script>

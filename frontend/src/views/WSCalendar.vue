@@ -37,7 +37,6 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import { BooksysBrowser } from "@/libs/browser";
 import ConditionInfoCard from "@/components/ConditionInfoCard";
 import SessionMonthCard from "@/components/SessionMonthCard";
 import SessionsOverview from "@/components/SessionsOverview";
@@ -74,12 +73,6 @@ export default {
     };
   },
   computed: {
-    isMobile: function () {
-      return BooksysBrowser.isMobile();
-    },
-    isDesktop: function () {
-      return !BooksysBrowser.isMobile();
-    },
     ...mapGetters("configuration", ["getTimezone"]),
     ...mapGetters("sessions", ["getSessionsCalendar"]),
   },
