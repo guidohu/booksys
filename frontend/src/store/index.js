@@ -1,10 +1,13 @@
 import { createStore } from "vuex";
 import loginStatus from "@/store/modules/loginStatus";
+import screenSize from "@/store/modules/screenSize";
 
 export const store = createStore({
   modules: {
-    // will be added dynamically in depending on the route in router
+    // Modules will be added dynamically depending on the route
+    // in router. Only a few default modules are defined here.
     loginStatus: loginStatus,
+    screenSize: screenSize,
   },
 });
 

@@ -123,7 +123,7 @@ export default {
       return dayjs(isoTime).format("DD");
     },
     isMobile: function () {
-      return BooksysBrowser.isMobile();
+      return BooksysBrowser.isMobileResponsive();
     },
     getCalendarDayBoxClass: function (daySessionData) {
       const boxMonth = dayjs(daySessionData.window_start)

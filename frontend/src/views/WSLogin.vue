@@ -49,9 +49,6 @@ export default {
     };
   },
   computed: {
-    isMobile: function () {
-      return BooksysBrowser.isMobile();
-    },
     ...mapGetters("login", ["username"]),
     ...mapGetters("configuration", ["getLogoFile"]),
   },

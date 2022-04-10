@@ -14,9 +14,8 @@
 
 <script>
 import { defineAsyncComponent } from "vue";
-import { BooksysBrowser } from "@/libs/browser";
 import { getBackendStatus } from "@/api/backend";
-import { mapGetters } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 
 // Lazy imports
 const AlertMessage = defineAsyncComponent(() =>
@@ -37,9 +36,6 @@ export default {
     };
   },
   computed: {
-    isMobile: function () {
-      return BooksysBrowser.isMobile();
-    },
     ...mapGetters("loginStatus", ["isLoggedIn"]),
   },
   watch: {
@@ -57,13 +53,11 @@ export default {
       }
     },
   },
-  beforeCreate() {
-    // set mobile view and style
-    if (BooksysBrowser.isMobile()) {
-      BooksysBrowser.setViewportMobile();
-      BooksysBrowser.setManifest();
-      BooksysBrowser.setMetaMobile();
-    }
+  methods: {
+    ...mapActions("screenSize", ["initScreenSize"]),
+  },
+  created() {
+    this.initScreenSize();
   },
   mounted() {
     // short pulse check on the

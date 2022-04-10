@@ -6,6 +6,12 @@ module.exports = {
   devServer: {
     proxy: "http://localhost:80",
   },
+  pages: {
+    index: {
+      title: 'Wake and Surf',
+      entry: 'src/main.js',
+    }
+  },
   configureWebpack: {
     mode: "production",
     optimization: {
@@ -71,7 +77,7 @@ module.exports = {
     },
     themeColor: "#1accda",
     msTileColor: "#1accda",
-    appleMobileWebAppCapable: "no",
+    appleMobileWebAppCapable: "yes",
     appleMobileWebAppStatusBarStyle: "black",
     iconPaths: {
       maskicon: null,
