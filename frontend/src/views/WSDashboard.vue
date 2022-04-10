@@ -10,27 +10,29 @@
     >
       <database-update-modal />
     </div>
-    <div v-if="isDesktop" class="display">
-      <header v-if="userInfo != null" class="welcome">
-        Welcome,
-        <router-link to="/account" class="header-desktop">
-          {{ userInfo.first_name }} {{ userInfo.last_name }}
-        </router-link>
-      </header>
-      <dashboard-admin
-        v-if="role && role == 'admin' && getSessions != null"
-        :session-data="getSessions"
-      />
-      <dashboard-member
-        v-if="role && role == 'member' && getSessions != null"
-        :session-data="getSessions"
-      />
-      <dashboard-guest
-        v-if="role && role == 'guest' && getSessions != null"
-        :session-data="getSessions"
-      />
-    </div>
-    <div v-else>
+    <show-for-desktop>
+      <div class="display">
+        <header v-if="userInfo != null" class="welcome">
+          Welcome,
+          <router-link to="/account" class="header-desktop">
+            {{ userInfo.first_name }} {{ userInfo.last_name }}
+          </router-link>
+        </header>
+        <dashboard-admin
+          v-if="role && role == 'admin' && getSessions != null"
+          :session-data="getSessions"
+        />
+        <dashboard-member
+          v-if="role && role == 'member' && getSessions != null"
+          :session-data="getSessions"
+        />
+        <dashboard-guest
+          v-if="role && role == 'guest' && getSessions != null"
+          :session-data="getSessions"
+        />
+      </div>
+    </show-for-desktop>
+    <show-for-mobile>
       <dashboard-admin-mobile
         v-if="role && role == 'admin' && getSessions != null"
         :session-data="getSessions"
@@ -43,14 +45,15 @@
         v-if="role && role == 'guest' && getSessions != null"
         :session-data="getSessions"
       />
-    </div>
+    </show-for-mobile>
   </div>
 </template>
 
 <script>
 import { defineAsyncComponent } from "vue";
 import { mapGetters, mapActions } from "vuex";
-import { BooksysBrowser } from "@/libs/browser";
+import ShowForMobile from "@/components/bricks/ShowForMobile.vue";
+import ShowForDesktop from "@/components/bricks/ShowForDesktop.vue";
 import * as dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
@@ -104,18 +107,14 @@ export default {
     DashboardMemberMobile,
     DashboardGuestMobile,
     DatabaseUpdateModal,
+    ShowForDesktop,
+    ShowForMobile,
   },
   computed: {
     ...mapGetters("login", ["userInfo", "role"]),
     ...mapGetters("loginStatus", ["isLoggedIn"]),
     ...mapGetters("sessions", ["getSessions"]),
     ...mapGetters("configuration", ["getDbUpdateStatus"]),
-    isMobile: function () {
-      return BooksysBrowser.isMobile();
-    },
-    isDesktop: function () {
-      return !BooksysBrowser.isMobile();
-    },
   },
   watch: {
     role: function () {
@@ -127,7 +126,7 @@ export default {
     ...mapActions("sessions", ["querySessions"]),
     ...mapActions("configuration", ["queryDbUpdateStatus"]),
     getTimeZone: function () {
-      return "Europe/Berlin";
+      return "Europe/Zurich";
     },
     dbUpdateCheck() {
       if (this.role == "admin") {
@@ -145,8 +144,9 @@ export default {
     // load user info into store
     this.getUserInfo()
       .then(() => {
-        console.log("got user info");
+        console.log("Check for potential db update.");
         this.dbUpdateCheck();
+        console.log("Get session info.");
         this.getSessionInfo();
       })
       .catch((errors) => {
