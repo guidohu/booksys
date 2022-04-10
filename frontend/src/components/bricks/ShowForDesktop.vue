@@ -5,31 +5,22 @@
 </template>
 
 <script>
+import { BooksysBrowser } from "@/libs/browser";
 export default {
   name: "ShowForDesktop",
   props: ["minWidth"],
   data() {
     return {
-      screenWidth: 0,
       isDesktop: false,
-      defaultMinWidth: 992,
     };
   },
   methods: {
     calculateDesktop: function () {
-      const screenWidth = window.innerWidth;
-      this.screenWidth = screenWidth;
-
-      if (this.minWidth != null && this.screenWidth > this.minWidth) {
-        this.isDesktop = true;
-        return;
+      if (this.minWidth != null){
+        this.isDesktop = !BooksysBrowser.isMobileResponsive(this.minWidth);
+      }else{
+        this.isDesktop = !BooksysBrowser.isMobileResponsive();
       }
-      if (this.minWidth == null && this.screenWidth > this.defaultMinWidth) {
-        this.isDesktop = true;
-        return;
-      }
-      this.isDesktop = false;
-      return;
     },
   },
   mounted() {

@@ -19,34 +19,42 @@ export class BooksysBrowser {
     return check;
   }
 
+  static isMobileResponsive(maxWidth=992) {
+    const screenWidth = window.innerWidth;
+    if(maxWidth < screenWidth){
+      return false;
+    }
+    return true;
+  }
+
   static setViewportMobile() {
     const metaTag = document.createElement("meta");
-    metaTag.name = "viewport";
-    metaTag.content = "width=device-width, user-scalable=no, initial-scale=1.0";
-    document.getElementsByTagName("head")[0].appendChild(metaTag);
+    // metaTag.name = "viewport";
+    // metaTag.content = "width=device-width, user-scalable=no, initial-scale=1.0";
+    // document.getElementsByTagName("head")[0].appendChild(metaTag);
   }
 
   static setManifest() {
-    const linkTag = document.createElement("link");
-    linkTag.rel = "manifest";
-    linkTag.href = "manifest.json";
-    document.getElementsByTagName("head")[0].appendChild(linkTag);
+    // const linkTag = document.createElement("link");
+    // linkTag.rel = "manifest";
+    // linkTag.href = "manifest.json";
+    // document.getElementsByTagName("head")[0].appendChild(linkTag);
   }
 
   static setMetaMobile() {
     let metaTag = document.createElement("meta");
-    metaTag.name = "mobile-web-app-capable";
-    metaTag.content = "yes";
-    document.getElementsByTagName("head")[0].appendChild(metaTag);
+    // metaTag.name = "mobile-web-app-capable";
+    // metaTag.content = "yes";
+    // document.getElementsByTagName("head")[0].appendChild(metaTag);
 
     metaTag = document.createElement("meta");
-    metaTag.name = "apple-mobile-web-app-capable";
-    metaTag.content = "yes";
-    document.getElementsByTagName("head")[0].appendChild(metaTag);
+    // metaTag.name = "apple-mobile-web-app-capable";
+    // metaTag.content = "yes";
+    // document.getElementsByTagName("head")[0].appendChild(metaTag);
 
     metaTag = document.createElement("meta");
-    metaTag.name = "apple-mobile-web-app-status-bar-style";
-    metaTag.content = "black";
-    document.getElementsByTagName("head")[0].appendChild(metaTag);
+    // metaTag.name = "apple-mobile-web-app-status-bar-style";
+    // metaTag.content = "black";
+    // document.getElementsByTagName("head")[0].appendChild(metaTag);
   }
 }

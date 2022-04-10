@@ -7,11 +7,15 @@
       name="Description"
       content="An app to manage everything in your boat community. From scheduling sessions, tracking usage and finances."
     />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!-- <meta name="viewport" content="width=device-width,initial-scale=1.0" /> -->
+    <!-- <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" /> -->
     <base href="/" />
+    <link rel="manifest" href="/manifest.json" />
     <link rel="icon" href="/img/favicon.png" />
     <link rel="apple-touch-icon" href="/img/apple-touch-icon.png" />
-    <title>Booking System</title>
+    <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
   <body>
     <noscript>
@@ -21,8 +25,9 @@
         continue.</strong
       >
     </noscript>
+    <!-- application itself -->
     <div id="app"></div>
-    <!-- built files will be auto injected -->
+    <!-- container for dialogs -->
     <div id="dialog"></div>
   </body>
 </html>
