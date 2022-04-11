@@ -1,4 +1,5 @@
 import User from "@/api/user";
+import values from "lodash/values";
 
 const state = () => ({
   heatHistory: [],
@@ -266,17 +267,17 @@ const mutations = {
     console.log("Store: setUserList to", users);
     state.userList = users;
   },
-  setUserListDetailed(state, users) {
-    console.log("Store: setUserListDetailed to", users);
-    state.userListDetailed = users;
+  setUserListDetailed(state, data) {
+    console.log("Store: setUserListDetailed to", data);
+    state.userListDetailed = values(data.users);
   },
   setUserGroups(state, groups) {
     console.log("Store: setUserGroups to", groups);
-    state.userGroups = groups;
+    state.userGroups = values(groups);
   },
   setUserRoles(state, roles) {
     console.log("Store: setUserRoles to", roles);
-    state.userRoles = roles;
+    state.userRoles = values(roles);
   },
 };
 

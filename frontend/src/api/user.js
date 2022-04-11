@@ -1,5 +1,6 @@
 import values from "lodash/values";
 import Login from "./login";
+import Request from "@/api/common/request.js";
 import { UserPointer } from "@/dataTypes/user";
 
 export default class User {
@@ -204,42 +205,8 @@ export default class User {
   }
 
   static getUserSchedule() {
-    return new Promise((resolve, reject) => {
-      fetch("/api/user.php?action=get_my_user_sessions", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              if (data == null) {
-                console.error(
-                  "User/getUserSchedule: Cannot parse server response",
-                  data
-                );
-                reject(["Cannot parse server response"]);
-              } else if (data.sessions == null || data.sessions_old == null) {
-                console.log("Cannot get user's sessions:", response);
-                reject(["Cannot get user's sessions"]);
-              } else {
-                console.log("User's sessions retrieved");
-                resolve(data);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "User/getUserSchedule: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("User/getUserSchedule", error);
-          reject([error]);
-        });
-    });
+    console.debug("User/getUserSchedule called");
+    return Request.getRequest('/api/user.php?action=get_my_user_sessions');
   }
 
   static cancelSession(sessionId) {
@@ -315,46 +282,8 @@ export default class User {
   }
 
   static getDetailedUserList() {
-    return new Promise((resolve, reject) => {
-      fetch("/api/user.php?action=get_all_users_detailed", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              if (data == null) {
-                console.error(
-                  "User/getDetailedUserList: Cannot parse server response",
-                  data
-                );
-                reject(["Cannot parse server response"]);
-              } else if (data.data.users == null) {
-                console.log(
-                  "User/getDetailedUserList: Cannot get user list:",
-                  response
-                );
-                reject(["Cannot get user list"]);
-              } else {
-                console.log("User/getDetailedUserList: User list retrieved");
-                const usersResponse = values(data.data.users);
-                resolve(usersResponse);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "User/getDetailedUserList: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("User/getDetailedUserList:", error);
-          reject([error]);
-        });
-    });
+    console.debug("User/getDetailedUserList called");
+    return Request.getRequest('/api/user.php?action=get_all_users_detailed');
   }
 
   static lockUser(userId) {
@@ -525,77 +454,13 @@ export default class User {
   }
 
   static getUserGroups() {
-    return new Promise((resolve, reject) => {
-      fetch("/api/user.php?action=get_user_groups", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              if (data == null) {
-                console.error(
-                  "User/getUserGroups: Cannot parse server response",
-                  data
-                );
-                reject(["Cannot parse server response"]);
-              } else {
-                console.log("User/getUserGroups: User group list retrieved");
-                const usersResponse = values(data.data);
-                resolve(usersResponse);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "User/getUserGroups: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("User/getUserGroups:", error);
-          reject([error]);
-        });
-    });
+    console.debug("User/getUserGroups called");
+    return Request.getRequest("/api/user.php?action=get_user_groups");
   }
 
   static getUserRoles() {
-    return new Promise((resolve, reject) => {
-      fetch("/api/user.php?action=get_user_roles", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              if (data == null) {
-                console.error(
-                  "User/getUserRoles: Cannot parse server response",
-                  data
-                );
-                reject(["Cannot parse server response"]);
-              } else {
-                console.log("User/getUserRoles: User role list retrieved");
-                const usersResponse = values(data.data);
-                resolve(usersResponse);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "User/getUserRoles: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("User/getUserRoles:", error);
-          reject([error]);
-        });
-    });
+    console.debug("User/getUserRoles called");
+    return Request.getRequest("/api/user.php?action=get_user_roles");
   }
 
   static saveUserGroup(userGroup) {
