@@ -1,42 +1,12 @@
+import Request from "@/api/common/request.js";
+
 export default class Configuration {
   /**
    * Returns the recaptcha key.
    */
   static getRecaptchaKey() {
     console.log("configuration/getRecaptchaKey called");
-    return new Promise((resolve, reject) => {
-      fetch("/api/configuration.php?action=get_recaptcha_key", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("configuration/getRecaptchaKey response data:", data);
-              if (data.ok && data.data != null) {
-                resolve(data.data.key);
-              } else {
-                console.log(
-                  "configuration/getRecaptchaKey: Cannot retrieve recaptcha key, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "configuration/getRecaptchaKey: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("configuration/getRecaptchaKey", error);
-          reject([error]);
-        });
-    });
+    return Request.getRequest('/api/configuration.php?action=get_recaptcha_key');
   }
 
   /**
@@ -44,76 +14,12 @@ export default class Configuration {
    */
   static getLogoFile() {
     console.log("configuration/getLogoFile called");
-    return new Promise((resolve, reject) => {
-      fetch("/api/configuration.php?action=get_logo_file", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("configuration/getLogoFile response data:", data);
-              if (data.ok && data.data != null) {
-                resolve(data.data.uri);
-              } else {
-                console.log(
-                  "configuration/getLogoFile: Cannot retrieve logo file, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "configuration/getLogoFile: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("configuration/getLogoFile", error);
-          reject([error]);
-        });
-    });
+    return Request.getRequest('/api/configuration.php?action=get_logo_file');
   }
 
   static getDbConfig() {
     console.log("configuration/getDbConfig called");
-    return new Promise((resolve, reject) => {
-      fetch("/api/configuration.php?action=get_db_config", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("configuration/getDbConfig response data:", data);
-              if (data.ok) {
-                resolve(data.data);
-              } else {
-                console.log(
-                  "configuration/getDbConfig: Cannot retrieve db config, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "configuration/getDbConfig: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("configuration/getDbConfig", error);
-          reject([error]);
-        });
-    });
+    return Request.getRequest('/api/configuration.php?action=get_db_config');
   }
 
   static setDbConfig(config) {

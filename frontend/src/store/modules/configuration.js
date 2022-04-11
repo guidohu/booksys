@@ -116,9 +116,9 @@ const actions = {
   queryRecaptchaKey({ commit }) {
     return new Promise((resolve, reject) => {
       Configuration.getRecaptchaKey()
-        .then((key) => {
+        .then((response) => {
           // load latest configuration
-          commit("setRecaptchaKey", key);
+          commit("setRecaptchaKey", response);
           resolve();
         })
         .catch((errors) => {
@@ -195,8 +195,8 @@ const mutations = {
     state.CONFIG_LOADED = true;
     console.log("configuration set to", value);
   },
-  setRecaptchaKey(state, value) {
-    state.recaptchaKey = value;
+  setRecaptchaKey(state, response) {
+    state.recaptchaKey = response.key;
   },
   setLogoFile(state, value) {
     state.logoFile = value;

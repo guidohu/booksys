@@ -1,39 +1,9 @@
+import Request from "@/api/common/request.js";
+
 export default class Boat {
   static getEngineHourLog() {
     console.log("api/getEngineHourLog called");
-    return new Promise((resolve, reject) => {
-      fetch("/api/boat.php?action=get_engine_hours_log", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("Boat/getEngineHourLog response data:", data);
-              if (data.ok) {
-                resolve(data.data);
-              } else {
-                console.log(
-                  "Boat/getEngineHourLog: Cannot retrieve engine hour logs, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Boat/getEngineHourLog: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Boat/getEngineHourLog", error);
-          reject([error]);
-        });
-    });
+    return Request.getRequest('/api/boat.php?action=get_engine_hours_log');
   }
 
   static getEngineHourLogLatest() {
@@ -173,39 +143,7 @@ export default class Boat {
 
   static getFuelLog() {
     console.log("api/getFuelLog called");
-    return new Promise((resolve, reject) => {
-      fetch("/api/boat.php?action=get_fuel_log", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("Boat/getFuelLog response data:", data);
-              if (data.ok) {
-                resolve(data.data);
-              } else {
-                console.log(
-                  "Boat/getFuelLog: Cannot retrieve engine hour logs, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Boat/getFuelLog: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Boat/getFuelLog", error);
-          reject([error]);
-        });
-    });
+    return Request.getRequest('/api/boat.php?action=get_fuel_log');
   }
 
   /**
@@ -308,39 +246,7 @@ export default class Boat {
 
   static getMaintenanceLog() {
     console.log("api/getMaintenanceLog called");
-    return new Promise((resolve, reject) => {
-      fetch("/api/boat.php?action=get_maintenance_log", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("Boat/getMaintenanceLog response data:", data);
-              if (data.ok) {
-                resolve(data.data);
-              } else {
-                console.error(
-                  "Boat/getMaintenanceLog: Cannot retrieve maintenance logs, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Boat/getMaintenanceLog: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Boat/getMaintenanceLog", error);
-          reject([error]);
-        });
-    });
+    return Request.getRequest('/api/boat.php?action=get_maintenance_log');
   }
 
   /**

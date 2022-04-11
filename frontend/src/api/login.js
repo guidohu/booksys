@@ -1,4 +1,5 @@
 import { sha256 } from "js-sha256";
+import Request from "@/api/common/request.js";
 
 export default class Login {
   // perform backend login
@@ -69,71 +70,12 @@ export default class Login {
 
   static getMyUser() {
     console.log("Login/getMyUser called");
-    return new Promise((resolve, reject) => {
-      fetch("/api/user.php?action=get_my_user", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              if (data.ok) {
-                resolve(data.data);
-              } else {
-                console.error("Login/getMyUser: Cannot get user info", data);
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Login/getMyUser: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Login/getMyUser:", error);
-          reject([error]);
-        });
-    });
+    return Request.getRequest('/api/user.php?action=get_my_user');
   }
 
   static isLoggedIn() {
-    console.log("Login/isLoggedIn called");
-    return new Promise((resolve, reject) => {
-      fetch("/api/login.php?action=isLoggedIn", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              if (data.ok) {
-                resolve(data.data.loggedIn);
-              } else {
-                console.error(
-                  "Login/isLoggedIn: Cannot get login status",
-                  data
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Login/isLoggedIn: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Login/isLoggedIn:", error);
-          reject([error]);
-        });
-    });
+    console.log("/api/login.php?action=isLoggedIn");
+    return Request.getRequest('/api/user.php?action=get_my_user');
   }
 
   static async postData(data) {
@@ -141,14 +83,6 @@ export default class Login {
       method: "POST",
       cache: "no-cache",
       body: JSON.stringify(data),
-    });
-    return result.json();
-  }
-
-  static async getData(url) {
-    const result = await fetch(url, {
-      method: "GET",
-      cache: "no-cache",
     });
     return result.json();
   }

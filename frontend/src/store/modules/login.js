@@ -62,7 +62,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       ApiLogin.isLoggedIn()
         .then((status) => {
-          commit("setIsLoggedIn", status);
+          commit("setIsLoggedIn", status.loggedIn);
           dispatch("loginStatus/setIsLoggedIn", status, { root: true });
           if (status == true) {
             dispatch("getUserInfo");

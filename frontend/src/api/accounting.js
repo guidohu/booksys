@@ -1,42 +1,12 @@
+import Request from "@/api/common/request.js";
+
 export default class Accounting {
   /**
    * Returns all the years that we have data for.
    */
   static getYears() {
     console.log("accounting/getYears called");
-    return new Promise((resolve, reject) => {
-      fetch("/api/payment.php?action=get_years", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("accounting/getYears response data:", data);
-              if (data.ok) {
-                resolve(data.data);
-              } else {
-                console.log(
-                  "accounting/getYears: Cannot retrieve years, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "accounting/getYears: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("accounting/getYears", error);
-          reject([error]);
-        });
-    });
+    return Request.getRequest('/api/payment.php?action=get_years');
   }
 
   /**
@@ -44,39 +14,7 @@ export default class Accounting {
    */
   static getExpenseTypes() {
     console.log("accounting/getExpenseTypes called");
-    return new Promise((resolve, reject) => {
-      fetch("/api/payment.php?action=get_expenditure_types", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("accounting/getExpenseTypes response data:", data);
-              if (data.ok) {
-                resolve(data.data);
-              } else {
-                console.log(
-                  "accounting/getExpenseTypes: Cannot retrieve expense types, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "accounting/getExpenseTypes: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("accounting/getExpenseTypes", error);
-          reject([error]);
-        });
-    });
+    return Request.getRequest('/api/payment.php?action=get_expenditure_types');
   }
 
   /**
@@ -84,39 +22,7 @@ export default class Accounting {
    */
   static getIncomeTypes() {
     console.log("accounting/getIncomeTypes called");
-    return new Promise((resolve, reject) => {
-      fetch("/api/payment.php?action=get_payment_types", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("accounting/getIncomeTypes response data:", data);
-              if (data.ok) {
-                resolve(data.data);
-              } else {
-                console.log(
-                  "accounting/getIncomeTypes: Cannot retrieve income types, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "accounting/getIncomeTypes: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("accounting/getIncomeTypes", error);
-          reject([error]);
-        });
-    });
+    return Request.getRequest('/api/payment.php?action=get_payment_types');
   }
 
   /**
