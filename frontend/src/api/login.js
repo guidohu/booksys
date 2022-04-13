@@ -74,8 +74,8 @@ export default class Login {
   }
 
   static isLoggedIn() {
-    console.log("/api/login.php?action=isLoggedIn");
-    return Request.getRequest('/api/user.php?action=get_my_user');
+    console.log("Login/isLoggedIn called");
+    return Request.getRequest('/api/login.php?action=isLoggedIn');
   }
 
   static async postData(data) {

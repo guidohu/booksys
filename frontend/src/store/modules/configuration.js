@@ -129,10 +129,10 @@ const actions = {
   queryLogoFile({ commit }) {
     return new Promise((resolve, reject) => {
       Configuration.getLogoFile()
-        .then((uri) => {
+        .then((response) => {
           // load latest configuration
-          commit("setLogoFile", uri);
-          resolve(uri);
+          commit("setLogoFile", response.uri);
+          resolve(response.uri);
         })
         .catch((errors) => {
           reject(errors);

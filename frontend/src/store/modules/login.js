@@ -63,11 +63,11 @@ const actions = {
       ApiLogin.isLoggedIn()
         .then((status) => {
           commit("setIsLoggedIn", status.loggedIn);
-          dispatch("loginStatus/setIsLoggedIn", status, { root: true });
-          if (status == true) {
+          dispatch("loginStatus/setIsLoggedIn", status.loggedIn, { root: true });
+          if (status.loggedIn == true) {
             dispatch("getUserInfo");
           }
-          resolve(status);
+          resolve(status.loggedIn);
         })
         .catch((errors) => {
           reject(errors);
