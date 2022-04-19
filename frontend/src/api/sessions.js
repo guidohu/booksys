@@ -3,6 +3,7 @@ import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
 import * as dayjsAdvancedFormat from "dayjs/plugin/advancedFormat";
 import Session from "@/dataTypes/session";
+import Request from "@/api/common/request";
 
 export default class Sessions {
   /**
@@ -284,143 +285,44 @@ export default class Sessions {
   static createSession(sessionData) {
     dayjs.extend(dayjsAdvancedFormat);
 
-    return new Promise((resolve, reject) => {
-      // build request body
-      const session = {
-        title: sessionData.title,
-        comment: sessionData.description,
-        max_riders: sessionData.maximumRiders,
-        start: dayjs(sessionData.start).format("X"),
-        end: dayjs(sessionData.end).format("X"),
-        type: sessionData.type,
-      };
+    // build request body
+    const session = {
+      title: sessionData.title,
+      comment: sessionData.description,
+      max_riders: sessionData.maximumRiders,
+      start: dayjs(sessionData.start).format("X"),
+      end: dayjs(sessionData.end).format("X"),
+      type: sessionData.type,
+    };
 
-      fetch("/api/booking.php?action=add_session", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(session),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("create session response data:", data);
-              if (data.ok) {
-                resolve(data);
-              } else {
-                console.log(
-                  "Sessions/createSession: Cannot create session, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Sessions/createSession: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Sessions/createSession", error);
-          reject([error]);
-        });
-    });
+    return Request.postRequest("/api/booking.php?action=add_session", session);
   }
 
   static editSession(sessionData) {
     dayjs.extend(dayjsAdvancedFormat);
 
-    return new Promise((resolve, reject) => {
-      // build request body
-      const session = {
-        id: sessionData.id,
-        title: sessionData.title,
-        comment: sessionData.description,
-        max_riders: sessionData.maximumRiders,
-        start: dayjs(sessionData.start).format("X"),
-        end: dayjs(sessionData.end).format("X"),
-        type: sessionData.type,
-      };
+    // build request body
+    const session = {
+      id: sessionData.id,
+      title: sessionData.title,
+      comment: sessionData.description,
+      max_riders: sessionData.maximumRiders,
+      start: dayjs(sessionData.start).format("X"),
+      end: dayjs(sessionData.end).format("X"),
+      type: sessionData.type,
+    };
 
-      fetch("/api/booking.php?action=edit_session", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(session),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("edit session response data:", data);
-              if (data.ok) {
-                resolve(data);
-              } else {
-                console.log(
-                  "Sessions/editSession: Cannot create session, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Sessions/editSession: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Sessions/editSession", error);
-          reject([error]);
-        });
-    });
+    return Request.postRequest("/api/booking.php?action=edit_session", session);
   }
 
   static deleteSession(sessionData) {
     console.log("api/deleteSession called for session:", sessionData);
-    return new Promise((resolve, reject) => {
-      // build request body
-      const session = {
-        session_id: sessionData.id,
-      };
+    // build request body
+    const session = {
+      session_id: sessionData.id,
+    };
 
-      fetch("/api/booking.php?action=delete_session", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(session),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("Sessions/deleteSession response data:", data);
-              if (data.ok) {
-                resolve(data);
-              } else {
-                console.log(
-                  "Sessions/deleteSession: Cannot create session, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Sessions/deleteSession: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Sessions/deleteSession", error);
-          reject([error]);
-        });
-    });
+    return Request.postRequest("/api/booking.php?action=delete_session", session);
   }
 
   static addUsersToSession(sessionId, users) {
@@ -430,46 +332,13 @@ export default class Sessions {
       "and users",
       users
     );
-    return new Promise((resolve, reject) => {
-      // build request body
-      const requestBody = {
-        user_ids: users.map((u) => u.id),
-        session_id: sessionId,
-      };
+    // build request body
+    const requestBody = {
+      user_ids: users.map((u) => u.id),
+      session_id: sessionId,
+    };
 
-      fetch("/api/booking.php?action=add_users", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(requestBody),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("Sessions/addUsersToSession response data:", data);
-              if (data.ok) {
-                resolve(data);
-              } else {
-                console.log(
-                  "Sessions/addUsersToSession: Cannot add user to session, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Sessions/addUsersToSession: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Sessions/addUsersToSession", error);
-          reject([error]);
-        });
-    });
+    return Request.postRequest("/api/booking.php?action=add_users", requestBody);
   }
 
   /**
@@ -479,48 +348,12 @@ export default class Sessions {
    * @returns
    */
   static deleteUserFromSession(sessionId, user) {
-    return new Promise((resolve, reject) => {
-      // build request body
-      const requestBody = {
-        user_id: user.id,
-        session_id: sessionId,
-      };
+    // build request body
+    const requestBody = {
+      user_id: user.id,
+      session_id: sessionId,
+    };
 
-      fetch("/api/booking.php?action=delete_user", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(requestBody),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log(
-                "Sessions/deleteUserFromSession response data:",
-                data
-              );
-              if (data.ok) {
-                resolve(data);
-              } else {
-                console.log(
-                  "Sessions/deleteUserFromSession: Cannot delete user from session, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Sessions/deleteUserFromSession: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Sessions/deleteUserFromSession fetch:", error);
-          reject([error]);
-        });
-    });
+    return Request.postRequest("/api/booking.php?action=delete_user", requestBody);
   }
 }

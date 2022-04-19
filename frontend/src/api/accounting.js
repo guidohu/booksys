@@ -31,48 +31,15 @@ export default class Accounting {
    */
   static getStatistics(year) {
     console.log("accounting/getStatistics called with:", year);
-    return new Promise((resolve, reject) => {
-      if (year == null) {
-        year = "any";
-      }
+    if (year == null) {
+      year = "any";
+    }
 
-      const requestData = {
-        year: year,
-      };
+    const requestData = {
+      year: year,
+    };
 
-      fetch("/api/payment.php?action=get_statistics", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(requestData),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("accounting/getStatistics response data:", data);
-              if (data.ok) {
-                resolve(data.data);
-              } else {
-                console.log(
-                  "accounting/getStatistics: Cannot retrieve statistics, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "accounting/getStatistics: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("accounting/getStatistics", error);
-          reject([error]);
-        });
-    });
+    return Request.postRequest("/api/payment.php?action=get_statistics", requestData);
   }
 
   /**
@@ -82,48 +49,15 @@ export default class Accounting {
    */
   static getTransactions(year) {
     console.log("accounting/getTransactions called with:", year);
-    return new Promise((resolve, reject) => {
-      if (year == null) {
-        year = "any";
-      }
+    if (year == null) {
+      year = "any";
+    }
 
-      const requestData = {
-        year: year,
-      };
+    const requestData = {
+      year: year,
+    };
 
-      fetch("/api/payment.php?action=get_transactions", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(requestData),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("accounting/getTransactions response data:", data);
-              if (data.ok) {
-                resolve(data.data);
-              } else {
-                console.log(
-                  "accounting/getTransactions: Cannot retrieve transactions, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "accounting/getTransactions: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("accounting/getTransactions", error);
-          reject([error]);
-        });
-    });
+    return Request.postRequest("/api/payment.php?action=get_transactions", requestData);
   }
 
   /**
@@ -132,45 +66,11 @@ export default class Accounting {
    */
   static deleteTransaction(transaction) {
     console.log("accounting/deleteTransaction called with:", transaction);
-    return new Promise((resolve, reject) => {
-      const requestData = {
-        table_id: transaction.tbl,
-        row_id: transaction.id,
-      };
-
-      fetch("/api/payment.php?action=delete_transaction", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(requestData),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("accounting/deleteTransaction response data:", data);
-              if (data.ok) {
-                resolve();
-              } else {
-                console.log(
-                  "accounting/deleteTransaction: Cannot delete transactions, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "accounting/deleteTransaction: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("accounting/deleteTransaction", error);
-          reject([error]);
-        });
-    });
+    const requestData = {
+      table_id: transaction.tbl,
+      row_id: transaction.id,
+    };
+    return Request.postRequest("/api/payment.php?action=delete_transaction", requestData);
   }
 
   /**
@@ -186,48 +86,14 @@ export default class Accounting {
    */
   static addIncome(incomeTransaction) {
     console.log("accounting/addIncome called with:", incomeTransaction);
-    return new Promise((resolve, reject) => {
-      const requestData = {
-        amount: incomeTransaction.amount,
-        type_id: incomeTransaction.typeId,
-        date: incomeTransaction.date,
-        user_id: incomeTransaction.userId,
-        comment: incomeTransaction.comment,
-      };
-
-      fetch("/api/payment.php?action=add_payment", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(requestData),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("accounting/addIncome response data:", data);
-              if (data.ok) {
-                resolve();
-              } else {
-                console.log(
-                  "accounting/addIncome: Cannot add income transactions, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "accounting/addIncome: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("accounting/addIncome", error);
-          reject([error]);
-        });
-    });
+    const requestData = {
+      amount: incomeTransaction.amount,
+      type_id: incomeTransaction.typeId,
+      date: incomeTransaction.date,
+      user_id: incomeTransaction.userId,
+      comment: incomeTransaction.comment,
+    };
+    return Request.postRequest("/api/payment.php?action=add_payment", requestData);
   }
 
   /**
@@ -243,47 +109,13 @@ export default class Accounting {
    */
   static addExpense(expenseTransaction) {
     console.log("accounting/addExpense called with:", expenseTransaction);
-    return new Promise((resolve, reject) => {
-      const requestData = {
-        amount: expenseTransaction.amount,
-        type_id: expenseTransaction.typeId,
-        date: expenseTransaction.date,
-        user_id: expenseTransaction.userId,
-        comment: expenseTransaction.comment,
-      };
-
-      fetch("/api/payment.php?action=add_expenditure", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(requestData),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("accounting/addExpense response data:", data);
-              if (data.ok) {
-                resolve();
-              } else {
-                console.log(
-                  "accounting/addExpense: Cannot add income transactions, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "accounting/addExpense: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("accounting/addExpense", error);
-          reject([error]);
-        });
-    });
+    const requestData = {
+      amount: expenseTransaction.amount,
+      type_id: expenseTransaction.typeId,
+      date: expenseTransaction.date,
+      user_id: expenseTransaction.userId,
+      comment: expenseTransaction.comment,
+    };
+    return Request.postRequest("/api/payment.php?action=add_expenditure", requestData);
   }
 }

@@ -158,41 +158,7 @@ export default class Boat {
    */
   static addFuelEntry(fuelEntry) {
     console.log("api/addFuelEntry called");
-    return new Promise((resolve, reject) => {
-      fetch("/api/boat.php?action=update_fuel", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(fuelEntry),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("Boat/addFuelEntry response data:", data);
-              if (data.ok) {
-                resolve();
-              } else {
-                console.log(
-                  "Boat/addFuelEntry: Cannot add engine hour entry, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Boat/addFuelEntry: Cannot parse server response",
-                error,
-                response
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Boat/addFuelEntry", error);
-          reject([error]);
-        });
-    });
+    return Request.postRequest("/api/boat.php?action=update_fuel", fuelEntry);
   }
 
   /**
@@ -208,40 +174,7 @@ export default class Boat {
    */
   static updateFuelEntry(fuelEntry) {
     console.log("api/updateFuelEntry called, with", fuelEntry);
-    return new Promise((resolve, reject) => {
-      fetch("/api/boat.php?action=update_fuel_entry", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(fuelEntry),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("Boat/updateFuelEntry response data:", data);
-              if (data.ok) {
-                resolve();
-              } else {
-                console.log(
-                  "Boat/updateFuelEntry: Cannot update fuel entry, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Boat/updateFuelEntry: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Boat/updateFuelEntry", error);
-          reject([error]);
-        });
-    });
+    return Request.postRequest("/api/boat.php?action=update_fuel_entry", fuelEntry);
   }
 
   static getMaintenanceLog() {
@@ -260,41 +193,7 @@ export default class Boat {
    */
   static addMaintenanceEntry(maintenanceEntry) {
     console.log("api/addMaintenanceEntry called, with", maintenanceEntry);
-    return new Promise((resolve, reject) => {
-      fetch("/api/boat.php?action=update_maintenance_log", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(maintenanceEntry),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("Boat/addMaintenanceEntry response data:", data);
-              if (data.ok) {
-                resolve();
-              } else {
-                console.log(
-                  "Boat/addMaintenanceEntry: Cannot add maintenance entry, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Boat/addMaintenanceEntry: Cannot parse server response",
-                error,
-                response
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Boat/addMaintenanceEntry", error);
-          reject([error]);
-        });
-    });
+    return Request.postRequest("/api/boat.php?action=update_maintenance_log", maintenanceEntry);
   }
 
   static getMyNautiqueInfo(boatId, token, tokenExpiry) {
@@ -304,39 +203,6 @@ export default class Boat {
       token: token,
       token_expiry: tokenExpiry,
     };
-    return new Promise((resolve, reject) => {
-      fetch("/api/mynautique.php?action=get_boat_info", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(request),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("Boat/getMyNautiqueInfo response data:", data);
-              if (data.ok) {
-                resolve(data.data);
-              } else {
-                console.error(
-                  "Boat/getMyNautiqueInfo: Cannot retrieve maintenance logs, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Boat/getMyNautiqueInfo: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Boat/getMyNautiqueInfo", error);
-          reject([error]);
-        });
-    });
+    return Request.postRequest("/api/mynautique.php?action=get_boat_info", request);
   }
 }
