@@ -57,14 +57,16 @@ const getters = {
 
 const actions = {
   queryHeatHistory({ commit }) {
-    let successCb = (response) => {
-      console.log(response);
-      commit("setHeatHistory", response);
-    };
-    let failCb = (error) => {
-      console.log(error);
-    };
-    User.getHeats(successCb, failCb);
+    return new Promise((resolve, reject) => {
+      User.getHeats()
+        .then((response) => {
+          commit("setHeatHistory", response);
+          resolve();
+        })
+        .catch((error) => {
+          reject(error);
+        })
+    });
   },
   changeUserProfile({ dispatch }, profileData) {
     return new Promise((resolve, reject) => {
@@ -109,6 +111,7 @@ const actions = {
       User.cancelSession(sessionId)
         .then(() => {
           dispatch("queryUserSchedule");
+          resolve();
         })
         .catch((error) => {
           reject(error);

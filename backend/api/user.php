@@ -40,7 +40,8 @@
         echo json_encode($response);
         exit;
     case 'get_my_user_heats':
-        get_my_user_heats($configuration);
+        $response = get_my_user_heats($configuration);
+        echo json_encode($response);
         exit;
     case 'get_my_user_sessions':
         get_my_user_sessions($configuration);
@@ -595,9 +596,8 @@
   function get_my_user_heats($configuration){
     $db = new DBAccess($configuration);
     if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
         error_log("get_my_user_heats: not able to connect to database");
-        exit;
+        return Status::errorStatus("not able to connect to database");
     }    
     $res = Array();
     
@@ -674,7 +674,7 @@
     $res['currency'] = $configuration->currency;
     $res['balance_current'] = round($res['balance_current'], 2);
     
-    echo json_encode($res);    
+    return Status::successDataResponse("success", $res);  
   }
   
   # lock a user
@@ -978,7 +978,7 @@
     }    
     $db->disconnect();
     
-    return Status::successStatus("Successfully updated.");
+    return Status::successDataResponse("success", null);
   }
   
   function get_my_user_sessions($configuration){
