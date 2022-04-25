@@ -1,3 +1,5 @@
+import Request from "@/api/common/request";
+
 export default class Heat {
   /**
    * Creates heats on the backend
@@ -14,40 +16,7 @@ export default class Heat {
    */
   static addHeats(heats) {
     console.log("heat/addHeats called, with", heats);
-    return new Promise((resolve, reject) => {
-      fetch("/api/heat.php?action=add_heats", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(heats),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("add heats response data:", data);
-              if (data.ok) {
-                resolve(data.data);
-              } else {
-                console.log(
-                  "heat/addHeats: Cannot create heats, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "heat/addHeats: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("heat/addHeats", error);
-          reject([error]);
-        });
-    });
+    return Request.postRequest("/api/heat.php?action=add_heats", heats);
   }
 
   /**
@@ -56,44 +25,10 @@ export default class Heat {
    */
   static deleteHeat(heatId) {
     console.log("heat/deleteHeat called, with", heatId);
-    return new Promise((resolve, reject) => {
-      const request = {
-        heat_id: heatId,
-      };
-
-      fetch("/api/heat.php?action=delete_heat", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(request),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("delete heat response data:", data);
-              if (data.ok) {
-                resolve(data);
-              } else {
-                console.log(
-                  "heat/deleteHeat: Cannot delete heats due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "heat/deleteHeat: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("heat/deleteHeat", error);
-          reject([error]);
-        });
-    });
+    const request = {
+      heat_id: heatId,
+    };
+    return Request.postRequest("/api/heat.php?action=delete_heat", request);
   }
 
   /**
@@ -102,47 +37,13 @@ export default class Heat {
    */
   static updateHeat(heatUpdate) {
     console.log("heat/updateHeat called, with", heatUpdate);
-    return new Promise((resolve, reject) => {
-      const request = {
-        heat_id: heatUpdate.id,
-        user_id: heatUpdate.userId,
-        duration_s: heatUpdate.duration,
-        comment: heatUpdate.comment,
-      };
-
-      fetch("/api/heat.php?action=update_heat", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(request),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("update heat response data:", data);
-              if (data.ok) {
-                resolve(data);
-              } else {
-                console.log(
-                  "heat/updateHeat: Cannot delete heats due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "heat/updateHeat: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("heat/updateHeat", error);
-          reject([error]);
-        });
-    });
+    const request = {
+      heat_id: heatUpdate.id,
+      user_id: heatUpdate.userId,
+      duration_s: heatUpdate.duration,
+      comment: heatUpdate.comment,
+    };
+    return Request.postRequest("/api/heat.php?action=update_heat", request);
   }
 
   /**
@@ -151,43 +52,9 @@ export default class Heat {
    */
   static getHeatsBySession(sessionId) {
     console.log("heat/getHeatsBySession called, with", sessionId);
-    return new Promise((resolve, reject) => {
-      const request = {
-        session_id: sessionId,
-      };
-
-      fetch("/api/heat.php?action=get_session_heats", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(request),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("get heats by session response data:", data);
-              if (data.ok) {
-                resolve(data.data);
-              } else {
-                console.log(
-                  "heat/getHeatsBySession: Cannot get heats, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "heat/getHeatsBySession: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("heat/getHeatsBySession", error);
-          reject([error]);
-        });
-    });
+    const request = {
+      session_id: sessionId,
+    };
+    return Request.postRequest("/api/heat.php?action=get_session_heats", request);
   }
 }

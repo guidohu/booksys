@@ -18,15 +18,17 @@
   switch($_GET['action']){
 	case 'login':
 		$response = login($configuration);
-		echo json_encode($response);
-		exit;
+		break;
 	case 'isLoggedIn':
 		$response = isLoggedIn($configuration);
-		echo json_encode($response);
-		exit;
+		break;
 	default:
-		exit;
+		$response = Status::errorStatus("Action not supported");
+		break;
   }
+
+  echo json_encode($response);
+  return;
   
   // The functions
   //------------------------------------------------------

@@ -147,7 +147,7 @@
         $response["db_version_required"] = $configuration->required_db_version;
         $response["db_version"] = _get_database_version($configuration);
 
-        return $response;
+        return Status::successDataResponse("success", $response);
     }
 
     /**
@@ -174,9 +174,7 @@
         $db_version_required = $configuration->required_db_version;
         $db_version          = _get_database_version($configuration);
         if(!isset($db_version)){
-            $response['ok'] = FALSE;
-            $response['message'] = "Cannot get db version";
-            $response['updateAvailable'] = FALSE;
+            return Status::errorStatus("Cannot get db schema version");
         }
 
         // compare versions
@@ -184,7 +182,7 @@
             $response['updateAvailable'] = TRUE;
         }
         
-        return $response;
+        return Status::successDataResponse("success", $response);
     }
 
     /**

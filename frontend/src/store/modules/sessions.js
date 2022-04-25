@@ -92,7 +92,7 @@ const actions = {
       Sessions.createSession(sessionObj)
         .then((response) => {
           dispatch("querySessions");
-          resolve(response.data);
+          resolve(response);
         })
         .catch((error) => {
           reject(error);
@@ -105,7 +105,7 @@ const actions = {
       Sessions.editSession(sessionObj)
         .then((response) => {
           dispatch("querySessions");
-          resolve(response.data);
+          resolve(response);
         })
         .catch((error) => {
           reject(error);
