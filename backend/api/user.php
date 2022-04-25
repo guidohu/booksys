@@ -44,7 +44,8 @@
         echo json_encode($response);
         exit;
     case 'get_my_user_sessions':
-        get_my_user_sessions($configuration);
+        $response = get_my_user_sessions($configuration);
+        echo json_encode($response);
         exit;
     case 'change_my_user_data':
         $response = change_my_user_data($configuration);
@@ -993,9 +994,8 @@
     // database connection
     $db = new DBAccess($configuration);
     if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
         error_log('api/user.php: Cannot open database connection');
-        return;
+        return Status::errorStatus("Backend error: Cannot connect to the database");
     }
     
     // select all sessions where the user is either creator, booked in session
@@ -1032,9 +1032,7 @@
     $db_res = $db->fetch_stmt_hash();
     if(!isset($db_res) or $db_res === FALSE){
         error_log('api/user.php: Cannot retrieve sessions for user: ' . $session_data['user_id']);
-        HttpHeader::setResponseCode(500);
-        echo "Cannot retrieve sessions";
-        return;
+        return Status::errorStatus("Cannot retrieve sessions from database.");
     }
     
     $old_idx = 0;
@@ -1108,15 +1106,12 @@
         }
     }
     
-    $json = json_encode($res, JSON_PARTIAL_OUTPUT_ON_ERROR, 0);
-    if($json == FALSE){
-        error_log('api/user.php: Cannot encode result to json');
-        HttpHeader::setResponseCode(500);
-        echo "Cannot retrieve sessions (parsing error)";
-        return;
-    }
+    // $json = json_encode($res, JSON_PARTIAL_OUTPUT_ON_ERROR, 0);
+    // if($json == FALSE){
+    //     error_log('api/user.php: Cannot encode result to json');
+    //     return Status::errorStatus("Cannot retrieve sessions (parsing error)");
+    // }
 
-    echo $json;
-    
+    return Status::successDataResponse("success", $res);
   }
 ?>

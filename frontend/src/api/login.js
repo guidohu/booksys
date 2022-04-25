@@ -19,53 +19,15 @@ export default class Login {
         password: pwHash,
       };
 
-      fetch("/api/login.php?action=login", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(request),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              if (data.ok) {
-                resolve();
-              } else {
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          reject([error]);
-        });
+      Request.postRequest("/api/login.php?action=login")
+      .then((response) => resolve(response))
+      .catch((error) => reject(error));
     });
   }
 
-  static logout(cbSuccess, cbFailed) {
-    fetch("/api/logout.php", {
-      method: "GET",
-      cache: "no-cache",
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        if (data.ok) {
-          cbSuccess(data);
-        } else {
-          cbFailed("Error while logging out");
-        }
-      })
-      .catch((error) => {
-        console.log("action: login/logout", error);
-        cbFailed({
-          ok: false,
-          message: error,
-        });
-      });
+  static logout() {
+    console.log("Login/logout called");
+    return Request.getRequest('/api/logout.php');
   }
 
   static getMyUser() {
@@ -76,15 +38,6 @@ export default class Login {
   static isLoggedIn() {
     console.log("Login/isLoggedIn called");
     return Request.getRequest('/api/login.php?action=isLoggedIn');
-  }
-
-  static async postData(data) {
-    const result = await fetch("/api/login.php?action=login", {
-      method: "POST",
-      cache: "no-cache",
-      body: JSON.stringify(data),
-    });
-    return result.json();
   }
 
   static calcHash(password) {

@@ -33,25 +33,8 @@ export default class Configuration {
     return Request.postRequest("/api/configuration.php?action=setup_db_config", requestData);
   }
 
-  static getConfiguration(cbSuccess, cbFailure) {
-    fetch("/api/configuration.php?action=get_configuration", {
-      method: "GET",
-      cache: "no-cache",
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        if (data.ok == true) {
-          cbSuccess(data.data);
-        } else {
-          cbFailure("Configuration retrieval not successful");
-        }
-      })
-      .catch((error) => {
-        console.log("Configuration/getConfiguration:", error);
-        cbFailure(error);
-      });
+  static getConfiguration() {
+    return Request.getRequest("/api/configuration.php?action=get_configuration");
   }
 
   static setConfiguration(params) {
@@ -103,53 +86,15 @@ export default class Configuration {
     return Request.postRequest("/api/configuration.php?action=setup_mynautique_config", requestData);
   }
 
-  static needsDbUpdate(cbSuccess, cbFailure) {
-    fetch("/api/backend.php?action=admin_check_database_update", {
-      method: "GET",
-      cache: "no-cache",
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        cbSuccess(data);
-      })
-      .catch((error) => {
-        cbFailure(error);
-      });
+  static needsDbUpdate() {
+    return Request.getRequest("/api/backend.php?action=admin_check_database_update");
   }
 
   static getDbVersion() {
-    return new Promise((resolve, reject) => {
-      fetch("/api/backend.php?action=get_version", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          return response.json();
-        })
-        .then((data) => {
-          resolve(data);
-        })
-        .catch((error) => {
-          reject([error]);
-        });
-    });
+    return Request.getRequest("/api/backend.php?action=get_version");
   }
 
-  static updateDb(cbSuccess, cbFailure) {
-    fetch("/api/backend.php?action=update_database", {
-      method: "GET",
-      cache: "no-cache",
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
-        cbSuccess(data);
-      })
-      .catch((error) => {
-        cbFailure(error);
-      });
+  static updateDb() {
+    return Request.getRequest("/api/backend.php?action=update_database");
   }
 }

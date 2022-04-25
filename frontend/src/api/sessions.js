@@ -41,91 +41,63 @@ export default class Sessions {
 
     console.log("getSessionsCalendar:", query);
     return new Promise((resolve, reject) => {
-      fetch("/api/booking.php?action=get_booking_month", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(query),
+      Request.postRequest("/api/booking.php?action=get_booking_month", query)
+      .then((days) => {
+        let monthSessions = [];
+        for (let i = 0; i < days.length; i++) {
+          let res = days[i];
+          let timezone = res.timezone;
+          const winStart = res.window_start;
+          // const winEnd     = res.window_end;
+          res.window_start = dayjs
+            .unix(res.window_start)
+            .tz(timezone)
+            .format();
+          res.window_end = dayjs
+            .unix(res.window_end)
+            .tz(timezone)
+            .format();
+          res.sunrise = dayjs.unix(res.sunrise).tz(timezone).format();
+          res.sunset = dayjs.unix(res.sunset).tz(timezone).format();
+          const busDayStart = res.business_day_start.split(":");
+          const busDayEnd = res.business_day_end.split(":");
+          res.business_day_start = dayjs
+            .unix(winStart)
+            .tz(timezone)
+            .set("hour", busDayStart[0])
+            .set("minutes", busDayStart[1])
+            .set("seconds", busDayStart[2])
+            .format();
+          res.business_day_end = dayjs
+            .unix(winStart)
+            .tz(timezone)
+            .set("hour", busDayEnd[0])
+            .set("minutes", busDayEnd[1])
+            .set("seconds", busDayEnd[2])
+            .format();
+
+          // convert session times to ISO time
+          for (let i = 0; i < res.sessions.length; i++) {
+            const s = res.sessions[i];
+            const session = new Session(
+              s.id,
+              s.title,
+              s.comment,
+              dayjs.unix(s.start).tz(timezone).format(),
+              dayjs.unix(s.end).tz(timezone).format(),
+              s.free,
+              s.type
+            );
+            session.addRiders(s.riders);
+            res.sessions[i] = session;
+          }
+          monthSessions.push(res);
+        }
+        resolve(monthSessions);
       })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("getSessionsCalendar response data:", data);
-              if (data.ok) {
-                console.log("getSessionsCalendar, ok response");
-                let days = data.data;
-                let monthSessions = [];
-                for (let i = 0; i < days.length; i++) {
-                  let res = days[i];
-                  let timezone = res.timezone;
-                  const winStart = res.window_start;
-                  // const winEnd     = res.window_end;
-                  res.window_start = dayjs
-                    .unix(res.window_start)
-                    .tz(timezone)
-                    .format();
-                  res.window_end = dayjs
-                    .unix(res.window_end)
-                    .tz(timezone)
-                    .format();
-                  res.sunrise = dayjs.unix(res.sunrise).tz(timezone).format();
-                  res.sunset = dayjs.unix(res.sunset).tz(timezone).format();
-                  const busDayStart = res.business_day_start.split(":");
-                  const busDayEnd = res.business_day_end.split(":");
-                  res.business_day_start = dayjs
-                    .unix(winStart)
-                    .tz(timezone)
-                    .set("hour", busDayStart[0])
-                    .set("minutes", busDayStart[1])
-                    .set("seconds", busDayStart[2])
-                    .format();
-                  res.business_day_end = dayjs
-                    .unix(winStart)
-                    .tz(timezone)
-                    .set("hour", busDayEnd[0])
-                    .set("minutes", busDayEnd[1])
-                    .set("seconds", busDayEnd[2])
-                    .format();
-
-                  // convert session times to ISO time
-                  for (let i = 0; i < res.sessions.length; i++) {
-                    const s = res.sessions[i];
-                    const session = new Session(
-                      s.id,
-                      s.title,
-                      s.comment,
-                      dayjs.unix(s.start).tz(timezone).format(),
-                      dayjs.unix(s.end).tz(timezone).format(),
-                      s.free,
-                      s.type
-                    );
-                    session.addRiders(s.riders);
-                    res.sessions[i] = session;
-                  }
-                  monthSessions.push(res);
-                }
-
-                resolve(monthSessions);
-              } else {
-                console.log(
-                  "Sessions/getSessionsCalendar: Cannot get sessions, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Sessions/getSessionsCalendar: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Sessions/getSessionsCalendar", error);
-          reject([error]);
-        });
+      .catch((errors) => {
+        reject(errors);
+      })
     });
   }
 
@@ -134,150 +106,96 @@ export default class Sessions {
     dayjs.extend(dayjsTimezone);
     dayjs.extend(dayjsAdvancedFormat);
 
+    const query = {
+      start: dayjs(dateStart).format("X"),
+      end: dayjs(dateEnd).format("X"),
+    };
+
     console.log("getSessions:", dateStart);
     return new Promise((resolve, reject) => {
-      const query = {
-        start: dayjs(dateStart).format("X"),
-        end: dayjs(dateEnd).format("X"),
-      };
-      fetch("/api/booking.php?action=get_booking_day", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(query),
+      Request.postRequest("/api/booking.php?action=get_booking_day", query)
+      .then((res) => {
+        let timezone = res.timezone;
+        const winStart = res.window_start;
+        // const winEnd     = res.window_end;
+        res.window_start = dayjs
+          .unix(res.window_start)
+          .tz(timezone)
+          .format();
+        res.window_end = dayjs
+          .unix(res.window_end)
+          .tz(timezone)
+          .format();
+        res.sunrise = dayjs.unix(res.sunrise).tz(timezone).format();
+        res.sunset = dayjs.unix(res.sunset).tz(timezone).format();
+        const busDayStart = res.business_day_start.split(":");
+        const busDayEnd = res.business_day_end.split(":");
+        res.business_day_start = dayjs
+          .unix(winStart)
+          .tz(timezone)
+          .set("hour", busDayStart[0])
+          .set("minutes", busDayStart[1])
+          .set("seconds", busDayStart[2])
+          .format();
+        res.business_day_end = dayjs
+          .unix(winStart)
+          .tz(timezone)
+          .set("hour", busDayEnd[0])
+          .set("minutes", busDayEnd[1])
+          .set("seconds", busDayEnd[2])
+          .format();
+
+        // convert session times to ISO time
+        for (let i = 0; i < res.sessions.length; i++) {
+          const s = res.sessions[i];
+          const session = new Session(
+            s.id,
+            s.title,
+            s.comment,
+            dayjs.unix(s.start).tz(timezone).format(),
+            dayjs.unix(s.end).tz(timezone).format(),
+            s.free,
+            s.type
+          );
+          session.addRiders(s.riders);
+          res.sessions[i] = session;
+        }
+
+        resolve(res);
       })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("getSessions response data:", data);
-              if (data.ok) {
-                let res = data.data;
-                let timezone = res.timezone;
-                const winStart = res.window_start;
-                // const winEnd     = res.window_end;
-                res.window_start = dayjs
-                  .unix(res.window_start)
-                  .tz(timezone)
-                  .format();
-                res.window_end = dayjs
-                  .unix(res.window_end)
-                  .tz(timezone)
-                  .format();
-                res.sunrise = dayjs.unix(res.sunrise).tz(timezone).format();
-                res.sunset = dayjs.unix(res.sunset).tz(timezone).format();
-                const busDayStart = res.business_day_start.split(":");
-                const busDayEnd = res.business_day_end.split(":");
-                res.business_day_start = dayjs
-                  .unix(winStart)
-                  .tz(timezone)
-                  .set("hour", busDayStart[0])
-                  .set("minutes", busDayStart[1])
-                  .set("seconds", busDayStart[2])
-                  .format();
-                res.business_day_end = dayjs
-                  .unix(winStart)
-                  .tz(timezone)
-                  .set("hour", busDayEnd[0])
-                  .set("minutes", busDayEnd[1])
-                  .set("seconds", busDayEnd[2])
-                  .format();
-
-                // convert session times to ISO time
-                for (let i = 0; i < res.sessions.length; i++) {
-                  const s = res.sessions[i];
-                  const session = new Session(
-                    s.id,
-                    s.title,
-                    s.comment,
-                    dayjs.unix(s.start).tz(timezone).format(),
-                    dayjs.unix(s.end).tz(timezone).format(),
-                    s.free,
-                    s.type
-                  );
-                  session.addRiders(s.riders);
-                  res.sessions[i] = session;
-                }
-
-                resolve(res);
-              } else {
-                console.log(
-                  "Sessions/getSessions: Cannot get sessions, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Sessions/getSessions: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Sessions/getSessions", error);
-          reject([error]);
-        });
+      .catch((errors) => reject(errors));
     });
   }
 
   static getSession(sessionId) {
     console.log("sessions/getSession called, with", sessionId);
+    const requestData = {
+      id: sessionId,
+    };
     return new Promise((resolve, reject) => {
-      const requestData = {
-        id: sessionId,
-      };
-
-      fetch("/api/booking.php?action=get_session", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(requestData),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("sessions/getSession response data:", data);
-              if (data.ok) {
-                const sR = data.data;
-                const session = new Session(
-                  sR.id,
-                  sR.title,
-                  sR.comment,
-                  dayjs.unix(sR.start_time).format(),
-                  dayjs.unix(sR.end_time).format(),
-                  sR.riders_max,
-                  sR.type
-                );
-                const sessionMetaInfo = {
-                  sunrise: dayjs.unix(sR.sunrise).format(),
-                  sunset: dayjs.unix(sR.sunset).format(),
-                };
-                session.addRiders(sR.riders);
-                resolve({
-                  session: session,
-                  metaInfo: sessionMetaInfo,
-                });
-              } else {
-                console.log(
-                  "sessions/getSession: Cannot update fuel entry, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "sessions/getSession: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
+      Request.postRequest("/api/booking.php?action=get_session", requestData)
+        .then((sR) => {
+          const session = new Session(
+            sR.id,
+            sR.title,
+            sR.comment,
+            dayjs.unix(sR.start_time).format(),
+            dayjs.unix(sR.end_time).format(),
+            sR.riders_max,
+            sR.type
+          );
+          const sessionMetaInfo = {
+            sunrise: dayjs.unix(sR.sunrise).format(),
+            sunset: dayjs.unix(sR.sunset).format(),
+          };
+          session.addRiders(sR.riders);
+          resolve({
+            session: session,
+            metaInfo: sessionMetaInfo,
+          });
         })
         .catch((error) => {
-          console.error("sessions/getSession", error);
-          reject([error]);
+          reject(error);
         });
     });
   }

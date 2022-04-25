@@ -47,16 +47,20 @@ const actions = {
     });
   },
   logout({ commit, dispatch }) {
-    let successCb = () => {
-      commit("setUserInfo", null);
-      commit("setIsLoggedIn", false);
-      dispatch("loginStatus/setIsLoggedIn", false, { root: true });
-      console.log("Logout successful");
-    };
-    let failCb = (data) => {
-      console.error("Logout failed:", data);
-    };
-    ApiLogin.logout(successCb, failCb);
+    return new Promise((resolve, reject) => {
+      ApiLogin.logout()
+      .then(() => {
+        commit("setUserInfo", null);
+        commit("setIsLoggedIn", false);
+        dispatch("loginStatus/setIsLoggedIn", false, { root: true });
+        resolve();
+        console.log("Logout successful");
+      })
+      .catch((errors) => {
+        console.error("Logout failed:", errors);
+        reject(errors);
+      })
+    })
   },
   getIsLoggedIn({ commit, dispatch }) {
     return new Promise((resolve, reject) => {

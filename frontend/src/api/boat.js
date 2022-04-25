@@ -8,43 +8,7 @@ export default class Boat {
 
   static getEngineHourLogLatest() {
     console.log("api/getEngineHourLogLatest called");
-    return new Promise((resolve, reject) => {
-      fetch("/api/boat.php?action=get_engine_hours_latest", {
-        method: "GET",
-        cache: "no-cache",
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("Boat/getEngineHourLogLatest response data:", data);
-              if (data.ok) {
-                if (data.data.length > 0) {
-                  resolve(data.data[0]);
-                } else {
-                  resolve(null);
-                }
-              } else {
-                console.log(
-                  "Boat/getEngineHourLogLatest: Cannot retrieve engine hour logs, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Boat/getEngineHourLogLatest: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Boat/getEngineHourLogLatest", error);
-          reject([error]);
-        });
-    });
+    return Request.getRequest('/api/boat.php?action=get_engine_hours_latest');
   }
 
   /**
@@ -59,40 +23,7 @@ export default class Boat {
    */
   static addEngineHours(engineHourEntry) {
     console.log("api/addEngineHours called");
-    return new Promise((resolve, reject) => {
-      fetch("/api/boat.php?action=update_engine_hours", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(engineHourEntry),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("Boat/addEngineHours response data:", data);
-              if (data.ok) {
-                resolve();
-              } else {
-                console.log(
-                  "Boat/addEngineHours: Cannot add engine hour entry, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Boat/addEngineHours: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Boat/addEngineHours", error);
-          reject([error]);
-        });
-    });
+    return Request.getRequest('/api/boat.php?action=update_engine_hours', engineHourEntry);
   }
 
   /**
@@ -105,40 +36,7 @@ export default class Boat {
    */
   static updateEngineHours(engineHourEntryUpdate) {
     console.log("api/updateEngineHours called, with", engineHourEntryUpdate);
-    return new Promise((resolve, reject) => {
-      fetch("/api/boat.php?action=update_engine_hours_entry", {
-        method: "POST",
-        cache: "no-cache",
-        body: JSON.stringify(engineHourEntryUpdate),
-      })
-        .then((response) => {
-          response
-            .json()
-            .then((data) => {
-              console.log("Boat/updateEngineHours response data:", data);
-              if (data.ok) {
-                resolve();
-              } else {
-                console.log(
-                  "Boat/updateEngineHours: Cannot update engine hour entry, due to:",
-                  data.msg
-                );
-                reject([data.msg]);
-              }
-            })
-            .catch((error) => {
-              console.error(
-                "Boat/updateEngineHours: Cannot parse server response",
-                error
-              );
-              reject([error]);
-            });
-        })
-        .catch((error) => {
-          console.error("Boat/updateEngineHours", error);
-          reject([error]);
-        });
-    });
+    return Request.postRequest('/api/boat.php?action=update_engine_hours_entry', engineHourEntryUpdate);
   }
 
   static getFuelLog() {
