@@ -19,7 +19,7 @@ export default class Login {
         password: pwHash,
       };
 
-      Request.postRequest("/api/login.php?action=login")
+      Request.postRequest("/api/login.php?action=login", request)
       .then((response) => resolve(response))
       .catch((error) => reject(error));
     });
