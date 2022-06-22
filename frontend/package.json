@@ -23,7 +23,7 @@
     "sprintf-js": "^1.1.2",
     "vue": "^3.2.31",
     "vue-loading-overlay": "^5.0.3",
-    "vue-recaptcha": "^2.0.1",
+    "vue-recaptcha": "^2.0.2",
     "vue-router": "^4.0.14",
     "vuex": "^4.0.2"
   },
