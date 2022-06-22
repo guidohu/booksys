@@ -1,6 +1,6 @@
 <template>
   <div class="box">
-    <fuel-log-status class="mb-2"/>
+    <fuel-log-status class="mb-2" />
     <fuel-log-form class="mb-4" />
     <div class="d-grid gap-2 ms-1 me-1 mb-2">
       <button

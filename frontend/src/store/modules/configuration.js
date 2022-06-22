@@ -70,7 +70,7 @@ const getters = {
   },
   getMyNautiqueBoatId: (state) => {
     return state.myNautiqueBoatId;
-  }
+  },
 };
 
 const actions = {
@@ -82,30 +82,37 @@ const actions = {
       return;
     }
 
-    let successCb = (config) => {
-      commit("setConfiguration", config);
-    };
-    let failureCb = () => {
-      commit("setConfiguration", null);
-    };
-    Configuration.getConfiguration(successCb, failureCb);
+    return new Promise((resolve, reject) => {
+      Configuration.getConfiguration()
+      .then((config) => {
+        commit("setConfiguration", config);
+        resolve(config);
+      })
+      .catch((errors) => {
+        commit("setConfiguration", null);
+        reject(errors);
+      })
+    })
   },
   queryDbUpdateStatus({ commit }) {
-    let successCb = (response) => {
-      commit("setDbUpdateStatus", response);
-    };
-    let failureCb = (error) => {
-      console.error("store/configuration: Cannot get needsDbUpdate:", error);
-      commit("setDbUpdateStatus", null);
-    };
-    Configuration.needsDbUpdate(successCb, failureCb);
+    return new Promise((resolve, reject) => {
+      Configuration.needsDbUpdate()
+      .then((updateInfo) => {
+        commit("setDbUpdateStatus", updateInfo);
+        resolve(updateInfo);
+      })
+      .catch((errors) => {
+        commit("setDbUpdateStatus", null);
+        reject(errors);
+      })
+    });
   },
   queryDbVersionInfo({ commit }) {
     return new Promise((resolve, reject) => {
       Configuration.getDbVersion()
         .then((info) => {
           commit("setDbVersionInfo", info);
-          resolve();
+          resolve(info);
         })
         .catch((errors) => {
           commit("setDbVersionInfo", null);
@@ -116,9 +123,9 @@ const actions = {
   queryRecaptchaKey({ commit }) {
     return new Promise((resolve, reject) => {
       Configuration.getRecaptchaKey()
-        .then((key) => {
+        .then((response) => {
           // load latest configuration
-          commit("setRecaptchaKey", key);
+          commit("setRecaptchaKey", response);
           resolve();
         })
         .catch((errors) => {
@@ -129,10 +136,10 @@ const actions = {
   queryLogoFile({ commit }) {
     return new Promise((resolve, reject) => {
       Configuration.getLogoFile()
-        .then((uri) => {
+        .then((response) => {
           // load latest configuration
-          commit("setLogoFile", uri);
-          resolve(uri);
+          commit("setLogoFile", response.uri);
+          resolve(response.uri);
         })
         .catch((errors) => {
           reject(errors);
@@ -140,19 +147,20 @@ const actions = {
     });
   },
   updateDb({ commit, dispatch }) {
-    commit("setIsUpdating", true);
-    let successCb = (response) => {
-      console.log("updateDb response:", response);
-      dispatch("queryDbVersionInfo");
-      commit("setIsUpdating", false);
-      commit("setUpdateResult", response);
-    };
-    let failureCb = (error) => {
-      console.log("updateDb error:", error);
-      commit("setIsUpdating", false);
-      commit("setUpdateResult ", { ok: false, msg: error });
-    };
-    Configuration.updateDb(successCb, failureCb);
+    return new Promise((resolve, reject) => {
+      commit("setIsUpdating", true);
+      Configuration.updateDb()
+      .then(() => {
+        dispatch("queryDbVersionInfo");
+        commit("setIsUpdating", false);
+        commit("setUpdateResult", true);
+      })
+      .catch((errors) => {
+        console.log("updateDb error:", errors);
+        commit("setIsUpdating", false);
+        commit("setUpdateResult ", { ok: false, msg: errors[0] });
+      })
+    })
   },
   setConfiguration({ dispatch, commit }, configurationValues) {
     return new Promise((resolve, reject) => {
@@ -195,15 +203,19 @@ const mutations = {
     state.CONFIG_LOADED = true;
     console.log("configuration set to", value);
   },
-  setRecaptchaKey(state, value) {
-    state.recaptchaKey = value;
+  setRecaptchaKey(state, response) {
+    state.recaptchaKey = response.key;
   },
   setLogoFile(state, value) {
     state.logoFile = value;
   },
   setDbUpdateStatus(state, value) {
     console.log(value);
-    state.dbUpdateStatus = value;
+    if(value != null){
+      state.dbUpdateStatus = value.updateAvailable;
+    } else {
+      state.dbUpdateStatus = null;
+    }
   },
   setDbVersionInfo(state, value) {
     if (value == null) {
@@ -241,8 +253,8 @@ const mutations = {
   setIsUpdating(state, value) {
     state.dbIsUpdating = value;
   },
-  setUpdateResult(state, value) {
-    if (value.ok == true) {
+  setUpdateResult(state, success, errorMessage="") {
+    if (success == true) {
       state.dbUpdateResult = {
         success: true,
         msg: "Database upgrade was successful",
@@ -251,7 +263,7 @@ const mutations = {
     } else {
       state.dbUpdateResult = {
         success: false,
-        msg: value.msg,
+        msg: errorMessage,
       };
     }
   },

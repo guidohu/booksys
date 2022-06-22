@@ -1,11 +1,15 @@
 <template>
   <modal-container name="setup-modal" :visible="true">
-    <modal-header :title="setupSteps[setupStep].title"/>
+    <modal-header :title="setupSteps[setupStep].title" />
     <modal-body>
-      <div class="progress mb-3" style="height: 2px;">
-        <div class="progress-bar bg-info" role="progressbar" :style="progress"></div>
+      <div class="progress mb-3" style="height: 2px">
+        <div
+          class="progress-bar bg-info"
+          role="progressbar"
+          :style="progress"
+        ></div>
       </div>
-      <warning-box v-if="errors.length > 0" class="mt-4" :errors="errors"/>
+      <warning-box v-if="errors.length > 0" class="mt-4" :errors="errors" />
       <!-- Database setup -->
       <database-configuration
         v-if="setupSteps[setupStep].name == 'db'"
@@ -16,9 +20,7 @@
       <!-- Administrator Account Setup -->
       <div v-if="setupSteps[setupStep].name == 'administrator'">
         <div class="row mb-4">
-          <div class="col-12">
-            Setup the Administrator Account
-          </div>
+          <div class="col-12">Setup the Administrator Account</div>
         </div>
         <user-sign-up
           :user-data="adminUserConfig"
@@ -100,7 +102,7 @@
 </template>
 
 <script>
-import { defineAsyncComponent } from "vue"; 
+import { defineAsyncComponent } from "vue";
 import { getBackendStatus } from "@/api/backend";
 import Configuration from "@/api/configuration";
 import User from "@/api/user";
@@ -116,9 +118,7 @@ const DatabaseConfiguration = defineAsyncComponent(() =>
   )
 );
 const UserSignUp = defineAsyncComponent(() =>
-  import(
-    /* webpackChunkName: "user-sign-up" */ "@/components/forms/UserSignUp"
-  )
+  import(/* webpackChunkName: "user-sign-up" */ "@/components/forms/UserSignUp")
 );
 const MyNautiqueConfiguration = defineAsyncComponent(() =>
   import(
@@ -173,23 +173,23 @@ export default {
           name: "done",
           title: "Setup Done",
         },
-      ]
+      ],
     };
   },
   computed: {
-    progress: function() {
+    progress: function () {
       let value = "width: ";
       value += parseInt(((this.setupStep + 1) / this.setupSteps.length) * 100);
       value += "%";
       return value;
-    }
+    },
   },
   mounted() {
     this.isLoading = true;
     this.getBackendStatus();
   },
   methods: {
-    dbConfigInputHandler: function(config) {
+    dbConfigInputHandler: function (config) {
       this.dbConfig = config;
     },
     setDbSettings: function () {
@@ -219,7 +219,7 @@ export default {
       this.adminUserConfig.ownRisk = u.ownRisk;
       this.adminUserConfig.license = u.license;
     },
-    handleMyNautiqueUpdate: function(data) {
+    handleMyNautiqueUpdate: function (data) {
       this.myNautiqueConfig.enabled = data.enabled;
       this.myNautiqueConfig.user = data.user;
       this.myNautiqueConfig.password = data.password;
@@ -256,7 +256,7 @@ export default {
           this.isLoading = false;
         });
     },
-    setMyNautiqueSettings: function() {
+    setMyNautiqueSettings: function () {
       this.isLoading = true;
       console.log("myNautiqueConfig", this.myNautiqueConfig);
       Configuration.setMyNautiqueConfig({
@@ -264,14 +264,14 @@ export default {
         mynautiqueUser: this.myNautiqueConfig.user,
         mynautiquePassword: this.myNautiqueConfig.password,
       })
-      .then(() => {
-        this.isLoading = false;
-        this.getBackendStatus();
-      })
-      .catch((errors) => {
-        this.errors = errors;
-        this.isLoading = false;
-      })
+        .then(() => {
+          this.isLoading = false;
+          this.getBackendStatus();
+        })
+        .catch((errors) => {
+          this.errors = errors;
+          this.isLoading = false;
+        });
     },
     close: function () {
       console.log("Navigate to login");

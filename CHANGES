@@ -1,3 +1,8 @@
+v3.2.0
+- remove duplicate code
+- fix recaptcha
+- fix session balance to take refunds into account
+
 v3.1.0
 - add myNautique compatibility
 

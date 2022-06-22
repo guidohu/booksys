@@ -9,7 +9,7 @@
       </div>
       <div v-else>
         <form>
-          <warning-box v-if="errors.length > 0" :errors="errors"/>
+          <warning-box v-if="errors.length > 0" :errors="errors" />
           <div class="row" v-if="getDbVersionInfo != null">
             <div class="col-4 offset-sm-1 font-weight-bold">App Version</div>
             <div class="col-6">v{{ getDbVersionInfo.appVersion }}</div>
@@ -86,14 +86,8 @@
                 :key="query.query"
               >
                 <div class="col-sm-12 col-xs-12">
-                  <i
-                    v-if="query.ok == true"
-                    class="bi bi-check"
-                  />
-                  <i
-                    v-if="query.ok == false"
-                    class="bi bi-x"
-                  />
+                  <i v-if="query.ok == true" class="bi bi-check" />
+                  <i v-if="query.ok == false" class="bi bi-x" />
                   {{ query.query }}
                 </div>
               </div>
@@ -165,7 +159,7 @@ import ModalContainer from "@/components/bricks/ModalContainer.vue";
 import ModalHeader from "@/components/bricks/ModalHeader.vue";
 import ModalBody from "@/components/bricks/ModalBody.vue";
 import ModalFooter from "@/components/bricks/ModalFooter.vue";
-import WarningBox from '@/components/WarningBox.vue';
+import WarningBox from "@/components/WarningBox.vue";
 
 export default {
   name: "DatabaseUpdateModal",

@@ -272,9 +272,14 @@
 		}else{
 			$statistic['total_session_payment_selected_year'] = $statistic['total_session_payment'];
 		}
+
+		// get total session refunds
+		$query = "SELECT coalesce(sum(amount_chf), 0) as sum FROM expenditure WHERE type_id = 4";
+		$res = $db->fetch_data_hash($query);
+		$statistic['total_session_refunds'] = $res[0]['sum'];
 		
 		// get total open cost (payment for sessions - heat costs)
-		$statistic['total_open'] = $statistic['total_session_payment'] - $statistic['total_used'];
+		$statistic['total_open'] = $statistic['total_session_payment'] - $statistic['total_used'] - $statistic['total_session_refunds'];
 		
 		// get current balance
 		$statistic['current_balance'] = $statistic['total_payment'] - $statistic['total_expenditure'];

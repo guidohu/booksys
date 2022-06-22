@@ -75,10 +75,8 @@ import ModalContainer from "@/components/bricks/ModalContainer.vue";
 import ModalHeader from "@/components/bricks/ModalHeader.vue";
 import ModalBody from "@/components/bricks/ModalBody.vue";
 import ModalFooter from "@/components/bricks/ModalFooter.vue";
+import { VueRecaptcha } from 'vue-recaptcha';
 
-const VueRecaptcha = defineAsyncComponent(() =>
-  import(/* webpackChunkName: "vue-recaptcha" */ "vue-recaptcha")
-);
 const UserSignUp = defineAsyncComponent(() =>
   import(/* webpackChunkName: "user-sign-up" */ "@/components/forms/UserSignUp")
 );

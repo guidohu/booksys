@@ -24,70 +24,58 @@
   
   $_SESSION = Login::getSessionData($configuration);
   
+  $response = null;
+
   switch($_GET['action']){
-    case 'get_admin_users':
-        get_admin_users($configuration, $lc);
-        exit;
-    case 'get_session_users':
-        get_session_users($configuration, $lc);
-        exit;
     case 'get_all_users':
         $response = get_all_users($configuration, $lc);
-        echo json_encode($response); 
-        exit;
+        break;
     case 'get_my_user':
         $response = get_my_user($configuration);
-        echo json_encode($response);
-        exit;
+        break;
     case 'get_my_user_heats':
-        get_my_user_heats($configuration);
-        exit;
+        $response = get_my_user_heats($configuration);
+        break;
     case 'get_my_user_sessions':
-        get_my_user_sessions($configuration);
-        exit;
+        $response = get_my_user_sessions($configuration);
+        break;
     case 'change_my_user_data':
         $response = change_my_user_data($configuration);
-        echo json_encode($response);
-        exit;
+        break;
     case 'lock_user':
         $response = lock_user($configuration, $lc);
-        echo json_encode($response);
-        exit;
+        break;
     case 'unlock_user':
         $response = unlock_user($configuration, $lc);
-        echo json_encode($response);
-        exit;
+        break;
     case 'change_user_group_membership':
         $response = change_user_group_membership($configuration, $lc);
-        echo json_encode($response);
-        exit;
+        break;
 	case 'get_all_users_detailed':
         $response = get_all_users_detailed($configuration, $lc);
-        echo json_encode($response);
-        exit;
+        break;
     case 'get_user_groups':
         $response = get_user_groups($configuration, $lc);
-        echo json_encode($response);
-        exit; 
+        break; 
     case 'get_user_roles':
         $response = get_user_roles($configuration, $lc);
-        echo json_encode($response);
-        exit;
+        break;
     case 'save_user_group':
         $response = save_user_group($configuration, $lc);
-        echo json_encode($response);
-        exit;
+        break;
     case 'delete_user_group':
         $response = delete_user_group($configuration, $lc);
-        echo json_encode($response);
-        exit;
+        break;
     case 'delete_user':
         $response = delete_user($configuration, $lc);
-        echo json_encode($response);
-        exit;
+        break;
+    default:
+        HttpHeader::setResponseCode(400);
+        $response = Status::errorStatus("Action not supported");
+        break;
   }
   
-  HttpHeader::setResponseCode(400);
+  echo json_encode($response);
   return;
 
   function delete_user($configuration, $lc){
@@ -595,9 +583,8 @@
   function get_my_user_heats($configuration){
     $db = new DBAccess($configuration);
     if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
         error_log("get_my_user_heats: not able to connect to database");
-        exit;
+        return Status::errorStatus("not able to connect to database");
     }    
     $res = Array();
     
@@ -674,7 +661,7 @@
     $res['currency'] = $configuration->currency;
     $res['balance_current'] = round($res['balance_current'], 2);
     
-    echo json_encode($res);    
+    return Status::successDataResponse("success", $res);  
   }
   
   # lock a user
@@ -808,75 +795,6 @@
     return Status::successDataResponse("Users retrieved", $res);
   }
   
-  /* Returns the admin users*/
-  function get_admin_users($configuration, $lc){
-    // only admins are allowed to call this function
-    if(!$lc->isAdmin()){
-        HttpHeader::setResponseCode(403);
-        exit;
-    }
-   
-    // connect to the database
-    $db = new DBAccess($configuration);
-    if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
-        exit;
-    }
-    
-    $query = 'SELECT u.id AS id, u.first_name AS first_name, u.last_name AS last_name
-        FROM user u
-        JOIN user_status us ON u.status = us.id
-        JOIN user_role ur ON us.user_role_id = ur.id
-        WHERE ur.name = "admin" 
-        AND u.deleted = 0
-        ORDER BY u.first_name, u.last_name;';
-    $res = $db->fetch_data_hash($query, 0);
-    $db->disconnect();
-    if(!$res){
-        HttpHeader::setResponseCode(500);
-    }
-    echo json_encode($res);
-  }
-
-  function get_session_users($configuration, $lc){
-    // only admins are allowed to call this function
-    if(!$lc->isAdmin()){
-        HttpHeader::setResponseCode(403);
-        exit;
-    }
-
-    $data = json_decode(file_get_contents('php://input'));
-    $sanitizer = new Sanitizer();
-    if(!isset($data->session_id) or !$sanitizer->isInt($data->session_id)){
-        error_log('api/user.php: No session_id provided: ' . $data->session_id);
-        echo 'No valid session_id provided';
-    }
-
-    // connect to the database
-    $db = new DBAccess($configuration);
-    if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
-        exit;
-    }
-    
-    $query = 'SELECT u.id AS id, u.first_name AS first_name, u.last_name AS last_name
-        FROM user u
-        JOIN user_to_session us ON u.id = us.user_id
-        WHERE us.session_id = ? 
-        AND u.deleted = 0
-        ORDER BY u.first_name, u.last_name;';
-    $db->prepare($query);
-    $db->bind_param('i', $data->session_id);
-    $db->execute();
-    $res = $db->fetch_stmt_hash();
-    if(!isset($res)){
-        HttpHeader::setResponseCode(500);
-        exit;
-    }
-    $db->disconnect();
-    echo json_encode($res);
-  }
-  
   function get_my_user($configuration){
   
     // sanitize cookie
@@ -978,7 +896,7 @@
     }    
     $db->disconnect();
     
-    return Status::successStatus("Successfully updated.");
+    return Status::successDataResponse("success", null);
   }
   
   function get_my_user_sessions($configuration){
@@ -993,9 +911,8 @@
     // database connection
     $db = new DBAccess($configuration);
     if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
         error_log('api/user.php: Cannot open database connection');
-        return;
+        return Status::errorStatus("Backend error: Cannot connect to the database");
     }
     
     // select all sessions where the user is either creator, booked in session
@@ -1032,9 +949,7 @@
     $db_res = $db->fetch_stmt_hash();
     if(!isset($db_res) or $db_res === FALSE){
         error_log('api/user.php: Cannot retrieve sessions for user: ' . $session_data['user_id']);
-        HttpHeader::setResponseCode(500);
-        echo "Cannot retrieve sessions";
-        return;
+        return Status::errorStatus("Cannot retrieve sessions from database.");
     }
     
     $old_idx = 0;
@@ -1108,15 +1023,12 @@
         }
     }
     
-    $json = json_encode($res, JSON_PARTIAL_OUTPUT_ON_ERROR, 0);
-    if($json == FALSE){
-        error_log('api/user.php: Cannot encode result to json');
-        HttpHeader::setResponseCode(500);
-        echo "Cannot retrieve sessions (parsing error)";
-        return;
-    }
+    // $json = json_encode($res, JSON_PARTIAL_OUTPUT_ON_ERROR, 0);
+    // if($json == FALSE){
+    //     error_log('api/user.php: Cannot encode result to json');
+    //     return Status::errorStatus("Cannot retrieve sessions (parsing error)");
+    // }
 
-    echo $json;
-    
+    return Status::successDataResponse("success", $res);
   }
 ?>

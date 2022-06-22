@@ -1,4 +1,5 @@
 import Accounting from "@/api/accounting";
+import { round } from "lodash";
 
 const state = () => ({
   selectedYear: "any",
@@ -30,46 +31,40 @@ const getters = {
     return state.incomeTypes;
   },
   getTotalPayments: (state) => {
-    return Math.round(Number(state.totalPayments) * 100) / 100;
+    return round(state.totalPayments, 0);
   },
   getTotalPaymentsAllTime: (state) => {
-    return Math.round(Number(state.totalPaymentsAllTime) * 100) / 100;
+    return round(state.totalPaymentsAllTime, 0);
   },
   getTotalSessionPayments: (state) => {
-    return Math.round(Number(state.totalSessionPayments) * 100) / 100;
+    return round(state.totalSessionPayments, 0);
   },
   getTotalSessionPaymentsAllTime: (state) => {
-    return Math.round(Number(state.totalSessionPaymentsAllTime) * 100) / 100;
+    return round(state.totalSessionPaymentsAllTime, 0);
   },
   getTotalExpenditures: (state) => {
-    return Math.round(Number(state.totalExpenditures) * 100) / 100;
+    return round(state.totalExpenditures, 0);
   },
   getTotalExpendituresAllTime: (state) => {
-    return Math.round(Number(state.totalExpendituresAllTime) * 100) / 100;
+    return round(state.totalExpendituresAllTime, 0);
   },
   getBalance: (state) => {
-    return Math.round(Number(state.balance) * 100) / 100;
+    return round(state.balance, 0);
   },
   getTotalSessionUsed: (state) => {
-    return Math.round(Number(state.totalSessionUsed) * 100) / 100;
+    return round(state.totalSessionUsed, 0);
   },
   getTotalSessionUsedAllTime: (state) => {
-    return Math.round(Number(state.totalExpendituresAllTime) * 100) / 100;
+    return round(state.totalExpendituresAllTime, 0);
   },
   getSessionProfit: (state) => {
-    return Math.round(Number(state.sessionProfit) * 100) / 100;
+    return round(state.sessionProfit, 0);
   },
   getSessionProfitAllTime: (state) => {
-    return Math.round(Number(state.sessionProfitAllTime) * 100) / 100;
+    return round(state.sessionProfitAllTime, 0);
   },
   getSessionsBalance: (state) => {
-    return (
-      Math.round(
-        Number(
-          state.totalSessionPaymentsAllTime - state.totalSessionUsedAllTime
-        ) * 100
-      ) / 100
-    );
+    return round(state.sessionsBalance, 0);
   },
   getTransactions: (state) => {
     return state.transactions;
@@ -224,6 +219,9 @@ const mutations = {
     // Profit/Loss
     state.sessionProfit = statistics.current_session_profit_selected_year;
     state.sessionProfitAllTime = statistics.current_profit_selected_year;
+
+    // Session Balance
+    state.sessionsBalance = statistics.total_open;
 
     // admin_minutes: 18584
     // admin_minutes_selected_year: 0

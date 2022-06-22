@@ -61,7 +61,6 @@
 </template>
 
 <script>
-import { BooksysBrowser } from "@/libs/browser";
 import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
 import DashboardButton from "@/components/bricks/DashboardButton.vue";
 
@@ -70,11 +69,6 @@ export default {
   components: {
     SubpageContainer,
     DashboardButton,
-  },
-  computed: {
-    isDesktop: function () {
-      return !BooksysBrowser.isMobile();
-    },
   },
 };
 </script>

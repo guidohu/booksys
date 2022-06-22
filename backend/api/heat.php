@@ -22,12 +22,14 @@
 	if(!$lc->isAdmin($configuration->admin_user_role_id)){
 		header("Location:".$configuration->$configuration->login_page);
 		HttpHeader::setResponseCode(302);
+		$db->disconnect();
 		exit;
 	}
 	
 	// check if we have an action
 	if(!isset($_GET['action'])){
 		HttpHeader::setResponseCode(200);
+		$db->disconnect();
 		exit;
 	}
 	
@@ -56,6 +58,8 @@
 			break;
 		default:
 			HttpHeader::setResponseCode(400);
+			$response = Status::errorStatus("Action not supported");
+			break;
 	}
 
 	$db->disconnect();

@@ -36,6 +36,10 @@ class Sanitizer{
 	public function isAlphaNum($text){
 		return $this->match($text, '/^[a-zA-Z0-9]+$/');
 	}
+
+	public function isRecaptcha($text){
+		return $this->match($text, '/^[a-zA-Z0-9_\-=]+$/');
+	}
 	
 	public function isAlphaNumEmail($text){
 		return $this->match($text, '/^[0-9a-zA-Z@_\.-]+$/');

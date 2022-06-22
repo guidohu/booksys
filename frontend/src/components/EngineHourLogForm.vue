@@ -88,9 +88,16 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("boat", ["getEngineHourLogLatest", "getMyNautiqueEngineHours"]),
+    ...mapGetters("boat", [
+      "getEngineHourLogLatest",
+      "getMyNautiqueEngineHours",
+    ]),
     ...mapGetters("login", ["userInfo"]),
-    ...mapGetters("configuration", ["getEngineHourFormat", "getMyNautiqueEnabled", "getMyNautiqueBoatId"]),
+    ...mapGetters("configuration", [
+      "getEngineHourFormat",
+      "getMyNautiqueEnabled",
+      "getMyNautiqueBoatId",
+    ]),
   },
   watch: {
     userInfo: function () {
@@ -106,7 +113,7 @@ export default {
         this.form.afterHours = null;
       } else if (newData.before_hours != null && newData.after_hours != null) {
         // the latest engine entry is complete
-        // (has before and after)        
+        // (has before and after)
         this.form.beforeHours = null;
         this.form.type = false;
         this.prefillBefore();
@@ -121,11 +128,11 @@ export default {
       this.setDisableBefore();
       this.setShowAfter();
     },
-    getMyNautiqueBoatId: function(boatId) {
+    getMyNautiqueBoatId: function (boatId) {
       this.queryMyNautiqueInfo(boatId);
     },
     getMyNautiqueEngineHours: function (newEngineHours) {
-      if(this.disableBefore == false) {
+      if (this.disableBefore == false) {
         this.prefillBefore();
       } else {
         this.prefillAfter();
@@ -133,17 +140,21 @@ export default {
     },
   },
   methods: {
-    ...mapActions("boat", ["queryEngineHourLogLatest", "addEngineHours", "queryMyNautiqueInfo"]),
+    ...mapActions("boat", [
+      "queryEngineHourLogLatest",
+      "addEngineHours",
+      "queryMyNautiqueInfo",
+    ]),
     ...mapActions("configuration", ["queryConfiguration"]),
-    prefillBefore: function() {
-      if(this.getMyNautiqueEnabled && this.getMyNautiqueEngineHours != null){
+    prefillBefore: function () {
+      if (this.getMyNautiqueEnabled && this.getMyNautiqueEngineHours != null) {
         this.form.beforeHours = this.getMyNautiqueEngineHours;
         this.beforeDescription = "prefilled by myNautique";
         this.afterDescription = null;
       }
     },
-    prefillAfter: function() {
-      if(this.getMyNautiqueEnabled && this.getMyNautiqueEngineHours != null){
+    prefillAfter: function () {
+      if (this.getMyNautiqueEnabled && this.getMyNautiqueEngineHours != null) {
         this.form.afterHours = this.getMyNautiqueEngineHours;
         this.beforeDescription = null;
         this.afterDescription = "prefilled by myNautique";
@@ -214,7 +225,7 @@ export default {
     this.queryConfiguration();
     this.setDriver();
     this.queryEngineHourLogLatest();
-    if(this.getMyNautiqueBoatId){
+    if (this.getMyNautiqueBoatId) {
       this.queryMyNautiqueInfo(this.getMyNautiqueBoatId);
     }
     this.setDisableBefore();

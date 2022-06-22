@@ -19,7 +19,7 @@
             :src="getLocationMap"
             frameborder="0"
             style="
-              {
+               {
                 border: 0;
               }
             "
@@ -49,22 +49,19 @@ export default {
   name: "WSInfo",
   components: {
     CardModule,
-    SubpageContainer
+    SubpageContainer,
   },
   computed: {
     ...mapGetters("configuration", ["getLocationAddress", "getLocationMap"]),
-    isMobile: function () {
-      return BooksysBrowser.isMobile();
-    },
     mapHeight: function () {
-      if (this.isMobile) {
+      if (BooksysBrowser.isMobileResponsive()) {
         return 350;
       } else {
         return 300;
       }
     },
     mapWidth: function () {
-      if (this.isMobile) {
+      if (BooksysBrowser.isMobileResponsive()) {
         return 340;
       } else {
         return 600;
@@ -82,7 +79,6 @@ export default {
 </script>
 
 <style scoped>
-
 .card-height {
   max-height: 500px;
   min-height: 500px;

@@ -122,7 +122,7 @@ export default {
           },
         },
       ];
-      if (BooksysBrowser.isMobile()) {
+      if (BooksysBrowser.isMobileResponsive()) {
         remove(columns, function (n, idx) {
           return idx == 4;
         });

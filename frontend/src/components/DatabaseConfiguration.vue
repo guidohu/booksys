@@ -70,11 +70,11 @@ export default {
   },
   watch: {
     conf: {
-      handler(){
+      handler() {
         this.$emit("config-change", this.conf);
       },
       deep: true,
-    }
+    },
   },
   created() {
     this.conf.host = this.dbconfig.host;

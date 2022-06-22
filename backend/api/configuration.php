@@ -16,52 +16,40 @@
         exit;
     }
 
+    $response = null;
+
     switch($_GET['action']){
         case 'get_db_config':
             $response = get_db_config($configuration);
-            echo json_encode($response);
-            exit;
+            break;
         case 'get_recaptcha_key':
             $response = get_recaptcha_key($configuration);
-            echo json_encode($response);
-            exit;
+            break;
         case 'get_logo_file':
             $response = get_logo_file($configuration);
-            echo json_encode($response);
-            exit;
-        case 'get_customization_parameters':
-            get_customization_parameters($configuration);
-            exit;
+            break;
         case 'get_configuration':
             $response = get_configuration($configuration);
-            echo json_encode($response);
-            exit;
+            break;
         case 'set_configuration':
             $response = set_configuration($configuration);
-            echo json_encode($response);
-            exit;
+            break;
         case 'setup_db_config':
             $response = setup_db_config($configuration);
-            echo json_encode($response);
-            exit;
+            break;
         case 'setup_mynautique_config':
             $response = setup_mynautique_config($configuration);
-            echo json_encode($response);
-            exit;
-        case 'is_admin_user_configured':
-            is_admin_user_configured($configuration);
-            exit;
+            break;
         case 'make_user_admin':
             $response = make_user_admin($configuration);
-            echo json_encode($response);
-            exit;
+            break;
+        default:
+            HttpHeader::setResponseCode(400);
+            $response = Status::errorStatus("Action not supported");
+            break;
     }
 
-    HttpHeader::setResponseCode(400);
-    $status = array();
-    $status['ok'] = FALSE;
-    $status['message'] = 'invalid action requested';
-    echo json_encode($status);
+    echo json_encode($response);
     return;
 
     // returns the current database configuration
@@ -101,23 +89,6 @@
         $response = array();
         $response['uri'] = $configuration->logo_file;
         return Status::successDataResponse("success", $response);
-    }
-
-    function get_customization_parameters($configuration){
-        // only available to users that are logged in
-        _is_logged_in_or_return($configuration);
-
-        // return customization parameters
-        $response = array();
-        $response['currency']                = $configuration->currency;
-        $response['location_map_iframe']     = $configuration->location_map;
-        $response['location_address']        = $configuration->location_address;
-        $response['payment_account_owner']   = $configuration->payment_account_owner;
-        $response['payment_account_iban']    = $configuration->payment_account_iban;
-        $response['payment_account_bic']     = $configuration->payment_account_bic;
-        $response['payment_account_comment'] = $configuration->payment_account_comment;
-        echo json_encode($response);
-        return;
     }
 
     function get_configuration($configuration){
@@ -212,10 +183,10 @@
         if(isset($data->smtp_server) && !$sanitizer->isServerAddress($data->smtp_server)){
             return Status::errorStatus("The provided SMTP server address is not in a valid format. (e.g., smtp.gmail.com:587");
         }
-        if(isset($data->recaptcha_privatekey) && !$sanitizer->isAlphaNum($data->recaptcha_privatekey)){
+        if(isset($data->recaptcha_privatekey) && !$sanitizer->isRecaptcha($data->recaptcha_privatekey)){
             return Status::errorStatus("The provided recaptcha private key is not in a valid format.");
         }
-        if(isset($data->recaptcha_publickey) && !$sanitizer->isAlphaNum($data->recaptcha_publickey)){
+        if(isset($data->recaptcha_publickey) && !$sanitizer->isRecaptcha($data->recaptcha_publickey)){
             return Status::errorStatus("The provided recaptcha public key is not in a valid format.");
         }
         if(isset($data->engine_hour_format) && !$sanitizer->isEngineHourFormat($data->engine_hour_format)){
@@ -393,25 +364,6 @@
         return Status::errorStatus("myNautique could not be configured, an error occurred");
     }
 
-    // Tests whether there is at least one admin present in the database
-    // (if an admin exists the user setup has been done)
-    function is_admin_user_configured($configuration){
-        $res = array();
-        try{
-            $res['OK'] = TRUE;
-            $res['admin_exists'] = _is_admin_user_configured($configuration);
-        }
-        catch(Exception $e){
-            $res['OK'] = FALSE;
-            error_log($e);
-            $res['msg'] = "Error querying the database to check whether an admin already exists";
-        }
-        
-        // return result
-        echo json_encode($res);
-        return;
-    }
-
     /**
      * make_user_admin allows a user to become admin during the
      * initial setup of the application. As soon as an admin user
@@ -465,7 +417,7 @@
     function _is_admin_user_configured($configuration){
         $db = new DBAccess($configuration);
         if(!$db->connect()){
-            throw new Exception('api/configuration/is_admin_user_configured: cannot connect to database');
+            throw new Exception('api/configuration/_is_admin_user_configured: cannot connect to database');
         }
 
         $query = 'SELECT u.id 

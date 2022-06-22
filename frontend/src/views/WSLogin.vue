@@ -32,7 +32,6 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import LoginForm from "@/components/LoginForm.vue";
-import { BooksysBrowser } from "@/libs/browser";
 import OverlaySpinner from "@/components/styling/OverlaySpinner.vue";
 
 export default {
@@ -49,9 +48,6 @@ export default {
     };
   },
   computed: {
-    isMobile: function () {
-      return BooksysBrowser.isMobile();
-    },
     ...mapGetters("login", ["username"]),
     ...mapGetters("configuration", ["getLogoFile"]),
   },
@@ -98,6 +94,7 @@ export default {
             this.$router.push("/dashboard");
           }
         } else {
+          console.log("User not logged in: show login");
           this.showLogin = true;
         }
         this.isLoading = false;
