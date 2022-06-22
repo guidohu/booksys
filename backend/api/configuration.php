@@ -183,10 +183,10 @@
         if(isset($data->smtp_server) && !$sanitizer->isServerAddress($data->smtp_server)){
             return Status::errorStatus("The provided SMTP server address is not in a valid format. (e.g., smtp.gmail.com:587");
         }
-        if(isset($data->recaptcha_privatekey) && !$sanitizer->isAlphaNum($data->recaptcha_privatekey)){
+        if(isset($data->recaptcha_privatekey) && !$sanitizer->isRecaptcha($data->recaptcha_privatekey)){
             return Status::errorStatus("The provided recaptcha private key is not in a valid format.");
         }
-        if(isset($data->recaptcha_publickey) && !$sanitizer->isAlphaNum($data->recaptcha_publickey)){
+        if(isset($data->recaptcha_publickey) && !$sanitizer->isRecaptcha($data->recaptcha_publickey)){
             return Status::errorStatus("The provided recaptcha public key is not in a valid format.");
         }
         if(isset($data->engine_hour_format) && !$sanitizer->isEngineHourFormat($data->engine_hour_format)){
