@@ -22,8 +22,8 @@ export default class Boat {
    * }
    */
   static addEngineHours(engineHourEntry) {
-    console.log("api/addEngineHours called");
-    return Request.getRequest('/api/boat.php?action=update_engine_hours', engineHourEntry);
+    console.log("api/addEngineHours called, with", engineHourEntry);
+    return Request.postRequest('/api/boat.php?action=update_engine_hours', engineHourEntry);
   }
 
   /**

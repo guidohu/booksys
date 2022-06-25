@@ -153,9 +153,7 @@ import ModalBody from "../components/bricks/ModalBody.vue";
 import ModalFooter from "../components/bricks/ModalFooter.vue";
 import InputText from "../components/forms/inputs/InputText.vue";
 import InputPassword from "../components/forms/inputs/InputPassword.vue";
-
-const VueRecaptcha = () =>
-  import(/* webpackChunkName: "vue-recaptcha" */ "vue-recaptcha");
+import { VueRecaptcha } from 'vue-recaptcha';
 
 export default {
   name: "WSPasswordReset",
