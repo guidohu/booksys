@@ -1,3 +1,7 @@
+v3.2.1
+- fix boat engine hour check in
+- fix recaptcha for password reset
+
 v3.2.0
 - remove duplicate code
 - fix recaptcha
