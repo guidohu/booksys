@@ -74,8 +74,8 @@ export default {
   data() {
     return {
       errors: [],
-      enabled: false,
       fuelLevel: 0,
+      timer: null,
     };
   },
   computed: {
@@ -140,6 +140,23 @@ export default {
       };
       this.errors = [];
     },
+    startAutoRefresh: function () {
+      this.timer = setInterval(
+        this.refresh,
+        5000
+      );
+    },
+    stopAutoRefresh: function () {
+      if (this.timer != null) {
+        console.log("myNautique auto refresh stopped");
+        clearInterval(this.timer);
+      }
+    },
+    refresh: function () {
+      if(this.getMyNautiqueEnabled && this.getMyNautiqueBoatId) {
+        this.queryMyNautiqueInfo(this.getMyNautiqueBoatId);
+      }
+    },
     ...mapActions("boat", ["addFuelEntry", "queryMyNautiqueInfo"]),
     ...mapActions("configuration", ["queryConfiguration"]),
   },
@@ -154,19 +171,28 @@ export default {
           .catch((error) => {
             this.errors = [error];
           });
+      } else {
+        console.log("myNautique disabled");
       }
       console.log("myNautiqueEnabled value changed to", enabled);
     },
-    // "getMyNautiqueFuelLevel": function(value) {
-    //   console.log("fuelLevel changed");
-    //   this.fuelLevel = value;
-    // },
   },
   created() {
-    this.queryConfiguration();
-    if (this.getMyNautiqueEnabled && this.getMyNautiqueBoatId) {
-      this.queryMyNautiqueInfo(this.getMyNautiqueBoatId);
-    }
+    this.queryConfiguration()
+      .then(() => {
+        // query myNautique if enabled
+        if (this.getMyNautiqueEnabled && this.getMyNautiqueBoatId) {
+          console.log("query myNautique");
+          this.queryMyNautiqueInfo(this.getMyNautiqueBoatId)
+            .then(() => {
+              console.log("enable myNautique auto refresh");
+              this.startAutoRefresh();
+            });
+        }
+      })
   },
+  beforeUnmount() {
+    this.stopAutoRefresh();
+  }
 };
 </script>

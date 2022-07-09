@@ -1,3 +1,6 @@
+unreleased
+- fuel status auto refresh for myNautique
+
 v3.2.1
 - fix boat engine hour check in
 - fix recaptcha for password reset

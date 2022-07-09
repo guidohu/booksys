@@ -1,6 +1,6 @@
 <template>
   <div class="container text-left">
-    <fuel-refuel-modal v-model:visible="visibleRefuelModal" />
+    <fuel-refuel-modal v-if="visibleRefuelModal" v-model:visible="visibleRefuelModal" />
     <form-button
       type="button"
       btn-style="info"
@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import { mapGetters } from "vuex";
 import FormButton from "@/components/forms/FormButton.vue";
 import FuelRefuelModal from "@/components/FuelRefuelModal.vue";
 
