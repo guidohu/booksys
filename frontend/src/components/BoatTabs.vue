@@ -2,19 +2,19 @@
   <div>
     <ul class="nav nav-tabs">
       <li class="nav-item">
-        <a class="nav-link active" data-bs-toggle="tab" href="#engine-hours">
+        <a class="nav-link active" data-bs-toggle="tab" href="#engine-hours" @click="selectTab('engine-hours')">
           <div class="bc_icon bc_icon_tab bc_icon_tacho align-middle nav-tab-icon" />
           Engine Hours
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" data-bs-toggle="tab" href="#fuel">
+        <a class="nav-link" data-bs-toggle="tab" href="#fuel" @click="selectTab('fuel')">
           <div class="bc_icon bc_icon_tab bc_icon_fuel align-middle nav-tab-icon" />
           Fuel
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" data-bs-toggle="tab" href="#maintenance">
+        <a class="nav-link" data-bs-toggle="tab" href="#maintenance"  @click="selectTab('maintenance')">
           <div class="bc_icon bc_icon_tab bc_icon_wrench align-middle nav-tab-icon" />
           Maintenance
         </a>
@@ -39,14 +39,38 @@
 import EngineHourLogContainer from "@/components/EngineHourLogContainer";
 import FuelLogContainer from "@/components/FuelLogContainer";
 import MaintenanceLogContainer from "@/components/MaintenanceLogContainer";
+import { Tab } from 'bootstrap';
 
 export default {
   name: "BoatTabs",
+  data() {
+    return {
+      selectedTab: null,
+    }
+  },
   components: {
     EngineHourLogContainer,
     FuelLogContainer,
     MaintenanceLogContainer,
   },
+  methods: {
+    selectTab: function(tabName) {
+      this.$router.push('/boat/'+tabName);
+    }
+  },
+  created() {
+    this.selectedTab = this.$route.params.tab;
+  },
+  mounted() {
+    if(this.selectedTab == "engine-hours" || this.selectedTab == "fuel" || this.selectedTab == "maintenance") {
+      // show specific tab
+      let tabTrigger = document.querySelector("[href='#"+this.selectedTab+"']");
+      console.log(tabTrigger);
+      let tab = new Tab(tabTrigger);
+      console.log(tab);
+      tab.show();
+    }
+  }
 };
 </script>
 

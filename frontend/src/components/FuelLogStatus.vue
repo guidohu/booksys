@@ -74,8 +74,8 @@ export default {
   data() {
     return {
       errors: [],
-      enabled: false,
       fuelLevel: 0,
+      timer: null,
     };
   },
   computed: {
@@ -119,54 +119,45 @@ export default {
     },
   },
   methods: {
-    add: function () {
-      const entry = {
-        user_id: this.userInfo.id,
-        engine_hours: this.form.engineHours,
-        liters: this.form.liters,
-        cost: this.form.cost,
-      };
-      this.addFuelEntry(entry)
-        .then(() => {
-          this.resetForm();
-        })
-        .catch((errors) => (this.errors = errors));
+    startAutoRefresh: function () {
+      this.timer = setInterval(
+        this.refresh,
+        5000
+      );
+      // make sure we stop auto refresh again at
+      // some point (15min)
+      setTimeout(this.stopAutoRefresh, 900000);
     },
-    resetForm: function () {
-      this.form = {
-        engineHours: null,
-        cost: null,
-        liters: null,
-      };
-      this.errors = [];
+    stopAutoRefresh: function () {
+      if (this.timer != null) {
+        console.log("myNautique auto refresh stopped");
+        clearInterval(this.timer);
+      }
     },
-    ...mapActions("boat", ["addFuelEntry", "queryMyNautiqueInfo"]),
+    refresh: function () {
+      if(this.getMyNautiqueEnabled && this.getMyNautiqueBoatId) {
+        this.queryMyNautiqueInfo(this.getMyNautiqueBoatId);
+      }
+    },
+    ...mapActions("boat", ["queryMyNautiqueInfo"]),
     ...mapActions("configuration", ["queryConfiguration"]),
   },
-  watch: {
-    getMyNautiqueEnabled: function (enabled) {
-      if (enabled) {
-        this.queryMyNautiqueInfo(this.getMyNautiqueBoatId)
-          .then(() => {
-            console.log("queried my nautique info");
-            // this.enabled = true;
-          })
-          .catch((error) => {
-            this.errors = [error];
-          });
-      }
-      console.log("myNautiqueEnabled value changed to", enabled);
-    },
-    // "getMyNautiqueFuelLevel": function(value) {
-    //   console.log("fuelLevel changed");
-    //   this.fuelLevel = value;
-    // },
-  },
   created() {
-    this.queryConfiguration();
-    if (this.getMyNautiqueEnabled && this.getMyNautiqueBoatId) {
-      this.queryMyNautiqueInfo(this.getMyNautiqueBoatId);
-    }
+    this.queryConfiguration()
+      .then(() => {
+        // query myNautique if enabled
+        if (this.getMyNautiqueEnabled && this.getMyNautiqueBoatId) {
+          console.log("query myNautique");
+          this.queryMyNautiqueInfo(this.getMyNautiqueBoatId)
+            .then(() => {
+              console.log("enable myNautique auto refresh");
+              this.startAutoRefresh();
+            });
+        }
+      })
   },
+  beforeUnmount() {
+    this.stopAutoRefresh();
+  }
 };
 </script>

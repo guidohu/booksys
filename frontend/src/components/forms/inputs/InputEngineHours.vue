@@ -10,6 +10,7 @@
           :state="state"
           :disabled="disabled"
           v-model="formValue"
+          @focus="$event.target.select()"
           @blur="changeHandler($event.target.value)"
           :placeholder="formPlaceholder"
         />

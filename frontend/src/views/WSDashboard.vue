@@ -5,7 +5,7 @@
         userInfo != null &&
         userInfo.user_role_name == 'admin' &&
         getDbUpdateStatus != null &&
-        getDbUpdateStatus.updateAvailable == true
+        getDbUpdateStatus == true
       "
     >
       <database-update-modal />
