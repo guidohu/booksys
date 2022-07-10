@@ -1,5 +1,8 @@
 unreleased
 - fuel status auto refresh for myNautique
+- fix db schema update check
+- auto select content of input fields
+- support direct navigation to boat tabs
 
 v3.2.1
 - fix boat engine hour check in
