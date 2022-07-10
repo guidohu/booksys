@@ -1,4 +1,4 @@
-unreleased
+v3.3.0
 - fuel status auto refresh for myNautique
 - fix db schema update check
 - auto select content of input fields
