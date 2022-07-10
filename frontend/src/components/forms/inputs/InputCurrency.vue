@@ -10,6 +10,7 @@
           :id="id"
           :value="modelValue"
           :placeholder="placeholder"
+          @focus="$event.target.select()"
           @input="changeHandler($event.target.value)"
         />
         <span class="input-group-text">{{ currency }}</span>
