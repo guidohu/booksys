@@ -119,32 +119,14 @@ export default {
     },
   },
   methods: {
-    add: function () {
-      const entry = {
-        user_id: this.userInfo.id,
-        engine_hours: this.form.engineHours,
-        liters: this.form.liters,
-        cost: this.form.cost,
-      };
-      this.addFuelEntry(entry)
-        .then(() => {
-          this.resetForm();
-        })
-        .catch((errors) => (this.errors = errors));
-    },
-    resetForm: function () {
-      this.form = {
-        engineHours: null,
-        cost: null,
-        liters: null,
-      };
-      this.errors = [];
-    },
     startAutoRefresh: function () {
       this.timer = setInterval(
         this.refresh,
         5000
       );
+      // make sure we stop auto refresh again at
+      // some point (15min)
+      setTimeout(this.stopAutoRefresh, 900000);
     },
     stopAutoRefresh: function () {
       if (this.timer != null) {
@@ -157,25 +139,8 @@ export default {
         this.queryMyNautiqueInfo(this.getMyNautiqueBoatId);
       }
     },
-    ...mapActions("boat", ["addFuelEntry", "queryMyNautiqueInfo"]),
+    ...mapActions("boat", ["queryMyNautiqueInfo"]),
     ...mapActions("configuration", ["queryConfiguration"]),
-  },
-  watch: {
-    getMyNautiqueEnabled: function (enabled) {
-      if (enabled) {
-        this.queryMyNautiqueInfo(this.getMyNautiqueBoatId)
-          .then(() => {
-            console.log("queried my nautique info");
-            // this.enabled = true;
-          })
-          .catch((error) => {
-            this.errors = [error];
-          });
-      } else {
-        console.log("myNautique disabled");
-      }
-      console.log("myNautiqueEnabled value changed to", enabled);
-    },
   },
   created() {
     this.queryConfiguration()
