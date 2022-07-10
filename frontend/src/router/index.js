@@ -154,7 +154,7 @@ const routes = [
     component: Calendar,
   },
   {
-    path: "/boat",
+    path: "/boat/:tab?",
     name: "Boat",
     beforeEnter: (to, from, next) => {
       if (loginEnforced(to, from, next)) {
@@ -245,6 +245,11 @@ const router = createRouter({
   history: createWebHistory(),
   base: process.env.BASE_URL,
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  document.title = to.name;
+  next();
 });
 
 export default router;
