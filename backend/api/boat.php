@@ -356,7 +356,7 @@
         $query = "INSERT INTO boat_fuel
                 (timestamp, engine_hours, liters, cost_chf, user_id, contributes_to_balance)
                 VALUES
-                (?,?,?,?,?, ?);";
+                (?,?,?,?,?,?);";
         $db->prepare($query);
         $db->bind_param('sdddii',
             $date->format('Y-m-d H:i:s'),
