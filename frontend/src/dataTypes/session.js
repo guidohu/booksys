@@ -9,7 +9,10 @@ export default class Session {
     start = null, // ISO string
     end = null, // ISO string
     maxRiders = null,
-    type = null
+    type = null,
+    creator_id = null,
+    creator_first_name = null,
+    creator_last_name = null,
   ) {
     this.id = id;
     this.title = title;
@@ -18,6 +21,9 @@ export default class Session {
     this.end = end;
     this.maximumRiders = maxRiders;
     this.type = type;
+    this.creator_id = creator_id;
+    this.creator_first_name = creator_first_name;
+    this.creator_last_name = creator_last_name;
   }
 
   addRiders = (riders) => {
