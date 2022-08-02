@@ -59,6 +59,12 @@
           {{ dateString }}
         </div>
       </div>
+      <div v-if="session != null && session.creator_first_name != null && session.creator_last_name != null" class="row">
+        <div class="col-4">Host</div>
+        <div class="col-8">
+          {{ session.creator_first_name }} {{ session.creator_last_name }}
+        </div>
+      </div>
       <div class="row">
         <div class="col-4">Session</div>
         <div class="col-8">

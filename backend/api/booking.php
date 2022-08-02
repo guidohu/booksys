@@ -472,22 +472,25 @@
 
         // get all sessions that happen between start and end
         $query = 'SELECT 
-            id as id,
-            UNIX_TIMESTAMP(start_time) as start,
-            UNIX_TIMESTAMP(end_time) as end,
-            title as title,
-            comment as description,
-            type as type,
-            free as free,
-            creator_id as creator_id
-            FROM session
+            s.id as id,
+            UNIX_TIMESTAMP(s.start_time) as start,
+            UNIX_TIMESTAMP(s.end_time) as end,
+            s.title as title,
+            s.comment as description,
+            s.type as type,
+            s.free as free,
+            s.creator_id as creator_id,
+			u.first_name as first_name,
+			u.last_name as last_name
+            FROM session s 
+			LEFT JOIN user u ON u.id = s.creator_id
             WHERE
-            ( UNIX_TIMESTAMP(start_time) >= ? AND UNIX_TIMESTAMP(start_time) < ? )
+            ( UNIX_TIMESTAMP(s.start_time) >= ? AND UNIX_TIMESTAMP(s.start_time) < ? )
             OR
-            ( UNIX_TIMESTAMP(end_time) >= ? AND UNIX_TIMESTAMP(end_time) < ? )
+            ( UNIX_TIMESTAMP(s.end_time) >= ? AND UNIX_TIMESTAMP(s.end_time) < ? )
             OR
-            ( UNIX_TIMESTAMP(start_time) < ? AND UNIX_TIMESTAMP(end_time) >= ? )
-            ORDER BY start_time;';
+            ( UNIX_TIMESTAMP(s.start_time) < ? AND UNIX_TIMESTAMP(s.end_time) >= ? )
+            ORDER BY s.start_time;';
         $db->prepare($query);
         $db->bind_param('iiiiii', 
             $start,
@@ -516,6 +519,8 @@
                 'free'       => $result[$i]['free'],
                 'type'       => $result[$i]['type'],
                 'creator_id' => $result[$i]['creator_id'],
+				'creator_first_name' => $result[$i]['first_name'],
+				'creator_last_name' => $result[$i]['last_name'],
                 'duration'   => $result[$i]['end'] - $result[$i]['start']);
         }
 

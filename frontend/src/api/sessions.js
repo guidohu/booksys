@@ -86,7 +86,10 @@ export default class Sessions {
               dayjs.unix(s.start).tz(timezone).format(),
               dayjs.unix(s.end).tz(timezone).format(),
               s.free,
-              s.type
+              s.type,
+              s.creator_id,
+              s.creator_first_name,
+              s.creator_last_name
             );
             session.addRiders(s.riders);
             res.sessions[i] = session;
@@ -155,7 +158,10 @@ export default class Sessions {
             dayjs.unix(s.start).tz(timezone).format(),
             dayjs.unix(s.end).tz(timezone).format(),
             s.free,
-            s.type
+            s.type,
+            s.creator_id,
+            s.creator_first_name,
+            s.creator_last_name
           );
           session.addRiders(s.riders);
           res.sessions[i] = session;
