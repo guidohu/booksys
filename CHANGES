@@ -1,3 +1,6 @@
+v3.4.0
+- display the host of a session
+
 v3.3.0
 - fuel status auto refresh for myNautique
 - fix db schema update check
