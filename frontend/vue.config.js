@@ -6,10 +6,14 @@ module.exports = {
   devServer: {
     proxy: {
       "^/api/v2": {
-        target: "http://localhost:81",
+        target: "http://localhost:80",
         changeOrigin: true,
       },
-      "^/api/": {
+      "^/api/v1": {
+        target: "http://localhost:80",
+        changeOrigin: true,
+      },
+      "^/uploads": {
         target: "http://localhost:80",
         changeOrigin: true,
       },

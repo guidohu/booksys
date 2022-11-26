@@ -12,7 +12,7 @@ import (
 
 func main() {
 	var port int
-	flag.IntVar(&port, "port", 8080, "The port to listen on")
+	flag.IntVar(&port, "port", 80, "The port to listen on")
 	flag.Parse()
 
 	http.Handle("/api/v2/ping", http.HandlerFunc(getPing))

@@ -13,6 +13,6 @@ COPY api/v2 api/v2
 # RUN ls -l ./
 # RUN ls -lah ./
 RUN go build -v -o /usr/local/bin/app ./api/v2/server/main.go
-EXPOSE 8080
+EXPOSE 80
 
 CMD ["app"]

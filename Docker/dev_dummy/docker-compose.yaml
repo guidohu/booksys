@@ -7,7 +7,7 @@ services:
         command:
           - "--api.insecure=true"
           - "--providers.docker=true"
-          - "--providers.docker.exposedbydefault=true"
+          - "--providers.docker.exposedbydefault=false"
           - "--entrypoints.web.address=:80"
         ports:
           - "80:80"
@@ -25,22 +25,40 @@ services:
             - '3306:3306'
         expose:
             - '3306'
-    backend:
-        build: ../../backend/Dockerfile_api_v1
+    api_v1:
+        build:
+            context: ../../backend
+            dockerfile: Dockerfile_api_v1
+        container_name: dev_dummy_backend_api_v1
         environment:
             DB_SERVER: 'db:3306'
             DB_NAME: 'booksys'
             DB_USER: 'user'
             DB_PASSWORD: 'userpassword'
         labels:
-            - "traefik.http.routers.backend.rule=PathPrefix(`/api/v1`) || PathPrefix(`/api/v1`) || PathPrefix(`/uploads/`) || PathPrefix(`/uploads`)"
-            - "traefik.http.services.backend.loadbalancer.server.port=80"
+            - "traefik.enable=true"
+            - "traefik.http.routers.api_v1.rule=PathPrefix(`/api/v1`) || PathPrefix(`/api/v1`) || PathPrefix(`/uploads/`) || PathPrefix(`/uploads`)"
+            - "traefik.http.services.api_v1.loadbalancer.server.port=80"
         volumes:
             - ${PWD}/../../backend/api/v1:/var/www/html/api/v1
             - ${PWD}/../../backend/classes:/var/www/html/classes
             - ${PWD}/config.php:/var/www/html/config/config.php
             - ${PWD}/../../backend/config/db:/var/www/html/config/db
             - ${PWD}/backend/etc/apache2/000-default.conf:/etc/apache2/sites-available/000-default.conf
+    api_v2:
+        build:
+            context: ../../backend
+            dockerfile: Dockerfile_api_v2
+        container_name: dev_dummy_backend_api_v2
+        environment:
+            DB_SERVER: 'db:3306'
+            DB_NAME: 'booksys'
+            DB_USER: 'user'
+            DB_PASSWORD: 'userpassword'
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.api_v2.rule=PathPrefix(`/api/v2`) || PathPrefix(`/api/v2`)"
+            - "traefik.http.services.api_v2.loadbalancer.server.port=80" 
     frontend:
         build: "./frontend"
         user: "node"
@@ -50,6 +68,7 @@ services:
         volumes:
             - ../../frontend:/home/node/app
         labels:
+            - "traefik.enable=true"
             - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
             - "traefik.http.services.frontend.loadbalancer.server.port=8080"
         command: "npm run serve"
