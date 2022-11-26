@@ -16,7 +16,7 @@ export default class Heat {
    */
   static addHeats(heats) {
     console.log("heat/addHeats called, with", heats);
-    return Request.postRequest("/api/heat.php?action=add_heats", heats);
+    return Request.postRequest("/api/v1/heat.php?action=add_heats", heats);
   }
 
   /**
@@ -28,7 +28,7 @@ export default class Heat {
     const request = {
       heat_id: heatId,
     };
-    return Request.postRequest("/api/heat.php?action=delete_heat", request);
+    return Request.postRequest("/api/v1/heat.php?action=delete_heat", request);
   }
 
   /**
@@ -43,7 +43,7 @@ export default class Heat {
       duration_s: heatUpdate.duration,
       comment: heatUpdate.comment,
     };
-    return Request.postRequest("/api/heat.php?action=update_heat", request);
+    return Request.postRequest("/api/v1/heat.php?action=update_heat", request);
   }
 
   /**
@@ -55,6 +55,6 @@ export default class Heat {
     const request = {
       session_id: sessionId,
     };
-    return Request.postRequest("/api/heat.php?action=get_session_heats", request);
+    return Request.postRequest("/api/v1/heat.php?action=get_session_heats", request);
   }
 }

@@ -4,7 +4,16 @@ module.exports = {
   outputDir: "dist",
   publicPath: "/",
   devServer: {
-    proxy: "http://localhost:80",
+    proxy: {
+      "^/api/v2": {
+        target: "http://localhost:81",
+        changeOrigin: true,
+      },
+      "^/api/": {
+        target: "http://localhost:80",
+        changeOrigin: true,
+      },
+    },
   },
   pages: {
     index: {
@@ -88,4 +97,4 @@ module.exports = {
     },
     workboxPluginMode: "GenerateSW",
   },
-};
+}

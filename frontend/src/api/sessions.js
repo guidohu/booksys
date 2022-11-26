@@ -41,7 +41,7 @@ export default class Sessions {
 
     console.log("getSessionsCalendar:", query);
     return new Promise((resolve, reject) => {
-      Request.postRequest("/api/booking.php?action=get_booking_month", query)
+      Request.postRequest("/api/v1/booking.php?action=get_booking_month", query)
       .then((days) => {
         let monthSessions = [];
         for (let i = 0; i < days.length; i++) {
@@ -116,7 +116,7 @@ export default class Sessions {
 
     console.log("getSessions:", dateStart);
     return new Promise((resolve, reject) => {
-      Request.postRequest("/api/booking.php?action=get_booking_day", query)
+      Request.postRequest("/api/v1/booking.php?action=get_booking_day", query)
       .then((res) => {
         let timezone = res.timezone;
         const winStart = res.window_start;
@@ -179,7 +179,7 @@ export default class Sessions {
       id: sessionId,
     };
     return new Promise((resolve, reject) => {
-      Request.postRequest("/api/booking.php?action=get_session", requestData)
+      Request.postRequest("/api/v1/booking.php?action=get_session", requestData)
         .then((sR) => {
           const session = new Session(
             sR.id,
@@ -219,7 +219,7 @@ export default class Sessions {
       type: sessionData.type,
     };
 
-    return Request.postRequest("/api/booking.php?action=add_session", session);
+    return Request.postRequest("/api/v1/booking.php?action=add_session", session);
   }
 
   static editSession(sessionData) {
@@ -236,22 +236,22 @@ export default class Sessions {
       type: sessionData.type,
     };
 
-    return Request.postRequest("/api/booking.php?action=edit_session", session);
+    return Request.postRequest("/api/v1/booking.php?action=edit_session", session);
   }
 
   static deleteSession(sessionData) {
-    console.log("api/deleteSession called for session:", sessionData);
+    console.log("api/v1/deleteSession called for session:", sessionData);
     // build request body
     const session = {
       session_id: sessionData.id,
     };
 
-    return Request.postRequest("/api/booking.php?action=delete_session", session);
+    return Request.postRequest("/api/v1/booking.php?action=delete_session", session);
   }
 
   static addUsersToSession(sessionId, users) {
     console.log(
-      "api/addUsersToSession called for session:",
+      "api/v1/addUsersToSession called for session:",
       sessionId,
       "and users",
       users
@@ -262,7 +262,7 @@ export default class Sessions {
       session_id: sessionId,
     };
 
-    return Request.postRequest("/api/booking.php?action=add_users", requestBody);
+    return Request.postRequest("/api/v1/booking.php?action=add_users", requestBody);
   }
 
   /**
@@ -278,6 +278,6 @@ export default class Sessions {
       session_id: sessionId,
     };
 
-    return Request.postRequest("/api/booking.php?action=delete_user", requestBody);
+    return Request.postRequest("/api/v1/booking.php?action=delete_user", requestBody);
   }
 }

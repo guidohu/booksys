@@ -19,7 +19,7 @@ export default class Login {
         password: pwHash,
       };
 
-      Request.postRequest("/api/login.php?action=login", request)
+      Request.postRequest("/api/v1/login.php?action=login", request)
       .then((response) => resolve(response))
       .catch((error) => reject(error));
     });
@@ -27,17 +27,17 @@ export default class Login {
 
   static logout() {
     console.log("Login/logout called");
-    return Request.getRequest('/api/logout.php');
+    return Request.getRequest('/api/v1/logout.php');
   }
 
   static getMyUser() {
     console.log("Login/getMyUser called");
-    return Request.getRequest('/api/user.php?action=get_my_user');
+    return Request.getRequest('/api/v1/user.php?action=get_my_user');
   }
 
   static isLoggedIn() {
     console.log("Login/isLoggedIn called");
-    return Request.getRequest('/api/login.php?action=isLoggedIn');
+    return Request.getRequest('/api/v1/login.php?action=isLoggedIn');
   }
 
   static calcHash(password) {

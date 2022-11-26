@@ -27,7 +27,7 @@ services:
         expose:
             - '3306'
     backend:
-        build: ../../backend
+        build: ../../backend/api/v1
         container_name: "backend_fresh"
         environment:
             DB_SERVER: 'db:3306'
@@ -35,7 +35,7 @@ services:
             DB_USER: 'user'
             DB_PASSWORD: 'userpassword'
         labels:
-            - "traefik.http.routers.backend.rule=PathPrefix(`/api/`) || PathPrefix(`/api`) || PathPrefix(`/uploads/`) || PathPrefix(`/uploads`)"
+            - "traefik.http.routers.backend.rule=PathPrefix(`/api/v1/`) || PathPrefix(`/api/v1`) || PathPrefix(`/uploads/`) || PathPrefix(`/uploads`)"
             - "traefik.http.services.backend.loadbalancer.server.port=80"
         volumes:
             - ${PWD}/../../backend/api:/var/www/html/api

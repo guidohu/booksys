@@ -14,7 +14,7 @@ RUN apt-get clean
 RUN a2enmod headers
 
 # copy our UI application code
-COPY api/     /var/www/html/api
+COPY api/v1     /var/www/html/api/v1
 COPY classes/ /var/www/html/classes
 COPY config/  /var/www/html/config
 RUN  chown -R www-data:www-data /var/www/html

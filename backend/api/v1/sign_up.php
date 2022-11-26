@@ -5,7 +5,7 @@
 	// automatically load all classes
 	spl_autoload_register('sign_up_autoloader');
 	function sign_up_autoloader($class){
-		include '../classes/'.$class.'.php';
+		include '../../classes/'.$class.'.php';
 	}
 	
 	// User does not need to be logged in. This is basically an open API

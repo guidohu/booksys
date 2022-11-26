@@ -2,8 +2,8 @@
     // automatically load all classes
     spl_autoload_register('configuration_autoloader');
     function configuration_autoloader($class){
-        if(file_exists(__DIR__.'/../classes/'.$class.'.php')){
-            include __DIR__.'/../classes/'.$class.'.php';
+        if(file_exists(__DIR__.'/../../classes/'.$class.'.php')){
+            include __DIR__.'/../../classes/'.$class.'.php';
         }
     }
 

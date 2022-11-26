@@ -2,7 +2,7 @@
 	// automatically load all classes
 	spl_autoload_register('payment_autoloader');
 	function payment_autoloader($class){
-		include '../classes/'.$class.'.php';
+		include '../../classes/'.$class.'.php';
 	}
 
 	// get configuration access

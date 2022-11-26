@@ -2,13 +2,13 @@ import Request from "@/api/common/request.js";
 
 export default class Boat {
   static getEngineHourLog() {
-    console.log("api/getEngineHourLog called");
-    return Request.getRequest('/api/boat.php?action=get_engine_hours_log');
+    console.log("api/v1/getEngineHourLog called");
+    return Request.getRequest('/api/v1/boat.php?action=get_engine_hours_log');
   }
 
   static getEngineHourLogLatest() {
-    console.log("api/getEngineHourLogLatest called");
-    return Request.getRequest('/api/boat.php?action=get_engine_hours_latest');
+    console.log("api/v1/getEngineHourLogLatest called");
+    return Request.getRequest('/api/v1/boat.php?action=get_engine_hours_latest');
   }
 
   /**
@@ -22,8 +22,8 @@ export default class Boat {
    * }
    */
   static addEngineHours(engineHourEntry) {
-    console.log("api/addEngineHours called, with", engineHourEntry);
-    return Request.postRequest('/api/boat.php?action=update_engine_hours', engineHourEntry);
+    console.log("api/v1/addEngineHours called, with", engineHourEntry);
+    return Request.postRequest('/api/v1/boat.php?action=update_engine_hours', engineHourEntry);
   }
 
   /**
@@ -35,13 +35,13 @@ export default class Boat {
    * }
    */
   static updateEngineHours(engineHourEntryUpdate) {
-    console.log("api/updateEngineHours called, with", engineHourEntryUpdate);
-    return Request.postRequest('/api/boat.php?action=update_engine_hours_entry', engineHourEntryUpdate);
+    console.log("api/v1/updateEngineHours called, with", engineHourEntryUpdate);
+    return Request.postRequest('/api/v1/boat.php?action=update_engine_hours_entry', engineHourEntryUpdate);
   }
 
   static getFuelLog() {
-    console.log("api/getFuelLog called");
-    return Request.getRequest('/api/boat.php?action=get_fuel_log');
+    console.log("api/v1/getFuelLog called");
+    return Request.getRequest('/api/v1/boat.php?action=get_fuel_log');
   }
 
   /**
@@ -55,8 +55,8 @@ export default class Boat {
    * }
    */
   static addFuelEntry(fuelEntry) {
-    console.log("api/addFuelEntry called");
-    return Request.postRequest("/api/boat.php?action=update_fuel", fuelEntry);
+    console.log("api/v1/addFuelEntry called");
+    return Request.postRequest("/api/v1/boat.php?action=update_fuel", fuelEntry);
   }
 
   /**
@@ -71,13 +71,13 @@ export default class Boat {
    * }
    */
   static updateFuelEntry(fuelEntry) {
-    console.log("api/updateFuelEntry called, with", fuelEntry);
-    return Request.postRequest("/api/boat.php?action=update_fuel_entry", fuelEntry);
+    console.log("api/v1/updateFuelEntry called, with", fuelEntry);
+    return Request.postRequest("/api/v1/boat.php?action=update_fuel_entry", fuelEntry);
   }
 
   static getMaintenanceLog() {
-    console.log("api/getMaintenanceLog called");
-    return Request.getRequest('/api/boat.php?action=get_maintenance_log');
+    console.log("api/v1/getMaintenanceLog called");
+    return Request.getRequest('/api/v1/boat.php?action=get_maintenance_log');
   }
 
   /**
@@ -90,17 +90,17 @@ export default class Boat {
    * }
    */
   static addMaintenanceEntry(maintenanceEntry) {
-    console.log("api/addMaintenanceEntry called, with", maintenanceEntry);
-    return Request.postRequest("/api/boat.php?action=update_maintenance_log", maintenanceEntry);
+    console.log("api/v1/addMaintenanceEntry called, with", maintenanceEntry);
+    return Request.postRequest("/api/v1/boat.php?action=update_maintenance_log", maintenanceEntry);
   }
 
   static getMyNautiqueInfo(boatId, token, tokenExpiry) {
-    console.log("api/getMyNautiqueInfo called");
+    console.log("api/v1/getMyNautiqueInfo called");
     const request = {
       boat_id: boatId,
       token: token,
       token_expiry: tokenExpiry,
     };
-    return Request.postRequest("/api/mynautique.php?action=get_boat_info", request);
+    return Request.postRequest("/api/v1/mynautique.php?action=get_boat_info", request);
   }
 }

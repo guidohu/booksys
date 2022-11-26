@@ -6,18 +6,18 @@ import { UserPointer } from "@/dataTypes/user";
 export default class User {
   static getHeats() {
     console.debug("User/getHeats called");
-    return Request.getRequest('/api/user.php?action=get_my_user_heats');
+    return Request.getRequest('/api/v1/user.php?action=get_my_user_heats');
   }
 
   static makeAdmin(userId) {
     const requestData = {
       user_id: userId,
     };
-    return Request.postRequest('/api/configuration.php?action=make_user_admin', requestData);
+    return Request.postRequest('/api/v1/configuration.php?action=make_user_admin', requestData);
   }
 
   static changeUserProfile(profileData) {
-    return Request.postRequest('/api/user.php?action=change_my_user_data', profileData);
+    return Request.postRequest('/api/v1/user.php?action=change_my_user_data', profileData);
   }
 
   static changeUserPassword(passwordData) {
@@ -27,7 +27,7 @@ export default class User {
       password_old,
       password_new,
     };
-    return Request.postRequest('/api/password.php?action=change_password_by_password', postData);
+    return Request.postRequest('/api/v1/password.php?action=change_password_by_password', postData);
   }
 
   static changeUserPasswordByToken(tokenAndPassword) {
@@ -37,24 +37,24 @@ export default class User {
       password: password,
       token: tokenAndPassword.token,
     };
-    return Request.postRequest('/api/password.php?action=change_password_by_token', postData);
+    return Request.postRequest('/api/v1/password.php?action=change_password_by_token', postData);
   }
 
   static getUserSchedule() {
     console.debug("User/getUserSchedule called");
-    return Request.getRequest('/api/user.php?action=get_my_user_sessions');
+    return Request.getRequest('/api/v1/user.php?action=get_my_user_sessions');
   }
 
   static cancelSession(sessionId) {
     const queryData = {
       session_id: sessionId,
     };
-    return Request.postRequest('/api/booking.php?action=delete_user', queryData);
+    return Request.postRequest('/api/v1/booking.php?action=delete_user', queryData);
   }
 
   static getUserList() {
     return new Promise((resolve, reject) => {
-      Request.getRequest('/api/user.php?action=get_all_users')
+      Request.getRequest('/api/v1/user.php?action=get_all_users')
       .then((response) => {
         const usersResponse = response;
         let users = [];
@@ -71,28 +71,28 @@ export default class User {
 
   static getDetailedUserList() {
     console.debug("User/getDetailedUserList called");
-    return Request.getRequest('/api/user.php?action=get_all_users_detailed');
+    return Request.getRequest('/api/v1/user.php?action=get_all_users_detailed');
   }
 
   static lockUser(userId) {
     const queryData = {
       user_id: userId,
     };
-    return Request.postRequest('/api/user.php?action=lock_user', queryData);
+    return Request.postRequest('/api/v1/user.php?action=lock_user', queryData);
   }
 
   static unlockUser(userId) {
     const queryData = {
       user_id: userId,
     };
-    return Request.postRequest('/api/user.php?action=unlock_user', queryData);
+    return Request.postRequest('/api/v1/user.php?action=unlock_user', queryData);
   }
 
   static deleteUser(userId) {
     const queryData = {
       id: userId,
     };
-    return Request.postRequest('/api/user.php?action=delete_user', queryData);
+    return Request.postRequest('/api/v1/user.php?action=delete_user', queryData);
   }
 
   static setUserGroup(userId, userGroupId) {
@@ -106,23 +106,23 @@ export default class User {
       user_id: userId,
       status_id: userGroupId,
     };
-    return Request.postRequest('/api/user.php?action=change_user_group_membership', queryData);
+    return Request.postRequest('/api/v1/user.php?action=change_user_group_membership', queryData);
   }
 
   static getUserGroups() {
     console.debug("User/getUserGroups called");
-    return Request.getRequest("/api/user.php?action=get_user_groups");
+    return Request.getRequest("/api/v1/user.php?action=get_user_groups");
   }
 
   static getUserRoles() {
     console.debug("User/getUserRoles called");
-    return Request.getRequest("/api/user.php?action=get_user_roles");
+    return Request.getRequest("/api/v1/user.php?action=get_user_roles");
   }
 
   static saveUserGroup(userGroup) {
     console.log("User/saveUserGroup: called with userGroup", userGroup);
     const queryData = userGroup;
-    return Request.postRequest('/api/user.php?action=save_user_group', queryData);
+    return Request.postRequest('/api/v1/user.php?action=save_user_group', queryData);
   }
 
   static deleteUserGroup(userGroupId) {
@@ -130,7 +130,7 @@ export default class User {
     const queryData = {
       user_group_id: userGroupId,
     };
-    return Request.postRequest('/api/user.php?action=delete_user_group', queryData);
+    return Request.postRequest('/api/v1/user.php?action=delete_user_group', queryData);
   }
 
   static signUp(userData) {
@@ -149,7 +149,7 @@ export default class User {
       license: userData.license,
       recaptcha_token: userData.recaptchaResponse,
     };
-    return Request.postRequest('/api/sign_up.php?action=sign_up', queryData);
+    return Request.postRequest('/api/v1/sign_up.php?action=sign_up', queryData);
   }
 
   static requestPasswordResetToken(userData) {
@@ -158,6 +158,6 @@ export default class User {
       email: userData.email,
       recaptcha_token: userData.recaptchaResponse,
     };
-    return Request.postRequest('/api/password.php?action=token_request', queryData);
+    return Request.postRequest('/api/v1/password.php?action=token_request', queryData);
   }
 }

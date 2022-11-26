@@ -3,7 +3,7 @@
   // automatically load all classes
   spl_autoload_register('user_autoloader');
   function user_autoloader($class){
-    include '../classes/'.$class.'.php';
+    include '../../classes/'.$class.'.php';
   }
 
   // Load configuration

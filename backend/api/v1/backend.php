@@ -10,8 +10,8 @@
     // automatically load all classes that are needed
     spl_autoload_register('backend_autoloader');
     function backend_autoloader($class){
-        if(file_exists(__DIR__.'/../classes/'.$class.'.php')){
-            include __DIR__.'/../classes/'.$class.'.php';
+        if(file_exists(__DIR__.'/../../classes/'.$class.'.php')){
+            include __DIR__.'/../../classes/'.$class.'.php';
         }
     }
 
@@ -29,7 +29,7 @@
     }
 
     // test whether the config-file exists
-    if (!file_exists('../config/config.php') || !is_readable('../config/config.php')) {
+    if (!file_exists('../../config/config.php') || !is_readable('../../config/config.php')) {
         error_log("No config file yet");
         echo json_encode(Status::successDataResponse("no config", $statusResponse));
         exit;
@@ -214,7 +214,7 @@
         // apply changes for every update file
         foreach ($update_files as $file){
             // setup a new database
-            if(!$db->apply_sql_file(__DIR__."/../config/db/updates/".$file)){
+            if(!$db->apply_sql_file(__DIR__."/../../config/db/updates/".$file)){
                 $db->disconnect();
                 return Status::errorStatus("DB update in file $file could not be applied to database, please check error logs");
             }
@@ -334,7 +334,7 @@
 
     // returns an array containing the sql update files
     function _get_all_schema_update_files(){
-        $files = scandir (__DIR__.'/../config/db/updates/');
+        $files = scandir (__DIR__.'/../../config/db/updates/');
         $sql_files = array();
         foreach($files as $f){
             if(preg_match('/\.sql$/', $f)){

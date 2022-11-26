@@ -6,7 +6,7 @@ export default class Accounting {
    */
   static getYears() {
     console.log("accounting/getYears called");
-    return Request.getRequest('/api/payment.php?action=get_years');
+    return Request.getRequest('/api/v1/payment.php?action=get_years');
   }
 
   /**
@@ -14,7 +14,7 @@ export default class Accounting {
    */
   static getExpenseTypes() {
     console.log("accounting/getExpenseTypes called");
-    return Request.getRequest('/api/payment.php?action=get_expenditure_types');
+    return Request.getRequest('/api/v1/payment.php?action=get_expenditure_types');
   }
 
   /**
@@ -22,7 +22,7 @@ export default class Accounting {
    */
   static getIncomeTypes() {
     console.log("accounting/getIncomeTypes called");
-    return Request.getRequest('/api/payment.php?action=get_payment_types');
+    return Request.getRequest('/api/v1/payment.php?action=get_payment_types');
   }
 
   /**
@@ -39,7 +39,7 @@ export default class Accounting {
       year: year,
     };
 
-    return Request.postRequest("/api/payment.php?action=get_statistics", requestData);
+    return Request.postRequest("/api/v1/payment.php?action=get_statistics", requestData);
   }
 
   /**
@@ -57,7 +57,7 @@ export default class Accounting {
       year: year,
     };
 
-    return Request.postRequest("/api/payment.php?action=get_transactions", requestData);
+    return Request.postRequest("/api/v1/payment.php?action=get_transactions", requestData);
   }
 
   /**
@@ -70,7 +70,7 @@ export default class Accounting {
       table_id: transaction.tbl,
       row_id: transaction.id,
     };
-    return Request.postRequest("/api/payment.php?action=delete_transaction", requestData);
+    return Request.postRequest("/api/v1/payment.php?action=delete_transaction", requestData);
   }
 
   /**
@@ -93,7 +93,7 @@ export default class Accounting {
       user_id: incomeTransaction.userId,
       comment: incomeTransaction.comment,
     };
-    return Request.postRequest("/api/payment.php?action=add_payment", requestData);
+    return Request.postRequest("/api/v1/payment.php?action=add_payment", requestData);
   }
 
   /**
@@ -116,6 +116,6 @@ export default class Accounting {
       user_id: expenseTransaction.userId,
       comment: expenseTransaction.comment,
     };
-    return Request.postRequest("/api/payment.php?action=add_expenditure", requestData);
+    return Request.postRequest("/api/v1/payment.php?action=add_expenditure", requestData);
   }
 }

@@ -26,17 +26,17 @@ services:
         expose:
             - '3306'
     backend:
-        build: ../../backend
+        build: ../../backend/Dockerfile_api_v1
         environment:
             DB_SERVER: 'db:3306'
             DB_NAME: 'booksys'
             DB_USER: 'user'
             DB_PASSWORD: 'userpassword'
         labels:
-            - "traefik.http.routers.backend.rule=PathPrefix(`/api/`) || PathPrefix(`/api`) || PathPrefix(`/uploads/`) || PathPrefix(`/uploads`)"
+            - "traefik.http.routers.backend.rule=PathPrefix(`/api/v1`) || PathPrefix(`/api/v1`) || PathPrefix(`/uploads/`) || PathPrefix(`/uploads`)"
             - "traefik.http.services.backend.loadbalancer.server.port=80"
         volumes:
-            - ${PWD}/../../backend/api:/var/www/html/api
+            - ${PWD}/../../backend/api/v1:/var/www/html/api/v1
             - ${PWD}/../../backend/classes:/var/www/html/classes
             - ${PWD}/config.php:/var/www/html/config/config.php
             - ${PWD}/../../backend/config/db:/var/www/html/config/db

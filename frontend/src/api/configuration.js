@@ -6,7 +6,7 @@ export default class Configuration {
    */
   static getRecaptchaKey() {
     console.log("configuration/getRecaptchaKey called");
-    return Request.getRequest('/api/configuration.php?action=get_recaptcha_key');
+    return Request.getRequest('/api/v1/configuration.php?action=get_recaptcha_key');
   }
 
   /**
@@ -14,12 +14,12 @@ export default class Configuration {
    */
   static getLogoFile() {
     console.log("configuration/getLogoFile called");
-    return Request.getRequest('/api/configuration.php?action=get_logo_file');
+    return Request.getRequest('/api/v1/configuration.php?action=get_logo_file');
   }
 
   static getDbConfig() {
     console.log("configuration/getDbConfig called");
-    return Request.getRequest('/api/configuration.php?action=get_db_config');
+    return Request.getRequest('/api/v1/configuration.php?action=get_db_config');
   }
 
   static setDbConfig(config) {
@@ -30,11 +30,11 @@ export default class Configuration {
       db_user: config.user,
       db_password: config.password,
     };
-    return Request.postRequest("/api/configuration.php?action=setup_db_config", requestData);
+    return Request.postRequest("/api/v1/configuration.php?action=setup_db_config", requestData);
   }
 
   static getConfiguration() {
-    return Request.getRequest("/api/configuration.php?action=get_configuration");
+    return Request.getRequest("/api/v1/configuration.php?action=get_configuration");
   }
 
   static setConfiguration(params) {
@@ -72,7 +72,7 @@ export default class Configuration {
       request.mynautique_password = params.mynautique_password;
     }
 
-    return Request.postRequest("/api/configuration.php?action=set_configuration", request);
+    return Request.postRequest("/api/v1/configuration.php?action=set_configuration", request);
   }
 
   static setMyNautiqueConfig(config) {
@@ -83,18 +83,18 @@ export default class Configuration {
       mynautique_password: config.mynautiquePassword,
     };
 
-    return Request.postRequest("/api/configuration.php?action=setup_mynautique_config", requestData);
+    return Request.postRequest("/api/v1/configuration.php?action=setup_mynautique_config", requestData);
   }
 
   static needsDbUpdate() {
-    return Request.getRequest("/api/backend.php?action=admin_check_database_update");
+    return Request.getRequest("/api/v1/backend.php?action=admin_check_database_update");
   }
 
   static getDbVersion() {
-    return Request.getRequest("/api/backend.php?action=get_version");
+    return Request.getRequest("/api/v1/backend.php?action=get_version");
   }
 
   static updateDb() {
-    return Request.getRequest("/api/backend.php?action=update_database");
+    return Request.getRequest("/api/v1/backend.php?action=update_database");
   }
 }

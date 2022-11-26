@@ -2,8 +2,8 @@
     // automatically load all classes
     spl_autoload_register('mynautique_autoloader');
     function mynautique_autoloader($class){
-        if(file_exists(__DIR__.'/../classes/'.$class.'.php')){
-            include __DIR__.'/../classes/'.$class.'.php';
+        if(file_exists(__DIR__.'/../../classes/'.$class.'.php')){
+            include __DIR__.'/../../classes/'.$class.'.php';
         }
     }
 
@@ -31,22 +31,22 @@
         return;
     }
 
+    $response = null;
+
     switch($_GET['action']){
         case 'get_boat_info':
             $response = get_boat_info($configuration, $api_info);
-            echo json_encode($response);
-            exit;
+            break;
         case 'get_boats_info':
             $response = get_boats_info($configuration, $api_info);
-            echo json_encode($response);
-            exit;
+            break;
+        default:
+            HttpHeader::setResponseCode(400);
+            $response = Status::errorStatus("Action not supported");
+            break;
     }
 
-    HttpHeader::setResponseCode(400);
-    $status = array();
-    $status['ok'] = FALSE;
-    $status['message'] = 'invalid action requested';
-    echo json_encode($status);
+    echo json_encode($response);
     return;
 
     function get_boat_info($configuration, $api_info){
