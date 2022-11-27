@@ -3,11 +3,11 @@ version: '3.3'
 services:
     traefik:
         image: "traefik:latest"
-        container_name: "traefik_fresh"
+        container_name: "fresh_traefik"
         command:
           - "--api.insecure=true"
           - "--providers.docker=true"
-          - "--providers.docker.exposedbydefault=true"
+          - "--providers.docker.exposedbydefault=false"
           - "--entrypoints.web.address=:80"
         ports:
           - "80:80"
@@ -16,7 +16,7 @@ services:
           - "/var/run/docker.sock:/var/run/docker.sock:ro"
     db:
         build: "./database"
-        container_name: "db_fresh"
+        container_name: "fresh_db"
         environment:
             MYSQL_DATABASE: 'booksys'
             MYSQL_USER: 'user'
@@ -26,32 +26,50 @@ services:
             - '3306:3306'
         expose:
             - '3306'
-    backend:
-        build: ../../backend/api/v1
-        container_name: "backend_fresh"
+    api_v1:
+        build:
+            context: ../../backend
+            dockerfile: Dockerfile_api_v1
+        container_name: "fresh_backend_api_v1"
         environment:
             DB_SERVER: 'db:3306'
             DB_NAME: 'booksys'
             DB_USER: 'user'
             DB_PASSWORD: 'userpassword'
         labels:
-            - "traefik.http.routers.backend.rule=PathPrefix(`/api/v1/`) || PathPrefix(`/api/v1`) || PathPrefix(`/uploads/`) || PathPrefix(`/uploads`)"
-            - "traefik.http.services.backend.loadbalancer.server.port=80"
+            - "traefik.enable=true"
+            - "traefik.http.routers.api_v1.rule=PathPrefix(`/api/v1/`) || PathPrefix(`/api/v1`) || PathPrefix(`/uploads/`) || PathPrefix(`/uploads`)"
+            - "traefik.http.services.api_v1.loadbalancer.server.port=80"
         volumes:
-            - ${PWD}/../../backend/api:/var/www/html/api
+            - ${PWD}/../../backend/api/v1:/var/www/html/api/v1
             - ${PWD}/../../backend/classes:/var/www/html/classes
             - ${PWD}/../../backend/config/db:/var/www/html/config/db
-    # frontend:
-    #     build: "./frontend"
-    #     container_name: "frontend_fresh"
-    #     user: "node"
-    #     working_dir: /home/node/app
-    #     environment:
-    #         - NODE_ENV=development
-    #     volumes:
-    #         - ../../frontend:/home/node/app
-    #     labels:
-    #         - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
-    #         - "traefik.http.services.frontend.loadbalancer.server.port=8080"
-    #     command: "npm run serve"
+    api_v2:
+        build:
+            context: ../../backend
+            dockerfile: Dockerfile_api_v2
+        container_name: fresh_backend_api_v2
+        environment:
+            DB_SERVER: 'db:3306'
+            DB_NAME: 'booksys'
+            DB_USER: 'user'
+            DB_PASSWORD: 'userpassword'
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.api_v2.rule=PathPrefix(`/api/v2`) || PathPrefix(`/api/v2`)"
+            - "traefik.http.services.api_v2.loadbalancer.server.port=80" 
+    frontend:
+        build: "./frontend"
+        container_name: "fresh_frontend"
+        user: "node"
+        working_dir: /home/node/app
+        environment:
+            - NODE_ENV=development
+        volumes:
+            - ../../frontend:/home/node/app
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+            - "traefik.http.services.frontend.loadbalancer.server.port=8080"
+        command: "npm run serve"
     

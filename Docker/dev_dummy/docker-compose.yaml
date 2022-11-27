@@ -3,7 +3,7 @@ version: '3.3'
 services:
     traefik:
         image: "traefik:latest"
-        container_name: "traefik"
+        container_name: "dev_dummy_traefik"
         command:
           - "--api.insecure=true"
           - "--providers.docker=true"
@@ -16,6 +16,7 @@ services:
           - "/var/run/docker.sock:/var/run/docker.sock:ro"
     db:
         build: ./db
+        container_name: "dev_dummy_db"
         environment:
             MYSQL_DATABASE: 'booksys'
             MYSQL_USER: 'user'
@@ -61,6 +62,7 @@ services:
             - "traefik.http.services.api_v2.loadbalancer.server.port=80" 
     frontend:
         build: "./frontend"
+        container_name: "dev_dummy_frontend"
         user: "node"
         working_dir: /home/node/app
         environment:
