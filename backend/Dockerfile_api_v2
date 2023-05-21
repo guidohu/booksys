@@ -8,11 +8,7 @@ COPY api/v2/server/go.mod ./
 RUN go mod download && go mod verify
 
 COPY api/v2 api/v2
-# RUN echo "test"
-# RUN ls -l / > /tmp/test.txt
-# RUN ls -l ./
-# RUN ls -lah ./
-RUN go build -v -o /usr/local/bin/app ./api/v2/server/main.go
+RUN go build -v -o /usr/local/bin/app ./api/v2/main.go
 EXPOSE 80
 
 CMD ["app"]
