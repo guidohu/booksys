@@ -10,7 +10,7 @@ export default class Request {
             .json()
             .then((data) => {
               console.debug(url, "response data:", data);
-              if (data.ok) {
+              if (data.ok || data.status.ok) {
                 resolve(data.data);
               } else {
                 console.log(url, "response not ok, due to:", data.msg);
