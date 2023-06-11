@@ -86,15 +86,4 @@ export default class Configuration {
     return Request.postRequest("/api/v1/configuration.php?action=setup_mynautique_config", requestData);
   }
 
-  static needsDbUpdate() {
-    return Request.getRequest("/api/v1/backend.php?action=admin_check_database_update");
-  }
-
-  static getDbVersion() {
-    return Request.getRequest("/api/v1/backend.php?action=get_version");
-  }
-
-  static updateDb() {
-    return Request.getRequest("/api/v1/backend.php?action=update_database");
-  }
 }

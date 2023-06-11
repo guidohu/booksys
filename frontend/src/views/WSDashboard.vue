@@ -1,15 +1,5 @@
 <template>
   <div>
-    <div
-      v-if="
-        userInfo != null &&
-        userInfo.user_role_name == 'admin' &&
-        getDbUpdateStatus != null &&
-        getDbUpdateStatus == true
-      "
-    >
-      <database-update-modal />
-    </div>
     <show-for-desktop>
       <div class="display">
         <header v-if="userInfo != null" class="welcome">
@@ -91,11 +81,6 @@ const DashboardGuestMobile = defineAsyncComponent(() =>
     /* webpackChunkName: "dashboard-guest-mobile" */ "@/components/DashboardGuestMobile.vue"
   )
 );
-const DatabaseUpdateModal = defineAsyncComponent(() =>
-  import(
-    /* webpackChunkName: "database-update" */ "@/components/DatabaseUpdate.vue"
-  )
-);
 
 export default {
   name: "WSDashboard",
@@ -106,7 +91,6 @@ export default {
     DashboardAdminMobile,
     DashboardMemberMobile,
     DashboardGuestMobile,
-    DatabaseUpdateModal,
     ShowForDesktop,
     ShowForMobile,
   },
@@ -114,24 +98,12 @@ export default {
     ...mapGetters("login", ["userInfo", "role"]),
     ...mapGetters("loginStatus", ["isLoggedIn"]),
     ...mapGetters("sessions", ["getSessions"]),
-    ...mapGetters("configuration", ["getDbUpdateStatus"]),
-  },
-  watch: {
-    role: function () {
-      this.dbUpdateCheck();
-    },
   },
   methods: {
     ...mapActions("login", ["getUserInfo"]),
     ...mapActions("sessions", ["querySessions"]),
-    ...mapActions("configuration", ["queryDbUpdateStatus"]),
     getTimeZone: function () {
       return "Europe/Zurich";
-    },
-    dbUpdateCheck() {
-      if (this.role == "admin") {
-        this.queryDbUpdateStatus();
-      }
     },
     getSessionInfo() {
       const dateStart = dayjs().tz(this.getTimeZone()).startOf("day");
@@ -144,8 +116,6 @@ export default {
     // load user info into store
     this.getUserInfo()
       .then(() => {
-        console.log("Check for potential db update.");
-        this.dbUpdateCheck();
         console.log("Get session info.");
         this.getSessionInfo();
       })
