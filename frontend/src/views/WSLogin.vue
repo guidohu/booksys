@@ -69,6 +69,7 @@ export default {
           this.isLoading = false;
         })
         .catch((errors) => {
+          console.error("login failed:", errors);
           if (errors.length > 0) {
             this.status = errors[0];
           }

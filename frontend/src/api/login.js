@@ -1,4 +1,3 @@
-import { sha256 } from "js-sha256";
 import Request from "@/api/common/request.js";
 
 export default class Login {
@@ -8,18 +7,19 @@ export default class Login {
     return new Promise((resolve, reject) => {
       if (username == null || username == "") {
         reject(["no username provided"]);
+        return;
       }
       if (password == null || password == "") {
         reject(["no password provided"]);
+        return;
       }
 
-      const pwHash = Login.calcHash(password);
       const request = {
         username: username,
-        password: pwHash,
+        password: password,
       };
 
-      Request.postRequest("/api/v1/login.php?action=login", request)
+      Request.postRequest("/api/v2/auth/login", request)
       .then((response) => resolve(response))
       .catch((error) => reject(error));
     });
@@ -27,27 +27,16 @@ export default class Login {
 
   static logout() {
     console.log("Login/logout called");
-    return Request.getRequest('/api/v1/logout.php');
+    return Request.getRequest('/api/v2/auth/logout');
   }
 
   static getMyUser() {
     console.log("Login/getMyUser called");
-    return Request.getRequest('/api/v1/user.php?action=get_my_user');
+    return Request.getRequest('/api/v2/auth/user');
   }
 
   static isLoggedIn() {
     console.log("Login/isLoggedIn called");
-    return Request.getRequest('/api/v1/login.php?action=isLoggedIn');
-  }
-
-  static calcHash(password) {
-    try {
-      var hash = sha256.create();
-      hash.update(password);
-      return hash.hex();
-    } catch (e) {
-      console.error("Cannot calculate sha256 of password", e);
-      return null;
-    }
+    return Request.getRequest('/api/v2/auth/isloggedin');
   }
 }

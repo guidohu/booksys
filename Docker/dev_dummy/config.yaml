@@ -1,11 +1,8 @@
 port: 9090
 database:
   protocol: tcp
-  host: 127.0.0.1
+  host: db
   port: 3306
   user: user
   password: userpassword
   dbName: booksys
-http:
-  sessionInactivityTimeout: 604800
-  sessionTimeout: 31536000

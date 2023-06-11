@@ -7,17 +7,12 @@ import (
 	"net/http"
 )
 
-type pingResponse struct {
-	Status Status   `json:"status"`
-	Data   pingData `json:"data"`
-}
-
 type pingData struct {
 	Message string `json:"message"`
 }
 
-func Ping(w http.ResponseWriter, r *http.Request) {
-	resp := pingResponse{
+func (h *Handler) Ping(w http.ResponseWriter, r *http.Request) {
+	resp := Response{
 		Status: Status{
 			OK:  true,
 			Msg: "ping received",

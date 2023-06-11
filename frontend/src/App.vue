@@ -14,7 +14,7 @@
 
 <script>
 import { defineAsyncComponent } from "vue";
-import { getBackendStatus, getAPIV2Status } from "@/api/backend";
+import { getBackendStatus } from "@/api/backend";
 import { mapActions, mapGetters } from "vuex";
 
 // Lazy imports
@@ -88,11 +88,6 @@ export default {
           this.backendNotReachableAlertMsg =
             "Unknown error when connecting to the backend.";
         }
-      });
-
-    getAPIV2Status()
-      .then((status) => {
-        console.log(status);
       });
   },
 };

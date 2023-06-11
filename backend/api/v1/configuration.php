@@ -303,7 +303,7 @@
         if(!$res){
             // if the table does not exist, we setup the database
             // setup a new database
-            if(!file_exists("../config/db/schema.sql") || !$db->apply_sql_file("../config/db/schema.sql")){
+            if(!file_exists("../../config/db/schema.sql") || !$db->apply_sql_file("../../config/db/schema.sql")){
                 return Status::errorStatus("DB scheme could not be applied to database, please check server error logs");
             }
         }
@@ -335,8 +335,10 @@
         if(!isset($values->mynautique_enabled) || !($values->mynautique_enabled == FALSE || $values->mynautique_enabled == TRUE)){
             return Status::errorStatus('mynautique_enabled must be TRUE/FALSE');
         }
-        if(!isset($values->mynautique_user) || !preg_match('/^[a-zA-Z0-9-_@\.]*$/', $values->mynautique_user )){
-            return Status::errorStatus('mynautique_user must be a valid username');
+        if($values->mynautique_enabled == TRUE){
+            if(!isset($values->mynautique_user) || !preg_match('/^[a-zA-Z0-9-_@\.]*$/', $values->mynautique_user )){
+                return Status::errorStatus('mynautique_user must be a valid username');
+            }
         }
 
         // handle new account and password change
@@ -345,17 +347,19 @@
             // if mynautique is already configured and we do not change the password
             $set_password = FALSE;
         }
-        else if(!isset($values->mynautique_password) || !preg_match('/^[a-zA-Z0-9-_@]*$/', $values->mynautique_password )){
-            return Status::errorStatus('mynautique_password must be a valid password');
+        else if($values->mynautique_enabled == TRUE){
+            if(!isset($values->mynautique_password) || !preg_match('/^[a-zA-Z0-9-_@]*$/', $values->mynautique_password )){
+                return Status::errorStatus('mynautique_password must be a valid password');
+            }
         }
 
         // update configuration file
         $configuration->config_file_variables['mynautique_enabled'] = $values->mynautique_enabled == TRUE ? TRUE : FALSE;
-        $configuration->config_file_variables['mynautique_user'] = $values->mynautique_user;
+        $configuration->config_file_variables['mynautique_user'] = $values->mynautique_enabled == TRUE ? $values->mynautique_user : "";
         if($set_password == TRUE){
-            $configuration->config_file_variables['mynautique_password'] = $values->mynautique_password;
+            $configuration->config_file_variables['mynautique_password'] = $values->mynautique_enabled == TRUE ? $values->mynautique_password : "";
         }else{
-            $configuration->config_file_variables['mynautique_password'] = $configuration->mynautique_password;
+            $configuration->config_file_variables['mynautique_password'] = $values->mynautique_enabled == TRUE ? $configuration->mynautique_password : "";
         }
 
         if(_write_config_file($configuration->config_file_variables)){
@@ -510,7 +514,7 @@
 
         $config_string .=  '?>'."\n";
 
-        $bytes_written = file_put_contents ("../config/config.php", $config_string);
+        $bytes_written = file_put_contents ("../../config/config.php", $config_string);
 
         if($bytes_written == FALSE) {
             return $bytes_written;

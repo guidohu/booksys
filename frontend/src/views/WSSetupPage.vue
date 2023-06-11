@@ -331,8 +331,8 @@ export default {
           } else if (status.dbReachable == false) {
             // cannot reach database, thus allow to change settings
             this.setupStep = 0;
-          } else if (status.adminExists == false) {
-            // database is up, but there is no admin user yet
+          } else if (status.usersExist == false) {
+            // database is up, but there is no (admin) user yet
             this.setupStep = 1;
           } else if (status.myNautiqueConfigured == false) {
             // all good but myNautique has not been setup

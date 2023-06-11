@@ -1,20 +1,30 @@
 package config
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/spf13/viper"
 )
 
 type Configuration struct {
-	Database DBConfig `json:"database"`
+	Database DBConfig   `json:"database"`
+	Http     HttpConfig `yaml:"http"`
 }
 
 type DBConfig struct {
-	host     string `yaml:"host"`
-	port     string `yaml:"port"`
-	user     string `yaml:"user"`
-	password string `yaml:"password"`
+	Protocol string `yaml:"protocol"`
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	DBName   string `yaml:"dbName"`
+}
+
+type HttpConfig struct {
+	SessionInactivityTimeout uint `yaml:"sessionInactivityTimeout"`
+	SessionTimeout           uint `yaml:"sessionTimeout"`
 }
 
 func InitViper() error {
@@ -26,11 +36,20 @@ func InitViper() error {
 	return nil
 }
 
-func ReadConfig() error {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath("$HOME/.booksys-server")
-	viper.AddConfigPath(".")
+func ReadConfig(path string) error {
+	if path != "" {
+		_, err := os.Stat(path)
+		if err != nil {
+			return fmt.Errorf("Configuration file does not exist: %s", err)
+		}
+		viper.SetConfigFile(path)
+	} else {
+		// look for a config in
+		viper.SetConfigName("config")
+		viper.SetConfigType("yaml")
+		viper.AddConfigPath("$HOME/")
+		viper.AddConfigPath(".")
+	}
 
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -38,7 +57,7 @@ func ReadConfig() error {
 			log.Println("No config file found, using empty config")
 			return nil
 		} else {
-			log.Fatalf("Cannot read configuration file config.yaml")
+			return err
 		}
 	}
 
@@ -50,9 +69,30 @@ func ReadConfig() error {
 		log.Fatalf("Cannot decode configuration into config struct: %v", err)
 	}
 
+	fmt.Printf("%+v\n", viper.AllSettings())
+
 	return nil
 }
 
 func WriteConfig() error {
 	return viper.WriteConfig()
+}
+
+func IsDBConfigured() bool {
+	switch {
+	case !viper.IsSet("database.protocol"):
+		return false
+	case !viper.IsSet("database.password"):
+		return false
+	case !viper.IsSet("database.user"):
+		return false
+	case !viper.IsSet("database.host"):
+		return false
+	case !viper.IsSet("database.port"):
+		return false
+	case !viper.IsSet("database.dbname"):
+		return false
+	}
+
+	return true
 }

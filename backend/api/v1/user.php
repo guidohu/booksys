@@ -30,9 +30,6 @@
     case 'get_all_users':
         $response = get_all_users($configuration, $lc);
         break;
-    case 'get_my_user':
-        $response = get_my_user($configuration);
-        break;
     case 'get_my_user_heats':
         $response = get_my_user_heats($configuration);
         break;
@@ -795,39 +792,39 @@
     return Status::successDataResponse("Users retrieved", $res);
   }
   
-  function get_my_user($configuration){
+//   function get_my_user($configuration){
   
-    // sanitize cookie
-    $sanitize = new Sanitizer();
-    if(!$sanitize->isCookie($_COOKIE['SESSION'])){
-        return Status::errorStatus("invalid session cookie format");
-    }
+//     // sanitize cookie
+//     $sanitize = new Sanitizer();
+//     if(!$sanitize->isCookie($_COOKIE['SESSION'])){
+//         return Status::errorStatus("invalid session cookie format");
+//     }
   
-    // connect to the database
-    $db = new DBAccess($configuration);
-    if(!$db->connect()){
-        return Status::errorStatus("Cannot connect to database");
-    }
+//     // connect to the database
+//     $db = new DBAccess($configuration);
+//     if(!$db->connect()){
+//         return Status::errorStatus("Cannot connect to database");
+//     }
     
-    $query = 'SELECT u.id, u.username, u.first_name, u.last_name,
-                     u.address, u.city, u.plz, u.mobile, u.email,
-                     u.license, u.status, u.locked, u.comment, ur.id as user_role_id, ur.name as user_role_name
-                FROM user u, browser_session bs, user_status us, user_role ur 
-                WHERE bs.session_secret = ?
-                  AND bs.user_id = u.id
-                  AND u.status = us.id
-                  AND us.user_role_id = ur.id;';
-    $db->prepare($query);
-    $db->bind_param('s', $_COOKIE['SESSION'] );
-    $db->execute();
-    $res = $db->fetch_stmt_hash();
-    $db->disconnect();
-    if(!$res){
-        return Status::errorStatus("Cannot get user information");
-    }
+//     $query = 'SELECT u.id, u.username, u.first_name, u.last_name,
+//                      u.address, u.city, u.plz, u.mobile, u.email,
+//                      u.license, u.status, u.locked, u.comment, ur.id as user_role_id, ur.name as user_role_name
+//                 FROM user u, browser_session bs, user_status us, user_role ur 
+//                 WHERE bs.session_secret = ?
+//                   AND bs.user_id = u.id
+//                   AND u.status = us.id
+//                   AND us.user_role_id = ur.id;';
+//     $db->prepare($query);
+//     $db->bind_param('s', $_COOKIE['SESSION'] );
+//     $db->execute();
+//     $res = $db->fetch_stmt_hash();
+//     $db->disconnect();
+//     if(!$res){
+//         return Status::errorStatus("Cannot get user information");
+//     }
 
-    return Status::successDataResponse("success", $res[0]);
-  }
+//     return Status::successDataResponse("success", $res[0]);
+//   }
   
   // Change a user's personal data
   function change_my_user_data($configuration){

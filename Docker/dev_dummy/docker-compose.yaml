@@ -15,7 +15,9 @@ services:
         volumes:
           - "/var/run/docker.sock:/var/run/docker.sock:ro"
     db:
-        build: ./db
+        build:
+            context: ./database
+            dockerfile: Dockerfile
         container_name: "dev_dummy_db"
         environment:
             MYSQL_DATABASE: 'booksys'
@@ -56,6 +58,8 @@ services:
             DB_NAME: 'booksys'
             DB_USER: 'user'
             DB_PASSWORD: 'userpassword'
+        volumes:
+            - ${PWD}/config.yaml:/config.yaml
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.api_v2.rule=PathPrefix(`/api/v2`) || PathPrefix(`/api/v2`)"
