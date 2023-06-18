@@ -19,7 +19,7 @@ export default class Configuration {
 
   static getDbConfig() {
     console.log("configuration/getDbConfig called");
-    return Request.getRequest('/api/v1/configuration.php?action=get_db_config');
+    return Request.getRequest('/api/v2/database/config');
   }
 
   static setDbConfig(config) {
@@ -30,7 +30,7 @@ export default class Configuration {
       db_user: config.user,
       db_password: config.password,
     };
-    return Request.postRequest("/api/v1/configuration.php?action=setup_db_config", requestData);
+    return Request.postRequest("/api/v2/database/setup", requestData);
   }
 
   static getConfiguration() {
@@ -83,7 +83,7 @@ export default class Configuration {
       mynautique_password: config.mynautiquePassword,
     };
 
-    return Request.postRequest("/api/v1/configuration.php?action=setup_mynautique_config", requestData);
+    return Request.postRequest("/api/v2/mynautique/credentials/setup", requestData);
   }
 
 }

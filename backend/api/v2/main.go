@@ -11,40 +11,46 @@ import (
 
 	"golang.org/x/exp/slog"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
-func main() {
+func parseFlags() {
 	var port int
 	var configFile string
 	flag.IntVar(&port, "port", 80, "the port to listen on")
-	flag.StringVar(&configFile, "config_file", "config.yaml", "the configuration file to be used")
+	flag.StringVar(&configFile, "configfile", "config.yaml", "the configuration file to be used")
 
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
 	viper.BindPFlag("port", pflag.Lookup("port"))
-	viper.BindPFlag("configfile", pflag.Lookup(("config_file")))
+	viper.BindPFlag("configfile", pflag.Lookup(("configfile")))
 	viper.Debug()
 
 	flag.Parse()
 
-	// Read the configuration file
-	viper.Set("config_file", configFile)
-	slog.Info("Config file set to", slog.String("config_file", configFile))
+	viper.Set("configfile", configFile)
+	slog.Info("Config file set to", slog.String("configfile", configFile))
 	viper.Set("port", port)
+}
+
+func readConfigFile() {
+	configFile := viper.GetString("configfile")
 	err := config.ReadConfig(configFile)
 	if err != nil {
 		slog.Error("Cannot read config:", slog.String("configFile", configFile), slog.String("error", err.Error()))
 		os.Exit(1)
 	}
-	slog.Info("Server port found", slog.Int("port", port))
+}
 
-	// Connect to the database if configured.
+func connectDatabase() *database.DBMysql {
 	if !viper.IsSet("database.dbname") {
-		slog.Warn("Database configuration is not present in configuration file", slog.String("configFile", configFile))
+		slog.Warn("Database settings are not present in configuration")
+		return nil
 	}
+
 	db := &database.DBMysql{
 		User:     viper.GetString("database.user"),
 		Password: viper.GetString("database.password"),
@@ -53,24 +59,54 @@ func main() {
 		Port:     viper.GetString("database.port"),
 		DBName:   viper.GetString("database.dbname"),
 	}
-	err = db.Connect()
-	if err != nil {
+	if err := db.Connect(); err != nil {
 		slog.Warn(fmt.Sprintf("Database is not properly setup or not reachable. Error returned from Connet(): %s", err))
+		return nil
 	}
+	slog.Info("Connected to database", slog.String("name", viper.GetString("database.dbname")))
+	return db
+}
 
-	// initialize handlers
+func main() {
+	parseFlags()
+	readConfigFile()
+
+	// Connect to the database if configured.
+	db := connectDatabase()
+	defer db.Disconnect()
 	h := handlers.NewHandler(db)
-	a := handlers.NewIdenticationMiddleware(db)
 
+	// Watch config chages and create a new DB connection
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		slog.Info("Configuration file changed", slog.String("file", e.Name))
+		// Reconnect database upon config change
+		newDB := connectDatabase()
+		if newDB != nil {
+			h.SetDB(newDB)
+			fmt.Println("New db connected")
+		}
+		readConfigFile()
+	})
+	viper.WatchConfig()
+
+	// Register all handlers
 	http.Handle("/api/v2/health/status", http.HandlerFunc(h.HealthStatus))
 
 	http.Handle("/api/v2/ping", http.HandlerFunc(h.Ping))
 	http.Handle("/api/v2/auth/login", http.HandlerFunc(h.Login))
 	http.Handle("/api/v2/auth/isloggedin", http.HandlerFunc(h.IsLoggedIn))
-	http.Handle("/api/v2/auth/logout", http.HandlerFunc(a.Authenticated(h.Logout)))
-	http.Handle("/api/v2/auth/user", http.HandlerFunc(a.Authenticated(h.User)))
+	http.Handle("/api/v2/auth/logout", http.HandlerFunc(h.WithAuthentication(h.Logout)))
+	http.Handle("/api/v2/auth/user", http.HandlerFunc(h.WithAuthentication(h.User)))
 
-	slog.Info(fmt.Sprintf("Server listening on %d\n", port))
+	http.Handle("/api/v2/database/config", http.HandlerFunc(h.WithAuthentication(h.GetDBConfig)))
+	http.Handle("/api/v2/database/setup", http.HandlerFunc(h.SetupDBConfig))
 
-	slog.Warn(http.ListenAndServe(fmt.Sprintf(":%d", port), nil).Error())
+	http.Handle("/api/v2/mynautique/credentials/setup", http.HandlerFunc(h.SetupMyNautiqueCredentials))
+
+	http.Handle("/api/v2/user/signup", http.HandlerFunc(h.SignUp))
+	http.Handle("/api/v2/user/create-admin", http.HandlerFunc(h.MakeAdmin))
+
+	slog.Info(fmt.Sprintf("Server listening on port %d\n", viper.GetUint16("port")))
+
+	slog.Warn(http.ListenAndServe(fmt.Sprintf(":%d", viper.GetUint16("port")), nil).Error())
 }

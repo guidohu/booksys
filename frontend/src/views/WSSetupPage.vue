@@ -280,6 +280,14 @@ export default {
     },
     validateAdminUser: function () {
       const errors = [];
+      if (
+        typeof this.adminUserConfig.password == "undefined" ||
+        typeof this.adminUserConfig.email == "undefined" ||
+        typeof this.adminUserConfig.passwordConfirm == "undefined"
+      ) {
+        errors.push("Fields cannot be empty");
+        return errors
+      }
 
       if (
         this.adminUserConfig.password != this.adminUserConfig.passwordConfirm

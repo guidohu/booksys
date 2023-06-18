@@ -13,7 +13,7 @@ export default class User {
     const requestData = {
       user_id: userId,
     };
-    return Request.postRequest('/api/v1/configuration.php?action=make_user_admin', requestData);
+    return Request.postRequest('/api/v2/user/create-admin', requestData);
   }
 
   static changeUserProfile(profileData) {
@@ -135,21 +135,22 @@ export default class User {
 
   static signUp(userData) {
     console.log("User/signUp: called with userGroupId", userData);
-    const password = Login.calcHash(userData.password);
     const queryData = {
       username: userData.email,
-      password: password,
+      password: userData.password,
       first_name: userData.firstName,
       last_name: userData.lastName,
       address: userData.street,
       mobile: userData.phone,
-      plz: userData.zip,
+      plz: parseInt(userData.zip),
       city: userData.city,
       email: userData.email,
       license: userData.license,
+      ownRisk: userData.ownRisk,
       recaptcha_token: userData.recaptchaResponse,
     };
-    return Request.postRequest('/api/v1/sign_up.php?action=sign_up', queryData);
+    // TODO move this call to golang
+    return Request.postRequest('/api/v2/user/signup', queryData);
   }
 
   static requestPasswordResetToken(userData) {

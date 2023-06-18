@@ -176,57 +176,75 @@ func SetupUpserts() error {
 	return nil
 }
 
+const (
+	UserRoleGuest = iota + 1
+	UserRoleMember
+	UserRoleAdmin
+)
+
 // DefaultUserRoles contains all the access levels supported by the
-// app.
+// app. The current access levels are:
+// - Guest: Limited access to app functionality
+// - Member: Regular access but no Boat/Administration functionality
+// - Admin: Full access
 var DefaultUserRoles = []UserRole{
 	{
-		ID:          1,
+		ID:          UserRoleGuest,
 		Name:        "guest",
 		Description: "Guest User Permissions",
 	},
 	{
-		ID:          2,
+		ID:          UserRoleMember,
 		Name:        "member",
 		Description: "Member User Permissions",
 	},
 	{
-		ID:          3,
+		ID:          UserRoleAdmin,
 		Name:        "admin",
 		Description: "Administrator User Permissions",
 	},
 }
 
 // TODO minimum set of user status required for the app to work
+
+const (
+	UserStatusGuest = iota + 1
+	UserStatusMember
+	UserStatusAdmin
+	UserStatusCourse
+	UserStatusPartner
+)
+
 var DefaultUserStatus = []UserStatus{
 	{
-		ID:          1,
+		ID:          UserStatusGuest,
 		Name:        "Guest",
 		Description: "Guest Access",
-		UserRoleID:  1,
+		UserRoleID:  UserRoleGuest,
 	},
 	{
-		ID:          2,
+		ID:          UserStatusMember,
 		Name:        "Member",
 		Description: "Member Access",
-		UserRoleID:  2,
+		UserRoleID:  UserRoleMember,
 	},
 	{
-		ID:          3,
+		ID:          UserStatusAdmin,
 		Name:        "Admin",
 		Description: "Administrator and Boat Community Access",
-		UserRoleID:  3,
+		UserRoleID:  UserRoleAdmin,
 	},
 	{
-		ID:          4,
+		ID:          UserStatusCourse,
 		Name:        "Course",
 		Description: "Course Status and only Guest Access Permissions",
-		UserRoleID:  1,
+		UserRoleID:  UserRoleGuest,
 	},
 	{
-		ID:          5,
+		ID:          UserStatusPartner,
 		Name:        "Partner",
 		Description: "Partners with Member Permissions",
-		UserRoleID:  2,
+		UserRoleID:  UserRoleMember,
 	},
 }
 

@@ -19,9 +19,9 @@
     $response = null;
 
     switch($_GET['action']){
-        case 'get_db_config':
-            $response = get_db_config($configuration);
-            break;
+        // case 'get_db_config':
+        //     $response = get_db_config($configuration);
+        //     break;
         case 'get_recaptcha_key':
             $response = get_recaptcha_key($configuration);
             break;
@@ -366,56 +366,6 @@
             return Status::successStatus("mynautique configured");
         }
         return Status::errorStatus("myNautique could not be configured, an error occurred");
-    }
-
-    /**
-     * make_user_admin allows a user to become admin during the
-     * initial setup of the application. As soon as an admin user
-     * exits this function will not perform any action
-     *
-     * @param $configuration    configurtaion object
-     * @return response of the form
-     * {
-     *      ok      =>  TRUE|FALSE
-     *      message =>  "description message"
-     * }
-     */
-    function make_user_admin($configuration){
-        $data = json_decode(file_get_contents('php://input'));
-
-        // if there is already one admin user
-        // we do not allow this operation
-        if(_is_admin_user_configured($configuration)){
-            return Status::errorStatus("one admin user already exists, this operation is not permitted");
-        }
-
-        // input validation
-        $sanitizer = new Sanitizer();
-        if(! isset($data->user_id) or !$sanitizer->isInt($data->user_id)){
-			return Status::errorStatus("No valid user_id specified.");
-        }
-
-        // unlock user and make admin
-        $db = new DBAccess($configuration);
-        if(!$db->connect()){
-            return Status::errorStatus("Cannot connect to database.");
-        }
-        $query = 'UPDATE user 
-            SET status = ?, 
-            locked = ? 
-            WHERE id = ?;';
-        $db->prepare($query);
-        $db->bind_param('iii',
-            $configuration->default_admin_user_status_id,
-            0,
-            $data->user_id
-        );
-        if(!$db->execute()){
-            $db->disconnect();
-            return Status::errorStatus("Cannot make user admin");
-        }
-
-        return Status::successStatus("user promoted to admin user");
     }
 
     function _is_admin_user_configured($configuration){

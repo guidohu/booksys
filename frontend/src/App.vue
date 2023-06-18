@@ -66,7 +66,7 @@ export default {
     getBackendStatus()
       .then((status) => {
         // if we do not have a configFile for the app -> go to setup
-        if (!status.configFile || !status.configDb) {
+        if (!status.configFile || !status.configDb || !status.usersExist) {
           console.log("App Setup Done: no");
           if (this.$route.path !== "/setup") {
             this.$router.push("/setup");

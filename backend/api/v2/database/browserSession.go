@@ -14,6 +14,7 @@ func (d *DBMysql) AddBrowserSession(b BrowserSession) (string, error) {
 		slog.Error("Cannot add browser session", slog.String("error", err.Error()))
 		return "", err
 	}
+
 	return b.SessionSecret, nil
 }
 

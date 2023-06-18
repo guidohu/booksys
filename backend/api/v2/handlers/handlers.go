@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"server/database"
+	"sync/atomic"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -21,28 +22,26 @@ type HandlerContext uint
 const SessionContextKey HandlerContext = 1
 
 type Handler struct {
-	db database.Database
-}
-
-type IdentificationMiddleware struct {
-	db database.Database
+	db atomic.Pointer[database.Database]
 }
 
 func NewHandler(db database.Database) *Handler {
-	return &Handler{
-		db: db,
-	}
+	h := &Handler{}
+	h.db.Store(&db)
+	return h
 }
 
-func NewIdenticationMiddleware(db database.Database) *IdentificationMiddleware {
-	return &IdentificationMiddleware{
-		db: db,
-	}
+func (h *Handler) SetDB(db database.Database) {
+	h.db.Store(&db)
+}
+
+func (h *Handler) GetDB() database.Database {
+	return *(h.db.Load())
 }
 
 // Authentication middleware that gets the user session and calls the next Handler.
 // It makes sure the user is authenticated and adds this information ready for the next call.
-func (i *IdentificationMiddleware) Authenticated(next http.HandlerFunc) http.HandlerFunc {
+func (h *Handler) WithAuthentication(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// get user from cookie
 		cookie, err := r.Cookie("SESSION")
@@ -52,7 +51,7 @@ func (i *IdentificationMiddleware) Authenticated(next http.HandlerFunc) http.Han
 			return
 		}
 
-		session, err := i.db.GetBrowserSession(cookie.Value)
+		session, err := h.GetDB().GetBrowserSession(cookie.Value)
 		if err != nil || session == nil {
 			slog.Warn("No session found for given cookie", slog.String("error", err.Error()))
 			WriteFailureResponse("not authenticated", w)
@@ -72,11 +71,37 @@ func (i *IdentificationMiddleware) Authenticated(next http.HandlerFunc) http.Han
 	})
 }
 
+func (h *Handler) ReconnectDB() error {
+	if !viper.IsSet("database.dbname") {
+		slog.Warn("Database settings are not present in configuration")
+		return fmt.Errorf("database is not set in the configuration")
+	}
+
+	db := &database.DBMysql{
+		User:     viper.GetString("database.user"),
+		Password: viper.GetString("database.password"),
+		Protocol: viper.GetString("database.protocol"),
+		Host:     viper.GetString("database.host"),
+		Port:     viper.GetString("database.port"),
+		DBName:   viper.GetString("database.dbname"),
+	}
+	if err := db.Connect(); err != nil {
+		slog.Warn(fmt.Sprintf("Database is not properly setup or not reachable. Error returned from Connet(): %s", err))
+		return fmt.Errorf("database is not reachable, skip db replacement")
+	}
+	slog.Info("Connected to database", slog.String("name", viper.GetString("database.dbname")))
+	h.SetDB(db)
+	return nil
+}
+
 func GetSessionFromContext(r *http.Request) database.BrowserSession {
+	if r.Context().Value(SessionContextKey) == nil {
+		return database.BrowserSession{}
+	}
 	return r.Context().Value(SessionContextKey).(database.BrowserSession)
 }
 
-func ReadBodyAndValidate(r *http.Request, s any) error {
+func ReadBodyAndValidate(r *http.Request, s any, errorMap ...map[string]string) error {
 	// Get the content of the body
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -96,6 +121,19 @@ func ReadBodyAndValidate(r *http.Request, s any) error {
 	err = validate.Struct(s)
 	if err != nil {
 		slog.Warn("Struct does not validate", slog.String("error", err.Error()))
+		errs := err.(validator.ValidationErrors)
+
+		// return plain error if no error mapping is provided
+		if len(errorMap) == 0 {
+			return err
+		}
+		// return the custom error if present
+		for _, e := range errs {
+			msg, found := errorMap[0][e.StructField()]
+			if found {
+				return fmt.Errorf("%s", msg)
+			}
+		}
 		return err
 	}
 
@@ -125,6 +163,16 @@ func AuthenticatedOrFailure(b database.BrowserSession, w http.ResponseWriter) er
 	return nil
 }
 
+func AuthenticatedAsAdminOrFailure(b database.BrowserSession, w http.ResponseWriter) error {
+	if !b.Valid() || b.UserRoleID != database.UserRoleAdmin {
+		slog.Warn("Non admin role not allowed to call as admin")
+		WriteFailureResponse("unauthenticated action not allowed", w)
+		return fmt.Errorf("admin action is not authorized")
+	}
+	return nil
+}
+
+// WriteSuccessResponse writes a success message that contains data.
 func WriteSuccessResponse(message string, data any, w http.ResponseWriter) {
 	resp := Response{
 		Status: Status{
