@@ -110,13 +110,13 @@ export default class Sessions {
     dayjs.extend(dayjsAdvancedFormat);
 
     const query = {
-      start: dayjs(dateStart).format("X"),
-      end: dayjs(dateEnd).format("X"),
+      start: parseInt(dayjs(dateStart).format("X")),
+      end: parseInt(dayjs(dateEnd).format("X")),
     };
 
     console.log("getSessions:", dateStart);
     return new Promise((resolve, reject) => {
-      Request.postRequest("/api/v1/booking.php?action=get_booking_day", query)
+      Request.postRequest("/api/v2/booking/day/list", query)
       .then((res) => {
         let timezone = res.timezone;
         const winStart = res.window_start;

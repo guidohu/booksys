@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"golang.org/x/exp/slog"
 
@@ -16,7 +17,10 @@ type Database interface {
 	Ping() error
 	IsConfigured() bool
 	BrowserSessionTable
+	ConfigurationTable
 	UserTable
+	SessionTable
+	UserToSessionTable
 }
 
 type BrowserSessionTable interface {
@@ -24,6 +28,20 @@ type BrowserSessionTable interface {
 	GetBrowserSession(id string) (*BrowserSession, error)
 	UpdateBrowserSession(b BrowserSession) error
 	DeleteBrowserSession(b BrowserSession) error
+}
+
+type ConfigurationTable interface {
+	GetPropertyValue(key string) (Configuration, error)
+}
+
+type SessionTable interface {
+	// GetSessionsBetween returns all sessions between start and end time
+	GetSessionsBetween(start, end time.Time) ([]Session, error)
+}
+
+type UserToSessionTable interface {
+	// GetUsersForSession returns all users from a specific session
+	GetUsersForSession(id uint) ([]UserToSession, error)
 }
 
 type UserTable interface {

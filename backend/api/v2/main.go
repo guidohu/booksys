@@ -101,6 +101,9 @@ func main() {
 	http.Handle("/api/v2/database/config", http.HandlerFunc(h.WithAuthentication(h.GetDBConfig)))
 	http.Handle("/api/v2/database/setup", http.HandlerFunc(h.SetupDBConfig))
 
+	http.Handle("/api/v2/booking/day/list", http.HandlerFunc(h.WithAuthentication(h.GetBookingDay)))
+	// http.Handle("/api/v2/booking/month/list", http.HandlerFunc(h.WithAuthentication(h.GetBookingDay)))
+
 	http.Handle("/api/v2/mynautique/credentials/setup", http.HandlerFunc(h.SetupMyNautiqueCredentials))
 
 	http.Handle("/api/v2/user/signup", http.HandlerFunc(h.SignUp))

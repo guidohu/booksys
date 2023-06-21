@@ -67,6 +67,7 @@ const actions = {
           resolve();
         })
         .catch((error) => {
+          console.error("error when receiving sessions", error);
           commit("setSessions", null);
           reject(error);
         });

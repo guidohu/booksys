@@ -68,9 +68,6 @@ func ReadConfig(path string) error {
 	if err != nil {
 		log.Fatalf("Cannot decode configuration into config struct: %v", err)
 	}
-
-	fmt.Printf("%+v\n", viper.AllSettings())
-
 	return nil
 }
 
