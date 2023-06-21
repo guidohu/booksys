@@ -16,11 +16,18 @@ type Database interface {
 	Disconnect()
 	Ping() error
 	IsConfigured() bool
+	// views
+	LogsView
+	// tables
 	BrowserSessionTable
 	ConfigurationTable
 	UserTable
 	SessionTable
 	UserToSessionTable
+}
+
+type LogsView interface {
+	GetLogs() ([]Log, error)
 }
 
 type BrowserSessionTable interface {

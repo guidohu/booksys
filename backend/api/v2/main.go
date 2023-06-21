@@ -109,6 +109,8 @@ func main() {
 	http.Handle("/api/v2/user/signup", http.HandlerFunc(h.SignUp))
 	http.Handle("/api/v2/user/create-admin", http.HandlerFunc(h.MakeAdmin))
 
+	http.Handle("/api/v2/admin/logs", http.HandlerFunc(h.WithAuthentication(h.GetLogs)))
+
 	slog.Info(fmt.Sprintf("Server listening on port %d\n", viper.GetUint16("port")))
 
 	slog.Warn(http.ListenAndServe(fmt.Sprintf(":%d", viper.GetUint16("port")), nil).Error())

@@ -6,6 +6,6 @@ export default class Log {
    */
   static getLogs() {
     console.debug("Log/getLogs called");
-    return Request.getRequest("/api/v1/log.php?action=get_logs");
+    return Request.getRequest("/api/v2/admin/logs");
   }
 }
