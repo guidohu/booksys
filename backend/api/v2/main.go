@@ -98,6 +98,9 @@ func main() {
 	http.Handle("/api/v2/auth/logout", http.HandlerFunc(h.WithAuthentication(h.Logout)))
 	http.Handle("/api/v2/auth/user", http.HandlerFunc(h.WithAuthentication(h.User)))
 
+	http.Handle("/api/v2/configuration/list", http.HandlerFunc(h.WithAuthentication(h.GetConfiguration)))
+	http.Handle("/api/v2/configuration/set", http.HandlerFunc(h.WithAuthentication(h.SetConfiguration)))
+
 	http.Handle("/api/v2/database/config", http.HandlerFunc(h.WithAuthentication(h.GetDBConfig)))
 	http.Handle("/api/v2/database/setup", http.HandlerFunc(h.SetupDBConfig))
 
@@ -110,6 +113,7 @@ func main() {
 	http.Handle("/api/v2/user/create-admin", http.HandlerFunc(h.MakeAdmin))
 
 	http.Handle("/api/v2/admin/logs", http.HandlerFunc(h.WithAuthentication(h.GetLogs)))
+	// http.Handle("/api/v2/admin/configuration/list", http.HandlerFunc(h.WithAuthentication(h.GetLogs)))
 
 	slog.Info(fmt.Sprintf("Server listening on port %d\n", viper.GetUint16("port")))
 

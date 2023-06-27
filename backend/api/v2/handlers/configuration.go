@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"server/config"
 	"server/database"
+	"strconv"
 
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slog"
@@ -18,6 +19,69 @@ type GetDBConfigResponse struct {
 	DBUser       string `json:"db_user"`
 	DBPassword   string `json:"db_password,omitempty"`
 }
+
+// TODO validate and ERROR MAP
+type ConfigurationMessage struct {
+	Currency               string  `json:"currency" validate:"required,excludesall={} []!()<>"`
+	EngineHourFormat       string  `json:"engine_hour_format" validate:"required,oneof=hh.h hh:mm"`
+	FuelPaymentType        string  `json:"fuel_payment_type" validate:"required,oneof=billed instant"`
+	LocationAddress        string  `json:"location_address" validate:"excludesall={} []!><"`
+	LocationLatitude       float32 `json:"location_latitude" validate:"required,latitude"`
+	LocationLongitude      float32 `json:"location_longitude" validate:"required,longitude"`
+	LocationMap            string  `json:"location_map" validate:"omitempty,googlemapsurl"`
+	LocationTimeZone       string  `json:"location_time_zone" validate:"required"`
+	LogoFilePath           string  `json:"logo_file" validate:"omitempty,file"`
+	MyNautiqueBoatID       int     `json:"mynautique_boat_id" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=10"`
+	MyNautiqueEnabled      bool    `json:"mynautique_enabled" validate:"omitempty,boolean"`
+	MyNautiqueFuelCapacity int     `json:"mynautique_fuel_capacity" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=10"`
+	MyNautiquePassword     string  `json:"mynautique_password" validate:"required_if=MyNautiqueEnabled true,min=1"`
+	MyNautiqueUser         string  `json:"mynautique_user" validate:"required_if=MyNautiqueEnabled true,email"`
+	PaymentAccountBIC      string  `json:"payment_account_bic" validate:"omitempty,printascii"`
+	PaymentAccountComment  string  `json:"payment_account_comment"`
+	PaymentAccountIBAN     string  `json:"payment_account_iban" validate:"omitempty,printascii"`
+	PaymentAccountOwner    string  `json:"payment_account_owner"`
+	RecaptchaPrivateKey    string  `json:"recaptcha_privatekey" validate:"omitempty,recaptchakey,required_with=RecaptchaPublicKey"`
+	RecaptchaPublicKey     string  `json:"recaptcha_publickey" validate:"omitempty,recaptchakey,required_with=RecaptchaPrivateKey"`
+	SMTPPassword           string  `json:"smtp_password" validate:"required_with=SMTPSender"`
+	SMTPSender             string  `json:"smtp_sender" validate:"omitempty,required_with=SMTPSender,email"`
+	SMTPServer             string  `json:"smtp_server" validate:"required_with=SMTPSender"`
+	SMTPUsername           string  `json:"smtp_username" validate:"required_with=SMTPSender"`
+}
+
+var ConfigurationMessageValidationErrors = map[string]string{
+	"Currency":               "Use the 3 letter currency representation. E.g., USD, EUR, CHF.",
+	"EngineHourFormat":       "Engine hour format can only be hh.m or hh:mm.",
+	"FuelPaymentType":        "Fuel payment type is either 'instant' or 'billed'",
+	"LocationAddress":        "Location address cannot contain invalid characters such as []{}<> or similar.",
+	"LocationLatitude":       "Latitude is not a valid value.",
+	"LocationLongitude":      "Longitude is not a valid value.",
+	"LocationMap":            "Map URL needs to be a google embeded maps URL of the form https://www.google.com/maps/embeded?pb=...",
+	"LocationTimeZone":       "The timezone needs to be a valid representation such as Europe/Zurich.",
+	"LogoFilePath":           "Needs to be the path to the logo file on the server.",
+	"MyNautiqueBoatID":       "The boat ID from the my Nautique App should be a number.",
+	"MyNautiqueEnabled":      "MyNautique enabled needs to be true or false",
+	"MyNautiqueFuelCapacity": "The MyNautique fuel capacity needs to be a number.",
+	"MyNautiqueUser":         "The user for MyNautique needs to be an Email address.",
+	"MyNautiquePassword":     "A password for the MyNautique user needs to be set.",
+	"PaymentAccountBIC":      "BIC needs to be set to a valid value.",
+	"PaymentAccountComment":  "Comment cannot be parsed.",
+	"PaymentAccountIBAN":     "The IBAN number needs to be valid.",
+	"PaymentAccountOwner":    "The account owner cannot be parsed.",
+	"RecaptchaPrivateKey":    "Recaptcha private key is not valid.",
+	"RecaptchaPublicKey":     "Recaptcha public key is not valid.",
+	"SMTPPassword":           "SMTP Password needs to be set.",
+	"SMTPSender":             "SMTP sender is not a valid email address.",
+	"SMTPServer":             "SMTP server is not a valid  address.",
+	"SMTPUsername":           "No or invalid SMTP username provided",
+}
+
+// type GetConfigurationResponse struct {
+// 	ConfigurationMessage
+// }
+
+// type SetConfigurationRequest struct {
+// 	ConfigurationMessage
+// }
 
 type SetupDBConfigRequest struct {
 	DBServer   string `json:"db_server" validate:"required,hostname_port"`
@@ -106,6 +170,208 @@ func (h *Handler) GetDBConfig(w http.ResponseWriter, r *http.Request) {
 		DBPassword:   "",
 	}
 	WriteSuccessResponse("success", resp, w)
+}
+
+func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if !session.Valid() {
+		slog.Warn("Call to GetConfiguration without authentication")
+		WriteFailureResponse("Not authenticated", w)
+		return
+	}
+
+	properties, err := h.GetDB().GetAllPropertyValues()
+	if err != nil {
+		slog.Error("Cannot get configuration properties from database", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot get configuration", w)
+		return
+	}
+
+	pMap := make(map[string]string)
+	for _, p := range properties {
+		pMap[p.Property] = p.Value
+	}
+
+	lat, err := strconv.ParseFloat(pMap["location.latitude"], 32)
+	if err != nil {
+		slog.Error("Cannot convert location.latitude to float", slog.String("error", err.Error()))
+		lat = 0
+	}
+	lon, err := strconv.ParseFloat(pMap["location.longitude"], 32)
+	if err != nil {
+		slog.Error("Cannot convert location.longitude to float", slog.String("error", err.Error()))
+		lon = 0
+	}
+	boatid, err := strconv.Atoi(pMap["mynautique.boat.id"])
+	if pMap["mynautique.boat.id"] == "" {
+		boatid = 0
+	} else if err != nil {
+		slog.Error("Cannot convert mynautique.boat.id to int", slog.String("error", err.Error()))
+		boatid = 0
+	}
+	mynautiqueEnabled, err := strconv.ParseBool(pMap["mynautique.enabled"])
+	if pMap["mynautique.enabled"] == "" {
+		mynautiqueEnabled = false
+	} else if err != nil {
+		slog.Error("Cannot convert mynautique.enabled to bool", slog.String("error", err.Error()))
+		mynautiqueEnabled = false
+	}
+	mynautiqueFuelCapacity, err := strconv.Atoi(pMap["mynautique.fuel.capacity"])
+	if pMap["mynautique.fuel.capacity"] == "" {
+		mynautiqueFuelCapacity = 0
+	} else if err != nil {
+		slog.Error("Cannot convert boat.fuel.capacity to int", slog.String("error", err.Error()))
+		mynautiqueFuelCapacity = 0
+	}
+	resp := &ConfigurationMessage{
+		Currency:               pMap["currency"],
+		EngineHourFormat:       pMap["engine.hour.format"],
+		FuelPaymentType:        pMap["fuel.payment.type"],
+		LocationAddress:        pMap["location.address"],
+		LocationLatitude:       float32(lat),
+		LocationLongitude:      float32(lon),
+		LocationMap:            pMap["location.map"],
+		LocationTimeZone:       pMap["location.timezone"],
+		LogoFilePath:           pMap["logo.file"],
+		MyNautiqueBoatID:       boatid,
+		MyNautiqueEnabled:      mynautiqueEnabled,
+		MyNautiqueFuelCapacity: mynautiqueFuelCapacity,
+		MyNautiquePassword:     "hidden",
+		MyNautiqueUser:         pMap["mynautique.user"],
+		PaymentAccountBIC:      pMap["payment.account.bic"],
+		PaymentAccountComment:  pMap["payment.account.comment"],
+		PaymentAccountIBAN:     pMap["payment.account.iban"],
+		PaymentAccountOwner:    pMap["payment.account.owner"],
+		RecaptchaPrivateKey:    pMap["recaptcha.privatekey"],
+		RecaptchaPublicKey:     pMap["recaptcha.publickey"],
+		SMTPPassword:           "hidden",
+		SMTPSender:             pMap["smtp.sender"],
+		SMTPServer:             pMap["smtp.server"],
+		SMTPUsername:           pMap["smtp.username"],
+	}
+	WriteSuccessResponse("configuration", resp, w)
+}
+
+func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+
+	var req ConfigurationMessage
+	err := ReadBodyAndValidate(r, &req, ConfigurationMessageValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	props := []database.Configuration{
+		{
+			Property: "currency",
+			Value:    req.Currency,
+		},
+		{
+			Property: "engine.hour.format",
+			Value:    req.EngineHourFormat,
+		},
+		{
+			Property: "fuel.payment.type",
+			Value:    req.FuelPaymentType,
+		},
+		{
+			Property: "location.address",
+			Value:    req.LocationAddress,
+		},
+		{
+			Property: "location.latitude",
+			Value:    strconv.FormatFloat(float64(req.LocationLatitude), 'f', 6, 32),
+		},
+		{
+			Property: "location.longitude",
+			Value:    strconv.FormatFloat(float64(req.LocationLongitude), 'f', 6, 32),
+		},
+		{
+			Property: "location.map",
+			Value:    req.LocationMap,
+		},
+		{
+			Property: "location.time.zone",
+			Value:    req.LocationTimeZone,
+		},
+		{
+			Property: "logo.file",
+			Value:    req.LogoFilePath,
+		},
+		{
+			Property: "mynautique.boat.id",
+			Value:    strconv.FormatInt(int64(req.MyNautiqueBoatID), 10),
+		},
+		{
+			Property: "mynautique.enabled",
+			Value:    strconv.FormatBool(req.MyNautiqueEnabled),
+		},
+		{
+			Property: "mynautique.fuel.capacity",
+			Value:    strconv.FormatInt(int64(req.MyNautiqueFuelCapacity), 10),
+		},
+		{
+			Property: "mynautique.password",
+			Value:    req.MyNautiquePassword,
+		},
+		{
+			Property: "mynautique.user",
+			Value:    req.MyNautiqueUser,
+		},
+		{
+			Property: "payment.account.bic",
+			Value:    req.PaymentAccountBIC,
+		},
+		{
+			Property: "payment.account.comment",
+			Value:    req.PaymentAccountComment,
+		},
+		{
+			Property: "payment.account.iban",
+			Value:    req.PaymentAccountIBAN,
+		},
+		{
+			Property: "payment.account.owner",
+			Value:    req.PaymentAccountOwner,
+		},
+		{
+			Property: "recaptcha.privatekey",
+			Value:    req.RecaptchaPrivateKey,
+		},
+		{
+			Property: "recaptcha.publickey",
+			Value:    req.RecaptchaPublicKey,
+		},
+		{
+			Property: "smtp.password",
+			Value:    req.SMTPPassword,
+		},
+		{
+			Property: "smtp.sender",
+			Value:    req.SMTPSender,
+		},
+		{
+			Property: "smtp.server",
+			Value:    req.SMTPServer,
+		},
+		{
+			Property: "smtp.username",
+			Value:    req.SMTPUsername,
+		},
+	}
+	err = h.GetDB().UpdateOrInsertPropertyValues(props)
+	if err != nil {
+		slog.Warn("Cannot update configuration", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	WriteSuccessResponse("config updated", nil, w)
 }
 
 func (h *Handler) SetupMyNautiqueCredentials(w http.ResponseWriter, r *http.Request) {

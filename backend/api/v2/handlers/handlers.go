@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"server/database"
+	customvalidator "server/validator"
 	"sync/atomic"
 	"time"
 
@@ -118,6 +119,9 @@ func ReadBodyAndValidate(r *http.Request, s any, errorMap ...map[string]string) 
 
 	// Validate the struct
 	validate := validator.New()
+	// Add custom validators
+	validate.RegisterValidation("googlemapsurl", customvalidator.GoogleMapsURL)
+	validate.RegisterValidation("recaptchakey", customvalidator.RecaptchaKey)
 	err = validate.Struct(s)
 	if err != nil {
 		slog.Warn("Struct does not validate", slog.String("error", err.Error()))

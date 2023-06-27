@@ -7,7 +7,7 @@
     </div>
     <overlay-spinner :active="isUploading">
       <input-file
-        v-if="newLogoUri == null && (getLogoFile == null || showLogo == false)"
+        v-if="newLogoUri == null && (getLogoFile == null || getLogoFile == '' || showLogo == false)"
         id="logo-file"
         label="Your Logo"
         v-model="form.logoFile"
@@ -17,7 +17,7 @@
       />
       <div
         class="row"
-        v-if="newLogoUri != null || (getLogoFile != null && showLogo == true)"
+        v-if="newLogoUri != null || (getLogoFile != null && getLogoFile != '' && showLogo == true)"
       >
         <label class="col-3 col-form-label">Your Logo</label>
         <div class="col-9">
@@ -41,7 +41,7 @@
             v-if="
               newLogoUri != null ||
               form.logoFile != null ||
-              (getLogoFile != null && showLogo == true)
+              (getLogoFile != null && getLogoFile != '' && showLogo == true)
             "
             class="btn btn-outline-danger"
             @click="clearLogo"

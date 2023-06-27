@@ -34,6 +34,10 @@ export default class Configuration {
   }
 
   static getConfiguration() {
+    return Request.getRequest("/api/v2/configuration/list");
+  }
+
+  static getAdminConfiguration() {
     return Request.getRequest("/api/v1/configuration.php?action=get_configuration");
   }
 
@@ -58,10 +62,14 @@ export default class Configuration {
       recaptcha_privatekey: params.recaptcha_privatekey,
       recaptcha_publickey: params.recaptcha_publickey,
       mynautique_enabled: params.mynautique_enabled,
-      mynautique_user: params.mynautique_user,
-      mynautique_boat_id: params.mynautique_boat_id,
-      mynautique_fuel_capacity: params.mynautique_fuel_capacity,
     };
+
+    if (params.mynautique_enabled === true) {
+      request['mynautique_user'] = params.mynautique_user
+      request['mynautique_password'] = params.mynautique_password
+      request['mynautique_boat_id'] = parseInt(params.mynautique_boat_id, 10)
+      request['mynautique_fuel_capacity'] = parseInt(params.mynautique_fuel_capacity, 10)
+    }
 
     // only set password in case it is really given
     if (params.smtp_password != "hidden") {
@@ -72,7 +80,7 @@ export default class Configuration {
       request.mynautique_password = params.mynautique_password;
     }
 
-    return Request.postRequest("/api/v1/configuration.php?action=set_configuration", request);
+    return Request.postRequest("/api/v2/configuration/set", request);
   }
 
   static setMyNautiqueConfig(config) {

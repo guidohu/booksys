@@ -39,6 +39,8 @@ type BrowserSessionTable interface {
 
 type ConfigurationTable interface {
 	GetPropertyValue(key string) (Configuration, error)
+	GetAllPropertyValues() ([]Configuration, error)
+	UpdateOrInsertPropertyValues(conf []Configuration) error
 }
 
 type SessionTable interface {
