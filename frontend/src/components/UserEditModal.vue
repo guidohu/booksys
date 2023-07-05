@@ -90,15 +90,19 @@ export default {
       this.$emit("update:visible", false);
     },
     save: function () {
+      if(isNaN(this.form.zip)){
+        this.errors = [ "Zip Code needs to be a number."];
+        return;
+      }
       this.changeUserProfile({
         first_name: this.form.firstName,
         last_name: this.form.lastName,
         address: this.form.street,
-        plz: this.form.zip,
+        plz: Number(this.form.zip),
         city: this.form.city,
         email: this.form.email,
         mobile: this.form.phone,
-        license: this.form.license == true ? 1 : 0,
+        license: this.form.license == true,
       })
         .then(() => {
           this.errors = [];

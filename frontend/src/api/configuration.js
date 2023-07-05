@@ -14,7 +14,7 @@ export default class Configuration {
    */
   static getLogoFile() {
     console.log("configuration/getLogoFile called");
-    return Request.getRequest('/api/v1/configuration.php?action=get_logo_file');
+    return Request.getRequest('/api/v2/configuration/logo');
   }
 
   static getDbConfig() {
@@ -80,7 +80,7 @@ export default class Configuration {
       request.mynautique_password = params.mynautique_password;
     }
 
-    return Request.postRequest("/api/v2/configuration/set", request);
+    return Request.postRequest("/api/v2/admin/configuration/set", request);
   }
 
   static setMyNautiqueConfig(config) {

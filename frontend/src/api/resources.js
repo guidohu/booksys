@@ -4,7 +4,7 @@ export const uploadLogo = (file) => {
     const formData = new FormData();
     formData.append("logo", file);
 
-    fetch("/api/v1/resources.php?action=upload_logo", {
+    fetch("/api/v2/admin/upload/logo", {
       method: "POST",
       body: formData,
     })

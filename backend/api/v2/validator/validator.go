@@ -2,6 +2,7 @@ package validator
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/exp/slog"
@@ -21,8 +22,30 @@ func GoogleMapsURL(fl validator.FieldLevel) bool {
 func RecaptchaKey(fl validator.FieldLevel) bool {
 	r, err := regexp.Compile(`^[0-9a-zA-Z_-]{40}$`)
 	if err != nil {
-		slog.Error("cannot coompile RecaptchaKey regex")
+		slog.Error("cannot compile RecaptchaKey regex")
 		return false
 	}
 	return r.Match([]byte(fl.Field().String()))
+}
+
+// PasswordStrength validates if the password has at least:
+// - 12 characters
+// - contains a capital letter A-Z
+// - contains a lower case letter A-Z
+// - contains a number or special character
+func PasswordStrength(fl validator.FieldLevel) bool {
+	pwd := fl.Field().String()
+	if len(pwd) < 12 {
+		return false
+	}
+	if !strings.ContainsAny(pwd, "abcdefghijklmnopqrstuvwxyz") {
+		return false
+	}
+	if !strings.ContainsAny(pwd, "ABCDEFGHIJKLMNOPQRSTUVWXYZ") {
+		return false
+	}
+	if !strings.ContainsAny(pwd, "{}[]@!#$%^&*();:,./?<>") {
+		return false
+	}
+	return true
 }

@@ -69,9 +69,5 @@
         }  
     }
 
-    function get_logos($configuration){
-
-    }
-
 ?>
     

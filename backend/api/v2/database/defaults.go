@@ -328,54 +328,67 @@ var DefaultInvitationStatus = []InvitationStatus{
 	},
 }
 
+const (
+	ExpenseTypeFuelDirect = iota
+	ExpenseTypeMaintenance
+	ExpenseTypeMaterial
+	ExpenseTypeInvestment
+	ExpenseTypeSession
+	ExpenseTypeOther
+	ExpenseTypeMembershipFee
+	ExpenseTypeSalary
+	ExpenseTypeOwnersRefund
+	ExpenseTypeFuelBill
+)
+
 var DefaultExpenseTypes = []ExpenseType{
 	{
-		ID:      0,
+		ID:      ExpenseTypeFuelDirect,
 		Name:    "fuel",
 		Comment: "Costs for fuel",
 	},
 	{
-		ID:      1,
+		ID:      ExpenseTypeMaintenance,
 		Name:    "maintenance",
 		Comment: "Costs for maintenance.",
 	},
 	{
-		ID:      2,
+		ID:      ExpenseTypeMaterial,
 		Name:    "material",
 		Comment: "Material which is needed for the boat.",
 	},
 	{
-		ID:      3,
+		ID:      ExpenseTypeInvestment,
 		Name:    "invest",
 		Comment: "Investment in new Features, ...",
 	},
 	{
-		ID:      4,
+		ID:      ExpenseTypeSession,
 		Name:    "session",
 		Comment: "Payments for sessions.",
 	},
 	{
-		ID:      5,
+		ID:      ExpenseTypeOther,
 		Name:    "other",
 		Comment: "Other costs.",
 	},
 	{
-		ID:      6,
+		ID:      ExpenseTypeMembershipFee,
 		Name:    "membership fee",
 		Comment: "Membership Fee.",
 	},
 	{
-		ID:      7,
+		ID:      ExpenseTypeSalary,
 		Name:    "salary",
 		Comment: "Compensation for towing people or do whatever in the name of the community.",
 	},
 	{
-		ID:      8,
+		ID:      ExpenseTypeOwnersRefund,
 		Name:    "owners refund",
 		Comment: "Payback of investments from owners.",
 	},
 	{
-		ID:      9,
+		ID:      ExpenseTypeFuelBill,
 		Name:    "fuel bill",
 		Comment: "Costs for fuel paid through invoices.",
 	},

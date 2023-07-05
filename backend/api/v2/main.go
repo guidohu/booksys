@@ -89,6 +89,10 @@ func main() {
 	})
 	viper.WatchConfig()
 
+	// File server to serve uploaded files
+	fs := http.FileServer(http.Dir(viper.GetString("upload.path")))
+	http.Handle("/uploads/", http.StripPrefix("/uploads/", fs))
+
 	// Register all handlers
 	http.Handle("/api/v2/health/status", http.HandlerFunc(h.HealthStatus))
 
@@ -99,7 +103,7 @@ func main() {
 	http.Handle("/api/v2/auth/user", http.HandlerFunc(h.WithAuthentication(h.User)))
 
 	http.Handle("/api/v2/configuration/list", http.HandlerFunc(h.WithAuthentication(h.GetConfiguration)))
-	http.Handle("/api/v2/configuration/set", http.HandlerFunc(h.WithAuthentication(h.SetConfiguration)))
+	http.Handle("/api/v2/configuration/logo", http.HandlerFunc(h.GetLogoPath))
 
 	http.Handle("/api/v2/database/config", http.HandlerFunc(h.WithAuthentication(h.GetDBConfig)))
 	http.Handle("/api/v2/database/setup", http.HandlerFunc(h.SetupDBConfig))
@@ -111,9 +115,20 @@ func main() {
 
 	http.Handle("/api/v2/user/signup", http.HandlerFunc(h.SignUp))
 	http.Handle("/api/v2/user/create-admin", http.HandlerFunc(h.MakeAdmin))
+	http.Handle("/api/v2/user/my/balance", http.HandlerFunc(h.WithAuthentication(h.GetMyBalance)))
+	http.Handle("/api/v2/user/my/heats", http.HandlerFunc(h.WithAuthentication(h.GetMyHeats)))
+	http.Handle("/api/v2/user/my/heats/statistics", http.HandlerFunc(h.WithAuthentication(h.GetMyHeatStats)))
+	http.Handle("/api/v2/user/my/password/update", http.HandlerFunc(h.WithAuthentication(h.UpdateMyPassword)))
+	http.Handle("/api/v2/user/my/update", http.HandlerFunc(h.WithAuthentication(h.UpdateMyUser)))
 
+	http.Handle("/api/v2/admin/configuration/set", http.HandlerFunc(h.WithAuthentication(h.SetConfiguration)))
 	http.Handle("/api/v2/admin/logs", http.HandlerFunc(h.WithAuthentication(h.GetLogs)))
+	http.Handle("/api/v2/admin/upload/logo", http.HandlerFunc(h.WithAuthentication(h.UploadLogoFile)))
 	// http.Handle("/api/v2/admin/configuration/list", http.HandlerFunc(h.WithAuthentication(h.GetLogs)))
+
+	// TODO remove
+	jss := http.FileServer(http.Dir("../../../frontend/dist/"))
+	http.Handle("/", jss)
 
 	slog.Info(fmt.Sprintf("Server listening on port %d\n", viper.GetUint16("port")))
 

@@ -2,6 +2,7 @@ package database
 
 import (
 	"errors"
+	"time"
 
 	"golang.org/x/exp/slog"
 	"gorm.io/gorm"
@@ -79,4 +80,13 @@ func (d *DBMysql) UpdateOrInsertPropertyValues(conf []Configuration) error {
 	}
 
 	return nil
+}
+
+func (d *DBMysql) GetTimezoneLocation() (*time.Location, error) {
+	s, err := d.GetPropertyValue("location.time.zone")
+	if err != nil {
+		slog.Error("Cannot get location.time.zone", slog.String("error", err.Error()))
+		return nil, err
+	}
+	return time.LoadLocation(s.Value)
 }

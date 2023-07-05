@@ -66,6 +66,22 @@ const actions = {
         .catch((error) => {
           reject(error);
         })
+      User.getHeatStats()
+        .then((response) => {
+          commit("setHeatStats", response);
+          resolve();
+        })
+        .catch((error) => {
+          reject(error);
+        })
+      User.getBalance()
+        .then((response) => {
+          commit("setUserBalance", response);
+          resolve();
+        })
+        .catch((error) => {
+          reject(error);
+        })
     });
   },
   changeUserProfile({ dispatch }, profileData) {
@@ -253,8 +269,12 @@ const actions = {
 const mutations = {
   setHeatHistory(state, value) {
     state.heatHistory = value.heats;
+  },
+  setUserBalance(state, value) {
     state.balanceRounded = Math.round(value.balance_current * 100) / 100;
     state.balance = value.balance_current;
+  },
+  setHeatStats(state, value) {
     state.heatTimeMinutes = value.heat_time_min;
     state.heatTimeMinutesYTD = value.heat_time_min_ytd;
     state.heatCost = value.heat_cost;

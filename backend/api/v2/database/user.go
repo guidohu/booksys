@@ -35,6 +35,31 @@ func (d *DBMysql) AddUser(u User) (uint, error) {
 	return u.ID, tx.Error
 }
 
+// UpdateUser updates user values that are supposed to be updated
+// by the users themselves. It does not update PasswordSalt, PasswordHash
+// Locked, UserStatusID, Comment and IsDeleted
+func (d *DBMysql) UpdateUser(userID uint, user User) error {
+	// update the ID as we want it to be specified explicitly
+	user.ID = userID
+
+	return d.orm.Model(&user).
+		Select("*").
+		Omit("PasswordSalt", "PasswordHash", "Locked", "UserStatusID", "Comment", "IsDeleted").
+		Updates(user).Error
+}
+
+// UpdatePassword updates salt and password of a user. It does not
+// update anything else, although an entire user can be provided. It
+// ignores all values except the hash and the salt.
+func (d *DBMysql) UpdatePassword(userID uint, user User) error {
+	// update the ID as we want it to be specified explicitly
+	user.ID = userID
+
+	return d.orm.Model(&user).
+		Select("PasswordSalt", "PasswordHash").
+		Updates(user).Error
+}
+
 func (d *DBMysql) CountAdminUsers() int64 {
 	var count int64
 	d.orm.Model(&User{}).Where("status = ?", UserStatusAdmin).Count(&count)

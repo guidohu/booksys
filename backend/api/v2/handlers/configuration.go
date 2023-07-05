@@ -1,12 +1,17 @@
 package handlers
 
 import (
+	"crypto/sha256"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
+	"os"
+	"path/filepath"
 	"server/config"
 	"server/database"
 	"strconv"
+	"time"
 
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slog"
@@ -20,12 +25,11 @@ type GetDBConfigResponse struct {
 	DBPassword   string `json:"db_password,omitempty"`
 }
 
-// TODO validate and ERROR MAP
 type ConfigurationMessage struct {
 	Currency               string  `json:"currency" validate:"required,excludesall={} []!()<>"`
 	EngineHourFormat       string  `json:"engine_hour_format" validate:"required,oneof=hh.h hh:mm"`
 	FuelPaymentType        string  `json:"fuel_payment_type" validate:"required,oneof=billed instant"`
-	LocationAddress        string  `json:"location_address" validate:"excludesall={} []!><"`
+	LocationAddress        string  `json:"location_address" validate:"excludesall={}[]!><"`
 	LocationLatitude       float32 `json:"location_latitude" validate:"required,latitude"`
 	LocationLongitude      float32 `json:"location_longitude" validate:"required,longitude"`
 	LocationMap            string  `json:"location_map" validate:"omitempty,googlemapsurl"`
@@ -75,14 +79,6 @@ var ConfigurationMessageValidationErrors = map[string]string{
 	"SMTPUsername":           "No or invalid SMTP username provided",
 }
 
-// type GetConfigurationResponse struct {
-// 	ConfigurationMessage
-// }
-
-// type SetConfigurationRequest struct {
-// 	ConfigurationMessage
-// }
-
 type SetupDBConfigRequest struct {
 	DBServer   string `json:"db_server" validate:"required,hostname_port"`
 	DBName     string `json:"db_name" validate:"required,alphanum"`
@@ -94,6 +90,14 @@ type SetupMyNautiqueCredentialsRequest struct {
 	Enabled  bool   `json:"mynautique_enabled" validate:"boolean"`
 	User     string `json:"mynautique_user" validate:"omitempty,email"`
 	Password string `json:"mynautique_password"`
+}
+
+type UploadLogoFileResponse struct {
+	URI string `json:"uri"`
+}
+
+type GetLogoPathResponse struct {
+	URI string `json:"uri"`
 }
 
 func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
@@ -407,3 +411,98 @@ func (h *Handler) SetupMyNautiqueCredentials(w http.ResponseWriter, r *http.Requ
 
 	WriteSuccessResponse("config written", nil, w)
 }
+
+func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
+	// only admins are supposed to upload a logo file
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+
+	file, fileHeader, err := r.FormFile("logo")
+	if err != nil {
+		slog.Warn("cannot access the form file", slog.String("position", "logo"))
+		WriteFailureResponse("Cannot read the uploaded file.", w)
+		return
+	}
+	defer file.Close()
+
+	// check for the max logo size to be 512kB
+	if fileHeader.Size > 512*1024 {
+		slog.Warn("attempt to upload a file larger than 512kB", slog.Int64("size", fileHeader.Size))
+		WriteFailureResponse("File is larger than 512kB.", w)
+		return
+	}
+
+	contentTypes := fileHeader.Header.Values("Content-Type")
+	if len(contentTypes) == 0 {
+		slog.Warn("Cannot read Content-Type of file")
+		WriteFailureResponse("The uploaded file needs to be an image (e.g., Content-Type image/jpeg)", w)
+		return
+	}
+	contentType := contentTypes[0]
+	if contentType != "image/png" &&
+		contentType != "image/jpeg" &&
+		contentType != "image/jpg" &&
+		contentType != "image/gif" {
+		slog.Warn("Wrong Content-Type of file", slog.String("content_type", contentType))
+		WriteFailureResponse("The uploaded file needs to be an image (e.g., Content-Type image/jpeg)", w)
+		return
+	}
+
+	// store uploaded file into local path. We use a random filename
+	// to store multiple files without collisions.
+	nameTime := fmt.Sprintf("%s_%s", time.Now().Format(time.RFC3339), fileHeader.Filename)
+	hash := sha256.Sum256([]byte(nameTime))
+	fileHash := fmt.Sprintf("%x%s", hash[:16], filepath.Ext(fileHeader.Filename))
+	localFileName := filepath.Join(viper.GetString("upload.path"), fileHash)
+	if err := os.MkdirAll(filepath.Dir(localFileName), 0770); err != nil {
+		slog.Warn("Cannot create directory for file", slog.String("file", localFileName), slog.String("error", err.Error()))
+		WriteFailureResponse("File cannot get stored on server.", w)
+		return
+	}
+	out, err := os.Create(localFileName)
+	if err != nil {
+		slog.Warn("Cannot create file on server for file", slog.String("file", localFileName), slog.String("error", err.Error()))
+		WriteFailureResponse("File cannot get stored on server.", w)
+		return
+	}
+	defer out.Close()
+	_, err = io.Copy(out, file)
+	if err != nil {
+		slog.Warn("Cannot write to file on server for file", slog.String("file", localFileName), slog.String("error", err.Error()))
+		WriteFailureResponse("File cannot get stored on server.", w)
+		return
+	}
+
+	err = h.GetDB().UpdateOrInsertPropertyValues([]database.Configuration{
+		{
+			Property: "logo.file",
+			Value:    localFileName,
+		},
+	})
+	if err != nil {
+		slog.Warn("Cannot write file to configuration database", slog.String("file", localFileName), slog.String("error", err.Error()))
+		WriteFailureResponse("File cannot get stored on server.", w)
+		return
+	}
+
+	resp := &UploadLogoFileResponse{
+		URI: localFileName,
+	}
+	WriteSuccessResponse("file uploaded", resp, w)
+}
+
+func (h *Handler) GetLogoPath(w http.ResponseWriter, r *http.Request) {
+	conf, err := h.GetDB().GetPropertyValue("logo.file")
+	if err != nil {
+		slog.Warn("Cannot get logo file", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot get logo path from server.", w)
+		return
+	}
+	resp := &GetLogoPathResponse{}
+	resp.URI = conf.Value
+	WriteSuccessResponse("logo path", resp, w)
+}
+
+// TODO implement file removal

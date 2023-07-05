@@ -6,7 +6,17 @@ import { UserPointer } from "@/dataTypes/user";
 export default class User {
   static getHeats() {
     console.debug("User/getHeats called");
-    return Request.getRequest('/api/v1/user.php?action=get_my_user_heats');
+    return Request.getRequest('/api/v2/user/my/heats');
+  }
+
+  static getHeatStats() {
+    console.debug("User/getHeatStats called");
+    return Request.getRequest('/api/v2/user/my/heats/statistics');
+  }
+
+  static getBalance() {
+    console.debug("User/getBalance called");
+    return Request.getRequest('/api/v2/user/my/balance');
   }
 
   static makeAdmin(userId) {
@@ -17,17 +27,16 @@ export default class User {
   }
 
   static changeUserProfile(profileData) {
-    return Request.postRequest('/api/v1/user.php?action=change_my_user_data', profileData);
+    return Request.postRequest('/api/v2/user/my/update', profileData);
   }
 
   static changeUserPassword(passwordData) {
-    const password_old = Login.calcHash(passwordData.oldPassword);
-    const password_new = Login.calcHash(passwordData.newPassword);
+    console.debug("User/changeUserPassword called");
     const postData = {
-      password_old,
-      password_new,
+      password_old: passwordData.oldPassword,
+      password_new: passwordData.newPassword,
     };
-    return Request.postRequest('/api/v1/password.php?action=change_password_by_password', postData);
+    return Request.postRequest('/api/v2/user/my/password/update', postData);
   }
 
   static changeUserPasswordByToken(tokenAndPassword) {

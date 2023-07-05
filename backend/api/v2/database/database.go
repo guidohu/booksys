@@ -21,8 +21,11 @@ type Database interface {
 	// tables
 	BrowserSessionTable
 	ConfigurationTable
-	UserTable
+	ExpenditureTable
+	HeatTable
 	SessionTable
+	PaymentTable
+	UserTable
 	UserToSessionTable
 }
 
@@ -41,6 +44,20 @@ type ConfigurationTable interface {
 	GetPropertyValue(key string) (Configuration, error)
 	GetAllPropertyValues() ([]Configuration, error)
 	UpdateOrInsertPropertyValues(conf []Configuration) error
+	GetTimezoneLocation() (*time.Location, error)
+}
+
+type ExpenditureTable interface {
+	GetUserSessionPaybacks(userID uint) (float64, error)
+}
+
+type HeatTable interface {
+	GetUserHeats(userID uint, size int) ([]Heat, error)
+	GetUserHeatStats(userID uint, start time.Time, end time.Time) (int64, float64, error)
+}
+
+type PaymentTable interface {
+	GetUserSessionPayments(userID uint) (float64, error)
 }
 
 type SessionTable interface {
@@ -66,6 +83,8 @@ type UserTable interface {
 	ChangeLock(id uint, locked bool) error
 	// Count users that have status_id of an admin
 	CountAdminUsers() int64
+	UpdatePassword(userID uint, user User) error
+	UpdateUser(userID uint, user User) error
 	// Returns if users are present
 	UsersExist() (bool, error)
 }
