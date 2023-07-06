@@ -88,12 +88,19 @@ type GetMySessionsResponse struct {
 }
 
 type MySessionResponse struct {
+	ID        uint           `json:"id"`
+	Title     string         `json:"title"`
+	Type      uint           `json:"type"`
+	TypeName  string         `json:"type_name"`
+	StartTime int64          `json:"start_time"`
+	EndTime   int64          `json:"end_time"`
+	Riders    []SessionRider `json:"riders"`
+}
+
+type SessionRider struct {
 	ID        uint   `json:"id"`
-	Title     string `json:"title"`
-	Type      uint   `json:"type"`
-	TypeName  string `json:"type_name"`
-	StartTime int64  `json:"start_time"`
-	EndTime   int64  `json:"end_time"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }
 
 type GetMyHeatsResponse struct {
@@ -336,6 +343,20 @@ func (h *Handler) GetMySessions(w http.ResponseWriter, r *http.Request) {
 	past := []MySessionResponse{}
 	now := time.Now()
 	for _, s := range sessions {
+		// get riders for session
+		users, err := h.GetDB().GetUsersForSession(s.ID)
+		if err != nil {
+			slog.Error("Cannot get users for session", slog.String("error", err.Error()))
+		}
+		sessionUsers := []SessionRider{}
+		for _, u := range users {
+			sessionUsers = append(sessionUsers, SessionRider{
+				ID:        u.ID,
+				FirstName: u.User.FirstName,
+				LastName:  u.User.LastName,
+			})
+		}
+
 		session := MySessionResponse{
 			ID:        s.ID,
 			Title:     s.Title,
@@ -343,6 +364,7 @@ func (h *Handler) GetMySessions(w http.ResponseWriter, r *http.Request) {
 			TypeName:  s.SessionType.Name,
 			StartTime: s.StartTime.Unix(),
 			EndTime:   s.EndTime.Unix(),
+			Riders:    sessionUsers,
 		}
 		if now.After(s.EndTime) {
 			past = append(past, session)
@@ -354,8 +376,6 @@ func (h *Handler) GetMySessions(w http.ResponseWriter, r *http.Request) {
 		UpcomingSessions: upcoming,
 		PastSessions:     past,
 	}
-
-	// TODO get all the riders for each of my session
 
 	WriteSuccessResponse("user sessions", resp, w)
 }
