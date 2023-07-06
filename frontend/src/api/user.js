@@ -51,7 +51,7 @@ export default class User {
 
   static getUserSchedule() {
     console.debug("User/getUserSchedule called");
-    return Request.getRequest('/api/v1/user.php?action=get_my_user_sessions');
+    return Request.getRequest('/api/v2/user/my/sessions');
   }
 
   static cancelSession(sessionId) {

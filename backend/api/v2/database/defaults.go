@@ -267,6 +267,11 @@ var DefaultSessionTypes = []SessionType{
 	},
 }
 
+var DefaultSessionTypesMap = map[int]SessionType{
+	DefaultSessionType: DefaultSessionTypes[0],
+	CourseSessionType:  DefaultSessionTypes[1],
+}
+
 var DefaultPricing = []Pricing{
 	{
 		ID:             1,

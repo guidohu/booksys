@@ -207,6 +207,10 @@ func (Session) TableName() string {
 	return "session"
 }
 
+func (s Session) Equal(t Session) bool {
+	return reflect.DeepEqual(s, t)
+}
+
 type SessionType struct {
 	ID      uint   `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
 	Name    string `gorm:"type:text CHARACTER SET utf8"`

@@ -82,6 +82,20 @@ var UpdateMyPasswordValidationErrors = map[string]string{
 	"PasswordNew": "A new password has to be provided. It needs to be at least 12 characters and contain a capital letter, a lower case letter and a digit or special character.",
 }
 
+type GetMySessionsResponse struct {
+	UpcomingSessions []MySessionResponse `json:"sessions"`
+	PastSessions     []MySessionResponse `json:"sessions_old"`
+}
+
+type MySessionResponse struct {
+	ID        uint   `json:"id"`
+	Title     string `json:"title"`
+	Type      uint   `json:"type"`
+	TypeName  string `json:"type_name"`
+	StartTime int64  `json:"start_time"`
+	EndTime   int64  `json:"end_time"`
+}
+
 type GetMyHeatsResponse struct {
 	Heats []HeatResponse `json:"heats"`
 }
@@ -300,6 +314,50 @@ func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	WriteSuccessResponse("password changed", nil, w)
+}
+
+func (h *Handler) GetMySessions(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if session.UserID == 0 {
+		slog.Warn("Unknown user accessing GetMyHeats")
+		WriteFailureResponse("Not authenticated", w)
+		return
+	}
+
+	sessions, err := h.GetDB().GetSessionsByUser(session.UserID)
+	if err != nil {
+		slog.Error("Cannot get user sessions", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot get user sessions", w)
+		return
+	}
+
+	// split into past and future
+	upcoming := []MySessionResponse{}
+	past := []MySessionResponse{}
+	now := time.Now()
+	for _, s := range sessions {
+		session := MySessionResponse{
+			ID:        s.ID,
+			Title:     s.Title,
+			Type:      s.SessionTypeID,
+			TypeName:  s.SessionType.Name,
+			StartTime: s.StartTime.Unix(),
+			EndTime:   s.EndTime.Unix(),
+		}
+		if now.After(s.EndTime) {
+			past = append(past, session)
+		} else {
+			upcoming = append(upcoming, session)
+		}
+	}
+	resp := &GetMySessionsResponse{
+		UpcomingSessions: upcoming,
+		PastSessions:     past,
+	}
+
+	// TODO get all the riders for each of my session
+
+	WriteSuccessResponse("user sessions", resp, w)
 }
 
 func (h *Handler) GetMyHeats(w http.ResponseWriter, r *http.Request) {

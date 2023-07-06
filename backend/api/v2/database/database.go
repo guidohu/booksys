@@ -63,6 +63,7 @@ type PaymentTable interface {
 type SessionTable interface {
 	// GetSessionsBetween returns all sessions between start and end time
 	GetSessionsBetween(start, end time.Time) ([]Session, error)
+	GetSessionsByUser(userID uint) ([]Session, error)
 }
 
 type UserToSessionTable interface {
