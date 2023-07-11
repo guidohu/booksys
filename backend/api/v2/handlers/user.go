@@ -88,19 +88,13 @@ type GetMySessionsResponse struct {
 }
 
 type MySessionResponse struct {
-	ID        uint           `json:"id"`
-	Title     string         `json:"title"`
-	Type      uint           `json:"type"`
-	TypeName  string         `json:"type_name"`
-	StartTime int64          `json:"start_time"`
-	EndTime   int64          `json:"end_time"`
-	Riders    []SessionRider `json:"riders"`
-}
-
-type SessionRider struct {
-	ID        uint   `json:"id"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
+	ID        uint        `json:"id"`
+	Title     string      `json:"title"`
+	Type      uint        `json:"type"`
+	TypeName  string      `json:"type_name"`
+	StartTime int64       `json:"start_time"`
+	EndTime   int64       `json:"end_time"`
+	Riders    []UserShort `json:"riders"`
 }
 
 type GetMyHeatsResponse struct {
@@ -126,6 +120,14 @@ type GetMyBalanceResponse struct {
 	PaymentTotal float64 `json:"payment_total"`
 	PaybackTotal float64 `json:"payback_total"`
 	Balance      float64 `json:"balance_current"`
+}
+
+type GetAllUsersShortResponse []UserShort
+
+type UserShort struct {
+	ID        uint   `json:"id"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }
 
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
@@ -348,9 +350,9 @@ func (h *Handler) GetMySessions(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			slog.Error("Cannot get users for session", slog.String("error", err.Error()))
 		}
-		sessionUsers := []SessionRider{}
+		sessionUsers := []UserShort{}
 		for _, u := range users {
-			sessionUsers = append(sessionUsers, SessionRider{
+			sessionUsers = append(sessionUsers, UserShort{
 				ID:        u.ID,
 				FirstName: u.User.FirstName,
 				LastName:  u.User.LastName,
@@ -487,4 +489,29 @@ func (h *Handler) GetMyBalance(w http.ResponseWriter, r *http.Request) {
 	}
 
 	WriteSuccessResponse("balance", resp, w)
+}
+
+func (h *Handler) GetAllUsersShort(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+
+	users, err := h.GetDB().GetUsers()
+	if err != nil {
+		slog.Error("Cannot get users", slog.String("error", err.Error()))
+		WriteFailureResponse("cannot get users", w)
+		return
+	}
+
+	usersShort := []UserShort{}
+	for _, u := range users {
+		usersShort = append(usersShort, UserShort{
+			ID:        u.ID,
+			FirstName: u.FirstName,
+			LastName:  u.LastName,
+		})
+	}
+	WriteSuccessResponse("users", usersShort, w)
+
 }

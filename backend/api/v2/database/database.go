@@ -54,6 +54,7 @@ type ExpenditureTable interface {
 type HeatTable interface {
 	GetUserHeats(userID uint, size int) ([]Heat, error)
 	GetUserHeatStats(userID uint, start time.Time, end time.Time) (int64, float64, error)
+	GetHeatInSessionCount(sessionID uint) (int, error)
 }
 
 type PaymentTable interface {
@@ -61,9 +62,14 @@ type PaymentTable interface {
 }
 
 type SessionTable interface {
+	GetSession(sessionID uint) (Session, error)
 	// GetSessionsBetween returns all sessions between start and end time
 	GetSessionsBetween(start, end time.Time) ([]Session, error)
 	GetSessionsByUser(userID uint) ([]Session, error)
+	CreateSession(s Session) (uint, error)
+	DeleteUsersFromSession(sessionID uint) error
+	DeleteSession(sessionID uint) error
+	UpdateSession(s Session) error
 }
 
 type UserToSessionTable interface {
@@ -88,6 +94,8 @@ type UserTable interface {
 	UpdateUser(userID uint, user User) error
 	// Returns if users are present
 	UsersExist() (bool, error)
+	// Returns all users
+	GetUsers() ([]User, error)
 }
 
 type DBMysql struct {
@@ -122,7 +130,7 @@ func (d *DBMysql) Connect() error {
 	// - TODO change all session_type occurrences to have ID 1 and 2 instead of 0 and 1
 
 	datetimePrecision := 2
-	dsn := fmt.Sprintf("%s:%s@%s(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", d.User, d.Password, d.Protocol, d.Host, d.Port, d.DBName)
+	dsn := fmt.Sprintf("%s:%s@%s(%s:%s)/%s?charset=utf8&parseTime=True&loc=UTC", d.User, d.Password, d.Protocol, d.Host, d.Port, d.DBName)
 	orm, err := gorm.Open(gormMysql.New(gormMysql.Config{
 		DSN:                       dsn,                // data source name, refer https://github.com/go-sql-driver/mysql#dsn-data-source-name
 		DefaultStringSize:         256,                // add default size for string fields, by default, will use db type `longtext` for fields without size, not a primary key, no index defined and don't have default values

@@ -189,10 +189,7 @@ func (Pricing) TableName() string {
 
 type Session struct {
 	ID            uint        `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
-	Date          time.Time   `gorm:"type:date DEFAULT NULL"`
-	Start         time.Time   `gorm:"type:time DEFAULT NULL"`
 	StartTime     time.Time   `gorm:"type:timestamp DEFAULT CURRENT_TIMESTAMP"`
-	End           time.Time   `gorm:"type:time DEFAULT NULL"`
 	EndTime       time.Time   `gorm:"type:timestamp DEFAULT CURRENT_TIMESTAMP"`
 	Title         string      `gorm:"type:text CHARACTER SET utf8"`
 	Comment       string      `gorm:"type:text CHARACTER SET utf8"`

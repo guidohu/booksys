@@ -214,12 +214,12 @@ export default class Sessions {
       title: sessionData.title,
       comment: sessionData.description,
       max_riders: sessionData.maximumRiders,
-      start: dayjs(sessionData.start).format("X"),
-      end: dayjs(sessionData.end).format("X"),
+      start: parseInt(dayjs(sessionData.start).format("X")),
+      end: parseInt(dayjs(sessionData.end).format("X")),
       type: sessionData.type,
     };
 
-    return Request.postRequest("/api/v1/booking.php?action=add_session", session);
+    return Request.postRequest("/api/v2/session/create", session);
   }
 
   static editSession(sessionData) {
@@ -230,13 +230,13 @@ export default class Sessions {
       id: sessionData.id,
       title: sessionData.title,
       comment: sessionData.description,
-      max_riders: sessionData.maximumRiders,
-      start: dayjs(sessionData.start).format("X"),
-      end: dayjs(sessionData.end).format("X"),
+      max_riders: parseInt(sessionData.maximumRiders),
+      start: parseInt(dayjs(sessionData.start).format("X")),
+      end: parseInt(dayjs(sessionData.end).format("X")),
       type: sessionData.type,
     };
 
-    return Request.postRequest("/api/v1/booking.php?action=edit_session", session);
+    return Request.postRequest("/api/v2/session/edit", session);
   }
 
   static deleteSession(sessionData) {
@@ -246,7 +246,7 @@ export default class Sessions {
       session_id: sessionData.id,
     };
 
-    return Request.postRequest("/api/v1/booking.php?action=delete_session", session);
+    return Request.postRequest("/api/v2/session/delete", session);
   }
 
   static addUsersToSession(sessionId, users) {

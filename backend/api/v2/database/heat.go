@@ -27,3 +27,9 @@ func (d *DBMysql) GetUserHeatStats(userID uint, start time.Time, end time.Time) 
 		Scan(&s).Error
 	return s.duration, s.cost, err
 }
+
+func (d *DBMysql) GetHeatInSessionCount(sessionID uint) (int, error) {
+	var count int
+	err := d.orm.Raw("SELECT count(*) FROM heat WHERE session_id = ?", sessionID).Scan(&count).Error
+	return count, err
+}

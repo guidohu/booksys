@@ -83,3 +83,9 @@ func (d *DBMysql) ChangeUserStatus(id uint, userStatusId uint) error {
 func (d *DBMysql) ChangeLock(id uint, locked bool) error {
 	return d.orm.Debug().Model(&User{}).Where("id = ?", id).Update("locked", locked).Error
 }
+
+func (d *DBMysql) GetUsers() ([]User, error) {
+	var users []User
+	err := d.orm.Find(&users).Error
+	return users, err
+}

@@ -11,7 +11,7 @@
       @close="$emit('update:visible', false)"
     />
     <modal-body>
-      <warning-box v-if="errors.length" :erors="errors" />
+      <warning-box v-if="errors.length" :errors="errors" />
       <form @submit.prevent="save">
         <input-text
           id="session-title"
@@ -170,6 +170,7 @@ export default {
             this.close();
           })
           .catch((err) => {
+            console.warn("Error received:", err)
             this.errors = err;
           });
       } else {

@@ -63,7 +63,7 @@ export default class User {
 
   static getUserList() {
     return new Promise((resolve, reject) => {
-      Request.getRequest('/api/v1/user.php?action=get_all_users')
+      Request.getRequest('/api/v2/user/list-short')
       .then((response) => {
         const usersResponse = response;
         let users = [];

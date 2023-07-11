@@ -2,6 +2,7 @@ package validator
 
 import (
 	"regexp"
+	"server/database"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -48,4 +49,10 @@ func PasswordStrength(fl validator.FieldLevel) bool {
 		return false
 	}
 	return true
+}
+
+// SessionType checks if the provided session type is valid.
+func SessionType(fl validator.FieldLevel) bool {
+	_, found := database.DefaultSessionTypesMap[int(fl.Field().Int())]
+	return found
 }

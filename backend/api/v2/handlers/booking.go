@@ -100,15 +100,15 @@ func (h *Handler) getBooking(start time.Time, end time.Time) (GetBookingResponse
 	for _, session := range s {
 		sr := SessionResponse{
 			ID:               session.ID,
-			Start:            session.Start.Unix(),
-			End:              session.End.Unix(),
+			Start:            session.StartTime.Unix(),
+			End:              session.EndTime.Unix(),
 			Title:            session.Title,
 			Comment:          session.Comment,
 			FreeSpaces:       session.FreeSpaces,
 			CreatorID:        session.CreatorID,
 			CreatorFirstName: session.Creator.FirstName,
 			CreatorLastName:  session.Creator.LastName,
-			Duration:         int64(session.End.Sub(session.Start).Seconds()),
+			Duration:         int64(session.EndTime.Sub(session.StartTime).Seconds()),
 			Riders:           []RiderResponse{},
 		}
 		users, err := h.GetDB().GetUsersForSession(session.ID)

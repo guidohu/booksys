@@ -9,6 +9,10 @@ import (
 // GetSessionsBetween get sessions between start and end
 func (d *DBMysql) GetSessionsBetween(start, end time.Time) ([]Session, error) {
 	var sessions []Session
+	// Find sessions that
+	// 1. start after 'start' and start before 'end'
+	// 2. end after 'start' and end before 'end'
+	// 3. start after 'start' and end before 'end'
 	err := d.orm.Model(&Session{}).
 		Where("UNIX_TIMESTAMP(start_time) >= ? AND UNIX_TIMESTAMP(start_time) < ?", start.Unix(), end.Unix()).
 		Or("UNIX_TIMESTAMP(end_time) >= ? AND UNIX_TIMESTAMP(end_time) < ?", start.Unix(), end.Unix()).
@@ -16,6 +20,13 @@ func (d *DBMysql) GetSessionsBetween(start, end time.Time) ([]Session, error) {
 		Preload("SessionType").
 		Preload("Creator").
 		Find(&sessions).Error
+	d.orm.Debug().Model(&Session{}).
+		Where("UNIX_TIMESTAMP(start_time) >= ? AND UNIX_TIMESTAMP(start_time) < ?", start.Unix(), end.Unix()).
+		Or("UNIX_TIMESTAMP(end_time) >= ? AND UNIX_TIMESTAMP(end_time) < ?", start.Unix(), end.Unix()).
+		Or("UNIX_TIMESTAMP(start_time) < ? AND UNIX_TIMESTAMP(end_time) >= ?", start.Unix(), end.Unix()).
+		Preload("SessionType").
+		Preload("Creator").
+		Find(&sessions)
 	return sessions, err
 }
 
@@ -52,4 +63,27 @@ func (d *DBMysql) GetUsersForSession(id uint) ([]UserToSession, error) {
 		Preload("User").
 		Error
 	return users, err
+}
+
+func (d *DBMysql) CreateSession(s Session) (uint, error) {
+	err := d.orm.Create(&s).Error
+	return s.ID, err
+}
+
+func (d *DBMysql) GetSession(sessionID uint) (Session, error) {
+	var session Session
+	err := d.orm.First(&session, sessionID).Error
+	return session, err
+}
+
+func (d *DBMysql) UpdateSession(s Session) error {
+	return d.orm.Save(&s).Error
+}
+
+func (d *DBMysql) DeleteUsersFromSession(sessionID uint) error {
+	return d.orm.Exec("DELETE FROM user_to_session WHERE session_id = ?", sessionID).Error
+}
+
+func (d *DBMysql) DeleteSession(sessionID uint) error {
+	return d.orm.Exec("DELETE FROM session WHERE id = ?", sessionID).Error
 }

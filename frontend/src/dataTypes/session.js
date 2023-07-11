@@ -1,5 +1,5 @@
-export const SESSION_TYPE_OPEN = 0;
-export const SESSION_TYPE_PRIVATE = 1;
+export const SESSION_TYPE_OPEN = 1;
+export const SESSION_TYPE_PRIVATE = 2;
 
 export default class Session {
   constructor(

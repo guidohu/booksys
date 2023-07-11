@@ -111,10 +111,15 @@ func main() {
 	http.Handle("/api/v2/booking/day/list", http.HandlerFunc(h.WithAuthentication(h.GetBookingDay)))
 	// http.Handle("/api/v2/booking/month/list", http.HandlerFunc(h.WithAuthentication(h.GetBookingDay)))
 
+	http.Handle("/api/v2/session/create", http.HandlerFunc(h.WithAuthentication(h.CreateSession)))
+	http.Handle("/api/v2/session/delete", http.HandlerFunc(h.WithAuthentication(h.DeleteSession)))
+	http.Handle("/api/v2/session/edit", http.HandlerFunc(h.WithAuthentication(h.EditSession)))
+
 	http.Handle("/api/v2/mynautique/credentials/setup", http.HandlerFunc(h.SetupMyNautiqueCredentials))
 
 	http.Handle("/api/v2/user/signup", http.HandlerFunc(h.SignUp))
 	http.Handle("/api/v2/user/create-admin", http.HandlerFunc(h.MakeAdmin))
+	http.Handle("/api/v2/user/list-short", http.HandlerFunc(h.WithAuthentication(h.GetAllUsersShort)))
 	http.Handle("/api/v2/user/my/balance", http.HandlerFunc(h.WithAuthentication(h.GetMyBalance)))
 	http.Handle("/api/v2/user/my/heats", http.HandlerFunc(h.WithAuthentication(h.GetMyHeats)))
 	http.Handle("/api/v2/user/my/heats/statistics", http.HandlerFunc(h.WithAuthentication(h.GetMyHeatStats)))
