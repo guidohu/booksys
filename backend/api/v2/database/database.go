@@ -75,6 +75,8 @@ type SessionTable interface {
 type UserToSessionTable interface {
 	// GetUsersForSession returns all users from a specific session
 	GetUsersForSession(id uint) ([]UserToSession, error)
+	AddSessionToUserEntry(u UserToSession) error
+	DeleteSessionToUserEntry(userID uint, sessionID uint) error
 }
 
 type UserTable interface {

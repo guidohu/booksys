@@ -61,6 +61,7 @@ func (d *DBMysql) GetUsersForSession(id uint) ([]UserToSession, error) {
 	err := d.orm.Model(&UserToSession{}).
 		Where("session_id = ?", id).
 		Preload("User").
+		Find(&users).
 		Error
 	return users, err
 }
@@ -86,4 +87,13 @@ func (d *DBMysql) DeleteUsersFromSession(sessionID uint) error {
 
 func (d *DBMysql) DeleteSession(sessionID uint) error {
 	return d.orm.Exec("DELETE FROM session WHERE id = ?", sessionID).Error
+}
+
+func (d *DBMysql) AddSessionToUserEntry(u UserToSession) error {
+	return d.orm.Where(UserToSession{UserID: u.UserID, SessionID: u.SessionID}).
+		FirstOrCreate(&u).Error
+}
+
+func (d *DBMysql) DeleteSessionToUserEntry(userID uint, sessionID uint) error {
+	return d.orm.Exec("DELETE FROM user_to_session WHERE user_id = ? AND session_id = ?", userID, sessionID).Error
 }

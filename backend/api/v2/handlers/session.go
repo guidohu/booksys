@@ -46,13 +46,18 @@ var DeleteSessionValidationErrors = map[string]string{
 	"SessionID": "Please provide a valid session id.",
 }
 
+type AddSessionUserRequest struct {
+	SessionID uint   `json:"session_id" validate:"required"`
+	UserIDs   []uint `json:"user_ids" validate:"required"`
+}
+
+type RemoveSessionUserRequest struct {
+	SessionID uint `json:"session_id" validate:"required,numeric"`
+	UserID    uint `json:"user_id" validate:"required,numeric"`
+}
+
 func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	session := GetSessionFromContext(r)
-	if session.UserID == 0 {
-		slog.Warn("Unknown user accessing CreateSession")
-		WriteFailureResponse("Not authenticated", w)
-		return
-	}
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return
 	}
@@ -102,11 +107,6 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) EditSession(w http.ResponseWriter, r *http.Request) {
 	session := GetSessionFromContext(r)
-	if session.UserID == 0 {
-		slog.Warn("Unknown user accessing EditSession")
-		WriteFailureResponse("Not authenticated", w)
-		return
-	}
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return
 	}
@@ -163,11 +163,6 @@ func (h *Handler) EditSession(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) DeleteSession(w http.ResponseWriter, r *http.Request) {
 	session := GetSessionFromContext(r)
-	if session.UserID == 0 {
-		slog.Warn("Unknown user accessing DeleteSession")
-		WriteFailureResponse("Not authenticated", w)
-		return
-	}
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return
 	}
@@ -209,4 +204,78 @@ func (h *Handler) DeleteSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	WriteSuccessResponse("session removed", nil, w)
+}
+
+func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+	req := &AddSessionUserRequest{}
+	err := ReadBodyAndValidate(r, req)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse("Invalid request.", w)
+		return
+	}
+
+	// check if session exists
+	s, err := h.GetDB().GetSession(req.SessionID)
+	if err != nil {
+		slog.Warn("Session cannot be found", slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
+		WriteFailureResponse("Session does not exist.", w)
+		return
+	}
+
+	// check if all users exist, skip non existing
+	existingUsers := []uint{}
+	for _, userID := range req.UserIDs {
+		user, err := h.GetDB().GetUserById(userID)
+		if err != nil {
+			slog.Warn("Adding user that does not exist to session is skipped", slog.Uint64("userID", uint64(userID)), slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
+			continue
+		}
+		if user.ID == 0 {
+			slog.Warn("Adding user that does not exist to session is skipped", slog.Uint64("userID", uint64(userID)), slog.Uint64("sessionID", uint64(req.SessionID)))
+			continue
+		}
+		existingUsers = append(existingUsers, userID)
+	}
+
+	// add existing users to session
+	for _, u := range existingUsers {
+		entry := database.UserToSession{
+			SessionID: s.ID,
+			UserID:    u,
+			TimeAdded: time.Now(),
+		}
+		err = h.GetDB().AddSessionToUserEntry(entry)
+		if err != nil {
+			slog.Warn("Cannot add user to session. Skipped", slog.Uint64("userID", uint64(u)), slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
+		}
+	}
+	WriteSuccessResponse("users added", nil, w)
+}
+
+func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+	req := &RemoveSessionUserRequest{}
+	err := ReadBodyAndValidate(r, req)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse("Invalid request.", w)
+		return
+	}
+
+	// remove entry
+	err = h.GetDB().DeleteSessionToUserEntry(req.UserID, req.SessionID)
+	if err != nil {
+		slog.Warn("User to Session entry not found for", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Uint64("userID", uint64(req.UserID)), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot remove user from session.", w)
+		return
+	}
+	WriteSuccessResponse("users removed", nil, w)
 }

@@ -162,9 +162,9 @@ export default {
       console.log("selected", this.selected);
 
       if (this.selected.length > 0) {
-        console.log("Add selected");
+        console.log("Users to add", this.userList.filter((u) => this.selected.includes(u.id.toString())))
         this.usersToAdd.push(
-          ...this.userList.filter((u) => this.selected.includes(u.id))
+          ...this.userList.filter((u) => this.selected.includes(u.id.toString()))
         );
       } else if (
         this.selected.length == 0 &&

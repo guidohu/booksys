@@ -262,7 +262,7 @@ export default class Sessions {
       session_id: sessionId,
     };
 
-    return Request.postRequest("/api/v1/booking.php?action=add_users", requestBody);
+    return Request.postRequest("/api/v2/session/user/add", requestBody);
   }
 
   /**
@@ -278,6 +278,6 @@ export default class Sessions {
       session_id: sessionId,
     };
 
-    return Request.postRequest("/api/v1/booking.php?action=delete_user", requestBody);
+    return Request.postRequest("/api/v2/session/user/remove", requestBody);
   }
 }

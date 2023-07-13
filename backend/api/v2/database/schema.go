@@ -270,7 +270,7 @@ type UserToSession struct {
 	User      User      `gorm:"foreignKey:UserID;references:ID"`
 	SessionID uint      `gorm:"type:mediumint(9) DEFAULT NULL"`
 	Session   Session   `gorm:"foreignKey:SessionID;references:ID"`
-	TimeAdded time.Time `gorm:"column:time;type:time DEFAULT NULL"`
+	TimeAdded time.Time `gorm:"column:time;type:datetime DEFAULT NULL"`
 }
 
 func (UserToSession) TableName() string {
