@@ -109,7 +109,7 @@ func main() {
 	http.Handle("/api/v2/database/setup", http.HandlerFunc(h.SetupDBConfig))
 
 	http.Handle("/api/v2/booking/day/list", http.HandlerFunc(h.WithAuthentication(h.GetBookingDay)))
-	// http.Handle("/api/v2/booking/month/list", http.HandlerFunc(h.WithAuthentication(h.GetBookingDay)))
+	http.Handle("/api/v2/booking/series/list", http.HandlerFunc(h.WithAuthentication(h.GetBookingSeries)))
 
 	http.Handle("/api/v2/session/create", http.HandlerFunc(h.WithAuthentication(h.CreateSession)))
 	http.Handle("/api/v2/session/delete", http.HandlerFunc(h.WithAuthentication(h.DeleteSession)))

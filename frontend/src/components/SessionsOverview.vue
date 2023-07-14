@@ -51,13 +51,13 @@
                 Riders
               </div>
               <div
-                v-if="session.rider == null || session.riders.length == 0"
+                v-if="session.riders == null || session.riders.length == 0"
                 class="col-7"
               >
                 -
               </div>
               <div
-                v-if="session.rider != null && session.riders.length > 0"
+                v-if="session.riders != null && session.riders.length > 0"
                 class="col-7"
               >
                 <div
@@ -69,7 +69,7 @@
                     {{ rider.name }}
                   </div>
                 </div>
-                <div v-if="sessions.riders.length > 3">
+                <div v-if="session.riders.length > 3">
                   <div class="col-12 text-truncate">...</div>
                 </div>
               </div>

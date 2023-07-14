@@ -15,6 +15,10 @@ type GetBookingDayRequest struct {
 	End   int64 `json:"end" validate:"required,number"`
 }
 
+type GetBookingSeriesRequest struct {
+	TimeWindows []GetBookingDayRequest `json:"time_windows" validate:"required"`
+}
+
 type GetBookingResponse struct {
 	Start            int64             `json:"window_start"`
 	End              int64             `json:"window_end"`
@@ -25,6 +29,8 @@ type GetBookingResponse struct {
 	OpeningHourEnd   string            `json:"business_day_end"`
 	Sessions         []SessionResponse `json:"sessions"`
 }
+
+type GetBookingSeriesResponse []GetBookingResponse
 
 type SessionResponse struct {
 	ID               uint            `json:"id"`
@@ -60,6 +66,28 @@ func (h *Handler) GetBookingDay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	WriteSuccessResponse("bookings retrieved", &b, w)
+}
+
+func (h *Handler) GetBookingSeries(w http.ResponseWriter, r *http.Request) {
+	var req GetBookingSeriesRequest
+	err := ReadBodyAndValidate(r, &req)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse("Request payload not valid", w)
+		return
+	}
+	resp := []GetBookingResponse{}
+	for _, window := range req.TimeWindows {
+		b, err := h.getBooking(time.Unix(window.Start, 0), time.Unix(window.End, 0))
+		if err != nil {
+			slog.Warn("Cannot retrieve bookings for window", slog.Int64("start", window.Start), slog.Int64("end", window.End), slog.String("error", err.Error()))
+			b = GetBookingResponse{}
+		}
+		resp = append(resp, b)
+	}
+	var response GetBookingSeriesResponse
+	response = GetBookingSeriesResponse(resp)
+	WriteSuccessResponse("bookings", &response, w)
 }
 
 func (h *Handler) getBooking(start time.Time, end time.Time) (GetBookingResponse, error) {
@@ -111,15 +139,15 @@ func (h *Handler) getBooking(start time.Time, end time.Time) (GetBookingResponse
 			Duration:         int64(session.EndTime.Sub(session.StartTime).Seconds()),
 			Riders:           []RiderResponse{},
 		}
-		users, err := h.GetDB().GetUsersForSession(session.ID)
+		usersToSession, err := h.GetDB().GetUsersForSession(session.ID)
 		if err != nil {
 			slog.Warn("Cannot retrieve users for", slog.Uint64("session", uint64(session.ID)), slog.String("error", err.Error()))
 			return GetBookingResponse{}, err
 		}
-		for _, user := range users {
+		for _, entry := range usersToSession {
 			sr.Riders = append(sr.Riders, RiderResponse{
-				ID:   user.ID,
-				Name: fmt.Sprintf("%s %s", user.User.FirstName, user.User.LastName),
+				ID:   entry.UserID,
+				Name: fmt.Sprintf("%s %s", entry.User.FirstName, entry.User.LastName),
 			})
 		}
 		b.Sessions = append(b.Sessions, sr)

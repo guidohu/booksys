@@ -277,5 +277,5 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request) 
 		WriteFailureResponse("Cannot remove user from session.", w)
 		return
 	}
-	WriteSuccessResponse("users removed", nil, w)
+	WriteSuccessResponse("user removed", nil, w)
 }

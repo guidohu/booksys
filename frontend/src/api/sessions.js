@@ -24,24 +24,24 @@ export default class Sessions {
 
     // build 42 time windows (7 days for 6 weeks)
     let query = {
-      timeWindows: [],
+      time_windows: [],
     };
 
     for (let i = 0; i < 42; i++) {
       // create new time window
-      const start = dateIterator.startOf("day").format("X");
-      const end = dateIterator.endOf("day").format("X");
+      const start = parseInt(dateIterator.startOf("day").format("X"));
+      const end = parseInt(dateIterator.endOf("day").format("X"));
       const window = {
         start: start,
         end: end,
       };
-      query.timeWindows.push(window);
+      query.time_windows.push(window);
       dateIterator = dateIterator.add(1, "day");
     }
 
     console.log("getSessionsCalendar:", query);
     return new Promise((resolve, reject) => {
-      Request.postRequest("/api/v1/booking.php?action=get_booking_month", query)
+      Request.postRequest("/api/v2/booking/series/list", query)
       .then((days) => {
         let monthSessions = [];
         for (let i = 0; i < days.length; i++) {
