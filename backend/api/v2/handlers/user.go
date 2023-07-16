@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/shopspring/decimal"
 	"github.com/spf13/viper"
 	"golang.org/x/exp/slog"
 )
@@ -102,24 +103,24 @@ type GetMyHeatsResponse struct {
 }
 
 type HeatResponse struct {
-	Date            string  `json:"date"` // dd.mm.YYYY representation
-	DateUnixMillis  int64   `json:"date_unix_millis"`
-	Cost            float64 `json:"cost"`     // #.## representation
-	DurationText    string  `json:"duration"` // ##:## representation
-	DurationSeconds int64   `json:"duration_seconds"`
+	Date            string          `json:"date"` // dd.mm.YYYY representation
+	DateUnixMillis  int64           `json:"date_unix_millis"`
+	Cost            decimal.Decimal `json:"cost"`     // #.## representation
+	DurationText    string          `json:"duration"` // ##:## representation
+	DurationSeconds int64           `json:"duration_seconds"`
 }
 
 type GetMyHeatStatsResponse struct {
-	HeatTimeMinutesTotal int64   `json:"heat_time_min"`
-	HeatCostTotal        float64 `json:"heat_cost"`
-	HeatTimeMinutesYTD   int64   `json:"heat_time_min_ytd"`
-	HeatCostYTD          float64 `json:"heat_cost_ytd"`
+	HeatTimeMinutesTotal int64           `json:"heat_time_min"`
+	HeatCostTotal        decimal.Decimal `json:"heat_cost"`
+	HeatTimeMinutesYTD   int64           `json:"heat_time_min_ytd"`
+	HeatCostYTD          decimal.Decimal `json:"heat_cost_ytd"`
 }
 
 type GetMyBalanceResponse struct {
-	PaymentTotal float64 `json:"payment_total"`
-	PaybackTotal float64 `json:"payback_total"`
-	Balance      float64 `json:"balance_current"`
+	PaymentTotal decimal.Decimal `json:"payment_total"`
+	PaybackTotal decimal.Decimal `json:"payback_total"`
+	Balance      decimal.Decimal `json:"balance_current"`
 }
 
 type GetAllUsersShortResponse []UserShort
@@ -405,7 +406,7 @@ func (h *Handler) GetMyHeats(w http.ResponseWriter, r *http.Request) {
 		resp.Heats = append(resp.Heats, HeatResponse{
 			Date:            heat.Timestamp.Format("02.01.2006"),
 			DateUnixMillis:  heat.Timestamp.UnixMilli(),
-			Cost:            math.Floor(float64(heat.Cost)*100) / 100,
+			Cost:            heat.Cost,
 			DurationText:    t.Add(duration).Format("15:04"),
 			DurationSeconds: int64(heat.DurationSeconds),
 		})
@@ -483,9 +484,9 @@ func (h *Handler) GetMyBalance(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := &GetMyBalanceResponse{
-		PaymentTotal: math.Round(payment*100) / 100,
-		PaybackTotal: math.Round(payback*100) / 100,
-		Balance:      math.Round((payment-payback-cost)*100) / 100,
+		PaymentTotal: payment,
+		PaybackTotal: payback,
+		Balance:      payment.Sub(payback).Sub(cost),
 	}
 
 	WriteSuccessResponse("balance", resp, w)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
 
 	gormMysql "gorm.io/driver/mysql"
@@ -49,18 +50,22 @@ type ConfigurationTable interface {
 }
 
 type ExpenditureTable interface {
-	GetUserSessionPaybacks(userID uint) (float64, error)
+	GetUserSessionPaybacks(userID uint) (decimal.Decimal, error)
 }
 
 type HeatTable interface {
 	GetUserHeats(userID uint, size int) ([]Heat, error)
-	GetUserHeatStats(userID uint, start time.Time, end time.Time) (int64, float64, error)
+	GetUserHeatStats(userID uint, start time.Time, end time.Time) (int64, decimal.Decimal, error)
 	GetHeatInSessionCount(sessionID uint) (int, error)
 	GetHeatsInSession(sessionID uint) ([]Heat, error)
+	AddHeat(h *Heat) error
+	DeleteHeat(heatID uint) error
+	GetHeat(heatID uint) (Heat, error)
+	ChangeHeat(h *Heat) error
 }
 
 type PaymentTable interface {
-	GetUserSessionPayments(userID uint) (float64, error)
+	GetUserSessionPayments(userID uint) (decimal.Decimal, error)
 }
 
 type PricingTable interface {

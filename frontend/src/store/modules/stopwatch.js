@@ -113,15 +113,19 @@ const actions = {
 
         const newHeat = {
           uid: uid,
-          user_id: userId,
-          session_id: sessionId,
+          user_id: parseInt(userId),
+          session_id: parseInt(sessionId),
           comment: comment,
-          duration_s: duration,
+          duration_s: parseInt(duration),
         };
 
         commit("setIsDisplayUpdaterActive", false);
 
-        Heat.addHeats([newHeat])
+        const heats = {
+          heats: [newHeat]
+        }
+
+        Heat.addHeats(heats)
           .then((response) => {
             // TODO check if all have been added
             console.log(response);

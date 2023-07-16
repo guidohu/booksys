@@ -1,6 +1,10 @@
 package database
 
-import "time"
+import (
+	"time"
+
+	"github.com/shopspring/decimal"
+)
 
 func (d *DBMysql) GetUserHeats(userID uint, size int) ([]Heat, error) {
 	var h []Heat
@@ -13,10 +17,10 @@ func (d *DBMysql) GetUserHeats(userID uint, size int) ([]Heat, error) {
 	return h, err
 }
 
-func (d *DBMysql) GetUserHeatStats(userID uint, start time.Time, end time.Time) (int64, float64, error) {
+func (d *DBMysql) GetUserHeatStats(userID uint, start time.Time, end time.Time) (int64, decimal.Decimal, error) {
 	type stats struct {
 		duration int64
-		cost     float64
+		cost     decimal.Decimal
 	}
 	var s stats
 	err := d.orm.Raw(`
@@ -42,4 +46,22 @@ func (d *DBMysql) GetHeatsInSession(sessionID uint) ([]Heat, error) {
 		Preload("Session").
 		Find(&heats).Error
 	return heats, err
+}
+
+func (d *DBMysql) AddHeat(h *Heat) error {
+	return d.orm.Create(h).Error
+}
+
+func (d *DBMysql) DeleteHeat(heatID uint) error {
+	return d.orm.Exec("DELETE FROM heat WHERE id = ?", heatID).Error
+}
+
+func (d *DBMysql) GetHeat(heatID uint) (Heat, error) {
+	var h Heat
+	err := d.orm.Where("id = ?", heatID).First(&h).Error
+	return h, err
+}
+
+func (d *DBMysql) ChangeHeat(h *Heat) error {
+	return d.orm.Save(h).Error
 }

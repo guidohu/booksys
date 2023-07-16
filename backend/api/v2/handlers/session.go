@@ -6,6 +6,7 @@ import (
 	"server/database"
 	"time"
 
+	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
 )
 
@@ -71,16 +72,16 @@ type GetSessionHeatsRequest struct {
 }
 
 type GetSessionHeatsResponse struct {
-	HeatID    uint    `json:"heat_id"`
-	UserID    uint    `json:"user_id"`
-	FirstName string  `json:"first_name"`
-	LastName  string  `json:"last_name"`
-	SessionID uint    `json:"session_id"`
-	Timestamp int64   `json:"timestamp"`
-	Duration  int64   `json:"duration"`
-	Cost      float64 `json:"cost"`
-	Pricing   float64 `json:"price_per_min"`
-	Comment   string  `json:"comment"`
+	HeatID    uint            `json:"heat_id"`
+	UserID    uint            `json:"user_id"`
+	FirstName string          `json:"first_name"`
+	LastName  string          `json:"last_name"`
+	SessionID uint            `json:"session_id"`
+	Timestamp int64           `json:"timestamp"`
+	Duration  int64           `json:"duration_s"`
+	Cost      decimal.Decimal `json:"cost"`
+	Pricing   decimal.Decimal `json:"price_per_min"`
+	Comment   string          `json:"comment"`
 }
 
 func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request) {
@@ -414,9 +415,9 @@ func (h *Handler) GetSessionHeats(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("Cannot get pricing information for heats.", w)
 		return
 	}
-	pricingMap := map[uint]float64{}
+	pricingMap := map[uint]decimal.Decimal{}
 	for _, p := range pricing {
-		pricingMap[p.UserStatusID] = float64(p.PricePerMinute)
+		pricingMap[p.UserStatusID] = p.PricePerMinute
 	}
 
 	resp := []GetSessionHeatsResponse{}
@@ -434,7 +435,7 @@ func (h *Handler) GetSessionHeats(w http.ResponseWriter, r *http.Request) {
 			SessionID: heat.SessionID,
 			Timestamp: heat.Timestamp.Unix(),
 			Duration:  int64(heat.DurationSeconds),
-			Cost:      float64(heat.Cost),
+			Cost:      heat.Cost,
 			Pricing:   pricingMap[heat.User.UserStatusID],
 			Comment:   heat.Comment,
 		})

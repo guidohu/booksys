@@ -111,6 +111,10 @@ func main() {
 	http.Handle("/api/v2/booking/day/list", http.HandlerFunc(h.WithAuthentication(h.GetBookingDay)))
 	http.Handle("/api/v2/booking/series/list", http.HandlerFunc(h.WithAuthentication(h.GetBookingSeries)))
 
+	http.Handle("/api/v2/heat/change", http.HandlerFunc(h.WithAuthentication(h.ChangeHeat)))
+	http.Handle("/api/v2/heat/delete", http.HandlerFunc(h.WithAuthentication(h.DeleteHeat)))
+	http.Handle("/api/v2/heats/create", http.HandlerFunc(h.WithAuthentication(h.AddHeats)))
+
 	http.Handle("/api/v2/session/get", http.HandlerFunc(h.WithAuthentication(h.GetSession)))
 	http.Handle("/api/v2/session/create", http.HandlerFunc(h.WithAuthentication(h.CreateSession)))
 	http.Handle("/api/v2/session/delete", http.HandlerFunc(h.WithAuthentication(h.DeleteSession)))

@@ -3,30 +3,32 @@ package database
 import (
 	"reflect"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 type BoatEngineHour struct {
-	ID          uint      `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
-	Timestamp   time.Time `gorm:"type:datetime DEFAULT NULL"`
-	BeforeHours float32   `gorm:"type:DECIMAL(10,5) DEFAULT NULL"`
-	AfterHours  float32   `gorm:"type:DECIMAL(10,5) DEFAULT NULL"`
-	DeltaHours  float32   `gorm:"type:DECIMAL(10,5) DEFAULT NULL"`
-	Type        int8      `gorm:"type:int(11) DEFAULT NULL"`
-	UserID      uint      `gorm:"type:mediumint(9) DEFAULT NULL"`
-	User        User      `gorm:"foreignKey:UserID;references:ID"`
-	Comment     string    `gorm:"type:text CHARACTER SET utf8"`
+	ID          uint            `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
+	Timestamp   time.Time       `gorm:"type:datetime DEFAULT NULL"`
+	BeforeHours decimal.Decimal `gorm:"type:DECIMAL(10,5) DEFAULT NULL"`
+	AfterHours  decimal.Decimal `gorm:"type:DECIMAL(10,5) DEFAULT NULL"`
+	DeltaHours  decimal.Decimal `gorm:"type:DECIMAL(10,5) DEFAULT NULL"`
+	Type        int8            `gorm:"type:int(11) DEFAULT NULL"`
+	UserID      uint            `gorm:"type:mediumint(9) DEFAULT NULL"`
+	User        User            `gorm:"foreignKey:UserID;references:ID"`
+	Comment     string          `gorm:"type:text CHARACTER SET utf8"`
 }
 
 type BoatFuel struct {
-	ID                  uint      `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
-	Timestamp           time.Time `gorm:"type:datetime DEFAULT NULL"`
-	UserID              uint      `gorm:"type:mediumint(9) DEFAULT NULL"`
-	User                User      `gorm:"foreignKey:UserID;references:ID"`
-	EngineHours         float32   `gorm:"type:DECIMAL(10,5) DEFAULT NULL"`
-	Liters              float32   `gorm:"type:DECIMAL(10,3) DEFAULT NULL"`
-	Cost                float32   `gorm:"column:cost_chf;type:DECIMAL(10,3) DEFAULT NULL"`
-	CostBrutto          float32   `gorm:"column:cost_chf_brutto;type:DECIMAL(10,3) DEFAULT NULL"`
-	ContributeToBalance bool      `gorm:"column:contributes_to_balance;type:int(8) DEFAULT 1"`
+	ID                  uint            `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
+	Timestamp           time.Time       `gorm:"type:datetime DEFAULT NULL"`
+	UserID              uint            `gorm:"type:mediumint(9) DEFAULT NULL"`
+	User                User            `gorm:"foreignKey:UserID;references:ID"`
+	EngineHours         decimal.Decimal `gorm:"type:DECIMAL(10,5) DEFAULT NULL"`
+	Liters              decimal.Decimal `gorm:"type:DECIMAL(10,3) DEFAULT NULL"`
+	Cost                decimal.Decimal `gorm:"column:cost_chf;type:DECIMAL(10,3) DEFAULT NULL"`
+	CostBrutto          decimal.Decimal `gorm:"column:cost_chf_brutto;type:DECIMAL(10,3) DEFAULT NULL"`
+	ContributeToBalance bool            `gorm:"column:contributes_to_balance;type:int(8) DEFAULT 1"`
 }
 
 func (BoatFuel) TableName() string {
@@ -34,12 +36,12 @@ func (BoatFuel) TableName() string {
 }
 
 type BoatMaintenance struct {
-	ID          uint      `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
-	Timestamp   time.Time `gorm:"type:timestamp DEFAULT CURRENT_TIMESTAMP"`
-	UserID      uint      `gorm:"type:mediumint(9) DEFAULT NULL"`
-	User        User      `gorm:"foreignKey:UserID;references:ID"`
-	EngineHours float32   `gorm:"type:DECIMAL(10,5) DEFAULT NULL"`
-	Description string    `gorm:"type:text CHARACTER SET utf8"`
+	ID          uint            `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
+	Timestamp   time.Time       `gorm:"type:timestamp DEFAULT CURRENT_TIMESTAMP"`
+	UserID      uint            `gorm:"type:mediumint(9) DEFAULT NULL"`
+	User        User            `gorm:"foreignKey:UserID;references:ID"`
+	EngineHours decimal.Decimal `gorm:"type:DECIMAL(10,5) DEFAULT NULL"`
+	Description string          `gorm:"type:text CHARACTER SET utf8"`
 }
 
 func (BoatMaintenance) TableName() string {
@@ -81,14 +83,14 @@ func (b *BrowserSession) Valid() bool {
 }
 
 type Expense struct {
-	ID            uint        `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
-	UserID        uint        `gorm:"type:mediumint(9) DEFAULT NULL"`
-	User          User        `gorm:"foreignKey:UserID;references:ID"`
-	ExpenseTypeID uint        `gorm:"column:type_id;type:int(11) NOT NULL DEFAULT '0'"`
-	ExpenseType   ExpenseType `gorm:"foreignKey:ExpenseTypeID;references:ID"`
-	Timestamp     time.Time   `gorm:"type:timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP"`
-	Amount        float32     `gorm:"column:amount_chf;type:DECIMAL(10,3) DEFAULT NULL"`
-	Comment       string      `gorm:"type:text CHARACTER SET utf8"`
+	ID            uint            `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
+	UserID        uint            `gorm:"type:mediumint(9) DEFAULT NULL"`
+	User          User            `gorm:"foreignKey:UserID;references:ID"`
+	ExpenseTypeID uint            `gorm:"column:type_id;type:int(11) NOT NULL DEFAULT '0'"`
+	ExpenseType   ExpenseType     `gorm:"foreignKey:ExpenseTypeID;references:ID"`
+	Timestamp     time.Time       `gorm:"type:timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP"`
+	Amount        decimal.Decimal `gorm:"column:amount_chf;type:DECIMAL(10,3) DEFAULT NULL"`
+	Comment       string          `gorm:"type:text CHARACTER SET utf8"`
 }
 
 func (Expense) TableName() string {
@@ -106,15 +108,15 @@ func (ExpenseType) TableName() string {
 }
 
 type Heat struct {
-	ID              uint      `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
-	UserID          uint      `gorm:"type:mediumint(9) DEFAULT NULL"`
-	User            User      `gorm:"foreignKey:UserID;references:ID"`
-	SessionID       uint      `gorm:"type:mediumint(9) DEFAULT NULL"`
-	Session         Session   `gorm:"foreignKey:SessionID;references:ID"`
-	Timestamp       time.Time `gorm:"type:timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP"`
-	DurationSeconds int32     `gorm:"column:duration_s;type:int(11) DEFAULT NULL"`
-	Cost            float32   `gorm:"column:cost_chf;type:DECIMAL(10,3) DEFAULT NULL"`
-	Comment         string    `gorm:"type:text CHARACTER SET utf8 DEFAULT NULL"`
+	ID              uint            `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
+	UserID          uint            `gorm:"type:mediumint(9) DEFAULT NULL"`
+	User            User            `gorm:"foreignKey:UserID;references:ID"`
+	SessionID       uint            `gorm:"type:mediumint(9) DEFAULT NULL"`
+	Session         Session         `gorm:"foreignKey:SessionID;references:ID"`
+	Timestamp       time.Time       `gorm:"type:timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP"`
+	DurationSeconds int32           `gorm:"column:duration_s;type:int(11) DEFAULT NULL"`
+	Cost            decimal.Decimal `gorm:"column:cost_chf;type:DECIMAL(10,3) DEFAULT NULL"`
+	Comment         string          `gorm:"type:text CHARACTER SET utf8 DEFAULT NULL"`
 }
 
 func (Heat) TableName() string {
@@ -162,13 +164,13 @@ func (PasswordReset) TableName() string {
 }
 
 type Income struct {
-	ID            uint      `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
-	UserID        uint      `gorm:"type:mediumint(9) DEFAULT NULL"`
-	User          User      `gorm:"foreignKey:UserID;references:ID"`
-	Timestamp     time.Time `gorm:"type:timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP"`
-	Amount        float32   `gorm:"column:amount_chf;type:DECIMAL(10,3) DEFAULT NULL"`
-	ExpenseTypeID uint      `gorm:"column:type_id;type:int(11) DEFAULT NULL"`
-	Comment       string    `gorm:"type:text CHARACTER SET utf8"`
+	ID            uint            `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
+	UserID        uint            `gorm:"type:mediumint(9) DEFAULT NULL"`
+	User          User            `gorm:"foreignKey:UserID;references:ID"`
+	Timestamp     time.Time       `gorm:"type:timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP"`
+	Amount        decimal.Decimal `gorm:"column:amount_chf;type:DECIMAL(10,3) DEFAULT NULL"`
+	ExpenseTypeID uint            `gorm:"column:type_id;type:int(11) DEFAULT NULL"`
+	Comment       string          `gorm:"type:text CHARACTER SET utf8"`
 }
 
 func (Income) TableName() string {
@@ -176,11 +178,11 @@ func (Income) TableName() string {
 }
 
 type Pricing struct {
-	ID             uint       `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
-	UserStatusID   uint       `gorm:"type:int(11) DEFAULT NULL"`
-	UserStatus     UserStatus `gorm:"foreignKey:UserStatusID;references:ID"`
-	PricePerMinute float32    `gorm:"column:price_chf_min;type:DECIMAL(10,3) DEFAULT NULL"`
-	Comment        string     `gorm:"type:text CHARACTER SET utf8"`
+	ID             uint            `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
+	UserStatusID   uint            `gorm:"type:int(11) DEFAULT NULL"`
+	UserStatus     UserStatus      `gorm:"foreignKey:UserStatusID;references:ID"`
+	PricePerMinute decimal.Decimal `gorm:"column:price_chf_min;type:DECIMAL(10,3) DEFAULT NULL"`
+	Comment        string          `gorm:"type:text CHARACTER SET utf8"`
 }
 
 func (Pricing) TableName() string {

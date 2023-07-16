@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
 
 	"gorm.io/gorm/clause"
@@ -272,35 +273,40 @@ var DefaultSessionTypesMap = map[int]SessionType{
 	CourseSessionType:  DefaultSessionTypes[1],
 }
 
+var DefaultPriceGuest, _ = decimal.NewFromString("2.80")
+var DefaultPriceMember, _ = decimal.NewFromString("2.80")
+var DefaultPriceCommunity, _ = decimal.NewFromString("1.30")
+var DefaultPriceCourse, _ = decimal.NewFromString("0.00")
+
 var DefaultPricing = []Pricing{
 	{
 		ID:             1,
 		UserStatusID:   1,
-		PricePerMinute: 2.80,
+		PricePerMinute: DefaultPriceGuest,
 		Comment:        "Guest Price",
 	},
 	{
 		ID:             2,
 		UserStatusID:   2,
-		PricePerMinute: 2.80,
+		PricePerMinute: DefaultPriceMember,
 		Comment:        "Member Price",
 	},
 	{
 		ID:             3,
 		UserStatusID:   3,
-		PricePerMinute: 1.30,
+		PricePerMinute: DefaultPriceCommunity,
 		Comment:        "Boat Community Price",
 	},
 	{
 		ID:             4,
 		UserStatusID:   4,
-		PricePerMinute: 0.00,
+		PricePerMinute: DefaultPriceCourse,
 		Comment:        "Course Price",
 	},
 	{
 		ID:             5,
 		UserStatusID:   5,
-		PricePerMinute: 1.30,
+		PricePerMinute: DefaultPriceCommunity,
 		Comment:        "Partner of Boat Community",
 	},
 }
