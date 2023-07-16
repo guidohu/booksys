@@ -98,8 +98,8 @@ export default {
         .catch((errors) => (this.errors = errors));
     },
     mouseOverDayHandler: function (day) {
-      this.sunrise = day.sunrise;
-      this.sunset = day.sunset;
+      this.sunrise = dayjs(day.sunrise).format('X');
+      this.sunset = dayjs(day.sunset).format('X');
 
       this.sessionsOverview = day;
     },

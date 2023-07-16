@@ -1,12 +1,17 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"server/database"
 	"time"
 
 	"golang.org/x/exp/slog"
 )
+
+type GetSessionRequest struct {
+	SessionID uint64 `json:"id" validate:"required"`
+}
 
 type CreateSessionRequest struct {
 	Title     string `json:"title" validate:"omitempty"`
@@ -54,6 +59,108 @@ type AddSessionUserRequest struct {
 type RemoveSessionUserRequest struct {
 	SessionID uint `json:"session_id" validate:"required,numeric"`
 	UserID    uint `json:"user_id" validate:"required,numeric"`
+}
+
+type GetSessionMetadataResponse struct {
+	SunriseTime int64 `json:"sunrise"`
+	SunsetTime  int64 `json:"sunset"`
+}
+
+type GetSessionHeatsRequest struct {
+	SessionID uint `json:"session_id" validate:"required,numeric"`
+}
+
+type GetSessionHeatsResponse struct {
+	HeatID    uint    `json:"heat_id"`
+	UserID    uint    `json:"user_id"`
+	FirstName string  `json:"first_name"`
+	LastName  string  `json:"last_name"`
+	SessionID uint    `json:"session_id"`
+	Timestamp int64   `json:"timestamp"`
+	Duration  int64   `json:"duration"`
+	Cost      float64 `json:"cost"`
+	Pricing   float64 `json:"price_per_min"`
+	Comment   string  `json:"comment"`
+}
+
+func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+	req := &GetSessionRequest{}
+	err := ReadBodyAndValidate(r, req)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse("Request payload is not valid.", w)
+		return
+	}
+
+	s, err := h.GetDB().GetSession(uint(req.SessionID))
+	if err != nil {
+		slog.Warn("Cannot get session", slog.Uint64("sessionID", req.SessionID), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot get session from server.", w)
+		return
+	}
+
+	riders, err := h.getRiders(s.ID)
+	if err != nil {
+		slog.Warn("Cannot get riders for session", slog.Uint64("sessionID", req.SessionID), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot get rider information for session.", w)
+		return
+	}
+	ridersShort := []RiderResponse{}
+	for _, rider := range riders {
+		ridersShort = append(ridersShort, RiderResponse{
+			ID:        rider.ID,
+			Name:      fmt.Sprintf("%s %s", rider.FirstName, rider.LastName),
+			FirstName: rider.FirstName,
+			LastName:  rider.LastName,
+		})
+	}
+
+	resp := SessionResponse{
+		ID:               s.ID,
+		Start:            s.StartTime.Unix(),
+		End:              s.EndTime.Unix(),
+		Title:            s.Title,
+		Comment:          s.Comment,
+		FreeSpaces:       s.FreeSpaces,
+		CreatorID:        s.CreatorID,
+		CreatorFirstName: s.Creator.FirstName,
+		CreatorLastName:  s.Creator.LastName,
+		Duration:         int64(s.EndTime.Sub(s.StartTime).Seconds()),
+		Riders:           ridersShort,
+	}
+	WriteSuccessResponse("session info", &resp, w)
+}
+
+func (h *Handler) GetSessionMetadata(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+	req := &GetSessionRequest{}
+	err := ReadBodyAndValidate(r, req)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse("Request payload is not valid.", w)
+		return
+	}
+
+	s, err := h.GetDB().GetSession(uint(req.SessionID))
+	if err != nil {
+		slog.Warn("Cannot get session", slog.Uint64("sessionID", req.SessionID), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot get session from server.", w)
+		return
+	}
+
+	sunrise, sunset := h.getSunriseSunset(s.StartTime)
+	resp := &GetSessionMetadataResponse{
+		SunriseTime: sunrise.Unix(),
+		SunsetTime:  sunset.Unix(),
+	}
+	WriteSuccessResponse("session metadata", resp, w)
 }
 
 func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
@@ -278,4 +385,59 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	WriteSuccessResponse("user removed", nil, w)
+}
+
+func (h *Handler) GetSessionHeats(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+	req := &GetSessionHeatsRequest{}
+	err := ReadBodyAndValidate(r, req)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse("Invalid request.", w)
+		return
+	}
+
+	heats, err := h.GetDB().GetHeatsInSession(req.SessionID)
+	if err != nil {
+		slog.Warn("Cannot get heats for session", slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot get heats for session.", w)
+		return
+	}
+
+	// get pricing for each user
+	pricing, err := h.GetDB().GetPricings()
+	if err != nil {
+		slog.Warn("Cannot get pricing information for session", slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot get pricing information for heats.", w)
+		return
+	}
+	pricingMap := map[uint]float64{}
+	for _, p := range pricing {
+		pricingMap[p.UserStatusID] = float64(p.PricePerMinute)
+	}
+
+	resp := []GetSessionHeatsResponse{}
+	for _, heat := range heats {
+		if _, exists := pricingMap[heat.User.UserStatusID]; !exists {
+			slog.Warn("Cannot get pricing information for", slog.Uint64("user", uint64(heat.User.ID)))
+			WriteFailureResponse("Cannot get pricing information for users.", w)
+			return
+		}
+		resp = append(resp, GetSessionHeatsResponse{
+			HeatID:    heat.ID,
+			UserID:    heat.UserID,
+			FirstName: heat.User.FirstName,
+			LastName:  heat.User.LastName,
+			SessionID: heat.SessionID,
+			Timestamp: heat.Timestamp.Unix(),
+			Duration:  int64(heat.DurationSeconds),
+			Cost:      float64(heat.Cost),
+			Pricing:   pricingMap[heat.User.UserStatusID],
+			Comment:   heat.Comment,
+		})
+	}
+	WriteSuccessResponse("heats for session", &resp, w)
 }

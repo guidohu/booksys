@@ -25,6 +25,7 @@ type Database interface {
 	HeatTable
 	SessionTable
 	PaymentTable
+	PricingTable
 	UserTable
 	UserToSessionTable
 }
@@ -55,10 +56,15 @@ type HeatTable interface {
 	GetUserHeats(userID uint, size int) ([]Heat, error)
 	GetUserHeatStats(userID uint, start time.Time, end time.Time) (int64, float64, error)
 	GetHeatInSessionCount(sessionID uint) (int, error)
+	GetHeatsInSession(sessionID uint) ([]Heat, error)
 }
 
 type PaymentTable interface {
 	GetUserSessionPayments(userID uint) (float64, error)
+}
+
+type PricingTable interface {
+	GetPricings() ([]Pricing, error)
 }
 
 type SessionTable interface {

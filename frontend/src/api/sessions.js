@@ -179,7 +179,7 @@ export default class Sessions {
       id: sessionId,
     };
     return new Promise((resolve, reject) => {
-      Request.postRequest("/api/v1/booking.php?action=get_session", requestData)
+      Request.postRequest("/api/v2/session/get", requestData)
         .then((sR) => {
           const session = new Session(
             sR.id,
@@ -190,14 +190,32 @@ export default class Sessions {
             sR.riders_max,
             sR.type
           );
-          const sessionMetaInfo = {
-            sunrise: dayjs.unix(sR.sunrise).format(),
-            sunset: dayjs.unix(sR.sunset).format(),
-          };
+          // const sessionMetaInfo = {
+          //   sunrise: dayjs.unix(sR.sunrise).format(),
+          //   sunset: dayjs.unix(sR.sunset).format(),
+          // };
           session.addRiders(sR.riders);
           resolve({
             session: session,
-            metaInfo: sessionMetaInfo,
+            // metaInfo: sessionMetaInfo,
+          });
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+  }
+
+  static getSessionMetadata(sessionId) {
+    console.log("sessions/getSessionMetadata called, with", sessionId);
+    const requestData = {
+      id: sessionId,
+    };
+    return new Promise((resolve, reject) => {
+      Request.postRequest("/api/v2/session/metadata/get", requestData)
+        .then((resp) => {
+          resolve({
+            metaInfo: resp,
           });
         })
         .catch((error) => {

@@ -208,7 +208,7 @@ export default {
       "setUserId",
       "setComment",
     ]),
-    ...mapActions("sessions", ["querySession"]),
+    ...mapActions("sessions", ["querySession", "querySessionMetadata"]),
     navigateBack: function () {
       this.$router.push("/today");
     },

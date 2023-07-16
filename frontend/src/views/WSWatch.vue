@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
 import StopWatchCard from "@/components/StopWatchCard";
 import SessionHeatListCard from "@/components/SessionHeatListCard";
@@ -74,6 +74,9 @@ export default {
   computed: {
     ...mapGetters("sessions", ["getSessionConditionInfo"]),
   },
+  methods: {
+    ...mapActions("sessions", ["querySessionMetadata"]),
+  },
   created() {
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = Number(urlParams.get("sessionId"));
@@ -82,6 +85,10 @@ export default {
     } else {
       this.sessionId = sessionId;
     }
+
+    this.querySessionMetadata(sessionId)
+    .then(() => console.log("queried session metadata"))
+    .catch((errors) => (this.errors = errors));
   },
 };
 </script>

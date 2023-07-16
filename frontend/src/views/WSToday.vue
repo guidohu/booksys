@@ -132,7 +132,7 @@ export default {
       if (sessions == null) {
         return null;
       } else {
-        return sessions.sunrise;
+        return dayjs(sessions.sunrise).format('X');
       }
     },
     sunset: function () {
@@ -140,7 +140,7 @@ export default {
       if (sessions == null) {
         return null;
       } else {
-        return sessions.sunset;
+        return dayjs(sessions.sunset).format('X');
       }
     },
   },

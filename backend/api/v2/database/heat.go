@@ -33,3 +33,13 @@ func (d *DBMysql) GetHeatInSessionCount(sessionID uint) (int, error) {
 	err := d.orm.Raw("SELECT count(*) FROM heat WHERE session_id = ?", sessionID).Scan(&count).Error
 	return count, err
 }
+
+func (d *DBMysql) GetHeatsInSession(sessionID uint) ([]Heat, error) {
+	var heats []Heat
+	err := d.orm.Model(&Heat{}).
+		Where("session_id = ?", sessionID).
+		Preload("User").
+		Preload("Session").
+		Find(&heats).Error
+	return heats, err
+}

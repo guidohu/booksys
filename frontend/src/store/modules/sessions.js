@@ -79,6 +79,18 @@ const actions = {
       Sessions.getSession(sessionId)
         .then((s) => {
           commit("setSession", s.session);
+          resolve();
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+  },
+  querySessionMetadata({ commit}, sessionId) {
+    console.log("Trigger querySessionMetadata with:", sessionId);
+    return new Promise((resolve, reject) => {
+      Sessions.getSessionMetadata(sessionId)
+        .then((s) => {
           commit("setSessionConditionInfo", s.metaInfo);
           resolve();
         })

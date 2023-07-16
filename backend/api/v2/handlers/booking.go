@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"server/database"
 	"strconv"
 	"time"
 
@@ -47,8 +48,10 @@ type SessionResponse struct {
 }
 
 type RiderResponse struct {
-	ID   uint   `json:"id"`
-	Name string `json:"name"`
+	ID        uint   `json:"id"`
+	Name      string `json:"name"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }
 
 func (h *Handler) GetBookingDay(w http.ResponseWriter, r *http.Request) {
@@ -139,20 +142,35 @@ func (h *Handler) getBooking(start time.Time, end time.Time) (GetBookingResponse
 			Duration:         int64(session.EndTime.Sub(session.StartTime).Seconds()),
 			Riders:           []RiderResponse{},
 		}
-		usersToSession, err := h.GetDB().GetUsersForSession(session.ID)
+		riders, err := h.getRiders(session.ID)
 		if err != nil {
 			slog.Warn("Cannot retrieve users for", slog.Uint64("session", uint64(session.ID)), slog.String("error", err.Error()))
 			return GetBookingResponse{}, err
 		}
-		for _, entry := range usersToSession {
+		for _, rider := range riders {
 			sr.Riders = append(sr.Riders, RiderResponse{
-				ID:   entry.UserID,
-				Name: fmt.Sprintf("%s %s", entry.User.FirstName, entry.User.LastName),
+				ID:        rider.ID,
+				Name:      fmt.Sprintf("%s %s", rider.FirstName, rider.LastName),
+				FirstName: rider.FirstName,
+				LastName:  rider.LastName,
 			})
 		}
 		b.Sessions = append(b.Sessions, sr)
 	}
 	return *b, nil
+}
+
+func (h *Handler) getRiders(sessionID uint) ([]database.User, error) {
+	users := []database.User{}
+	usersToSession, err := h.GetDB().GetUsersForSession(sessionID)
+	if err != nil {
+		slog.Warn("Cannot retrieve users for", slog.Uint64("session", uint64(sessionID)), slog.String("error", err.Error()))
+		return users, err
+	}
+	for _, entry := range usersToSession {
+		users = append(users, entry.User)
+	}
+	return users, nil
 }
 
 func (h *Handler) getSunriseSunset(date time.Time) (time.Time, time.Time) {

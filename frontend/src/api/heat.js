@@ -55,6 +55,6 @@ export default class Heat {
     const request = {
       session_id: sessionId,
     };
-    return Request.postRequest("/api/v1/heat.php?action=get_session_heats", request);
+    return Request.postRequest("/api/v2/session/heats/get", request);
   }
 }
