@@ -119,6 +119,7 @@ export default {
   },
   watch: {
     engineHourEntry: function (newValue) {
+      console.debug("EngineHourEntryModal: new engineHourEntry", newValue);
       this.setFormContent(newValue);
     },
   },
@@ -127,12 +128,12 @@ export default {
       if (entry != null) {
         this.form = {
           id: entry.id,
-          date: dayjs(entry.time * 1000).format("YYYY-MM-DDTHH:mm"),
+          date: dayjs.unix(entry.timestamp).format("YYYY-MM-DDTHH:mm"),
           driver: entry.user_first_name,
           beforeHours: entry.before_hours,
           afterHours: entry.after_hours,
           deltaHours: entry.delta_hours,
-          type: entry.type == 0 ? false : true,
+          type: entry.type == 1 ? false : true,
         };
       }
     },
@@ -145,7 +146,7 @@ export default {
     save: function () {
       const update = {
         id: this.form.id,
-        type: this.form.type == true ? 1 : 0,
+        type: this.form.type == true ? 2 : 1,
       };
       this.updateEngineHours(update)
         .then(() => this.close())

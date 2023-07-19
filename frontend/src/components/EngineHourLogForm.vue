@@ -105,13 +105,13 @@ export default {
     },
     getEngineHourLogLatest: function (newData) {
       console.log("engineHourLatest just changed", newData);
-      if (newData == null) {
+      if (newData.id === 0 && parseFloat(newData.before_hours) === 0.0) {
         // no engineHourLatest so far
         this.form.beforeHours = null;
         this.form.beforeDescription = null;
         this.prefillBefore();
         this.form.afterHours = null;
-      } else if (newData.before_hours != null && newData.after_hours != null) {
+      } else if (parseFloat(newData.before_hours) > 0 && parseFloat(newData.after_hours) > 0) {
         // the latest engine entry is complete
         // (has before and after)
         this.form.beforeHours = null;
@@ -161,13 +161,12 @@ export default {
       }
     },
     setDisableBefore: function () {
-      if (
-        this.getEngineHourLogLatest != null &&
-        this.getEngineHourLogLatest.after_hours != null
-      ) {
+      if (this.getEngineHourLogLatest == null) {
         this.disableBefore = false;
         return;
-      } else if (this.getEngineHourLogLatest == null) {
+      } else if (
+        parseFloat(this.getEngineHourLogLatest.after_hours) > 0
+      ) {
         this.disableBefore = false;
         return;
       }
@@ -176,7 +175,7 @@ export default {
     setShowAfter: function () {
       if (
         this.getEngineHourLogLatest != null &&
-        this.getEngineHourLogLatest.after_hours == null
+        parseFloat(this.getEngineHourLogLatest.after_hours) === 0.0
       ) {
         this.showAfter = true;
         return;
@@ -185,8 +184,7 @@ export default {
     },
     setDriver: function () {
       if (
-        this.getEngineHourLogLatest != null &&
-        this.getEngineHourLogLatest.after_hours == null
+        parseFloat(this.getEngineHourLogLatest != null && this.getEngineHourLogLatest.after_hours) === 0.0
       ) {
         this.form.driverName =
           this.getEngineHourLogLatest.user_first_name +
@@ -204,9 +202,9 @@ export default {
     },
     add: function () {
       // get the type
-      // 0: private
-      // 1: course
-      const type = this.form.type ? 1 : 0;
+      // 1: private
+      // 2: course
+      const type = this.form.type ? 2 : 1;
 
       const data = {
         user_id: this.form.driverId,

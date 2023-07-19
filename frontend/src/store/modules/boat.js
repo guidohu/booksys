@@ -188,11 +188,7 @@ const mutations = {
     state.engineHourLog = value;
   },
   setEngineHourLogLatest(state, value) {
-    if(value.length > 0){
-      state.engineHourLogLatest = value[0];
-    }else{
-      state.engineHourLogLatest = null;
-    }
+    state.engineHourLogLatest = value;
   },
   setFuelLog(state, value) {
     state.fuelLog = value;

@@ -74,11 +74,11 @@ export default {
     setColumns: function () {
       this.columns = [
         {
-          key: "time",
+          key: "timestamp",
           label: "Date",
           sortable: true,
           formatter: (value) => {
-            return dayjs(value * 1000).format("DD.MM.YYYY HH:mm");
+            return dayjs.unix(value).format("DD.MM.YYYY HH:mm");
           },
         },
         {
@@ -103,7 +103,10 @@ export default {
           label: "After",
           sortable: true,
           class: "text-end",
-          formatter: (value) => {
+          formatter: (value, key, item) => {
+            if (parseFloat(item.after_hours) <= 0.001) {
+              return "-"
+            }
             return formatEngineHour(value, this.getEngineHourFormat);
           },
         },
@@ -112,7 +115,10 @@ export default {
           label: "Diff",
           sortable: true,
           class: "text-end",
-          formatter: (value) => {
+          formatter: (value, key, item) => {
+            if (parseFloat(item.after_hours) <= 0.001 && parseFloat(value) <= 0.001) {
+              return '-'
+            }
             return formatEngineHour(value, this.getEngineHourFormat);
           },
         },
@@ -123,7 +129,7 @@ export default {
       this.showEntryHourModal = true;
     },
     rowClass: function (item) {
-      if (item.type == 0) {
+      if (item.type == 1) {
         return "clickable";
       } else {
         return "highlight clickable";

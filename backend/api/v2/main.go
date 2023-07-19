@@ -102,6 +102,11 @@ func main() {
 	http.Handle("/api/v2/auth/logout", http.HandlerFunc(h.WithAuthentication(h.Logout)))
 	http.Handle("/api/v2/auth/user", http.HandlerFunc(h.WithAuthentication(h.User)))
 
+	http.Handle("/api/v2/boat/engine-hour/entry/update", http.HandlerFunc(h.WithAuthentication(h.UpdateEngineHoursEntry)))
+	http.Handle("/api/v2/boat/engine-hour/update", http.HandlerFunc(h.WithAuthentication(h.UpdateEngineHours)))
+	http.Handle("/api/v2/boat/engine-hour/latest/get", http.HandlerFunc(h.WithAuthentication(h.GetEngineHourLatest)))
+	http.Handle("/api/v2/boat/engine-hours/get", http.HandlerFunc(h.WithAuthentication(h.GetEngineHours)))
+
 	http.Handle("/api/v2/configuration/list", http.HandlerFunc(h.WithAuthentication(h.GetConfiguration)))
 	http.Handle("/api/v2/configuration/logo", http.HandlerFunc(h.GetLogoPath))
 

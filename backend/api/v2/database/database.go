@@ -20,6 +20,7 @@ type Database interface {
 	// views
 	LogsView
 	// tables
+	BoatEngineHoursTable
 	BrowserSessionTable
 	ConfigurationTable
 	ExpenditureTable
@@ -33,6 +34,14 @@ type Database interface {
 
 type LogsView interface {
 	GetLogs() ([]Log, error)
+}
+
+type BoatEngineHoursTable interface {
+	GetEngineHourLatest() (BoatEngineHour, error)
+	GetEngineHours() ([]BoatEngineHour, error)
+	GetEngineHoursEntry(id uint) (BoatEngineHour, error)
+	AddEngineHours(b BoatEngineHour) error
+	UpdateEngineHours(b BoatEngineHour) error
 }
 
 type BrowserSessionTable interface {

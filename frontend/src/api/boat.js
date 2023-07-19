@@ -2,13 +2,13 @@ import Request from "@/api/common/request.js";
 
 export default class Boat {
   static getEngineHourLog() {
-    console.log("api/v1/getEngineHourLog called");
-    return Request.getRequest('/api/v1/boat.php?action=get_engine_hours_log');
+    console.log("api/v2/getEngineHourLog called");
+    return Request.getRequest('/api/v2/boat/engine-hours/get');
   }
 
   static getEngineHourLogLatest() {
-    console.log("api/v1/getEngineHourLogLatest called");
-    return Request.getRequest('/api/v1/boat.php?action=get_engine_hours_latest');
+    console.log("api/v2/getEngineHourLogLatest called");
+    return Request.getRequest('/api/v2/boat/engine-hour/latest/get');
   }
 
   /**
@@ -22,8 +22,8 @@ export default class Boat {
    * }
    */
   static addEngineHours(engineHourEntry) {
-    console.log("api/v1/addEngineHours called, with", engineHourEntry);
-    return Request.postRequest('/api/v1/boat.php?action=update_engine_hours', engineHourEntry);
+    console.log("api/v2/addEngineHours called, with", engineHourEntry);
+    return Request.postRequest('/api/v2/boat/engine-hour/update', engineHourEntry);
   }
 
   /**
@@ -35,8 +35,8 @@ export default class Boat {
    * }
    */
   static updateEngineHours(engineHourEntryUpdate) {
-    console.log("api/v1/updateEngineHours called, with", engineHourEntryUpdate);
-    return Request.postRequest('/api/v1/boat.php?action=update_engine_hours_entry', engineHourEntryUpdate);
+    console.log("api/v2/updateEngineHours called, with", engineHourEntryUpdate);
+    return Request.postRequest('/api/v2/boat/engine-hour/entry/update', engineHourEntryUpdate);
   }
 
   static getFuelLog() {
