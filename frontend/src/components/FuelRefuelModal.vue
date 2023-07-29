@@ -102,11 +102,14 @@ export default {
   },
   methods: {
     saveFuel: function () {
+      const engineHours = isNaN(this.form.engineHours) || this.form.engineHours === "" ? null : this.form.engineHours;
+      const liters = isNaN(this.form.liters) || this.form.liters === "" ? null : this.form.liters;
+      const cost = isNaN(this.form.cost) || this.form.cost === "" ? null : this.form.cost;
       const entry = {
-        user_id: this.userInfo.id,
-        engine_hours: this.form.engineHours,
-        liters: this.form.liters,
-        cost: this.form.cost,
+        user_id: parseInt(this.userInfo.id),
+        engine_hours: engineHours,
+        liters: liters,
+        cost: cost,
       };
       this.addFuelEntry(entry)
         .then(() => {

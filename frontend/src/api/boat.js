@@ -40,8 +40,8 @@ export default class Boat {
   }
 
   static getFuelLog() {
-    console.log("api/v1/getFuelLog called");
-    return Request.getRequest('/api/v1/boat.php?action=get_fuel_log');
+    console.log("api/v2/getFuelLog called");
+    return Request.getRequest('/api/v2/boat/fuel-entries/get');
   }
 
   /**
@@ -55,8 +55,8 @@ export default class Boat {
    * }
    */
   static addFuelEntry(fuelEntry) {
-    console.log("api/v1/addFuelEntry called");
-    return Request.postRequest("/api/v1/boat.php?action=update_fuel", fuelEntry);
+    console.log("api/v2/addFuelEntry called");
+    return Request.postRequest("/api/v2/boat/fuel-entry/add", fuelEntry);
   }
 
   /**
@@ -72,12 +72,12 @@ export default class Boat {
    */
   static updateFuelEntry(fuelEntry) {
     console.log("api/v1/updateFuelEntry called, with", fuelEntry);
-    return Request.postRequest("/api/v1/boat.php?action=update_fuel_entry", fuelEntry);
+    return Request.postRequest("/api/v2/boat/fuel-entry/edit", fuelEntry);
   }
 
   static getMaintenanceLog() {
     console.log("api/v1/getMaintenanceLog called");
-    return Request.getRequest('/api/v1/boat.php?action=get_maintenance_log');
+    return Request.getRequest('/api/v2/boat/maintenance-entries/get');
   }
 
   /**
@@ -90,8 +90,8 @@ export default class Boat {
    * }
    */
   static addMaintenanceEntry(maintenanceEntry) {
-    console.log("api/v1/addMaintenanceEntry called, with", maintenanceEntry);
-    return Request.postRequest("/api/v1/boat.php?action=update_maintenance_log", maintenanceEntry);
+    console.log("api/v2/addMaintenanceEntry called, with", maintenanceEntry);
+    return Request.postRequest("/api/v2/boat/maintenance-entry/add", maintenanceEntry);
   }
 
   static getMyNautiqueInfo(boatId, token, tokenExpiry) {
@@ -101,6 +101,6 @@ export default class Boat {
       token: token,
       token_expiry: tokenExpiry,
     };
-    return Request.postRequest("/api/v1/mynautique.php?action=get_boat_info", request);
+    return Request.postRequest("/api/v2/boat/mynautique/telemetry/get", request);
   }
 }

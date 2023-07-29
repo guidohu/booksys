@@ -143,7 +143,7 @@ export default {
     },
     rowClass: function (item) {
       // we highlight entries that have a deduction
-      if (item.cost_brutto != null) {
+      if (item.is_discounted == true) {
         return "highlight clickable";
       } else {
         return "clickable";

@@ -24,6 +24,7 @@ func (d *DBMysql) Migrate() error {
 	err = d.autoMigrate()
 	if err != nil {
 		slog.Error("autoMigrate failed:", err)
+		return err
 	}
 
 	// prepare database for initialization
@@ -32,9 +33,14 @@ func (d *DBMysql) Migrate() error {
 	err = d.initializeContent()
 	if err != nil {
 		slog.Error("initialize database failed:", err)
+		return err
 	}
 
-	// cleanup
+	// post schema update tasks
+	err = d.cleanup()
+	if err != nil {
+		slog.Error("post migration tasks failed:", err)
+	}
 
 	return nil
 }
@@ -166,6 +172,20 @@ func (d *DBMysql) initializeContent() error {
 }
 
 func (d *DBMysql) cleanup() error {
+
+	// set is_discounted where a discount was provided
+	// for boat_fuel
+	err := d.orm.Exec(`UPDATE boat_fuel 
+		SET is_discounted = 1
+		WHERE 
+			cost_chf_brutto IS NOT NULL 
+			AND cost_chf_brutto <> cost_chf;`).Error
+	if err != nil {
+		slog.Error("migration cleanup table `boat_fuel` - failed to set is_discounted")
+		return err
+	}
+	slog.Info("migration cleanup table `boat_fuel` - set is_discounted done")
+
 	return nil
 }
 

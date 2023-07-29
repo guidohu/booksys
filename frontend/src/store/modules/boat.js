@@ -8,8 +8,6 @@ const state = () => ({
   fuelLog: [],
   maintenanceLog: [],
   myNautique: {
-    token: "",
-    tokenExpiry: 0,
     boat: {
       fuelLevel: 0,
       fuelCapacity: 1,
@@ -103,8 +101,6 @@ const actions = {
     return new Promise((resolve, reject) => {
       Boat.getMyNautiqueInfo(
         boatId,
-        state.myNautique.token,
-        state.myNautique.tokenExpiry
       )
         .then((response) => {
           commit("setMyNautiqueInfo", response);
@@ -228,12 +224,9 @@ const mutations = {
       return;
     }
 
-    state.myNautique.token = value.token;
-    state.myNautique.tokenExpiry = value.token_expiry;
-    state.myNautique.boat.fuelLevel = value.boat.telemetry.FUEL_LEVEL_LINC;
-    state.myNautique.boat.fuelCapacity = value.boat.metainfo.fuel_capacity;
-    state.myNautique.boat.engineHours =
-      value.boat.telemetry.EngineTotalHoursOfOperation;
+    state.myNautique.boat.fuelLevel = parseFloat(value.telemetry.fuel_level);
+    state.myNautique.boat.fuelCapacity = parseFloat(value.fuel_capacity);
+    state.myNautique.boat.engineHours = parseFloat(value.telemetry.engine_hours);
   },
 };
 

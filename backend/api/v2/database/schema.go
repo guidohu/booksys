@@ -21,15 +21,16 @@ type BoatEngineHour struct {
 }
 
 type BoatFuel struct {
-	ID                  uint            `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
-	Timestamp           time.Time       `gorm:"type:datetime DEFAULT NULL"`
-	UserID              uint            `gorm:"type:mediumint(9) DEFAULT NULL"`
-	User                User            `gorm:"foreignKey:UserID;references:ID"`
-	EngineHours         decimal.Decimal `gorm:"type:DECIMAL(10,5) DEFAULT NULL"`
-	Liters              decimal.Decimal `gorm:"type:DECIMAL(10,3) DEFAULT NULL"`
-	Cost                decimal.Decimal `gorm:"column:cost_chf;type:DECIMAL(10,3) DEFAULT NULL"`
-	CostBrutto          decimal.Decimal `gorm:"column:cost_chf_brutto;type:DECIMAL(10,3) DEFAULT NULL"`
-	ContributeToBalance bool            `gorm:"column:contributes_to_balance;type:int(8) DEFAULT 1"`
+	ID                  uint             `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
+	Timestamp           time.Time        `gorm:"type:datetime DEFAULT NULL"`
+	UserID              uint             `gorm:"type:mediumint(9) DEFAULT NULL"`
+	User                User             `gorm:"foreignKey:UserID;references:ID"`
+	EngineHours         *decimal.Decimal `gorm:"type:DECIMAL(10,5) DEFAULT NULL"`
+	Liters              *decimal.Decimal `gorm:"type:DECIMAL(10,3) DEFAULT NULL"`
+	Cost                *decimal.Decimal `gorm:"column:cost_chf;type:DECIMAL(10,3) DEFAULT NULL"`
+	CostBrutto          *decimal.Decimal `gorm:"column:cost_chf_brutto;type:DECIMAL(10,3) DEFAULT NULL"`
+	ContributeToBalance bool             `gorm:"column:contributes_to_balance;type:int(8) DEFAULT 1"`
+	IsDiscounted        bool             `gorm:"column:is_discounted;type:int(8) DEFAULT 0"`
 }
 
 func (BoatFuel) TableName() string {

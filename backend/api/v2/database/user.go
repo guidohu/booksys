@@ -76,6 +76,12 @@ func (d *DBMysql) UsersExist() (bool, error) {
 	return exists, nil
 }
 
+func (d *DBMysql) UserExists(id uint) bool {
+	var user User
+	err := d.orm.Model(&User{}).Where("id = ?", id).First(&user).Error
+	return err == nil
+}
+
 func (d *DBMysql) ChangeUserStatus(id uint, userStatusId uint) error {
 	return d.orm.Model(&User{}).Where("id = ?", id).Updates(User{UserStatusID: userStatusId}).Error
 }

@@ -50,6 +50,70 @@ var UpdateEngineHoursEntryValidationErrors = map[string]string{
 	"UsageType": "Please provide the type of the session.",
 }
 
+type GetFuelEntriesResponse struct {
+	ID                   uint             `json:"id"`
+	AverageLitersPerHour decimal.Decimal  `json:"avg_liters_per_hour"`
+	CostNet              *decimal.Decimal `json:"cost"`
+	CostGros             *decimal.Decimal `json:"cost_brutto"`
+	IsDiscounted         bool             `json:"is_discounted"`
+	DiffHours            decimal.Decimal  `json:"diff_hours"`
+	EngineHours          *decimal.Decimal `json:"engine_hours"`
+	Liters               decimal.Decimal  `json:"liters"`
+	Timestamp            int64            `json:"timestamp"`
+	UserFirstName        string           `json:"user_first_name"`
+	UserLastName         string           `json:"user_last_name"`
+	UserID               uint             `json:"user_id"`
+}
+
+type AddFuelEntryRequest struct {
+	Cost        *decimal.Decimal `json:"cost" validate:"required,numeric"`
+	EngineHours *decimal.Decimal `json:"engine_hours" validate:"required,numeric"`
+	Liters      *decimal.Decimal `json:"liters" validate:"required,numeric"`
+	UserID      uint             `json:"user_id" validate:"required"`
+}
+
+var FuelEntryValidationErrors = map[string]string{
+	"UserID":       "Please provide an user ID.",
+	"Cost":         "Please provide the cost.",
+	"EngineHours":  "Please provide the engine hours at time of refueling.",
+	"Liters":       "Please provide the amount of fuel.",
+	"ID":           "Please provide a fuel entry ID.",
+	"CostNet":      "Please provide the net cost.",
+	"CostGros":     "Please provide the gros cost.",
+	"IsDiscounted": "Please provide whether this entry is discounted or not.",
+}
+
+type ChangeFuelEntryRequest struct {
+	ID           uint             `json:"id"`
+	CostNet      *decimal.Decimal `json:"cost" validate:"required,numeric"`
+	CostGros     *decimal.Decimal `json:"cost_brutto,omitempty" validate:"omitempty,numeric"`
+	EngineHours  *decimal.Decimal `json:"engine_hours" validate:"required,numeric"`
+	Liters       *decimal.Decimal `json:"liters" validate:"required,numeric"`
+	IsDiscounted bool             `json:"is_discounted"`
+}
+
+type GetMaintenanceEntriesResponse struct {
+	ID            uint            `json:"id"`
+	Description   string          `json:"description"`
+	EngineHours   decimal.Decimal `json:"engine_hours"`
+	Timestamp     int64           `json:"timestamp"`
+	UserFirstName string          `json:"user_first_name"`
+	UserLastName  string          `json:"user_last_name"`
+	UserID        uint            `json:"user_id"`
+}
+
+type AddMaintenanceEntryRequest struct {
+	Description string          `json:"description" validate:"required"`
+	EngineHours decimal.Decimal `json:"engine_hours" validate:"required,numeric"`
+	UserID      uint            `json:"user_id" validate:"required"`
+}
+
+var AddMaintenanceEntryValidationErrors = map[string]string{
+	"Description": "Please provide a description of the maintenance.",
+	"EngineHours": "Please provide the engine hours at which you performed maintenance.",
+	"UserID":      "Please provide a valid user ID.",
+}
+
 func (h *Handler) GetEngineHourLatest(w http.ResponseWriter, r *http.Request) {
 	session := GetSessionFromContext(r)
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
@@ -167,7 +231,7 @@ func (h *Handler) UpdateEngineHours(w http.ResponseWriter, r *http.Request) {
 		entry.CheckedIn = false
 		err = h.GetDB().UpdateEngineHours(entry)
 	} else {
-		slog.Warn("Cannot add new engine hours, not a valid entry.", slog.Any("latest", latest), slog.Any("req", req))
+		slog.Warn("Cannot add new engine hours, not a valid entry.", slog.Any("req", req))
 		WriteFailureResponse("Cannot add new engine hours, please check your input.", w)
 		return
 	}
@@ -208,4 +272,191 @@ func (h *Handler) UpdateEngineHoursEntry(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	WriteSuccessResponse("entry updated", nil, w)
+}
+
+func (h *Handler) GetFuelEntries(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+	fuelEntries, err := h.GetDB().GetFuelEntries()
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		slog.Warn("Cannot get fuel entries", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot get fuel entries.", w)
+		return
+	}
+	resp := []GetFuelEntriesResponse{}
+	var lastEngineHour decimal.Decimal
+	for i := len(fuelEntries) - 1; i >= 0; i-- {
+		e := fuelEntries[i]
+		entry := GetFuelEntriesResponse{
+			ID:            e.ID,
+			CostNet:       e.Cost,
+			CostGros:      e.CostBrutto,
+			IsDiscounted:  e.IsDiscounted,
+			EngineHours:   e.EngineHours,
+			Liters:        *e.Liters,
+			Timestamp:     e.Timestamp.Unix(),
+			UserFirstName: e.User.FirstName,
+			UserLastName:  e.User.LastName,
+			UserID:        e.UserID,
+		}
+		if !lastEngineHour.IsZero() {
+			diffHours := e.EngineHours.Sub(lastEngineHour)
+			if !diffHours.IsNegative() {
+				liters, _ := e.Liters.Float64()
+				hours, _ := diffHours.Float64()
+				var avgFuelPerHour float64 = 0
+				if hours > 0.001 {
+					avgFuelPerHour = liters / hours
+				}
+				entry.DiffHours = diffHours
+				entry.AverageLitersPerHour = decimal.NewFromFloat(avgFuelPerHour)
+			}
+		}
+		lastEngineHour = *e.EngineHours
+		resp = append([]GetFuelEntriesResponse{entry}, resp...)
+	}
+	WriteSuccessResponse("fuel entries", resp, w)
+}
+
+func (h *Handler) AddFuelEntry(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+	req := &AddFuelEntryRequest{}
+	err := ReadBodyAndValidate(r, req, FuelEntryValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	billType, err := h.GetDB().GetPropertyValue("fuel.payment.type")
+	if err != nil {
+		slog.Warn("Cannot determine whether fuel is billed or paid directly", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot determine whether fuel is billed or paid directly.", w)
+		return
+	}
+	entry := database.BoatFuel{
+		ID:                  0,
+		Timestamp:           time.Now(),
+		UserID:              req.UserID,
+		EngineHours:         req.EngineHours,
+		Liters:              req.Liters,
+		Cost:                req.Cost,
+		CostBrutto:          nil,
+		ContributeToBalance: billType.Value != "billed",
+	}
+	err = h.GetDB().AddFuelEntry(entry)
+	if err != nil {
+		slog.Warn("Cannot add fuel entry", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot add fuel entry.", w)
+		return
+	}
+	WriteSuccessResponse("fuel entry added", nil, w)
+}
+
+func (h *Handler) ChangeFuelEntry(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+	req := &ChangeFuelEntryRequest{}
+	err := ReadBodyAndValidate(r, req, FuelEntryValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	entry, err := h.GetDB().GetFuelEntry(req.ID)
+	if err != nil {
+		slog.Warn("Cannot find fuel entry", slog.Uint64("id", uint64(req.ID)), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot find existing fuel entry.", w)
+		return
+	}
+
+	newEntry := database.BoatFuel{
+		ID:                  req.ID,
+		Timestamp:           entry.Timestamp,
+		UserID:              entry.UserID,
+		EngineHours:         req.EngineHours,
+		Liters:              req.Liters,
+		Cost:                req.CostNet,
+		CostBrutto:          req.CostGros,
+		ContributeToBalance: entry.ContributeToBalance,
+		IsDiscounted:        req.IsDiscounted,
+	}
+	err = h.GetDB().ChangeFuelEntry(newEntry)
+	if err != nil {
+		slog.Warn("Cannot change fuel entry", slog.Uint64("id", uint64(req.ID)), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot change existing fuel entry.", w)
+		return
+	}
+	WriteSuccessResponse("fuel entry saved", nil, w)
+}
+
+func (h *Handler) GetMaintenanceEntries(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+
+	logs, err := h.GetDB().GetMaintenance()
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		slog.Warn("Cannot get fuel entries", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot get fuel entries.", w)
+		return
+	}
+
+	resp := []GetMaintenanceEntriesResponse{}
+	for _, l := range logs {
+		resp = append(resp, GetMaintenanceEntriesResponse{
+			ID:            l.ID,
+			Description:   l.Description,
+			EngineHours:   l.EngineHours,
+			Timestamp:     l.Timestamp.Unix(),
+			UserFirstName: l.User.FirstName,
+			UserLastName:  l.User.LastName,
+			UserID:        l.UserID,
+		})
+	}
+	WriteSuccessResponse("maintenance entries", &resp, w)
+}
+
+func (h *Handler) AddMaintenanceEntry(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+	req := &AddMaintenanceEntryRequest{}
+	err := ReadBodyAndValidate(r, req, AddMaintenanceEntryValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	if !h.GetDB().UserExists(req.UserID) {
+		slog.Warn("Request payload is not valid", slog.String("error", "user does not exist"))
+		WriteFailureResponse("Please provide a valid user ID.", w)
+		return
+	}
+
+	entry := database.BoatMaintenance{
+		ID:          0,
+		Timestamp:   time.Now(),
+		UserID:      req.UserID,
+		EngineHours: req.EngineHours,
+		Description: req.Description,
+	}
+	err = h.GetDB().AddMaintenanceEntry(entry)
+	if err != nil {
+		slog.Warn("Cannot add maintenance entry", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot add maintenance entry.", w)
+		return
+	}
+	WriteSuccessResponse("maintenance entry created", nil, w)
 }

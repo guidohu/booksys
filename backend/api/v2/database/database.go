@@ -21,6 +21,8 @@ type Database interface {
 	LogsView
 	// tables
 	BoatEngineHoursTable
+	BoatFuelTable
+	BoatMaintenanceTable
 	BrowserSessionTable
 	ConfigurationTable
 	ExpenditureTable
@@ -44,6 +46,17 @@ type BoatEngineHoursTable interface {
 	UpdateEngineHours(b BoatEngineHour) error
 }
 
+type BoatFuelTable interface {
+	GetFuelEntries() ([]BoatFuel, error)
+	GetFuelEntry(id uint) (BoatFuel, error)
+	AddFuelEntry(e BoatFuel) error
+	ChangeFuelEntry(e BoatFuel) error
+}
+
+type BoatMaintenanceTable interface {
+	GetMaintenance() ([]BoatMaintenance, error)
+	AddMaintenanceEntry(m BoatMaintenance) error
+}
 type BrowserSessionTable interface {
 	AddBrowserSession(b BrowserSession) (string, error)
 	GetBrowserSession(id string) (*BrowserSession, error)
@@ -56,6 +69,7 @@ type ConfigurationTable interface {
 	GetAllPropertyValues() ([]Configuration, error)
 	UpdateOrInsertPropertyValues(conf []Configuration) error
 	GetTimezoneLocation() (*time.Location, error)
+	GetMyNautiqueConfiguration() (MyNautiqueConfiguration, error)
 }
 
 type ExpenditureTable interface {
@@ -116,6 +130,8 @@ type UserTable interface {
 	UpdateUser(userID uint, user User) error
 	// Returns if users are present
 	UsersExist() (bool, error)
+	// Returns true if user exists
+	UserExists(id uint) bool
 	// Returns all users
 	GetUsers() ([]User, error)
 }

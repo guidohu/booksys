@@ -64,6 +64,11 @@ export default {
   },
   methods: {
     add: function () {
+      if (isNaN(this.form.engineHours) || this.form.engineHours == null){
+        this.errors = [ "Please add a valid number for the engine hours." ];
+        return;
+      }
+
       const entry = {
         user_id: this.userInfo.id,
         engine_hours: this.form.engineHours,

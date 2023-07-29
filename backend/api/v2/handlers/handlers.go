@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"server/database"
+	"server/mynautique"
 	customvalidator "server/validator"
 	"sync/atomic"
 	"time"
@@ -23,7 +24,8 @@ type HandlerContext uint
 const SessionContextKey HandlerContext = 1
 
 type Handler struct {
-	db atomic.Pointer[database.Database]
+	db               atomic.Pointer[database.Database]
+	myNautiqueClient atomic.Pointer[mynautique.Client]
 }
 
 func NewHandler(db database.Database) *Handler {
@@ -38,6 +40,14 @@ func (h *Handler) SetDB(db database.Database) {
 
 func (h *Handler) GetDB() database.Database {
 	return *(h.db.Load())
+}
+
+func (h *Handler) SetMyNautiqueClient(m mynautique.Client) {
+	h.myNautiqueClient.Store(&m)
+}
+
+func (h *Handler) GetMyNautiqueClient() *mynautique.Client {
+	return h.myNautiqueClient.Load()
 }
 
 // Authentication middleware that gets the user session and calls the next Handler.

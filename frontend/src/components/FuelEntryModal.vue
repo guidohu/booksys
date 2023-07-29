@@ -166,16 +166,14 @@ export default {
       if (entry != null) {
         // apply some logic depending on the backend data to get the right values for
         // net/gross and cost
-        const costGross =
-          entry.cost_brutto == null ? entry.cost : entry.cost_brutto;
-        const costNet = entry.cost_brutto == null ? null : entry.cost;
-        const cost = entry.cost_brutto == null ? entry.cost : entry.cost_brutto;
+        const costGross = entry.is_discounted == false ? entry.cost : entry.cost_brutto;
+        const costNet = entry.is_discounted == false ? null : entry.cost;
+        const cost = entry.is_discounted == false ? entry.cost : entry.cost_brutto;
 
         this.form = {
           id: entry.id,
           date: dayjs(entry.timestamp * 1000).format("YYYY-MM-DDTHH:mm"),
-          isDiscounted:
-            entry.cost != null && entry.cost_brutto != null ? true : false,
+          isDiscounted: entry.is_discounted,
           cost: formatCurrency(cost, null),
           costGross: formatCurrency(costGross, null),
           costNet: formatCurrency(costNet, null),
@@ -205,13 +203,16 @@ export default {
       }
 
       let cost = 0;
-      let costBrutto = 0;
+      let costBrutto = null;
+      let isDiscounted = false;
       if (this.form.isDiscounted) {
         cost = this.form.costNet;
         costBrutto = this.form.costGross;
+        isDiscounted = true;
       } else {
         cost = this.form.cost;
         costBrutto = null;
+        isDiscounted = false
       }
 
       const updatedEntry = {
@@ -220,6 +221,7 @@ export default {
         liters: this.form.fuel,
         cost: cost,
         cost_brutto: costBrutto,
+        is_discounted: isDiscounted,
       };
 
       this.updateFuelEntry(updatedEntry)

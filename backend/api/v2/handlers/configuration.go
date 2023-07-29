@@ -38,8 +38,8 @@ type ConfigurationMessage struct {
 	MyNautiqueBoatID       int     `json:"mynautique_boat_id" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=10"`
 	MyNautiqueEnabled      bool    `json:"mynautique_enabled" validate:"omitempty,boolean"`
 	MyNautiqueFuelCapacity int     `json:"mynautique_fuel_capacity" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=10"`
-	MyNautiquePassword     string  `json:"mynautique_password" validate:"required_if=MyNautiqueEnabled true,min=1"`
-	MyNautiqueUser         string  `json:"mynautique_user" validate:"required_if=MyNautiqueEnabled true,email"`
+	MyNautiquePassword     string  `json:"mynautique_password" validate:"required_if=MyNautiqueEnabled true,omitempty,gt=1"`
+	MyNautiqueUser         string  `json:"mynautique_user" validate:"required_if=MyNautiqueEnabled true,omitempty,email"`
 	PaymentAccountBIC      string  `json:"payment_account_bic" validate:"omitempty,printascii"`
 	PaymentAccountComment  string  `json:"payment_account_comment"`
 	PaymentAccountIBAN     string  `json:"payment_account_iban" validate:"omitempty,printascii"`

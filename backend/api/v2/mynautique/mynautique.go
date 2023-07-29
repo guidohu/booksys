@@ -15,14 +15,11 @@ import (
 var api_url = "https://mynautique.azurewebsites.net/api/v2"
 var auth_url = "https://identitytoolkit.googleapis.com/v1"
 
-type MyNautiqueClient struct {
-	// User       string
-	// Password   string
-	// AuthAPIKey string
-	auth  loginResponse
-	Fleet []BoatInfo
-	// Client     *http.Client
-	Options *Options
+type Client struct {
+	auth      loginResponse
+	AuthUntil time.Time
+	Fleet     []BoatInfo
+	Options   *Options
 }
 
 type Options struct {
@@ -356,11 +353,12 @@ func (b *BoatInfo) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func NewMyNautiqueClient(opts *Options) *MyNautiqueClient {
-	c := &MyNautiqueClient{
+func NewMyNautiqueClient(opts *Options) *Client {
+	c := &Client{
 		Options: &Options{
 			Client: &http.Client{},
 		},
+		AuthUntil: time.Now().Add(-1 * time.Hour),
 	}
 	if opts == nil {
 		return c
@@ -374,7 +372,8 @@ func NewMyNautiqueClient(opts *Options) *MyNautiqueClient {
 	return c
 }
 
-func (m *MyNautiqueClient) Login() error {
+func (m *Client) Login() error {
+	now := time.Now()
 	postBody, _ := json.Marshal(map[string]any{
 		"email":             m.Options.User,
 		"password":          m.Options.Password,
@@ -405,11 +404,16 @@ func (m *MyNautiqueClient) Login() error {
 	if err == nil {
 		response.ExpiresInSeconds = int64(expIn)
 	}
+	m.AuthUntil = now.Add(time.Second * time.Duration(response.ExpiresInSeconds-10))
 	m.auth = response
 	return nil
 }
 
-func (m *MyNautiqueClient) GetFleet() error {
+func (m *Client) GetFleet() error {
+	if m.isAuthExpired() {
+		m.Login()
+	}
+
 	url := fmt.Sprintf("%s/fleet/get-fleet", api_url)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	req.Header.Add("token", m.auth.IDToken)
@@ -432,7 +436,11 @@ func (m *MyNautiqueClient) GetFleet() error {
 	return nil
 }
 
-func (m *MyNautiqueClient) GetBoatTelemetry(id int64) (Telemetry, error) {
+func (m *Client) GetBoatTelemetry(id int64) (Telemetry, error) {
+	if m.isAuthExpired() {
+		m.Login()
+	}
+
 	t := Telemetry{}
 	url := fmt.Sprintf("%s/boat/get-boat-telemetry/%d", api_url, id)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
@@ -447,10 +455,13 @@ func (m *MyNautiqueClient) GetBoatTelemetry(id int64) (Telemetry, error) {
 		return t, fmt.Errorf("cannot read response from get telemetry: %s", err.Error())
 	}
 
-	fmt.Printf("%+s\n", body)
 	err = json.Unmarshal(body, &t)
 	if err != nil {
 		return t, fmt.Errorf("cannot parse telemetry response: %s", err.Error())
 	}
 	return t, nil
+}
+
+func (m *Client) isAuthExpired() bool {
+	return time.Now().After(m.AuthUntil)
 }

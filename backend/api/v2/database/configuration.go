@@ -2,8 +2,11 @@ package database
 
 import (
 	"errors"
+	"fmt"
+	"strconv"
 	"time"
 
+	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
 	"gorm.io/gorm"
 )
@@ -33,6 +36,14 @@ var AllowedProperties = map[string]interface{}{
 	"smtp.sender":              nil,
 	"smtp.server":              nil,
 	"smtp.username":            nil,
+}
+
+type MyNautiqueConfiguration struct {
+	Enabled      bool
+	BoatID       int64
+	FuelCapacity decimal.Decimal
+	Password     string
+	User         string
 }
 
 func (d *DBMysql) GetPropertyValue(key string) (Configuration, error) {
@@ -89,4 +100,47 @@ func (d *DBMysql) GetTimezoneLocation() (*time.Location, error) {
 		return nil, err
 	}
 	return time.LoadLocation(s.Value)
+}
+
+func (d *DBMysql) GetMyNautiqueConfiguration() (MyNautiqueConfiguration, error) {
+	config := MyNautiqueConfiguration{}
+	valid := true
+	enabled, _ := d.GetPropertyValue("mynautique.enabled")
+	if enabled.Value == "true" {
+		config.Enabled = true
+	}
+	fuelCapacity, _ := d.GetPropertyValue("mynautique.fuel.capacity")
+	if fuelCapacity.Value != "" {
+		fc, err := decimal.NewFromString(fuelCapacity.Value)
+		if err == nil {
+			config.FuelCapacity = fc
+		} else {
+			slog.Error("Cannot parse mynautique.fuel.capacity")
+			valid = false
+		}
+	}
+	boatID, _ := d.GetPropertyValue("mynautique.boat.id")
+	if boatID.Value != "" {
+		bi, err := strconv.Atoi(boatID.Value)
+		if err != nil {
+			slog.Error("Cannot parse mynautique.boat.id")
+			valid = false
+		} else {
+			config.BoatID = int64(bi)
+		}
+	}
+	user, _ := d.GetPropertyValue("mynautique.user")
+	if user.Value != "" {
+		config.User = user.Value
+	}
+	password, _ := d.GetPropertyValue("mynautique.password")
+	if password.Value != "" {
+		config.Password = password.Value
+	}
+
+	if valid {
+		return config, nil
+	}
+	slog.Error("Return empty mynautique configuration")
+	return MyNautiqueConfiguration{}, fmt.Errorf("invalid mynautique configuration")
 }

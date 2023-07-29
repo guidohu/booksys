@@ -106,6 +106,12 @@ func main() {
 	http.Handle("/api/v2/boat/engine-hour/update", http.HandlerFunc(h.WithAuthentication(h.UpdateEngineHours)))
 	http.Handle("/api/v2/boat/engine-hour/latest/get", http.HandlerFunc(h.WithAuthentication(h.GetEngineHourLatest)))
 	http.Handle("/api/v2/boat/engine-hours/get", http.HandlerFunc(h.WithAuthentication(h.GetEngineHours)))
+	http.Handle("/api/v2/boat/fuel-entries/get", http.HandlerFunc(h.WithAuthentication(h.GetFuelEntries)))
+	http.Handle("/api/v2/boat/fuel-entry/add", http.HandlerFunc(h.WithAuthentication(h.AddFuelEntry)))
+	http.Handle("/api/v2/boat/fuel-entry/edit", http.HandlerFunc(h.WithAuthentication(h.ChangeFuelEntry)))
+	http.Handle("/api/v2/boat/maintenance-entries/get", http.HandlerFunc(h.WithAuthentication(h.GetMaintenanceEntries)))
+	http.Handle("/api/v2/boat/maintenance-entry/add", http.HandlerFunc(h.WithAuthentication(h.AddMaintenanceEntry)))
+	http.Handle("/api/v2/boat/mynautique/telemetry/get", http.HandlerFunc(h.WithAuthentication(h.GetBoatTelemetry)))
 
 	http.Handle("/api/v2/configuration/list", http.HandlerFunc(h.WithAuthentication(h.GetConfiguration)))
 	http.Handle("/api/v2/configuration/logo", http.HandlerFunc(h.GetLogoPath))
