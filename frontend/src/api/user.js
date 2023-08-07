@@ -120,18 +120,30 @@ export default class User {
 
   static getUserGroups() {
     console.debug("User/getUserGroups called");
-    return Request.getRequest("/api/v1/user.php?action=get_user_groups");
+    return Request.getRequest("/api/v2/user/groups/get");
   }
 
   static getUserRoles() {
     console.debug("User/getUserRoles called");
-    return Request.getRequest("/api/v1/user.php?action=get_user_roles");
+    return Request.getRequest("/api/v2/user/roles/get");
   }
 
   static saveUserGroup(userGroup) {
     console.log("User/saveUserGroup: called with userGroup", userGroup);
-    const queryData = userGroup;
-    return Request.postRequest('/api/v1/user.php?action=save_user_group', queryData);
+    let url = '/api/v2/user/group/edit'
+    if (userGroup.user_group_id == null) {
+      url = '/api/v2/user/group/create'
+    }
+    const queryData = {
+      price_id: parseInt(userGroup.price_id),
+      price_description: userGroup.price_description,
+      price_min: parseFloat(userGroup.price_min),
+      user_group_id: parseInt(userGroup.user_group_id),
+      user_group_description: userGroup.user_group_description,
+      user_group_name: userGroup.user_group_name,
+      user_role_id: parseInt(userGroup.user_role_id),
+    }
+    return Request.postRequest(url, queryData);
   }
 
   static deleteUserGroup(userGroupId) {
@@ -139,7 +151,7 @@ export default class User {
     const queryData = {
       user_group_id: userGroupId,
     };
-    return Request.postRequest('/api/v1/user.php?action=delete_user_group', queryData);
+    return Request.postRequest('/api/v2/user/group/delete', queryData);
   }
 
   static signUp(userData) {
@@ -158,7 +170,6 @@ export default class User {
       ownRisk: userData.ownRisk,
       recaptcha_token: userData.recaptchaResponse,
     };
-    // TODO move this call to golang
     return Request.postRequest('/api/v2/user/signup', queryData);
   }
 

@@ -131,6 +131,58 @@ type UserShort struct {
 	LastName  string `json:"last_name"`
 }
 
+type GetUserGroupsResponse struct {
+	PriceDescription     string          `json:"price_description"`
+	PriceID              uint            `json:"price_id"`
+	PricePerMinute       decimal.Decimal `json:"price_min"`
+	UserGroupDescription string          `json:"user_group_description"`
+	UserGroupID          uint            `json:"user_group_id"`
+	UserGroupName        string          `json:"user_group_name"`
+	UserRoleDescription  string          `json:"user_role_description"`
+	UserRoleID           uint            `json:"user_role_id"`
+	UserRoleName         string          `json:"user_role_name"`
+}
+
+type CreateUserGroupsRequest struct {
+	PriceDescription     string          `json:"price_description"`
+	PricePerMinute       decimal.Decimal `json:"price_min" validate:"required"`
+	UserGroupDescription string          `json:"user_group_description"`
+	UserGroupName        string          `json:"user_group_name" validate:"required"`
+	UserRoleID           uint            `json:"user_role_id"`
+}
+
+type ChangeUserGroupRequest struct {
+	PriceDescription     string          `json:"price_description" validate:"required"`
+	PriceID              uint            `json:"price_id" validate:"required"`
+	PricePerMinute       decimal.Decimal `json:"price_min" validate:"required"`
+	UserGroupDescription string          `json:"user_group_description" validate:"required"`
+	UserGroupID          uint            `json:"user_group_id" validate:"required"`
+	UserGroupName        string          `json:"user_group_name" validate:"required"`
+	UserRoleID           uint            `json:"user_role_id" validate:"required"`
+}
+
+type DeleteUserGroupRequest struct {
+	UserGroupID uint `json:"user_group_id" validate:"required"`
+}
+
+var UserGroupsValidationErrors = map[string]string{
+	"PriceDescription":     "Please add a short description for the pricing.",
+	"PriceID":              "Invalid price_id provided.",
+	"PricePerMinute":       "Please provide pricing information for a price per minute (e.g. 2.30).",
+	"UserGroupDescription": "Please provide a description for the user group.",
+	"UserGroupID":          "The user group ID is invalid.",
+	"UserGroupName":        "Please provide a unique user group name.",
+	"UserRoleDescription":  "Please provide a description foor the user role.",
+	"UserRoleID":           "The user role ID is invalid.",
+	"UserRoleName":         "Please provide a user role name.",
+}
+
+type GetUserRolesResponse struct {
+	UserRoleDescription string `json:"user_role_description"`
+	UserRoleID          uint   `json:"user_role_id"`
+	UserRoleName        string `json:"user_role_name"`
+}
+
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	req := &SignUpRequest{}
 	err := ReadBodyAndValidate(r, req, SignUpRequestValidationErrors)
@@ -515,4 +567,152 @@ func (h *Handler) GetAllUsersShort(w http.ResponseWriter, r *http.Request) {
 	}
 	WriteSuccessResponse("users", usersShort, w)
 
+}
+
+func (h *Handler) GetUserGroups(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+
+	pricings, err := h.GetDB().GetPricings()
+	if err != nil {
+		slog.Error("Cannot get user groups", slog.String("error", err.Error()))
+		WriteFailureResponse("cannot get user groups", w)
+		return
+	}
+
+	userGroups := []GetUserGroupsResponse{}
+	for _, p := range pricings {
+		userGroups = append(userGroups, GetUserGroupsResponse{
+			PriceDescription:     p.Comment,
+			PriceID:              p.ID,
+			PricePerMinute:       p.PricePerMinute,
+			UserGroupDescription: p.UserStatus.Description,
+			UserGroupID:          p.UserStatusID,
+			UserGroupName:        p.UserStatus.Name,
+			UserRoleDescription:  p.UserStatus.UserRole.Description,
+			UserRoleID:           p.UserStatus.UserRoleID,
+			UserRoleName:         p.UserStatus.UserRole.Name,
+		})
+	}
+	WriteSuccessResponse("user groups", userGroups, w)
+}
+
+func (h *Handler) CreateUserGroup(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+
+	req := &CreateUserGroupsRequest{}
+	err := ReadBodyAndValidate(r, req, UserGroupsValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	// this request consists of creating a user pricing
+	// and a user group in one go
+	u := database.UserStatus{
+		Name:        req.UserGroupName,
+		Description: req.UserGroupDescription,
+		UserRoleID:  req.UserRoleID,
+	}
+	p := database.Pricing{
+		PricePerMinute: req.PricePerMinute,
+		Comment:        req.PriceDescription,
+	}
+	err = h.GetDB().CreateUserGroup(u, p)
+	if err != nil {
+		slog.Error("Cannot create new user group", slog.String("error", err.Error()))
+		WriteFailureResponse("cannot get create new user group", w)
+		return
+	}
+	WriteSuccessResponse("user group created", nil, w)
+}
+
+func (h *Handler) ChangeUserGroup(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+
+	req := &ChangeUserGroupRequest{}
+	err := ReadBodyAndValidate(r, req, UserGroupsValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	// this request consists of creating a user pricing
+	// and a user group in one go
+	u := database.UserStatus{
+		ID:          req.UserGroupID,
+		Name:        req.UserGroupName,
+		Description: req.UserGroupDescription,
+		UserRoleID:  req.UserRoleID,
+	}
+	p := database.Pricing{
+		ID:             req.PriceID,
+		UserStatusID:   req.UserGroupID,
+		PricePerMinute: req.PricePerMinute,
+		Comment:        req.PriceDescription,
+	}
+	err = h.GetDB().ChangeUserGroup(u, p)
+	if err != nil {
+		slog.Error("Cannot update user group", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot update user group.", w)
+		return
+	}
+	WriteSuccessResponse("user group changed", nil, w)
+}
+
+func (h *Handler) DeleteUserGroup(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+
+	req := &DeleteUserGroupRequest{}
+	err := ReadBodyAndValidate(r, req, UserGroupsValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	err = h.GetDB().DeleteUserGroup(req.UserGroupID)
+	if err != nil {
+		slog.Error("Cannot delete user group", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot delete user group.", w)
+		return
+	}
+	WriteSuccessResponse("user group deleted", nil, w)
+}
+
+func (h *Handler) GetUserRoles(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+
+	roles, err := h.GetDB().GetUserRoles()
+	if err != nil {
+		slog.Error("Cannot get user roles", slog.String("error", err.Error()))
+		WriteFailureResponse("cannot get user roles", w)
+		return
+	}
+
+	userRoles := []GetUserRolesResponse{}
+	for _, u := range roles {
+		userRoles = append(userRoles, GetUserRolesResponse{
+			UserRoleDescription: u.Description,
+			UserRoleID:          u.ID,
+			UserRoleName:        u.Name,
+		})
+	}
+	WriteSuccessResponse("user roles", userRoles, w)
 }

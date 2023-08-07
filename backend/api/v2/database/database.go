@@ -30,6 +30,8 @@ type Database interface {
 	SessionTable
 	PaymentTable
 	PricingTable
+	UserGroupTable
+	UserRoleTable
 	UserTable
 	UserToSessionTable
 }
@@ -104,6 +106,16 @@ type SessionTable interface {
 	DeleteUsersFromSession(sessionID uint) error
 	DeleteSession(sessionID uint) error
 	UpdateSession(s Session) error
+}
+
+type UserGroupTable interface {
+	CreateUserGroup(us UserStatus, p Pricing) error
+	ChangeUserGroup(us UserStatus, p Pricing) error
+	DeleteUserGroup(id uint) error
+}
+
+type UserRoleTable interface {
+	GetUserRoles() ([]UserRole, error)
 }
 
 type UserToSessionTable interface {
