@@ -17,7 +17,7 @@ type GetSessionRequest struct {
 type CreateSessionRequest struct {
 	Title     string `json:"title" validate:"omitempty"`
 	Comment   string `json:"comment" validate:"omitempty"`
-	Start     int64  `json:"start" validate:"required,numeric"`
+	Start     int64  `json:"start" validate:"required"`
 	End       int64  `json:"end" validate:"required"`
 	MaxRiders int64  `json:"max_riders" validate:"required"`
 	Type      int64  `json:"type" validate:"required,sessiontype"`

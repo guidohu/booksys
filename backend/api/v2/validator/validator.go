@@ -53,6 +53,6 @@ func PasswordStrength(fl validator.FieldLevel) bool {
 
 // SessionType checks if the provided session type is valid.
 func SessionType(fl validator.FieldLevel) bool {
-	_, found := database.DefaultSessionTypesMap[int(fl.Field().Uint())]
+	_, found := database.DefaultSessionTypesMap[int(fl.Field().Int())]
 	return found
 }

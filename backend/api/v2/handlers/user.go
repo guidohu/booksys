@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"net/http"
@@ -129,6 +130,25 @@ type UserShort struct {
 	ID        uint   `json:"id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
+}
+
+type UserDetailed struct {
+	ID               uint            `json:"id"`
+	Username         string          `json:"username"`
+	FirstName        string          `json:"first_name"`
+	LastName         string          `json:"last_name"`
+	Address          string          `json:"address"`
+	City             string          `json:"city"`
+	ZipCode          int             `json:"plz"`
+	MobilePhoneNr    string          `json:"mobile"`
+	Email            string          `json:"email"`
+	License          bool            `json:"license"`
+	Locked           bool            `json:"locked"`
+	UserGroupID      uint            `json:"status"`
+	Comment          string          `json:"comment"`
+	TotalHeatCost    decimal.Decimal `json:"total_heat_cost"`
+	TotalHeatSeconds int64           `json:"total_heat_seconds"`
+	TotalPayment     decimal.Decimal `json:"total_payment"`
 }
 
 type GetUserGroupsResponse struct {
@@ -566,7 +586,62 @@ func (h *Handler) GetAllUsersShort(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	WriteSuccessResponse("users", usersShort, w)
+}
 
+func (h *Handler) GetAllUsersDetailed(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+
+	users, err := h.GetDB().GetUsers()
+	if err != nil {
+		slog.Error("Cannot get users", slog.String("error", err.Error()))
+		WriteFailureResponse("cannot get users", w)
+		return
+	}
+
+	usersDetailed := []UserDetailed{}
+	for _, u := range users {
+		duration, cost, err := h.GetDB().GetUserHeatStats(u.ID, time.Time{}, time.Now())
+		if err != nil {
+			slog.Error("Cannot get user heat duration and cost", slog.String("error", err.Error()))
+			WriteFailureResponse("cannot get heat duration and cost", w)
+			return
+		}
+		paybacks, err := h.GetDB().GetUserSessionPaybacks(u.ID)
+		if err != nil {
+			slog.Error("Cannot get user paybacks", slog.String("error", err.Error()))
+			WriteFailureResponse("cannot get user paybacks", w)
+			return
+		}
+		payments, err := h.GetDB().GetUserSessionPayments(u.ID)
+		if err != nil {
+			slog.Error("Cannot get user payments", slog.String("error", err.Error()))
+			WriteFailureResponse("cannot get user payments", w)
+			return
+		}
+		fmt.Println(duration, cost, paybacks, payments)
+		usersDetailed = append(usersDetailed, UserDetailed{
+			ID:               u.ID,
+			Username:         u.Username,
+			FirstName:        u.FirstName,
+			LastName:         u.LastName,
+			Address:          u.Address,
+			City:             u.City,
+			ZipCode:          u.ZipCode,
+			MobilePhoneNr:    u.MobilePhoneNr,
+			Email:            u.Email,
+			License:          u.BoatLicense,
+			Locked:           u.Locked,
+			UserGroupID:      u.UserStatusID,
+			Comment:          u.Comment,
+			TotalHeatCost:    cost,
+			TotalHeatSeconds: duration,
+			TotalPayment:     payments.Sub(paybacks),
+		})
+	}
+	WriteSuccessResponse("users detailed", usersDetailed, w)
 }
 
 func (h *Handler) GetUserGroups(w http.ResponseWriter, r *http.Request) {

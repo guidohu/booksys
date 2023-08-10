@@ -292,7 +292,7 @@ const mutations = {
   },
   setUserListDetailed(state, data) {
     console.log("Store: setUserListDetailed to", data);
-    state.userListDetailed = values(data.users);
+    state.userListDetailed = values(data);
   },
   setUserGroups(state, groups) {
     console.log("Store: setUserGroups to", groups);

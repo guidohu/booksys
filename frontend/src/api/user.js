@@ -80,7 +80,7 @@ export default class User {
 
   static getDetailedUserList() {
     console.debug("User/getDetailedUserList called");
-    return Request.getRequest('/api/v1/user.php?action=get_all_users_detailed');
+    return Request.getRequest('/api/v2/user/list-detailed');
   }
 
   static lockUser(userId) {

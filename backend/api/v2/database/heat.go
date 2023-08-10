@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -17,19 +18,22 @@ func (d *DBMysql) GetUserHeats(userID uint, size int) ([]Heat, error) {
 	return h, err
 }
 
+// GetUserHeatStats returns total duration seconds and total cost
 func (d *DBMysql) GetUserHeatStats(userID uint, start time.Time, end time.Time) (int64, decimal.Decimal, error) {
-	type stats struct {
-		duration int64
-		cost     decimal.Decimal
+	type Stats struct {
+		Duration int64
+		Cost     decimal.Decimal
 	}
-	var s stats
+	s := &Stats{}
+	fmt.Println("start", start.Unix())
+	fmt.Println("end", end.Unix())
 	err := d.orm.Raw(`
 	    SELECT sum(duration_s) as duration, sum(cost_chf) as cost
 	    FROM heat
 		WHERE UNIX_TIMESTAMP(heat.timestamp) >= ?
 		  AND UNIX_TIMESTAMP(heat.timestamp) < ?`, start.Unix(), end.Unix()).
-		Scan(&s).Error
-	return s.duration, s.cost, err
+		Scan(s).Error
+	return s.Duration, s.Cost, err
 }
 
 func (d *DBMysql) GetHeatInSessionCount(sessionID uint) (int, error) {

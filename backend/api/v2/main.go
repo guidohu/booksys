@@ -139,6 +139,7 @@ func main() {
 
 	http.Handle("/api/v2/user/signup", http.HandlerFunc(h.SignUp))
 	http.Handle("/api/v2/user/create-admin", http.HandlerFunc(h.MakeAdmin))
+	http.Handle("/api/v2/user/list-detailed", http.HandlerFunc(h.WithAuthentication(h.GetAllUsersDetailed)))
 	http.Handle("/api/v2/user/list-short", http.HandlerFunc(h.WithAuthentication(h.GetAllUsersShort)))
 	http.Handle("/api/v2/user/group/create", http.HandlerFunc(h.WithAuthentication(h.CreateUserGroup)))
 	http.Handle("/api/v2/user/group/edit", http.HandlerFunc(h.WithAuthentication(h.ChangeUserGroup)))
