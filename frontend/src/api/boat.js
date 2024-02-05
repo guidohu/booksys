@@ -71,12 +71,12 @@ export default class Boat {
    * }
    */
   static updateFuelEntry(fuelEntry) {
-    console.log("api/v1/updateFuelEntry called, with", fuelEntry);
+    console.log("/api/v2/boat/fuel-entry/edit called, with", fuelEntry);
     return Request.postRequest("/api/v2/boat/fuel-entry/edit", fuelEntry);
   }
 
   static getMaintenanceLog() {
-    console.log("api/v1/getMaintenanceLog called");
+    console.log("/api/v2/boat/maintenance-entries/get called");
     return Request.getRequest('/api/v2/boat/maintenance-entries/get');
   }
 
@@ -90,12 +90,12 @@ export default class Boat {
    * }
    */
   static addMaintenanceEntry(maintenanceEntry) {
-    console.log("api/v2/addMaintenanceEntry called, with", maintenanceEntry);
+    console.log("/api/v2/boat/maintenance-entry/add called, with", maintenanceEntry);
     return Request.postRequest("/api/v2/boat/maintenance-entry/add", maintenanceEntry);
   }
 
   static getMyNautiqueInfo(boatId, token, tokenExpiry) {
-    console.log("api/v1/getMyNautiqueInfo called");
+    console.log("/api/v2/boat/mynautique/telemetry/get called");
     const request = {
       boat_id: boatId,
       token: token,
