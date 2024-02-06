@@ -112,6 +112,7 @@ type UserGroupTable interface {
 	CreateUserGroup(us UserStatus, p Pricing) error
 	ChangeUserGroup(us UserStatus, p Pricing) error
 	DeleteUserGroup(id uint) error
+	SetUserGroup(userID uint, groupID uint) error
 }
 
 type UserRoleTable interface {
@@ -128,6 +129,8 @@ type UserToSessionTable interface {
 type UserTable interface {
 	// AddUser adds a user to the database and returns an error if it failed
 	AddUser(u User) (uint, error)
+	// Returns all the admin users
+	GetAdminUsers() ([]User, error)
 	// GetUserByUsername find the user that has either the given username
 	// or the given email address. Returns an error in case the user was not found.
 	GetUserByName(name string) (User, error)

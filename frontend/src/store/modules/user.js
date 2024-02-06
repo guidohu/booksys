@@ -212,23 +212,10 @@ const actions = {
         });
     });
   },
-  lockUser({ dispatch }, userId) {
-    console.log("Trigger action lockUser");
+  lockUser({ dispatch }, data) {
+    console.log("Trigger action lockUser/unlockUser", data);
     return new Promise((resolve, reject) => {
-      User.lockUser(userId)
-        .then(() => {
-          dispatch("queryUserListDetailed");
-          resolve();
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
-  },
-  unlockUser({ dispatch }, userId) {
-    console.log("Trigger action unlockUser");
-    return new Promise((resolve, reject) => {
-      User.unlockUser(userId)
+      User.lockUser(data.user, data.locked)
         .then(() => {
           dispatch("queryUserListDetailed");
           resolve();
@@ -256,12 +243,12 @@ const actions = {
     return new Promise((resolve, reject) => {
       User.setUserGroup(data.userId, data.userGroupId)
         .then(() => {
-          dispatch("queryUserListDetailed");
           resolve();
+          dispatch("queryUserListDetailed");
         })
         .catch((error) => {
           reject(error);
-        });
+        })
     });
   },
 };

@@ -66,6 +66,12 @@ func (d *DBMysql) CountAdminUsers() int64 {
 	return count
 }
 
+func (d *DBMysql) GetAdminUsers() ([]User, error) {
+	users := []User{}
+	err := d.orm.Where("status = ?", UserStatusAdmin).Find(&users).Error
+	return users, err
+}
+
 func (d *DBMysql) UsersExist() (bool, error) {
 	var exists bool
 	err := d.db.QueryRow("SELECT IF(COUNT(*), 'true', 'false') AS users FROM user;").Scan(&exists)

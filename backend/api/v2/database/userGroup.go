@@ -130,3 +130,7 @@ func (d *DBMysql) DeleteUserGroup(id uint) error {
 		return nil
 	})
 }
+
+func (d *DBMysql) SetUserGroup(userID uint, groupID uint) error {
+	return d.orm.Model(&User{}).Where("id = ?", userID).Update("status", groupID).Error
+}

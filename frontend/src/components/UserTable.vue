@@ -171,7 +171,6 @@ export default {
       "queryUserListDetailed",
       "queryUserGroups",
       "lockUser",
-      "unlockUser",
       "deleteUser",
       "setUserGroup",
     ]),
@@ -196,10 +195,10 @@ export default {
       return this.selectedItems.length > 0;
     },
     lock: function (user) {
-      this.lockUser(user.id).catch((errors) => (this.errors = errors));
+      this.lockUser({ 'user': user.id, 'locked': true}).catch((errors) => (this.errors = errors));
     },
     unlock: function (user) {
-      this.unlockUser(user.id).catch((errors) => (this.errors = errors));
+      this.lockUser({ 'user': user.id, 'locked': false}).catch((errors) => (this.errors = errors));
     },
     groupChangeHandler: function (userGroupId, userId) {
       console.log("Change to: userGroupId", userGroupId, "for user", userId);

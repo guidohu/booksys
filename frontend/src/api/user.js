@@ -83,18 +83,13 @@ export default class User {
     return Request.getRequest('/api/v2/user/list-detailed');
   }
 
-  static lockUser(userId) {
+  static lockUser(userId, locked) {
+    console.debug("User/lockUser called with ID", userId, "locked", locked);
     const queryData = {
       user_id: userId,
+      locked: locked,
     };
-    return Request.postRequest('/api/v1/user.php?action=lock_user', queryData);
-  }
-
-  static unlockUser(userId) {
-    const queryData = {
-      user_id: userId,
-    };
-    return Request.postRequest('/api/v1/user.php?action=unlock_user', queryData);
+    return Request.postRequest('/api/v2/user/lock/set', queryData);
   }
 
   static deleteUser(userId) {
@@ -112,10 +107,10 @@ export default class User {
       userGroupId
     );
     const queryData = {
-      user_id: userId,
-      status_id: userGroupId,
+      user_id: parseInt(userId),
+      status_id: parseInt(userGroupId),
     };
-    return Request.postRequest('/api/v1/user.php?action=change_user_group_membership', queryData);
+    return Request.postRequest('/api/v2/user/group/set', queryData);
   }
 
   static getUserGroups() {

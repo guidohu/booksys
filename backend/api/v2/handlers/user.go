@@ -192,15 +192,35 @@ var UserGroupsValidationErrors = map[string]string{
 	"UserGroupDescription": "Please provide a description for the user group.",
 	"UserGroupID":          "The user group ID is invalid.",
 	"UserGroupName":        "Please provide a unique user group name.",
-	"UserRoleDescription":  "Please provide a description foor the user role.",
+	"UserRoleDescription":  "Please provide a description for the user role.",
 	"UserRoleID":           "The user role ID is invalid.",
 	"UserRoleName":         "Please provide a user role name.",
+}
+
+type SetUserGroupRequest struct {
+	UserID      uint `json:"user_id" validate:"required"`
+	UserGroupID uint `json:"status_id" validate:"required"`
+}
+
+var SetUserGroupsValidationErrors = map[string]string{
+	"UserID":      "The user ID is invalid.",
+	"UserGroupID": "The user group ID is invalid.",
 }
 
 type GetUserRolesResponse struct {
 	UserRoleDescription string `json:"user_role_description"`
 	UserRoleID          uint   `json:"user_role_id"`
 	UserRoleName        string `json:"user_role_name"`
+}
+
+type SetUserLockRequest struct {
+	UserID uint `json:"user_id" validate:"required"`
+	Locked bool `json:"locked"`
+}
+
+var SetUserLockValidationErrors = map[string]string{
+	"UserID": "The user ID is invalid.",
+	"Locked": "The value for 'Locked' is invalid.",
 }
 
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
@@ -768,6 +788,68 @@ func (h *Handler) DeleteUserGroup(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("user group deleted", nil, w)
 }
 
+func (h *Handler) SetUserGroup(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+
+	req := &SetUserGroupRequest{}
+	err := ReadBodyAndValidate(r, req, SetUserGroupsValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	user, err := h.GetDB().GetUserById(req.UserID)
+	if err != nil {
+		slog.Error("Cannot find user", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot find user.", w)
+		return
+	}
+	userGroups, err := h.GetDB().GetPricings()
+	if err != nil {
+		slog.Error("Cannot get valid groups", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot get valid groups.", w)
+		return
+	}
+
+	groupFound := false
+	for _, group := range userGroups {
+		if group.UserStatusID == req.UserGroupID {
+			groupFound = true
+			break
+		}
+	}
+	if !groupFound {
+		slog.Warn("Invalid group provided", slog.Int("user_group_id", int(req.UserGroupID)))
+		WriteFailureResponse("Invalid group ID provided.", w)
+		return
+	}
+
+	// check that his user is not the only remaining admin
+	admins, err := h.GetDB().GetAdminUsers()
+	if err != nil {
+		slog.Error("Cannot get admin users", slog.String("error", err.Error()))
+		WriteFailureResponse("Internal error, cannot lock/unlock user.", w)
+		return
+	}
+	if len(admins) == 1 && admins[0].ID == user.ID {
+		slog.Warn("Cannot change group of the only admin ", slog.Uint64("user_id", uint64(user.ID)))
+		WriteFailureResponse("Cannot change group of the only administrator.", w)
+		return
+	}
+
+	err = h.GetDB().SetUserGroup(user.ID, req.UserGroupID)
+	if err != nil {
+		slog.Error("Cannot change user group for user", slog.Int("user_id", int(req.UserID)), slog.Int("user_group_id", int(req.UserGroupID)), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot change user group for user.", w)
+		return
+	}
+	WriteSuccessResponse("user group set", nil, w)
+}
+
 func (h *Handler) GetUserRoles(w http.ResponseWriter, r *http.Request) {
 	session := GetSessionFromContext(r)
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
@@ -790,4 +872,47 @@ func (h *Handler) GetUserRoles(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 	WriteSuccessResponse("user roles", userRoles, w)
+}
+
+func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+
+	req := &SetUserLockRequest{}
+	err := ReadBodyAndValidate(r, req, SetUserLockValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	user, err := h.GetDB().GetUserById(req.UserID)
+	if err != nil {
+		slog.Error("Cannot find user", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot find user.", w)
+		return
+	}
+
+	// check that his user is not the only remaining admin
+	admins, err := h.GetDB().GetAdminUsers()
+	if err != nil {
+		slog.Error("Cannot get admin users", slog.String("error", err.Error()))
+		WriteFailureResponse("Internal error, cannot lock/unlock user.", w)
+		return
+	}
+	if len(admins) == 1 && admins[0].ID == user.ID {
+		slog.Warn("Cannot lock/unlock the only admin ", slog.Uint64("user_id", uint64(user.ID)))
+		WriteFailureResponse("Cannot lock/unlock the only administrator.", w)
+		return
+	}
+
+	err = h.GetDB().ChangeLock(user.ID, req.Locked)
+	if err != nil {
+		slog.Error("Cannot change lock status for user", slog.Int("user_id", int(req.UserID)), slog.Bool("locked", req.Locked), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot change user group for user.", w)
+		return
+	}
+	WriteSuccessResponse("user lock set", nil, w)
 }
