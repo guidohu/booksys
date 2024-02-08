@@ -153,6 +153,7 @@ func main() {
 	http.Handle("/api/v2/user/my/password/update", http.HandlerFunc(h.WithAuthentication(h.UpdateMyPassword)))
 	http.Handle("/api/v2/user/my/sessions", http.HandlerFunc(h.WithAuthentication(h.GetMySessions)))
 	http.Handle("/api/v2/user/my/update", http.HandlerFunc(h.WithAuthentication(h.UpdateMyUser)))
+	http.Handle("/api/v2/user/delete", http.HandlerFunc(h.WithAuthentication(h.DeleteUser)))
 	http.Handle("/api/v2/user/roles/get", http.HandlerFunc(h.WithAuthentication(h.GetUserRoles)))
 
 	http.Handle("/api/v2/admin/configuration/set", http.HandlerFunc(h.WithAuthentication(h.SetConfiguration)))

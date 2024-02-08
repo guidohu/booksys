@@ -94,9 +94,9 @@ export default class User {
 
   static deleteUser(userId) {
     const queryData = {
-      id: userId,
+      user_id: userId,
     };
-    return Request.postRequest('/api/v1/user.php?action=delete_user', queryData);
+    return Request.postRequest('/api/v2/user/delete', queryData);
   }
 
   static setUserGroup(userId, userGroupId) {

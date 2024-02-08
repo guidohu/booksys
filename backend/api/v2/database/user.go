@@ -35,6 +35,29 @@ func (d *DBMysql) AddUser(u User) (uint, error) {
 	return u.ID, tx.Error
 }
 
+func (d *DBMysql) DeleteUserById(id uint) error {
+	user := User{
+		ID: id,
+	}
+	return d.orm.Model(&user).Updates(map[string]interface{}{
+		"username":      "",
+		"password_salt": 0,
+		"password_hash": "none",
+		"first_name":    "",
+		"last_name":     "",
+		"address":       "",
+		"city":          "",
+		"plz":           0,
+		"mobile":        "",
+		"email":         "",
+		"license":       0,
+		"status":        1,
+		"locked":        1,
+		"comment":       "deleted user",
+		"deleted":       1,
+	}).Error
+}
+
 // UpdateUser updates user values that are supposed to be updated
 // by the users themselves. It does not update PasswordSalt, PasswordHash
 // Locked, UserStatusID, Comment and IsDeleted
@@ -96,8 +119,8 @@ func (d *DBMysql) ChangeLock(id uint, locked bool) error {
 	return d.orm.Debug().Model(&User{}).Where("id = ?", id).Update("locked", locked).Error
 }
 
-func (d *DBMysql) GetUsers() ([]User, error) {
+func (d *DBMysql) GetUsers(includeDeleted bool) ([]User, error) {
 	var users []User
-	err := d.orm.Find(&users).Error
+	err := d.orm.Where("deleted = 0 OR deleted = ?", includeDeleted).Find(&users).Error
 	return users, err
 }

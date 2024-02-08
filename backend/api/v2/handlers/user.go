@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"math/rand"
@@ -223,6 +224,14 @@ var SetUserLockValidationErrors = map[string]string{
 	"Locked": "The value for 'Locked' is invalid.",
 }
 
+type DeleteUserRequest struct {
+	UserID uint `json:"user_id" validate:"required"`
+}
+
+var DeleteUserValidationErrors = map[string]string{
+	"UserID": "The user ID is invalid.",
+}
+
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	req := &SignUpRequest{}
 	err := ReadBodyAndValidate(r, req, SignUpRequestValidationErrors)
@@ -316,6 +325,61 @@ func (h *Handler) MakeAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	WriteSuccessResponse("success", nil, w)
+}
+
+func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	// balance has to be zero
+	// delete user (zeroing out personal info)
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+
+	req := &DeleteUserRequest{}
+	err := ReadBodyAndValidate(r, req, DeleteUserValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	if session.UserID == req.UserID {
+		slog.Info("Skip user deletion, user cannot delete itself.")
+		WriteFailureResponse("You cannot delete yourself.", w)
+		return
+	}
+
+	user, err := h.GetDB().GetUserById(req.UserID)
+	if err != nil {
+		slog.Warn("Cannot find", slog.Int("user_id", int(req.UserID)), ":", err.Error())
+		WriteFailureResponse("User not found.", w)
+		return
+	}
+
+	if user.UserStatus.UserRoleID == database.UserRoleAdmin {
+		slog.Warn("Cannot delete admin ", slog.Int("user_id", int(req.UserID)))
+		WriteFailureResponse("Users with admin roles cannot be removed.", w)
+		return
+	}
+
+	balance, err := h.getUserBalance(req.UserID)
+	if err != nil {
+		slog.Warn("Cannot get balance for", slog.Int("user_id", int(req.UserID)))
+		WriteFailureResponse("Cannot check for balance to be 0 for this user.", w)
+		return
+	}
+	if !balance.Balance.IsZero() {
+		slog.Warn("Balance is not 0 for", slog.Int("user_id", int(req.UserID)), ": Cannot delete user.")
+		WriteFailureResponse("Cannot delete user with non-zero balance.", w)
+		return
+	}
+	err = h.GetDB().DeleteUserById(req.UserID)
+	if err != nil {
+		slog.Error("Cannot delete user", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot delete user.", w)
+		return
+	}
+	WriteSuccessResponse("user deleted", nil, w)
 }
 
 func (h *Handler) UpdateMyUser(w http.ResponseWriter, r *http.Request) {
@@ -553,34 +617,12 @@ func (h *Handler) GetMyBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	now := time.Now()
-	_, cost, err := h.GetDB().GetUserHeatStats(session.UserID, time.Time{}, now)
+	resp, err := h.getUserBalance(session.UserID)
 	if err != nil {
-		slog.Error("Cannot get total costs", slog.String("user", session.User.Username), slog.String("error", err.Error()))
-		WriteFailureResponse("Cannot get balance for user.", w)
+		slog.Error("Cannot get user balance", err.Error())
+		WriteFailureResponse("Cannot get user balance.", w)
 		return
 	}
-
-	payment, err := h.GetDB().GetUserSessionPayments(session.UserID)
-	if err != nil {
-		slog.Error("Cannot get total payments for", slog.String("user", session.User.Username), slog.String("error", err.Error()))
-		WriteFailureResponse("Cannot get balance for user", w)
-		return
-	}
-
-	payback, err := h.GetDB().GetUserSessionPaybacks(session.UserID)
-	if err != nil {
-		slog.Error("Cannot get total paybacks for", slog.String("user", session.User.Username), slog.String("error", err.Error()))
-		WriteFailureResponse("Cannot get balance for user", w)
-		return
-	}
-
-	resp := &GetMyBalanceResponse{
-		PaymentTotal: payment,
-		PaybackTotal: payback,
-		Balance:      payment.Sub(payback).Sub(cost),
-	}
-
 	WriteSuccessResponse("balance", resp, w)
 }
 
@@ -590,7 +632,7 @@ func (h *Handler) GetAllUsersShort(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	users, err := h.GetDB().GetUsers()
+	users, err := h.GetDB().GetUsers( /*includeDeleted=*/ false)
 	if err != nil {
 		slog.Error("Cannot get users", slog.String("error", err.Error()))
 		WriteFailureResponse("cannot get users", w)
@@ -614,7 +656,7 @@ func (h *Handler) GetAllUsersDetailed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	users, err := h.GetDB().GetUsers()
+	users, err := h.GetDB().GetUsers( /*includeDeleted=*/ false)
 	if err != nil {
 		slog.Error("Cannot get users", slog.String("error", err.Error()))
 		WriteFailureResponse("cannot get users", w)
@@ -915,4 +957,32 @@ func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	WriteSuccessResponse("user lock set", nil, w)
+}
+
+func (h *Handler) getUserBalance(userID uint) (*GetMyBalanceResponse, error) {
+	now := time.Now()
+	_, cost, err := h.GetDB().GetUserHeatStats(userID, time.Time{}, now)
+	if err != nil {
+		slog.Error("Cannot get total costs", slog.Int("user", int(userID)), slog.String("error", err.Error()))
+		return nil, errors.New("Cannot get balance for user.")
+	}
+
+	payment, err := h.GetDB().GetUserSessionPayments(userID)
+	if err != nil {
+		slog.Error("Cannot get total payments for", slog.Int("user", int(userID)), slog.String("error", err.Error()))
+		return nil, errors.New("Cannot get balance for user.")
+	}
+
+	payback, err := h.GetDB().GetUserSessionPaybacks(userID)
+	if err != nil {
+		slog.Error("Cannot get total paybacks for", slog.Int("user", int(userID)), slog.String("error", err.Error()))
+		return nil, errors.New("Cannot get balance for user.")
+	}
+
+	resp := &GetMyBalanceResponse{
+		PaymentTotal: payment,
+		PaybackTotal: payback,
+		Balance:      payment.Sub(payback).Sub(cost),
+	}
+	return resp, nil
 }

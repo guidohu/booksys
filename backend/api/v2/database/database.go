@@ -129,6 +129,8 @@ type UserToSessionTable interface {
 type UserTable interface {
 	// AddUser adds a user to the database and returns an error if it failed
 	AddUser(u User) (uint, error)
+	// Flags a user as deleted and removes all personal data.
+	DeleteUserById(id uint) error
 	// Returns all the admin users
 	GetAdminUsers() ([]User, error)
 	// GetUserByUsername find the user that has either the given username
@@ -148,7 +150,7 @@ type UserTable interface {
 	// Returns true if user exists
 	UserExists(id uint) bool
 	// Returns all users
-	GetUsers() ([]User, error)
+	GetUsers(includeDeleted bool) ([]User, error)
 }
 
 type DBMysql struct {
