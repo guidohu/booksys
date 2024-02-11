@@ -72,7 +72,6 @@ func (d *DBMysql) migrationPreflight() error {
 	if err != nil {
 		return err
 	}
-
 	if count == 0 {
 		slog.Info("migration preflight table `session_type` - skip")
 	} else {
@@ -118,8 +117,38 @@ func (d *DBMysql) migrationPreflight() error {
 		slog.Info("migration preflight table `session_type` - done")
 	}
 
-	// TODO further fixes come here
+	// increase id in expenditure_type
+	count = 0
+	err = d.db.QueryRow("SELECT COUNT(*) FROM expenditure_type WHERE ID = 0").Scan(&count)
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		slog.Info("migration preflight table `expenditure_type` - skip")
+	} else {
+		t, err := d.db.Begin()
+		if err != nil {
+			slog.Error("migration preflight table `expenditure_type` - failed to create transaction")
+			return err
+		}
+		for i, _ := range DefaultExpenseTypes {
+			newID := len(DefaultExpenseTypes) - i // idx is current ID + 1
+			_, err = t.Query("UPDATE expenditure_type SET id = ? WHERE id = ?", newID, newID-1)
+			if err != nil {
+				slog.Error("migration preflight table `expenditure_type` - failed to move type ID from N to N+1 with", slog.Int("N", newID-1))
+				return err
+			}
+			slog.Info("migration preflight table `expenditure_type` - move type ID from N to N+1 with", slog.Int("N", newID-1))
+		}
+		err = t.Commit()
+		if err != nil {
+			slog.Error("migration preflight table `expenditure_type` - failed to commit transaction")
+			return err
+		}
+		slog.Info("migration preflight table `expenditure_type` - done")
+	}
 
+	// TODO further fixes come here
 	return nil
 }
 
@@ -360,7 +389,7 @@ var DefaultInvitationStatus = []InvitationStatus{
 }
 
 const (
-	ExpenseTypeFuelDirect = iota
+	ExpenseTypeFuelDirect = iota + 1
 	ExpenseTypeMaintenance
 	ExpenseTypeMaterial
 	ExpenseTypeInvestment

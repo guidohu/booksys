@@ -89,7 +89,7 @@ type Expense struct {
 	UserID        uint            `gorm:"type:mediumint(9) DEFAULT NULL"`
 	User          User            `gorm:"foreignKey:UserID;references:ID"`
 	ExpenseTypeID uint            `gorm:"column:type_id;type:int(11) NOT NULL DEFAULT '0'"`
-	ExpenseType   ExpenseType     `gorm:"foreignKey:ExpenseTypeID;references:ID"`
+	ExpenseType   ExpenseType     `gorm:"foreignKey:ExpenseTypeID;references:ID;constraint:OnUpdate:CASCADE"`
 	Timestamp     time.Time       `gorm:"type:timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP"`
 	Amount        decimal.Decimal `gorm:"column:amount_chf;type:DECIMAL(10,3) DEFAULT NULL"`
 	Comment       string          `gorm:"type:text CHARACTER SET utf8"`
@@ -171,7 +171,8 @@ type Income struct {
 	User          User            `gorm:"foreignKey:UserID;references:ID"`
 	Timestamp     time.Time       `gorm:"type:timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP"`
 	Amount        decimal.Decimal `gorm:"column:amount_chf;type:DECIMAL(10,3) DEFAULT NULL"`
-	ExpenseTypeID uint            `gorm:"column:type_id;type:int(11) DEFAULT NULL"`
+	ExpenseTypeID uint            `gorm:"column:type_id;type:int(11) NOT NULL DEFAULT '0'"`
+	ExpenseType   ExpenseType     `gorm:"foreignKey:ExpenseTypeID;references:ID;constraint:OnUpdate:CASCADE"`
 	Comment       string          `gorm:"type:text CHARACTER SET utf8"`
 }
 
