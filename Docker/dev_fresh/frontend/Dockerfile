@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:21
 
 RUN npm install --save bootstrap-vue
 RUN npm install --save bootstrap

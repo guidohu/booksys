@@ -1,5 +1,5 @@
 # build the app with node 16 LTS
-FROM node:16 as build-stage
+FROM node:21 as build-stage
 
 WORKDIR /home/node/app
 COPY package*.json     ./

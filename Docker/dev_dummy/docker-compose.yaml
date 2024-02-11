@@ -65,7 +65,7 @@ services:
             - "traefik.http.routers.api_v2.rule=PathPrefix(`/api/v2`) || PathPrefix(`/api/v2`)"
             - "traefik.http.services.api_v2.loadbalancer.server.port=80" 
     frontend:
-        build: "./frontend"
+        build: "../../frontend"
         container_name: "dev_dummy_frontend"
         user: "node"
         working_dir: /home/node/app
