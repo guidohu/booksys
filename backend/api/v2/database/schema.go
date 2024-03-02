@@ -51,7 +51,7 @@ func (BoatMaintenance) TableName() string {
 }
 
 type BrowserSession struct {
-	SessionSecret string    `gorm:"primaryKey;type:varchar(512) COLLATE utf8_unicode_ci NOT NULL"`
+	SessionSecret string    `gorm:"primaryKey;type:varchar(512) NOT NULL"`
 	ValidUntil    time.Time `gorm:"column:valid_thru;type:datetime DEFAULT NULL"`
 	LastActivity  time.Time `gorm:"type:datetime DEFAULT NULL"`
 	UserID        uint      `gorm:"type:mediumint(9) DEFAULT NULL"`

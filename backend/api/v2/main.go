@@ -8,6 +8,7 @@ import (
 	"server/config"
 	"server/database"
 	"server/handlers"
+	"time"
 
 	"golang.org/x/exp/slog"
 
@@ -75,6 +76,17 @@ func main() {
 	db := connectDatabase()
 	defer db.Disconnect()
 	h := handlers.NewHandler(db)
+	go func() {
+		for {
+			slog.Debug("Re-check database connection.")
+			if db == nil || db.Ping() != nil {
+				slog.Info("Connection attempt to db.")
+				db = connectDatabase()
+				h.SetDB(db)
+			}
+			time.Sleep(10 * time.Second)
+		}
+	}()
 
 	// Watch config chages and create a new DB connection
 	viper.OnConfigChange(func(e fsnotify.Event) {

@@ -28,7 +28,7 @@ func (h *Handler) HealthStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	healthStatus.ConfigDB = config.IsDBConfigured()
-	healthStatus.DBReachable = config.IsDBConfigured() && h.GetDB().Ping() == nil
+	healthStatus.DBReachable = h.GetDB() != nil && config.IsDBConfigured() && h.GetDB().Ping() == nil
 	if healthStatus.DBReachable {
 		healthStatus.UsersExist, err = h.GetDB().UsersExist()
 		if err != nil {

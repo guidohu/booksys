@@ -196,11 +196,13 @@ func (d *DBMysql) Connect() error {
 		SkipInitializeWithVersion: false,              // smart configure based on used version
 	}), &gorm.Config{})
 	if err != nil {
+		slog.Error("Cannot connect with gorm", slog.String("error", err.Error()))
 		return err
 	}
 	d.orm = orm
 	d.db, err = orm.DB()
 	if err != nil {
+		slog.Error("Cannot assign db handler", slog.String("error", err.Error()))
 		return err
 	}
 

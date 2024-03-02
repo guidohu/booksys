@@ -33,6 +33,8 @@ services:
             context: ../../backend
             dockerfile: Dockerfile_api_v1
         container_name: dev_dummy_backend_api_v1
+        depends_on:
+            - db
         environment:
             DB_SERVER: 'db:3306'
             DB_NAME: 'booksys'
@@ -53,6 +55,8 @@ services:
             context: ../../backend
             dockerfile: Dockerfile_api_v2
         container_name: dev_dummy_backend_api_v2
+        depends_on:
+            - db
         environment:
             DB_SERVER: 'db:3306'
             DB_NAME: 'booksys'
@@ -63,10 +67,16 @@ services:
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.api_v2.rule=PathPrefix(`/api/v2`) || PathPrefix(`/api/v2`)"
-            - "traefik.http.services.api_v2.loadbalancer.server.port=80" 
+            - "traefik.http.services.api_v2.loadbalancer.server.port=9090" 
     frontend:
-        build: "../../frontend"
+        # We use a development instance and not the
+        # real container.
+        build: "./frontend"
         container_name: "dev_dummy_frontend"
+        depends_on:
+            - db
+            - api_v1
+            - api_v2
         user: "node"
         working_dir: /home/node/app
         environment:

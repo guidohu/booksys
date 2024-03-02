@@ -1,11 +1,19 @@
-port: 9090
+configfile: config.yaml
 database:
-  protocol: tcp
-  host: 127.0.0.1
-  port: 3306
-  user: user
-  password: userpassword
-  dbName: booksys
+    dbname: booksys
+    host: 127.0.0.1
+    password: userpassword
+    port: "3306"
+    protocol: tcp
+    user: user
 http:
-  sessionInactivityTimeout: 604800
-  sessionTimeout: 31536000
+    sessioninactivitytimeout: 604800
+    sessiontimeout: 31536000
+mynautique:
+    apikey: AIzaSyAb8S3Owvo8k-gI8eK_DEztFOn0FcZFRxw
+    enabled: true
+    password: test
+    user: test@example.com
+port: 9090
+upload:
+    path: ./uploads
