@@ -45,6 +45,27 @@ type GetAccountingStatisticsResponse struct {
 	RefundsSessionTotal               *decimal.Decimal `json:"total_session_refunds"`
 }
 
+type GetAccountingTransactionsRequest struct {
+	// Year 0 stand for 'any' year.
+	Year uint64 `json:"year"`
+}
+
+var GetAccountingTransactionsValidationErrors = map[string]string{
+	"Year": "Please provide a valid year or 0.",
+}
+
+type GetAccountingTransactionsResponse []database.TransactionRow
+
+type DeleteTransactionRequest struct {
+	TableID uint64 `json:"table_id"`
+	RowID   uint64 `json:"row_id"`
+}
+
+var DeleteTransactionValidationErrors = map[string]string{
+	"TableID": "Please provide a valid table_id.",
+	"RowID":   "Please provide a valid row id.",
+}
+
 func (h *Handler) GetAccountingYears(w http.ResponseWriter, r *http.Request) {
 	session := GetSessionFromContext(r)
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
@@ -127,23 +148,7 @@ func (h *Handler) GetAccountingStatistics(w http.ResponseWriter, r *http.Request
 	}
 	slog.Info("GetAccountingStatistics for", slog.Uint64("year", req.Year))
 
-	resp := &GetAccountingStatisticsResponse{
-		RideMinutesCashCredit:             &decimal.Decimal{},
-		RideMinutesCashUsed:               &decimal.Decimal{},
-		RideMinutesCashUsedSelectedYear:   &decimal.Decimal{},
-		Balance:                           &decimal.Decimal{},
-		SessionProfit:                     &decimal.Decimal{},
-		SessionProfitSelectedYear:         &decimal.Decimal{},
-		ExpenseTotal:                      &decimal.Decimal{},
-		ExpenseTotalSelectedYear:          &decimal.Decimal{},
-		ExpenseNoRefundsTotal:             &decimal.Decimal{},
-		ExpenseNoRefundsTotalSelectedYear: &decimal.Decimal{},
-		IncomeTotal:                       &decimal.Decimal{},
-		IncomeTotalSelectedYear:           &decimal.Decimal{},
-		IncomeSessionPayment:              &decimal.Decimal{},
-		IncomeSessionPaymentSelectedYear:  &decimal.Decimal{},
-		RefundsSessionTotal:               &decimal.Decimal{},
-	}
+	resp := &GetAccountingStatisticsResponse{}
 
 	// Get total payments.
 	payments, err := h.GetDB().GetPaymentTotal(0)
@@ -237,4 +242,47 @@ func (h *Handler) GetAccountingStatistics(w http.ResponseWriter, r *http.Request
 	resp.SessionProfitSelectedYear = &yearCurrentProfit
 
 	WriteSuccessResponse("accounting statistics", resp, w)
+}
+
+func (h *Handler) GetAccountingTransactions(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+	req := &GetAccountingTransactionsRequest{}
+	err := ReadBodyAndValidate(r, req, GetAccountingTransactionsValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+	slog.Info("GetAccountingTransactions for", slog.Uint64("year", req.Year))
+
+	var resp GetAccountingTransactionsResponse
+	resp, err = h.GetDB().GetTransactions(req.Year)
+	if err != nil {
+		slog.Warn("Cannot get transactions", slog.String("error", err.Error()))
+	}
+
+	WriteSuccessResponse("accounting transactions", resp, w)
+}
+
+func (h *Handler) DeleteTransaction(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+	req := &DeleteTransactionRequest{}
+	err := ReadBodyAndValidate(r, req, DeleteTransactionValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+	err = h.GetDB().DeleteTransaction(req.TableID, req.RowID)
+	if err != nil {
+		slog.Warn("Cannot get transactions", slog.String("error", err.Error()))
+	}
+
+	WriteSuccessResponse("transaction deleted", nil, w)
 }

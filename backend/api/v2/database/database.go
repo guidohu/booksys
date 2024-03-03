@@ -51,6 +51,8 @@ type AccountingCollection interface {
 	GetHeatCostTotal(uint64) (decimal.Decimal, error)
 	GetSessionPaymentTotal(uint64) (decimal.Decimal, error)
 	GetSessionRefundsTotal(uint64) (decimal.Decimal, error)
+	GetTransactions(uint64) ([]TransactionRow, error)
+	DeleteTransaction(uint64, uint64) error
 }
 
 type BoatEngineHoursTable interface {

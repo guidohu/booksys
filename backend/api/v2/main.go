@@ -144,6 +144,8 @@ func main() {
 	http.Handle("/api/v2/accounting/expense_types/list", http.HandlerFunc(h.WithAuthentication(h.GetExpenseTypes)))
 	http.Handle("/api/v2/accounting/income_types/list", http.HandlerFunc(h.WithAuthentication(h.GetIncomeTypes)))
 	http.Handle("/api/v2/accounting/statistics/get", http.HandlerFunc(h.WithAuthentication(h.GetAccountingStatistics)))
+	http.Handle("/api/v2/accounting/transactions/delete", http.HandlerFunc(h.WithAuthentication(h.DeleteTransaction)))
+	http.Handle("/api/v2/accounting/transactions/get", http.HandlerFunc(h.WithAuthentication(h.GetAccountingTransactions)))
 	http.Handle("/api/v2/accounting/years/list", http.HandlerFunc(h.WithAuthentication(h.GetAccountingYears)))
 
 	http.Handle("/api/v2/booking/day/list", http.HandlerFunc(h.WithAuthentication(h.GetBookingDay)))

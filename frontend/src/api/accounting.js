@@ -47,16 +47,16 @@ export default class Accounting {
    * @param {*} year
    */
   static getTransactions(year) {
-    console.log("accounting/getTransactions called with:", year);
+    console.log("/api/v2/accounting/transactions/get called with:", year);
     if (year == null) {
-      year = "any";
+      year = 0;
     }
 
     const requestData = {
-      year: year,
+      year: parseInt(year),
     };
 
-    return Request.postRequest("/api/v1/payment.php?action=get_transactions", requestData);
+    return Request.postRequest("/api/v2/accounting/transactions/get", requestData);
   }
 
   /**
@@ -64,12 +64,12 @@ export default class Accounting {
    * @param {*} transaction
    */
   static deleteTransaction(transaction) {
-    console.log("accounting/deleteTransaction called with:", transaction);
+    console.log("/api/v2/accounting/transactions/delete called with:", transaction);
     const requestData = {
-      table_id: transaction.tbl,
-      row_id: transaction.id,
+      table_id: parseInt(transaction.tbl),
+      row_id: parseInt(transaction.id),
     };
-    return Request.postRequest("/api/v1/payment.php?action=delete_transaction", requestData);
+    return Request.postRequest("/api/v2/accounting/transactions/delete", requestData);
   }
 
   /**

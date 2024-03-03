@@ -1,7 +1,29 @@
 package database
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/shopspring/decimal"
+)
+
+type TransactionRow struct {
+	ID        uint64           `json:"id"`
+	Amount    *decimal.Decimal `json:"amount"`
+	Comment   string           `json:"comment"`
+	UserID    uint64           `json:"user_id"`
+	FirstName string           `json:"fn"`
+	LastName  string           `json:"ln"`
+	TableID   uint64           `json:"tbl"`
+	Timestamp time.Time        `json:"timestamp"`
+	TypeID    uint64           `json:"type_id"`
+	TypeName  string           `json:"session"`
+}
+
+const (
+	TableIdExpenditure = iota
+	TableIdPayment
+	TableIdBoatFuel
 )
 
 func (d *DBMysql) GetYears() ([]uint64, error) {
@@ -80,6 +102,57 @@ func (d *DBMysql) GetSessionRefundsTotal(year uint64) (decimal.Decimal, error) {
 		FROM expenditure WHERE type_id = ? 
 		AND (year(timestamp) = ? OR 0 = ?)
 	`, ExpenseTypeSession, year, year)
+}
+
+func (d *DBMysql) GetTransactions(year uint64) ([]TransactionRow, error) {
+	r := []TransactionRow{}
+	err := d.orm.Debug().Raw(`
+		SELECT acc.tbl as table_id, acc.id as id, acc.user_id as user_id, u.first_name as first_name, u.last_name as last_name, 
+			acc.type_id as type_id, et.name as type_name, acc.timestamp as timestamp, 
+			acc.amount as amount, acc.comment as comment
+		FROM 
+		(
+			SELECT 0 as tbl, e.id, e.user_id, e.type_id, 
+				e.timestamp, e.amount_chf * -1 as amount, e.comment 
+			FROM expenditure e
+			UNION ALL
+			SELECT 1 as tbl, p.id, p.user_id, p.type_id as type_id, 
+				p.timestamp, p.amount_chf as amount, p.comment as comment 
+			FROM payment p
+			UNION ALL
+			SELECT 2 as tbl, b.id, b.user_id, 0 as type_id,
+				b.timestamp, b.cost_chf * -1 as amount, 
+				CONCAT(b.liters, 'L fuel') as comment
+			FROM boat_fuel b WHERE contributes_to_balance = 1
+		) as acc 
+		LEFT JOIN user u ON u.id = acc.user_id
+		LEFT JOIN expenditure_type et ON et.id = acc.type_id 
+		WHERE year(acc.timestamp) = ? OR 0 = ?
+		ORDER BY acc.timestamp DESC
+	`, year, year).Scan(&r).Error
+	return r, err
+}
+
+func (d *DBMysql) DeleteTransaction(tableID uint64, rowID uint64) error {
+	switch tableID {
+	case TableIdExpenditure:
+		e := Expense{
+			ID: uint(rowID),
+		}
+		return d.orm.Delete(&e).Error
+	case TableIdPayment:
+		p := Income{
+			ID: uint(rowID),
+		}
+		return d.orm.Delete(&p).Error
+	case TableIdBoatFuel:
+		b := BoatFuel{
+			ID: uint(rowID),
+		}
+		return d.orm.Delete(&b).Error
+	default:
+		return fmt.Errorf("table ID %d unknown, cannot delete row %d", tableID, rowID)
+	}
 }
 
 func (d *DBMysql) getSingleDecimalResult(rawQuery string, values ...interface{}) (decimal.Decimal, error) {
