@@ -5,24 +5,24 @@ export default class Accounting {
    * Returns all the years that we have data for.
    */
   static getYears() {
-    console.log("accounting/getYears called");
-    return Request.getRequest('/api/v1/payment.php?action=get_years');
+    console.log("/api/v2/accounting/years/list called");
+    return Request.getRequest('/api/v2/accounting/years/list');
   }
 
   /**
    * Returns all the expense types that there are.
    */
   static getExpenseTypes() {
-    console.log("accounting/getExpenseTypes called");
-    return Request.getRequest('/api/v1/payment.php?action=get_expenditure_types');
+    console.log("/api/v2/accounting/expense_types/list");
+    return Request.getRequest('/api/v2/accounting/expense_types/list');
   }
 
   /**
    * Returns all the income types that there are.
    */
   static getIncomeTypes() {
-    console.log("accounting/getIncomeTypes called");
-    return Request.getRequest('/api/v1/payment.php?action=get_payment_types');
+    console.log("/api/v2/accounting/income_types/list called");
+    return Request.getRequest('/api/v2/accounting/income_types/list');
   }
 
   /**
@@ -30,16 +30,15 @@ export default class Accounting {
    * a specific number
    */
   static getStatistics(year) {
-    console.log("accounting/getStatistics called with:", year);
+    console.log("/api/v2/accounting/statistics/get called with year:", year);
     if (year == null) {
-      year = "any";
+      year = 0;
     }
-
     const requestData = {
-      year: year,
+      year: parseInt(year),
     };
 
-    return Request.postRequest("/api/v1/payment.php?action=get_statistics", requestData);
+    return Request.postRequest("/api/v2/accounting/statistics/get", requestData);
   }
 
   /**

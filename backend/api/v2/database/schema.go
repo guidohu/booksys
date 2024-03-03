@@ -100,9 +100,9 @@ func (Expense) TableName() string {
 }
 
 type ExpenseType struct {
-	ID      uint   `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
-	Name    string `gorm:"type:text CHARACTER SET utf8"`
-	Comment string `gorm:"type:text CHARACTER SET utf8"`
+	ID      uint   `gorm:"type:int(11) NOT NULL AUTO_INCREMENT" json:"id"`
+	Name    string `gorm:"type:text CHARACTER SET utf8" json:"name"`
+	Comment string `gorm:"type:text CHARACTER SET utf8" json:"comment"`
 }
 
 func (ExpenseType) TableName() string {

@@ -76,8 +76,8 @@ const actions = {
     console.log("Action triggered: queryYears");
     return new Promise((resolve, reject) => {
       Accounting.getYears()
-        .then((years) => {
-          commit("setYears", years);
+        .then((resp) => {
+          commit("setYears", resp.years);
           resolve();
         })
         .catch((errors) => {
@@ -89,8 +89,8 @@ const actions = {
     console.log("Action triggered: queryExpenseTypes");
     return new Promise((resolve, reject) => {
       Accounting.getExpenseTypes()
-        .then((types) => {
-          commit("setExpenseTypes", types);
+        .then((data) => {
+          commit("setExpenseTypes", data.types);
           resolve();
         })
         .catch((errors) => {
@@ -102,8 +102,8 @@ const actions = {
     console.log("Action triggered: queryIncomeTypes");
     return new Promise((resolve, reject) => {
       Accounting.getIncomeTypes()
-        .then((types) => {
-          commit("setIncomeTypes", types);
+        .then((data) => {
+          commit("setIncomeTypes", data.types);
           resolve();
         })
         .catch((errors) => {
@@ -112,7 +112,7 @@ const actions = {
     });
   },
   queryStatistics({ commit }, year) {
-    console.log("Action triggered: queryStatistics");
+    console.log("Action triggered: queryStatistics for year", year);
     return new Promise((resolve, reject) => {
       Accounting.getStatistics(year)
         .then((statistics) => {
@@ -222,15 +222,6 @@ const mutations = {
 
     // Session Balance
     state.sessionsBalance = statistics.total_open;
-
-    // admin_minutes: 18584
-    // admin_minutes_selected_year: 0
-    // currency: "CHF"
-    // guest_minutes: 0
-    // guest_minutes_selected_year: 0
-    // member_minutes: 59441
-    // member_minutes_selected_year: 0
-    // total_open: 1966.4599999999919
   },
   setTransactions(state, transactions) {
     state.transactions = transactions;

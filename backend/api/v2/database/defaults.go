@@ -139,6 +139,18 @@ func (d *DBMysql) migrationPreflight() error {
 				return err
 			}
 			slog.Info("migration preflight table `expenditure_type` - move type ID from N to N+1 with", slog.Int("N", newID-1))
+			_, err = t.Query("UPDATE expenditure SET type_id = ? WHERE type_id = ?", newID, newID-1)
+			if err != nil {
+				slog.Error("migration preflight table `expenditure` - failed to move type ID from N to N+1 with", slog.Int("N", newID-1))
+				return err
+			}
+			slog.Info("migration preflight table `payment` - move type ID from N to N+1 with", slog.Int("N", newID-1))
+			_, err = t.Query("UPDATE payment SET type_id = ? WHERE type_id = ?", newID, newID-1)
+			if err != nil {
+				slog.Error("migration preflight table `payment_type` - failed to move type ID from N to N+1 with", slog.Int("N", newID-1))
+				return err
+			}
+			slog.Info("migration preflight table `payment` - move type ID from N to N+1 with", slog.Int("N", newID-1))
 		}
 		err = t.Commit()
 		if err != nil {
@@ -146,6 +158,13 @@ func (d *DBMysql) migrationPreflight() error {
 			return err
 		}
 		slog.Info("migration preflight table `expenditure_type` - done")
+	}
+
+	// explicitly change type for browser_session.session_secret
+	_, err = d.db.Query("ALTER TABLE browser_session MODIFY COLUMN session_secret VARCHAR(512)")
+	if err != nil {
+		slog.Error("migration preflight table `browser_session` - failed to MODIFY COLUMN", slog.String("error", err.Error()))
+		return err
 	}
 
 	// TODO further fixes come here

@@ -19,6 +19,8 @@ type Database interface {
 	IsConfigured() bool
 	// views
 	LogsView
+	// collections
+	AccountingCollection
 	// tables
 	BoatEngineHoursTable
 	BoatFuelTable
@@ -26,6 +28,7 @@ type Database interface {
 	BrowserSessionTable
 	ConfigurationTable
 	ExpenditureTable
+	ExpenditureTypeTable
 	HeatTable
 	SessionTable
 	PaymentTable
@@ -38,6 +41,16 @@ type Database interface {
 
 type LogsView interface {
 	GetLogs() ([]Log, error)
+}
+
+type AccountingCollection interface {
+	GetYears() ([]uint64, error)
+	GetPaymentTotal(uint64) (decimal.Decimal, error)
+	GetExpenseTotal(uint64) (decimal.Decimal, error)
+	GetExpenseNoRefundsTotal(uint64) (decimal.Decimal, error)
+	GetHeatCostTotal(uint64) (decimal.Decimal, error)
+	GetSessionPaymentTotal(uint64) (decimal.Decimal, error)
+	GetSessionRefundsTotal(uint64) (decimal.Decimal, error)
 }
 
 type BoatEngineHoursTable interface {
@@ -76,6 +89,10 @@ type ConfigurationTable interface {
 
 type ExpenditureTable interface {
 	GetUserSessionPaybacks(userID uint) (decimal.Decimal, error)
+}
+
+type ExpenditureTypeTable interface {
+	GetExpenseTypes() ([]ExpenseType, error)
 }
 
 type HeatTable interface {

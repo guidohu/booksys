@@ -127,8 +127,8 @@ export default {
   methods: {
     ...mapActions("accounting", ["queryYears", "queryStatistics"]),
     ...mapActions("configuration", ["queryConfiguration"]),
-    yearSelectionChangeHandler: function (selection) {
-      this.queryStatistics(selection).catch((errors) => (this.errors = errors));
+    yearSelectionChangeHandler: function () {
+      this.queryStatistics(this.form.selectedYear).catch((errors) => (this.errors = errors));
     },
   },
   created() {

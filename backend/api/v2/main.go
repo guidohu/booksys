@@ -141,6 +141,11 @@ func main() {
 	http.Handle("/api/v2/database/config", http.HandlerFunc(h.WithAuthentication(h.GetDBConfig)))
 	http.Handle("/api/v2/database/setup", http.HandlerFunc(h.SetupDBConfig))
 
+	http.Handle("/api/v2/accounting/expense_types/list", http.HandlerFunc(h.WithAuthentication(h.GetExpenseTypes)))
+	http.Handle("/api/v2/accounting/income_types/list", http.HandlerFunc(h.WithAuthentication(h.GetIncomeTypes)))
+	http.Handle("/api/v2/accounting/statistics/get", http.HandlerFunc(h.WithAuthentication(h.GetAccountingStatistics)))
+	http.Handle("/api/v2/accounting/years/list", http.HandlerFunc(h.WithAuthentication(h.GetAccountingYears)))
+
 	http.Handle("/api/v2/booking/day/list", http.HandlerFunc(h.WithAuthentication(h.GetBookingDay)))
 	http.Handle("/api/v2/booking/series/list", http.HandlerFunc(h.WithAuthentication(h.GetBookingSeries)))
 
