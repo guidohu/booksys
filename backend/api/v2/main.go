@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net/http"
@@ -69,6 +70,8 @@ func connectDatabase() *database.DBMysql {
 }
 
 func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	parseFlags()
 	readConfigFile()
 
@@ -76,28 +79,35 @@ func main() {
 	db := connectDatabase()
 	defer db.Disconnect()
 	h := handlers.NewHandler(db)
+	reconnectChannel := make(chan struct{})
 	go func() {
+		// re-establish connection every 10 second if there
+		// is no database connection
+		ticker := time.NewTicker(10 * time.Second)
 		for {
-			slog.Debug("Re-check database connection.")
-			if db == nil || db.Ping() != nil {
-				slog.Info("Connection attempt to db.")
+			select {
+			case <-ctx.Done():
+				ticker.Stop()
+				return
+			case <-ticker.C:
+				if db == nil || db.Ping() != nil {
+					slog.Info("Connection attempt to db.")
+					db = connectDatabase()
+					h.SetDB(db)
+				}
+			case <-reconnectChannel:
+				slog.Info("Reconnect db.")
 				db = connectDatabase()
 				h.SetDB(db)
 			}
-			time.Sleep(10 * time.Second)
 		}
 	}()
 
 	// Watch config chages and create a new DB connection
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		slog.Info("Configuration file changed", slog.String("file", e.Name))
-		// Reconnect database upon config change
-		newDB := connectDatabase()
-		if newDB != nil {
-			h.SetDB(newDB)
-			fmt.Println("New db connected")
-		}
 		readConfigFile()
+		reconnectChannel <- struct{}{}
 	})
 	viper.WatchConfig()
 
