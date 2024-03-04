@@ -142,6 +142,7 @@ func main() {
 	http.Handle("/api/v2/database/setup", http.HandlerFunc(h.SetupDBConfig))
 
 	http.Handle("/api/v2/accounting/expense_types/list", http.HandlerFunc(h.WithAuthentication(h.GetExpenseTypes)))
+	http.Handle("/api/v2/accounting/expense/add", http.HandlerFunc(h.WithAuthentication(h.AddExpense)))
 	http.Handle("/api/v2/accounting/income_types/list", http.HandlerFunc(h.WithAuthentication(h.GetIncomeTypes)))
 	http.Handle("/api/v2/accounting/income/add", http.HandlerFunc(h.WithAuthentication(h.AddIncome)))
 	http.Handle("/api/v2/accounting/statistics/get", http.HandlerFunc(h.WithAuthentication(h.GetAccountingStatistics)))

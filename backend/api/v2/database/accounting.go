@@ -159,6 +159,10 @@ func (d *DBMysql) AddIncome(data Income) error {
 	return d.orm.Create(&data).Error
 }
 
+func (d *DBMysql) AddExpense(data Expense) error {
+	return d.orm.Create(&data).Error
+}
+
 func (d *DBMysql) getSingleDecimalResult(rawQuery string, values ...interface{}) (decimal.Decimal, error) {
 	p := struct {
 		Result *decimal.Decimal

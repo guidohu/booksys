@@ -53,6 +53,7 @@ type AccountingCollection interface {
 	GetSessionRefundsTotal(uint64) (decimal.Decimal, error)
 	GetTransactions(uint64) ([]TransactionRow, error)
 	DeleteTransaction(uint64, uint64) error
+	AddExpense(Expense) error
 	AddIncome(Income) error
 }
 

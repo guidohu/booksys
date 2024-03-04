@@ -67,7 +67,7 @@ var DeleteTransactionValidationErrors = map[string]string{
 	"RowID":   "Please provide a valid row id.",
 }
 
-type AddIncomeRequest struct {
+type AddTransactionRequest struct {
 	Amount  *decimal.Decimal `json:"amount" validate:"numeric"`
 	Comment string           `json:"comment"`
 	Date    string           `json:"date" validate:"required"`
@@ -75,7 +75,7 @@ type AddIncomeRequest struct {
 	UserID  uint64           `json:"user_id" validate:"required,numeric"`
 }
 
-var AddIncomeValidationErrors = map[string]string{
+var AddTransactionValidationErrors = map[string]string{
 	"Amount":  "Please provide an amount.",
 	"Comment": "Please provide a valid comment.",
 	"Date":    "Please provide a valid date.",
@@ -311,8 +311,8 @@ func (h *Handler) AddIncome(w http.ResponseWriter, r *http.Request) {
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return
 	}
-	req := &AddIncomeRequest{}
-	err := ReadBodyAndValidate(r, req, AddIncomeValidationErrors)
+	req := &AddTransactionRequest{}
+	err := ReadBodyAndValidate(r, req, AddTransactionValidationErrors)
 	if err != nil {
 		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
 		WriteFailureResponse(err.Error(), w)
@@ -365,10 +365,75 @@ func (h *Handler) AddIncome(w http.ResponseWriter, r *http.Request) {
 
 	err = h.GetDB().AddIncome(incomeEntry)
 	if err != nil {
-		slog.Warn("Cannot get transactions", slog.String("error", err.Error()))
+		slog.Warn("Cannot add income transaction", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot write income transaction to database because of an error.", w)
+		return
 	}
 
 	// TODO write an email to the user for Session Payments.
 
 	WriteSuccessResponse("income added", nil, w)
+}
+
+func (h *Handler) AddExpense(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+	req := &AddTransactionRequest{}
+	err := ReadBodyAndValidate(r, req, AddTransactionValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	expenseEntry := database.Income{
+		UserID:        uint(req.UserID),
+		Amount:        *req.Amount,
+		ExpenseTypeID: uint(req.TypeID),
+		Comment:       req.Comment,
+	}
+
+	// Check if user exists.
+	_, err = h.GetDB().GetUserById(uint(req.UserID))
+	if err != nil {
+		slog.Warn("Cannot find user with", slog.Uint64("user_id", req.UserID))
+		WriteFailureResponse("Cannot find the selected user", w)
+		return
+	}
+	expenseEntry.UserID = uint(req.UserID)
+
+	// Parse time.
+	date, err := time.Parse("2006-01-02T15:04", req.Date)
+	if err != nil {
+		slog.Warn("Cannot parse date information from", slog.String("date", req.Date))
+		WriteFailureResponse("Cannot parse date, has to be of the form 2006-01-02T15:04", w)
+		return
+	}
+	expenseEntry.Timestamp = date
+
+	// Some require a comment and for some types we set
+	// a default one.
+	switch req.TypeID {
+	case database.ExpenseTypeFuelDirect:
+		slog.Warn("Attempt to use accounting API to add fuel expenses.")
+		WriteFailureResponse("Please use boat API for fuel expenses.", w)
+		return
+	default:
+		if expenseEntry.Comment == "" {
+			slog.Warn("No comment specified for new expense entry.")
+			WriteFailureResponse("No comment specified for new expense entry.", w)
+			return
+		}
+	}
+
+	err = h.GetDB().AddIncome(expenseEntry)
+	if err != nil {
+		slog.Warn("Cannot add expense transaction", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot write expense transaction to database because of an error.", w)
+		return
+	}
+
+	WriteSuccessResponse("expense added", nil, w)
 }

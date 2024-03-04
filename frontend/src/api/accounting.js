@@ -107,7 +107,7 @@ export default class Accounting {
    * }
    */
   static addExpense(expenseTransaction) {
-    console.log("accounting/addExpense called with:", expenseTransaction);
+    console.log("/api/v2/accounting/expense/add called with:", expenseTransaction);
     const requestData = {
       amount: expenseTransaction.amount,
       type_id: expenseTransaction.typeId,
@@ -115,6 +115,6 @@ export default class Accounting {
       user_id: expenseTransaction.userId,
       comment: expenseTransaction.comment,
     };
-    return Request.postRequest("/api/v1/payment.php?action=add_expenditure", requestData);
+    return Request.postRequest("/api/v2/accounting/expense/add", requestData);
   }
 }
