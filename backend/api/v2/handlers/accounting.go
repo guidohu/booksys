@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
@@ -64,6 +65,22 @@ type DeleteTransactionRequest struct {
 var DeleteTransactionValidationErrors = map[string]string{
 	"TableID": "Please provide a valid table_id.",
 	"RowID":   "Please provide a valid row id.",
+}
+
+type AddIncomeRequest struct {
+	Amount  *decimal.Decimal `json:"amount" validate:"numeric"`
+	Comment string           `json:"comment"`
+	Date    string           `json:"date" validate:"required"`
+	TypeID  uint64           `json:"type_id" validate:"expensetype"`
+	UserID  uint64           `json:"user_id" validate:"required,numeric"`
+}
+
+var AddIncomeValidationErrors = map[string]string{
+	"Amount":  "Please provide an amount.",
+	"Comment": "Please provide a valid comment.",
+	"Date":    "Please provide a valid date.",
+	"TypeID":  "Please provide a valid income type.",
+	"UserID":  "Please provide a valid user id.",
 }
 
 func (h *Handler) GetAccountingYears(w http.ResponseWriter, r *http.Request) {
@@ -282,7 +299,76 @@ func (h *Handler) DeleteTransaction(w http.ResponseWriter, r *http.Request) {
 	err = h.GetDB().DeleteTransaction(req.TableID, req.RowID)
 	if err != nil {
 		slog.Warn("Cannot get transactions", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot delete transaction because of an error.", w)
+		return
 	}
 
 	WriteSuccessResponse("transaction deleted", nil, w)
+}
+
+func (h *Handler) AddIncome(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+	req := &AddIncomeRequest{}
+	err := ReadBodyAndValidate(r, req, AddIncomeValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	incomeEntry := database.Income{
+		UserID:        uint(req.UserID),
+		Amount:        *req.Amount,
+		ExpenseTypeID: uint(req.TypeID),
+		Comment:       req.Comment,
+	}
+
+	// Check if user exists.
+	_, err = h.GetDB().GetUserById(uint(req.UserID))
+	if err != nil {
+		slog.Warn("Cannot find user with", slog.Uint64("user_id", req.UserID))
+		WriteFailureResponse("Cannot find the selected user", w)
+		return
+	}
+	incomeEntry.UserID = uint(req.UserID)
+
+	// Parse time.
+	date, err := time.Parse("2006-01-02T15:04", req.Date)
+	if err != nil {
+		slog.Warn("Cannot parse date information from", slog.String("date", req.Date))
+		WriteFailureResponse("Cannot parse date, has to be of the form 2006-01-02T15:04", w)
+		return
+	}
+	incomeEntry.Timestamp = date
+
+	// Some require a comment and for some types we set
+	// a default one.
+	switch req.TypeID {
+	case database.ExpenseTypeSession:
+		if req.Comment == "" {
+			incomeEntry.Comment = "Session Payment"
+		}
+	case database.ExpenseTypeMembershipFee:
+		if req.Comment == "" {
+			incomeEntry.Comment = "Membership Fee"
+		}
+	default:
+		if incomeEntry.Comment == "" {
+			slog.Warn("No comment specified for new income entry.")
+			WriteFailureResponse("No comment specified for new income entry.", w)
+			return
+		}
+	}
+
+	err = h.GetDB().AddIncome(incomeEntry)
+	if err != nil {
+		slog.Warn("Cannot get transactions", slog.String("error", err.Error()))
+	}
+
+	// TODO write an email to the user for Session Payments.
+
+	WriteSuccessResponse("income added", nil, w)
 }

@@ -134,6 +134,7 @@ func ReadBodyAndValidate(r *http.Request, s any, errorMap ...map[string]string) 
 	validate.RegisterValidation("recaptchakey", customvalidator.RecaptchaKey)
 	validate.RegisterValidation("strongpassword", customvalidator.PasswordStrength)
 	validate.RegisterValidation("sessiontype", customvalidator.SessionType)
+	validate.RegisterValidation("expensetype", customvalidator.ExpenseType)
 	err = validate.Struct(s)
 	if err != nil {
 		slog.Warn("Struct does not validate", slog.String("error", err.Error()))

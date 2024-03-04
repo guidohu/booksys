@@ -84,7 +84,7 @@ export default class Accounting {
    * }
    */
   static addIncome(incomeTransaction) {
-    console.log("accounting/addIncome called with:", incomeTransaction);
+    console.log("/api/v2/accounting/income/add called with:", incomeTransaction);
     const requestData = {
       amount: incomeTransaction.amount,
       type_id: incomeTransaction.typeId,
@@ -92,7 +92,7 @@ export default class Accounting {
       user_id: incomeTransaction.userId,
       comment: incomeTransaction.comment,
     };
-    return Request.postRequest("/api/v1/payment.php?action=add_payment", requestData);
+    return Request.postRequest("/api/v2/accounting/income/add", requestData);
   }
 
   /**

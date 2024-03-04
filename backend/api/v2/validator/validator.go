@@ -56,3 +56,9 @@ func SessionType(fl validator.FieldLevel) bool {
 	_, found := database.DefaultSessionTypesMap[int(fl.Field().Int())]
 	return found
 }
+
+// ExpenseType checks if the provided expense type is valid.
+func ExpenseType(fl validator.FieldLevel) bool {
+	_, found := database.DefaultExpenseTypesMap[int(fl.Field().Uint())]
+	return found
+}

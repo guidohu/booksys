@@ -155,6 +155,10 @@ func (d *DBMysql) DeleteTransaction(tableID uint64, rowID uint64) error {
 	}
 }
 
+func (d *DBMysql) AddIncome(data Income) error {
+	return d.orm.Create(&data).Error
+}
+
 func (d *DBMysql) getSingleDecimalResult(rawQuery string, values ...interface{}) (decimal.Decimal, error) {
 	p := struct {
 		Result *decimal.Decimal

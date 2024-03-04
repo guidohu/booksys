@@ -473,6 +473,19 @@ var DefaultExpenseTypes = []ExpenseType{
 	},
 }
 
+var DefaultExpenseTypesMap = map[int]ExpenseType{
+	ExpenseTypeFuelDirect:    DefaultExpenseTypes[0],
+	ExpenseTypeMaintenance:   DefaultExpenseTypes[1],
+	ExpenseTypeMaterial:      DefaultExpenseTypes[2],
+	ExpenseTypeInvestment:    DefaultExpenseTypes[3],
+	ExpenseTypeSession:       DefaultExpenseTypes[4],
+	ExpenseTypeOther:         DefaultExpenseTypes[5],
+	ExpenseTypeMembershipFee: DefaultExpenseTypes[6],
+	ExpenseTypeSalary:        DefaultExpenseTypes[7],
+	ExpenseTypeOwnersRefund:  DefaultExpenseTypes[8],
+	ExpenseTypeFuelBill:      DefaultExpenseTypes[9],
+}
+
 var DefaultConfiguration = []Configuration{
 	{
 		ID:       1,
