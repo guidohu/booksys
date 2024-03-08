@@ -2,13 +2,16 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
 	"server/config"
 	"server/database"
 	"server/handlers"
+	"syscall"
 	"time"
 
 	"golang.org/x/exp/slog"
@@ -111,6 +114,10 @@ func main() {
 	})
 	viper.WatchConfig()
 
+	server := &http.Server{
+		Addr: fmt.Sprintf(":%d", viper.GetUint16("port")),
+	}
+
 	// File server to serve uploaded files
 	fs := http.FileServer(http.Dir(viper.GetString("upload.path")))
 	http.Handle("/uploads/", http.StripPrefix("/uploads/", fs))
@@ -198,5 +205,24 @@ func main() {
 
 	slog.Info(fmt.Sprintf("Server listening on port %d\n", viper.GetUint16("port")))
 
-	slog.Warn(http.ListenAndServe(fmt.Sprintf(":%d", viper.GetUint16("port")), nil).Error())
+	go func() {
+		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+			slog.Error("HTTP server failure", slog.String("error", err.Error()))
+			os.Exit(1)
+		}
+		slog.Info("Stopped serving new connections.")
+	}()
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+
+	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownRelease()
+
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		slog.Error("HTTP shutdown failure", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+	slog.Info("Graceful shutdown complete.")
 }
