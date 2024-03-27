@@ -3,6 +3,8 @@ package database
 import (
 	"errors"
 	"fmt"
+	"net"
+	"reflect"
 	"strconv"
 	"time"
 
@@ -46,6 +48,22 @@ type MyNautiqueConfiguration struct {
 	User         string
 }
 
+type EmailConfiguration struct {
+	Sender     string
+	ServerPort string
+	Server     string
+	Port       string
+	Username   string
+	Password   string
+}
+
+func (e *EmailConfiguration) Empty() bool {
+	if reflect.DeepEqual(e, &EmailConfiguration{}) {
+		return true
+	}
+	return false
+}
+
 func (d *DBMysql) GetPropertyValue(key string) (Configuration, error) {
 	var value Configuration
 	err := d.orm.Where("property = ?", key).First(&value).Error
@@ -56,6 +74,14 @@ func (d *DBMysql) GetAllPropertyValues() ([]Configuration, error) {
 	var values []Configuration
 	err := d.orm.Find(&values).Error
 	return values, err
+}
+
+func getPropertyValuesMap(c []Configuration) map[string]Configuration {
+	configMap := map[string]Configuration{}
+	for _, p := range c {
+		configMap[p.Property] = p
+	}
+	return configMap
 }
 
 func (d *DBMysql) UpdateOrInsertPropertyValues(conf []Configuration) error {
@@ -100,6 +126,34 @@ func (d *DBMysql) GetTimezoneLocation() (*time.Location, error) {
 		return nil, err
 	}
 	return time.LoadLocation(s.Value)
+}
+
+func (d *DBMysql) GetEmailConfiguration() (EmailConfiguration, error) {
+	config := EmailConfiguration{}
+	properties, err := d.GetAllPropertyValues()
+	if err != nil {
+		return EmailConfiguration{}, err
+	}
+	for _, p := range properties {
+		switch p.Property {
+		case "smtp.sender":
+			config.Sender = p.Value
+		case "smtp.server":
+			config.ServerPort = p.Value
+			host, port, err := net.SplitHostPort(p.Value)
+			if err != nil {
+				slog.Error("Cannot parse smtp.server into host and port", slog.String("error", err.Error()))
+				return EmailConfiguration{}, err
+			}
+			config.Server = host
+			config.Port = port
+		case "smtp.password":
+			config.Password = p.Value
+		case "smtp.username":
+			config.Username = p.Value
+		}
+	}
+	return config, nil
 }
 
 func (d *DBMysql) GetMyNautiqueConfiguration() (MyNautiqueConfiguration, error) {

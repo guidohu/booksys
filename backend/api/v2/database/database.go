@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -186,27 +187,24 @@ type DBMysql struct {
 	DBName   string
 }
 
+func (d *DBMysql) String() string {
+	return d.getDSN( /*hidePassword=*/ true)
+}
+
+func (d *DBMysql) getDSN(hidePassword bool) string {
+	password := d.Password
+	if hidePassword {
+		password = "***hidden***"
+	}
+	return fmt.Sprintf("%s:%s@%s(%s:%s)/%s?charset=utf8&parseTime=True&loc=UTC", d.User, password, d.Protocol, d.Host, d.Port, d.DBName)
+}
+
 func (d *DBMysql) Connect() error {
-	// d.config = mysql.Config{
-	// 	User:                 d.User,
-	// 	Passwd:               d.Password,
-	// 	Net:                  d.Protocol,
-	// 	Addr:                 fmt.Sprintf("%s:%s", d.Host, d.Port),
-	// 	DBName:               d.DBName,
-	// 	AllowNativePasswords: true,
-	// }
-
-	// db, err := sql.Open("mysql", d.config.FormatDSN())
-	// if err != nil {
-	// 	return err
-	// }
-	// d.db = db
-
 	// Premigration steps if needed
 	// - TODO change all session_type occurrences to have ID 1 and 2 instead of 0 and 1
 
 	datetimePrecision := 2
-	dsn := fmt.Sprintf("%s:%s@%s(%s:%s)/%s?charset=utf8&parseTime=True&loc=UTC", d.User, d.Password, d.Protocol, d.Host, d.Port, d.DBName)
+	dsn := d.getDSN( /*hidePassword=*/ false)
 	orm, err := gorm.Open(gormMysql.New(gormMysql.Config{
 		DSN:                       dsn,                // data source name, refer https://github.com/go-sql-driver/mysql#dsn-data-source-name
 		DefaultStringSize:         256,                // add default size for string fields, by default, will use db type `longtext` for fields without size, not a primary key, no index defined and don't have default values
@@ -230,6 +228,7 @@ func (d *DBMysql) Connect() error {
 	// If db exists we migrate otherwise we setup the tables
 	dbIsSetup, err := d.tableExists("user")
 	if err != nil {
+		slog.Error("Cannot check if table 'user' exists", slog.String("error", err.Error()))
 		return err
 	}
 
@@ -257,7 +256,9 @@ func (d *DBMysql) Disconnect() {
 	// } else {
 	// 	ormDB.Close()
 	// }
-
+	if d.db == nil {
+		return
+	}
 	d.db.Close()
 }
 
@@ -285,7 +286,9 @@ func (d *DBMysql) IsConfigured() bool {
 }
 
 func (d *DBMysql) tableExists(tableName string) (bool, error) {
-	fmt.Println(d.DBName)
+	if d.DBName == "" {
+		return false, errors.New("database name not provided")
+	}
 	rows, err := d.db.Query(fmt.Sprintf("SHOW TABLE STATUS FROM %s WHERE Name = ?", d.DBName), tableName)
 	if err != nil {
 		return false, err

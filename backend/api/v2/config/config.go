@@ -1,16 +1,27 @@
+// This package handles configuration. It follows the following principle.
+//
+// Configuration required globally is stored in a configuration file and can be provided
+// with environment variables or flags alternatively.
+//
+// Priority is: flag, environment variables and then config file.
+//
+// Configuration that could be different for different tenants will be stored in a database
+// to be more flexible in case we implement multi tenancy at some point.
+//
+// Priority is always the configuration stored in the database.
 package config
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/spf13/viper"
 )
 
 type Configuration struct {
-	Database DBConfig   `json:"database"`
+	Database DBConfig   `yaml:"database"`
 	Http     HttpConfig `yaml:"http"`
+	params   *BasicParams
 }
 
 type DBConfig struct {
@@ -23,26 +34,25 @@ type DBConfig struct {
 }
 
 type HttpConfig struct {
-	SessionInactivityTimeout uint `yaml:"sessionInactivityTimeout"`
-	SessionTimeout           uint `yaml:"sessionTimeout"`
+	Port                     uint   `yaml:"port"`
+	SessionInactivityTimeout uint   `yaml:"sessionInactivityTimeout"`
+	SessionTimeout           uint   `yaml:"sessionTimeout"`
+	UploadPath               string `yaml:"uploadPath"`
 }
 
-func InitViper() error {
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath("$HOME/.booksys-server")
-	viper.AddConfigPath(".")
-
-	return nil
+type BasicParams struct {
+	EnvironmentPrefix string
+	ConfigFilePath    string
 }
 
-func ReadConfig(path string) error {
-	if path != "" {
-		_, err := os.Stat(path)
+func NewBasicConfiguration(p *BasicParams) (*Configuration, error) {
+	// v := viper.New()
+	if p.ConfigFilePath != "" {
+		_, err := os.Stat(p.ConfigFilePath)
 		if err != nil {
-			return fmt.Errorf("Configuration file does not exist: %s", err)
+			return nil, fmt.Errorf("Configuration file does not exist: %s", err)
 		}
-		viper.SetConfigFile(path)
+		viper.SetConfigFile(p.ConfigFilePath)
 	} else {
 		// look for a config in
 		viper.SetConfigName("config")
@@ -50,26 +60,53 @@ func ReadConfig(path string) error {
 		viper.AddConfigPath("$HOME/")
 		viper.AddConfigPath(".")
 	}
+	return &Configuration{}, nil
+}
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			log.Println("No config file found, using empty config")
-			return nil
-		} else {
-			return err
-		}
-	}
+func InitViper() error {
+	// vipe
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	viper.AddConfigPath("$HOME/.booksys-server")
 
-	// verify that the configuration matches
-	// the Configuration struct
-	conf := &Configuration{}
-	err = viper.Unmarshal(conf)
-	if err != nil {
-		log.Fatalf("Cannot decode configuration into config struct: %v", err)
-	}
 	return nil
 }
+
+// func ReadConfig(v *viper.Viper) error {
+// 	if v.GetString() != "" {
+// 		_, err := os.Stat(path)
+// 		if err != nil {
+// 			return fmt.Errorf("Configuration file does not exist: %s", err)
+// 		}
+// 		viper.SetConfigFile(path)
+// 	} else {
+// 		// look for a config in
+// 		viper.SetConfigName("config")
+// 		viper.SetConfigType("yaml")
+// 		viper.AddConfigPath("$HOME/")
+// 		viper.AddConfigPath(".")
+// 	}
+
+// 	err := viper.ReadInConfig()
+// 	if err != nil {
+// 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+// 			log.Println("No config file found, using empty config")
+// 			return nil
+// 		} else {
+// 			return err
+// 		}
+// 	}
+
+// 	// verify that the configuration matches
+// 	// the Configuration struct
+// 	conf := &Configuration{}
+// 	err = viper.Unmarshal(conf)
+// 	if err != nil {
+// 		log.Fatalf("Cannot decode configuration into config struct: %v", err)
+// 	}
+// 	return nil
+// }
 
 func WriteConfig() error {
 	return viper.WriteConfig()
