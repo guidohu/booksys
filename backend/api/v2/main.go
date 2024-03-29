@@ -176,7 +176,8 @@ func main() {
 		}
 	}()
 	hp := handlers.HandlerParams{
-		Database: db,
+		Database:      db,
+		Configuration: v,
 	}
 	h := handlers.NewHandler(hp)
 	chReconnectDatabase := make(chan struct{})

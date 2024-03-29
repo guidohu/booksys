@@ -101,7 +101,7 @@ type GetLogoPathResponse struct {
 }
 
 func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
-	if config.IsDBConfigured() {
+	if config.IsDBConfigured(h.config) {
 		slog.Warn("SetupDB called for already setup DB")
 		WriteFailureResponse("Invalid request", w)
 		return

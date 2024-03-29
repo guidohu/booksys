@@ -4,6 +4,7 @@ import (
 	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
 
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -36,6 +37,9 @@ func (d *DBMysql) Migrate() error {
 		return err
 	}
 
+	// re-install triggers
+	d.installTriggers()
+
 	// post schema update tasks
 	err = d.cleanup()
 	if err != nil {
@@ -59,6 +63,9 @@ func (d *DBMysql) Initialize() error {
 		slog.Error("initialize database failed:", err)
 		return err
 	}
+
+	// re-install triggers
+	d.installTriggers()
 
 	return nil
 }
@@ -192,6 +199,7 @@ func (d *DBMysql) autoMigrate() error {
 		&UserStatus{},
 		&UserToSession{},
 		&Configuration{},
+		&ConfigurationVersion{},
 	}
 	return d.orm.AutoMigrate(tables...)
 }
@@ -205,6 +213,7 @@ func (d *DBMysql) initializeContent() error {
 		{DefaultInvitationStatus},
 		{DefaultExpenseTypes},
 		{DefaultConfiguration},
+		{DefaultConfigurationVersion},
 	}
 
 	// Setup default values
@@ -217,6 +226,26 @@ func (d *DBMysql) initializeContent() error {
 		}
 	}
 	return nil
+}
+
+func (d *DBMysql) installTriggers() error {
+	return d.orm.Transaction(func(tx *gorm.DB) error {
+		// Remove trigger
+		err := tx.Exec("DROP TRIGGER IF EXISTS configuration_update_trigger").Error
+		if err != nil {
+			slog.Error("Cannot drop trigger configuration_update_trigger", slog.String("error", err.Error()))
+			return err
+		}
+		err = tx.Exec(`CREATE TRIGGER configuration_update_trigger
+			AFTER UPDATE ON configuration FOR EACH ROW
+			UPDATE configuration_version SET version = version + 1, time = NOW()
+			`).Error
+		if err != nil {
+			slog.Error("Cannot create trigger configuration_update_trigger", slog.String("error", err.Error()))
+			return err
+		}
+		return nil
+	})
 }
 
 func (d *DBMysql) cleanup() error {
@@ -626,5 +655,12 @@ var DefaultConfiguration = []Configuration{
 		ID:       28,
 		Property: "fuel.payment.type",
 		Value:    "instant",
+	},
+}
+
+var DefaultConfigurationVersion = []ConfigurationVersion{
+	{
+		ID:      1,
+		Version: 1,
 	},
 }

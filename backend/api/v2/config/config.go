@@ -112,19 +112,19 @@ func WriteConfig() error {
 	return viper.WriteConfig()
 }
 
-func IsDBConfigured() bool {
+func IsDBConfigured(v *viper.Viper) bool {
 	switch {
-	case !viper.IsSet("database.protocol"):
+	case !v.IsSet("database.protocol"):
 		return false
-	case !viper.IsSet("database.password"):
+	case !v.IsSet("database.password"):
 		return false
-	case !viper.IsSet("database.user"):
+	case !v.IsSet("database.user"):
 		return false
-	case !viper.IsSet("database.host"):
+	case !v.IsSet("database.host"):
 		return false
-	case !viper.IsSet("database.port"):
+	case !v.IsSet("database.port"):
 		return false
-	case !viper.IsSet("database.dbname"):
+	case !v.IsSet("database.dbname"):
 		return false
 	}
 

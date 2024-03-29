@@ -291,3 +291,13 @@ type Configuration struct {
 func (Configuration) TableName() string {
 	return "configuration"
 }
+
+type ConfigurationVersion struct {
+	ID        uint       `gorm:"type:int(11);autoIncrement:false"`
+	Version   uint       `gorm:"type:int(11) NOT NULL DEFAULT 1"`
+	Timestamp *time.Time `gorm:"column:time;type:datetime DEFAULT NULL"`
+}
+
+func (ConfigurationVersion) TableName() string {
+	return "configuration_version"
+}
