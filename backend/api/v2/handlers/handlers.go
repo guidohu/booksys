@@ -209,11 +209,11 @@ func WriteSuccessResponse(message string, data any, w http.ResponseWriter) {
 	io.Copy(w, bytes.NewReader(j))
 }
 
-func SetSessionCookie(w http.ResponseWriter, s string) {
+func SetSessionCookie(w http.ResponseWriter, s string, validUntil time.Time) {
 	cookie := http.Cookie{
 		Name:     "SESSION",
 		Value:    s,
-		Expires:  time.Now().Add(time.Second * time.Duration(viper.GetInt64("http.sessiontimeout"))),
+		Expires:  validUntil,
 		Path:     "/",
 		Domain:   "",
 		Secure:   false,

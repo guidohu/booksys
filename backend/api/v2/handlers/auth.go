@@ -10,7 +10,6 @@ import (
 
 	// "github.com/GehirnInc/crypt/sha512_crypt"
 
-	"github.com/spf13/viper"
 	crypt "github.com/tredoe/osutil/v2/userutil/crypt/sha512_crypt"
 	"golang.org/x/exp/slog"
 
@@ -104,7 +103,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sessionSecretString := fmt.Sprintf("%x", sessionSecret)
-	validUntil := time.Now().Add(time.Duration(viper.GetInt64("http.sessioninactivitytimeout")) * time.Second)
+	validUntil := time.Now().Add(time.Duration(h.config.GetInt64("http.sessioninactivitytimeout")) * time.Second)
 	slog.Info("Create new session for", slog.String("user", u.Username), slog.String("validUntil", validUntil.String()))
 	session := database.BrowserSession{
 		SessionSecret: sessionSecretString,
@@ -125,7 +124,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// set cookie and create response
-	SetSessionCookie(w, sessionSecretString)
+	SetSessionCookie(w, sessionSecretString, validUntil)
 	WriteSuccessResponse("login successful", nil, w)
 }
 
@@ -149,7 +148,7 @@ func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// update valid until of browser session
-	session.ValidUntil = time.Now().Add(time.Duration(viper.GetInt64("http.sessioninactivitytimeout")) * time.Second)
+	session.ValidUntil = time.Now().Add(time.Duration(h.config.GetInt64("http.sessioninactivitytimeout")) * time.Second)
 	// TODO only update if creation time is not older than max session time
 
 	resp.LoggedIn = true
