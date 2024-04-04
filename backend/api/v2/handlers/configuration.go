@@ -100,6 +100,10 @@ type GetLogoPathResponse struct {
 	URI string `json:"uri"`
 }
 
+type GetRecaptchaKeyResponse struct {
+	Key string `json:"key"`
+}
+
 func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 	if config.IsDBConfigured(h.config) {
 		slog.Warn("SetupDB called for already setup DB")
@@ -506,3 +510,15 @@ func (h *Handler) GetLogoPath(w http.ResponseWriter, r *http.Request) {
 }
 
 // TODO implement file removal
+
+func (h *Handler) GetRecaptchaKey(w http.ResponseWriter, r *http.Request) {
+	conf, err := h.GetDB().GetPropertyValue("recaptcha.publickey")
+	if err != nil {
+		slog.Warn("Cannot get recaptcha public key", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot get recaptcha key from server.", w)
+		return
+	}
+	resp := &GetRecaptchaKeyResponse{}
+	resp.Key = conf.Value
+	WriteSuccessResponse("recaptcha key", resp, w)
+}

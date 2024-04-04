@@ -6,7 +6,7 @@ export default class Configuration {
    */
   static getRecaptchaKey() {
     console.log("configuration/getRecaptchaKey called");
-    return Request.getRequest('/api/v1/configuration.php?action=get_recaptcha_key');
+    return Request.getRequest('/api/v2/configuration/recaptcha-key');
   }
 
   /**
