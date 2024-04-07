@@ -1,19 +1,28 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"server/database"
 	"strconv"
 	"time"
 
 	"github.com/shopspring/decimal"
-	"github.com/spf13/viper"
 	"golang.org/x/exp/slog"
 )
+
+var recaptchaSiteVerifyUrl = "https://www.google.com/recaptcha/api/siteverify"
+
+type RecaptchaResponse struct {
+	Success    bool     `json:"success"`
+	Hostname   string   `json:"hostname"`
+	ErrorCodes []string `json:"error-codes"`
+}
 
 type SignUpRequest struct {
 	Username       string `json:"username" validate:"required,excludesall=!<>{}[]()^"`
@@ -27,7 +36,7 @@ type SignUpRequest struct {
 	Email          string `json:"email" validate:"required,email"`
 	License        bool   `json:"license" validate:"boolean"`
 	AcceptGTC      bool   `json:"ownRisk" validate:"required,boolean"`
-	RecaptchaToken string `json:"recaptcha_token" validate:"omitempty,alphanum"`
+	RecaptchaToken string `json:"recaptcha_token" validate:"omitempty"`
 }
 
 type SignUpResponse struct {
@@ -241,14 +250,46 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO recaptcha validation
-	if viper.GetString("recaptcha.privatekey") != "" {
-		// TODO verify recaptcha
-		panic("not implemented recaptcha validation")
+	// Get recaptcha keys (resp, entire configuration).
+	properties, err := h.GetDB().GetAllPropertyValues()
+	if err != nil {
+		slog.Warn("Cannot get configuration from database:", slog.String("error", err.Error()))
+		WriteFailureResponse("Recaptcha check failed, with unknown config state.", w)
+		return
+	}
+	pMap := database.GetPropertyValuesMapFromConfiguration(properties)
+	v, exists := pMap["recaptcha.privatekey"]
+	if exists && v.Value != "" {
+		data := url.Values{
+			"secret":   {v.Value},
+			"response": {req.RecaptchaToken},
+		}
+		resp, err := http.PostForm(recaptchaSiteVerifyUrl, data)
+		if err != nil {
+			slog.Warn("Cannot verify recaptcha token:", slog.String("error", err.Error()))
+			WriteFailureResponse("Recaptcha check failed, cannot verify token.", w)
+			return
+		}
+
+		response := RecaptchaResponse{}
+		decoder := json.NewDecoder(resp.Body)
+		err = decoder.Decode(&response)
+		if err != nil {
+			slog.Warn("Cannot verify recaptcha token:", slog.String("error", err.Error()))
+			WriteFailureResponse("Recaptcha check failed, cannot parse recaptcha verification response.", w)
+			return
+		}
+
+		if !response.Success {
+			slog.Warn("Invalid recaptcha token:", slog.String("error", err.Error()))
+			WriteFailureResponse("Recaptcha check failed, provided recaptcha token is invalid.", w)
+			return
+		}
 	}
 
 	// Check if user already exists to not overwrite it
 	if _, err = h.GetDB().GetUserByName(req.Username); err == nil {
+
 		slog.Warn("Signup an already existing user", slog.String("user", req.Username))
 		WriteFailureResponse("user already exists", w)
 		return

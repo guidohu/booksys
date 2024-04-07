@@ -20,6 +20,9 @@ if (process.env.NODE_ENV === "production") {
 
 // Setup App
 const app = createApp(App);
+app.config.devtools = (process.env.NODE_ENV === "development");
+app.config.devtools = true;
+app.config.performance = true;
 app.use(router);
 app.use(store);
 app.mount("#app");

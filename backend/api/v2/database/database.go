@@ -28,6 +28,7 @@ type Database interface {
 	BoatMaintenanceTable
 	BrowserSessionTable
 	ConfigurationTable
+	ConfigurationVersionTable
 	ExpenditureTable
 	ExpenditureTypeTable
 	HeatTable
@@ -90,6 +91,10 @@ type ConfigurationTable interface {
 	UpdateOrInsertPropertyValues(conf []Configuration) error
 	GetTimezoneLocation() (*time.Location, error)
 	GetMyNautiqueConfiguration() (MyNautiqueConfiguration, error)
+}
+
+type ConfigurationVersionTable interface {
+	GetConfigurationVersion() (ConfigurationVersion, error)
 }
 
 type ExpenditureTable interface {
@@ -234,10 +239,10 @@ func (d *DBMysql) Connect() error {
 
 	switch {
 	case !dbIsSetup:
-		slog.Info("New database setup detected.")
+		slog.Info("DB Setup check: New database setup detected.")
 		err = d.Initialize()
 	case dbIsSetup:
-		slog.Info("Existing database setup detected.")
+		slog.Info("DB Setup check: Existing database setup detected.")
 		err = d.Migrate()
 	}
 	if err != nil {

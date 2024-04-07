@@ -25,12 +25,21 @@ const SessionContextKey HandlerContext = 1
 
 type Handler struct {
 	db               atomic.Pointer[database.Database]
+	config           *viper.Viper
+	emailClient      atomic.Pointer[email.Client]
 	myNautiqueClient atomic.Pointer[mynautique.Client]
 }
 
-func NewHandler(db database.Database) *Handler {
-	h := &Handler{}
-	h.db.Store(&db)
+type HandlerParams struct {
+	Database      database.Database
+	Configuration *viper.Viper
+}
+
+func NewHandler(params HandlerParams) *Handler {
+	h := &Handler{
+		config: params.Configuration,
+	}
+	h.db.Store(&params.Database)
 	return h
 }
 
