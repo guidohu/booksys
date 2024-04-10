@@ -62,6 +62,10 @@ type RemoveSessionUserRequest struct {
 	UserID    uint `json:"user_id" validate:"required,numeric"`
 }
 
+type RemoveSessionMyUserRequest struct {
+	SessionID uint `json:"session_id" validate:"required,numeric"`
+}
+
 type GetSessionMetadataResponse struct {
 	SunriseTime int64 `json:"sunrise"`
 	SunsetTime  int64 `json:"sunset"`
@@ -378,6 +382,8 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// TODO check that there are no heats yet for this user.
+
 	// remove entry
 	err = h.GetDB().DeleteSessionToUserEntry(req.UserID, req.SessionID)
 	if err != nil {
@@ -385,6 +391,55 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request) 
 		WriteFailureResponse("Cannot remove user from session.", w)
 		return
 	}
+	WriteSuccessResponse("user removed", nil, w)
+}
+
+func (h *Handler) RemoveMyUserFromSession(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	req := &RemoveSessionMyUserRequest{}
+	err := ReadBodyAndValidate(r, req)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse("Invalid request.", w)
+		return
+	}
+
+	// Get users for this session
+	users, err := h.GetDB().GetUsersForSession(req.SessionID)
+	if err != nil {
+		slog.Warn("Cannot get users for session", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot get users for the provided session.", w)
+		return
+	}
+
+	// A user is not allowed to remove itself from a session in case
+	// there are already heats.
+	heats, err := h.GetDB().GetUserHeatsBySession(req.SessionID, session.UserID, 0)
+	if err != nil {
+		slog.Warn("Cannot get heats for session and user", slog.Uint64("session", uint64(req.SessionID)), slog.Uint64("user", uint64(session.UserID)), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot get users for the provided session.", w)
+		return
+	}
+	for _, heat := range heats {
+		if heat.UserID == session.UserID {
+			slog.Warn("Cannot delete user for session, user has heats assigned ", slog.Uint64("user", uint64(session.UserID)), slog.Uint64("session", uint64(req.SessionID)))
+			WriteFailureResponse("Error, cannot remove user from session.", w)
+			return
+		}
+	}
+
+	// Check that there are users for this session.
+	for _, u := range users {
+		if u.UserID == session.UserID {
+			err = h.GetDB().DeleteSessionToUserEntry(u.UserID, req.SessionID)
+			if err != nil {
+				slog.Warn("Cannot delete user for session", slog.String("error", err.Error()))
+				WriteFailureResponse("Error, cannot remove user from session.", w)
+				return
+			}
+		}
+	}
+
 	WriteSuccessResponse("user removed", nil, w)
 }
 

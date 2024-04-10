@@ -1,28 +1,20 @@
 package handlers
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
 	"math/rand"
 	"net/http"
-	"net/url"
 	"server/database"
+	"server/notifications/email"
+	"server/recaptcha"
 	"strconv"
 	"time"
 
 	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
 )
-
-var recaptchaSiteVerifyUrl = "https://www.google.com/recaptcha/api/siteverify"
-
-type RecaptchaResponse struct {
-	Success    bool     `json:"success"`
-	Hostname   string   `json:"hostname"`
-	ErrorCodes []string `json:"error-codes"`
-}
 
 type SignUpRequest struct {
 	Username       string `json:"username" validate:"required,excludesall=!<>{}[]()^"`
@@ -241,6 +233,28 @@ var DeleteUserValidationErrors = map[string]string{
 	"UserID": "The user ID is invalid.",
 }
 
+type GetPasswordResetTokenRequest struct {
+	UserEmail      string `json:"email" validate:"email,required"`
+	RecaptchaToken string `json:"recaptcha_token"`
+}
+
+var GetPasswordResetTokenValidationErrors = map[string]string{
+	"UserEmail":      "Please provide a valid email address.",
+	"RecaptchaToken": "Please provide a recaptcha token to prove you are not a silly robot.",
+}
+
+type SetPasswordWithTokenRequest struct {
+	UserEmail string `json:"email" validate:"email,required"`
+	Password  string `json:"password" validate:"required,strongpassword"`
+	Token     string `json:"token" validate:"required"`
+}
+
+var SetPasswordWithTokenValidationErrors = map[string]string{
+	"UserEmail": "Please provide a valid email address.",
+	"Password":  "A new password has to be provided. It needs to be at least 12 characters and contain a capital letter, a lower case letter and a digit or special character.",
+	"Token":     "Please provide the token that was sent to you.",
+}
+
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	req := &SignUpRequest{}
 	err := ReadBodyAndValidate(r, req, SignUpRequestValidationErrors)
@@ -260,28 +274,12 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	pMap := database.GetPropertyValuesMapFromConfiguration(properties)
 	v, exists := pMap["recaptcha.privatekey"]
 	if exists && v.Value != "" {
-		data := url.Values{
-			"secret":   {v.Value},
-			"response": {req.RecaptchaToken},
-		}
-		resp, err := http.PostForm(recaptchaSiteVerifyUrl, data)
+		valid, err := recaptcha.Valid(req.RecaptchaToken, v.Value)
 		if err != nil {
-			slog.Warn("Cannot verify recaptcha token:", slog.String("error", err.Error()))
 			WriteFailureResponse("Recaptcha check failed, cannot verify token.", w)
 			return
 		}
-
-		response := RecaptchaResponse{}
-		decoder := json.NewDecoder(resp.Body)
-		err = decoder.Decode(&response)
-		if err != nil {
-			slog.Warn("Cannot verify recaptcha token:", slog.String("error", err.Error()))
-			WriteFailureResponse("Recaptcha check failed, cannot parse recaptcha verification response.", w)
-			return
-		}
-
-		if !response.Success {
-			slog.Warn("Invalid recaptcha token:", slog.String("error", err.Error()))
+		if !valid {
 			WriteFailureResponse("Recaptcha check failed, provided recaptcha token is invalid.", w)
 			return
 		}
@@ -289,7 +287,6 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	// Check if user already exists to not overwrite it
 	if _, err = h.GetDB().GetUserByName(req.Username); err == nil {
-
 		slog.Warn("Signup an already existing user", slog.String("user", req.Username))
 		WriteFailureResponse("user already exists", w)
 		return
@@ -1026,4 +1023,169 @@ func (h *Handler) getUserBalance(userID uint) (*GetMyBalanceResponse, error) {
 		Balance:      payment.Sub(payback).Sub(cost),
 	}
 	return resp, nil
+}
+
+func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request) {
+	req := &GetPasswordResetTokenRequest{}
+	err := ReadBodyAndValidate(r, req, GetPasswordResetTokenValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	// Check whether recaptcha is enabled.
+	config, err := h.GetDB().GetAllPropertyValuesMap()
+	if err != nil {
+		slog.Warn("Cannot load internal configuration properties", slog.String("error", err.Error()))
+		WriteFailureResponse("Internal error, cannot send reset token.", w)
+		return
+	}
+	prop, exists := config["recaptcha.privatekey"]
+	if !exists || prop.Value == "" {
+		slog.Warn("Password reset token requests should be protected by recaptcha. Please setup recaptcha in the settings.")
+	} else {
+		valid, err := recaptcha.Valid(req.RecaptchaToken, prop.Value)
+		if err != nil {
+			WriteFailureResponse("Recaptcha check failed, cannot verify token.", w)
+			return
+		}
+		if !valid {
+			WriteFailureResponse("Recaptcha check failed, provided recaptcha token is invalid.", w)
+			return
+		}
+	}
+
+	// Check whether user exists.
+	user, err := h.GetDB().GetUserByName(req.UserEmail)
+	if err != nil {
+		slog.Warn("Cannot find user for password token request", slog.String("error", err.Error()))
+		WriteSuccessResponse("Token requested, please check your email inbox.", nil, w)
+		return
+	}
+	fmt.Printf("DEBUG: user %v\n", user)
+
+	// Generate token.
+	tokenEntry := database.PasswordReset{
+		UserID:    user.ID,
+		Token:     strconv.Itoa(rand.Intn(999999)),
+		Timestamp: time.Now().Add(1 * time.Hour),
+		Valid:     true,
+	}
+
+	// Store token in database.
+	fmt.Printf("DEBUG: %+v\n", tokenEntry)
+	err = h.GetDB().AddPasswordResetToken(tokenEntry)
+	if err != nil {
+		slog.Error("Cannot store password reset token", slog.String("error", err.Error()))
+		WriteFailureResponse("Internal error, cannot send reset token.", w)
+		return
+	}
+
+	// Send email with token to user.
+	emailConfig, err := h.GetDB().GetEmailConfiguration()
+	if err != nil {
+		slog.Error("Cannot get email configuration to reset token", slog.String("error", err.Error()))
+		WriteFailureResponse("Internal error, cannot send reset token.", w)
+		return
+	}
+	client := email.Client{
+		Host:     emailConfig.Server,
+		Port:     emailConfig.Port,
+		Username: emailConfig.Username,
+		Password: emailConfig.Password,
+	}
+	body, err := client.TokenResetMessage(
+		user,
+		tokenEntry.Token,
+		emailConfig.Sender,
+		"Password Reset Token")
+	if err != nil {
+		slog.Error("Cannot create email body", slog.String("error", err.Error()))
+		WriteFailureResponse("Internal error, cannot send reset token.", w)
+		return
+	}
+	email := email.Email{
+		Recipient: user.Email,
+		Sender:    emailConfig.Sender,
+		Message:   body,
+	}
+	err = client.Send(&email)
+	if err != nil {
+		slog.Error("Cannot send email", slog.String("error", err.Error()))
+		WriteFailureResponse("Internal error, cannot send reset token.", w)
+		return
+	}
+	WriteSuccessResponse("Token requested, please check your email inbox.", nil, w)
+}
+
+func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request) {
+	req := &SetPasswordWithTokenRequest{}
+	err := ReadBodyAndValidate(r, req, SetPasswordWithTokenValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	// Get user by email
+	user, err := h.GetDB().GetUserByName(req.UserEmail)
+	if err != nil {
+		slog.Warn("User cannot be found", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot reset password username or token are not valid.", w)
+		return
+	}
+
+	// Check that we have a password reset token for this email.
+	// That did not expire and is valid.
+	dbToken, err := h.GetDB().GetPasswordResetEntry(user.ID, req.Token)
+	if err != nil {
+		slog.Warn("Token cannot be found", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot reset password username or token are not valid.", w)
+		return
+	}
+
+	// Verify that token is valid (we did this in the SQL statement already, though
+	// better be sure)
+	if dbToken.Token != req.Token {
+		slog.Warn("Token do not match", slog.String("db", dbToken.Token), slog.String("request", req.Token))
+		WriteFailureResponse("Cannot reset password username or token are not valid.", w)
+		return
+	}
+	if !dbToken.Valid {
+		slog.Warn("Token is not valid.", slog.String("user", req.UserEmail), slog.String("token", dbToken.Token))
+		WriteFailureResponse("Cannot reset password username or token are not valid.", w)
+		return
+	}
+	if dbToken.Timestamp.Before(time.Now()) {
+		slog.Warn("Token is expired", slog.String("timestamp", dbToken.Timestamp.String()), slog.String("now", time.Now().String()))
+		WriteFailureResponse("Cannot reset password username or token are not valid.", w)
+		return
+	}
+
+	// Create new password hash and
+	// update new password.
+	// Note: We hash the passworrd, this was previously done in the UI.
+	salt := rand.Intn(math.MaxUint16)
+	newPasswordHash, err := cryptSha512(hashSha256(req.Password), strconv.Itoa(salt))
+	if err != nil {
+		slog.Warn("Password hash could no be generated", slog.String("error", err.Error()))
+		WriteFailureResponse("Internal error. Password cannot be changed.", w)
+		return
+	}
+	userPassword := database.User{
+		PasswordSalt: salt,
+		PasswordHash: newPasswordHash,
+	}
+	err = h.GetDB().UpdatePassword(user.ID, userPassword)
+	if err != nil {
+		slog.Warn("Password could no be stored in user table", slog.String("error", err.Error()))
+		WriteFailureResponse("Internal error. Password could not be changed.", w)
+		return
+	}
+
+	// Invalidate password reset tokens for this user.
+	h.GetDB().InvalidatePasswordResetEntries(user.ID)
+
+	WriteSuccessResponse("password reset", nil, w)
 }

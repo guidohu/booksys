@@ -212,7 +212,7 @@ func (d *DBMysql) initializeContent() error {
 		{DefaultPricing},
 		{DefaultInvitationStatus},
 		{DefaultExpenseTypes},
-		{DefaultConfiguration},
+		{DefaultConfiguration}, // TODO, do only update in case a value really changes
 		{DefaultConfigurationVersion},
 	}
 

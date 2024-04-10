@@ -11,6 +11,7 @@ import (
 	"server/database"
 	"server/handlers"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -107,7 +108,6 @@ func readConfigFile(v *viper.Viper) {
 	v.SetConfigFile(v.GetString("config"))
 	err = v.ReadInConfig()
 	if err != nil {
-		fmt.Println(err.Error())
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			slog.Error("No config file found", slog.String("config", v.GetString("config")))
 			os.Exit(1)
@@ -156,15 +156,15 @@ func main() {
 		readConfigFile(v)
 	}
 
-	// Print the config file.
+	// Print the config file and exit.
 	if *printConfig {
 		printConfigString(v)
-		// slog.Error("Please provide a --config <path_to_config_file> flag.")
 		os.Exit(0)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	var wg sync.WaitGroup
 
 	// Connect to the database if configured. If the database
 	// is not configured or up yet, we simply retry until
@@ -181,6 +181,8 @@ func main() {
 	}
 	h := handlers.NewHandler(hp)
 	chReconnectDatabase := make(chan struct{})
+	chDBConfigChange := make(chan struct{})
+	wg.Add(1)
 	go func() {
 		// re-establish connection every 10 second if there
 		// is no database connection
@@ -189,6 +191,7 @@ func main() {
 			select {
 			case <-ctx.Done():
 				ticker.Stop()
+				wg.Done()
 				return
 			case <-ticker.C:
 				if db == nil || db.Ping() != nil {
@@ -204,14 +207,44 @@ func main() {
 		}
 	}()
 
-	// Watch config changes and create a new DB connection
+	// Watch config file changes and create a new DB connection.
 	v.OnConfigChange(func(e fsnotify.Event) {
 		slog.Info("Configuration file changed", slog.String("file", e.Name))
 		readConfigFile(v)
-		// notify all config reloads
+		// Notify dependents about config change.
 		chReconnectDatabase <- struct{}{}
 	})
 	v.WatchConfig()
+
+	// Watch configuration in database.
+	wg.Add(1)
+	go func() {
+		slog.Info("Start watching DB config.")
+		config.WatchDBConfig(ctx, db, chDBConfigChange)
+		slog.Info("Done watching DB config.")
+		wg.Done()
+	}()
+
+	wg.Add(1)
+	go func() {
+		slog.Info("Start waiting for DB config change.")
+		for {
+			select {
+			case <-ctx.Done():
+				slog.Info("Done waiting for DB config change (ctx done).")
+				wg.Done()
+				return
+			case change, open := <-chDBConfigChange:
+				if !open {
+					slog.Info("Done waiting for DB config change (channel closed).")
+					wg.Done()
+					return
+				}
+				config.LoadDBConfig(v, db)
+				slog.Info("Got new config change reported.", change)
+			}
+		}
+	}()
 
 	mux := http.NewServeMux()
 	server := &http.Server{
@@ -245,6 +278,7 @@ func main() {
 
 	mux.Handle("/api/v2/configuration/list", http.HandlerFunc(h.WithAuthentication(h.GetConfiguration)))
 	mux.Handle("/api/v2/configuration/logo", http.HandlerFunc(h.GetLogoPath))
+	mux.Handle("/api/v2/configuration/recaptcha-key", http.HandlerFunc(h.GetRecaptchaKey))
 
 	mux.Handle("/api/v2/database/config", http.HandlerFunc(h.WithAuthentication(h.GetDBConfig)))
 	mux.Handle("/api/v2/database/setup", http.HandlerFunc(h.SetupDBConfig))
@@ -277,6 +311,7 @@ func main() {
 	mux.Handle("/api/v2/mynautique/credentials/setup", http.HandlerFunc(h.SetupMyNautiqueCredentials))
 	mux.Handle("/api/v2/user/signup", http.HandlerFunc(h.SignUp))
 	mux.Handle("/api/v2/user/create-admin", http.HandlerFunc(h.MakeAdmin))
+	mux.Handle("/api/v2/user/delete", http.HandlerFunc(h.WithAuthentication(h.DeleteUser)))
 	mux.Handle("/api/v2/user/list-detailed", http.HandlerFunc(h.WithAuthentication(h.GetAllUsersDetailed)))
 	mux.Handle("/api/v2/user/list-short", http.HandlerFunc(h.WithAuthentication(h.GetAllUsersShort)))
 	mux.Handle("/api/v2/user/lock/set", http.HandlerFunc(h.WithAuthentication(h.SetUserLock)))
@@ -289,9 +324,11 @@ func main() {
 	mux.Handle("/api/v2/user/my/heats", http.HandlerFunc(h.WithAuthentication(h.GetMyHeats)))
 	mux.Handle("/api/v2/user/my/heats/statistics", http.HandlerFunc(h.WithAuthentication(h.GetMyHeatStats)))
 	mux.Handle("/api/v2/user/my/password/update", http.HandlerFunc(h.WithAuthentication(h.UpdateMyPassword)))
+	mux.Handle("/api/v2/user/my/session/delete", http.HandlerFunc(h.WithAuthentication(h.RemoveMyUserFromSession)))
 	mux.Handle("/api/v2/user/my/sessions", http.HandlerFunc(h.WithAuthentication(h.GetMySessions)))
 	mux.Handle("/api/v2/user/my/update", http.HandlerFunc(h.WithAuthentication(h.UpdateMyUser)))
-	mux.Handle("/api/v2/user/delete", http.HandlerFunc(h.WithAuthentication(h.DeleteUser)))
+	mux.Handle("/api/v2/user/password/reset-by-token", http.HandlerFunc(h.SetPasswordWithToken))
+	mux.Handle("/api/v2/user/password/token-request", http.HandlerFunc(h.GetPasswordResetToken))
 	mux.Handle("/api/v2/user/roles/get", http.HandlerFunc(h.WithAuthentication(h.GetUserRoles)))
 
 	mux.Handle("/api/v2/admin/configuration/set", http.HandlerFunc(h.WithAuthentication(h.SetConfiguration)))
@@ -302,6 +339,7 @@ func main() {
 	jss := http.FileServer(http.Dir("../../../frontend/dist/"))
 	mux.Handle("/", jss)
 
+	wg.Add(1)
 	go func() {
 		slog.Info(fmt.Sprintf("Server listening on address %s\n", server.Addr))
 		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
@@ -309,6 +347,7 @@ func main() {
 			os.Exit(1)
 		}
 		slog.Info("Stopped serving new connections.")
+		wg.Done()
 	}()
 
 	sigChan := make(chan os.Signal, 1)
@@ -322,5 +361,9 @@ func main() {
 		slog.Error("HTTP shutdown failure", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
+
+	// Cancel context and wait for all routines to end.
+	cancel()
+	wg.Wait()
 	slog.Info("Shutdown complete.")
 }

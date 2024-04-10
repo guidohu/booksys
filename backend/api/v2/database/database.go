@@ -33,6 +33,7 @@ type Database interface {
 	ExpenditureTypeTable
 	HeatTable
 	SessionTable
+	PasswordResetTable
 	PaymentTable
 	PricingTable
 	UserGroupTable
@@ -88,8 +89,10 @@ type BrowserSessionTable interface {
 type ConfigurationTable interface {
 	GetPropertyValue(key string) (Configuration, error)
 	GetAllPropertyValues() ([]Configuration, error)
+	GetAllPropertyValuesMap() (map[string]Configuration, error)
 	UpdateOrInsertPropertyValues(conf []Configuration) error
 	GetTimezoneLocation() (*time.Location, error)
+	GetEmailConfiguration() (EmailConfiguration, error)
 	GetMyNautiqueConfiguration() (MyNautiqueConfiguration, error)
 }
 
@@ -107,6 +110,7 @@ type ExpenditureTypeTable interface {
 
 type HeatTable interface {
 	GetUserHeats(userID uint, size int) ([]Heat, error)
+	GetUserHeatsBySession(sessionID uint, userID uint, size int) ([]Heat, error)
 	GetUserHeatStats(userID uint, start time.Time, end time.Time) (int64, decimal.Decimal, error)
 	GetHeatInSessionCount(sessionID uint) (int, error)
 	GetHeatsInSession(sessionID uint) ([]Heat, error)
@@ -114,6 +118,12 @@ type HeatTable interface {
 	DeleteHeat(heatID uint) error
 	GetHeat(heatID uint) (Heat, error)
 	ChangeHeat(h *Heat) error
+}
+
+type PasswordResetTable interface {
+	AddPasswordResetToken(entry PasswordReset) error
+	GetPasswordResetEntry(userID uint, token string) (PasswordReset, error)
+	InvalidatePasswordResetEntries(userID uint) error
 }
 
 type PaymentTable interface {

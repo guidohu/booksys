@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"server/database"
 	"server/mynautique"
+	"server/notifications/email"
 	customvalidator "server/validator"
 	"sync/atomic"
 	"time"
@@ -49,6 +50,19 @@ func (h *Handler) SetDB(db database.Database) {
 
 func (h *Handler) GetDB() database.Database {
 	return *(h.db.Load())
+}
+
+func (h *Handler) SetEmailClient(e email.Client) {
+	h.emailClient.Store(&e)
+}
+
+func (h *Handler) GetEmailClient() email.Client {
+	// client := *(h.emailClient.Load())
+	// if client == nil {
+	// 	// Try to create a client
+	// 	h.GetDB().GetMyNautiqueConfiguration()
+	// }
+	return *(h.emailClient.Load())
 }
 
 func (h *Handler) SetMyNautiqueClient(m mynautique.Client) {

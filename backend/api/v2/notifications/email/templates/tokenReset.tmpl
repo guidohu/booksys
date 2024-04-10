@@ -1,0 +1,11 @@
+To: {{ .Recipient }}
+From: {{ .Sender }}
+Subject: {{ .Subject }}
+
+Dear {{ .FirstName }} {{ .LastName }}
+
+You've just requested a password reset. Please use this token when asked, to reset your password:
+
+Token: {{ .Token }}
+
+See you on the lake soon.

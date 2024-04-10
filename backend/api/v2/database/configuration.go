@@ -76,7 +76,15 @@ func (d *DBMysql) GetAllPropertyValues() ([]Configuration, error) {
 	return values, err
 }
 
-func getPropertyValuesMap(c []Configuration) map[string]Configuration {
+func (d *DBMysql) GetAllPropertyValuesMap() (map[string]Configuration, error) {
+	values, err := d.GetAllPropertyValues()
+	if err != nil {
+		return nil, err
+	}
+	return GetPropertyValuesMapFromConfiguration(values), nil
+}
+
+func GetPropertyValuesMapFromConfiguration(c []Configuration) map[string]Configuration {
 	configMap := map[string]Configuration{}
 	for _, p := range c {
 		configMap[p.Property] = p

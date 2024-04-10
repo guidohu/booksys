@@ -40,13 +40,13 @@ export default class User {
   }
 
   static changeUserPasswordByToken(tokenAndPassword) {
-    const password = Login.calcHash(tokenAndPassword.password);
+    console.debug("User/changeUserPasswordByToken called");
     const postData = {
       email: tokenAndPassword.email,
-      password: password,
+      password: tokenAndPassword.password,
       token: tokenAndPassword.token,
     };
-    return Request.postRequest('/api/v1/password.php?action=change_password_by_token', postData);
+    return Request.postRequest('/api/v2/user/password/reset-by-token', postData);
   }
 
   static getUserSchedule() {
@@ -58,7 +58,7 @@ export default class User {
     const queryData = {
       session_id: sessionId,
     };
-    return Request.postRequest('/api/v1/booking.php?action=delete_user', queryData);
+    return Request.postRequest('/api/v2/user/my/session/delete', queryData);
   }
 
   static getUserList() {
@@ -169,11 +169,11 @@ export default class User {
   }
 
   static requestPasswordResetToken(userData) {
-    console.log("User/requestToken: called with userData", userData);
+    console.log("/api/v2/user/password/token-request: called with userData", userData);
     const queryData = {
       email: userData.email,
       recaptcha_token: userData.recaptchaResponse,
     };
-    return Request.postRequest('/api/v1/password.php?action=token_request', queryData);
+    return Request.postRequest('/api/v2/user/password/token-request', queryData);
   }
 }

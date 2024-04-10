@@ -37,10 +37,6 @@ export default class Configuration {
     return Request.getRequest("/api/v2/configuration/list");
   }
 
-  static getAdminConfiguration() {
-    return Request.getRequest("/api/v1/configuration.php?action=get_configuration");
-  }
-
   static setConfiguration(params) {
     const request = {
       logo_file: params.logo_file,

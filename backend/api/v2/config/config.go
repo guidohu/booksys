@@ -12,8 +12,13 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"server/database"
+	"time"
+
+	"golang.org/x/exp/slog"
 
 	"github.com/spf13/viper"
 )
@@ -129,4 +134,45 @@ func IsDBConfigured(v *viper.Viper) bool {
 	}
 
 	return true
+}
+
+func LoadDBConfig(v *viper.Viper, db *database.DBMysql) error {
+	p, err := db.GetAllPropertyValues()
+	if err != nil {
+		slog.Error("Cannot retrieve configuration from database", slog.String("error", err.Error()))
+		return err
+	}
+	for _, property := range p {
+		v.Set(property.Property, property.Value)
+	}
+	return nil
+}
+
+func WatchDBConfig(ctx context.Context, db *database.DBMysql, notifyCh chan struct{}) {
+	ticker := time.NewTicker(10 * time.Second)
+	lastVersion := database.ConfigurationVersion{}
+	for {
+		select {
+		case <-ctx.Done():
+			ticker.Stop()
+
+			return
+		case <-ticker.C:
+			if db == nil {
+				slog.Warn("Watch DB Config: No database connection available.")
+				continue
+			}
+			version, err := db.GetConfigurationVersion()
+			if err != nil {
+				slog.Warn("Watch DB Config: Cannot retrieve configuration version from database", slog.String("error", err.Error()))
+			}
+			if lastVersion.Version != version.Version {
+				slog.Info("Watch DB Config: New config version detected", slog.Uint64("version", uint64(version.Version)), slog.String("date", version.Timestamp.String()))
+				lastVersion = version
+				notifyCh <- struct{}{}
+			} else {
+				slog.Info("Watch DB Config: No config change.")
+			}
+		}
+	}
 }

@@ -46,7 +46,7 @@ type ConfigurationMessage struct {
 	PaymentAccountOwner    string  `json:"payment_account_owner"`
 	RecaptchaPrivateKey    string  `json:"recaptcha_privatekey" validate:"omitempty,recaptchakey,required_with=RecaptchaPublicKey"`
 	RecaptchaPublicKey     string  `json:"recaptcha_publickey" validate:"omitempty,recaptchakey,required_with=RecaptchaPrivateKey"`
-	SMTPPassword           string  `json:"smtp_password" validate:"required_with=SMTPSender"`
+	SMTPPassword           string  `json:"smtp_password" validate:"omitempty"`
 	SMTPSender             string  `json:"smtp_sender" validate:"omitempty,required_with=SMTPSender,email"`
 	SMTPServer             string  `json:"smtp_server" validate:"required_with=SMTPSender"`
 	SMTPUsername           string  `json:"smtp_username" validate:"required_with=SMTPSender"`
@@ -273,6 +273,11 @@ func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse(err.Error(), w)
 		return
 	}
+
+	// TODO check smtp.password
+	// - needs to be set in case there is other smtp configuration
+	// - can be empty in case there is a password in the db already
+	// - empty will not change the password in the db
 
 	props := []database.Configuration{
 		{

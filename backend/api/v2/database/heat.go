@@ -18,6 +18,18 @@ func (d *DBMysql) GetUserHeats(userID uint, size int) ([]Heat, error) {
 	return h, err
 }
 
+func (d *DBMysql) GetUserHeatsBySession(sessionID uint, userID uint, size int) ([]Heat, error) {
+	var h []Heat
+	err := d.orm.Where("user_id = ?", userID).
+		Where("session_id = ?", sessionID).
+		Order("timestamp desc").
+		Limit(size).
+		Preload("User").
+		Preload("Session").
+		Find(&h).Error
+	return h, err
+}
+
 // GetUserHeatStats returns total duration seconds and total cost
 func (d *DBMysql) GetUserHeatStats(userID uint, start time.Time, end time.Time) (int64, decimal.Decimal, error) {
 	type Stats struct {
