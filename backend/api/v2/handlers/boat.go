@@ -140,7 +140,7 @@ func (h *Handler) GetEngineHourLatest(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("boat engine hour entry", resp, w)
 }
 
-func (h *Handler) GetEngineHours(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetEngineHoursList(w http.ResponseWriter, r *http.Request) {
 	session := GetSessionFromContext(r)
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return

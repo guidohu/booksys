@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
+	"golang.org/x/exp/slog"
 )
 
 var api_url = "https://mynautique.azurewebsites.net/api/v2"
@@ -118,49 +119,49 @@ type Telemetry struct {
 }
 
 type telemetryRaw struct {
-	DeviceSerial                  int64   `json:"deviceSerial"`
-	ServiceMessage                string  `json:"serviceMessage"`
-	ServiceDetailsMessage         string  `json:"serviceDetailsMessage"`
-	GPSLongitude                  float64 `json:"gps_long"`
-	GPSLatitude                   float64 `json:"gps_lat"`
-	IsWebSocketConnected          bool    `json:"isWebSocketConnected"`
-	AccelXYZMagnitude             string  `json:"Accel_XYZ_Magnitude"`
-	BallastBelly                  string  `json:"BALLAST_BELLY"`
-	BallastPortSupplementary      string  `json:"BALLAST_PORT_SUPP"`
-	BallastStarboardSupplementary string  `json:"BALLAST_STBD_SUPP"`
-	BallastPortRear               string  `json:"BALLAST_REAR_PORT"`
-	BallastStarboardRear          string  `json:"BALLAST_REAR_STBD"`
-	BoatStatus                    string  `json:"BOAT_STATUS"`
-	DigitalInput4                 string  `json:"Digital_Input_4"`
-	EngineHoursLinc               string  `json:"ENGINE_HOURS_LINC"`
-	FuelLevelLinc                 string  `json:"FUEL_LEVEL_LINC"`
-	GPSAltitude                   string  `json:"GPS_Altitude_m"`
-	GPSCourse                     string  `json:"GPS_Course"`
-	GSMSignalQualityBars          string  `json:"GSM_Signal_Quality_bars"`
-	TemperatureCelsius            string  `json:"Temp_C"`
-	GPSQuality                    string  `json:"gps_qual"`
-	GPSSpeed                      string  `json:"gps_speed"`
-	In1Ana                        string  `json:"in1_ana"`
-	In2Ana                        string  `json:"in2_ana"`
-	In3Ana                        string  `json:"in3_ana"`
-	IsSleeping                    bool    `json:"isSleeping"`
-	LastSensorUpdate              int64   `json:"lastSensorUpdate"`
-	EngineSpeed                   string  `json:"EngineSpeed"`
-	GPSSpeedKmh                   string  `json:"GPS_Speed_kmh"`
-	GPSSpeedMph                   string  `json:"GPS_Speed_mph"`
-	Timestamp                     int64   `json:"ts"`
-	GPSNumSatellites              string  `json:"GPS_Num_Satellites"`
-	AirTemperatureLinc            string  `json:"AIR_TEMP_LINC"`
-	EngineTotalHoursOfOperation   string  `json:"EngineTotalHoursOfOperation"`
-	LincDate                      string  `json:"LINC_DATE"`
-	WaterDepth                    string  `json:"WATER_DEPTH"`
-	WaterTemperature              string  `json:"WATER_TEMP"`
-	FuelLevel1                    string  `json:"FuelLevel1"`
-	GSMConnected                  string  `json:"GSM_Connected"`
-	GSMSignalQualityDBm           string  `json:"GSM_Signal_Quality_dBm"`
-	ServiceDateCapture            string  `json:"SERVICE_DATE_CAPTURE"`
-	ServiceHoursCapture           string  `json:"SERVICE_HOURS_CAPTURE"`
-	ServiceReminderEnabled        string  `json:"SERVICE_REMINDER_ENABLE"`
+	DeviceSerial                  int64  `json:"deviceSerial"`
+	ServiceMessage                string `json:"serviceMessage"`
+	ServiceDetailsMessage         string `json:"serviceDetailsMessage"`
+	GPSLongitude                  string `json:"gps_long"`
+	GPSLatitude                   string `json:"gps_lat"`
+	IsWebSocketConnected          bool   `json:"isWebSocketConnected"`
+	AccelXYZMagnitude             string `json:"Accel_XYZ_Magnitude"`
+	BallastBelly                  string `json:"BALLAST_BELLY"`
+	BallastPortSupplementary      string `json:"BALLAST_PORT_SUPP"`
+	BallastStarboardSupplementary string `json:"BALLAST_STBD_SUPP"`
+	BallastPortRear               string `json:"BALLAST_REAR_PORT"`
+	BallastStarboardRear          string `json:"BALLAST_REAR_STBD"`
+	BoatStatus                    string `json:"BOAT_STATUS"`
+	DigitalInput4                 string `json:"Digital_Input_4"`
+	EngineHoursLinc               string `json:"ENGINE_HOURS_LINC"`
+	FuelLevelLinc                 string `json:"FUEL_LEVEL_LINC"`
+	GPSAltitude                   string `json:"GPS_Altitude_m"`
+	GPSCourse                     string `json:"GPS_Course"`
+	GSMSignalQualityBars          string `json:"GSM_Signal_Quality_bars"`
+	TemperatureCelsius            string `json:"Temp_C"`
+	GPSQuality                    string `json:"gps_qual"`
+	GPSSpeed                      string `json:"gps_speed"`
+	In1Ana                        string `json:"in1_ana"`
+	In2Ana                        string `json:"in2_ana"`
+	In3Ana                        string `json:"in3_ana"`
+	IsSleeping                    bool   `json:"isSleeping"`
+	LastSensorUpdate              int64  `json:"lastSensorUpdate"`
+	EngineSpeed                   string `json:"EngineSpeed"`
+	GPSSpeedKmh                   string `json:"GPS_Speed_kmh"`
+	GPSSpeedMph                   string `json:"GPS_Speed_mph"`
+	Timestamp                     int64  `json:"ts"`
+	GPSNumSatellites              string `json:"GPS_Num_Satellites"`
+	AirTemperatureLinc            string `json:"AIR_TEMP_LINC"`
+	EngineTotalHoursOfOperation   string `json:"EngineTotalHoursOfOperation"`
+	LincDate                      string `json:"LINC_DATE"`
+	WaterDepth                    string `json:"WATER_DEPTH"`
+	WaterTemperature              string `json:"WATER_TEMP"`
+	FuelLevel1                    string `json:"FuelLevel1"`
+	GSMConnected                  string `json:"GSM_Connected"`
+	GSMSignalQualityDBm           string `json:"GSM_Signal_Quality_dBm"`
+	ServiceDateCapture            string `json:"SERVICE_DATE_CAPTURE"`
+	ServiceHoursCapture           string `json:"SERVICE_HOURS_CAPTURE"`
+	ServiceReminderEnabled        string `json:"SERVICE_REMINDER_ENABLE"`
 }
 
 type sDate struct {
@@ -174,7 +175,7 @@ func (t *Telemetry) UnmarshalJSON(data []byte) error {
 	}
 	var r telemetryRaw
 	if err := json.Unmarshal(data, &r); err != nil {
-		return err
+		return fmt.Errorf("cannot parse telemetryRaw: %q", err)
 	}
 
 	// parse all the strings into meaningful types
@@ -200,6 +201,10 @@ func (t *Telemetry) UnmarshalJSON(data []byte) error {
 	fuelLevelLinc, err := strconv.Atoi(r.FuelLevelLinc)
 	errs = append(errs, err)
 	GPSAltitude, err := strconv.Atoi(r.GPSAltitude)
+	errs = append(errs, err)
+	GPSLongitude, err := decimal.NewFromString(r.GPSLongitude)
+	errs = append(errs, err)
+	GPSLatitude, err := decimal.NewFromString(r.GPSLatitude)
 	errs = append(errs, err)
 	GPSCourse, err := decimal.NewFromString(r.GPSCourse)
 	errs = append(errs, err)
@@ -253,18 +258,23 @@ func (t *Telemetry) UnmarshalJSON(data []byte) error {
 	}
 
 	// check all the errors
+	var lastError error
 	for i, e := range errs {
 		if e != nil {
-			return fmt.Errorf("cannot parse raw telemetry (internal ref: %d): %s", i, e.Error())
+			lastError = fmt.Errorf("cannot parse raw telemetry (internal ref: %d): %s", i, e.Error())
+			slog.Error(fmt.Sprintf("cannot parse raw telemetry (internal ref: %d): %s", i, e.Error()))
 		}
+	}
+	if lastError != nil {
+		return lastError
 	}
 
 	*t = Telemetry{
 		DeviceSerial:                  r.DeviceSerial,
 		ServiceMessage:                r.ServiceMessage,
 		ServiceDetailsMessage:         r.ServiceDetailsMessage,
-		GPSLongitude:                  decimal.NewFromFloat(r.GPSLongitude),
-		GPSLatitude:                   decimal.NewFromFloat(r.GPSLatitude),
+		GPSLongitude:                  GPSLongitude,
+		GPSLatitude:                   GPSLatitude,
 		IsWebSocketConnected:          false,
 		AccelXYZMagnitude:             accelXYZ,
 		BallastBelly:                  int64(ballastBelly),
@@ -390,6 +400,9 @@ func (m *Client) Login() error {
 		return fmt.Errorf("cannot login: %s", err.Error())
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("cannot login, server returned %d - %s", resp.StatusCode, resp.Status)
+	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("cannot read login response: %s", err.Error())
@@ -411,7 +424,10 @@ func (m *Client) Login() error {
 
 func (m *Client) GetFleet() error {
 	if m.isAuthExpired() {
-		m.Login()
+		err := m.Login()
+		if err != nil {
+			return err
+		}
 	}
 
 	url := fmt.Sprintf("%s/fleet/get-fleet", api_url)
@@ -437,11 +453,13 @@ func (m *Client) GetFleet() error {
 }
 
 func (m *Client) GetBoatTelemetry(id int64) (Telemetry, error) {
-	if m.isAuthExpired() {
-		m.Login()
-	}
-
 	t := Telemetry{}
+	if m.isAuthExpired() {
+		err := m.Login()
+		if err != nil {
+			return t, err
+		}
+	}
 	url := fmt.Sprintf("%s/boat/get-boat-telemetry/%d", api_url, id)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	req.Header.Add("token", m.auth.IDToken)
@@ -463,5 +481,9 @@ func (m *Client) GetBoatTelemetry(id int64) (Telemetry, error) {
 }
 
 func (m *Client) isAuthExpired() bool {
-	return time.Now().After(m.AuthUntil)
+	if time.Now().After(m.AuthUntil) {
+		slog.Info("myNautique authentication expired.")
+		return true
+	}
+	return false
 }

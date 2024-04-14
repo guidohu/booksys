@@ -129,6 +129,8 @@ export default {
       this.showEntryHourModal = true;
     },
     rowClass: function (item) {
+      // Type: 1 default session
+      // Type: 2 course session
       if (item.type == 1) {
         return "clickable";
       } else {

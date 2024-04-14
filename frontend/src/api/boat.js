@@ -2,8 +2,7 @@ import Request from "@/api/common/request.js";
 
 export default class Boat {
   static getEngineHourLog() {
-    console.log("api/v2/getEngineHourLog called");
-    return Request.getRequest('/api/v2/boat/engine-hours/get');
+    return Request.getRequest('/api/v2/boat/engine-hours/list');
   }
 
   static getEngineHourLogLatest() {

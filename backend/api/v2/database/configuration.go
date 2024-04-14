@@ -28,6 +28,7 @@ var AllowedProperties = map[string]interface{}{
 	"mynautique.fuel.capacity": nil,
 	"mynautique.password":      nil,
 	"mynautique.user":          nil,
+	"mynautique.api.key":       nil,
 	"payment.account.bic":      nil,
 	"payment.account.comment":  nil,
 	"payment.account.iban":     nil,
@@ -46,6 +47,7 @@ type MyNautiqueConfiguration struct {
 	FuelCapacity decimal.Decimal
 	Password     string
 	User         string
+	APIKey       string
 }
 
 type EmailConfiguration struct {
@@ -106,6 +108,11 @@ func (d *DBMysql) UpdateOrInsertPropertyValues(conf []Configuration) error {
 					slog.Error("Property cannot be found", slog.String("property", c.Property), slog.String("value", c.Value))
 					continue
 				}
+			}
+
+			// Handle hidden values.
+			if c.Value == "hidden" {
+				continue
 			}
 
 			prop.Property = c.Property
@@ -198,6 +205,10 @@ func (d *DBMysql) GetMyNautiqueConfiguration() (MyNautiqueConfiguration, error) 
 	password, _ := d.GetPropertyValue("mynautique.password")
 	if password.Value != "" {
 		config.Password = password.Value
+	}
+	apiKey, _ := d.GetPropertyValue("mynautique.api.key")
+	if apiKey.Value != "" {
+		config.APIKey = apiKey.Value
 	}
 
 	if valid {

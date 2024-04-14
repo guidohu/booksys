@@ -250,6 +250,7 @@ export default {
 </script>
 
 <style>
+
 .table-size {
   overflow-y: scroll;
   width: 100%;
@@ -270,6 +271,11 @@ thead th {
 
 .table > :not(:first-child) {
   border-top: 1.5px solid currentColor;
+}
+
+.table>:not(caption)>*>* {
+  /* to remove any bootstrap background styling */
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .selected {

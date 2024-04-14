@@ -42,6 +42,8 @@ var databasePort *string = flag.String("database_port", "3306", "The port for th
 var databaseProtocol *string = flag.String("database_protocol", "tcp", "The protocol for the DB connection.")
 var databaseUser *string = flag.String("database_user", "", "The user for the DB connection.")
 
+var myNautiqueAPIKey *string = flag.String("mynautique_api_key", "", "The API key for the mynautique integration.")
+
 var printConfig *bool = flag.Bool("print_config", false, "Prints the config an exits.")
 
 func getFlags(v *viper.Viper) {
@@ -56,6 +58,7 @@ func getFlags(v *viper.Viper) {
 	v.BindPFlag("database.host", flag.Lookup("database_host"))
 	v.BindPFlag("database.port", flag.Lookup("database_port"))
 	v.BindPFlag("database.dbname", flag.Lookup("database_name"))
+	v.BindPFlag("mynautique.api.key", flag.Lookup("mynautique_api_key"))
 	flag.Parse()
 }
 
@@ -71,6 +74,7 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("database.host", "127.0.0.1")
 	v.SetDefault("database.port", "3306")
 	v.SetDefault("database.dbname", "")
+	v.SetDefault("mynautique.api.key", "")
 }
 
 func getEnvironment(v *viper.Viper) {
@@ -268,7 +272,7 @@ func main() {
 	mux.Handle("/api/v2/boat/engine-hour/entry/update", http.HandlerFunc(h.WithAuthentication(h.UpdateEngineHoursEntry)))
 	mux.Handle("/api/v2/boat/engine-hour/update", http.HandlerFunc(h.WithAuthentication(h.UpdateEngineHours)))
 	mux.Handle("/api/v2/boat/engine-hour/latest/get", http.HandlerFunc(h.WithAuthentication(h.GetEngineHourLatest)))
-	mux.Handle("/api/v2/boat/engine-hours/get", http.HandlerFunc(h.WithAuthentication(h.GetEngineHours)))
+	mux.Handle("/api/v2/boat/engine-hours/list", http.HandlerFunc(h.WithAuthentication(h.GetEngineHoursList)))
 	mux.Handle("/api/v2/boat/fuel-entries/get", http.HandlerFunc(h.WithAuthentication(h.GetFuelEntries)))
 	mux.Handle("/api/v2/boat/fuel-entry/add", http.HandlerFunc(h.WithAuthentication(h.AddFuelEntry)))
 	mux.Handle("/api/v2/boat/fuel-entry/edit", http.HandlerFunc(h.WithAuthentication(h.ChangeFuelEntry)))

@@ -1,5 +1,6 @@
 export default class Request {
   static getRequest(url) {
+    console.debug("GET", url)
     return new Promise((resolve, reject) => {
       fetch(url, {
         method: "GET",

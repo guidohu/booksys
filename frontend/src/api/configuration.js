@@ -65,6 +65,7 @@ export default class Configuration {
       request['mynautique_password'] = params.mynautique_password
       request['mynautique_boat_id'] = parseInt(params.mynautique_boat_id, 10)
       request['mynautique_fuel_capacity'] = parseInt(params.mynautique_fuel_capacity, 10)
+      request['mynautique_api_key'] = params.mynautique_api_key
     }
 
     // only set password in case it is really given

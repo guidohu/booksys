@@ -5,7 +5,6 @@ import (
 	"server/mynautique"
 
 	"github.com/shopspring/decimal"
-	"github.com/spf13/viper"
 	"golang.org/x/exp/slog"
 )
 
@@ -50,12 +49,18 @@ func (h *Handler) GetBoatTelemetry(w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := h.GetMyNautiqueClient()
+	// Prefer specific config over database config.
+	// Note: We intend to implement an abstraction for this.
+	apiKey := h.config.GetString("mynautique.api.key")
+	if apiKey == "" {
+		apiKey = config.APIKey
+	}
 	if client == nil {
 		slog.Info("Creating new myNautique Client")
 		client = mynautique.NewMyNautiqueClient(&mynautique.Options{
 			User:       config.User,
 			Password:   config.Password,
-			AuthAPIKey: viper.GetString("mynautique.apikey"),
+			AuthAPIKey: apiKey,
 		})
 		h.SetMyNautiqueClient(*client)
 	}

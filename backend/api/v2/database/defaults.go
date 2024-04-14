@@ -101,6 +101,13 @@ func (d *DBMysql) migrationPreflight() error {
 		}
 		slog.Info("migration preflight table `session_type` - move session id 1 to id 2 done")
 
+		_, err = t.Query("UPDATE boat_engine_hours SET type = 2 WHERE type = 1")
+		if err != nil {
+			slog.Error("migration preflight table `boat_engine_hours` - failed to move session id 1 to id 2")
+			return err
+		}
+		slog.Info("migration preflight table `boat_engine_hours` - move session id 1 to id 2 done")
+
 		_, err = t.Query("UPDATE session SET type = 1 WHERE type = 0")
 		if err != nil {
 			slog.Error("migration preflight table `session_type` - failed to move session id 0 to id 1")
@@ -108,9 +115,23 @@ func (d *DBMysql) migrationPreflight() error {
 		}
 		slog.Info("migration preflight table `session_type` - move session id 0 to id 1 done")
 
+		_, err = t.Query("UPDATE boat_engine_hours SET type = 1 WHERE type = 0")
+		if err != nil {
+			slog.Error("migration preflight table `boat_engine_hours` - failed to move session id 0 to id 1")
+			return err
+		}
+		slog.Info("migration preflight table `boat_engine_hours` - move session id 0 to id 1 done")
+
 		_, err = t.Query("DELETE FROM session_type WHERE id = 0")
 		if err != nil {
 			slog.Error("migration preflight table `session_type` - failed to remove id 0")
+			return err
+		}
+
+		slog.Info("migration preflight table `session_type` - rename original session_type 1")
+		_, err = t.Query("UPDATE session_type SET name = ?, comment = ? WHERE id = ?", DefaultSessionTypes[0].Name, DefaultSessionTypes[0].Comment, DefaultSessionTypes[0].ID)
+		if err != nil {
+			slog.Error("migration preflight table `session_type` - failed to rename original session_type 1")
 			return err
 		}
 		slog.Info("migration preflight table `session_type` - remove id 0 done")
@@ -120,7 +141,6 @@ func (d *DBMysql) migrationPreflight() error {
 			slog.Error("migration preflight table `session_type` - failed to commit transaction")
 			return err
 		}
-
 		slog.Info("migration preflight table `session_type` - done")
 	}
 

@@ -167,6 +167,9 @@ func WatchDBConfig(ctx context.Context, db *database.DBMysql, notifyCh chan stru
 				slog.Warn("Watch DB Config: Cannot retrieve configuration version from database", slog.String("error", err.Error()))
 			}
 			if lastVersion.Version != version.Version {
+				if version.Timestamp == nil {
+					version.Timestamp = &time.Time{}
+				}
 				slog.Info("Watch DB Config: New config version detected", slog.Uint64("version", uint64(version.Version)), slog.String("date", version.Timestamp.String()))
 				lastVersion = version
 				notifyCh <- struct{}{}

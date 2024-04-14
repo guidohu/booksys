@@ -166,6 +166,13 @@
           size="small"
           v-model="form.myNautiqueFuelCapacity"
         />
+        <input-text
+          v-if="form.myNautiqueEnabled"
+          id="my-nautique-api-key"
+          label="API Key"
+          size="small"
+          v-model="form.myNautiqueAPIKey"
+        />
         <div class="alert alert-info">
           ReCAPTCHA protects the application and its users from SPAMers. Thus it
           is recommended to use ReCAPTCHA.
@@ -299,6 +306,7 @@ export default {
         mynautique_password: v.myNautiquePassword,
         mynautique_boat_id: v.myNautiqueBoatId,
         mynautique_fuel_capacity: v.myNautiqueFuelCapacity,
+        mynautique_api_key: v.myNautiqueAPIKey,
       };
 
       return newConfiguration;
@@ -353,6 +361,7 @@ export default {
         smtpPassword: defaultValues.smtp_password,
         recaptchaPrivateKey: defaultValues.recaptcha_privatekey,
         recaptchaPublicKey: defaultValues.recaptcha_publickey,
+        myNautiqueAPIKey: defaultValues.mynautique_api_key,
         myNautiqueEnabled: defaultValues.mynautique_enabled,
         myNautiqueUser: defaultValues.mynautique_user,
         myNautiquePassword: defaultValues.mynautique_password,

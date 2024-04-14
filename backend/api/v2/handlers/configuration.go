@@ -40,6 +40,7 @@ type ConfigurationMessage struct {
 	MyNautiqueFuelCapacity int     `json:"mynautique_fuel_capacity" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=10"`
 	MyNautiquePassword     string  `json:"mynautique_password" validate:"required_if=MyNautiqueEnabled true,omitempty,gt=1"`
 	MyNautiqueUser         string  `json:"mynautique_user" validate:"required_if=MyNautiqueEnabled true,omitempty,email"`
+	MyNautiqueAPIKey       string  `json:"mynautique_api_key" validate:"required_if=MyNautiqueEnabled true,omitempty"`
 	PaymentAccountBIC      string  `json:"payment_account_bic" validate:"omitempty,printascii"`
 	PaymentAccountComment  string  `json:"payment_account_comment"`
 	PaymentAccountIBAN     string  `json:"payment_account_iban" validate:"omitempty,printascii"`
@@ -62,6 +63,7 @@ var ConfigurationMessageValidationErrors = map[string]string{
 	"LocationMap":            "Map URL needs to be a google embeded maps URL of the form https://www.google.com/maps/embeded?pb=...",
 	"LocationTimeZone":       "The timezone needs to be a valid representation such as Europe/Zurich.",
 	"LogoFilePath":           "Needs to be the path to the logo file on the server.",
+	"MyNautiqueAPIKey":       "The API key for the my Nautique App needs to be provided.",
 	"MyNautiqueBoatID":       "The boat ID from the my Nautique App should be a number.",
 	"MyNautiqueEnabled":      "MyNautique enabled needs to be true or false",
 	"MyNautiqueFuelCapacity": "The MyNautique fuel capacity needs to be a number.",
@@ -246,6 +248,7 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 		MyNautiqueFuelCapacity: mynautiqueFuelCapacity,
 		MyNautiquePassword:     "hidden",
 		MyNautiqueUser:         pMap["mynautique.user"],
+		MyNautiqueAPIKey:       pMap["mynautique.api.key"],
 		PaymentAccountBIC:      pMap["payment.account.bic"],
 		PaymentAccountComment:  pMap["payment.account.comment"],
 		PaymentAccountIBAN:     pMap["payment.account.iban"],
@@ -335,6 +338,10 @@ func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request) {
 		{
 			Property: "mynautique.user",
 			Value:    req.MyNautiqueUser,
+		},
+		{
+			Property: "mynautique.api.key",
+			Value:    req.MyNautiqueAPIKey,
 		},
 		{
 			Property: "payment.account.bic",
