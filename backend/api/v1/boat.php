@@ -26,9 +26,6 @@
     $response = null;
 
     switch($_GET['action']){
-        case 'get_engine_hours_log':
-            $response = get_engine_hours_log($configuration);
-            break;
         case 'get_engine_hours_latest':
             $response = get_engine_hours_latest($configuration);
             break;
@@ -60,36 +57,6 @@
 
     echo json_encode($response);
     return;
-
-    /* Returns the log_book data */
-    function get_engine_hours_log($configuration){
-        $db = new DBAccess($configuration);
-        if(!$db->connect()){
-            error_log('api/boat: Cannot connect to the database');
-            return Status::errorStatus("Cannot connect to the database");
-        }
-
-        $query = 'SELECT blb.id as id, UNIX_TIMESTAMP(DATE_FORMAT(blb.timestamp, "%Y-%m-%dT%T+02:00")) as time, blb.before_hours as before_hours,
-                        blb.after_hours as after_hours, blb.delta_hours as delta_hours,
-                        blb.type as type, st.name as type_name, u.id as user_id,
-                        u.first_name as user_first_name, u.last_name as user_last_name
-                    FROM boat_engine_hours blb, user u, session_type st
-                    WHERE blb.user_id = u.id
-                    AND blb.type    = st.id
-                    ORDER BY blb.timestamp DESC';
-
-        // Limit the number of returned lines for mobile browsers
-        if(MobileDevice::isMobileBrowser() or isset($_GET['mobile'])){
-            $query .= "  LIMIT 0, 100";
-        }
-
-        $res = $db->fetch_data_hash($query);
-        $db->disconnect();
-        if(!isset($res)){
-            return Status::errorStatus("Cannot retrieve engine hour logs from database.");
-        }
-        return Status::successDataResponse("Engine hour log retrieved.", $res);
-    }
 
     /* Returns the fuel log data */
     function get_fuel_log($configuration){

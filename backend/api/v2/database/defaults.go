@@ -371,7 +371,6 @@ const (
 	CourseSessionType
 )
 
-// TODO change all session type occurrences from 0 to 1 and from 1 to two in the code and in the database
 var DefaultSessionTypes = []SessionType{
 	{
 		ID:      DefaultSessionType,
@@ -675,6 +674,11 @@ var DefaultConfiguration = []Configuration{
 		ID:       28,
 		Property: "fuel.payment.type",
 		Value:    "instant",
+	},
+	{
+		ID:       29,
+		Property: "mynautique.api.key",
+		Value:    "",
 	},
 }
 

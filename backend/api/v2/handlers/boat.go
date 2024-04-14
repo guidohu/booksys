@@ -131,8 +131,8 @@ func (h *Handler) GetEngineHourLatest(w http.ResponseWriter, r *http.Request) {
 		BeforeHours:   b.BeforeHours,
 		AfterHours:    b.AfterHours,
 		DeltaHours:    b.DeltaHours,
-		UsageType:     uint(b.Type),
-		UsageTypeName: database.DefaultSessionTypesMap[int(b.Type)].Name,
+		UsageType:     uint(b.TypeID),
+		UsageTypeName: database.DefaultSessionTypesMap[int(b.TypeID)].Name,
 		UserFirstName: b.User.FirstName,
 		UserLastName:  b.User.LastName,
 		UserID:        b.UserID,
@@ -159,8 +159,8 @@ func (h *Handler) GetEngineHoursList(w http.ResponseWriter, r *http.Request) {
 			BeforeHours:   b.BeforeHours,
 			AfterHours:    b.AfterHours,
 			DeltaHours:    b.DeltaHours,
-			UsageType:     uint(b.Type),
-			UsageTypeName: database.DefaultSessionTypesMap[int(b.Type)].Name,
+			UsageType:     b.Type.ID,
+			UsageTypeName: database.DefaultSessionTypesMap[int(b.TypeID)].Name,
 			UserFirstName: b.User.FirstName,
 			UserLastName:  b.User.LastName,
 			UserID:        b.UserID,
@@ -209,7 +209,7 @@ func (h *Handler) UpdateEngineHours(w http.ResponseWriter, r *http.Request) {
 		BeforeHours: req.BeforeHours,
 		AfterHours:  req.AfterHours,
 		DeltaHours:  deltaHours,
-		Type:        req.UsageType,
+		TypeID:      req.UsageType,
 		UserID:      req.UserID,
 		Comment:     "",
 	}
@@ -264,7 +264,7 @@ func (h *Handler) UpdateEngineHoursEntry(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	entry.Type = req.UsageType
+	entry.TypeID = req.UsageType
 	err = h.GetDB().UpdateEngineHours(entry)
 	if err != nil {
 		slog.Warn("Cannot update engine hour entry", slog.String("error", err.Error()))

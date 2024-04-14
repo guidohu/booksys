@@ -13,7 +13,8 @@ type BoatEngineHour struct {
 	BeforeHours decimal.Decimal `gorm:"type:DECIMAL(10,5) DEFAULT NULL"`
 	AfterHours  decimal.Decimal `gorm:"type:DECIMAL(10,5) DEFAULT NULL"`
 	DeltaHours  decimal.Decimal `gorm:"type:DECIMAL(10,5) DEFAULT NULL"`
-	Type        uint8           `gorm:"type:int(11) DEFAULT NULL"`
+	TypeID      uint8           `gorm:"column:type;type:mediumint(9) DEFAULT NULL"`
+	Type        SessionType     `gorm:"foreignKey:TypeID;references:ID"`
 	UserID      uint            `gorm:"type:mediumint(9) DEFAULT NULL"`
 	User        User            `gorm:"foreignKey:UserID;references:ID"`
 	Comment     string          `gorm:"type:text CHARACTER SET utf8"`

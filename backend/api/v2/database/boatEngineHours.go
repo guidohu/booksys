@@ -14,7 +14,11 @@ func (d *DBMysql) GetEngineHoursEntry(id uint) (BoatEngineHour, error) {
 
 func (d *DBMysql) GetEngineHours() ([]BoatEngineHour, error) {
 	var b []BoatEngineHour
-	err := d.orm.Model(&BoatEngineHour{}).Preload("User").Order("timestamp DESC").Find(&b).Error
+	err := d.orm.Model(&BoatEngineHour{}).
+		Preload("User").
+		Preload("Type").
+		Order("timestamp DESC").
+		Find(&b).Error
 	return b, err
 }
 
