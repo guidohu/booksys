@@ -341,6 +341,14 @@ func (h *Handler) AddFuelEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check that user is an admin user
+	isAdmin, _ := h.GetDB().IsAdminUser(req.UserID)
+	if !isAdmin {
+		slog.Warn("Non admin user tried to add fuel entry.", slog.Uint64("userID", uint64(req.UserID)))
+		WriteFailureResponse("Non admin user is not allowed to change engine hours.", w)
+		return
+	}
+
 	billType, err := h.GetDB().GetPropertyValue("fuel.payment.type")
 	if err != nil {
 		slog.Warn("Cannot determine whether fuel is billed or paid directly", slog.String("error", err.Error()))
