@@ -6,7 +6,6 @@ export default class Boat {
   }
 
   static getEngineHourLogLatest() {
-    console.log("api/v2/getEngineHourLogLatest called");
     return Request.getRequest('/api/v2/boat/engine-hour/latest/get');
   }
 
@@ -21,7 +20,6 @@ export default class Boat {
    * }
    */
   static addEngineHours(engineHourEntry) {
-    console.log("api/v2/addEngineHours called, with", engineHourEntry);
     return Request.postRequest('/api/v2/boat/engine-hour/update', engineHourEntry);
   }
 
@@ -34,12 +32,10 @@ export default class Boat {
    * }
    */
   static updateEngineHours(engineHourEntryUpdate) {
-    console.log("api/v2/updateEngineHours called, with", engineHourEntryUpdate);
     return Request.postRequest('/api/v2/boat/engine-hour/entry/update', engineHourEntryUpdate);
   }
 
   static getFuelLog() {
-    console.log("api/v2/getFuelLog called");
     return Request.getRequest('/api/v2/boat/fuel-entries/get');
   }
 
@@ -54,7 +50,6 @@ export default class Boat {
    * }
    */
   static addFuelEntry(fuelEntry) {
-    console.log("api/v2/addFuelEntry called");
     return Request.postRequest("/api/v2/boat/fuel-entry/add", fuelEntry);
   }
 
@@ -70,12 +65,10 @@ export default class Boat {
    * }
    */
   static updateFuelEntry(fuelEntry) {
-    console.log("/api/v2/boat/fuel-entry/edit called, with", fuelEntry);
     return Request.postRequest("/api/v2/boat/fuel-entry/edit", fuelEntry);
   }
 
   static getMaintenanceLog() {
-    console.log("/api/v2/boat/maintenance-entries/get called");
     return Request.getRequest('/api/v2/boat/maintenance-entries/get');
   }
 
@@ -89,12 +82,10 @@ export default class Boat {
    * }
    */
   static addMaintenanceEntry(maintenanceEntry) {
-    console.log("/api/v2/boat/maintenance-entry/add called, with", maintenanceEntry);
     return Request.postRequest("/api/v2/boat/maintenance-entry/add", maintenanceEntry);
   }
 
   static getMyNautiqueInfo(boatId, token, tokenExpiry) {
-    console.log("/api/v2/boat/mynautique/telemetry/get called");
     const request = {
       boat_id: boatId,
       token: token,

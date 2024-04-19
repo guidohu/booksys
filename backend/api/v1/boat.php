@@ -26,17 +26,11 @@
     $response = null;
 
     switch($_GET['action']){
-        case 'update_engine_hours_entry':
-            $response = update_engine_hours_entry($configuration);
-            break;
         case 'update_fuel':
             $response = update_fuel($configuration);
             break;
         case 'update_fuel_entry':
             $response = update_fuel_entry($configuration);
-            break;
-        case 'get_fuel_log':
-            $response = get_fuel_log($configuration);
             break;
         case 'get_maintenance_log':
             $response = get_maintenance_log($configuration);
@@ -51,53 +45,6 @@
 
     echo json_encode($response);
     return;
-
-    /* Returns the fuel log data */
-    function get_fuel_log($configuration){
-        $db = new DBAccess($configuration);
-        if(!$db->connect()){
-            error_log('api/boat: Cannot connect to the database');
-            return Status::errorStatus("Cannot connect to the database");
-        }
-
-        $query = 'SELECT bf.id as id, UNIX_TIMESTAMP(DATE_FORMAT(bf.timestamp, "%Y-%m-%dT%TZ")) as timestamp, bf.engine_hours as engine_hours,
-                        bf.liters as liters, bf.cost_chf as cost, bf.cost_chf_brutto as cost_brutto,
-                        u.id as user_id,
-                        u.first_name as user_first_name, u.last_name as user_last_name
-                    FROM boat_fuel bf, user u
-                    WHERE bf.user_id = u.id
-                    ORDER BY bf.timestamp DESC';
-
-        $res = $db->fetch_data_hash($query, -1);
-        $db->disconnect();
-        if(!isset($res)){
-            HttpHeader::setResponseCode(500);
-            return Status::errorStatus("Cannot get the fuel logs from the database.");
-        }
-
-        $last_engine_hour = NULL;
-        for($i = count($res) - 1; $i >= 0; $i--){
-            if($last_engine_hour == NULL){
-                $last_engine_hour = $res[$i]["engine_hours"];
-                continue;
-            }
-
-            $diff_hours = $res[$i]["engine_hours"] - $last_engine_hour;
-            if($diff_hours <= 0){
-                // covers the case of:
-                // - having a new boat with less engine hours
-                $last_engine_hour = $res[$i]["engine_hours"];
-                continue;
-            }
-
-            $avg_fuel_p_hour = $res[$i]["liters"] / $diff_hours;
-            $res[$i]["diff_hours"] = $diff_hours;
-            $res[$i]["avg_liters_per_hour"] = $avg_fuel_p_hour;
-            $last_engine_hour = $res[$i]["engine_hours"];
-        }
-
-        return Status::successDataResponse("success", $res);
-    }
 
     /* Returns the maintenance log data */
     function get_maintenance_log($configuration){
@@ -118,45 +65,6 @@
             return Status::errorStatus("Cannot retrieve maintenance log entries from the database");
         }
         return Status::successDataResponse("success", $res);
-    }
-
-    // Note: currently we only allow to switch the type
-    function update_engine_hours_entry($configuration){
-        $post_data = json_decode(file_get_contents('php://input'));
-
-        // general input validation
-        $sanitizer = new Sanitizer();
-        if(! isset($post_data->type) or !$sanitizer->isInt($post_data->type)){
-            // currently we only allow 0 (private) or 1 (course)
-            if($post_data->type != 0 and $post_data->type != 1){
-                return Status::errorStatus("No valid engine hours entry type selected");
-            }
-        }
-        if(!$post_data->id or !$sanitizer->isInt($post_data->id)){
-            return Status::errorStatus("No valid engine hours entry ID selected");
-        }
-
-        // setup database access
-        $db = new DBAccess($configuration);
-        if(!$db->connect()){
-            return Status::errorStatus("Cannot connect to the database");
-        }
-
-        // check that the entry does indeed exist
-        $query = 'UPDATE boat_engine_hours 
-            SET type = ?
-            WHERE id = ?';
-        $db->prepare($query);
-        $db->bind_param('dd',
-            $post_data->type,
-            $post_data->id
-        );
-        if(!$db->execute()){
-            $db->disconnect();
-            return Status::errorStatus("Cannot update engine hours log entry due to an unknown errror.");
-        }
-
-        return Status::successStatus("successfully updated");
     }
 
     function update_fuel($configuration){

@@ -202,9 +202,11 @@ const mutations = {
     let totalFuel = 0;
     forEach(sortedLog, function (v) {
       if (i < 5 && v.avg_liters_per_hour != null && v.diff_hours != null) {
-        if (v.diff_hours > 0 && v.avg_liters_per_hour > 0) {
-          totalFuel += v.diff_hours * v.avg_liters_per_hour;
-          totalDiffHours += v.diff_hours;
+        let diff = parseFloat(v.diff_hours);
+        let avg = parseFloat(v.avg_liters_per_hour);
+        if (diff > 0 && avg > 0) {
+          totalFuel += diff * avg;
+          totalDiffHours += diff;
           i++;
         }
       }
