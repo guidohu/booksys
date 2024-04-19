@@ -26,14 +26,8 @@
     $response = null;
 
     switch($_GET['action']){
-        case 'get_engine_hours_latest':
-            $response = get_engine_hours_latest($configuration);
-            break;
         case 'update_engine_hours_entry':
             $response = update_engine_hours_entry($configuration);
-            break;
-        case 'update_engine_hours':
-            $response = update_engine_hours($configuration);
             break;
         case 'update_fuel':
             $response = update_fuel($configuration);
@@ -126,30 +120,6 @@
         return Status::successDataResponse("success", $res);
     }
 
-    /* Returns the latest log_book entry, even if not complete yet */
-    function get_engine_hours_latest($configuration){
-        $db = new DBAccess($configuration);
-        if(!$db->connect()){
-            error_log('api/boat: Cannot connect to the database');
-            return Status::errorStatus("Cannot connect to the database");
-        }
-
-        $query = 'SELECT blb.id as id, blb.timestamp as time_stamp, blb.before_hours as before_hours,
-                    blb.after_hours as after_hours, blb.delta_hours as delta_hours,
-                    blb.type as type, st.name as type_name, u.id as user_id,
-                    u.first_name as user_first_name, u.last_name as user_last_name
-                    FROM boat_engine_hours blb
-                    LEFT JOIN user u ON u.id = blb.user_id
-                    LEFT JOIN session_type st ON st.id = blb.type
-                    INNER JOIN (SELECT max(timestamp) as timestamp FROM boat_engine_hours) beh ON beh.timestamp = blb.timestamp';
-        $res = $db->fetch_data_hash($query);
-        $db->disconnect();
-        if(!isset($res)){
-            return Status::errorStatus("Cannot get the latest engine hours entry");
-        }
-        return Status::successDataResponse("success", $res);
-    }
-
     // Note: currently we only allow to switch the type
     function update_engine_hours_entry($configuration){
         $post_data = json_decode(file_get_contents('php://input'));
@@ -187,97 +157,6 @@
         }
 
         return Status::successStatus("successfully updated");
-    }
-
-    function update_engine_hours($configuration){
-        $post_data = json_decode(file_get_contents('php://input'));
-
-        // general input validation
-        $sanitizer = new Sanitizer();
-        if(!$post_data->user_id or !$sanitizer->isInt($post_data->user_id)){
-            return Status::errorStatus("No valid user selected, please select a user");
-        }
-        if(!$post_data->engine_hours_before or ! $sanitizer->isFloat($post_data->engine_hours_before)){
-            return Status::errorStatus("No valid value for engine hours 'before' given.");
-        }
-        if(isset($post_data->engine_hours_after) and !$sanitizer->isFloat($post_data->engine_hours_after)){
-            return Status::errorStatus("No valid value for engine hours 'after' given.");
-        }
-        if(isset($post_data->type) and !$sanitizer->isInt($post_data->type)){
-            return Status::errorStatus("No valid type for the boat usage has been selected.");
-        }
-        // logical input validation
-        if(isset($post_data->engine_hours_after)){
-            if($post_data->engine_hours_after < $post_data->engine_hours_before){
-                return Status::errorStatus("Engine hours afterwards cannot be smaller than before.");
-            }
-        }
-
-        // check if there exists an empty log entry which needs an update
-        $db = new DBAccess($configuration);
-        if(!$db->connect()){
-            return Status::errorStatus("Cannot connect to database");
-        }
-        $query = 'SELECT count(*) as numberof FROM (SELECT blb.id as id, blb.before_hours as before_hours
-                    FROM boat_engine_hours blb
-                WHERE blb.after_hours IS NULL AND
-                        blb.delta_hours IS NULL) as dummy';
-        $res = $db->fetch_data_hash($query);
-        if($res == FALSE){
-            $db->disconnect();
-            return Status::errorStatus("Cannot determine whether this is a new entry or one that can be updated.");
-        }
-
-        if($res[0]['numberof'] > 0 and $post_data->engine_hours_after){
-            // update the existing entry
-            $query = 'UPDATE boat_engine_hours blb
-                        SET blb.after_hours = ?,
-                            blb.delta_hours = ?
-                    WHERE blb.after_hours IS NULL';
-            $db->prepare($query);
-            $db->bind_param(
-                'dd',
-                $post_data->engine_hours_after,
-                $post_data->engine_hours_after - $post_data->engine_hours_before
-            );
-            if(!$db->execute()){
-                $db->disconnect();
-                return Status::errorStatus("Cannot update existing entry. An error occurred.");
-            }
-        }elseif($res[0]['numberof'] > 0){
-            $db->disconnect();
-            return Status::errorStatus("To update the engine hour entry, please provide the engine hours after the trip.");
-        }
-        else{
-            // check that type is valid
-            $usage_type = 0;
-            if(! isset($post_data->type)){
-                return Status::errorStatus("No valid boat usage type selected.");
-            }else{
-                $usage_type = $post_data->type;
-            }
-
-            // create a new entry
-            $date = new DateTime();
-            $query = 'INSERT INTO boat_engine_hours
-                    (timestamp, before_hours, type, user_id)
-                    VALUES
-                    (?,?,?,?)';
-            $db->prepare($query);
-            $db->bind_param(
-                'sdii',
-                $date->format('Y-m-d H:i:s'),
-                sprintf('%.5f',$post_data->engine_hours_before),
-                $usage_type,
-                $post_data->user_id
-            );
-            if(!$db->execute()){
-                $db->disconnect();
-                return Status::errorStatus("Internal Server Error, cannot add new engine hours entry.");
-            }
-        }
-        $db->disconnect();
-        return Status::successStatus("new engine hour entry added or existing one updated");
     }
 
     function update_fuel($configuration){

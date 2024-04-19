@@ -170,6 +170,8 @@ type UserTable interface {
 	DeleteUserById(id uint) error
 	// Returns all the admin users
 	GetAdminUsers() ([]User, error)
+	// Returns true if a user is an admin user.
+	IsAdminUser(userID uint) (bool, error)
 	// GetUserByUsername find the user that has either the given username
 	// or the given email address. Returns an error in case the user was not found.
 	GetUserByName(name string) (User, error)

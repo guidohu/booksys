@@ -2,7 +2,11 @@ package database
 
 func (d *DBMysql) GetEngineHourLatest() (BoatEngineHour, error) {
 	var b BoatEngineHour
-	err := d.orm.Model(&BoatEngineHour{}).Preload("User").Order("timestamp DESC").First(&b).Error
+	err := d.orm.Model(&BoatEngineHour{}).
+		Preload("User").
+		Preload("Type").
+		Order("timestamp DESC").
+		First(&b).Error
 	return b, err
 }
 

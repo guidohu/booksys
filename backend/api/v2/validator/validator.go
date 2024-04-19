@@ -51,9 +51,17 @@ func PasswordStrength(fl validator.FieldLevel) bool {
 	return true
 }
 
-// SessionType checks if the provided session type is valid.
+// SessionType checks if the provided session type is valid. It requires
+// the field to be of type uint.
 func SessionType(fl validator.FieldLevel) bool {
-	_, found := database.DefaultSessionTypesMap[int(fl.Field().Int())]
+	found := false
+	defer func() {
+		if err := recover(); err != nil {
+			slog.Error("recovered from panic, field value was not of uint family", slog.String("field", fl.Field().String()))
+			found = false
+		}
+	}()
+	_, found = database.DefaultSessionTypesMap[int(fl.Field().Uint())]
 	return found
 }
 

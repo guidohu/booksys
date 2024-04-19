@@ -28,7 +28,7 @@ type GetEngineHoursResponse []GetEngineHourLatestResponse
 
 type UpdateEngineHoursRequest struct {
 	BeforeHours decimal.Decimal `json:"engine_hours_before" validate:"required,numeric"`
-	AfterHours  decimal.Decimal `json:"engine_hours_after,omitempty" validate:"numeric"`
+	AfterHours  decimal.Decimal `json:"engine_hours_after,omitempty" validate:"omitempty,numeric"`
 	UsageType   uint8           `json:"type" validate:"required,sessiontype"`
 	UserID      uint            `json:"user_id" validate:"required,numeric"`
 }
@@ -131,7 +131,7 @@ func (h *Handler) GetEngineHourLatest(w http.ResponseWriter, r *http.Request) {
 		BeforeHours:   b.BeforeHours,
 		AfterHours:    b.AfterHours,
 		DeltaHours:    b.DeltaHours,
-		UsageType:     uint(b.TypeID),
+		UsageType:     b.Type.ID,
 		UsageTypeName: database.DefaultSessionTypesMap[int(b.TypeID)].Name,
 		UserFirstName: b.User.FirstName,
 		UserLastName:  b.User.LastName,
@@ -180,6 +180,14 @@ func (h *Handler) UpdateEngineHours(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
 		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	// check that user is an admin user
+	isAdmin, _ := h.GetDB().IsAdminUser(req.UserID)
+	if !isAdmin {
+		slog.Warn("Non admin user tried to update engine hours.", slog.Uint64("userID", uint64(req.UserID)))
+		WriteFailureResponse("Non admin user is not allowed to change engine hours.", w)
 		return
 	}
 

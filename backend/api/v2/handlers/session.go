@@ -20,7 +20,7 @@ type CreateSessionRequest struct {
 	Start     int64  `json:"start" validate:"required"`
 	End       int64  `json:"end" validate:"required"`
 	MaxRiders int64  `json:"max_riders" validate:"required"`
-	Type      int64  `json:"type" validate:"required,sessiontype"`
+	Type      uint8  `json:"type" validate:"required,sessiontype"`
 }
 
 var SessionValidationErrors = map[string]string{
@@ -41,7 +41,7 @@ type EditSessionRequest struct {
 	Start     int64  `json:"start" validate:"required,numeric"`
 	End       int64  `json:"end" validate:"required"`
 	MaxRiders int64  `json:"max_riders" validate:"required"`
-	Type      int64  `json:"type" validate:"required,sessiontype"`
+	Type      uint8  `json:"type" validate:"required,sessiontype"`
 }
 
 type DeleteSessionRequest struct {
