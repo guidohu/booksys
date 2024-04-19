@@ -238,14 +238,14 @@ func main() {
 				slog.Info("Done waiting for DB config change (ctx done).")
 				wg.Done()
 				return
-			case change, open := <-chDBConfigChange:
+			case _, open := <-chDBConfigChange:
 				if !open {
 					slog.Info("Done waiting for DB config change (channel closed).")
 					wg.Done()
 					return
 				}
 				config.LoadDBConfig(v, db)
-				slog.Info("Got new config change reported.", change)
+				slog.Info("Got new config change reported. Load new config from Database.")
 			}
 		}
 	}()

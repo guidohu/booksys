@@ -14,7 +14,7 @@ import (
 )
 
 var api_url = "https://mynautique.azurewebsites.net/api/v2"
-var auth_url = "https://identitytoolkit.googleapis.com/v1"
+var AuthURL = "https://identitytoolkit.googleapis.com/v1"
 
 type Client struct {
 	auth      loginResponse
@@ -368,7 +368,9 @@ func NewMyNautiqueClient(opts *Options) *Client {
 		Options: &Options{
 			Client: &http.Client{},
 		},
-		AuthUntil: time.Now().Add(-1 * time.Hour),
+		// We initialize the client to be not logged
+		// in by setting the time here to "zero".
+		AuthUntil: time.Time{},
 	}
 	if opts == nil {
 		return c
@@ -383,6 +385,7 @@ func NewMyNautiqueClient(opts *Options) *Client {
 }
 
 func (m *Client) Login() error {
+	slog.Info("New myNautique login attempt.")
 	now := time.Now()
 	postBody, _ := json.Marshal(map[string]any{
 		"email":             m.Options.User,
@@ -390,7 +393,7 @@ func (m *Client) Login() error {
 		"returnSecureToken": true,
 	})
 	requestBody := bytes.NewBuffer(postBody)
-	url := fmt.Sprintf("%s/accounts:signInWithPassword?key=%s", auth_url, m.Options.AuthAPIKey)
+	url := fmt.Sprintf("%s/accounts:signInWithPassword?key=%s", AuthURL, m.Options.AuthAPIKey)
 	req, err := http.NewRequest(http.MethodPost, url, requestBody)
 	if err != nil {
 		return fmt.Errorf("cannot build request: %s", err.Error())
@@ -419,6 +422,7 @@ func (m *Client) Login() error {
 	}
 	m.AuthUntil = now.Add(time.Second * time.Duration(response.ExpiresInSeconds-10))
 	m.auth = response
+	slog.Info("New myNautique login successful.")
 	return nil
 }
 
@@ -438,6 +442,12 @@ func (m *Client) GetFleet() error {
 		return fmt.Errorf("cannot get fleet: %s", err.Error())
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		// we invalidate our authentication
+		slog.Info("Invalidate AuthUntil of mynautique client.")
+		m.AuthUntil = time.Time{}
+		return fmt.Errorf("cannot get fleet, server returned %d - %s", resp.StatusCode, resp.Status)
+	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("cannot read response from get fleet: %s", err.Error())
@@ -468,6 +478,12 @@ func (m *Client) GetBoatTelemetry(id int64) (Telemetry, error) {
 		return t, fmt.Errorf("cannot get telemetry: %s", err.Error())
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		// we invalidate our authentication
+		slog.Info("Invalidate AuthUntil of mynautique client.")
+		m.AuthUntil = time.Time{}
+		return t, fmt.Errorf("cannot get boat telemetry, server returned %d - %s", resp.StatusCode, resp.Status)
+	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return t, fmt.Errorf("cannot read response from get telemetry: %s", err.Error())
@@ -481,6 +497,7 @@ func (m *Client) GetBoatTelemetry(id int64) (Telemetry, error) {
 }
 
 func (m *Client) isAuthExpired() bool {
+	slog.Info("myNautique authentication valid until", slog.String("time", m.AuthUntil.String()))
 	if time.Now().After(m.AuthUntil) {
 		slog.Info("myNautique authentication expired.")
 		return true

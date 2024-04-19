@@ -239,12 +239,32 @@ func (d *DBMysql) initializeContent() error {
 	// Setup default values
 	for _, i := range defaultValues {
 		for _, r := range i {
-			result := d.orm.Clauses(clause.OnConflict{DoNothing: true}).Create(r)
+			result := d.orm.Debug().Clauses(clause.OnConflict{DoNothing: true}).Create(r)
 			if result.Error != nil {
 				return result.Error
 			}
 		}
 	}
+
+	// Set the schema.version to our new value.
+	dbProps, err := d.GetAllPropertyValuesMap()
+	if err != nil {
+		return err
+	}
+	for _, i := range DefaultConfiguration {
+		if i.Property == "schema.version" {
+			// Do not change the ID
+			i.ID = dbProps["schema.version"].ID
+			err := d.orm.Save(&i).Error
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	// Update configuration values.
+	// Delete all configurations that do not exist.
+	// d.orm.Find()
 	return nil
 }
 
@@ -536,147 +556,118 @@ var DefaultExpenseTypesMap = map[int]ExpenseType{
 
 var DefaultConfiguration = []Configuration{
 	{
-		ID:       1,
 		Property: "schema.version",
 		Value:    "2.0",
 	},
 	{
-		ID:       2,
 		Property: "browser.session.timeout.default",
 		Value:    "10800",
 	},
 	{
-		ID:       3,
 		Property: "browser.session.timeout.max",
 		Value:    "604800",
 	},
 	{
-		ID:       4,
 		Property: "location.longitude",
 		Value:    "8.542939",
 	},
 	{
-		ID:       5,
 		Property: "location.latitude",
 		Value:    "47.367658",
 	},
 	{
-		ID:       6,
 		Property: "location.gmt_offset",
 		Value:    "1",
 	},
 	{
-		ID:       7,
 		Property: "location.timezone",
 		Value:    "Europe/Berlin",
 	},
 	{
-		ID:       8,
 		Property: "business.day.start",
 		Value:    "08:00:00",
 	},
 	{
-		ID:       9,
 		Property: "business.day.end",
 		Value:    "21:00:00",
 	},
 	{
-		ID:       10,
 		Property: "business.day.startatsunrise",
 		Value:    "false",
 	},
 	{
-		ID:       11,
 		Property: "business.day.endatsunset",
 		Value:    "false",
 	},
 	{
-		ID:       12,
 		Property: "session.cancel.graceperiod",
 		Value:    "86400",
 	},
 	{
-		ID:       13,
 		Property: "recaptcha.privatekey",
 		Value:    "",
 	},
 	{
-		ID:       14,
 		Property: "recaptcha.publickey",
 		Value:    "",
 	},
 	{
-		ID:       15,
 		Property: "currency",
 		Value:    "CHF",
 	},
 	{
-		ID:       16,
 		Property: "location.address",
 		Value:    "",
 	},
 	{
-		ID:       17,
 		Property: "location.map",
 		Value:    "",
 	},
 	{
-		ID:       18,
 		Property: "payment.account.owner",
 		Value:    "",
 	},
 	{
-		ID:       19,
 		Property: "payment.account.iban",
 		Value:    "",
 	},
 	{
-		ID:       20,
 		Property: "payment.account.bic",
 		Value:    "",
 	},
 	{
-		ID:       21,
 		Property: "payment.account.comment",
 		Value:    "",
 	},
 	{
-		ID:       22,
 		Property: "smtp.sender",
 		Value:    "",
 	},
 	{
-		ID:       23,
 		Property: "smtp.server",
 		Value:    "",
 	},
 	{
-		ID:       24,
 		Property: "smtp.username",
 		Value:    "",
 	},
 	{
-		ID:       25,
 		Property: "smtp.password",
 		Value:    "",
 	},
 	{
-		ID:       26,
 		Property: "logo.file",
 		Value:    "",
 	},
 	{
-		ID:       27,
 		Property: "engine.hour.format",
 		Value:    "hh.h",
 	},
 	{
-		ID:       28,
 		Property: "fuel.payment.type",
 		Value:    "instant",
 	},
 	{
-		ID:       29,
 		Property: "mynautique.api.key",
 		Value:    "",
 	},

@@ -285,7 +285,7 @@ func (UserToSession) TableName() string {
 
 type Configuration struct {
 	ID       uint   `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
-	Property string `gorm:"type:VARCHAR(255) NOT NULL"`
+	Property string `gorm:"primaryKey;type:VARCHAR(255) NOT NULL"`
 	Value    string `gorm:"type:TEXT"`
 }
 

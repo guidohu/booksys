@@ -80,7 +80,6 @@ func (h *Handler) GetBoatTelemetry(w http.ResponseWriter, r *http.Request) {
 		FuelCapacity: config.FuelCapacity,
 	}
 	WriteSuccessResponse("boat telemetry", resp, w)
-
 }
 
 func (h *Handler) isMyNautiqueConfigured() bool {
