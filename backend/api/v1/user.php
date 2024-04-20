@@ -27,9 +27,6 @@
   $response = null;
 
   switch($_GET['action']){
-    case 'get_all_users':
-        $response = get_all_users($configuration, $lc);
-        break;
     case 'get_my_user_heats':
         $response = get_my_user_heats($configuration);
         break;
@@ -762,34 +759,6 @@
       }
       $db->disconnect();
       return Status::successStatus("success");
-  }
-  
-  /* Returns all users */
-  function get_all_users($configuration, $lc){
-    // only admins are allowed to call this function
-    if(!$lc->isAdmin()){
-        return Status::errorStatus("No authorization");
-    }
-    
-    // connect to the database
-    $db = new DBAccess($configuration);
-    if(!$db->connect()){
-        return Status::errorStatus("Cannot connect to database");
-    }
-    
-    $query = 'SELECT 
-        id as id, 
-        first_name as first_name, 
-        last_name as last_name 
-        FROM user 
-        WHERE deleted = 0
-        ORDER BY first_name, last_name;';
-    $res = $db->fetch_data_hash($query);
-    $db->disconnect();
-    if(!$res){
-        return Status::errorStatus("Cannot get users from database");
-    }
-    return Status::successDataResponse("Users retrieved", $res);
   }
   
 //   function get_my_user($configuration){
