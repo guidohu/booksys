@@ -265,14 +265,13 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get recaptcha keys (resp, entire configuration).
-	properties, err := h.GetDB().GetAllPropertyValues()
+	config, err := h.GetDB().GetAllPropertyValuesMap()
 	if err != nil {
-		slog.Warn("Cannot get configuration from database:", slog.String("error", err.Error()))
-		WriteFailureResponse("Recaptcha check failed, with unknown config state.", w)
+		slog.Warn("Cannot load internal configuration properties", slog.String("error", err.Error()))
+		WriteFailureResponse("Internal error, cannot sign up user.", w)
 		return
 	}
-	pMap := database.GetPropertyValuesMapFromConfiguration(properties)
-	v, exists := pMap["recaptcha.privatekey"]
+	v, exists := config["recaptcha.privatekey"]
 	if exists && v.Value != "" {
 		valid, err := recaptcha.Valid(req.RecaptchaToken, v.Value)
 		if err != nil {
@@ -1063,7 +1062,6 @@ func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request) 
 		WriteSuccessResponse("Token requested, please check your email inbox.", nil, w)
 		return
 	}
-	fmt.Printf("DEBUG: user %v\n", user)
 
 	// Generate token.
 	tokenEntry := database.PasswordReset{
@@ -1074,7 +1072,6 @@ func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Store token in database.
-	fmt.Printf("DEBUG: %+v\n", tokenEntry)
 	err = h.GetDB().AddPasswordResetToken(tokenEntry)
 	if err != nil {
 		slog.Error("Cannot store password reset token", slog.String("error", err.Error()))
