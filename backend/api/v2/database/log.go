@@ -21,7 +21,7 @@ func (d *DBMysql) GetLogs() ([]Log, error) {
 		return []Log{}, err
 	}
 	// make sure the currency is a valid value
-	r, _ := regexp.Compile(`[A-Za-z]{3}|\$`)
+	r, _ := regexp.Compile(`[A-Za-z]{2,5}|\$`)
 	if !r.MatchString(currency.Value) {
 		slog.Warn("Currency is not a safe and valid string to build the SQL statement for retrieving logs")
 		return []Log{}, fmt.Errorf("currency is no valid value log text cannot be built")
