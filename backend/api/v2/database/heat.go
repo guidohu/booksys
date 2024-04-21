@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -37,13 +36,12 @@ func (d *DBMysql) GetUserHeatStats(userID uint, start time.Time, end time.Time) 
 		Cost     decimal.Decimal
 	}
 	s := &Stats{}
-	fmt.Println("start", start.Unix())
-	fmt.Println("end", end.Unix())
 	err := d.orm.Raw(`
 	    SELECT sum(duration_s) as duration, sum(cost_chf) as cost
 	    FROM heat
 		WHERE UNIX_TIMESTAMP(heat.timestamp) >= ?
-		  AND UNIX_TIMESTAMP(heat.timestamp) < ?`, start.Unix(), end.Unix()).
+		  AND UNIX_TIMESTAMP(heat.timestamp) < ?
+		  AND user_id = ?`, start.Unix(), end.Unix(), userID).
 		Scan(s).Error
 	return s.Duration, s.Cost, err
 }

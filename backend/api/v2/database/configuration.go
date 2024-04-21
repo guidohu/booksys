@@ -21,7 +21,7 @@ var AllowedProperties = map[string]interface{}{
 	"location.latitude":        nil,
 	"location.longitude":       nil,
 	"location.map":             nil,
-	"location.time.zone":       nil,
+	"location.timezone":        nil,
 	"logo.file":                nil,
 	"mynautique.boat.id":       nil,
 	"mynautique.enabled":       nil,
@@ -135,9 +135,9 @@ func (d *DBMysql) UpdateOrInsertPropertyValues(conf []Configuration) error {
 }
 
 func (d *DBMysql) GetTimezoneLocation() (*time.Location, error) {
-	s, err := d.GetPropertyValue("location.time.zone")
+	s, err := d.GetPropertyValue("location.timezone")
 	if err != nil {
-		slog.Error("Cannot get location.time.zone", slog.String("error", err.Error()))
+		slog.Error("Cannot get location.timezone", slog.String("error", err.Error()))
 		return nil, err
 	}
 	return time.LoadLocation(s.Value)

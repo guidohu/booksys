@@ -600,7 +600,7 @@ func (h *Handler) GetMyHeats(w http.ResponseWriter, r *http.Request) {
 			Date:            heat.Timestamp.Format("02.01.2006"),
 			DateUnixMillis:  heat.Timestamp.UnixMilli(),
 			Cost:            heat.Cost,
-			DurationText:    t.Add(duration).Format("15:04"),
+			DurationText:    t.Add(duration).Format("15:04:05"),
 			DurationSeconds: int64(heat.DurationSeconds),
 		})
 	}
@@ -629,13 +629,14 @@ func (h *Handler) GetMyHeatStats(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("Cannot get stats from database", w)
 		return
 	}
-	beginOfYear := time.Date(now.Year(), 0, 0, 0, 0, 0, 0, loc)
+	beginOfYear := time.Date(now.Year(), time.January, 0, 0, 0, 0, 0, loc)
 	durationYTD, costYTD, err := h.GetDB().GetUserHeatStats(session.UserID, beginOfYear, time.Now())
 	if err != nil {
 		slog.Error("Cannot get total duration")
 		WriteFailureResponse("Cannot get stats from database", w)
 		return
 	}
+	fmt.Println(durationYTD, costYTD)
 
 	resp := &GetMyHeatStatsResponse{
 		HeatTimeMinutesTotal: int64(math.Ceil(float64(duration) / 60.0)),

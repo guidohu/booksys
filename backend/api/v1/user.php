@@ -27,9 +27,6 @@
   $response = null;
 
   switch($_GET['action']){
-    case 'get_my_user_heats':
-        $response = get_my_user_heats($configuration);
-        break;
     case 'get_my_user_sessions':
         $response = get_my_user_sessions($configuration);
         break;
@@ -571,91 +568,6 @@
     $response['currency'] = $configuration->currency;
     
     return Status::successDataResponse("success", $response);
-  }
-  
-  /* Returns all heats of a user */
-  function get_my_user_heats($configuration){
-    $db = new DBAccess($configuration);
-    if(!$db->connect()){
-        error_log("get_my_user_heats: not able to connect to database");
-        return Status::errorStatus("not able to connect to database");
-    }    
-    $res = Array();
-    
-    // get the total minutes and costs
-    $session = Login::getSessionData($configuration);
-    $query = "SELECT sum(duration_s) as time, sum(cost_chf) as cost
-              FROM heat 
-              WHERE user_id = ?";
-    $db->prepare($query);
-    $db->bind_param('i', $session['user_id']);
-    $db->execute();
-    $sum = $db->fetch_stmt_hash();
-    if(count($sum)>0){
-        $res['heat_time_min'] = (int) ($sum[0]['time'] / 60);
-        $res['heat_cost'] = round(floatval($sum[0]['cost']), 2);
-    }
-
-    // get the total minutes and costs (YTD)
-    $query = "SELECT sum(duration_s) as time, sum(cost_chf) as cost
-              FROM heat 
-              WHERE year(heat.timestamp) = year(now())
-                AND user_id = ?";
-    $db->prepare($query);
-    $db->bind_param('i', $session['user_id']);
-    $db->execute();
-    $sum = $db->fetch_stmt_hash();
-    if(count($sum)>0){
-        $res['heat_time_min_ytd'] = (int) ($sum[0]['time'] / 60);
-        $res['heat_cost_ytd'] = round(floatval($sum[0]['cost']), 2);
-    }
-    
-    // get the actual balance of the user
-    $query = "SELECT sum(amount_chf) as total 
-              FROM payment WHERE user_id = ?
-              AND type_id = 4;";
-    $db->prepare($query);
-    $db->bind_param('i', $session['user_id']);
-    $db->execute();
-    $payment = $db->fetch_stmt_hash();
-    if(count($payment)>0){
-        $res['payment_total']   = round(floatval($payment[0]['total']), 2);
-        $res['balance_current'] = $res['payment_total'] - $res['heat_cost'];
-    }
-    
-    // deduct the payback from the user's balance_current
-    $query = "SELECT sum(amount_chf) as payback
-              FROM expenditure 
-              WHERE user_id = ? AND type_id = 4;";
-    $db->prepare($query);
-    $db->bind_param('i', $session['user_id']);
-    $db->execute();
-    $payback = $db->fetch_stmt_hash();
-    if(count($payback)>0){
-        $res['payback_total']   = round(floatval($payback[0]['payback']), 2);
-        $res['balance_current'] = $res['balance_current'] - $res['payback_total'];
-    }
-    
-    // Get the user's last heats
-    $query = "SELECT timestamp, duration_s, cost_chf
-              FROM heat WHERE user_id = ? 
-              ORDER BY timestamp DESC LIMIT 100;";
-    $db->prepare($query);
-    $db->bind_param('i', $session['user_id']);
-    $db->execute();
-    $heats = $db->fetch_stmt_hash();
-    for($i=0; $i<count($heats); $i++){
-        $res['heats'][$i]['date'] = date('d.m.Y', strtotime($heats[$i]['timestamp']));
-        $res['heats'][$i]['cost'] = sprintf('%.2f', $heats[$i]['cost_chf']);
-        $min = floor($heats[$i]['duration_s'] / 60);
-        $sec = sprintf('%02d', round($heats[$i]['duration_s'] % 60));
-        $res['heats'][$i]['duration'] =  $min . ':' . $sec;
-    }
-
-    $res['currency'] = $configuration->currency;
-    $res['balance_current'] = round($res['balance_current'], 2);
-    
-    return Status::successDataResponse("success", $res);  
   }
   
   # lock a user

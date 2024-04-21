@@ -20,6 +20,7 @@
 </template>
 
 <script>
+import { sprintf } from "sprintf-js";
 import { mapGetters, mapActions } from "vuex";
 import ModalContainer from "./bricks/ModalContainer.vue";
 import ModalHeader from "./bricks/ModalHeader.vue";
@@ -48,14 +49,18 @@ export default {
           key: "cost",
           label: "Cost",
           formatter: (value) => {
-            return this.formatCost(value);
+            const v = parseFloat(value);
+            if(isNaN(v)) {
+              return "NaN"
+            }
+            return this.formatCost(v);
           },
         },
         {
           key: "duration",
           label: "Duration",
           formatter: (value) => {
-            return value + " min";
+            return value;
           },
         },
       ],
@@ -71,7 +76,7 @@ export default {
       this.$emit("update:visible", false);
     },
     formatCost: function (value) {
-      return value + " " + this.getCurrency;
+      return sprintf("%.02f %s", value, this.getCurrency);
     },
   },
   created() {

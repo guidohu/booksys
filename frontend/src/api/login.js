@@ -31,7 +31,6 @@ export default class Login {
   }
 
   static getMyUser() {
-    console.log("Login/getMyUser called");
     return Request.getRequest('/api/v2/auth/user');
   }
 

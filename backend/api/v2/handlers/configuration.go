@@ -312,7 +312,7 @@ func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request) {
 			Value:    req.LocationMap,
 		},
 		{
-			Property: "location.time.zone",
+			Property: "location.timezone",
 			Value:    req.LocationTimeZone,
 		},
 		{
