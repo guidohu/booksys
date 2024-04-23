@@ -27,6 +27,7 @@ import ModalHeader from "./bricks/ModalHeader.vue";
 import ModalBody from "./bricks/ModalBody.vue";
 import ModalFooter from "./bricks/ModalFooter.vue";
 import TableModule from "./bricks/TableModule.vue";
+import { formatCost } from "@/libs/formatters";
 
 export default {
   name: "UserHeatsModal",
@@ -49,11 +50,7 @@ export default {
           key: "cost",
           label: "Cost",
           formatter: (value) => {
-            const v = parseFloat(value);
-            if(isNaN(v)) {
-              return "NaN"
-            }
-            return this.formatCost(v);
+            return this.formatCost(value);
           },
         },
         {
@@ -76,7 +73,7 @@ export default {
       this.$emit("update:visible", false);
     },
     formatCost: function (value) {
-      return sprintf("%.02f %s", value, this.getCurrency);
+      return formatCost(value, this.getCurrency);
     },
   },
   created() {

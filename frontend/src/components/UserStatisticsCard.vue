@@ -5,19 +5,19 @@
       <div class="row">
         <div class="col-6">
           <div class="row">
-            <div class="col-12">Riding Time: {{ this.formatHeatTime(heatTimeMinutesYTD) }}</div>
+            <div class="col-12">Riding Time: {{ this.formatDuration(heatTimeMinutesYTD) }}</div>
           </div>
           <div class="row">
             <div class="col-12">
-              Riding Time (all-time): {{ this.formatHeatTime(heatTimeMinutes) }}
+              Riding Time (all-time): {{ this.formatDuration(heatTimeMinutes) }}
             </div>
           </div>
           <div class="row">
-            <div class="col-12">Cost: {{ heatCostYTD }} {{ getCurrency }}</div>
+            <div class="col-12">Cost: {{ this.formatCost(heatCostYTD) }}</div>
           </div>
           <div class="row">
             <div class="col-12">
-              Cost (all-time): {{ this.formatCost(heatCost) }} {{ getCurrency }}
+              Cost (all-time): {{ this.formatCost(heatCost) }}
             </div>
           </div>
         </div>
@@ -40,8 +40,7 @@
 import { mapGetters, mapActions } from "vuex";
 import SectionedCardModule from "./bricks/SectionedCardModule.vue";
 import UserHeatsModal from "./UserHeatsModal";
-import { floor } from "lodash";
-import { sprintf } from "sprintf-js";
+import { formatDurationString, formatNumber } from "@/libs/formatters";
 
 export default {
   name: "UserStatisticsCard",
@@ -70,29 +69,11 @@ export default {
     showLatestHeats: function () {
       this.showUserHeatsModal = true;
     },
-    // TODO add these formatter to the formatters.js lib.
-    formatHeatTime: function(minutes) {
-      // get minutes
-      let fmtMinutes = 0;
-      fmtMinutes = minutes % 60;
-      minutes = minutes - fmtMinutes;
-      // get hours
-      let fmtHours =  (minutes / 60) % 24;
-      minutes = minutes - (fmtHours * 60);
-      // get days
-      let fmtDays = (minutes / 60 / 24);
-      if(fmtDays > 0){
-        return sprintf("%d days %d hours %d minutes", fmtDays, fmtHours, fmtMinutes);
-      }
-      if(fmtHours > 0){
-        return sprintf("%d hours %d minutes", fmtHours, fmtMinutes);
-      }
-      return sprintf("%d minutes", fmtMinutes);
+    formatDuration: function(minutes) {
+      return formatDurationString(minutes*60, false);
     },
     formatCost: function(cost) {
-      const c = Number(cost);
-      // TODO make locale override configurable.
-      return c.toLocaleString('ch-DE');
+      return formatNumber(cost) + " " + this.getCurrency;
     }
   },
   created() {

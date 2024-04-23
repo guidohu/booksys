@@ -6,7 +6,7 @@
         <div class="col-6">
           <div class="row">
             <div class="col-12">
-              Current Balance: {{ balanceRounded }} {{ getCurrency }}
+              Current Balance: {{ this.formatBalance(balanceRounded) }}
             </div>
           </div>
         </div>
@@ -29,6 +29,7 @@
 import { mapGetters, mapActions } from "vuex";
 import SectionedCardModule from "./bricks/SectionedCardModule.vue";
 import PaymentInfoModal from "./PaymentInfoModal.vue";
+import { formatCost } from "@/libs/formatters";
 
 export default {
   name: "UserBalanceCard",
@@ -51,6 +52,9 @@ export default {
     showPaymentInfo: function () {
       this.showPaymentInfoModal = true;
     },
+    formatBalance: function(value) {
+      return formatCost(value, this.getCurrency);
+    }
   },
   created() {
     this.queryConfiguration();
