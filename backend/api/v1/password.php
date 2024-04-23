@@ -29,16 +29,6 @@
 	case 'change_password_by_token':
 		$response = change_password_by_token($configuration);
 		break;
-	case 'change_password_by_password':
-	    // only a user which is logged in is allowed to change a 
-		// password
-		if(! $lc->isLoggedIn()){
-			$response['ok'] = FALSE;
-			$response['message'] = "You are not logged in.";
-			break;
-	    }
-		$response = change_password_by_password($configuration);
-		break;
 	default:
 		$response = Status::errorStatus("unknown action for this API");
   }
@@ -251,83 +241,6 @@ _END;
 
 	// TODO send an email to the user indicating that password has been reset
 
-	return $response;	
-  }
-  
-  /**
-   * change_password_by_password allows to change the current password to a new one by presenting
-   * both old and new password
-   *
-   * @param $configuration		configuration object
-   * @return $response of the form
-   * {
-   * 	ok		=>	TRUE|FALSE		indicating success or failure
-   * 	message => "somestring"		indicating additional information especially for failures
-   * }
-   */
-  function change_password_by_password($configuration){
-	$data = json_decode(file_get_contents('php://input'));
-
-	$response  = array(
-		'ok' 		=> TRUE,
-		'message' 	=> 'password changed'
-	);
-	
-	// validate input
-	$sanitizer = new Sanitizer();
-	if(!isset($data->password_old) or !$sanitizer->isAsciiText($data->password_old)){
-	    $response['ok'] 	 = FALSE;
-		$response['message'] = "Your provided old password is not in a valid format";
-		return $response;
-	}	
-	if(!isset($data->password_new) or !$sanitizer->isAsciiText($data->password_new)){
-	    $response['ok'] 	 = FALSE;
-		$response['message'] = "Your provided new password is not in a valid format";
-		return $response;
-	}
-	
-	// get user object by session id and password
-	$user      = new User($configuration);
-	$user_data = $user->getUser();
-	
-	// check that the old password was correct
-	if(! $user->isPasswordCorrect($data->password_old)){
-		$response['ok'] 	 = FALSE;
-		$response['message'] = "Wrong password provided";
-		return $response;
-	}
-
-	// generate new password salt/hash
-	$new_salt          = rand(0, 65635);
-	$new_password_hash = crypt($data->password_new, '$6$rounds=5000$'.$new_salt);
-	
-	// update password
-	$db = new DBAccess($configuration);
-	if(!$db->connect()){
-		HttpHeader::setResponseCode(500);
-		error_log("Cannot connect to database");
-		echo "Internal server error.";
-		exit;
-	}
-	$query = "UPDATE user 
-		SET password_salt = ?,
-		password_hash = ?
-	    WHERE id = ?";
-	$db->prepare($query);
-	$db->bind_param('isi', 
-		$new_salt,  
-		$new_password_hash,
-		$user_data['id']
-	);
-	if(!$db->execute()){
-		error_log('Change password did not work: ' . $query);
-		$db->disconnect();
-		HttpHeader::setResponseCode(500);
-		echo "Internal error, password could not be changed. Please try again or contact us";
-		exit;
-	}
-
-	$db->disconnect();
 	return $response;	
   }
     

@@ -28,7 +28,6 @@ export default class User {
   }
 
   static changeUserPassword(passwordData) {
-    console.debug("User/changeUserPassword called");
     const postData = {
       password_old: passwordData.oldPassword,
       password_new: passwordData.newPassword,
