@@ -435,9 +435,15 @@ func (h *Handler) UpdateMyUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Handle special case where there are multiple users with
+	// the same email but different usernames.
+	username := req.Email
+	if session.Username != session.User.Email {
+		username = session.Username
+	}
 	user := database.User{
 		ID:            session.UserID,
-		Username:      req.Email,
+		Username:      username,
 		PasswordSalt:  0,  // will not be set
 		PasswordHash:  "", // will not be set
 		FirstName:     req.FirstName,

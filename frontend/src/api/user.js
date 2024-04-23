@@ -5,17 +5,14 @@ import { UserPointer } from "@/dataTypes/user";
 
 export default class User {
   static getHeats() {
-    console.debug("User/getHeats called");
     return Request.getRequest('/api/v2/user/my/heats');
   }
 
   static getHeatStats() {
-    console.debug("User/getHeatStats called");
     return Request.getRequest('/api/v2/user/my/heats/statistics');
   }
 
   static getBalance() {
-    console.debug("User/getBalance called");
     return Request.getRequest('/api/v2/user/my/balance');
   }
 

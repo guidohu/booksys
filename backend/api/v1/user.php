@@ -30,9 +30,6 @@
     case 'get_my_user_sessions':
         $response = get_my_user_sessions($configuration);
         break;
-    case 'change_my_user_data':
-        $response = change_my_user_data($configuration);
-        break;
     case 'lock_user':
         $response = lock_user($configuration, $lc);
         break;
@@ -706,76 +703,6 @@
 
 //     return Status::successDataResponse("success", $res[0]);
 //   }
-  
-  // Change a user's personal data
-  function change_my_user_data($configuration){
-    $data = json_decode(file_get_contents('php://input'));
-    
-    // input validation
-    $sanitizer = new Sanitizer();
-    if(! isset($data->first_name)){
-        return Status::errorStatus("No first name provided.");
-    }
-    if(! isset($data->last_name)){
-        return Status::errorStatus("No last name provided.");
-    }
-    if(! isset($data->address)){
-        return Status::errorStatus("No address provided.");
-    }
-    if(!isset($data->mobile) or !$sanitizer->isMobileNumber($data->mobile)){
-        return Status::errorStatus("The mobile number is not correct.");
-    }
-    if(! isset($data->plz) or !$sanitizer->isInt($data->plz)){
-        return Status::errorStatus("The zip code is not of a valid format.");
-    }
-    if(! isset($data->city)){
-        return Status::errorStatus("No city provided.");
-    }
-    if(! isset($data->email) or !$sanitizer->isEmail($data->email)){
-        return Status::errorStatus("The email address is not correct.");
-    }
-    if(! isset($data->license) or !$sanitizer->isBoolean($data->license)){
-        return Status::errorStatus("Invalid input for the license information.");
-    }
-    
-    // get the user info
-    $user = new User($configuration);
-    $user_data = $user->getUser();
-    
-    // update the user in the database
-    $db = new DBAccess($configuration);
-    if(!$db->connect()){
-        return Status::errorStatus("Backend error: Cannot connect to the database");
-    }
-    $query = "UPDATE user SET
-                      first_name = ?, 
-                      last_name = ?, 
-                      address = ?, 
-                      city = ?, 
-                      plz = ?, 
-                      mobile = ?, 
-                      email = ?, 
-                      license = ?
-                      WHERE id = ?;";
-    $db->prepare($query);
-    $db->bind_param('ssssissii',
-                    $data->first_name,
-                    $data->last_name,
-                    $data->address,
-                    $data->city,
-                    $data->plz,
-                    $data->mobile,
-                    $data->email,
-                    $data->license,
-                    $user_data['id']);
-    if(!$db->execute()){
-        $db->disconnect();
-        return Status::errorStatus("Backend error: Cannot update user data");
-    }    
-    $db->disconnect();
-    
-    return Status::successDataResponse("success", null);
-  }
   
   function get_my_user_sessions($configuration){
     // the upcoming sessions
