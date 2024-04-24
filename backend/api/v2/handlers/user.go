@@ -1093,28 +1093,12 @@ func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request) 
 		WriteFailureResponse("Internal error, cannot send reset token.", w)
 		return
 	}
-	client := email.Client{
-		Host:     emailConfig.Server,
-		Port:     emailConfig.Port,
-		Username: emailConfig.Username,
-		Password: emailConfig.Password,
-	}
-	body, err := client.TokenResetMessage(
+	client := email.NewClient(emailConfig)
+	err = client.SendTokenResetMessage(
 		user,
 		tokenEntry.Token,
 		emailConfig.Sender,
 		"Password Reset Token")
-	if err != nil {
-		slog.Error("Cannot create email body", slog.String("error", err.Error()))
-		WriteFailureResponse("Internal error, cannot send reset token.", w)
-		return
-	}
-	email := email.Email{
-		Recipient: user.Email,
-		Sender:    emailConfig.Sender,
-		Message:   body,
-	}
-	err = client.Send(&email)
 	if err != nil {
 		slog.Error("Cannot send email", slog.String("error", err.Error()))
 		WriteFailureResponse("Internal error, cannot send reset token.", w)

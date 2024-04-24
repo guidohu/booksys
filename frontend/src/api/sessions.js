@@ -258,7 +258,6 @@ export default class Sessions {
   }
 
   static deleteSession(sessionData) {
-    console.log("/api/v2/session/delete called for session:", sessionData);
     // build request body
     const session = {
       session_id: sessionData.id,
@@ -268,12 +267,6 @@ export default class Sessions {
   }
 
   static addUsersToSession(sessionId, users) {
-    console.log(
-      "/api/v2/session/user/add called for session:",
-      sessionId,
-      "and users",
-      users
-    );
     // build request body
     const requestBody = {
       user_ids: users.map((u) => u.id),

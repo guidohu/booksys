@@ -1,4 +1,5 @@
 import values from "lodash/values";
+import sortBy from "lodash/sortBy";
 import Login from "./login";
 import Request from "@/api/common/request.js";
 import { UserPointer } from "@/dataTypes/user";
@@ -66,6 +67,7 @@ export default class User {
         response.forEach((u) => {
           users.push(new UserPointer(u.id, u.first_name, u.last_name));
         });
+        users = sortBy(users, ['firstName', 'lastName']);
         resolve(users);
       })
       .catch((error) => {

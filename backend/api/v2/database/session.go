@@ -1,9 +1,12 @@
 package database
 
 import (
+	"fmt"
 	"server/generics"
 	"sort"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // GetSessionsBetween get sessions between start and end
@@ -90,10 +93,30 @@ func (d *DBMysql) DeleteSession(sessionID uint) error {
 }
 
 func (d *DBMysql) AddSessionToUserEntry(u UserToSession) error {
-	return d.orm.Where(UserToSession{UserID: u.UserID, SessionID: u.SessionID}).
-		FirstOrCreate(&u).Error
+	return d.orm.Transaction(func(tx *gorm.DB) error {
+		err := tx.Where(UserToSession{UserID: u.UserID, SessionID: u.SessionID}).
+			FirstOrCreate(&u).Error
+		if err != nil {
+			return err
+		}
+		session := &Session{}
+		err = tx.First(session, u.SessionID).Error
+		if err != nil {
+			return err
+		}
+		if session.FreeSpaces < 1 {
+			return fmt.Errorf("cannot add user %d to sessioon %d because there are no free spaces left", u.UserID, u.SessionID)
+		}
+		return tx.Exec("UPDATE session SET free = free - 1 WHERE id = ?", u.SessionID).Error
+	})
 }
 
 func (d *DBMysql) DeleteSessionToUserEntry(userID uint, sessionID uint) error {
-	return d.orm.Exec("DELETE FROM user_to_session WHERE user_id = ? AND session_id = ?", userID, sessionID).Error
+	return d.orm.Transaction(func(tx *gorm.DB) error {
+		err := d.orm.Exec("DELETE FROM user_to_session WHERE user_id = ? AND session_id = ?", userID, sessionID).Error
+		if err != nil {
+			return err
+		}
+		return tx.Exec("UPDATE session SET free = free + 1 WHERE id = ?", sessionID).Error
+	})
 }

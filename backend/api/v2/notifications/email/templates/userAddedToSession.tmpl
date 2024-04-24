@@ -1,0 +1,14 @@
+To: {{ .Recipient }}
+From: {{ .Sender }}
+Subject: {{ .Subject }}
+
+Dear {{ .FirstName }} {{ .LastName }}
+
+You have been added to the following session:
+
+Date: {{ .Date }}
+      {{ .Start }} to {{ .End }}
+
+Please login to {{ .URL }} to check your schedule.
+
+See you on the lake soon.

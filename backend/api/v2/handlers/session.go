@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"server/database"
+	"server/notifications/email"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -339,7 +340,20 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// check if all users exist, skip non existing
+	// get users that are already part of the session
+	sessionUsers, err := h.GetDB().GetUsersForSession(req.SessionID)
+	if err != nil {
+		slog.Warn("Existing session users cannot be found", slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot scan session for users.", w)
+		return
+	}
+	sessionUsersMap := make(map[uint]database.User)
+	for _, u := range sessionUsers {
+		sessionUsersMap[u.UserID] = u.User
+	}
+
+	// check if all users are valid, skip invalid ones
+	// and the ones already listed in the session.
 	existingUsers := []uint{}
 	for _, userID := range req.UserIDs {
 		user, err := h.GetDB().GetUserById(userID)
@@ -351,7 +365,17 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request) {
 			slog.Warn("Adding user that does not exist to session is skipped", slog.Uint64("userID", uint64(userID)), slog.Uint64("sessionID", uint64(req.SessionID)))
 			continue
 		}
+		if _, exists := sessionUsersMap[user.ID]; exists {
+			slog.Warn("User already exists in this session, do not add again", slog.Uint64("userID", uint64(userID)), slog.Uint64("sessionID", uint64(req.SessionID)))
+			continue
+		}
 		existingUsers = append(existingUsers, userID)
+	}
+
+	if s.FreeSpaces < uint(len(existingUsers)) {
+		slog.Info("Session does not have enough capacity for all users.", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Uint64("free", uint64(s.FreeSpaces)), slog.Uint64("required", uint64(len(existingUsers))))
+		WriteFailureResponse("There is not enough space to add all the users.", w)
+		return
 	}
 
 	// add existing users to session
@@ -364,6 +388,28 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request) {
 		err = h.GetDB().AddSessionToUserEntry(entry)
 		if err != nil {
 			slog.Warn("Cannot add user to session. Skipped", slog.Uint64("userID", uint64(u)), slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
+		}
+
+		// Inform user about the session.
+		emailConfig, err := h.GetDB().GetEmailConfiguration()
+		if err != nil {
+			slog.Error("Cannot get email configuration to reset token", slog.String("error", err.Error()))
+			WriteFailureResponse("Internal error, cannot send reset token.", w)
+			return
+		}
+		if !emailConfig.Empty() {
+			client := email.NewClient(emailConfig)
+			err = client.SendUserAddedToSessionMessage(
+				sessionUsersMap[u],
+				s,
+				emailConfig.Sender,
+				"You are invited for a session on the lake.",
+				// TODO: make the URL configurable.
+				"www.wakeandsurf.ch",
+			)
+			if err != nil {
+				slog.Error("Cannot send session notification email", slog.String("error", err.Error()))
+			}
 		}
 	}
 	WriteSuccessResponse("users added", nil, w)
@@ -382,7 +428,37 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// TODO check that there are no heats yet for this user.
+	// Get the user.
+	user, err := h.GetDB().GetUserById(req.UserID)
+	if err != nil {
+		slog.Warn("Cannot remove user from session, user not found", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Uint64("userID", uint64(req.UserID)), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot remove user from session, user does not exist.", w)
+		return
+	}
+
+	// Get the session.
+	s, err := h.GetDB().GetSession(req.SessionID)
+	if err != nil {
+		slog.Warn("Cannot load session information, session not found", slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot remove user from session, session does not exist.", w)
+		return
+	}
+
+	// A user is not allowed to be removed from a session in case
+	// there are already heats.
+	heats, err := h.GetDB().GetUserHeatsBySession(req.SessionID, user.ID, 0)
+	if err != nil {
+		slog.Warn("Cannot get heats for session and user", slog.Uint64("session", uint64(req.SessionID)), slog.Uint64("user", uint64(session.UserID)), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot access users for the provided session.", w)
+		return
+	}
+	for _, heat := range heats {
+		if heat.UserID == session.UserID {
+			slog.Warn("Cannot delete user for session, user has heats assigned ", slog.Uint64("user", uint64(session.UserID)), slog.Uint64("session", uint64(req.SessionID)))
+			WriteFailureResponse("Error, cannot remove user from session. The user has heats in this session.", w)
+			return
+		}
+	}
 
 	// remove entry
 	err = h.GetDB().DeleteSessionToUserEntry(req.UserID, req.SessionID)
@@ -390,6 +466,28 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request) 
 		slog.Warn("User to Session entry not found for", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Uint64("userID", uint64(req.UserID)), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot remove user from session.", w)
 		return
+	}
+
+	// Inform user about the cancellation of the session.
+	emailConfig, err := h.GetDB().GetEmailConfiguration()
+	if err != nil {
+		slog.Error("Cannot get email configuration to reset token", slog.String("error", err.Error()))
+		WriteFailureResponse("Internal error, cannot send reset token.", w)
+		return
+	}
+	if !emailConfig.Empty() {
+		client := email.NewClient(emailConfig)
+		err = client.SendUserRemovedFromSessionMessage(
+			user,
+			s,
+			emailConfig.Sender,
+			"Session has been cancelled.",
+			// TODO: make the URL configurable.
+			"www.wakeandsurf.ch",
+		)
+		if err != nil {
+			slog.Error("Cannot send session cancellation email", slog.String("error", err.Error()))
+		}
 	}
 	WriteSuccessResponse("user removed", nil, w)
 }
@@ -428,7 +526,7 @@ func (h *Handler) RemoveMyUserFromSession(w http.ResponseWriter, r *http.Request
 		}
 	}
 
-	// Check that there are users for this session.
+	// Remove the user from the session in case it is listed.
 	for _, u := range users {
 		if u.UserID == session.UserID {
 			err = h.GetDB().DeleteSessionToUserEntry(u.UserID, req.SessionID)
