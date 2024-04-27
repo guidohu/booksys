@@ -114,7 +114,6 @@ export default class Sessions {
       end: parseInt(dayjs(dateEnd).format("X")),
     };
 
-    console.log("getSessions:", dateStart);
     return new Promise((resolve, reject) => {
       Request.postRequest("/api/v2/booking/day/list", query)
       .then((res) => {

@@ -42,7 +42,6 @@ const actions = {
     });
   },
   querySessions({ commit, state, rootState }, time) {
-    console.log("Trigger querySessions with timespan", time);
     if (time == null && state.sessions == null) {
       console.log("vuex/querySessions: no time window provided, do nothing");
       return;
