@@ -154,7 +154,7 @@ func (h *Handler) DeleteHeat(w http.ResponseWriter, r *http.Request) {
 	err = h.GetDB().DeleteHeat(req.HeatID)
 	if err != nil {
 		slog.Warn("Could not delete heat", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
+		WriteFailureResponse("Could not delete heat, heat not valid.", w)
 		return
 	}
 	WriteSuccessResponse("heat deleted", nil, w)
@@ -182,20 +182,21 @@ func (h *Handler) ChangeHeat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get pricing
-	pricing, err := h.GetDB().GetPricings()
+	pricing, err := h.GetDB().GetUserStatusToPricingsMap()
 	if err != nil {
-		slog.Warn("Cannot get pricing information for user", slog.Uint64("user", uint64(req.UserID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot get pricing information for user", slog.Uint64("user", uint64(heat.UserID)), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get pricing information.", w)
 		return
 	}
-	var price decimal.Decimal
-	for _, p := range pricing {
-		if p.UserStatusID == user.UserStatusID {
-			price = p.PricePerMinute
-		}
+	p, ok := pricing[user.UserStatusID]
+	if !ok {
+		slog.Warn("Cannot get pricing information for user, user status ID not found", slog.Uint64("user", uint64(heat.UserID)))
+		WriteFailureResponse("Cannot get pricing information.", w)
+		return
 	}
+	price := p.PricePerMinute
 	if price.IsZero() {
-		slog.Warn("Cannot get a pricing for user", slog.Uint64("user", uint64(req.UserID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot get a pricing for user, price is zero", slog.Uint64("user", uint64(heat.UserID)))
 		WriteFailureResponse("Cannot get pricing information.", w)
 		return
 	}
@@ -210,7 +211,7 @@ func (h *Handler) ChangeHeat(w http.ResponseWriter, r *http.Request) {
 
 	cost := h.calculateHeatCost(req.DurationSeconds, price)
 	newHeat := database.Heat{
-		ID:              req.HeatID,
+		ID:              heat.ID,
 		UserID:          user.ID,
 		SessionID:       heat.SessionID,
 		Timestamp:       heat.Timestamp,

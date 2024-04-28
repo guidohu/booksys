@@ -15,7 +15,6 @@ export default class Heat {
    * ]
    */
   static addHeats(heats) {
-    console.log("heat/addHeats called, with", heats);
     return Request.postRequest("/api/v2/heats/create", heats);
   }
 
@@ -24,7 +23,6 @@ export default class Heat {
    * @param {Number} heatId
    */
   static deleteHeat(heatId) {
-    console.log("heat/deleteHeat called, with", heatId);
     const request = {
       heat_id: heatId,
     };
@@ -36,7 +34,6 @@ export default class Heat {
    * @param {Object} heatUpdate
    */
   static updateHeat(heatUpdate) {
-    console.log("heat/updateHeat called, with", heatUpdate);
     const request = {
       heat_id: heatUpdate.id,
       user_id: heatUpdate.userId,
@@ -51,7 +48,6 @@ export default class Heat {
    * @param {*} sessionId the ID of the session to get the heats from
    */
   static getHeatsBySession(sessionId) {
-    console.log("heat/getHeatsBySession called, with", sessionId);
     const request = {
       session_id: sessionId,
     };

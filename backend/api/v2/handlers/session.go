@@ -562,15 +562,11 @@ func (h *Handler) GetSessionHeats(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get pricing for each user
-	pricing, err := h.GetDB().GetPricings()
+	pricingMap, err := h.GetDB().GetUserStatusToPricingsMap()
 	if err != nil {
 		slog.Warn("Cannot get pricing information for session", slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get pricing information for heats.", w)
 		return
-	}
-	pricingMap := map[uint]decimal.Decimal{}
-	for _, p := range pricing {
-		pricingMap[p.UserStatusID] = p.PricePerMinute
 	}
 
 	resp := []GetSessionHeatsResponse{}
@@ -589,7 +585,7 @@ func (h *Handler) GetSessionHeats(w http.ResponseWriter, r *http.Request) {
 			Timestamp: heat.Timestamp.Unix(),
 			Duration:  int64(heat.DurationSeconds),
 			Cost:      heat.Cost,
-			Pricing:   pricingMap[heat.User.UserStatusID],
+			Pricing:   pricingMap[heat.User.UserStatusID].PricePerMinute,
 			Comment:   heat.Comment,
 		})
 	}
