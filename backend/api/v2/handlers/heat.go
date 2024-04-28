@@ -184,19 +184,19 @@ func (h *Handler) ChangeHeat(w http.ResponseWriter, r *http.Request) {
 	// Get pricing
 	pricing, err := h.GetDB().GetUserStatusToPricingsMap()
 	if err != nil {
-		slog.Warn("Cannot get pricing information for user", slog.Uint64("user", uint64(heat.UserID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot get pricing information for user", slog.Uint64("user", uint64(user.ID)), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get pricing information.", w)
 		return
 	}
 	p, ok := pricing[user.UserStatusID]
 	if !ok {
-		slog.Warn("Cannot get pricing information for user, user status ID not found", slog.Uint64("user", uint64(heat.UserID)))
+		slog.Warn("Cannot get pricing information for user, user status ID not found", slog.Uint64("user", uint64(user.ID)))
 		WriteFailureResponse("Cannot get pricing information.", w)
 		return
 	}
 	price := p.PricePerMinute
 	if price.IsZero() {
-		slog.Warn("Cannot get a pricing for user, price is zero", slog.Uint64("user", uint64(heat.UserID)))
+		slog.Warn("Cannot get a pricing for user, price is zero", slog.Uint64("user", uint64(user.ID)))
 		WriteFailureResponse("Cannot get pricing information.", w)
 		return
 	}
