@@ -64,7 +64,7 @@ func (h *Handler) AddHeats(w http.ResponseWriter, r *http.Request) {
 			Msg: "heat added",
 		}
 	}
-	WriteSuccessResponse("check each heat individually", &resp, w)
+	WriteSuccessResponse("added heats, check individual responses", &resp, w)
 }
 
 func (h *Handler) addHeat(heat AddHeatRequest) error {
@@ -72,24 +72,33 @@ func (h *Handler) addHeat(heat AddHeatRequest) error {
 	user, err := h.GetDB().GetUserById(heat.UserID)
 	if err != nil {
 		slog.Warn("Cannot get user information for", slog.Uint64("user", uint64(heat.UserID)), slog.String("error", err.Error()))
-		return fmt.Errorf("Cannot get user.")
+		return fmt.Errorf("cannot get user")
+	}
+
+	// Check that session exists.
+	if heat.SessionID != 0 {
+		session, err := h.GetDB().GetSession(heat.SessionID)
+		if err != nil || session.ID == 0 {
+			slog.Warn("Cannot find session", slog.Uint64("session", uint64(heat.SessionID)), slog.String("error", err.Error()))
+			return fmt.Errorf("cannot get pricing information for user")
+		}
 	}
 
 	// Get pricing
-	pricing, err := h.GetDB().GetPricings()
+	pricing, err := h.GetDB().GetUserStatusToPricingsMap()
 	if err != nil {
 		slog.Warn("Cannot get pricing information for user", slog.Uint64("user", uint64(heat.UserID)), slog.String("error", err.Error()))
-		return fmt.Errorf("Cannot get pricing information for user.")
+		return fmt.Errorf("cannot get pricing information for user")
 	}
-	var price decimal.Decimal
-	for _, p := range pricing {
-		if p.UserStatusID == user.UserStatusID {
-			price = p.PricePerMinute
-		}
+	p, ok := pricing[user.UserStatusID]
+	if !ok {
+		slog.Warn("Cannot get pricing information for user, user status ID not found", slog.Uint64("user", uint64(heat.UserID)))
+		return fmt.Errorf("cannot get pricing information for user")
 	}
+	price := p.PricePerMinute
 	if price.IsZero() {
-		slog.Warn("Cannot get a pricing for user", slog.Uint64("user", uint64(heat.UserID)), slog.String("error", err.Error()))
-		return fmt.Errorf("Cannot get a pricing for this user.")
+		slog.Warn("Cannot get a pricing for user, price is zero", slog.Uint64("user", uint64(heat.UserID)))
+		return fmt.Errorf("cannot get a pricing for this user")
 	}
 
 	newHeat := database.Heat{
@@ -104,7 +113,7 @@ func (h *Handler) addHeat(heat AddHeatRequest) error {
 	err = h.GetDB().AddHeat(&newHeat)
 	if err != nil {
 		slog.Warn("Cannot add heat", slog.String("error", err.Error()))
-		return fmt.Errorf("Cannot add the heat to the database.")
+		return fmt.Errorf("cannot add the heat to the database")
 	}
 	return nil
 }

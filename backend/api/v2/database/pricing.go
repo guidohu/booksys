@@ -8,3 +8,15 @@ func (d *DBMysql) GetPricings() ([]Pricing, error) {
 		Find(&pricing).Error
 	return pricing, err
 }
+
+func (d *DBMysql) GetUserStatusToPricingsMap() (map[uint]Pricing, error) {
+	pMap := map[uint]Pricing{}
+	pricings, err := d.GetPricings()
+	if err != nil {
+		return pMap, err
+	}
+	for _, p := range pricings {
+		pMap[p.UserStatusID] = p
+	}
+	return pMap, nil
+}

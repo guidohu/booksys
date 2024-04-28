@@ -35,12 +35,6 @@
 	
 	$response = '';
 	switch($_GET['action']){
-		case 'add_heat':
-			$response = add_heat($configuration, $db);
-			break;
-		case 'add_heats':
-			$response = add_heats($configuration, $db);
-			break;
 		case 'get_heats':
 			$response = get_heats($configuration, $db);
 			break;
@@ -65,28 +59,6 @@
 	$db->disconnect();
 	echo json_encode($response);
 	return;
-	
-	// add a single heat
-	function add_heat($configuration, $db){
-		$data = json_decode(file_get_contents('php://input'));
-		$response = check_and_add_heat($configuration, $db, $data);
-		return $response;
-	}
-
-	// add multiple heats
-	function add_heats($configuration, $db){
-		$data = json_decode(file_get_contents('php://input'));
-
-		$response = array();
-		foreach($data as $time => $entry){
-			$id = $time;
-			if(isset($entry->uid)){
-				$id = $entry->uid;
-			}
-			$response[$id] = check_and_add_heat($configuration, $db, $entry);
-		}
-		return Status::successDataResponse("check individual responses per heat", $response);
-	}
 
 	// get the sessions of a specific heat
 	function get_session_heats($configuration, $db){
@@ -311,58 +283,6 @@
 		}
 	}
 
-	function check_and_add_heat($configuration, $db, $data){
-		$status = array();
-
-		// sanitize input
-		$sanitized_msg = validate_heat_input($data);
-		if($sanitized_msg != 'ok'){
-			return Status::errorStatus($sanitized_msg);
-		}
-
-		// check if user exists
-		$error = validate_user_exists($configuration, $data->user_id);
-		if($error != NULL){
-			return Status::errorStatus($error);
-		}
-
-		// check if session_id exists / or is Null
-		if($data->session_id != NULL && $data->session_id != ''){
-			$error = validate_session_exists($db, $data->session_id);
-			if($error != NULL){
-				return Status::errorStatus($error);
-			}
-		}
-
-		// get cost for this user and heat
-		$cost = 0;
-		try{
-			$cost = get_cost_for_heat($configuration, $db, $data->user_id, $data->duration_s);
-		}catch (Exception $e){
-			return Status::errorStatus($e->getMessage());
-		}
-
-		// get the comment
-		$comment = NULL;
-		if(isset($data->comment)){
-			$comment = $data->comment;
-		}
-				
-		// enter the heat to the database
-		$entry = array();
-		$entry['user_id']    = $data->user_id;
-		$entry['session_id'] = $data->session_id;
-		$entry['duration_s'] = $data->duration_s;
-		$entry['cost']       = $cost;
-		$entry['comment']    = $comment;
-
-		if(db_add_heat($db, $entry)){
-			return Status::successStatus("Added heat for user $data->user_id");
-		}else{
-			return Status::errorStatus("Could not add heat for user $data->user_id");
-		}
-	}
-
 	function validate_heat_input($data){
 		$sanitizer = new Sanitizer();
 		$error = validate_user_id($data->user_id, $sanitizer);
@@ -485,27 +405,6 @@
 			return NULL;
 		}else{
 			return $res[0]['price_chf_min'];
-		}
-	}
-
-	// add a given entry to the heat table in the database
-	function db_add_heat($db, $entry){
-		// enter the heat to the database
-		error_log(print_r($entry, TRUE));
-		$query = 'INSERT INTO heat (user_id, session_id, duration_s, cost_chf, comment)
-		          VALUES (?, ?, ?, ?, ?);';
-		$db->prepare($query);
-		$db->bind_param('iiids',
-			$entry['user_id'],
-			$entry['session_id'],
-			$entry['duration_s'],
-			$entry['cost'],
-			$entry['comment']);
-		if($db->execute()){
-			return TRUE;
-		}else{
-			error_log("api/heat.php: Cannot add heat for user/time:" . $entry->user_id . "/".$entry->duration_s);
-			return FALSE;
 		}
 	}
 ?>

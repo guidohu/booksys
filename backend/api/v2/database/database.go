@@ -132,6 +132,7 @@ type PaymentTable interface {
 
 type PricingTable interface {
 	GetPricings() ([]Pricing, error)
+	GetUserStatusToPricingsMap() (map[uint]Pricing, error)
 }
 
 type SessionTable interface {
