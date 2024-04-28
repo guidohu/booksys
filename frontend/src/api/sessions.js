@@ -173,7 +173,6 @@ export default class Sessions {
   }
 
   static getSession(sessionId) {
-    console.log("sessions/getSession called, with", sessionId);
     const requestData = {
       id: sessionId,
     };
@@ -189,14 +188,9 @@ export default class Sessions {
             sR.riders_max,
             sR.type
           );
-          // const sessionMetaInfo = {
-          //   sunrise: dayjs.unix(sR.sunrise).format(),
-          //   sunset: dayjs.unix(sR.sunset).format(),
-          // };
           session.addRiders(sR.riders);
           resolve({
             session: session,
-            // metaInfo: sessionMetaInfo,
           });
         })
         .catch((error) => {
