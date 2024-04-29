@@ -58,9 +58,9 @@ export default {
   methods: {
     formatTime: function (item) {
       return (
-        dayjs.unix(item.start).tz(this.getTimezone).format("DD.MM.YYYY HH:mm") +
+        dayjs.unix(item.start_time).tz(this.getTimezone).format("DD.MM.YYYY HH:mm") +
         " - " +
-        dayjs.unix(item.end).tz(this.getTimezone).format("HH:mm")
+        dayjs.unix(item.end_time).tz(this.getTimezone).format("HH:mm")
       );
     },
     cancelSession: function (sessionId) {
