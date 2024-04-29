@@ -47,7 +47,6 @@ export default class User {
   }
 
   static getUserSchedule() {
-    console.debug("User/getUserSchedule called");
     return Request.getRequest('/api/v2/user/my/sessions');
   }
 

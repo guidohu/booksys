@@ -27,12 +27,6 @@
   $response = null;
 
   switch($_GET['action']){
-    case 'lock_user':
-        $response = lock_user($configuration, $lc);
-        break;
-    case 'unlock_user':
-        $response = unlock_user($configuration, $lc);
-        break;
     case 'change_user_group_membership':
         $response = change_user_group_membership($configuration, $lc);
         break;
@@ -562,70 +556,6 @@
     $response['currency'] = $configuration->currency;
     
     return Status::successDataResponse("success", $response);
-  }
-  
-  # lock a user
-  function lock_user($configuration, $lc){
-    // only admins are allowed to call this function
-    if(!$lc->isAdmin()){
-        return Status::errorStatus("permission denied");
-    }
-    
-    $post_data = json_decode(file_get_contents('php://input'));
-    
-    // sanitize input
-    $sanitizer = new Sanitizer();
-    if(!$post_data->user_id or !$sanitizer->isInt($post_data->user_id)){
-        return Status::errorStatus("No valid user_id provided, please select a user");
-    }
-    
-    // connect to the database
-    $db = new DBAccess($configuration);
-    if(!$db->connect()){
-        return Status::errorStatus("Cannot connect to the database");
-    }
-    
-    $query = 'UPDATE user SET locked = 1 WHERE id = ?;';
-    $db->prepare($query);
-    $db->bind_param('d', $post_data->user_id);
-    if(!$db->execute()){
-        $db->disconnect();
-        return Status::errorStatus("Attempt to lock user failed.");
-    }
-    $db->disconnect();
-    return Status::successStatus("success");
-  }
-  
-  # unlock a user
-  function unlock_user($configuration, $lc){
-    // only admins are allowed to call this function
-    if(!$lc->isAdmin()){
-        return Status::errorStatus("not sufficient permissions");
-    }
-    
-    $post_data = json_decode(file_get_contents('php://input'));
-    
-    // sanitize input
-    $sanitizer = new Sanitizer();
-    if(!$post_data->user_id or !$sanitizer->isInt($post_data->user_id)){
-        return Status::errorStatus("No valid user_id selected, please select a user");
-    }
-    
-    // connect to the database
-    $db = new DBAccess($configuration);
-    if(!$db->connect()){
-        return Status::errorStatus("Cannot connect to database");
-    }
-    
-    $query = 'UPDATE user SET locked = 0 WHERE id = ?;';
-    $db->prepare($query);
-    $db->bind_param('d', $post_data->user_id);
-    if(!$db->execute()){
-        $db->disconnect();
-        return Status::errorStatus("Attempt to unlock user failed");
-    }
-    $db->disconnect();
-    return Status::successStatus("success");
   }
   
   # change the status of a user
