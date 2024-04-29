@@ -81,7 +81,6 @@ export default class User {
   }
 
   static lockUser(userId, locked) {
-    console.debug("User/lockUser called with ID", userId, "locked", locked);
     const queryData = {
       user_id: userId,
       locked: locked,
@@ -97,12 +96,6 @@ export default class User {
   }
 
   static setUserGroup(userId, userGroupId) {
-    console.log(
-      "User/setUserGroup: called with userId",
-      userId,
-      "userGroupId",
-      userGroupId
-    );
     const queryData = {
       user_id: parseInt(userId),
       status_id: parseInt(userGroupId),

@@ -27,9 +27,6 @@
   $response = null;
 
   switch($_GET['action']){
-    case 'change_user_group_membership':
-        $response = change_user_group_membership($configuration, $lc);
-        break;
 	case 'get_all_users_detailed':
         $response = get_all_users_detailed($configuration, $lc);
         break;
@@ -556,45 +553,6 @@
     $response['currency'] = $configuration->currency;
     
     return Status::successDataResponse("success", $response);
-  }
-  
-  # change the status of a user
-  # e.g. to 'member', 'admin', 'guest'
-  function change_user_group_membership($configuration, $lc){
-      // only admins are allowed to call this function
-      if(!$lc->isAdmin()){
-          return Status::errorStatus("Not sufficient permissions");
-      }
-      
-      $post_data = json_decode(file_get_contents('php://input'));
-    
-      // sanitize input
-      $sanitizer = new Sanitizer();
-      if(!$post_data->user_id or !$sanitizer->isInt($post_data->user_id)){
-          return Status::errorStatus("No valid user selected, please select a user");
-      }
-      if(!$post_data->status_id or !$sanitizer->isInt($post_data->status_id)){
-          return Status::errorStatus("No valid status selected, please select a status");
-      }
-      
-      // connect to the database
-      $db = new DBAccess($configuration);
-      if(!$db->connect()){
-        return Status::errorStatus("Cannot connect to database");
-      }
-    
-      $query = 'UPDATE user SET status = ? WHERE id = ?;';
-      $db->prepare($query);
-      $db->bind_param('dd', 
-          $post_data->status_id, 
-          $post_data->user_id
-      );
-      if(!$db->execute()){
-          $db->disconnect();
-          return Status::errorStatus("Attempt to update a user's group has failed");
-      }
-      $db->disconnect();
-      return Status::successStatus("success");
   }
   
 //   function get_my_user($configuration){

@@ -981,7 +981,7 @@ func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// check that his user is not the only remaining admin
+	// check that this user is not the only remaining admin
 	admins, err := h.GetDB().GetAdminUsers()
 	if err != nil {
 		slog.Error("Cannot get admin users", slog.String("error", err.Error()))
