@@ -30,12 +30,6 @@
 	case 'get_all_users_detailed':
         $response = get_all_users_detailed($configuration, $lc);
         break;
-    case 'get_user_groups':
-        $response = get_user_groups($configuration, $lc);
-        break; 
-    case 'get_user_roles':
-        $response = get_user_roles($configuration, $lc);
-        break;
     case 'save_user_group':
         $response = save_user_group($configuration, $lc);
         break;
@@ -355,88 +349,6 @@
     }
     $db->disconnect();
     return Status::errorStatus("could not update user group price");
-  }
-
-  function get_user_roles($configuration, $lc){
-    // only admins are allowed to call this function
-    if(!$lc->isAdmin()){
-        return Status::errorStatus("Not sufficient permissions");
-    }
-
-    $db = new DBAccess($configuration);
-    if(!$db->connect()){
-        HttpHeader::setResponseCode(500);
-        error_log("get_user_roles: not able to connect to database");
-        return Status::errorStatus("Cannot connect to the database");
-    }
-
-    $ret = Array();
-
-    // get user roles
-    $query = "SELECT ur.id AS user_role_id,
-                     ur.name AS user_role_name,
-                     ur.description AS user_role_description
-              FROM user_role ur";
-    $db->prepare($query);
-    $db->execute();
-    $res = $db->fetch_stmt_hash();
-
-    $i = 0;
-    foreach ($res as $row){
-        $i = $row['user_role_id'];
-        $ret[$i] = $row;
-    }
-
-    return Status::successDataResponse("success", $ret);
-  }
-
-  // Returns all user types from the database
-  function get_user_groups($configuration, $lc){
-    // only admins are allowed to call this function
-    if(!$lc->isAdmin()){
-        return Status::errorStatus("API call not allowed");
-    }
-
-    $db = new DBAccess($configuration);
-    if(!$db->connect()){
-        error_log("get_user_types: not able to connect to database");
-        return Status::errorStatus("Cannot connect to database");
-    }
-
-    $ret = Array();
-
-    // get user types
-    $query = "SELECT ur.id AS user_role_id, 
-                     ur.name AS user_role_name, 
-                     ur.description AS user_role_description, 
-                     us.id AS user_group_id, 
-                     us.name AS user_group_name, 
-                     us.description AS user_group_description, 
-                     p.id AS price_id, 
-                     p.price_chf_min AS price_min,
-                     p.comment AS price_description
-              FROM user_role ur
-              JOIN user_status us ON us.user_role_id = ur.id
-              JOIN pricing p ON p.user_status_id = us.id";
-    $db->prepare($query);
-    $db->execute();
-    $res = $db->fetch_stmt_hash();
-
-    $i = 0;
-    foreach ($res as $row){
-        $i = $row['user_group_id'];
-        $ret[$i]['user_group_id'] = $row['user_group_id'];
-        $ret[$i]['user_group_name'] = $row['user_group_name'];
-        $ret[$i]['user_group_description'] = $row['user_group_description'];
-        $ret[$i]['user_role_id'] = $row['user_role_id'];
-        $ret[$i]['user_role_name'] = $row['user_role_name'];
-        $ret[$i]['user_role_description'] = $row['user_role_description'];
-        $ret[$i]['price_id'] = $row['price_id'];
-        $ret[$i]['price_min'] = $row['price_min'];
-        $ret[$i]['price_description'] = $row['price_description'];
-    }
-
-    return Status::successDataResponse("success", $ret);
   }
   
   /* Returns all the details of all users (admin view) */

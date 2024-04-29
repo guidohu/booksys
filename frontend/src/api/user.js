@@ -104,12 +104,10 @@ export default class User {
   }
 
   static getUserGroups() {
-    console.debug("User/getUserGroups called");
     return Request.getRequest("/api/v2/user/groups/get");
   }
 
   static getUserRoles() {
-    console.debug("User/getUserRoles called");
     return Request.getRequest("/api/v2/user/roles/get");
   }
 
