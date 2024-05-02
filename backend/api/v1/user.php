@@ -33,9 +33,6 @@
     case 'delete_user_group':
         $response = delete_user_group($configuration, $lc);
         break;
-    case 'delete_user':
-        $response = delete_user($configuration, $lc);
-        break;
     default:
         HttpHeader::setResponseCode(400);
         $response = Status::errorStatus("Action not supported");
@@ -44,70 +41,6 @@
   
   echo json_encode($response);
   return;
-
-  function delete_user($configuration, $lc){
-    // user needs to be admin
-    if(!$lc->isAdmin()){
-        return Status::errorStatus("insufficient permissions");
-    }
-
-    $data = json_decode(file_get_contents('php://input'));
-
-    // sanitize
-    $sanitizer = new Sanitizer();
-    if(! isset($data->id) or !$sanitizer->isInt($data->id)){
-        return Status::errorStatus("No valid user id given.");
-    }
-
-    // do not delete yourself
-    $current_user = $lc->getSessionData($configuration);
-    if($data->id == $current_user['user_id']){
-        return Status::errorStatus("Deleting your own user is not possible.");
-    }
-
-    // the user that should be deleted cannot be admin
-    $userAPI = new User($configuration);
-    $user    = $userAPI->getUserById($data->id);
-    if($user['user_role_name'] == 'admin'){
-        return Status::errorStatus("Administrator users cannot be deleted.");
-    }
-
-    // the user that should be deleted has to have a zero balance
-    $balance = $userAPI->getUserBalance($user['id']);
-    if($balance != 0){
-        return Status::errorStatus('User can only be delete if they have a balance of 0.');
-    }
-
-    // delete user
-    $db = new DBAccess($configuration);
-    if(!$db->connect()){
-        error_log('api/user: Cannot connect to the database');
-        return Status::errorStatus('Cannot connect to the database.');
-    }
-    $query = "UPDATE user
-        SET deleted = 1,
-            comment = NULL,
-            locked  = 1,
-            license = 0,
-            email   = NULL,
-            mobile  = NULL,
-            plz     = NULL,
-            city    = NULL,
-            address = NULL,
-            last_name = 'user',
-            first_name = 'deleted',
-            password_hash = NULL,
-            password_salt = NULL,
-            username = NULL
-        WHERE id = ?;";
-    $db->prepare($query);
-    $db->bind_param('i', $user['id']);
-    if(!$db->execute()){
-        return Status::errorStatus("User could not be deleted.");
-    }
-
-    return Status::successStatus("success");
-  }
 
   function delete_user_group($configuration, $lc){
     // only admins are allowed to call this function

@@ -51,7 +51,7 @@ func (d *DBMysql) DeleteUserById(id uint) error {
 		"mobile":        "",
 		"email":         "",
 		"license":       0,
-		"status":        1,
+		"status":        UserStatusGuest,
 		"locked":        1,
 		"comment":       "deleted user",
 		"deleted":       1,
