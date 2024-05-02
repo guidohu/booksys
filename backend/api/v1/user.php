@@ -27,9 +27,6 @@
   $response = null;
 
   switch($_GET['action']){
-	case 'get_all_users_detailed':
-        $response = get_all_users_detailed($configuration, $lc);
-        break;
     case 'save_user_group':
         $response = save_user_group($configuration, $lc);
         break;
@@ -349,122 +346,6 @@
     }
     $db->disconnect();
     return Status::errorStatus("could not update user group price");
-  }
-  
-  /* Returns all the details of all users (admin view) */
-  function get_all_users_detailed($configuration, $lc){
-	// only admins are allowed to call this function
-    if(!$lc->isAdmin()){
-        HttpHeader::setResponseCode(403);
-        return Status::errorStatus("not authorized for this API call");
-    }
-	
-	$db = new DBAccess($configuration);
-	if(!$db->connect()){
-        error_log("get_all_user_detailed: not able to connect to database");
-        return Status::errorStatus("not able to connect to database");
-	}
-	
-	$ret = Array();
-    
-    # get user data
-    $query = "SELECT id, username, first_name, last_name,   
-	                 address, city, plz, mobile, email,
-					 license, status, locked, comment 
-			  FROM user WHERE deleted = 0";
-	$db->prepare($query);
-	$db->execute();
-	$res = $db->fetch_stmt_hash();
-	
-	$i = 0;
-	foreach ($res as $row){
-	    $i = $row['id'];
-		$ret[$i]['id'] = $row['id'];
-        $ret[$i]['username']   = $row['username'];
-        $ret[$i]['first_name'] = $row['first_name'];
-        $ret[$i]['last_name']  = $row['last_name'];
-        $ret[$i]['address']    = $row['address'];
-        $ret[$i]['city']       = $row['city'];
-        $ret[$i]['plz']        = $row['plz'];
-        $ret[$i]['mobile']     = $row['mobile'];
-        $ret[$i]['email']      = $row['email'];        
-        $ret[$i]['license']    = $row['license'];
-        $ret[$i]['locked']     = $row['locked'];
-        $ret[$i]['status']     = $row['status'];
-        $ret[$i]['comment']    = $row['comment'];
-        $ret[$i]['total_heat_cost']   = 0;        
-        $ret[$i]['total_heat_min']    = 0;
-        $ret[$i]['total_payment']     = 0;
-		$i++;
-	}
-    
-    # get cost info from heats
-    $query = "SELECT h.user_id as id, 
-            sum(h.cost_chf) as cost, 
-            sum(h.duration_s) as time
-        FROM heat h 
-        JOIN user u ON h.user_id = u.id 
-        WHERE u.deleted = 0 
-        GROUP BY h.user_id";
-	$db->prepare($query);
-	$db->execute();
-	$res = $db->fetch_stmt_hash();
-	foreach ($res as $row){
-        $id = $row['id'];
-        $ret[$id]['total_heat_cost'] = floatval($row['cost']);
-        $ret[$id]['total_heat_min'] = intval($row['time']/60);
-	}
-	    
-    # get payment info
-    $query = "SELECT p.user_id as id, 
-            sum(p.amount_chf) as pay
-        FROM payment p
-        JOIN user u ON u.id = p.user_id
-        WHERE p.type_id = 4 
-        AND u.deleted = 0
-        GROUP BY p.user_id";
-	$db->prepare($query);
-	$db->execute();
-	$res = $db->fetch_stmt_hash();
-	foreach ($res as $row){
-		$id = $row['id'];
-		if(!isset($ret[$id])){
-			error_log('lib_user: Payment from a user that does not exist: ' . $row['pay'] . ' ' . $configuration->currency . ' from user with ID: ' . $row['id']);
-			continue;
-		}
-		$ret[$id]['total_payment'] = floatval($row['pay']);
-	}
-	
-	# get payback info
-	$query = "SELECT e.user_id as id,
-            sum(e.amount_chf) as payback
-        FROM expenditure e
-        JOIN user u ON u.id = e.user_id
-        WHERE e.type_id = 4
-        AND u.deleted = 0 
-        GROUP BY e.user_id";
-	$db->prepare($query);
-	$db->execute();
-	$res = $db->fetch_stmt_hash();
-	foreach ($res as $row){
-		$id = $row['id'];
-		if(!isset($ret[$id])){
-			error_log('lib_user: Packback to a user that does not exist: ' . $row['payback'] . ' ' . $configuration->currency . ' to user with ID: ' . $row['id']);
-			continue;
-        }
-        error_log(print_r($row, TRUE));
-        if(isset($ret[$id]['total_payment'])){
-            $ret[$id]['total_payment'] = $ret[$id]['total_payment'] - floatval($row['payback']);
-        }else{
-            $ret[$id]['total_payment'] = floatval($row['payback']) * -1;
-        }
-    }
-    
-    $response = array();
-    $response['users'] = $ret;
-    $response['currency'] = $configuration->currency;
-    
-    return Status::successDataResponse("success", $response);
   }
   
 //   function get_my_user($configuration){

@@ -727,7 +727,6 @@ func (h *Handler) GetAllUsersDetailed(w http.ResponseWriter, r *http.Request) {
 			WriteFailureResponse("cannot get user payments", w)
 			return
 		}
-		fmt.Println(duration, cost, paybacks, payments)
 		usersDetailed = append(usersDetailed, UserDetailed{
 			ID:               u.ID,
 			Username:         u.Username,

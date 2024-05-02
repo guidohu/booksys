@@ -76,7 +76,6 @@ export default class User {
   }
 
   static getDetailedUserList() {
-    console.debug("User/getDetailedUserList called");
     return Request.getRequest('/api/v2/user/list-detailed');
   }
 
