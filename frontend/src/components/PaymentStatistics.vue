@@ -17,7 +17,7 @@
       <div class="row box-flex-content text-end">
         <div class="col-6 col-md-4">
           <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{ getTotalPayments }}</span> {{ getCurrency }}
+            <span class="lead">{{ formatNumber(getTotalPayments) }}</span> {{ getCurrency }}
             <br />
             Income
             <span v-if="form.selectedYear != 'any'"
@@ -27,7 +27,7 @@
         </div>
         <div class="col-6 col-md-4">
           <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{ getTotalExpenditures }}</span>
+            <span class="lead">{{ formatNumber(getTotalExpenditures) }}</span>
             {{ getCurrency }}
             <br />
             Expenses
@@ -38,7 +38,7 @@
         </div>
         <div class="col-6 col-md-4">
           <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{ getTotalSessionPayments }}</span>
+            <span class="lead">{{ formatNumber(getTotalSessionPayments) }}</span>
             {{ getCurrency }}
             <br />
             Sessions Income
@@ -49,21 +49,21 @@
         </div>
         <div class="col-6 col-md-4">
           <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{ getSessionsBalance }}</span> {{ getCurrency }}
+            <span class="lead">{{ formatNumber(getSessionsBalance) }}</span> {{ getCurrency }}
             <br />
             Sessions Credits
           </card-module>
         </div>
         <div class="col-6 col-md-4">
           <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{ getBalance }}</span> {{ getCurrency }}
+            <span class="lead">{{ formatNumber(getBalance) }}</span> {{ getCurrency }}
             <br />
             Balance
           </card-module>
         </div>
         <div class="col-6 col-md-4">
           <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{ getSessionProfit }}</span> {{ getCurrency }}
+            <span class="lead">{{ formatNumber(getSessionProfit) }}</span> {{ getCurrency }}
             <br />
             Session Profit
             <span v-if="form.selectedYear != 'any'"
@@ -83,6 +83,7 @@ import * as dayjs from "dayjs";
 import WarningBox from "@/components/WarningBox";
 import CardModule from "@/components/bricks/CardModule";
 import InputSelect from "@/components/forms/inputs/InputSelect.vue";
+import { formatNumber } from "@/libs/formatters.js";
 
 export default {
   name: "PaymentDetails",
@@ -130,6 +131,9 @@ export default {
     yearSelectionChangeHandler: function () {
       this.queryStatistics(this.form.selectedYear).catch((errors) => (this.errors = errors));
     },
+    formatNumber: function(number) {
+      return formatNumber(number);
+    }
   },
   created() {
     this.queryConfiguration();

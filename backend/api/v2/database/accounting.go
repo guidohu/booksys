@@ -17,7 +17,7 @@ type TransactionRow struct {
 	TableID   uint64           `json:"tbl"`
 	Timestamp time.Time        `json:"timestamp"`
 	TypeID    uint64           `json:"type_id"`
-	TypeName  string           `json:"session"`
+	TypeName  string           `json:"type_name"`
 }
 
 const (

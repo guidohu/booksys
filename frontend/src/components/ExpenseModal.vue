@@ -41,7 +41,7 @@
           :currency="getCurrency"
         />
         <input-fuel
-          v-if="form.type != null && form.type == 0"
+          v-if="form.type != null && form.type == 1"
           id="fuel-liters"
           label="Fuel"
           size="small"
@@ -49,7 +49,7 @@
           v-model="form.fuelLiters"
         />
         <input-engine-hours
-          v-if="form.type != null && form.type == 0"
+          v-if="form.type != null && form.type == 1"
           id="engine-hours"
           label="Engine"
           size="small"
@@ -58,7 +58,7 @@
           :display-format="getEngineHourFormat"
         />
         <input-text-multiline
-          v-if="form.type != null && form.type != 0"
+          v-if="form.type != null && form.type != 1"
           id="description"
           label="Description"
           rows="2"
@@ -66,7 +66,7 @@
         />
         <div
           class="alert alert-warning"
-          v-if="form.type == 0 && getFuelPaymentType == 'billed'"
+          v-if="form.type == 1 && getFuelPaymentType == 'billed'"
         >
           Entry will not be visible in the payment section as it is not a direct
           expense. According to your settings fuel consumption is 'billed' and
@@ -156,50 +156,50 @@ export default {
       console.log(newValue, oldValue);
       if (newValue != oldValue) {
         // if the type is either
-        if ([0].includes(Number(newValue))) {
-          // 0: fuel
+        if ([1].includes(Number(newValue))) {
+          // 1: fuel
           this.userLabel = "Driver";
           this.userDescription = "Driver that fueled the boat";
           this.typeDescription = "Add a fuel entry.";
-        } else if ([9].includes(Number(newValue))) {
-          // 9: fuel bill
+        } else if ([10].includes(Number(newValue))) {
+          // 10: fuel bill
           this.userLabel = "Payer";
           this.userDescription = "Pays the bill";
           this.typeDescription = "Fuel bill";
-        } else if ([3].includes(Number(newValue))) {
-          // 3: invest
+        } else if ([4].includes(Number(newValue))) {
+          // 4: invest
           this.userLabel = "Payee";
           this.userDescription = "Payee or internal reference.";
           this.typeDescription = "";
-        } else if ([1].includes(Number(newValue))) {
-          // 1: maintenance
+        } else if ([2].includes(Number(newValue))) {
+          // 2: maintenance
           this.userLabel = "Payee";
           this.userDescription = "Payee or internal reference.";
           this.typeDescription = "Expenses related to maintenance";
-        } else if ([2].includes(Number(newValue))) {
-          // 2: material
-          this.userLabel = "Payee";
+        } else if ([3].includes(Number(newValue))) {
+          // 3: material
+          this.userLabel = "Payee / Payer";
           this.userDescription = "Payee or internal reference.";
           this.typeDescription = "Expenses related to aquired parts.";
-        } else if ([6, 4].includes(Number(newValue))) {
-          // 6: membership fee
-          // 4: session
+        } else if ([7, 5].includes(Number(newValue))) {
+          // 7: membership fee
+          // 5: session
           this.userLabel = "Account";
           this.userDescription = "Refund to this account.";
           this.typeDescription = "Refund of payments.";
-        } else if ([5].includes(Number(newValue))) {
-          // 5: other
+        } else if ([6].includes(Number(newValue))) {
+          // 6: other
           this.userLabel = "Payee";
           this.userDescription = "Payee or internal reference";
           this.typeDescription =
             "everything that does not fit another category";
-        } else if ([7].includes(Number(newValue))) {
-          // 7: salary
+        } else if ([8].includes(Number(newValue))) {
+          // 8: salary
           this.userLabel = "Driver";
           this.userDescription = "Driver that we pay a compensation.";
           this.typeDescription = "Compensation payments";
-        } else if ([8].includes(Number(newValue))) {
-          // 8: owners refund
+        } else if ([9].includes(Number(newValue))) {
+          // 9: owners refund
           this.userLabel = "Payee";
           this.userDescription = "Owner that gets a refund.";
           this.typeDescription = "";
@@ -315,7 +315,7 @@ export default {
       }
 
       // fuel case
-      if (Number(this.form.type) == 0) {
+      if (Number(this.form.type) == 1) {
         this.addFuel();
       } else {
         this.addDefault();

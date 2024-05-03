@@ -39,8 +39,10 @@
           placeholder="0.00"
           :currency="getCurrency"
         />
+        <!-- Income type 5 (session payment) does not need a comment
+        it will be added automatically. -->
         <input-text-multiline
-          v-if="form.type != null && form.type != 4"
+          v-if="form.type != null && form.type != 5"
           id="description"
           label="Description"
           rows="2"
