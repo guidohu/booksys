@@ -148,7 +148,7 @@ func (h *Handler) GetIncomeTypes(w http.ResponseWriter, r *http.Request) {
 	resp := GetExpenseTypeResponse{
 		Types: incomeTypes,
 	}
-	WriteSuccessResponse("expense types", resp, w)
+	WriteSuccessResponse("income types", resp, w)
 }
 
 func (h *Handler) GetAccountingStatistics(w http.ResponseWriter, r *http.Request) {

@@ -29,12 +29,6 @@
 		case 'get_statistics':
 			$response = get_statistics($configuration);
 			break;
-		case 'get_payment_types':
-			$response = get_payment_types($configuration);
-			break;
-		case 'get_expenditure_types':
-			$response = get_expenditure_types($configuration);
-			break;
 		case 'add_expenditure':
 		    $response = add_expenditure($configuration);
 			break;
@@ -335,40 +329,6 @@
 		$statistic['currency'] = $configuration->currency;
 		
 		return Status::successDataResponse("success", $statistic);		
-	}
-	
-	/* Returns the different expenditure types and their name */
-	function get_expenditure_types($configuration){
-		$db = new DBAccess($configuration);
-		if(!$db->connect()){
-			return Status::errorStatus("Cannot connect to database");
-		}
-		
-		// get types for expenditures
-		$query = "SELECT id, name FROM expenditure_type ORDER BY name";
-		$res = $db->fetch_data_hash($query);
-		
-		$db->disconnect();
-		
-		return Status::successDataResponse("success", $res);	
-	}
-	
-	/* Returns the different payment types and their name */
-	function get_payment_types($configuration){		
-		$db = new DBAccess($configuration);
-		if(!$db->connect()){
-			return Status::errorStatus("Cannot connect to database");
-		}
-		
-		// get types for payments
-		$query = "SELECT id, name FROM expenditure_type 
-		            WHERE id NOT IN (0, 1, 2) 
-					ORDER BY name";
-		$res = $db->fetch_data_hash($query);
-		
-		$db->disconnect();
-		
-		return Status::successDataResponse("success", $res);
 	}
 	
 	/* Returns the years as an array for which we have payment data */
