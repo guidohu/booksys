@@ -16,17 +16,17 @@ func (d *DBMysql) CreateUserGroup(us UserStatus, p Pricing) error {
 			return err
 		}
 		if len(groups) > 0 {
-			return fmt.Errorf("User group already exists with that ID or name.")
+			return fmt.Errorf("user group already exists with that ID or name.")
 		}
 
 		// check that the user role exists
 		var roles []UserRole
-		err = tx.Where("id = ?", us.UserRoleID).Find(&roles).Error
+		err = tx.Debug().Where("id = ?", us.UserRoleID).Find(&roles).Error
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return err
 		}
-		if len(groups) != 1 {
-			return fmt.Errorf("User role does not exist.")
+		if len(roles) != 1 {
+			return fmt.Errorf("user role with id %d does not exist", us.UserRoleID)
 		}
 
 		// add the user status (aka user group)
@@ -62,7 +62,7 @@ func (d *DBMysql) ChangeUserGroup(us UserStatus, p Pricing) error {
 				return err
 			}
 			if collidingGroup.ID != 0 {
-				return fmt.Errorf("a group with this name already exists.")
+				return fmt.Errorf("a group with this name already exists")
 			}
 		}
 		// check that the price ID already exists
@@ -115,7 +115,7 @@ func (d *DBMysql) DeleteUserGroup(id uint) error {
 			return err
 		}
 		if user.ID != 0 {
-			return fmt.Errorf("User with ID %d is still member of this group.", user.ID)
+			return fmt.Errorf("user with ID %d is still member of this group", user.ID)
 		}
 
 		// delete entries

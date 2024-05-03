@@ -794,7 +794,7 @@ func (h *Handler) CreateUserGroup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// this request consists of creating a user pricing
-	// and a user group in one go
+	// and a user group in a single request.
 	u := database.UserStatus{
 		Name:        req.UserGroupName,
 		Description: req.UserGroupDescription,
