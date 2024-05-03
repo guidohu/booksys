@@ -58,7 +58,7 @@ var GetAccountingTransactionsValidationErrors = map[string]string{
 type GetAccountingTransactionsResponse []database.TransactionRow
 
 type DeleteTransactionRequest struct {
-	TableID uint64 `json:"table_id"`
+	TableID uint64 `json:"table_id" validate:"tableid"`
 	RowID   uint64 `json:"row_id"`
 }
 

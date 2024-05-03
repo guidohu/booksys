@@ -26,6 +26,26 @@ const (
 	TableIdBoatFuel
 )
 
+// TableIDMap contains the IDs of tables that are used for
+// money transactions.
+var TableIDMap = map[uint64]struct {
+	TableID   uint64
+	TableName string
+}{
+	TableIdExpenditure: {
+		TableID:   TableIdExpenditure,
+		TableName: "expenditure",
+	},
+	TableIdPayment: {
+		TableID:   TableIdPayment,
+		TableName: "payment",
+	},
+	TableIdBoatFuel: {
+		TableID:   TableIdBoatFuel,
+		TableName: "boat_fuel",
+	},
+}
+
 func (d *DBMysql) GetYears() ([]uint64, error) {
 	var years []uint64
 	err := d.orm.Raw(`
@@ -34,10 +54,13 @@ func (d *DBMysql) GetYears() ([]uint64, error) {
 		SELECT year(timestamp) AS year FROM expenditure
 		UNION
 		SELECT year(timestamp) AS year FROM boat_fuel
+		GROUP BY year
 		ORDER BY year ASC`).Scan(&years).Error
 	return years, err
 }
 
+// GetPaymentTotal returns the total payments for a given year. If year
+// is 0 it will return the total of all payments.
 func (d *DBMysql) GetPaymentTotal(year uint64) (decimal.Decimal, error) {
 	return d.getSingleDecimalResult(`
 		SELECT coalesce(sum(amount_chf), 0) as result
@@ -106,6 +129,10 @@ func (d *DBMysql) GetSessionRefundsTotal(year uint64) (decimal.Decimal, error) {
 
 func (d *DBMysql) GetTransactions(year uint64) ([]TransactionRow, error) {
 	r := []TransactionRow{}
+	// Table IDs are
+	// 0: expenditure
+	// 1: payment
+	// 2: boat_fuel
 	err := d.orm.Debug().Raw(`
 		SELECT acc.tbl as table_id, acc.id as id, acc.user_id as user_id, u.first_name as first_name, u.last_name as last_name, 
 			acc.type_id as type_id, et.name as type_name, acc.timestamp as timestamp, 

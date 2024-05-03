@@ -70,3 +70,9 @@ func ExpenseType(fl validator.FieldLevel) bool {
 	_, found := database.DefaultExpenseTypesMap[int(fl.Field().Uint())]
 	return found
 }
+
+// TableID checks whether the provided table ID is valid.
+func TableID(fl validator.FieldLevel) bool {
+	_, found := database.TableIDMap[fl.Field().Uint()]
+	return found
+}
