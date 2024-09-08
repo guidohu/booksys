@@ -5,7 +5,7 @@
         <div class="col-12">
           <img
             class="img-fluid custom-height"
-            v-if="getLogoFile != null"
+            v-if="getLogoFile != null && getLogoFile != ''"
             :src="getLogoFile"
             alt="Logo"
           />

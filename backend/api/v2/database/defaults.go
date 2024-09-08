@@ -28,6 +28,13 @@ func (d *DBMysql) Migrate() error {
 		return err
 	}
 
+	// run schema update manual tasks
+	err = d.migrationPostflight()
+	if err != nil {
+		slog.Error("migrationPostflight failed:", err)
+		return err
+	}
+
 	// prepare database for initialization
 
 	// initialize values
@@ -198,6 +205,38 @@ func (d *DBMysql) migrationPreflight() error {
 	return nil
 }
 
+func (d *DBMysql) migrationPostflight() error {
+	// Remove the id column in the Configuration table if present.
+	idColumnResult := []struct {
+		column_name string
+	}{}
+	var c Configuration
+	d.orm.Raw(`SELECT column_name
+	   FROM information_schema.COLUMNS
+	   WHERE TABLE_SCHEMA = ? 
+	   AND TABLE_NAME = ?
+	   AND COLUMN_NAME = ?;`, d.DBName, c.TableName(), "id").Scan(&idColumnResult)
+	if len(idColumnResult) > 0 {
+		slog.Info("migration postflight table `configuration` - ALTER TABLE")
+		err := d.orm.Exec("ALTER TABLE configuration DROP COLUMN id").Error
+		if err != nil {
+			// We do not really care whether this request is successful or not,
+			// as we do need to delete it, but it's fine if it is not there.
+			// TODO: check whether column is there, then delete.
+			slog.Error("migration postflight table `configuration` - failed to ALTER TABLE", slog.String("error", err.Error()))
+			return err
+		}
+	} else {
+		slog.Info("migration postflight table `configuration` - skip")
+	}
+
+	// Remove the mynautique.api.key if present
+	slog.Info("migration postflight table `configuration` - remove 'mynautique.api.key'")
+	d.orm.Exec("DELETE FROM configuration WHERE property = 'mynautique.api.key'")
+
+	return nil
+}
+
 func (d *DBMysql) autoMigrate() error {
 	tables := []interface{}{
 		&User{},
@@ -247,14 +286,14 @@ func (d *DBMysql) initializeContent() error {
 	}
 
 	// Set the schema.version to our new value.
-	dbProps, err := d.GetAllPropertyValuesMap()
-	if err != nil {
-		return err
-	}
+	// dbProps, err := d.GetAllPropertyValuesMap()
+	// if err != nil {
+	// 	return err
+	// }
 	for _, i := range DefaultConfiguration {
 		if i.Property == "schema.version" {
 			// Do not change the ID
-			i.ID = dbProps["schema.version"].ID
+			// i.ID = dbProps["schema.version"].ID
 			err := d.orm.Save(&i).Error
 			if err != nil {
 				return err
@@ -666,10 +705,6 @@ var DefaultConfiguration = []Configuration{
 	{
 		Property: "fuel.payment.type",
 		Value:    "instant",
-	},
-	{
-		Property: "mynautique.api.key",
-		Value:    "",
 	},
 }
 

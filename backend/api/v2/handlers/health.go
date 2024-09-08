@@ -3,7 +3,6 @@ package handlers
 import (
 	"net/http"
 	"os"
-	"server/config"
 
 	"golang.org/x/exp/slog"
 )
@@ -26,17 +25,21 @@ func (h *Handler) HealthStatus(w http.ResponseWriter, r *http.Request) {
 
 	// Check if configuration file exists or if one
 	// should exist.
-	if h.config.GetString("config") == "" {
+	configFile, _ := h.config.GetString("config")
+	if configFile == "" {
+		// Config file status is 'true' in case
+		// the config file is not set. We do not wait for or
+		// miss a config file.
 		healthStatus.ConfigFile = true
 	} else {
-		_, err := os.Stat(h.config.GetString("config"))
+		_, err := os.Stat(configFile)
 		if err == nil {
 			healthStatus.ConfigFile = true
 		}
 	}
 
-	healthStatus.ConfigDB = config.IsDBConfigured(h.config)
-	healthStatus.DBReachable = h.GetDB() != nil && config.IsDBConfigured(h.config) && h.GetDB().Ping() == nil
+	healthStatus.ConfigDB = h.config.IsDBConfigured()
+	healthStatus.DBReachable = h.GetDB() != nil && h.config.IsDBConfigured() && h.GetDB().Ping() == nil
 	if healthStatus.DBReachable {
 		usersExist, err := h.GetDB().UsersExist()
 		if err != nil {

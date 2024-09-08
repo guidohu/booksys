@@ -10,15 +10,12 @@ import (
 	"server/config"
 	"server/database"
 	"server/handlers"
-	"strings"
 	"sync"
 	"syscall"
 	"time"
 
-	"github.com/go-yaml/yaml"
 	"golang.org/x/exp/slog"
 
-	"github.com/fsnotify/fsnotify"
 	flag "github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -30,16 +27,16 @@ import (
 // - Config File
 var configFile *string = flag.String("config", "", "The configuration file to use.")
 
-var httpPort *int = flag.Int("http_port", 80, "The port the HTTP server listens on.")
-var httpSessionInactivityTimeout *uint = flag.Uint("http_session_inactivity_timeout", 604800, "Time until a HTTP session with no activity will be cancelled and a user gets logged out.")
-var httpSessionTimeout *uint = flag.Uint("http_session_timeout", 31536000, "Time in seconds until a user is logged out.")
-var httpUploadPath *string = flag.String("http_upload_path", "./uploads", "Path where content is uploaded to.")
+var httpPort *int = flag.Int("http_port", 0, "The port the HTTP server listens on.")
+var httpSessionInactivityTimeout *uint = flag.Uint("http_session_inactivity_timeout", 0, "Time until a HTTP session with no activity will be cancelled and a user gets logged out.")
+var httpSessionTimeout *uint = flag.Uint("http_session_timeout", 0, "Time in seconds until a user is logged out.")
+var httpUploadPath *string = flag.String("http_upload_path", "", "Path where content is uploaded to.")
 
 var databaseName *string = flag.String("database_name", "", "The database name.")
-var databaseHost *string = flag.String("database_host", "127.0.0.1", "The IP/hostname of the host the DB is on.")
+var databaseHost *string = flag.String("database_host", "", "The IP/hostname of the host the DB is on.")
 var databasePassword *string = flag.String("database_password", "", "The password for the DB user.")
-var databasePort *string = flag.String("database_port", "3306", "The port for the DB connection.")
-var databaseProtocol *string = flag.String("database_protocol", "tcp", "The protocol for the DB connection.")
+var databasePort *string = flag.String("database_port", "", "The port for the DB connection.")
+var databaseProtocol *string = flag.String("database_protocol", "", "The protocol for the DB connection.")
 var databaseUser *string = flag.String("database_user", "", "The user for the DB connection.")
 
 var myNautiqueAPIKey *string = flag.String("mynautique_api_key", "", "The API key for the mynautique integration.")
@@ -62,41 +59,41 @@ func getFlags(v *viper.Viper) {
 	flag.Parse()
 }
 
-func setDefaults(v *viper.Viper) {
-	v.SetDefault("config", "")
-	v.SetDefault("http.port", "80")
-	v.SetDefault("http.sessioninactivitytimeout", "604800")
-	v.SetDefault("http.sessiontimeout", "31536000")
-	v.SetDefault("http.upload_path", "./uploads")
-	v.SetDefault("database.user", "")
-	v.SetDefault("database.password", "")
-	v.SetDefault("database.protocol", "tcp")
-	v.SetDefault("database.host", "127.0.0.1")
-	v.SetDefault("database.port", "3306")
-	v.SetDefault("database.dbname", "")
-	v.SetDefault("mynautique.api.key", "")
-}
+// func setDefaults(v *viper.Viper) {
+// 	v.SetDefault("config", "")
+// 	v.SetDefault("http.port", "80")
+// 	v.SetDefault("http.sessioninactivitytimeout", "604800")
+// 	v.SetDefault("http.sessiontimeout", "31536000")
+// 	v.SetDefault("http.uploadpath", "./uploads")
+// 	v.SetDefault("database.user", "")
+// 	v.SetDefault("database.password", "")
+// 	v.SetDefault("database.protocol", "tcp")
+// 	v.SetDefault("database.host", "127.0.0.1")
+// 	v.SetDefault("database.port", "3306")
+// 	// v.SetDefault("database.dbname", "")
+// 	v.SetDefault("mynautique.api.key", "")
+// }
 
-func getEnvironment(v *viper.Viper) {
-	v.SetEnvPrefix("BOOKSYS")
-	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-	v.AutomaticEnv()
-}
+// func getEnvironment(v *viper.Viper) {
+// 	v.SetEnvPrefix("BOOKSYS")
+// 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+// 	v.AutomaticEnv()
+// }
 
-func printConfigString(v *viper.Viper) {
-	conf := &config.Configuration{}
-	err := v.Unmarshal(conf)
-	if err != nil {
-		slog.Error("Invalid configuration. Cannot decode configuration.", slog.String("error", err.Error()))
-		os.Exit(1)
-	}
-	c, err := yaml.Marshal(conf)
-	if err != nil {
-		slog.Error("Cannot generate configuration", slog.String("error", err.Error()))
-		os.Exit(1)
-	}
-	fmt.Print(string(c))
-}
+// func printConfigString(v *viper.Viper) {
+// 	conf := &config.Configuration{}
+// 	err := v.Unmarshal(conf)
+// 	if err != nil {
+// 		slog.Error("Invalid configuration. Cannot decode configuration.", slog.String("error", err.Error()))
+// 		os.Exit(1)
+// 	}
+// 	c, err := yaml.Marshal(conf)
+// 	if err != nil {
+// 		slog.Error("Cannot generate configuration", slog.String("error", err.Error()))
+// 		os.Exit(1)
+// 	}
+// 	fmt.Print(string(c))
+// }
 
 func readConfigFile(v *viper.Viper) {
 	// If we do not have a config file we return.
@@ -126,43 +123,61 @@ func readConfigFile(v *viper.Viper) {
 	}
 }
 
-func connectDatabase(v *viper.Viper) *database.DBMysql {
-	if !v.IsSet("database.dbname") {
-		slog.Warn("Database settings are not present in configuration")
-		return nil
-	}
-
+func connectDatabase(c *config.Config) *database.DBMysql {
+	user, _ := c.GetString("database.user")
+	password, _ := c.GetString("database.password")
+	protocol, _ := c.GetString("database.protocol")
+	host, _ := c.GetString("database.host")
+	port, _ := c.GetString("database.port")
+	dbname, _ := c.GetString("database.dbname")
 	db := &database.DBMysql{
-		User:     v.GetString("database.user"),
-		Password: v.GetString("database.password"),
-		Protocol: v.GetString("database.protocol"),
-		Host:     v.GetString("database.host"),
-		Port:     v.GetString("database.port"),
-		DBName:   v.GetString("database.dbname"),
+		User:     user,
+		Password: password,
+		Protocol: protocol,
+		Host:     host,
+		Port:     port,
+		DBName:   dbname,
 	}
-	slog.Info("Connecting to database client to:", slog.String("address", db.String()))
+	slog.Info("Connecting database client to:", slog.String("address", db.String()))
 	if err := db.Connect(); err != nil {
 		slog.Warn(fmt.Sprintf("Database is not properly setup or not reachable. Error returned from Connect(): %s", err))
 		return nil
 	}
-	slog.Info("Connected to database", slog.String("name", viper.GetString("database.dbname")))
+	slog.Info("Connected to database", slog.String("name", dbname))
 	return db
 }
 
+func reloadDBConfigWatcher(ctx context.Context, wg *sync.WaitGroup, w *config.DBConfigWatcher, db *database.DBMysql, ch chan struct{}) {
+	// TODO fix racecondition in db
+	wg.Add(1)
+	go func() {
+		slog.Info("Start watching DB config.")
+		w.Watch(ctx, db, ch)
+		slog.Info("Done watching DB config.")
+		wg.Done()
+	}()
+}
+
 func main() {
-	v := viper.New()
+	lh := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource: true,
+	})
+	logger := slog.New(lh)
+	slog.SetDefault(logger)
 
 	// Get startup configuration.
-	setDefaults(v)
+	v := viper.New()
 	getFlags(v)
-	getEnvironment(v)
-	if *configFile != "" {
-		readConfigFile(v)
+	conf, err := config.NewConfig(v)
+	if err != nil {
+		slog.Error("Invalid config", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
+	uploadPath, _ := conf.GetString("http.uploadpath")
 
-	// Print the config file and exit.
+	// If requested, print config and exit.
 	if *printConfig {
-		printConfigString(v)
+		fmt.Println(conf.ToStringFull())
 		os.Exit(0)
 	}
 
@@ -170,82 +185,58 @@ func main() {
 	defer cancel()
 	var wg sync.WaitGroup
 
-	// Connect to the database if configured. If the database
-	// is not configured or up yet, we simply retry until
-	// ctx is done.
-	db := connectDatabase(v)
-	defer func() {
-		if db != nil {
-			db.Disconnect()
-		}
-	}()
+	db := connectDatabase(conf)
 	hp := handlers.HandlerParams{
 		Database:      db,
-		Configuration: v,
+		Configuration: conf,
 	}
 	h := handlers.NewHandler(hp)
-	chReconnectDatabase := make(chan struct{})
-	chDBConfigChange := make(chan struct{})
+
+	if db != nil {
+		conf.SetDB(db)
+	}
+
+	// We want to know about config file updates, because the
+	// database configuration might change.
+	chConfigFileUpdate := conf.WatchFile()
+	// chPropertyChange := make(chan struct{})
+
+	// Watch for changes in the properties.
 	wg.Add(1)
 	go func() {
-		// re-establish connection every 10 second if there
-		// is no database connection
+		slog.Info("Watch properties routine started.")
+		conf.WatchProperties(ctx, nil /*chPropertyChange*/)
+		slog.Info("Watch properties routine done.")
+		wg.Done()
+	}()
+
+	// Auto(re)connect database, e.g. if database is not up
+	// when started, or configuration is not present yet.
+	wg.Add(1)
+	go func() {
+		slog.Info("Auto reconnect routine started.")
 		ticker := time.NewTicker(10 * time.Second)
 		for {
 			select {
 			case <-ctx.Done():
 				ticker.Stop()
 				wg.Done()
+				slog.Info("Auto reconnect routine done.")
 				return
 			case <-ticker.C:
 				if db == nil || db.Ping() != nil {
 					slog.Info("Schedule connection attempt to db.")
-					db = connectDatabase(v)
+					db = connectDatabase(conf)
 					h.SetDB(db)
+					conf.SetDB(db)
 				}
-			case <-chReconnectDatabase:
+			case <-chConfigFileUpdate:
 				slog.Info("Reconnect database after config change.")
-				db = connectDatabase(v)
+				db = connectDatabase(conf)
 				h.SetDB(db)
-			}
-		}
-	}()
-
-	// Watch config file changes and create a new DB connection.
-	v.OnConfigChange(func(e fsnotify.Event) {
-		slog.Info("Configuration file changed", slog.String("file", e.Name))
-		readConfigFile(v)
-		// Notify dependents about config change.
-		chReconnectDatabase <- struct{}{}
-	})
-	v.WatchConfig()
-
-	// Watch configuration in database.
-	wg.Add(1)
-	go func() {
-		slog.Info("Start watching DB config.")
-		config.WatchDBConfig(ctx, db, chDBConfigChange)
-		slog.Info("Done watching DB config.")
-		wg.Done()
-	}()
-
-	wg.Add(1)
-	go func() {
-		slog.Info("Start waiting for DB config change.")
-		for {
-			select {
-			case <-ctx.Done():
-				slog.Info("Done waiting for DB config change (ctx done).")
-				wg.Done()
-				return
-			case _, open := <-chDBConfigChange:
-				if !open {
-					slog.Info("Done waiting for DB config change (channel closed).")
-					wg.Done()
-					return
-				}
-				config.LoadDBConfig(v, db)
-				slog.Info("Got new config change reported. Load new config from Database.")
+				conf.SetDB(db)
+				conf.ReadConfigProperties()
+				uploadPath, _ = conf.GetString("http.uploadpath")
 			}
 		}
 	}()
@@ -257,7 +248,7 @@ func main() {
 	}
 
 	// File server to serve uploaded files
-	fs := http.FileServer(http.Dir(viper.GetString("upload.path")))
+	fs := http.FileServer(http.Dir(uploadPath))
 	mux.Handle("/uploads/", http.StripPrefix("/uploads/", fs))
 
 	// Register all handlers
@@ -284,7 +275,7 @@ func main() {
 	mux.Handle("/api/v2/configuration/logo", http.HandlerFunc(h.GetLogoPath))
 	mux.Handle("/api/v2/configuration/recaptcha-key", http.HandlerFunc(h.GetRecaptchaKey))
 
-	mux.Handle("/api/v2/database/config", http.HandlerFunc(h.WithAuthentication(h.GetDBConfig)))
+	// mux.Handle("/api/v2/database/config", http.HandlerFunc(h.WithAuthentication(h.GetDBConfig)))
 	mux.Handle("/api/v2/database/setup", http.HandlerFunc(h.SetupDBConfig))
 
 	mux.Handle("/api/v2/accounting/expense_types/list", http.HandlerFunc(h.WithAuthentication(h.GetExpenseTypes)))
@@ -365,6 +356,7 @@ func main() {
 		slog.Error("HTTP shutdown failure", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
+	slog.Info("HTTP server stopped.")
 
 	// Cancel context and wait for all routines to end.
 	cancel()

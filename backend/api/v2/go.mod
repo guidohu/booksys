@@ -14,6 +14,8 @@ require (
 	gorm.io/gorm v1.25.1
 )
 
+require github.com/go-yaml/yaml v2.1.0+incompatible
+
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect

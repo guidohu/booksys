@@ -22,12 +22,6 @@
         // case 'get_db_config':
         //     $response = get_db_config($configuration);
         //     break;
-        case 'get_recaptcha_key':
-            $response = get_recaptcha_key($configuration);
-            break;
-        case 'get_logo_file':
-            $response = get_logo_file($configuration);
-            break;
         case 'get_configuration':
             $response = get_configuration($configuration);
             break;
@@ -77,18 +71,6 @@
 
             return Status::successDataResponse("success", $db_config);
         }
-    }
-
-    function get_recaptcha_key($configuration){
-        $response = array();
-        $response['key'] = $configuration->recaptcha_publickey;
-        return Status::successDataResponse("success", $response);
-    }
-
-    function get_logo_file($configuration){
-        $response = array();
-        $response['uri'] = $configuration->logo_file;
-        return Status::successDataResponse("success", $response);
     }
 
     function get_configuration($configuration){

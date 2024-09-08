@@ -10,6 +10,7 @@ const state = () => ({
   timezone: "Europe/Zurich",
   maxRiders: 12,
   logoFile: null,
+  logoUri: "",
   engineHourFormat: "hh.h",
   fuelPaymentType: null,
   myNautiqueEnabled: null,
@@ -41,6 +42,9 @@ const getters = {
   },
   getLogoFile: (state) => {
     return state.logoFile;
+  },
+  getLogoUri: (state) => {
+    return state.logoUri;
   },
   getEngineHourFormat: (state) => {
     return state.engineHourFormat;
@@ -148,7 +152,7 @@ const mutations = {
     state.recaptchaKey = response.key;
   },
   setLogoFile(state, value) {
-    state.logoFile = value;
+    state.logoUri = value;
   },
 };
 

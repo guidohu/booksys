@@ -233,7 +233,7 @@ func (d *DBMysql) Connect() error {
 		SkipInitializeWithVersion: false,              // smart configure based on used version
 	}), &gorm.Config{})
 	if err != nil {
-		slog.Error("Cannot connect with gorm", slog.String("error", err.Error()))
+		slog.Warn("Cannot connect with gorm", slog.String("error", err.Error()))
 		return err
 	}
 	d.orm = orm
@@ -280,6 +280,7 @@ func (d *DBMysql) Disconnect() {
 	d.db.Close()
 }
 
+// Returns an error if db is not connected and connection cannot be established.
 func (d *DBMysql) Ping() error {
 	return d.db.Ping()
 }

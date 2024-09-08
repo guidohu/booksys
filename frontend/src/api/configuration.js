@@ -17,10 +17,10 @@ export default class Configuration {
     return Request.getRequest('/api/v2/configuration/logo');
   }
 
-  static getDbConfig() {
-    console.log("configuration/getDbConfig called");
-    return Request.getRequest('/api/v2/database/config');
-  }
+  // static getDbConfig() {
+  //   console.log("configuration/getDbConfig called");
+  //   return Request.getRequest('/api/v2/database/config');
+  // }
 
   static setDbConfig(config) {
     console.log("configuration/setDbConfig called with:", config);

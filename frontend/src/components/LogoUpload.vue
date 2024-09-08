@@ -7,7 +7,7 @@
     </div>
     <overlay-spinner :active="isUploading">
       <input-file
-        v-if="newLogoUri == null && (getLogoFile == null || getLogoFile == '' || showLogo == false)"
+        v-if="newLogoUri == null && (getLogoUri == null || getLogoUri == '' || showLogo == false)"
         id="logo-file"
         label="Your Logo"
         v-model="form.logoFile"
@@ -17,21 +17,21 @@
       />
       <div
         class="row"
-        v-if="newLogoUri != null || (getLogoFile != null && getLogoFile != '' && showLogo == true)"
+        v-if="newLogoUri != null || (getLogoUri != null && getLogoUri != '' && showLogo == true)"
       >
         <label class="col-3 col-form-label">Your Logo</label>
         <div class="col-9">
           <img
-            v-if="getLogoFile != null && newLogoUri == null"
-            :src="getLogoFile"
+            v-if="getLogoUri != null && newLogoUri == null"
+            :src="getLogoUri"
             class="img-fluid custom-height"
             alt="The logo for the login screen"
           />
           <img
-            v-if="newLogoUri != null && newLogoUri != getLogoFile"
+            v-if="newLogoUri != null && newLogoUri != getLogoUri"
             :src="newLogoUri"
             class="img-fluid custom-height"
-            alt="The logo for the login screen"
+            alt="The new logo for the login screen"
           />
         </div>
       </div>
@@ -41,7 +41,7 @@
             v-if="
               newLogoUri != null ||
               form.logoFile != null ||
-              (getLogoFile != null && getLogoFile != '' && showLogo == true)
+              (getLogoUri != null && getLogoUri != '' && showLogo == true)
             "
             class="btn btn-outline-danger"
             @click="clearLogo"
@@ -91,7 +91,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("configuration", ["getLogoFile"]),
+    ...mapGetters("configuration", ["getLogoUri"]),
   },
   methods: {
     uploadNewLogo: function () {

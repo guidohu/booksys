@@ -51,7 +51,7 @@ func (h *Handler) GetBoatTelemetry(w http.ResponseWriter, r *http.Request) {
 	client := h.GetMyNautiqueClient()
 	// Prefer specific config over database config.
 	// Note: We intend to implement an abstraction for this.
-	apiKey := h.config.GetString("mynautique.api.key")
+	apiKey, _ := h.config.GetString("mynautique.api.key")
 	if apiKey == "" {
 		apiKey = config.APIKey
 	}

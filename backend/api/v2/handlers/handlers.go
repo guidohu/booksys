@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"server/config"
 	"server/database"
 	"server/mynautique"
 	"server/notifications/email"
@@ -16,7 +17,6 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/spf13/viper"
 	"golang.org/x/exp/slog"
 )
 
@@ -26,14 +26,14 @@ const SessionContextKey HandlerContext = 1
 
 type Handler struct {
 	db               atomic.Pointer[database.Database]
-	config           *viper.Viper
+	config           *config.Config
 	emailClient      atomic.Pointer[email.Client]
 	myNautiqueClient atomic.Pointer[mynautique.Client]
 }
 
 type HandlerParams struct {
 	Database      database.Database
-	Configuration *viper.Viper
+	Configuration *config.Config
 }
 
 func NewHandler(params HandlerParams) *Handler {
@@ -105,27 +105,11 @@ func (h *Handler) WithAuthentication(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
-func (h *Handler) ReconnectDB() error {
-	if !viper.IsSet("database.dbname") {
-		slog.Warn("Database settings are not present in configuration")
-		return fmt.Errorf("database is not set in the configuration")
-	}
-
-	db := &database.DBMysql{
-		User:     viper.GetString("database.user"),
-		Password: viper.GetString("database.password"),
-		Protocol: viper.GetString("database.protocol"),
-		Host:     viper.GetString("database.host"),
-		Port:     viper.GetString("database.port"),
-		DBName:   viper.GetString("database.dbname"),
-	}
-	if err := db.Connect(); err != nil {
-		slog.Warn(fmt.Sprintf("Database is not properly setup or not reachable. Error returned from Connet(): %s", err))
-		return fmt.Errorf("database is not reachable, skip db replacement")
-	}
-	slog.Info("Connected to database", slog.String("name", viper.GetString("database.dbname")))
-	h.SetDB(db)
-	return nil
+func (h *Handler) WithLogging(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println(r.Method, r.URL)
+		next.ServeHTTP(w, r)
+	})
 }
 
 func GetSessionFromContext(r *http.Request) database.BrowserSession {

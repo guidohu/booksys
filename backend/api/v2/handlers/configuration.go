@@ -8,22 +8,20 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"server/config"
 	"server/database"
 	"strconv"
 	"time"
 
-	"github.com/spf13/viper"
 	"golang.org/x/exp/slog"
 )
 
-type GetDBConfigResponse struct {
-	IsConfigured bool   `json:"is_configured"`
-	DBServer     string `json:"db_server"`
-	DBName       string `json:"db_name"`
-	DBUser       string `json:"db_user"`
-	DBPassword   string `json:"db_password,omitempty"`
-}
+// type GetDBConfigResponse struct {
+// 	IsConfigured bool   `json:"is_configured"`
+// 	DBServer     string `json:"db_server"`
+// 	DBName       string `json:"db_name"`
+// 	DBUser       string `json:"db_user"`
+// 	DBPassword   string `json:"db_password,omitempty"`
+// }
 
 type ConfigurationMessage struct {
 	Currency               string  `json:"currency" validate:"required,excludesall={} []!()<>"`
@@ -40,7 +38,6 @@ type ConfigurationMessage struct {
 	MyNautiqueFuelCapacity int     `json:"mynautique_fuel_capacity" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=10"`
 	MyNautiquePassword     string  `json:"mynautique_password" validate:"required_if=MyNautiqueEnabled true,omitempty,gt=1"`
 	MyNautiqueUser         string  `json:"mynautique_user" validate:"required_if=MyNautiqueEnabled true,omitempty,email"`
-	MyNautiqueAPIKey       string  `json:"mynautique_api_key" validate:"required_if=MyNautiqueEnabled true,omitempty"`
 	PaymentAccountBIC      string  `json:"payment_account_bic" validate:"omitempty,printascii"`
 	PaymentAccountComment  string  `json:"payment_account_comment"`
 	PaymentAccountIBAN     string  `json:"payment_account_iban" validate:"omitempty,printascii"`
@@ -51,6 +48,18 @@ type ConfigurationMessage struct {
 	SMTPSender             string  `json:"smtp_sender" validate:"omitempty,required_with=SMTPSender,email"`
 	SMTPServer             string  `json:"smtp_server" validate:"required_with=SMTPSender"`
 	SMTPUsername           string  `json:"smtp_username" validate:"required_with=SMTPSender"`
+}
+
+type ConfigSource int
+
+const (
+	SourceCLI ConfigSource = iota
+	SourceDatabase
+)
+
+type StringConfigValue struct {
+	Value  string
+	Source ConfigSource
 }
 
 var ConfigurationMessageValidationErrors = map[string]string{
@@ -95,7 +104,8 @@ type SetupMyNautiqueCredentialsRequest struct {
 }
 
 type UploadLogoFileResponse struct {
-	URI string `json:"uri"`
+	URI      string `json:"uri"`
+	FileName string `json:"filename"`
 }
 
 type GetLogoPathResponse struct {
@@ -107,9 +117,15 @@ type GetRecaptchaKeyResponse struct {
 }
 
 func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
-	if config.IsDBConfigured(h.config) {
+	configFile, _ := h.config.GetString("config")
+	if configFile == "" {
+		slog.Warn("No config file path provided to store configuration. Database setup not possible.")
+		WriteFailureResponse("No config file path provided to store configuration. Database setup not possible, please provide a configuration file (--config flag).", w)
+		return
+	}
+	if h.config.IsDBConfigured() {
 		slog.Warn("SetupDB called for already setup DB")
-		WriteFailureResponse("Invalid request", w)
+		WriteFailureResponse("Invalid request. Database is already setup.", w)
 		return
 	}
 
@@ -128,7 +144,7 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// test db access
+	// Connect to database and initialize.
 	db := &database.DBMysql{
 		User:     req.DBUser,
 		Password: req.DBPassword,
@@ -141,47 +157,45 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 	defer db.Disconnect()
 	if err != nil {
 		slog.Warn(fmt.Sprintf("New database parameters are not valid. Error returned from Connet(): %s", err))
-		WriteFailureResponse("Cannot connect to database.", w)
+		WriteFailureResponse("Cannot connect to database. Please make sure that the credentials are correct and the database is accepting connections.", w)
 		return
 	}
 
-	// if database access was successful, we store the configurationn
-	viper.Set("database.user", req.DBUser)
-	viper.Set("database.password", req.DBPassword)
-	viper.Set("database.protocol", "tcp")
-	viper.Set("database.host", host)
-	viper.Set("database.port", port)
-	viper.Set("database.dbname", req.DBName)
-	err = viper.WriteConfig()
+	// If database access was successful, we store the configuration.
+	h.config.SetConfigFileValue("database.user", req.DBUser)
+	h.config.SetConfigFileValue("database.password", req.DBPassword)
+	h.config.SetConfigFileValue("database.protocol", "tcp")
+	h.config.SetConfigFileValue("database.host", host)
+	h.config.SetConfigFileValue("database.port", port)
+	h.config.SetConfigFileValue("database.dbname", req.DBName)
+	err = h.config.WriteConfigFile()
 	if err != nil {
 		slog.Warn("Cannot store new configuration", slog.String("error", err.Error()))
-		WriteFailureResponse("cannot write config", w)
+		WriteFailureResponse("Database was setup. No config file path provided to store database configuration, please start application by providing a config file.", w)
 		return
 	}
-	slog.Info("New database configuration has been written to", slog.String("configfile", viper.GetString("configfile")))
-
-	// Postprocess config change
-	h.ReconnectDB()
-
+	slog.Info("New database configuration has been written to", slog.String("configfile", configFile))
 	WriteSuccessResponse("config written", nil, w)
 }
 
-func (h *Handler) GetDBConfig(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
+// func (h *Handler) GetDBConfig(w http.ResponseWriter, r *http.Request) {
+// 	session := GetSessionFromContext(r)
+// 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+// 		return
+// 	}
 
-	resp := GetDBConfigResponse{
-		IsConfigured: true,
-		DBServer:     fmt.Sprintf("%s:%d", viper.GetString("database.host"), viper.GetUint("database.port")),
-		DBName:       viper.GetString("database.dbname"),
-		DBUser:       viper.GetString("database.user"),
-		DBPassword:   "",
-	}
-	WriteSuccessResponse("success", resp, w)
-}
+// 	resp := GetDBConfigResponse{
+// 		IsConfigured: true,
+// 		DBServer:     fmt.Sprintf("%s:%d", viper.GetString("database.host"), viper.GetUint("database.port")),
+// 		DBName:       viper.GetString("database.dbname"),
+// 		DBUser:       viper.GetString("database.user"),
+// 		DBPassword:   "",
+// 	}
+// 	WriteSuccessResponse("success", resp, w)
+// }
 
+// TODO create public and non public version of this
+// E.g. Public version should not contain private info like mynautique, db, ... things.
 func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 	session := GetSessionFromContext(r)
 	if !session.Valid() {
@@ -248,7 +262,90 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 		MyNautiqueFuelCapacity: mynautiqueFuelCapacity,
 		MyNautiquePassword:     "hidden",
 		MyNautiqueUser:         pMap["mynautique.user"],
-		MyNautiqueAPIKey:       pMap["mynautique.api.key"],
+		PaymentAccountBIC:      pMap["payment.account.bic"],
+		PaymentAccountComment:  pMap["payment.account.comment"],
+		PaymentAccountIBAN:     pMap["payment.account.iban"],
+		PaymentAccountOwner:    pMap["payment.account.owner"],
+		RecaptchaPrivateKey:    pMap["recaptcha.privatekey"],
+		RecaptchaPublicKey:     pMap["recaptcha.publickey"],
+		SMTPPassword:           "hidden",
+		SMTPSender:             pMap["smtp.sender"],
+		SMTPServer:             pMap["smtp.server"],
+		SMTPUsername:           pMap["smtp.username"],
+	}
+	WriteSuccessResponse("configuration", resp, w)
+}
+
+func (h *Handler) GetConfigurationAsAdmin(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+
+	if !session.Valid() {
+		slog.Warn("Call to GetConfiguration without authentication")
+		WriteFailureResponse("Not authenticated", w)
+		return
+	}
+
+	properties, err := h.GetDB().GetAllPropertyValues()
+	if err != nil {
+		slog.Error("Cannot get configuration properties from database", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot get configuration", w)
+		return
+	}
+
+	pMap := make(map[string]string)
+	for _, p := range properties {
+		pMap[p.Property] = p.Value
+	}
+
+	lat, err := strconv.ParseFloat(pMap["location.latitude"], 32)
+	if err != nil {
+		slog.Error("Cannot convert location.latitude to float", slog.String("error", err.Error()))
+		lat = 0
+	}
+	lon, err := strconv.ParseFloat(pMap["location.longitude"], 32)
+	if err != nil {
+		slog.Error("Cannot convert location.longitude to float", slog.String("error", err.Error()))
+		lon = 0
+	}
+	boatid, err := strconv.Atoi(pMap["mynautique.boat.id"])
+	if pMap["mynautique.boat.id"] == "" {
+		boatid = 0
+	} else if err != nil {
+		slog.Error("Cannot convert mynautique.boat.id to int", slog.String("error", err.Error()))
+		boatid = 0
+	}
+	mynautiqueEnabled, err := strconv.ParseBool(pMap["mynautique.enabled"])
+	if pMap["mynautique.enabled"] == "" {
+		mynautiqueEnabled = false
+	} else if err != nil {
+		slog.Error("Cannot convert mynautique.enabled to bool", slog.String("error", err.Error()))
+		mynautiqueEnabled = false
+	}
+	mynautiqueFuelCapacity, err := strconv.Atoi(pMap["mynautique.fuel.capacity"])
+	if pMap["mynautique.fuel.capacity"] == "" {
+		mynautiqueFuelCapacity = 0
+	} else if err != nil {
+		slog.Error("Cannot convert boat.fuel.capacity to int", slog.String("error", err.Error()))
+		mynautiqueFuelCapacity = 0
+	}
+	resp := &ConfigurationMessage{
+		Currency:               pMap["currency"],
+		EngineHourFormat:       pMap["engine.hour.format"],
+		FuelPaymentType:        pMap["fuel.payment.type"],
+		LocationAddress:        pMap["location.address"],
+		LocationLatitude:       float32(lat),
+		LocationLongitude:      float32(lon),
+		LocationMap:            pMap["location.map"],
+		LocationTimeZone:       pMap["location.timezone"],
+		LogoFilePath:           pMap["logo.file"],
+		MyNautiqueBoatID:       boatid,
+		MyNautiqueEnabled:      mynautiqueEnabled,
+		MyNautiqueFuelCapacity: mynautiqueFuelCapacity,
+		MyNautiquePassword:     "hidden",
+		MyNautiqueUser:         pMap["mynautique.user"],
 		PaymentAccountBIC:      pMap["payment.account.bic"],
 		PaymentAccountComment:  pMap["payment.account.comment"],
 		PaymentAccountIBAN:     pMap["payment.account.iban"],
@@ -340,10 +437,6 @@ func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request) {
 			Value:    req.MyNautiqueUser,
 		},
 		{
-			Property: "mynautique.api.key",
-			Value:    req.MyNautiqueAPIKey,
-		},
-		{
 			Property: "payment.account.bic",
 			Value:    req.PaymentAccountBIC,
 		},
@@ -398,7 +491,7 @@ func (h *Handler) SetupMyNautiqueCredentials(w http.ResponseWriter, r *http.Requ
 	// in case the configuration is already present, we do not
 	// allow to edit it
 	session := GetSessionFromContext(r)
-	if viper.IsSet("mynautique.enabled") && AuthenticatedAsAdminOrFailure(session, w) != nil {
+	if h.config.IsSet("mynautique.enabled") && AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return
 	}
 
@@ -409,21 +502,24 @@ func (h *Handler) SetupMyNautiqueCredentials(w http.ResponseWriter, r *http.Requ
 		WriteFailureResponse("Invalid request payload", w)
 		return
 	}
-
-	viper.Set("mynautique.enabled", req.Enabled)
-	viper.Set("mynautique.user", req.User)
-	viper.Set("mynautique.password", req.Password)
-
-	err = viper.WriteConfig()
+	err = h.config.SetPropertyValue("mynautique.enabled", fmt.Sprintf("%t", req.Enabled))
 	if err != nil {
-		slog.Warn("Cannot store new configuration", slog.String("error", err.Error()))
-		WriteFailureResponse("cannot write config", w)
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse("Invalid request payload", w)
 		return
 	}
-	slog.Info("New mynautique configuration has been written to", slog.String("configfile", viper.GetString("configfile")))
-
-	// Postprocess config change
-	h.ReconnectDB()
+	err = h.config.SetPropertyValue("mynautique.user", req.User)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse("Invalid request payload", w)
+		return
+	}
+	err = h.config.SetPropertyValue("mynautique.password", req.Password)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse("Invalid request payload", w)
+		return
+	}
 
 	WriteSuccessResponse("config written", nil, w)
 }
@@ -466,12 +562,13 @@ func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// store uploaded file into local path. We use a random filename
+	// store uploaded file into local path. We use a content based filename
 	// to store multiple files without collisions.
 	nameTime := fmt.Sprintf("%s_%s", time.Now().Format(time.RFC3339), fileHeader.Filename)
 	hash := sha256.Sum256([]byte(nameTime))
 	fileHash := fmt.Sprintf("%x%s", hash[:16], filepath.Ext(fileHeader.Filename))
-	localFileName := filepath.Join(viper.GetString("upload.path"), fileHash)
+	storageDir, _ := h.config.GetString("http.uploadpath")
+	localFileName := filepath.Join(storageDir, fileHash)
 	if err := os.MkdirAll(filepath.Dir(localFileName), 0770); err != nil {
 		slog.Warn("Cannot create directory for file", slog.String("file", localFileName), slog.String("error", err.Error()))
 		WriteFailureResponse("File cannot get stored on server.", w)
@@ -494,7 +591,7 @@ func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
 	err = h.GetDB().UpdateOrInsertPropertyValues([]database.Configuration{
 		{
 			Property: "logo.file",
-			Value:    localFileName,
+			Value:    fileHash,
 		},
 	})
 	if err != nil {
@@ -504,7 +601,8 @@ func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := &UploadLogoFileResponse{
-		URI: localFileName,
+		URI:      localFileName,
+		FileName: fileHash,
 	}
 	WriteSuccessResponse("file uploaded", resp, w)
 }
@@ -516,8 +614,12 @@ func (h *Handler) GetLogoPath(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("Cannot get logo path from server.", w)
 		return
 	}
+
+	// get upload directory
+	uploadDir, _ := h.config.GetString("http.uploadpath")
+	slog.Warn("DEBUG: uploadDir", slog.String("dir", uploadDir))
 	resp := &GetLogoPathResponse{}
-	resp.URI = conf.Value
+	resp.URI = filepath.Join(uploadDir, conf.Value)
 	WriteSuccessResponse("logo path", resp, w)
 }
 

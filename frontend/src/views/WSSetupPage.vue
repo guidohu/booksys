@@ -29,13 +29,6 @@
           @update:user="handleUserUpdate"
         />
       </div>
-      <!-- myNautique Setup -->
-      <my-nautique-configuration
-        v-if="setupSteps[setupStep].name == 'mynautique'"
-        :settings-data="myNautiqueConfig"
-        @save="setMyNautiqueSettings"
-        @update:settings="handleMyNautiqueUpdate"
-      />
       <!-- Setup Done -->
       <div v-if="setupSteps[setupStep].name == 'done'" class="row text-center">
         <div class="col-12">
@@ -73,16 +66,6 @@
         class="btn btn-outline-info"
         :disabled="isLoading"
         @click="addAdminUser"
-      >
-        <i class="bi bi-arrow-right" />
-        Next
-      </button>
-      <button
-        v-if="setupSteps[setupStep].name == 'mynautique'"
-        type="button"
-        class="btn btn-outline-info"
-        :disabled="isLoading"
-        @click="setMyNautiqueSettings"
       >
         <i class="bi bi-arrow-right" />
         Next
@@ -133,7 +116,6 @@ export default {
   name: "WSSetupPage",
   components: {
     DatabaseConfiguration,
-    MyNautiqueConfiguration,
     WarningBox,
     UserSignUp,
     ModalContainer,
@@ -148,9 +130,6 @@ export default {
       isLoading: false,
       dbConfig: {},
       adminUserConfig: {},
-      myNautiqueConfig: {
-        enabled: false,
-      },
       setupStep: 0,
       setupSteps: [
         {
@@ -165,11 +144,6 @@ export default {
         },
         {
           id: 2,
-          name: "mynautique",
-          title: "Setup myNautique",
-        },
-        {
-          id: 3,
           name: "done",
           title: "Setup Done",
         },
@@ -219,11 +193,6 @@ export default {
       this.adminUserConfig.ownRisk = u.ownRisk;
       this.adminUserConfig.license = u.license;
     },
-    handleMyNautiqueUpdate: function (data) {
-      this.myNautiqueConfig.enabled = data.enabled;
-      this.myNautiqueConfig.user = data.user;
-      this.myNautiqueConfig.password = data.password;
-    },
     addAdminUser: function () {
       // check for obvious validation errors
       const errors = this.validateAdminUser();
@@ -248,23 +217,6 @@ export default {
       User.makeAdmin(userId)
         .then(() => {
           this.errors = [];
-          this.isLoading = false;
-          this.getBackendStatus();
-        })
-        .catch((errors) => {
-          this.errors = errors;
-          this.isLoading = false;
-        });
-    },
-    setMyNautiqueSettings: function () {
-      this.isLoading = true;
-      console.log("myNautiqueConfig", this.myNautiqueConfig);
-      Configuration.setMyNautiqueConfig({
-        enabled: this.myNautiqueConfig.enabled,
-        mynautiqueUser: this.myNautiqueConfig.user,
-        mynautiquePassword: this.myNautiqueConfig.password,
-      })
-        .then(() => {
           this.isLoading = false;
           this.getBackendStatus();
         })
@@ -342,12 +294,9 @@ export default {
           } else if (status.usersExist == false) {
             // database is up, but there is no (admin) user yet
             this.setupStep = 1;
-          } else if (status.myNautiqueConfigured == false) {
-            // all good but myNautique has not been setup
-            this.setupStep = 2;
           } else {
             // setup is done
-            this.setupStep = 3;
+            this.setupStep = 2;
           }
           this.isLoading = false;
         })
