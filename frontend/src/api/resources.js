@@ -1,3 +1,8 @@
+/**
+ * Uploads a logo file to the server.
+ * @param {} file 
+ * @returns the URI to the file.
+ */
 export const uploadLogo = (file) => {
   return new Promise((resolve, reject) => {
     console.log("Uploading:", file);
@@ -13,8 +18,9 @@ export const uploadLogo = (file) => {
           .json()
           .then((data) => {
             if (data.ok) {
-              console.log("resources/uploadLogo: response:", data.msg);
-              resolve(data.data.uri);
+              console.log("resources/uploadLogo: response:", data);
+              const response = data.data;
+              resolve(response);
             } else {
               console.log(
                 "resources/uploadLogo: issue while uploading logo:",

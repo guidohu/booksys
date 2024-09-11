@@ -2,7 +2,7 @@
   <sectioned-card-module>
     <template v-slot:body>
       <warning-box v-if="errors.length > 0" :errrors="errors" />
-      <logo-upload @logoChanged="logoChangeHandler" />
+      <logo-upload @logo-changed="logoChangeHandler" />
       <form @submit.stop="save">
         <div class="alert alert-info">
           Settings related to the boat you are using.
@@ -250,8 +250,9 @@ export default {
   },
   methods: {
     ...mapActions("configuration", ["queryConfiguration", "setConfiguration"]),
-    logoChangeHandler: function (logoUri) {
-      this.form.logoFile = logoUri;
+    logoChangeHandler: function (logoFilename) {
+      console.debug("logoChangeHandler", logoFilename);
+      this.form.logoFile = logoFilename;
     },
     configChangeHandler: function () {
       const configuration = this.getSanitizedConfiguration();
@@ -363,6 +364,7 @@ export default {
   },
   watch: {
     getConfiguration: function (newValues) {
+      console.debug("getConfiguration() updated to new values:", newValues);
       this.setFormDefaults(newValues);
     },
     form: {

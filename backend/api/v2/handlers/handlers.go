@@ -107,8 +107,8 @@ func (h *Handler) WithAuthentication(next http.HandlerFunc) http.HandlerFunc {
 
 func (h *Handler) WithLogging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(r.Method, r.URL)
 		next.ServeHTTP(w, r)
+		fmt.Println(time.Now(), r.Method, r.URL)
 	})
 }
 

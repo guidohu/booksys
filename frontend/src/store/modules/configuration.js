@@ -10,7 +10,7 @@ const state = () => ({
   timezone: "Europe/Zurich",
   maxRiders: 12,
   logoFile: null,
-  logoUri: "",
+  logoUri: null,
   engineHourFormat: "hh.h",
   fuelPaymentType: null,
   myNautiqueEnabled: null,
@@ -66,6 +66,7 @@ const actions = {
   },
   queryConfiguration({ commit, state }) {
     if (state.CONFIG_LOADED == true) {
+      console.debug("Configuration is already loaded. Skip query for configuration on backend.");
       return;
     }
 
@@ -114,6 +115,7 @@ const actions = {
           // load latest configuration
           commit("invalidateConfiguration", {});
           dispatch("queryConfiguration", {});
+          dispatch("queryLogoFile", {});
           resolve();
         })
         .catch((errors) => {
@@ -152,6 +154,10 @@ const mutations = {
     state.recaptchaKey = response.key;
   },
   setLogoFile(state, value) {
+    if (value == "") {
+      state.logoUri = null;
+      return;
+    }
     state.logoUri = value;
   },
 };

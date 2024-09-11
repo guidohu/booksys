@@ -32,7 +32,7 @@ type ConfigurationMessage struct {
 	LocationLongitude      float32 `json:"location_longitude" validate:"required,longitude"`
 	LocationMap            string  `json:"location_map" validate:"omitempty,googlemapsurl"`
 	LocationTimeZone       string  `json:"location_time_zone" validate:"required"`
-	LogoFilePath           string  `json:"logo_file" validate:"omitempty,file"`
+	LogoFilePath           string  `json:"logo_file" validate:"omitempty,filepath"` // TODO: validator for uploaded file
 	MyNautiqueBoatID       int     `json:"mynautique_boat_id" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=10"`
 	MyNautiqueEnabled      bool    `json:"mynautique_enabled" validate:"omitempty,boolean"`
 	MyNautiqueFuelCapacity int     `json:"mynautique_fuel_capacity" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=10"`
@@ -588,18 +588,6 @@ func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.GetDB().UpdateOrInsertPropertyValues([]database.Configuration{
-		{
-			Property: "logo.file",
-			Value:    fileHash,
-		},
-	})
-	if err != nil {
-		slog.Warn("Cannot write file to configuration database", slog.String("file", localFileName), slog.String("error", err.Error()))
-		WriteFailureResponse("File cannot get stored on server.", w)
-		return
-	}
-
 	resp := &UploadLogoFileResponse{
 		URI:      localFileName,
 		FileName: fileHash,
@@ -619,7 +607,9 @@ func (h *Handler) GetLogoPath(w http.ResponseWriter, r *http.Request) {
 	uploadDir, _ := h.config.GetString("http.uploadpath")
 	slog.Warn("DEBUG: uploadDir", slog.String("dir", uploadDir))
 	resp := &GetLogoPathResponse{}
-	resp.URI = filepath.Join(uploadDir, conf.Value)
+	if conf.Value != "" {
+		resp.URI = filepath.Join(uploadDir, conf.Value)
+	}
 	WriteSuccessResponse("logo path", resp, w)
 }
 
