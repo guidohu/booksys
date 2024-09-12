@@ -1,6 +1,7 @@
 import Configuration from "@/api/configuration";
 
 const state = () => ({
+  ADMIN_CONFIG_LOADED: false,
   CONFIG_LOADED: false,
   configuration: null,
   recaptchaKey: null,
@@ -73,6 +74,26 @@ const actions = {
     return new Promise((resolve, reject) => {
       Configuration.getConfiguration()
       .then((config) => {
+        state.ADMIN_CONFIG_LOADED = true;
+        commit("setConfiguration", config);
+        resolve(config);
+      })
+      .catch((errors) => {
+        commit("setConfiguration", null);
+        reject(errors);
+      })
+    })
+  },
+  queryAdminConfiguration({ commit, state }) {
+    if (state.ADMIN_CONFIG_LOADED == true) {
+      console.debug("Admin Configuration is already loaded. Skip query for configuration on backend.");
+      return;
+    }
+
+    return new Promise((resolve, reject) => {
+      Configuration.getAdminConfiguration()
+      .then((config) => {
+        state.ADMIN_CONFIG_LOADED = true;
         commit("setConfiguration", config);
         resolve(config);
       })
@@ -127,6 +148,7 @@ const actions = {
 
 const mutations = {
   invalidateConfiguration(state) {
+    state.ADMIN_CONFIG_LOADED = false;
     state.CONFIG_LOADED = false;
   },
   setConfiguration(state, value) {
@@ -146,8 +168,6 @@ const mutations = {
     state.fuelPaymentType = value.fuel_payment_type;
     state.myNautiqueEnabled = value.mynautique_enabled;
     state.myNautiqueBoatId = value.mynautique_boat_id;
-
-    state.CONFIG_LOADED = true;
     console.log("configuration set to", value);
   },
   setRecaptchaKey(state, response) {

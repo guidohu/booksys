@@ -249,7 +249,7 @@ export default {
     ...mapGetters("configuration", ["getConfiguration"]),
   },
   methods: {
-    ...mapActions("configuration", ["queryConfiguration", "setConfiguration"]),
+    ...mapActions("configuration", ["queryAdminConfiguration", "setConfiguration"]),
     logoChangeHandler: function (logoFilename) {
       console.debug("logoChangeHandler", logoFilename);
       this.form.logoFile = logoFilename;
@@ -376,7 +376,7 @@ export default {
     },
   },
   created() {
-    this.queryConfiguration();
+    this.queryAdminConfiguration();
   },
   mounted() {
     this.setFormDefaults(this.getConfiguration);

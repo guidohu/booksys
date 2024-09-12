@@ -203,10 +203,10 @@ export default {
       this.newLogoUri = null;
       this.logoState = States.REPLACE;
     },
-    ...mapActions("configuration", ["queryConfiguration"]),
+    ...mapActions("configuration", ["queryAdminConfiguration"]),
   },
   created() {
-    this.queryConfiguration()
+    this.queryAdminConfiguration()
       .then(() => {
         if (this.getLogoUri == null) {
           this.logoState = States.NOLOGO;

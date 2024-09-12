@@ -271,7 +271,7 @@ func main() {
 	mux.Handle("/api/v2/boat/maintenance-entry/add", http.HandlerFunc(h.WithAuthentication(h.AddMaintenanceEntry)))
 	mux.Handle("/api/v2/boat/mynautique/telemetry/get", http.HandlerFunc(h.WithAuthentication(h.GetBoatTelemetry)))
 
-	mux.Handle("/api/v2/configuration/list", http.HandlerFunc(h.WithAuthentication(h.GetConfiguration)))
+	mux.Handle("/api/v2/configuration/list", http.HandlerFunc(h.WithAuthentication(h.GetPublicConfiguration)))
 	mux.Handle("/api/v2/configuration/logo", http.HandlerFunc(h.GetLogoPath))
 	mux.Handle("/api/v2/configuration/recaptcha-key", http.HandlerFunc(h.GetRecaptchaKey))
 
@@ -326,6 +326,7 @@ func main() {
 	mux.Handle("/api/v2/user/password/token-request", http.HandlerFunc(h.GetPasswordResetToken))
 	mux.Handle("/api/v2/user/roles/get", http.HandlerFunc(h.WithAuthentication(h.GetUserRoles)))
 
+	mux.Handle("/api/v2/admin/configuration/list", http.HandlerFunc(h.WithAuthentication(h.GetConfiguration)))
 	mux.Handle("/api/v2/admin/configuration/set", http.HandlerFunc(h.WithAuthentication(h.SetConfiguration)))
 	mux.Handle("/api/v2/admin/logs", http.HandlerFunc(h.WithAuthentication(h.GetLogs)))
 	mux.Handle("/api/v2/admin/upload/logo", http.HandlerFunc(h.WithAuthentication(h.UploadLogoFile)))

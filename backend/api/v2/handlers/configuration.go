@@ -23,6 +23,27 @@ import (
 // 	DBPassword   string `json:"db_password,omitempty"`
 // }
 
+// PublicConfigurationMessage represents the public configuration of the server.
+// It is available to regular users that are logged in.
+type PublicConfigurationMessage struct {
+	Currency               string  `json:"currency" validate:"required,excludesall={} []!()<>"`
+	EngineHourFormat       string  `json:"engine_hour_format" validate:"required,oneof=hh.h hh:mm"`
+	FuelPaymentType        string  `json:"fuel_payment_type" validate:"required,oneof=billed instant"`
+	LocationAddress        string  `json:"location_address" validate:"excludesall={}[]!><"`
+	LocationLatitude       float32 `json:"location_latitude" validate:"required,latitude"`
+	LocationLongitude      float32 `json:"location_longitude" validate:"required,longitude"`
+	LocationMap            string  `json:"location_map" validate:"omitempty,googlemapsurl"`
+	LocationTimeZone       string  `json:"location_time_zone" validate:"required"`
+	LogoFilePath           string  `json:"logo_file" validate:"omitempty,filepath"` // TODO: validator for uploaded file
+	MyNautiqueEnabled      bool    `json:"mynautique_enabled" validate:"omitempty,boolean"`
+	MyNautiqueFuelCapacity int     `json:"mynautique_fuel_capacity" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=10"`
+	PaymentAccountBIC      string  `json:"payment_account_bic" validate:"omitempty,printascii"`
+	PaymentAccountComment  string  `json:"payment_account_comment"`
+	PaymentAccountIBAN     string  `json:"payment_account_iban" validate:"omitempty,printascii"`
+	PaymentAccountOwner    string  `json:"payment_account_owner"`
+	RecaptchaPublicKey     string  `json:"recaptcha_publickey" validate:"omitempty,recaptchakey,required_with=RecaptchaPrivateKey"`
+}
+
 type ConfigurationMessage struct {
 	Currency               string  `json:"currency" validate:"required,excludesall={} []!()<>"`
 	EngineHourFormat       string  `json:"engine_hour_format" validate:"required,oneof=hh.h hh:mm"`
@@ -194,9 +215,7 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 // 	WriteSuccessResponse("success", resp, w)
 // }
 
-// TODO create public and non public version of this
-// E.g. Public version should not contain private info like mynautique, db, ... things.
-func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetPublicConfiguration(w http.ResponseWriter, r *http.Request) {
 	session := GetSessionFromContext(r)
 	if !session.Valid() {
 		slog.Warn("Call to GetConfiguration without authentication")
@@ -210,7 +229,6 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("Cannot get configuration", w)
 		return
 	}
-
 	pMap := make(map[string]string)
 	for _, p := range properties {
 		pMap[p.Property] = p.Value
@@ -226,13 +244,6 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Cannot convert location.longitude to float", slog.String("error", err.Error()))
 		lon = 0
 	}
-	boatid, err := strconv.Atoi(pMap["mynautique.boat.id"])
-	if pMap["mynautique.boat.id"] == "" {
-		boatid = 0
-	} else if err != nil {
-		slog.Error("Cannot convert mynautique.boat.id to int", slog.String("error", err.Error()))
-		boatid = 0
-	}
 	mynautiqueEnabled, err := strconv.ParseBool(pMap["mynautique.enabled"])
 	if pMap["mynautique.enabled"] == "" {
 		mynautiqueEnabled = false
@@ -247,7 +258,8 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Cannot convert boat.fuel.capacity to int", slog.String("error", err.Error()))
 		mynautiqueFuelCapacity = 0
 	}
-	resp := &ConfigurationMessage{
+
+	resp := &PublicConfigurationMessage{
 		Currency:               pMap["currency"],
 		EngineHourFormat:       pMap["engine.hour.format"],
 		FuelPaymentType:        pMap["fuel.payment.type"],
@@ -257,34 +269,22 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 		LocationMap:            pMap["location.map"],
 		LocationTimeZone:       pMap["location.timezone"],
 		LogoFilePath:           pMap["logo.file"],
-		MyNautiqueBoatID:       boatid,
 		MyNautiqueEnabled:      mynautiqueEnabled,
 		MyNautiqueFuelCapacity: mynautiqueFuelCapacity,
-		MyNautiquePassword:     "hidden",
-		MyNautiqueUser:         pMap["mynautique.user"],
 		PaymentAccountBIC:      pMap["payment.account.bic"],
 		PaymentAccountComment:  pMap["payment.account.comment"],
 		PaymentAccountIBAN:     pMap["payment.account.iban"],
 		PaymentAccountOwner:    pMap["payment.account.owner"],
-		RecaptchaPrivateKey:    pMap["recaptcha.privatekey"],
 		RecaptchaPublicKey:     pMap["recaptcha.publickey"],
-		SMTPPassword:           "hidden",
-		SMTPSender:             pMap["smtp.sender"],
-		SMTPServer:             pMap["smtp.server"],
-		SMTPUsername:           pMap["smtp.username"],
 	}
 	WriteSuccessResponse("configuration", resp, w)
 }
 
-func (h *Handler) GetConfigurationAsAdmin(w http.ResponseWriter, r *http.Request) {
+// TODO create public and non public version of this
+// E.g. Public version should not contain private info like mynautique, db, ... things.
+func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 	session := GetSessionFromContext(r)
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
-
-	if !session.Valid() {
-		slog.Warn("Call to GetConfiguration without authentication")
-		WriteFailureResponse("Not authenticated", w)
 		return
 	}
 
