@@ -15,7 +15,8 @@ func (h *Handler) GetLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logs, err := h.GetDB().GetLogs()
+	dbh := h.GetDB()
+	logs, err := dbh.GetLogs()
 	if err != nil {
 		slog.Warn("cannot get logs", slog.String("error", err.Error()))
 		WriteFailureResponse("cannot get logs", w)

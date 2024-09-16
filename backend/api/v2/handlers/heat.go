@@ -68,8 +68,9 @@ func (h *Handler) AddHeats(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) addHeat(heat AddHeatRequest) error {
+	dbh := h.GetDB()
 	// Get user
-	user, err := h.GetDB().GetUserById(heat.UserID)
+	user, err := dbh.GetUserById(heat.UserID)
 	if err != nil {
 		slog.Warn("Cannot get user information for", slog.Uint64("user", uint64(heat.UserID)), slog.String("error", err.Error()))
 		return fmt.Errorf("cannot get user")
@@ -77,7 +78,7 @@ func (h *Handler) addHeat(heat AddHeatRequest) error {
 
 	// Check that session exists.
 	if heat.SessionID != 0 {
-		session, err := h.GetDB().GetSession(heat.SessionID)
+		session, err := dbh.GetSession(heat.SessionID)
 		if err != nil || session.ID == 0 {
 			slog.Warn("Cannot find session", slog.Uint64("session", uint64(heat.SessionID)), slog.String("error", err.Error()))
 			return fmt.Errorf("cannot get pricing information for user")
@@ -85,7 +86,7 @@ func (h *Handler) addHeat(heat AddHeatRequest) error {
 	}
 
 	// Get pricing
-	pricing, err := h.GetDB().GetUserStatusToPricingsMap()
+	pricing, err := dbh.GetUserStatusToPricingsMap()
 	if err != nil {
 		slog.Warn("Cannot get pricing information for user", slog.Uint64("user", uint64(heat.UserID)), slog.String("error", err.Error()))
 		return fmt.Errorf("cannot get pricing information for user")
@@ -110,7 +111,7 @@ func (h *Handler) addHeat(heat AddHeatRequest) error {
 		Cost:            h.calculateHeatCost(heat.DurationSeconds, price),
 		Comment:         heat.Comment,
 	}
-	err = h.GetDB().AddHeat(&newHeat)
+	err = dbh.AddHeat(&newHeat)
 	if err != nil {
 		slog.Warn("Cannot add heat", slog.String("error", err.Error()))
 		return fmt.Errorf("cannot add the heat to the database")
@@ -151,7 +152,8 @@ func (h *Handler) DeleteHeat(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("Invalid request.", w)
 		return
 	}
-	err = h.GetDB().DeleteHeat(req.HeatID)
+	dbh := h.GetDB()
+	err = dbh.DeleteHeat(req.HeatID)
 	if err != nil {
 		slog.Warn("Could not delete heat", slog.String("error", err.Error()))
 		WriteFailureResponse("Could not delete heat, heat not valid.", w)
@@ -173,8 +175,9 @@ func (h *Handler) ChangeHeat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	dbh := h.GetDB()
 	// Get user
-	user, err := h.GetDB().GetUserById(req.UserID)
+	user, err := dbh.GetUserById(req.UserID)
 	if err != nil {
 		slog.Warn("Cannot get user information for", slog.Uint64("user", uint64(req.UserID)), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot find user.", w)
@@ -182,7 +185,7 @@ func (h *Handler) ChangeHeat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get pricing
-	pricing, err := h.GetDB().GetUserStatusToPricingsMap()
+	pricing, err := dbh.GetUserStatusToPricingsMap()
 	if err != nil {
 		slog.Warn("Cannot get pricing information for user", slog.Uint64("user", uint64(user.ID)), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get pricing information.", w)
@@ -202,7 +205,7 @@ func (h *Handler) ChangeHeat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get existing heat
-	heat, err := h.GetDB().GetHeat(req.HeatID)
+	heat, err := dbh.GetHeat(req.HeatID)
 	if err != nil || heat.ID == 0 {
 		slog.Warn("Cannot find existing heat", slog.Uint64("heat", uint64(req.HeatID)), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot find existing heat.", w)
@@ -219,7 +222,7 @@ func (h *Handler) ChangeHeat(w http.ResponseWriter, r *http.Request) {
 		Cost:            cost,
 		Comment:         req.Comment,
 	}
-	err = h.GetDB().ChangeHeat(&newHeat)
+	err = dbh.ChangeHeat(&newHeat)
 	if err != nil {
 		slog.Warn("Cannot change heat", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot update existing heat.", w)

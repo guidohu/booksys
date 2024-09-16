@@ -94,18 +94,19 @@ func (h *Handler) GetBookingSeries(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getBooking(start time.Time, end time.Time) (GetBookingResponse, error) {
+	dbh := h.GetDB()
 	sunrise, sunset := h.getSunriseSunset(start)
-	timezone, err := h.GetDB().GetPropertyValue("location.timezone")
+	timezone, err := dbh.GetPropertyValue("location.timezone")
 	if err != nil {
 		slog.Warn("Cannot retrieve location.timezone from the database", slog.String("error", err.Error()))
 		return GetBookingResponse{}, err
 	}
-	businessDayStart, err := h.GetDB().GetPropertyValue("business.day.start")
+	businessDayStart, err := dbh.GetPropertyValue("business.day.start")
 	if err != nil {
 		slog.Warn("Cannot retrieve business.day.start from the database", slog.String("error", err.Error()))
 		return GetBookingResponse{}, err
 	}
-	businessDayEnd, err := h.GetDB().GetPropertyValue("business.day.end")
+	businessDayEnd, err := dbh.GetPropertyValue("business.day.end")
 	if err != nil {
 		slog.Warn("Cannot retrieve business.day.end from the database", slog.String("error", err.Error()))
 		return GetBookingResponse{}, err
@@ -122,7 +123,7 @@ func (h *Handler) getBooking(start time.Time, end time.Time) (GetBookingResponse
 	}
 
 	// get sessions for that timeframe
-	s, err := h.GetDB().GetSessionsBetween(start, end)
+	s, err := dbh.GetSessionsBetween(start, end)
 	if err != nil {
 		slog.Warn("Cannot retrieve the sessions from the database", slog.String("error", err.Error()))
 		return GetBookingResponse{}, err
@@ -162,7 +163,8 @@ func (h *Handler) getBooking(start time.Time, end time.Time) (GetBookingResponse
 
 func (h *Handler) getRiders(sessionID uint) ([]database.User, error) {
 	users := []database.User{}
-	usersToSession, err := h.GetDB().GetUsersForSession(sessionID)
+	dbh := h.GetDB()
+	usersToSession, err := dbh.GetUsersForSession(sessionID)
 	if err != nil {
 		slog.Warn("Cannot retrieve users for", slog.Uint64("session", uint64(sessionID)), slog.String("error", err.Error()))
 		return users, err
@@ -174,11 +176,12 @@ func (h *Handler) getRiders(sessionID uint) ([]database.User, error) {
 }
 
 func (h *Handler) getSunriseSunset(date time.Time) (time.Time, time.Time) {
-	latProperty, err := h.GetDB().GetPropertyValue("location.latitude")
+	dbh := h.GetDB()
+	latProperty, err := dbh.GetPropertyValue("location.latitude")
 	if err != nil {
 		return time.Time{}, time.Time{}
 	}
-	lonProperty, err := h.GetDB().GetPropertyValue("location.longitude")
+	lonProperty, err := dbh.GetPropertyValue("location.longitude")
 	if err != nil {
 		return time.Time{}, time.Time{}
 	}

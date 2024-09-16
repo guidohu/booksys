@@ -15,6 +15,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"server/database"
 	"server/yaml"
 	"sort"
@@ -41,7 +42,7 @@ type DBConfig struct {
 	Port     string `yaml:"port"`
 	User     string `yaml:"user"`
 	Password string `yaml:"password"`
-	DBName   string `yaml:"dbName"`
+	DBName   string `yaml:"dbname"`
 }
 
 type HttpConfig struct {
@@ -141,21 +142,31 @@ func GetKeysMap() map[string]bool {
 // }
 
 func (c *Config) IsDBConfigured() bool {
-	switch {
-	case !c.IsSet("database.protocol"):
-		return false
-	case !c.IsSet("database.password"):
-		return false
-	case !c.IsSet("database.user"):
-		return false
-	case !c.IsSet("database.host"):
-		return false
-	case !c.IsSet("database.port"):
-		return false
-	case !c.IsSet("database.dbname"):
+	protocol, _ := c.GetString("database.protocol")
+	if protocol == "" {
+		slog.Info("Database protocol is not set in configuration")
 		return false
 	}
-
+	user, _ := c.GetString("database.user")
+	if user == "" {
+		slog.Info("Databse user is not set in configuration")
+		return false
+	}
+	host, _ := c.GetString("database.host")
+	if host == "" {
+		slog.Info("Database host is not set in configuration")
+		return false
+	}
+	port, _ := c.GetString("database.port")
+	if port == "" {
+		slog.Info("Database port is not set in configuration")
+		return false
+	}
+	dbname, _ := c.GetString("database.dbname")
+	if dbname == "" {
+		slog.Info("Database name is not set in configuration")
+		return false
+	}
 	return true
 }
 
@@ -210,7 +221,7 @@ var MandatoryConfigKeys = []string{
 }
 
 var ConfigDefaults map[string]string = map[string]string{
-	"config":                        "",
+	"config":                        "./config.yaml",
 	"http.port":                     "80",
 	"http.sessioninactivitytimeout": "604800",
 	"http.sessiontimeout":           "31536000",
@@ -327,6 +338,27 @@ func (c *Config) SetPropertyValue(key string, value string) error {
 }
 
 func (c *Config) WriteConfigFile() error {
+	// if file does not exist, we try to create it first.
+	location, _ := c.GetString("config")
+	if location == "" {
+		return fmt.Errorf("no config file path provided to store config")
+	}
+	if _, err := os.Stat(location); err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(filepath.Dir(location), 0755)
+			if err != nil {
+				return fmt.Errorf("cannot create directory for config file path: %v", err)
+			}
+			file, err := os.Create(location)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+		} else {
+			return fmt.Errorf("cannot access config file path: %v", err)
+		}
+	}
+	c.file.SetConfigFile(location)
 	return c.file.WriteConfig()
 }
 
@@ -404,6 +436,8 @@ func (c *Config) ToStringFull() string {
 			}
 			if v.IsSet(key) {
 				value = v.GetString(key)
+			} else {
+				value = "<not set>"
 			}
 			s.WriteString(fmt.Sprintf("%-30s:\t%-20s%-10s\n", key, value, identifier))
 		}
@@ -435,7 +469,11 @@ func (c *Config) ToStringFull() string {
 	sort.Strings(dbKeys)
 	for _, key := range dbKeys {
 		v := c.properties[key]
-		s.WriteString(fmt.Sprintf("%-30s:\t%s\n", key, v.Value))
+		value := v.Value
+		if value == "" {
+			value = "<not set>"
+		}
+		s.WriteString(fmt.Sprintf("%-30s:\t%s\n", key, value))
 	}
 
 	// print defaults

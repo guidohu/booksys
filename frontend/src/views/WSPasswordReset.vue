@@ -21,7 +21,7 @@
                 autocomplete="username"
               />
               <!-- Captcha -->
-              <div v-if="getRecaptchaKey != null" class="row mt-3">
+              <div v-if="getRecaptchaKey != null && getRecaptchaKey.length > 0" class="row mt-3">
                 <div class="col-12">
                   <vue-recaptcha
                     :sitekey="getRecaptchaKey"

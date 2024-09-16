@@ -54,7 +54,8 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get user from database
-	lookupUser, err := h.GetDB().GetUserByName(req.Username)
+	dbh := h.GetDB()
+	lookupUser, err := dbh.GetUserByName(req.Username)
 	if err != nil {
 		slog.Warn("User not found", slog.String("username", req.Username))
 		WriteFailureResponse("invalid username/password", w)
@@ -88,7 +89,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// generate a browser session that we store in the sessions db
-	u, err := h.GetDB().GetUserById(lookupUser.ID)
+	u, err := dbh.GetUserById(lookupUser.ID)
 	if err != nil {
 		slog.Warn("Cannot retrieve user details for", slog.String("user", lookupUser.Username))
 		WriteFailureResponse("invalid username/password", w)
@@ -116,7 +117,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		UserStatus:    u.UserStatusID,
 		UserRoleID:    u.UserStatus.UserRole.ID,
 	}
-	_, err = h.GetDB().AddBrowserSession(session)
+	_, err = dbh.AddBrowserSession(session)
 	if err != nil {
 		slog.Error("Cannot add browser session to database", slog.String("error", err.Error()))
 		WriteFailureResponse("invalid username/password", w)
@@ -139,8 +140,9 @@ func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	dbh := h.GetDB()
 	// Check if we know of that session and whether it is not expired yet
-	session, err := h.GetDB().GetBrowserSession(cookie.Value)
+	session, err := dbh.GetBrowserSession(cookie.Value)
 	if err != nil || !session.Valid() {
 		WriteSuccessResponse("not logged in", resp, w)
 		DeleteSessionCookie(w)
@@ -152,7 +154,7 @@ func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 	// TODO only update if creation time is not older than max session time
 
 	resp.LoggedIn = true
-	err = h.GetDB().UpdateBrowserSession(*session)
+	err = dbh.UpdateBrowserSession(*session)
 	if err != nil {
 		slog.Info("Cannot update browser session", slog.String("user", session.Username), slog.String("session", session.SessionSecret), slog.String("error", err.Error()))
 	}
@@ -167,7 +169,8 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.GetDB().DeleteBrowserSession(session)
+	dbh := h.GetDB()
+	err := dbh.DeleteBrowserSession(session)
 	if err != nil {
 		slog.Error("Cannot delete browser session", slog.String("error", err.Error()))
 	}
@@ -183,7 +186,8 @@ func (h *Handler) User(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.GetDB().GetUserById(session.UserID)
+	dbh := h.GetDB()
+	user, err := dbh.GetUserById(session.UserID)
 	if err != nil {
 		slog.Error("Cannot retrieve user information", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot retrieve user informaiton", w)

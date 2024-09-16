@@ -119,7 +119,8 @@ func (h *Handler) GetEngineHourLatest(w http.ResponseWriter, r *http.Request) {
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return
 	}
-	b, err := h.GetDB().GetEngineHourLatest()
+	dbh := h.GetDB()
+	b, err := dbh.GetEngineHourLatest()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Warn("Cannot get latest engine hour entry", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get latest engine hour entry.", w)
@@ -145,7 +146,8 @@ func (h *Handler) GetEngineHoursList(w http.ResponseWriter, r *http.Request) {
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return
 	}
-	engineHours, err := h.GetDB().GetEngineHours()
+	dbh := h.GetDB()
+	engineHours, err := dbh.GetEngineHours()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Warn("Cannot get engine hours", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get engine hours.", w)
@@ -183,8 +185,9 @@ func (h *Handler) UpdateEngineHours(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	dbh := h.GetDB()
 	// check that user is an admin user
-	isAdmin, _ := h.GetDB().IsAdminUser(req.UserID)
+	isAdmin, _ := dbh.IsAdminUser(req.UserID)
 	if !isAdmin {
 		slog.Warn("Non admin user tried to update engine hours.", slog.Uint64("userID", uint64(req.UserID)))
 		WriteFailureResponse("Non admin user is not allowed to change engine hours.", w)
@@ -192,7 +195,7 @@ func (h *Handler) UpdateEngineHours(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get latest entry
-	latest, err := h.GetDB().GetEngineHourLatest()
+	latest, err := dbh.GetEngineHourLatest()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Warn("Cannot get latest engine hour entry", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get latest engine hour entry.", w)
@@ -228,16 +231,16 @@ func (h *Handler) UpdateEngineHours(w http.ResponseWriter, r *http.Request) {
 	if latest.BeforeHours.IsZero() && latest.AfterHours.IsZero() && !latest.CheckedIn {
 		// this is the first entry
 		entry.CheckedIn = true
-		err = h.GetDB().AddEngineHours(entry)
+		err = dbh.AddEngineHours(entry)
 	} else if !req.BeforeHours.IsZero() && req.AfterHours.IsZero() && !latest.CheckedIn {
 		// start new half entry
 		entry.CheckedIn = true
-		err = h.GetDB().AddEngineHours(entry)
+		err = dbh.AddEngineHours(entry)
 	} else if latest.AfterHours.IsZero() && !req.AfterHours.IsZero() && latest.CheckedIn {
 		// finish half entry
 		entry.ID = latest.ID
 		entry.CheckedIn = false
-		err = h.GetDB().UpdateEngineHours(entry)
+		err = dbh.UpdateEngineHours(entry)
 	} else {
 		slog.Warn("Cannot add new engine hours, not a valid entry.", slog.Any("req", req))
 		WriteFailureResponse("Cannot add new engine hours, please check your input.", w)
@@ -265,7 +268,8 @@ func (h *Handler) UpdateEngineHoursEntry(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	entry, err := h.GetDB().GetEngineHoursEntry(req.ID)
+	dbh := h.GetDB()
+	entry, err := dbh.GetEngineHoursEntry(req.ID)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Warn("Cannot get engine hour entry", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot find engine hour entry.", w)
@@ -273,7 +277,7 @@ func (h *Handler) UpdateEngineHoursEntry(w http.ResponseWriter, r *http.Request)
 	}
 
 	entry.TypeID = req.UsageType
-	err = h.GetDB().UpdateEngineHours(entry)
+	err = dbh.UpdateEngineHours(entry)
 	if err != nil {
 		slog.Warn("Cannot update engine hour entry", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot update engine hour entry.", w)
@@ -287,7 +291,9 @@ func (h *Handler) GetFuelEntries(w http.ResponseWriter, r *http.Request) {
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return
 	}
-	fuelEntries, err := h.GetDB().GetFuelEntries()
+
+	dbh := h.GetDB()
+	fuelEntries, err := dbh.GetFuelEntries()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Warn("Cannot get fuel entries", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get fuel entries.", w)
@@ -341,15 +347,16 @@ func (h *Handler) AddFuelEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	dbh := h.GetDB()
 	// Check that user is an admin user
-	isAdmin, _ := h.GetDB().IsAdminUser(req.UserID)
+	isAdmin, _ := dbh.IsAdminUser(req.UserID)
 	if !isAdmin {
 		slog.Warn("Non admin user tried to add fuel entry.", slog.Uint64("userID", uint64(req.UserID)))
 		WriteFailureResponse("Non admin user is not allowed to change engine hours.", w)
 		return
 	}
 
-	billType, err := h.GetDB().GetPropertyValue("fuel.payment.type")
+	billType, err := dbh.GetPropertyValue("fuel.payment.type")
 	if err != nil {
 		slog.Warn("Cannot determine whether fuel is billed or paid directly", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot determine whether fuel is billed or paid directly.", w)
@@ -365,7 +372,7 @@ func (h *Handler) AddFuelEntry(w http.ResponseWriter, r *http.Request) {
 		CostBrutto:          nil,
 		ContributeToBalance: billType.Value != "billed",
 	}
-	err = h.GetDB().AddFuelEntry(entry)
+	err = dbh.AddFuelEntry(entry)
 	if err != nil {
 		slog.Warn("Cannot add fuel entry", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot add fuel entry.", w)
@@ -387,7 +394,8 @@ func (h *Handler) ChangeFuelEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	entry, err := h.GetDB().GetFuelEntry(req.ID)
+	dbh := h.GetDB()
+	entry, err := dbh.GetFuelEntry(req.ID)
 	if err != nil {
 		slog.Warn("Cannot find fuel entry", slog.Uint64("id", uint64(req.ID)), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot find existing fuel entry.", w)
@@ -405,7 +413,7 @@ func (h *Handler) ChangeFuelEntry(w http.ResponseWriter, r *http.Request) {
 		ContributeToBalance: entry.ContributeToBalance,
 		IsDiscounted:        req.IsDiscounted,
 	}
-	err = h.GetDB().ChangeFuelEntry(newEntry)
+	err = dbh.ChangeFuelEntry(newEntry)
 	if err != nil {
 		slog.Warn("Cannot change fuel entry", slog.Uint64("id", uint64(req.ID)), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot change existing fuel entry.", w)
@@ -420,7 +428,8 @@ func (h *Handler) GetMaintenanceEntries(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	logs, err := h.GetDB().GetMaintenance()
+	dbh := h.GetDB()
+	logs, err := dbh.GetMaintenance()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Warn("Cannot get fuel entries", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get fuel entries.", w)
@@ -455,7 +464,8 @@ func (h *Handler) AddMaintenanceEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !h.GetDB().UserExists(req.UserID) {
+	dbh := h.GetDB()
+	if !dbh.UserExists(req.UserID) {
 		slog.Warn("Request payload is not valid", slog.String("error", "user does not exist"))
 		WriteFailureResponse("Please provide a valid user ID.", w)
 		return
@@ -468,7 +478,7 @@ func (h *Handler) AddMaintenanceEntry(w http.ResponseWriter, r *http.Request) {
 		EngineHours: req.EngineHours,
 		Description: req.Description,
 	}
-	err = h.GetDB().AddMaintenanceEntry(entry)
+	err = dbh.AddMaintenanceEntry(entry)
 	if err != nil {
 		slog.Warn("Cannot add maintenance entry", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot add maintenance entry.", w)

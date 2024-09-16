@@ -85,7 +85,8 @@ func (h *Handler) WithAuthentication(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		session, err := h.GetDB().GetBrowserSession(cookie.Value)
+		dbh := h.GetDB()
+		session, err := dbh.GetBrowserSession(cookie.Value)
 		if err != nil || session == nil {
 			slog.Warn("No session found for given cookie", slog.String("error", err.Error()))
 			WriteFailureResponse("not authenticated", w)

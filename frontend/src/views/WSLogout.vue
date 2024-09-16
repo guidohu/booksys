@@ -21,7 +21,7 @@ export default {
     CardModule,
   },
   created() {
-    this.logout();
+    this.logout().catch(() => console.error("Logout failed."));
   },
   methods: {
     ...mapActions("login", ["logout"]),

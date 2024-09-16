@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"math/rand"
 	"net/http"
@@ -264,8 +263,9 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	dbh := h.GetDB()
 	// Get recaptcha keys (resp, entire configuration).
-	config, err := h.GetDB().GetAllPropertyValuesMap()
+	config, err := dbh.GetAllPropertyValuesMap()
 	if err != nil {
 		slog.Warn("Cannot load internal configuration properties", slog.String("error", err.Error()))
 		WriteFailureResponse("Internal error, cannot sign up user.", w)
@@ -285,7 +285,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if user already exists to not overwrite it
-	if _, err = h.GetDB().GetUserByName(req.Username); err == nil {
+	if _, err = dbh.GetUserByName(req.Username); err == nil {
 		slog.Warn("Signup an already existing user", slog.String("user", req.Username))
 		WriteFailureResponse("user already exists", w)
 		return
@@ -316,7 +316,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		UserStatusID:  database.UserStatusGuest,
 		Locked:        true,
 	}
-	id, err := h.GetDB().AddUser(user)
+	id, err := dbh.AddUser(user)
 	if err != nil {
 		slog.Warn("User could not be added to database", slog.String("error", err.Error()))
 		WriteFailureResponse("user cannot be created, please contact the administrator", w)
@@ -338,16 +338,17 @@ func (h *Handler) MakeAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	dbh := h.GetDB()
 	// check if an admin user exists already
 	// only the very first user can become an admin
-	if h.GetDB().CountAdminUsers() > 0 {
+	if dbh.CountAdminUsers() > 0 {
 		slog.Warn("An admin user already exists, cannot make the user 'administrator'", slog.String("ID", strconv.Itoa(req.UserID)))
 		WriteFailureResponse("An admin user already exists, cannot make the user 'administrator'", w)
 		return
 	}
 
 	// change the actual user status
-	err = h.GetDB().ChangeUserStatus(uint(req.UserID), database.UserStatusAdmin)
+	err = dbh.ChangeUserStatus(uint(req.UserID), database.UserStatusAdmin)
 	if err != nil {
 		slog.Warn("Cannot make the user an 'administrator', database action failed", slog.String("ID", strconv.Itoa(req.UserID)), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot make user an administrator. Call to DB failed.", w)
@@ -355,7 +356,7 @@ func (h *Handler) MakeAdmin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// unlock the user (users get created locked by default)
-	err = h.GetDB().ChangeLock(uint(req.UserID), false)
+	err = dbh.ChangeLock(uint(req.UserID), false)
 	if err != nil {
 		slog.Warn("Cannot unlock the new user, database action failed", slog.String("ID", strconv.Itoa(req.UserID)), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot make user an administrator. Call to DB failed.", w)
@@ -386,7 +387,8 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.GetDB().GetUserById(req.UserID)
+	dbh := h.GetDB()
+	user, err := dbh.GetUserById(req.UserID)
 	if err != nil {
 		slog.Warn("Cannot find", slog.Int("user_id", int(req.UserID)), ":", err.Error())
 		WriteFailureResponse("User not found.", w)
@@ -410,7 +412,7 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("Cannot delete user with non-zero balance.", w)
 		return
 	}
-	err = h.GetDB().DeleteUserById(req.UserID)
+	err = dbh.DeleteUserById(req.UserID)
 	if err != nil {
 		slog.Error("Cannot delete user", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot delete user.", w)
@@ -460,7 +462,8 @@ func (h *Handler) UpdateMyUser(w http.ResponseWriter, r *http.Request) {
 		IsDeleted:     false, // will not be set
 	}
 
-	err = h.GetDB().UpdateUser(session.UserID, user)
+	dbh := h.GetDB()
+	err = dbh.UpdateUser(session.UserID, user)
 	if err != nil {
 		slog.Warn("Cannot update user", slog.Uint64("userID", uint64(session.UserID)), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot update user", w)
@@ -485,8 +488,9 @@ func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	dbh := h.GetDB()
 	// verify that old password is correct
-	user, err := h.GetDB().GetUserById(session.UserID)
+	user, err := dbh.GetUserById(session.UserID)
 	if err != nil {
 		slog.Warn("Cannot find existing user by ID", slog.String("error", err.Error()))
 		WriteFailureResponse("password cannot be changed", w)
@@ -516,7 +520,7 @@ func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
 		PasswordSalt: salt,
 		PasswordHash: newPasswordHash,
 	}
-	err = h.GetDB().UpdatePassword(session.UserID, user)
+	err = dbh.UpdatePassword(session.UserID, user)
 	if err != nil {
 		slog.Warn("Password could no be stored in user table", slog.String("error", err.Error()))
 		WriteFailureResponse("Password could not be changed.", w)
@@ -533,7 +537,8 @@ func (h *Handler) GetMySessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessions, err := h.GetDB().GetSessionsByUser(session.UserID)
+	dbh := h.GetDB()
+	sessions, err := dbh.GetSessionsByUser(session.UserID)
 	if err != nil {
 		slog.Error("Cannot get user sessions", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get user sessions", w)
@@ -546,7 +551,7 @@ func (h *Handler) GetMySessions(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 	for _, s := range sessions {
 		// get riders for session
-		users, err := h.GetDB().GetUsersForSession(s.ID)
+		users, err := dbh.GetUsersForSession(s.ID)
 		if err != nil {
 			slog.Error("Cannot get users for session", slog.String("error", err.Error()))
 		}
@@ -590,7 +595,8 @@ func (h *Handler) GetMyHeats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	heats, err := h.GetDB().GetUserHeats(session.UserID, 100)
+	dbh := h.GetDB()
+	heats, err := dbh.GetUserHeats(session.UserID, 100)
 	if err != nil {
 		slog.Error("Cannot get user heats", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get user heats", w)
@@ -622,27 +628,27 @@ func (h *Handler) GetMyHeatStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	dbh := h.GetDB()
 	now := time.Now()
-	duration, cost, err := h.GetDB().GetUserHeatStats(session.UserID, time.Time{}, now)
+	duration, cost, err := dbh.GetUserHeatStats(session.UserID, time.Time{}, now)
 	if err != nil {
 		slog.Error("Cannot get total duration")
 		WriteFailureResponse("Cannot get stats from database", w)
 		return
 	}
-	loc, err := h.GetDB().GetTimezoneLocation()
+	loc, err := dbh.GetTimezoneLocation()
 	if err != nil {
 		slog.Error("Cannot get location", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get stats from database", w)
 		return
 	}
 	beginOfYear := time.Date(now.Year(), time.January, 0, 0, 0, 0, 0, loc)
-	durationYTD, costYTD, err := h.GetDB().GetUserHeatStats(session.UserID, beginOfYear, time.Now())
+	durationYTD, costYTD, err := dbh.GetUserHeatStats(session.UserID, beginOfYear, time.Now())
 	if err != nil {
 		slog.Error("Cannot get total duration")
 		WriteFailureResponse("Cannot get stats from database", w)
 		return
 	}
-	fmt.Println(durationYTD, costYTD)
 
 	resp := &GetMyHeatStatsResponse{
 		HeatTimeMinutesTotal: int64(math.Ceil(float64(duration) / 60.0)),
@@ -676,7 +682,8 @@ func (h *Handler) GetAllUsersShort(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	users, err := h.GetDB().GetUsers( /*includeDeleted=*/ false)
+	dbh := h.GetDB()
+	users, err := dbh.GetUsers( /*includeDeleted=*/ false)
 	if err != nil {
 		slog.Error("Cannot get users", slog.String("error", err.Error()))
 		WriteFailureResponse("cannot get users", w)
@@ -700,7 +707,8 @@ func (h *Handler) GetAllUsersDetailed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	users, err := h.GetDB().GetUsers( /*includeDeleted=*/ false)
+	dbh := h.GetDB()
+	users, err := dbh.GetUsers( /*includeDeleted=*/ false)
 	if err != nil {
 		slog.Error("Cannot get users", slog.String("error", err.Error()))
 		WriteFailureResponse("cannot get users", w)
@@ -709,19 +717,19 @@ func (h *Handler) GetAllUsersDetailed(w http.ResponseWriter, r *http.Request) {
 
 	usersDetailed := []UserDetailed{}
 	for _, u := range users {
-		duration, cost, err := h.GetDB().GetUserHeatStats(u.ID, time.Time{}, time.Now())
+		duration, cost, err := dbh.GetUserHeatStats(u.ID, time.Time{}, time.Now())
 		if err != nil {
 			slog.Error("Cannot get user heat duration and cost", slog.String("error", err.Error()))
 			WriteFailureResponse("cannot get heat duration and cost", w)
 			return
 		}
-		paybacks, err := h.GetDB().GetUserSessionPaybacks(u.ID)
+		paybacks, err := dbh.GetUserSessionPaybacks(u.ID)
 		if err != nil {
 			slog.Error("Cannot get user paybacks", slog.String("error", err.Error()))
 			WriteFailureResponse("cannot get user paybacks", w)
 			return
 		}
-		payments, err := h.GetDB().GetUserSessionPayments(u.ID)
+		payments, err := dbh.GetUserSessionPayments(u.ID)
 		if err != nil {
 			slog.Error("Cannot get user payments", slog.String("error", err.Error()))
 			WriteFailureResponse("cannot get user payments", w)
@@ -755,7 +763,8 @@ func (h *Handler) GetUserGroups(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pricings, err := h.GetDB().GetPricings()
+	dbh := h.GetDB()
+	pricings, err := dbh.GetPricings()
 	if err != nil {
 		slog.Error("Cannot get user groups", slog.String("error", err.Error()))
 		WriteFailureResponse("cannot get user groups", w)
@@ -804,7 +813,9 @@ func (h *Handler) CreateUserGroup(w http.ResponseWriter, r *http.Request) {
 		PricePerMinute: req.PricePerMinute,
 		Comment:        req.PriceDescription,
 	}
-	err = h.GetDB().CreateUserGroup(u, p)
+
+	dbh := h.GetDB()
+	err = dbh.CreateUserGroup(u, p)
 	if err != nil {
 		slog.Error("Cannot create new user group", slog.String("error", err.Error()))
 		WriteFailureResponse("cannot get create new user group", w)
@@ -841,7 +852,8 @@ func (h *Handler) ChangeUserGroup(w http.ResponseWriter, r *http.Request) {
 		PricePerMinute: req.PricePerMinute,
 		Comment:        req.PriceDescription,
 	}
-	err = h.GetDB().ChangeUserGroup(u, p)
+	dbh := h.GetDB()
+	err = dbh.ChangeUserGroup(u, p)
 	if err != nil {
 		slog.Error("Cannot update user group", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot update user group.", w)
@@ -864,7 +876,8 @@ func (h *Handler) DeleteUserGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.GetDB().DeleteUserGroup(req.UserGroupID)
+	dbh := h.GetDB()
+	err = dbh.DeleteUserGroup(req.UserGroupID)
 	if err != nil {
 		slog.Error("Cannot delete user group", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot delete user group.", w)
@@ -887,13 +900,14 @@ func (h *Handler) SetUserGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.GetDB().GetUserById(req.UserID)
+	dbh := h.GetDB()
+	user, err := dbh.GetUserById(req.UserID)
 	if err != nil {
 		slog.Error("Cannot find user", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot find user.", w)
 		return
 	}
-	userGroups, err := h.GetDB().GetPricings()
+	userGroups, err := dbh.GetPricings()
 	if err != nil {
 		slog.Error("Cannot get valid groups", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get valid groups.", w)
@@ -914,7 +928,7 @@ func (h *Handler) SetUserGroup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check that his user is not the only remaining admin
-	admins, err := h.GetDB().GetAdminUsers()
+	admins, err := dbh.GetAdminUsers()
 	if err != nil {
 		slog.Error("Cannot get admin users", slog.String("error", err.Error()))
 		WriteFailureResponse("Internal error, cannot lock/unlock user.", w)
@@ -926,7 +940,7 @@ func (h *Handler) SetUserGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.GetDB().SetUserGroup(user.ID, req.UserGroupID)
+	err = dbh.SetUserGroup(user.ID, req.UserGroupID)
 	if err != nil {
 		slog.Error("Cannot change user group for user", slog.Int("user_id", int(req.UserID)), slog.Int("user_group_id", int(req.UserGroupID)), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot change user group for user.", w)
@@ -941,7 +955,8 @@ func (h *Handler) GetUserRoles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	roles, err := h.GetDB().GetUserRoles()
+	dbh := h.GetDB()
+	roles, err := dbh.GetUserRoles()
 	if err != nil {
 		slog.Error("Cannot get user roles", slog.String("error", err.Error()))
 		WriteFailureResponse("cannot get user roles", w)
@@ -973,7 +988,8 @@ func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.GetDB().GetUserById(req.UserID)
+	dbh := h.GetDB()
+	user, err := dbh.GetUserById(req.UserID)
 	if err != nil {
 		slog.Error("Cannot find user", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot find user.", w)
@@ -981,7 +997,7 @@ func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check that this user is not the only remaining admin
-	admins, err := h.GetDB().GetAdminUsers()
+	admins, err := dbh.GetAdminUsers()
 	if err != nil {
 		slog.Error("Cannot get admin users", slog.String("error", err.Error()))
 		WriteFailureResponse("Internal error, cannot lock/unlock user.", w)
@@ -993,7 +1009,7 @@ func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.GetDB().ChangeLock(user.ID, req.Locked)
+	err = dbh.ChangeLock(user.ID, req.Locked)
 	if err != nil {
 		slog.Error("Cannot change lock status for user", slog.Int("user_id", int(req.UserID)), slog.Bool("locked", req.Locked), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot change user group for user.", w)
@@ -1003,20 +1019,21 @@ func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getUserBalance(userID uint) (*GetMyBalanceResponse, error) {
+	dbh := h.GetDB()
 	now := time.Now()
-	_, cost, err := h.GetDB().GetUserHeatStats(userID, time.Time{}, now)
+	_, cost, err := dbh.GetUserHeatStats(userID, time.Time{}, now)
 	if err != nil {
 		slog.Error("Cannot get total costs", slog.Int("user", int(userID)), slog.String("error", err.Error()))
 		return nil, errors.New("Cannot get balance for user.")
 	}
 
-	payment, err := h.GetDB().GetUserSessionPayments(userID)
+	payment, err := dbh.GetUserSessionPayments(userID)
 	if err != nil {
 		slog.Error("Cannot get total payments for", slog.Int("user", int(userID)), slog.String("error", err.Error()))
 		return nil, errors.New("Cannot get balance for user.")
 	}
 
-	payback, err := h.GetDB().GetUserSessionPaybacks(userID)
+	payback, err := dbh.GetUserSessionPaybacks(userID)
 	if err != nil {
 		slog.Error("Cannot get total paybacks for", slog.Int("user", int(userID)), slog.String("error", err.Error()))
 		return nil, errors.New("Cannot get balance for user.")
@@ -1039,8 +1056,9 @@ func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	dbh := h.GetDB()
 	// Check whether recaptcha is enabled.
-	config, err := h.GetDB().GetAllPropertyValuesMap()
+	config, err := dbh.GetAllPropertyValuesMap()
 	if err != nil {
 		slog.Warn("Cannot load internal configuration properties", slog.String("error", err.Error()))
 		WriteFailureResponse("Internal error, cannot send reset token.", w)
@@ -1062,7 +1080,7 @@ func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Check whether user exists.
-	user, err := h.GetDB().GetUserByName(req.UserEmail)
+	user, err := dbh.GetUserByName(req.UserEmail)
 	if err != nil {
 		slog.Warn("Cannot find user for password token request", slog.String("error", err.Error()))
 		WriteSuccessResponse("Token requested, please check your email inbox.", nil, w)
@@ -1078,7 +1096,7 @@ func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Store token in database.
-	err = h.GetDB().AddPasswordResetToken(tokenEntry)
+	err = dbh.AddPasswordResetToken(tokenEntry)
 	if err != nil {
 		slog.Error("Cannot store password reset token", slog.String("error", err.Error()))
 		WriteFailureResponse("Internal error, cannot send reset token.", w)
@@ -1086,7 +1104,7 @@ func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Send email with token to user.
-	emailConfig, err := h.GetDB().GetEmailConfiguration()
+	emailConfig, err := dbh.GetEmailConfiguration()
 	if err != nil {
 		slog.Error("Cannot get email configuration to reset token", slog.String("error", err.Error()))
 		WriteFailureResponse("Internal error, cannot send reset token.", w)
@@ -1115,8 +1133,9 @@ func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	dbh := h.GetDB()
 	// Get user by email
-	user, err := h.GetDB().GetUserByName(req.UserEmail)
+	user, err := dbh.GetUserByName(req.UserEmail)
 	if err != nil {
 		slog.Warn("User cannot be found", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot reset password username or token are not valid.", w)
@@ -1125,7 +1144,7 @@ func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request) {
 
 	// Check that we have a password reset token for this email.
 	// That did not expire and is valid.
-	dbToken, err := h.GetDB().GetPasswordResetEntry(user.ID, req.Token)
+	dbToken, err := dbh.GetPasswordResetEntry(user.ID, req.Token)
 	if err != nil {
 		slog.Warn("Token cannot be found", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot reset password username or token are not valid.", w)
@@ -1164,7 +1183,7 @@ func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request) {
 		PasswordSalt: salt,
 		PasswordHash: newPasswordHash,
 	}
-	err = h.GetDB().UpdatePassword(user.ID, userPassword)
+	err = dbh.UpdatePassword(user.ID, userPassword)
 	if err != nil {
 		slog.Warn("Password could no be stored in user table", slog.String("error", err.Error()))
 		WriteFailureResponse("Internal error. Password could not be changed.", w)
@@ -1172,7 +1191,7 @@ func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Invalidate password reset tokens for this user.
-	h.GetDB().InvalidatePasswordResetEntries(user.ID)
+	dbh.InvalidatePasswordResetEntries(user.ID)
 
 	WriteSuccessResponse("password reset", nil, w)
 }

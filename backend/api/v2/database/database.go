@@ -282,6 +282,9 @@ func (d *DBMysql) Disconnect() {
 
 // Returns an error if db is not connected and connection cannot be established.
 func (d *DBMysql) Ping() error {
+	if d.db == nil {
+		return errors.New("no db connection available")
+	}
 	return d.db.Ping()
 }
 

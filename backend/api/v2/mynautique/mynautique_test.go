@@ -1,7 +1,6 @@
 package mynautique
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"reflect"
@@ -59,11 +58,10 @@ func TestLogin(t *testing.T) {
 	})
 	err := m.Login()
 	if err != nil {
-		fmt.Println(err.Error())
 		t.Fail()
 	}
 	if !reflect.DeepEqual(expectedAuth, m.auth) {
-		fmt.Println("Got:", m.auth, "Expected:", expectedAuth)
+		t.Logf("got %v, want %v", m.auth, expectedAuth)
 		t.Fail()
 	}
 }
@@ -110,7 +108,7 @@ func TestGetFleet(t *testing.T) {
 	m.auth.IDToken = "foo-bar-id-token"
 	err := m.GetFleet()
 	if err != nil {
-		fmt.Println("Got:", err.Error(), "Expected:", nil)
+		t.Logf("got '%v', want '%v'", err.Error(), nil)
 		t.Fail()
 	}
 	assert.Equal(t, expectedFleet, m.Fleet, "Fleets should be the same.")
@@ -235,7 +233,7 @@ func TestGetBoatTelemetry(t *testing.T) {
 	m.auth.IDToken = "foo-bar-id-token"
 	telemetry, err := m.GetBoatTelemetry(999)
 	if err != nil {
-		fmt.Println("Got:", err.Error(), "Expected:", nil)
+		t.Logf("got %v, want %v", err.Error(), nil)
 		t.Fail()
 	}
 	assert.Equal(t, expectedTelemetry, telemetry, "Telemetry should be the same.")

@@ -27,21 +27,21 @@ import (
 // It is available to regular users that are logged in.
 type PublicConfigurationMessage struct {
 	Currency               string  `json:"currency" validate:"required,excludesall={} []!()<>"`
-	EngineHourFormat       string  `json:"engine_hour_format" validate:"required,oneof=hh.h hh:mm"`
-	FuelPaymentType        string  `json:"fuel_payment_type" validate:"required,oneof=billed instant"`
+	EngineHourFormat       string  `json:"engine_hour_format" validate:"required,oneof=hh.h hh:mm"`    // check if really needed
+	FuelPaymentType        string  `json:"fuel_payment_type" validate:"required,oneof=billed instant"` // check if really needed
 	LocationAddress        string  `json:"location_address" validate:"excludesall={}[]!><"`
 	LocationLatitude       float32 `json:"location_latitude" validate:"required,latitude"`
 	LocationLongitude      float32 `json:"location_longitude" validate:"required,longitude"`
 	LocationMap            string  `json:"location_map" validate:"omitempty,googlemapsurl"`
 	LocationTimeZone       string  `json:"location_time_zone" validate:"required"`
-	LogoFilePath           string  `json:"logo_file" validate:"omitempty,filepath"` // TODO: validator for uploaded file
-	MyNautiqueEnabled      bool    `json:"mynautique_enabled" validate:"omitempty,boolean"`
-	MyNautiqueFuelCapacity int     `json:"mynautique_fuel_capacity" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=10"`
+	LogoFilePath           string  `json:"logo_file" validate:"omitempty,filepath"`                                                       // TODO: validator for uploaded file | check if really needed
+	MyNautiqueEnabled      bool    `json:"mynautique_enabled" validate:"omitempty,boolean"`                                               // check if really needed
+	MyNautiqueFuelCapacity int     `json:"mynautique_fuel_capacity" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=10"` // check if really needed
 	PaymentAccountBIC      string  `json:"payment_account_bic" validate:"omitempty,printascii"`
 	PaymentAccountComment  string  `json:"payment_account_comment"`
 	PaymentAccountIBAN     string  `json:"payment_account_iban" validate:"omitempty,printascii"`
 	PaymentAccountOwner    string  `json:"payment_account_owner"`
-	RecaptchaPublicKey     string  `json:"recaptcha_publickey" validate:"omitempty,recaptchakey,required_with=RecaptchaPrivateKey"`
+	RecaptchaPublicKey     string  `json:"recaptcha_publickey" validate:"omitempty,recaptchakey,required_with=RecaptchaPrivateKey"` // check if really needed
 }
 
 type ConfigurationMessage struct {
@@ -144,9 +144,11 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("No config file path provided to store configuration. Database setup not possible, please provide a configuration file (--config flag).", w)
 		return
 	}
+	// We only want to allow setup for the DB, if DB settings are not
+	// already present in the configuration.
 	if h.config.IsDBConfigured() {
-		slog.Warn("SetupDB called for already setup DB")
-		WriteFailureResponse("Invalid request. Database is already setup.", w)
+		slog.Warn("SetupDB called but database settings are already provided.")
+		WriteFailureResponse("Invalid request. Database config was created.", w)
 		return
 	}
 
@@ -175,7 +177,6 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 		DBName:   req.DBName,
 	}
 	err = db.Connect()
-	defer db.Disconnect()
 	if err != nil {
 		slog.Warn(fmt.Sprintf("New database parameters are not valid. Error returned from Connet(): %s", err))
 		WriteFailureResponse("Cannot connect to database. Please make sure that the credentials are correct and the database is accepting connections.", w)
@@ -195,7 +196,9 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("Database was setup. No config file path provided to store database configuration, please start application by providing a config file.", w)
 		return
 	}
-	slog.Info("New database configuration has been written to", slog.String("configfile", configFile))
+	slog.Info("New database configuration has been written to", slog.String("config", configFile))
+	h.config.SetDB(db)
+	h.SetDB(db)
 	WriteSuccessResponse("config written", nil, w)
 }
 
@@ -223,7 +226,8 @@ func (h *Handler) GetPublicConfiguration(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	properties, err := h.GetDB().GetAllPropertyValues()
+	dbh := h.GetDB()
+	properties, err := dbh.GetAllPropertyValues()
 	if err != nil {
 		slog.Error("Cannot get configuration properties from database", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get configuration", w)
@@ -288,7 +292,8 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	properties, err := h.GetDB().GetAllPropertyValues()
+	dbh := h.GetDB()
+	properties, err := dbh.GetAllPropertyValues()
 	if err != nil {
 		slog.Error("Cannot get configuration properties from database", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get configuration", w)
@@ -357,6 +362,9 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 		SMTPServer:             pMap["smtp.server"],
 		SMTPUsername:           pMap["smtp.username"],
 	}
+	// TODO return if we have a myNautique API key. This is to
+	// decide whether to show the myNautique settings section in the
+	// UI.
 	WriteSuccessResponse("configuration", resp, w)
 }
 
@@ -477,7 +485,8 @@ func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request) {
 			Value:    req.SMTPUsername,
 		},
 	}
-	err = h.GetDB().UpdateOrInsertPropertyValues(props)
+	dbh := h.GetDB()
+	err = dbh.UpdateOrInsertPropertyValues(props)
 	if err != nil {
 		slog.Warn("Cannot update configuration", slog.String("error", err.Error()))
 		WriteFailureResponse(err.Error(), w)
@@ -596,7 +605,8 @@ func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetLogoPath(w http.ResponseWriter, r *http.Request) {
-	conf, err := h.GetDB().GetPropertyValue("logo.file")
+	dbh := h.GetDB()
+	conf, err := dbh.GetPropertyValue("logo.file")
 	if err != nil {
 		slog.Warn("Cannot get logo file", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get logo path from server.", w)
@@ -616,7 +626,8 @@ func (h *Handler) GetLogoPath(w http.ResponseWriter, r *http.Request) {
 // TODO implement file removal
 
 func (h *Handler) GetRecaptchaKey(w http.ResponseWriter, r *http.Request) {
-	conf, err := h.GetDB().GetPropertyValue("recaptcha.publickey")
+	dbh := h.GetDB()
+	conf, err := dbh.GetPropertyValue("recaptcha.publickey")
 	if err != nil {
 		slog.Warn("Cannot get recaptcha public key", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get recaptcha key from server.", w)

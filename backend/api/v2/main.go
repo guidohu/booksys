@@ -59,78 +59,17 @@ func getFlags(v *viper.Viper) {
 	flag.Parse()
 }
 
-// func setDefaults(v *viper.Viper) {
-// 	v.SetDefault("config", "")
-// 	v.SetDefault("http.port", "80")
-// 	v.SetDefault("http.sessioninactivitytimeout", "604800")
-// 	v.SetDefault("http.sessiontimeout", "31536000")
-// 	v.SetDefault("http.uploadpath", "./uploads")
-// 	v.SetDefault("database.user", "")
-// 	v.SetDefault("database.password", "")
-// 	v.SetDefault("database.protocol", "tcp")
-// 	v.SetDefault("database.host", "127.0.0.1")
-// 	v.SetDefault("database.port", "3306")
-// 	// v.SetDefault("database.dbname", "")
-// 	v.SetDefault("mynautique.api.key", "")
-// }
-
-// func getEnvironment(v *viper.Viper) {
-// 	v.SetEnvPrefix("BOOKSYS")
-// 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-// 	v.AutomaticEnv()
-// }
-
-// func printConfigString(v *viper.Viper) {
-// 	conf := &config.Configuration{}
-// 	err := v.Unmarshal(conf)
-// 	if err != nil {
-// 		slog.Error("Invalid configuration. Cannot decode configuration.", slog.String("error", err.Error()))
-// 		os.Exit(1)
-// 	}
-// 	c, err := yaml.Marshal(conf)
-// 	if err != nil {
-// 		slog.Error("Cannot generate configuration", slog.String("error", err.Error()))
-// 		os.Exit(1)
-// 	}
-// 	fmt.Print(string(c))
-// }
-
-func readConfigFile(v *viper.Viper) {
-	// If we do not have a config file we return.
-	if v.GetString("config") == "" {
-		slog.Info("No config file provided.")
-		return
-	}
-	slog.Info("Read config from", slog.String("config", v.GetString("config")))
-	_, err := os.Stat(v.GetString("config"))
-	if err != nil {
-		slog.Error("File does not exist", slog.String("config", v.GetString("config")), slog.String("error", err.Error()))
-	}
-	v.SetConfigFile(v.GetString("config"))
-	err = v.ReadInConfig()
-	if err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			slog.Error("No config file found", slog.String("config", v.GetString("config")))
-			os.Exit(1)
-		}
-	}
-	// Verify that the configuration matches the Configuration struct.
-	conf := &config.Configuration{}
-	err = v.Unmarshal(conf)
-	if err != nil {
-		slog.Error("Invalid configuration. Cannot decode configuration.", slog.String("error", err.Error()))
-		os.Exit(1)
-	}
-}
-
-func connectDatabase(c *config.Config) *database.DBMysql {
+// maybeConnectDatabase creates a new database client based on the provided configuration.
+// It tries to connect to the database but will return an
+// unconnected database client if the connection cannot be established.
+func maybeConnectDatabase(c *config.Config) database.DBMysql {
 	user, _ := c.GetString("database.user")
 	password, _ := c.GetString("database.password")
 	protocol, _ := c.GetString("database.protocol")
 	host, _ := c.GetString("database.host")
 	port, _ := c.GetString("database.port")
 	dbname, _ := c.GetString("database.dbname")
-	db := &database.DBMysql{
+	db := database.DBMysql{
 		User:     user,
 		Password: password,
 		Protocol: protocol,
@@ -141,21 +80,10 @@ func connectDatabase(c *config.Config) *database.DBMysql {
 	slog.Info("Connecting database client to:", slog.String("address", db.String()))
 	if err := db.Connect(); err != nil {
 		slog.Warn(fmt.Sprintf("Database is not properly setup or not reachable. Error returned from Connect(): %s", err))
-		return nil
+	} else {
+		slog.Info("Connected to database", slog.String("name", dbname))
 	}
-	slog.Info("Connected to database", slog.String("name", dbname))
 	return db
-}
-
-func reloadDBConfigWatcher(ctx context.Context, wg *sync.WaitGroup, w *config.DBConfigWatcher, db *database.DBMysql, ch chan struct{}) {
-	// TODO fix racecondition in db
-	wg.Add(1)
-	go func() {
-		slog.Info("Start watching DB config.")
-		w.Watch(ctx, db, ch)
-		slog.Info("Done watching DB config.")
-		wg.Done()
-	}()
 }
 
 func main() {
@@ -185,16 +113,13 @@ func main() {
 	defer cancel()
 	var wg sync.WaitGroup
 
-	db := connectDatabase(conf)
+	db := maybeConnectDatabase(conf)
 	hp := handlers.HandlerParams{
-		Database:      db,
+		Database:      &db,
 		Configuration: conf,
 	}
 	h := handlers.NewHandler(hp)
-
-	if db != nil {
-		conf.SetDB(db)
-	}
+	conf.SetDB(&db)
 
 	// We want to know about config file updates, because the
 	// database configuration might change.
@@ -224,17 +149,17 @@ func main() {
 				slog.Info("Auto reconnect routine done.")
 				return
 			case <-ticker.C:
-				if db == nil || db.Ping() != nil {
+				if db.Ping() != nil {
 					slog.Info("Schedule connection attempt to db.")
-					db = connectDatabase(conf)
-					h.SetDB(db)
-					conf.SetDB(db)
+					db = maybeConnectDatabase(conf)
+					h.SetDB(&db)
+					conf.SetDB(&db)
 				}
 			case <-chConfigFileUpdate:
 				slog.Info("Reconnect database after config change.")
-				db = connectDatabase(conf)
-				h.SetDB(db)
-				conf.SetDB(db)
+				db = maybeConnectDatabase(conf)
+				h.SetDB(&db)
+				conf.SetDB(&db)
 				conf.ReadConfigProperties()
 				uploadPath, _ = conf.GetString("http.uploadpath")
 			}

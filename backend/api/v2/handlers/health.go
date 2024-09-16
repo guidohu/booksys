@@ -16,8 +16,6 @@ type HealthStatusResponse struct {
 	DBReachable bool `json:"dbReachable"`
 	// True if users are present in the users table.
 	UsersExist bool `json:"usersExist"`
-	// True if myNautique is configured.
-	MyNautique bool `json:"myNautiqueConfigured"`
 }
 
 func (h *Handler) HealthStatus(w http.ResponseWriter, r *http.Request) {
@@ -38,18 +36,27 @@ func (h *Handler) HealthStatus(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Check if database configuration is present in the config.
 	healthStatus.ConfigDB = h.config.IsDBConfigured()
-	healthStatus.DBReachable = h.GetDB() != nil && h.config.IsDBConfigured() && h.GetDB().Ping() == nil
-	if healthStatus.DBReachable {
-		usersExist, err := h.GetDB().UsersExist()
-		if err != nil {
-			slog.Error("Cannot check for users:", err)
-			http.Error(w, "health status response", http.StatusInternalServerError)
-			return
+	if healthStatus.ConfigDB {
+		// Check whether the database handler is configured and
+		// able to connect.
+		dbh := h.GetDB()
+		if !dbh.IsConfigured() {
+			slog.Warn("Database handler is not configured.")
+		} else if err := dbh.Ping(); err != nil {
+			slog.Warn("Database handler is configured but cannot connect", slog.String("error", err.Error()))
+		} else {
+			healthStatus.DBReachable = true
+			usersExist, err := dbh.UsersExist()
+			if err != nil {
+				slog.Error("Cannot check for users:", err)
+				http.Error(w, "health status response", http.StatusInternalServerError)
+				return
+			}
+			healthStatus.UsersExist = usersExist
 		}
-		healthStatus.UsersExist = usersExist
 	}
-	healthStatus.MyNautique = h.config.IsSet("mynautique.enabled")
 
 	WriteSuccessResponse("health report", healthStatus, w)
 }

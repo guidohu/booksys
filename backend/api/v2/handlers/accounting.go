@@ -88,7 +88,8 @@ func (h *Handler) GetAccountingYears(w http.ResponseWriter, r *http.Request) {
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return
 	}
-	years, err := h.GetDB().GetYears()
+	dbh := h.GetDB()
+	years, err := dbh.GetYears()
 	if err != nil {
 		slog.Warn("Cannot get accounting years.", nil)
 		WriteFailureResponse(err.Error(), w)
@@ -107,7 +108,8 @@ func (h *Handler) GetExpenseTypes(w http.ResponseWriter, r *http.Request) {
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return
 	}
-	expenseTypes, err := h.GetDB().GetExpenseTypes()
+	dbh := h.GetDB()
+	expenseTypes, err := dbh.GetExpenseTypes()
 	if err != nil {
 		slog.Error("Cannot get expense types", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get expense types.", w)
@@ -124,7 +126,8 @@ func (h *Handler) GetIncomeTypes(w http.ResponseWriter, r *http.Request) {
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return
 	}
-	expenseTypes, err := h.GetDB().GetExpenseTypes()
+	dbh := h.GetDB()
+	expenseTypes, err := dbh.GetExpenseTypes()
 	if err != nil {
 		slog.Error("Cannot get expense types", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get expense types.", w)
@@ -168,77 +171,78 @@ func (h *Handler) GetAccountingStatistics(w http.ResponseWriter, r *http.Request
 	resp := &GetAccountingStatisticsResponse{}
 
 	// Get total payments.
-	payments, err := h.GetDB().GetPaymentTotal(0)
+	dbh := h.GetDB()
+	payments, err := dbh.GetPaymentTotal(0)
 	if err != nil {
 		slog.Warn("Cannot get payments total", slog.String("error", err.Error()))
 	}
 	resp.IncomeTotal = &payments
 
 	// Get total payments for given year.
-	yearPayments, err := h.GetDB().GetPaymentTotal(req.Year)
+	yearPayments, err := dbh.GetPaymentTotal(req.Year)
 	if err != nil {
 		slog.Warn("Cannot get yearPayments total for", slog.Uint64("year", req.Year), slog.String("error", err.Error()))
 	}
 	resp.IncomeTotalSelectedYear = &yearPayments
 
 	// Get total expenses.
-	expenses, err := h.GetDB().GetExpenseTotal(0)
+	expenses, err := dbh.GetExpenseTotal(0)
 	if err != nil {
 		slog.Warn("Cannot get expense total", slog.String("error", err.Error()))
 	}
 	resp.ExpenseTotal = &expenses
 
 	// Get total payments for given year.
-	yearExpenses, err := h.GetDB().GetExpenseTotal(req.Year)
+	yearExpenses, err := dbh.GetExpenseTotal(req.Year)
 	if err != nil {
 		slog.Warn("Cannot get yearExpenses total for", slog.Uint64("year", req.Year), slog.String("error", err.Error()))
 	}
 	resp.ExpenseTotalSelectedYear = &yearExpenses
 
 	// Get total expenses without refunds.
-	expensesNoRefund, err := h.GetDB().GetExpenseNoRefundsTotal(0)
+	expensesNoRefund, err := dbh.GetExpenseNoRefundsTotal(0)
 	if err != nil {
 		slog.Warn("Cannot get expense total without refunds", slog.String("error", err.Error()))
 	}
 	resp.ExpenseNoRefundsTotal = &expensesNoRefund
 
 	// Get total payments for given year without refunds.
-	yearExpensesNoRefund, err := h.GetDB().GetExpenseNoRefundsTotal(req.Year)
+	yearExpensesNoRefund, err := dbh.GetExpenseNoRefundsTotal(req.Year)
 	if err != nil {
 		slog.Warn("Cannot get yearExpenses total without refunds for", slog.Uint64("year", req.Year), slog.String("error", err.Error()))
 	}
 	resp.ExpenseNoRefundsTotalSelectedYear = &yearExpensesNoRefund
 
 	// Get total heat costs.
-	heatCosts, err := h.GetDB().GetHeatCostTotal(0)
+	heatCosts, err := dbh.GetHeatCostTotal(0)
 	if err != nil {
 		slog.Warn("Cannot get heat cost total", slog.String("error", err.Error()))
 	}
 	resp.RideMinutesCashUsed = &heatCosts
 
 	// Get total heat costs for given year.
-	yearHeatCosts, err := h.GetDB().GetHeatCostTotal(req.Year)
+	yearHeatCosts, err := dbh.GetHeatCostTotal(req.Year)
 	if err != nil {
 		slog.Warn("Cannot get yearHeatCosts total for", slog.Uint64("year", req.Year), slog.String("error", err.Error()))
 	}
 	resp.RideMinutesCashUsedSelectedYear = &yearHeatCosts
 
 	// Get session payment total.
-	sessionPayments, err := h.GetDB().GetSessionPaymentTotal(0)
+	sessionPayments, err := dbh.GetSessionPaymentTotal(0)
 	if err != nil {
 		slog.Warn("Cannot get session payment total", slog.String("error", err.Error()))
 	}
 	resp.IncomeSessionPayment = &sessionPayments
 
 	// Get session payment total for given year.
-	yearSessionPayments, err := h.GetDB().GetSessionPaymentTotal(req.Year)
+	yearSessionPayments, err := dbh.GetSessionPaymentTotal(req.Year)
 	if err != nil {
 		slog.Warn("Cannot get session payment total for", slog.Uint64("year", req.Year), slog.String("error", err.Error()))
 	}
 	resp.IncomeSessionPaymentSelectedYear = &yearSessionPayments
 
 	// Get session payment total.
-	sessionRefunds, err := h.GetDB().GetSessionRefundsTotal(0)
+	sessionRefunds, err := dbh.GetSessionRefundsTotal(0)
 	if err != nil {
 		slog.Warn("Cannot get session refunds total", slog.String("error", err.Error()))
 	}
@@ -275,8 +279,9 @@ func (h *Handler) GetAccountingTransactions(w http.ResponseWriter, r *http.Reque
 	}
 	slog.Info("GetAccountingTransactions for", slog.Uint64("year", req.Year))
 
+	dbh := h.GetDB()
 	var resp GetAccountingTransactionsResponse
-	resp, err = h.GetDB().GetTransactions(req.Year)
+	resp, err = dbh.GetTransactions(req.Year)
 	if err != nil {
 		slog.Warn("Cannot get transactions", slog.String("error", err.Error()))
 	}
@@ -296,7 +301,8 @@ func (h *Handler) DeleteTransaction(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse(err.Error(), w)
 		return
 	}
-	err = h.GetDB().DeleteTransaction(req.TableID, req.RowID)
+	dbh := h.GetDB()
+	err = dbh.DeleteTransaction(req.TableID, req.RowID)
 	if err != nil {
 		slog.Warn("Cannot get transactions", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot delete transaction because of an error.", w)
@@ -327,7 +333,8 @@ func (h *Handler) AddIncome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if user exists.
-	_, err = h.GetDB().GetUserById(uint(req.UserID))
+	dbh := h.GetDB()
+	_, err = dbh.GetUserById(uint(req.UserID))
 	if err != nil {
 		slog.Warn("Cannot find user with", slog.Uint64("user_id", req.UserID))
 		WriteFailureResponse("Cannot find the selected user", w)
@@ -363,7 +370,7 @@ func (h *Handler) AddIncome(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = h.GetDB().AddIncome(incomeEntry)
+	err = dbh.AddIncome(incomeEntry)
 	if err != nil {
 		slog.Warn("Cannot add income transaction", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot write income transaction to database because of an error.", w)
@@ -396,7 +403,8 @@ func (h *Handler) AddExpense(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if user exists.
-	_, err = h.GetDB().GetUserById(uint(req.UserID))
+	dbh := h.GetDB()
+	_, err = dbh.GetUserById(uint(req.UserID))
 	if err != nil {
 		slog.Warn("Cannot find user with", slog.Uint64("user_id", req.UserID))
 		WriteFailureResponse("Cannot find the selected user", w)
@@ -428,7 +436,7 @@ func (h *Handler) AddExpense(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = h.GetDB().AddIncome(expenseEntry)
+	err = dbh.AddIncome(expenseEntry)
 	if err != nil {
 		slog.Warn("Cannot add expense transaction", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot write expense transaction to database because of an error.", w)
