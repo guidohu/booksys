@@ -57,14 +57,14 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	dbh := h.GetDB()
 	lookupUser, err := dbh.GetUserByName(req.Username)
 	if err != nil {
-		slog.Warn("User not found", slog.String("username", req.Username))
+		slog.Warn("User not found", slog.String("username", req.Username), slog.String("error", err.Error()))
 		WriteFailureResponse("invalid username/password", w)
 		return
 	}
 
 	// return if user is locked
 	if lookupUser.Locked {
-		WriteFailureResponse("user account is locked", w)
+		WriteFailureResponse("user account not activated", w)
 		return
 	}
 

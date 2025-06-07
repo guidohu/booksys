@@ -9,6 +9,9 @@ import (
 // GetUserByUsername find the user that has either the given username
 // or the given email address.
 func (d *DBMysql) GetUserByName(name string) (User, error) {
+	if d.orm == nil {
+		return User{}, fmt.Errorf("database handler not available")
+	}
 	var users []User
 	d.orm.Where("username = ? or email = ?", name, name).Find(&users)
 	if len(users) > 1 {

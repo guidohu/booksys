@@ -112,6 +112,7 @@ func (d *DBMysql) UpdateOrInsertPropertyValues(conf []Configuration) error {
 
 			// Handle hidden values.
 			if c.Value == "hidden" {
+				// TODO document special meaning of hidden in API
 				continue
 			}
 
