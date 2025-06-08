@@ -1,4 +1,42 @@
 export default class Request {
+  static _handleResponse(url, method, response, resolve, reject) {
+    console.debug(method, url, "received response");
+
+    if (response.status != 200) {
+      console.warn(method, url, "error", response.status);
+      // handle a few specific error messages
+      response.text().then((bodyText) => {
+        if (response.status === 500 && bodyText.includes("Proxy erro")) {
+          reject(["Internal Server Error: Your request cannot be proxied to the backend. Is the API backend reachable?"]);
+        }
+        reject(["Error: Your request could not be handled. There is an issue with your request or with the backend."]);
+      })
+      .catch((error) => {
+        console.log("Error, cannot get response body", error);
+        reject(["Error: Your request could not be handled. There is an issue with your request or with the backend."]);
+      })
+      return; // Stop further processing
+    }
+
+    response.json()
+      .then((data) => {
+        console.debug(method, url, "response data:", data);
+        // Combined check: data.ok is primary, data.status.ok is secondary
+        // This covers cases where 'data.ok' is the sole indicator (like original postRequest)
+        // and cases where 'data.status.ok' might also be used (like original getRequest)
+        if (data.ok || (data.status && data.status.ok)) {
+          resolve(data.data);
+        } else {
+          console.warn(method, url, "response not ok, due to:", data.msg);
+          reject([data.msg]);
+        }
+      })
+      .catch((error) => {
+          console.warn(method, url, "cannot parse server response", error);
+          reject([error]);
+      });
+  }
+
   static getRequest(url) {
     console.debug("GET", url);
     return new Promise((resolve, reject) => {
@@ -7,38 +45,10 @@ export default class Request {
         cache: "no-cache",
       })
         .then((response) => {
-          if (response.status != 200) {
-            // handle a few specific error messages
-            response.text().then((bodyText) => {
-              if (response.status === 500 && bodyText.includes("Proxy erro")) {
-                reject(["Internal Server Error: Your request cannot be proxied to the backend. Is the API backend reachable?"]);
-              }
-              reject(["Error: Your request could not be handled. There is an issue with your request or with the backend."]);
-            })
-            .catch((error) => {
-              console.log("Internal Server Error, cannot get response body", error);
-              reject(["Error: Your request could not be handled. There is an issue with your request or with the backend."]);
-            })
-          } else {
-            response
-              .json()
-              .then((data) => {
-                console.debug("GET", url, "response data:", data);
-                if (data.ok || data.status.ok) {
-                  resolve(data.data);
-                } else {
-                  console.warn("GET", url, "response not ok, due to:", data.msg);
-                  reject([data.msg]);
-                }
-              })
-              .catch((error) => {
-                console.warn("GET", url, "cannot parse server response", error);
-                reject([error]);
-              });
-          }
+          Request._handleResponse(url, "GET", response, resolve, reject);
         })
         .catch((error) => {
-          console.error("GET", url, "request failed", error);
+          console.error("GET", url, "fetch failed", error);
           reject([error]);
         });
     });
@@ -53,38 +63,10 @@ export default class Request {
         body: JSON.stringify(payload),
       })
         .then((response) => {
-          if (response.status != 200) {
-            // handle a few specific error messages
-            response.text().then((bodyText) => {
-              if (response.status === 500 && bodyText.includes("Proxy erro")) {
-                reject(["Internal Server Error: Your request cannot be proxied to the backend. Is the API backend reachable?"]);
-              }
-              reject(["Error: Your request could not be handled. There is an issue with your request or with the backend."]);
-            })
-            .catch((error) => {
-              console.log("Internal Server Error, cannot get response body", error);
-              reject(["Error: Your request could not be handled. There is an issue with your request or with the backend."]);
-            })
-          } else {
-            response
-              .json()
-              .then((data) => {
-                console.debug("POST", url, "response data:", data);
-                if (data.ok) {
-                  resolve(data.data);
-                } else {
-                  console.warn("POST", url, "response not ok, due to:", data.msg);
-                  reject([data.msg]);
-                }
-              })
-              .catch((error) => {
-                  console.warn("POST", url, "cannot parse server response", error);
-                  reject([error]);
-              });
-          }
+          Request._handleResponse(url, "POST", response, resolve, reject);
         })
         .catch((error) => {
-          console.warn("POST", url, "request failed", error);
+          console.warn("POST", url, "fetch failed", error);
           reject([error]);
         });
     });
