@@ -1,5 +1,5 @@
-# build the app with node 16 LTS
-FROM node:21 as build-stage
+# build the app with node 24
+FROM node:24 AS build-stage
 
 WORKDIR /home/node/app
 COPY package*.json     ./
@@ -12,7 +12,7 @@ RUN npm install
 RUN npm run build
 
 # run the frontend behind nginx
-FROM nginx:alpine as production-stage
+FROM nginx:alpine AS production-stage
 RUN mkdir /app
 COPY --from=build-stage /home/node/app/dist /app
 COPY nginx.conf /etc/nginx/nginx.conf
