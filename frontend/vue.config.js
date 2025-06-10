@@ -4,6 +4,7 @@ module.exports = {
   outputDir: "dist",
   publicPath: "/",
   devServer: {
+    port: 8081,
     proxy: {
       "^/api/v2": {
         target: "http://localhost:9090",
