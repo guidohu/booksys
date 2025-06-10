@@ -33,6 +33,10 @@ export default class Request {
       })
       .catch((error) => {
           console.warn(method, url, "cannot parse server response", error);
+          if (error.toString().includes("SyntaxError")) {
+            reject(["Make sure your frontend can talk to the API backend. The returned response is not an expected JSON object but maybe a regular HTML file."]);
+            return;
+          }
           reject([error]);
       });
   }
