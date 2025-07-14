@@ -22,10 +22,14 @@ type GetBookingSeriesRequest struct {
 
 type GetBookingResponse struct {
 	Start            int64             `json:"window_start"`
+	StartText        string            `json:"window_start_text"`
 	End              int64             `json:"window_end"`
+	EndText          string            `json:"window_end_text"`
 	Timezone         string            `json:"timezone"`
 	Sunrise          int64             `json:"sunrise"`
+	SunriseText      string            `json:"sunrise_text"`
 	Sunset           int64             `json:"sunset"`
+	SunsetText       string            `json:"sunset_text"`
 	OpeningHourStart string            `json:"business_day_start"`
 	OpeningHourEnd   string            `json:"business_day_end"`
 	Sessions         []SessionResponse `json:"sessions"`
@@ -95,12 +99,12 @@ func (h *Handler) GetBookingSeries(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) getBooking(start time.Time, end time.Time) (GetBookingResponse, error) {
 	dbh := h.GetDB()
-	sunrise, sunset := h.getSunriseSunset(start)
-	timezone, err := dbh.GetPropertyValue("location.timezone")
+	location, err := h.getLocation()
 	if err != nil {
-		slog.Warn("Cannot retrieve location.timezone from the database", slog.String("error", err.Error()))
+		slog.Warn("Cannot get timezone for sunrise/sunset calculations", slog.String("error", err.Error()))
 		return GetBookingResponse{}, err
 	}
+	sunrise, sunset := h.getSunriseSunset(start, location)
 	businessDayStart, err := dbh.GetPropertyValue("business.day.start")
 	if err != nil {
 		slog.Warn("Cannot retrieve business.day.start from the database", slog.String("error", err.Error()))
@@ -113,10 +117,14 @@ func (h *Handler) getBooking(start time.Time, end time.Time) (GetBookingResponse
 	}
 	b := &GetBookingResponse{
 		Start:            start.Unix(),
+		StartText:        start.Format(time.RFC3339),
 		End:              end.Unix(),
-		Timezone:         timezone.Value,
+		EndText:          end.Format(time.RFC3339),
+		Timezone:         location.String(),
 		Sunrise:          sunrise.Unix(),
+		SunriseText:      sunrise.Format(time.RFC3339),
 		Sunset:           sunset.Unix(),
+		SunsetText:       sunset.Format(time.RFC3339),
 		OpeningHourStart: businessDayStart.Value,
 		OpeningHourEnd:   businessDayEnd.Value,
 		Sessions:         []SessionResponse{},
@@ -175,7 +183,7 @@ func (h *Handler) getRiders(sessionID uint) ([]database.User, error) {
 	return users, nil
 }
 
-func (h *Handler) getSunriseSunset(date time.Time) (time.Time, time.Time) {
+func (h *Handler) getSunriseSunset(date time.Time, timezone *time.Location) (time.Time, time.Time) {
 	dbh := h.GetDB()
 	latProperty, err := dbh.GetPropertyValue("location.latitude")
 	if err != nil {
@@ -197,6 +205,23 @@ func (h *Handler) getSunriseSunset(date time.Time) (time.Time, time.Time) {
 	return sunrise.SunriseSunset(
 		lat,
 		lon,
-		date.Year(), date.Month(), date.Day(),
+		date.In(timezone).Year(),
+		date.In(timezone).Month(),
+		date.In(timezone).Day(),
 	)
+}
+
+func (h *Handler) getLocation() (*time.Location, error) {
+	dbh := h.GetDB()
+	timezone, err := dbh.GetPropertyValue("location.timezone")
+	if err != nil {
+		slog.Warn("Cannot retrieve location.timezone from the database", slog.String("error", err.Error()))
+		return nil, err
+	}
+	location, err := time.LoadLocation(timezone.Value)
+	if err != nil {
+		slog.Warn("Invalid location.timezone retrieved from the database", slog.String("error", err.Error()))
+		return nil, err
+	}
+	return location, nil
 }

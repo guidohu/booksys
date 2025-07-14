@@ -162,8 +162,13 @@ func (h *Handler) GetSessionMetadata(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("Cannot get session from server.", w)
 		return
 	}
-
-	sunrise, sunset := h.getSunriseSunset(s.StartTime)
+	location, err := h.getLocation()
+	if err != nil {
+		slog.Warn("Cannot get timezone for sunrise/sunset calculations", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot get timezone for sunrise/sunset calculations.", w)
+		return
+	}
+	sunrise, sunset := h.getSunriseSunset(s.StartTime, location)
 	resp := &GetSessionMetadataResponse{
 		SunriseTime: sunrise.Unix(),
 		SunsetTime:  sunset.Unix(),
