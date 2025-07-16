@@ -2,18 +2,15 @@ package handlers
 
 import (
 	"crypto/rand"
-	"crypto/sha256"
 	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
-	// "github.com/GehirnInc/crypt/sha512_crypt"
-
-	crypt "github.com/tredoe/osutil/v2/userutil/crypt/sha512_crypt"
 	"golang.org/x/exp/slog"
 
 	"server/database"
+	"server/util/hash"
 )
 
 type LoginRequest struct {
@@ -71,10 +68,12 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	// hash the password (legacy)
 	// Note: This was previously done in the UI and now and
 	// the hash was used in the crypt function.
-	passwordHash := hashSha256(req.Password)
+	// The UI submitted the hex representation of the Sha256 hash
+	// of the password to the backend.
+	passwordHash := hash.Sha256(req.Password)
 
 	// crypt the password
-	hash, err := cryptSha512(passwordHash, strconv.Itoa(lookupUser.PasswordSalt))
+	hash, err := hash.CryptSha512(passwordHash, strconv.Itoa(lookupUser.PasswordSalt))
 	if err != nil {
 		slog.Warn("Cannot calculate password hash for", slog.String("user", lookupUser.Username))
 		WriteFailureResponse("invalid username/password", w)
@@ -213,20 +212,4 @@ func (h *Handler) User(w http.ResponseWriter, r *http.Request) {
 		Comment:       user.Comment,
 	}
 	WriteSuccessResponse("success", resp, w)
-}
-
-// hashPassword returns a sha256 hashed version of the given string
-func hashSha256(p string) string {
-	hasher := sha256.New()
-	hasher.Write([]byte(p))
-	hash := string(hasher.Sum(nil)[:])
-	return fmt.Sprintf("%x", hash)
-}
-
-// cryptSha512 generates a sha512 hashes password representation that
-// uses 5000 rounds and the given salt.
-func cryptSha512(p string, s string) (string, error) {
-	c := crypt.New()
-	cryptConfig := fmt.Sprintf("$6$rounds=5000$%s$", s)
-	return c.Generate([]byte(p), []byte(cryptConfig))
 }

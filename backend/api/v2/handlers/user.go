@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"net/http"
 	"server/database"
+	"server/util/hash"
 	"server/notifications/email"
 	"server/recaptcha"
 	"strconv"
@@ -293,7 +294,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 
 	// Crypt the password
 	salt := rand.Intn(math.MaxUint16)
-	hashedPassword, err := cryptSha512(hashSha256(req.Password), strconv.Itoa(salt))
+	hashedPassword, err := hash.CryptSha512(hash.Sha256(req.Password), strconv.Itoa(salt))
 	if err != nil {
 		slog.Warn("Password hash could no be generated", slog.String("error", err.Error()))
 		WriteFailureResponse("user cannot be created, please contact the administrator", w)
@@ -496,7 +497,7 @@ func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("password cannot be changed", w)
 		return
 	}
-	hashedPassword, err := cryptSha512(hashSha256(req.PasswordOld), strconv.Itoa(user.PasswordSalt))
+	hashedPassword, err := hash.CryptSha512(hash.Sha256(req.PasswordOld), strconv.Itoa(user.PasswordSalt))
 	if err != nil {
 		slog.Warn("Password hash could no be generated", slog.String("error", err.Error()))
 		WriteFailureResponse("password cannot be changed", w)
@@ -510,7 +511,7 @@ func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
 
 	// update new password
 	salt := rand.Intn(math.MaxUint16)
-	newPasswordHash, err := cryptSha512(hashSha256(req.PasswordNew), strconv.Itoa(salt))
+	newPasswordHash, err := hash.CryptSha512(hash.Sha256(req.PasswordNew), strconv.Itoa(salt))
 	if err != nil {
 		slog.Warn("Password hash could no be generated", slog.String("error", err.Error()))
 		WriteFailureResponse("password cannot be changed", w)
@@ -1173,7 +1174,7 @@ func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request) {
 	// update new password.
 	// Note: We hash the passworrd, this was previously done in the UI.
 	salt := rand.Intn(math.MaxUint16)
-	newPasswordHash, err := cryptSha512(hashSha256(req.Password), strconv.Itoa(salt))
+	newPasswordHash, err := hash.CryptSha512(hash.Sha256(req.Password), strconv.Itoa(salt))
 	if err != nil {
 		slog.Warn("Password hash could no be generated", slog.String("error", err.Error()))
 		WriteFailureResponse("Internal error. Password cannot be changed.", w)
