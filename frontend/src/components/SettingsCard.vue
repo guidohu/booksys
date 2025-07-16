@@ -246,7 +246,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("configuration", ["getConfiguration"]),
+    ...mapGetters("configuration", ["getAdminConfiguration"]),
   },
   methods: {
     ...mapActions("configuration", ["queryAdminConfiguration", "setConfiguration"]),
@@ -363,8 +363,8 @@ export default {
     },
   },
   watch: {
-    getConfiguration: function (newValues) {
-      console.debug("getConfiguration() updated to new values:", newValues);
+    getAdminConfiguration: function (newValues) {
+      console.debug("getAdminConfiguration() updated to new values:", newValues);
       this.setFormDefaults(newValues);
     },
     form: {
@@ -376,10 +376,12 @@ export default {
     },
   },
   created() {
-    this.queryAdminConfiguration();
+    this.queryAdminConfiguration()
+    .then(() => console.debug("settings loaded"))
+    .catch((errors) => console.error("failed to load settings:", errors));
   },
   mounted() {
-    this.setFormDefaults(this.getConfiguration);
+    this.setFormDefaults(this.getAdminConfiguration);
   },
 };
 </script>

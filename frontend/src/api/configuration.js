@@ -59,6 +59,9 @@ export default class Configuration {
       smtp_sender: params.smtp_sender,
       smtp_server: params.smtp_server,
       smtp_username: params.smtp_username,
+      // if the password is 'hidden', then the backend will
+      // not change the password.
+      smtp_password: params.smtp_password,
       recaptcha_privatekey: params.recaptcha_privatekey,
       recaptcha_publickey: params.recaptcha_publickey,
       mynautique_enabled: params.mynautique_enabled,
@@ -72,10 +75,6 @@ export default class Configuration {
       request['mynautique_api_key'] = params.mynautique_api_key
     }
 
-    // only set password in case it is really given
-    if (params.smtp_password != "hidden") {
-      request.smtp_password = params.smtp_password;
-    }
     // only set the myNautique password in case it is given
     if (params.mynautique_password != "hidden") {
       request.mynautique_password = params.mynautique_password;

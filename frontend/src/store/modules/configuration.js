@@ -4,6 +4,7 @@ const state = () => ({
   ADMIN_CONFIG_LOADED: false,
   CONFIG_LOADED: false,
   configuration: null,
+  adminConfiguration: null,
   recaptchaKey: null,
   currency: null,
   locationAddress: null,
@@ -25,6 +26,9 @@ const getters = {
   },
   getConfiguration: (state) => {
     return state.configuration;
+  },
+  getAdminConfiguration: (state) => {
+    return state.adminConfiguration;
   },
   getCurrency: (state) => {
     return state.currency;
@@ -74,7 +78,6 @@ const actions = {
     return new Promise((resolve, reject) => {
       Configuration.getConfiguration()
       .then((config) => {
-        state.ADMIN_CONFIG_LOADED = true;
         commit("setConfiguration", config);
         resolve(config);
       })
@@ -93,12 +96,11 @@ const actions = {
     return new Promise((resolve, reject) => {
       Configuration.getAdminConfiguration()
       .then((config) => {
-        state.ADMIN_CONFIG_LOADED = true;
-        commit("setConfiguration", config);
+        commit("setAdminConfiguration", config);
         resolve(config);
       })
       .catch((errors) => {
-        commit("setConfiguration", null);
+        commit("setAdminConfiguration", null);
         reject(errors);
       })
     })
@@ -135,6 +137,7 @@ const actions = {
         .then(() => {
           // load latest configuration
           commit("invalidateConfiguration", {});
+          dispatch("queryAdminConfiguration", {});
           dispatch("queryConfiguration", {});
           dispatch("queryLogoFile", {});
           resolve();
@@ -150,8 +153,11 @@ const mutations = {
   invalidateConfiguration(state) {
     state.ADMIN_CONFIG_LOADED = false;
     state.CONFIG_LOADED = false;
+    state.configuration = null;
+    state.adminConfiguration = null;
   },
   setConfiguration(state, value) {
+    state.CONFIG_LOADED = true;
     state.configuration = value;
     state.locationAddress =
       value.location_address != null
@@ -169,6 +175,26 @@ const mutations = {
     state.myNautiqueEnabled = value.mynautique_enabled;
     state.myNautiqueBoatId = value.mynautique_boat_id;
     console.log("configuration set to", value);
+  },
+  setAdminConfiguration(state, value) {
+    state.ADMIN_CONFIG_LOADED = true;
+    state.adminConfiguration = value;
+    state.locationAddress =
+      value.location_address != null
+        ? value.location_address
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\n/g, "<br>")
+        : null;
+    state.locationMap = value.location_map;
+    state.currency = value.currency;
+    state.logoFile = value.logo_file;
+    state.engineHourFormat = value.engine_hour_format;
+    state.fuelPaymentType = value.fuel_payment_type;
+    state.myNautiqueEnabled = value.mynautique_enabled;
+    state.myNautiqueBoatId = value.mynautique_boat_id;
+    console.log("admin configuration set to", value);
   },
   setRecaptchaKey(state, response) {
     state.recaptchaKey = response.key;
