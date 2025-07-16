@@ -26,6 +26,7 @@ type Email struct {
 	Recipient string
 	Sender    string
 	Message   string
+	Subject   string
 }
 
 func NewClient(config database.EmailConfiguration) *Client {
@@ -44,7 +45,7 @@ func (c *Client) Send(e *Email) error {
 		slog.Error("Email not sent", slog.String("to", e.Recipient), slog.String("error", err.Error()))
 		return err
 	}
-	slog.Info("Email sent", slog.String("to", e.Recipient))
+	slog.Info("Email sent", slog.String("to", e.Recipient), slog.String("subject", e.Subject))
 	return nil
 }
 
@@ -76,6 +77,7 @@ func (c *Client) SendTokenResetMessage(user database.User, token string, senderA
 		Recipient: user.Email,
 		Sender:    senderAddress,
 		Message:   out.String(),
+		Subject:   subject,
 	})
 }
 
@@ -113,6 +115,7 @@ func (c *Client) SendUserAddedToSessionMessage(user database.User, session datab
 		Recipient: user.Email,
 		Sender:    senderAddress,
 		Message:   out.String(),
+		Subject:   subject,
 	})
 }
 
@@ -150,5 +153,6 @@ func (c *Client) SendUserRemovedFromSessionMessage(user database.User, session d
 		Recipient: user.Email,
 		Sender:    senderAddress,
 		Message:   out.String(),
+		Subject:   subject,
 	})
 }
