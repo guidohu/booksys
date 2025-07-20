@@ -373,6 +373,7 @@ func NewMyNautiqueClient(opts *Options) *Client {
 		AuthUntil: time.Time{},
 	}
 	if opts == nil {
+		slog.Info("Returning empty client, no options provided.")
 		return c
 	}
 	c.Options.User = opts.User
@@ -422,7 +423,7 @@ func (m *Client) Login() error {
 	}
 	m.AuthUntil = now.Add(time.Second * time.Duration(response.ExpiresInSeconds-10))
 	m.auth = response
-	slog.Info("New myNautique login successful.")
+	slog.Info("New myNautique login successful, auth until:", slog.String("time", m.AuthUntil.String()))
 	return nil
 }
 

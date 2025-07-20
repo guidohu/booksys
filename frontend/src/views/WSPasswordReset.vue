@@ -279,6 +279,13 @@ export default {
     close: function () {
       this.$router.push("/");
     },
+    showEmail: function () {
+      this.errors = [];
+      this.isLoading = false;
+      this.showEmailDialog = true;
+      this.showTokenDialog = false;
+      this.showSuccessInfo = false;
+    },
   },
   created() {
     this.queryRecaptchaKey();

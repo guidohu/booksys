@@ -1,5 +1,7 @@
-FROM node:21
+FROM node:24
 
-RUN npm install --save bootstrap-vue
+WORKDIR /usr/app
+
+RUN npm cache clean --force
 RUN npm install --save bootstrap
-RUN npm install --save jquery
+RUN npm install --save bootstrap-vue

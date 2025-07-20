@@ -128,7 +128,7 @@ export default {
       this.setDisableBefore();
       this.setShowAfter();
     },
-    getMyNautiqueBoatId: function (boatId) {
+    watchMyNautiqueBoatId: function (boatId) {
       this.queryMyNautiqueInfo(boatId);
     },
     getMyNautiqueEngineHours: function (newEngineHours) {
@@ -223,7 +223,7 @@ export default {
     this.queryConfiguration();
     this.setDriver();
     this.queryEngineHourLogLatest();
-    if (this.getMyNautiqueBoatId) {
+    if (this.getMyNautiqueEnabled && this.getMyNautiqueBoatId) {
       this.queryMyNautiqueInfo(this.getMyNautiqueBoatId);
     }
     this.setDisableBefore();

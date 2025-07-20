@@ -7,11 +7,15 @@
 Start with a fresh deployment:
 
 ```
-docker-compose up
+docker compose up
 ```
 
 Take down the current deployment and remove the containers:
 
 ```
-docker-compose down
+docker compose down
 ```
+
+# Notes
+
+This setup will let you make live changes on the frontend as the frontend code is mapped into the frontend container. Whenever changes are saved, npm will rebuild the frontend app.

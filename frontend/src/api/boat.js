@@ -88,8 +88,6 @@ export default class Boat {
   static getMyNautiqueInfo(boatId, token, tokenExpiry) {
     const request = {
       boat_id: boatId,
-      token: token,
-      token_expiry: tokenExpiry,
     };
     return Request.postRequest("/api/v2/boat/mynautique/telemetry/get", request);
   }

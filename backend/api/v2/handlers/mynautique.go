@@ -8,6 +8,15 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+type Config struct {
+	Enabled      bool
+	APIKey       string
+	User         string
+	Password     string
+	BoatID       int64
+	FuelCapacity decimal.Decimal
+}
+
 type GetBoatInfoRequest struct {
 	BoatID int64 `json:"boat_id" validate:"required"`
 }
@@ -36,37 +45,58 @@ func (h *Handler) GetBoatTelemetry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
-	config, err := dbh.GetMyNautiqueConfiguration()
-	if err != nil {
-		slog.Warn("cannot lookup mynautique configuration", slog.String("error", err.Error()))
-		WriteFailureResponse("myNautique is not properly configured", w)
-		return
-	}
-	if !config.Enabled {
+	// dbh := h.GetDB()
+	// config, err := dbh.GetMyNautiqueConfiguration()
+	// if err != nil {
+	// 	slog.Warn("cannot lookup mynautique configuration", slog.String("error", err.Error()))
+	// 	WriteFailureResponse("myNautique is not properly configured", w)
+	// 	return
+	// }
+	// if !config.Enabled {
+	// 	slog.Warn("mynautique is not configured but GetBoatInfo was called")
+	// 	WriteFailureResponse("myNautique is not configured", w)
+	// 	return
+	// }
+
+	client := h.GetMyNautiqueClient()
+	config := Config{}
+	config.Enabled = h.config.GetBool("mynautique.enabled")
+	if config.Enabled == false {
 		slog.Warn("mynautique is not configured but GetBoatInfo was called")
 		WriteFailureResponse("myNautique is not configured", w)
 		return
 	}
-
-	client := h.GetMyNautiqueClient()
-	// Prefer specific config over database config.
-	// Note: We intend to implement an abstraction for this.
-	apiKey, _ := h.config.GetString("mynautique.api.key")
-	if apiKey == "" {
-		apiKey = config.APIKey
+	config.APIKey, _ = h.config.GetString("mynautique.api.key")
+	if config.APIKey == "" {
+		slog.Warn("mynautique API key is missing but GetBoatInfo was called")
+		WriteFailureResponse("myNautique API key missing", w)
+		return
 	}
+	config.FuelCapacity = decimal.NewFromInt(h.config.GetInt64("mynautique.fuel.capacity"))
+	config.User, _ = h.config.GetString("mynautique.user")
+	if config.User == "" {
+		slog.Warn("mynautique user is missing but GetBoatInfo was called")
+		WriteFailureResponse("myNautique user missing", w)
+		return
+	}
+	config.Password, _ = h.config.GetString("mynautique.password")
+	if config.User == "" {
+		slog.Warn("mynautique password is missing but GetBoatInfo was called")
+		WriteFailureResponse("myNautique password missing", w)
+		return
+	}
+
 	if client == nil {
 		slog.Info("Creating new myNautique Client")
 		client = mynautique.NewMyNautiqueClient(&mynautique.Options{
 			User:       config.User,
 			Password:   config.Password,
-			AuthAPIKey: apiKey,
+			AuthAPIKey: config.APIKey,
 		})
 		h.SetMyNautiqueClient(*client)
 	}
 
-	t, err := client.GetBoatTelemetry(config.BoatID)
+	t, err := client.GetBoatTelemetry(req.BoatID)
 	if err != nil {
 		slog.Warn("cannot get boat telemetry from my nautique", slog.String("error", err.Error()))
 		WriteFailureResponse("cannot get boat information from myNautique", w)

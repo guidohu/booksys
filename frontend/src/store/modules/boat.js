@@ -97,7 +97,7 @@ const actions = {
     });
   },
   queryMyNautiqueInfo({ commit, state }, boatId) {
-    console.log("Trigger queryMyNautiqueInfo");
+    console.log("Trigger queryMyNautiqueInfo for boatId:", boatId);
     return new Promise((resolve, reject) => {
       Boat.getMyNautiqueInfo(
         boatId,

@@ -1,4 +1,4 @@
-# booksys-vue
+# booksys frontend
 
 ## Project setup
 
@@ -11,6 +11,8 @@ npm install
 ```
 npm run serve
 ```
+
+This will expect the backend to run on port :9090. All request to the API will be proxied.
 
 ### Compiles and minifies for production
 

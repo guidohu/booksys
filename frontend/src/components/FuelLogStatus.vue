@@ -146,15 +146,17 @@ export default {
     this.queryConfiguration()
       .then(() => {
         // query myNautique if enabled
-        if (this.getMyNautiqueEnabled && this.getMyNautiqueBoatId) {
-          console.log("query myNautique");
+        if (this.getMyNautiqueEnabled) {
+          console.log("query myNautique with boat ID", this.getMyNautiqueBoatId);
           this.queryMyNautiqueInfo(this.getMyNautiqueBoatId)
             .then(() => {
               console.log("enable myNautique auto refresh");
               this.startAutoRefresh();
-            });
+            })
+            .catch((errors) => (this.errors = errors));
         }
       })
+      .catch((errors) => (this.errors = errors));
   },
   beforeUnmount() {
     this.stopAutoRefresh();

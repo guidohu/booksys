@@ -31,9 +31,10 @@ import (
 )
 
 type Configuration struct {
-	Database DBConfig   `yaml:"database"`
-	Http     HttpConfig `yaml:"http"`
-	params   *BasicParams
+	Database   DBConfig   `yaml:"database"`
+	Http       HttpConfig `yaml:"http"`
+	MyNautique MyNautique `yaml:"mynautique"`
+	params     *BasicParams
 }
 
 type DBConfig struct {
@@ -50,6 +51,10 @@ type HttpConfig struct {
 	SessionInactivityTimeout uint   `yaml:"sessionInactivityTimeout"`
 	SessionTimeout           uint   `yaml:"sessionTimeout"`
 	UploadPath               string `yaml:"uploadPath"`
+}
+
+type MyNautique struct {
+	APIKey string `yaml:"api.key"`
 }
 
 type BasicParams struct {
@@ -258,6 +263,9 @@ func NewConfig(flagConfig *viper.Viper) (*Config, error) {
 	c.environment.SetEnvPrefix("BOOKSYS")
 	c.environment.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	c.environment.AutomaticEnv()
+	for _, key := range GetKeys() {
+		c.environment.BindEnv(key)
+	}
 
 	// parse configuration file.
 	// Note: We get the configuration from flags, env or default
@@ -505,6 +513,11 @@ func (c *Config) GetInt64(key string) int64 {
 	value, _ := c.GetString(key)
 	i, _ := strconv.ParseInt(value, 10, 64)
 	return i
+}
+
+func (c *Config) GetBool(key string) bool {
+	value, _ := c.GetString(key)
+	return value == "true"
 }
 
 func (c *Config) IsSet(key string) bool {

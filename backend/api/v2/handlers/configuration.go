@@ -34,9 +34,10 @@ type PublicConfigurationMessage struct {
 	LocationLongitude      float32 `json:"location_longitude" validate:"required,longitude"`
 	LocationMap            string  `json:"location_map" validate:"omitempty,googlemapsurl"`
 	LocationTimeZone       string  `json:"location_time_zone" validate:"required"`
-	LogoFilePath           string  `json:"logo_file" validate:"omitempty,filepath"`                                                       // TODO: validator for uploaded file | check if really needed
-	MyNautiqueEnabled      bool    `json:"mynautique_enabled" validate:"omitempty,boolean"`                                               // check if really needed
-	MyNautiqueFuelCapacity int     `json:"mynautique_fuel_capacity" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=10"` // check if really needed
+	LogoFilePath           string  `json:"logo_file" validate:"omitempty,filepath"`                                                      // TODO: validator for uploaded file | check if really needed
+	MyNautiqueEnabled      bool    `json:"mynautique_enabled" validate:"omitempty,boolean"`                                              // check if really needed
+	MyNautiqueFuelCapacity int     `json:"mynautique_fuel_capacity" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=1"` // check if really needed
+	MyNautiqueBoatID       int     `json:"mynautique_boat_id" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=1"`       // required to query mynautique telemetry
 	PaymentAccountBIC      string  `json:"payment_account_bic" validate:"omitempty,printascii"`
 	PaymentAccountComment  string  `json:"payment_account_comment"`
 	PaymentAccountIBAN     string  `json:"payment_account_iban" validate:"omitempty,printascii"`
@@ -259,8 +260,15 @@ func (h *Handler) GetPublicConfiguration(w http.ResponseWriter, r *http.Request)
 	if pMap["mynautique.fuel.capacity"] == "" {
 		mynautiqueFuelCapacity = 0
 	} else if err != nil {
-		slog.Error("Cannot convert boat.fuel.capacity to int", slog.String("error", err.Error()))
+		slog.Error("Cannot convert mynautique.fuel.capacity to int", slog.String("error", err.Error()))
 		mynautiqueFuelCapacity = 0
+	}
+	mynautiqueBoatID, err := strconv.Atoi(pMap["mynautique.boat.id"])
+	if pMap["mynautique.boat.id"] == "" {
+		mynautiqueBoatID = 0
+	} else if err != nil {
+		slog.Error("Cannot convert mynautique.boat.id to int", slog.String("error", err.Error()))
+		mynautiqueBoatID = 0
 	}
 
 	resp := &PublicConfigurationMessage{
@@ -274,6 +282,7 @@ func (h *Handler) GetPublicConfiguration(w http.ResponseWriter, r *http.Request)
 		LocationTimeZone:       pMap["location.timezone"],
 		LogoFilePath:           pMap["logo.file"],
 		MyNautiqueEnabled:      mynautiqueEnabled,
+		MyNautiqueBoatID: mynautiqueBoatID,
 		MyNautiqueFuelCapacity: mynautiqueFuelCapacity,
 		PaymentAccountBIC:      pMap["payment.account.bic"],
 		PaymentAccountComment:  pMap["payment.account.comment"],

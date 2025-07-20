@@ -124,6 +124,14 @@ func (d *DBMysql) UpdateOrInsertPropertyValues(conf []Configuration) error {
 				continue
 			}
 		}
+		if res := tx.Model(&ConfigurationVersion{ID: 1}).Update("version", gorm.Expr("version + 1")); res.Error != nil {
+			slog.Error("Cannot update/set configuration version", slog.String("error", res.Error.Error()))
+			return res.Error
+		}
+		if res := tx.Model(&ConfigurationVersion{ID: 1}).Update("time", time.Now()); res.Error != nil {
+			slog.Error("Cannot update/set configuration time", slog.String("error", res.Error.Error()))
+			return res.Error
+		}
 		return nil
 	})
 
