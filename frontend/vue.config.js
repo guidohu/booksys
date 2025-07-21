@@ -10,10 +10,6 @@ module.exports = {
         target: "http://localhost:9090",
         changeOrigin: true,
       },
-      "^/api/v1": {
-        target: "http://localhost:80",
-        changeOrigin: true,
-      },
       "^/uploads": {
         target: "http://localhost:9090",
         changeOrigin: true,
