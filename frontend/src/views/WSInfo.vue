@@ -4,29 +4,33 @@
       <div class="row">
         <div class="col-12 mt-5 text-center">
           <div
-            v-if="getLocationAddress != null"
+            v-if="getLocationAddress != null && getLocationAddress.length > 0"
             cols="12"
             class="main-color"
             v-html="getLocationAddress"
           />
-          <div v-else>no address set by the site-owner</div>
+          <div class="main-color" v-else>
+            [ no address set by the site-owner ]
+          </div>
         </div>
       </div>
       <div class="row">
         <div class="col-12 text-center mt-3">
           <iframe
-            v-if="getLocationMap != null"
+            v-if="getLocationMap != null && getLocationMap.length > 0"
             :src="getLocationMap"
             frameborder="0"
             style="
-               {
+              {
                 border: 0;
               }
             "
             :width="mapWidth"
             :height="mapHeight"
           />
-          <div v-else>no map to display for this adress</div>
+          <div class="main-color" v-else>
+            [ no map configured ]
+          </div>
         </div>
       </div>
     </card-module>

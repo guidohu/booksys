@@ -1,0 +1,12 @@
+http:
+  routers:
+    external-backend:
+      entryPoints:
+        - "web"
+      rule: "PathPrefix(`/api/v2`) || PathPrefix(`/uploads`)"
+      service: "external-backend-service"
+  services:
+    external-backend-service:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:9090"

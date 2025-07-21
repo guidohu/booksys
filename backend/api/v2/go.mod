@@ -8,13 +8,11 @@ require (
 	github.com/nathan-osman/go-sunrise v1.1.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.15.0
-	github.com/tredoe/osutil/v2 v2.0.0-rc.16.0.20210906084627-10a53b06341f
+	github.com/tredoe/osutil v1.5.0
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/gorm v1.25.1
 )
-
-require github.com/go-yaml/yaml v2.1.0+incompatible
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

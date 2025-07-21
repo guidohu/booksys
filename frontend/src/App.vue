@@ -6,7 +6,7 @@
     />
     <router-view id="router-view" v-else />
     <footer class="legal-footer d-none d-lg-block">
-      developed 2013-2022 by Guido Hungerbuehler
+      developed 2013-2025 by Guido Hungerbuehler
       <a href="https://github.com/guidohu/booksys">Find me on Github</a>
     </footer>
   </div>
@@ -65,9 +65,8 @@ export default {
     // it is up and configured
     getBackendStatus()
       .then((status) => {
-        // if we do not have a configFile for the app -> go to setup
-        if (!status.configFile || !status.configDb || !status.usersExist) {
-          console.log("App Setup Done: no");
+        if (!status.configDb || !status.usersExist) {
+          console.log("App Setup Done: no (automated forward to setup)");
           if (this.$route.path !== "/setup") {
             this.$router.push("/setup");
           }
@@ -75,8 +74,6 @@ export default {
           this.backendReachable = false;
         } else {
           console.log("App Setup Done: yes (no automated forward to setup)");
-
-          // TODO check if user is logged in, if not -> redirect to login page
         }
       })
       .catch((error) => {

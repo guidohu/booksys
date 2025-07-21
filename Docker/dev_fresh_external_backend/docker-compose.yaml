@@ -1,20 +1,24 @@
 services:
     traefik:
         image: "traefik:latest"
-        container_name: "fresh_traefik"
+        container_name: "fresh_ext_backend_traefik"
         command:
           - "--api.insecure=true"
           - "--api.dashboard=true"
-          # - "--accesslog=true"
+          - "--accesslog=true"
+          - "--log.level=DEBUG"
           - "--providers.docker=true"
           - "--providers.docker.exposedbydefault=false"
           - "--entrypoints.web.address=:80"
           - "--entrypoints.traefik.address=:8081"
+          - "--providers.file.directory=/etc/traefik/dynamic_conf" # Or use --providers.file.filename=/etc/traefik/dynamic_config.yml
+          - "--providers.file.watch=true"
         ports:
           - "127.0.0.1:8080:80"
           - "127.0.0.1:8081:8081"
         volumes:
           - "/var/run/docker.sock:/var/run/docker.sock:ro"
+          - "./traefik:/etc/traefik/dynamic_conf:ro"
         labels:
           - "traefik.enable=true"
           - "traefik.http.routers.traefik.rule=PathPrefix(`/`)"
@@ -22,7 +26,7 @@ services:
           - "traefik.http.services.traefik.loadbalancer.server.port=8081"
     db:
         build: "./database"
-        container_name: "fresh_db"
+        container_name: "fresh_ext_backend_db"
         environment:
             MYSQL_DATABASE: "${MYSQL_DATABASE}"
             MYSQL_USER: "${MYSQL_USER}"
@@ -32,26 +36,9 @@ services:
             - '3306:3306'
         expose:
             - '3306'
-    api_v2:
-        build:
-            context: ../../backend
-            dockerfile: Dockerfile_api_v2
-        container_name: fresh_backend_api_v2
-        environment:
-            BOOKSYS_DATABASE_HOST: 'db'
-            BOOKSYS_DATABASE_PORT: 3306
-            BOOKSYS_DATABASE_USER: "${MYSQL_USER}"
-            BOOKSYS_DATABASE_PASSWORD: "${MYSQL_PASSWORD}"
-            BOOKSYS_DATABASE_DBNAME: "${MYSQL_DATABASE}"
-            BOOKSYS_MYNAUTIQUE_API_KEY: "${BOOKSYS_MYNAUTIQUE_API_KEY}"
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.api_v2.entrypoints=web"
-            - "traefik.http.routers.api_v2.rule=PathPrefix(`/api/v2`) || PathPrefix(`/uploads`)"
-            - "traefik.http.services.api_v2.loadbalancer.server.port=9090" 
     frontend:
         build: "./frontend"
-        container_name: "fresh_frontend"
+        container_name: "fresh_ext_backend_frontend"
         user: "node"
         working_dir: /home/node/app
         environment:
