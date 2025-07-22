@@ -5,8 +5,8 @@
         <div class="col-12">
           <img
             class="img-fluid custom-height"
-            v-if="getLogoFile != null && getLogoFile != ''"
-            :src="getLogoFile"
+            v-if="getLogoUri != null && getLogoUri != ''"
+            :src="getLogoUri"
             alt="Logo"
           />
         </div>
@@ -49,7 +49,7 @@ export default {
   },
   computed: {
     ...mapGetters("login", ["username"]),
-    ...mapGetters("configuration", ["getLogoFile"]),
+    ...mapGetters("configuration", ["getLogoUri"]),
   },
   methods: {
     ...mapActions("login", ["getIsLoggedIn", "login"]),
@@ -80,7 +80,8 @@ export default {
   created() {
     this.isLoading = true;
 
-    this.queryLogoFile().catch((errors) => console.log(errors));
+    this.queryLogoFile()
+      .catch((errors) => console.log(errors));
 
     this.getIsLoggedIn()
       .then((loggedIn) => {
