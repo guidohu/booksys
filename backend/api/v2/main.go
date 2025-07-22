@@ -7,62 +7,67 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"server/config"
-	"server/database"
-	"server/handlers"
+	"path/filepath"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
 
-	"golang.org/x/exp/slog"
+	"server/config"
+	"server/database"
+	"server/handlers"
 
-	flag "github.com/spf13/pflag"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"golang.org/x/exp/slog"
 )
 
 // Flag definition
-// Note: Configuration can be either specified in the following precedence:
+// Note: Configurations follow the following precedence from highest to lowest:
 // - Flags
 // - Environment Variables
 // - Config File
-var configFile *string = flag.String("config", "", "The configuration file to use.")
-
-var httpPort *int = flag.Int("http_port", 0, "The port the HTTP server listens on.")
-var httpSessionInactivityTimeout *uint = flag.Uint("http_session_inactivity_timeout", 0, "Time until a HTTP session with no activity will be cancelled and a user gets logged out.")
-var httpSessionTimeout *uint = flag.Uint("http_session_timeout", 0, "Time in seconds until a user is logged out.")
-var httpUploadPath *string = flag.String("http_upload_path", "", "Path where content is uploaded to.")
-
-var databaseName *string = flag.String("database_name", "", "The database name.")
-var databaseHost *string = flag.String("database_host", "", "The IP/hostname of the host the DB is on.")
-var databasePassword *string = flag.String("database_password", "", "The password for the DB user.")
-var databasePort *string = flag.String("database_port", "", "The port for the DB connection.")
-var databaseProtocol *string = flag.String("database_protocol", "", "The protocol for the DB connection.")
-var databaseUser *string = flag.String("database_user", "", "The user for the DB connection.")
-
-var myNautiqueAPIKey *string = flag.String("mynautique_api_key", "", "The API key for the mynautique integration.")
-
-var printConfig *bool = flag.Bool("print_config", false, "Prints the config an exits.")
+var (
+	// Place where we load the config from.
+	configFile = pflag.String("config", "", "The configuration file to use.")
+	// HTTP server settings
+	httpPort                     = pflag.Int("http_port", 0, "The port the HTTP server listens on.")
+	httpSessionInactivityTimeout = pflag.Uint("http_session_inactivity_timeout", 0, "Time until a HTTP session with no activity will be cancelled and a user gets logged out.")
+	httpSessionTimeout           = pflag.Uint("http_session_timeout", 0, "Time in seconds until a user is logged out.")
+	httpUploadPath               = pflag.String("http_uploadpath", "", "Path where content is uploaded to.")
+	// Database settings
+	databaseName     = pflag.String("database_dbname", "", "The database name.")
+	databaseHost     = pflag.String("database_host", "", "The IP/hostname of the host the DB is on.")
+	databasePassword = pflag.String("database_password", "", "The password for the DB user.")
+	databasePort     = pflag.String("database_port", "", "The port for the DB connection.")
+	databaseProtocol = pflag.String("database_protocol", "", "The protocol for the DB connection.")
+	databaseUser     = pflag.String("database_user", "", "The user for the DB connection.")
+	// MyNautique settings
+	myNautiqueAPIKey = pflag.String("mynautique_api_key", "", "The API key for the mynautique integration.")
+	// Additional control flags
+	printConfig = pflag.Bool("print_config", false, "Prints the config an exits.")
+)
 
 func getFlags(v *viper.Viper) {
-	v.BindPFlag("config", flag.Lookup("config"))
-	v.BindPFlag("http.port", flag.Lookup("http_port"))
-	v.BindPFlag("http.sessioninactivitytimeout", flag.Lookup("http_session_inactivity_timeout"))
-	v.BindPFlag("http.sessiontimeout", flag.Lookup("http_session_timeout"))
-	v.BindPFlag("http.uploadpath", flag.Lookup("http_upload_path"))
-	v.BindPFlag("database.user", flag.Lookup("database_user"))
-	v.BindPFlag("database.password", flag.Lookup("database_password"))
-	v.BindPFlag("database.protocol", flag.Lookup("database_protocol"))
-	v.BindPFlag("database.host", flag.Lookup("database_host"))
-	v.BindPFlag("database.port", flag.Lookup("database_port"))
-	v.BindPFlag("database.dbname", flag.Lookup("database_name"))
-	v.BindPFlag("mynautique.api.key", flag.Lookup("mynautique_api_key"))
-	flag.Parse()
+	v.BindPFlag("config", pflag.Lookup("config"))
+	v.BindPFlag("http.port", pflag.Lookup("http_port"))
+	v.BindPFlag("http.sessioninactivitytimeout", pflag.Lookup("http_session_inactivity_timeout"))
+	v.BindPFlag("http.sessiontimeout", pflag.Lookup("http_session_timeout"))
+	v.BindPFlag("http.uploadpath", pflag.Lookup("http_uploadpath"))
+	v.BindPFlag("database.user", pflag.Lookup("database_user"))
+	v.BindPFlag("database.password", pflag.Lookup("database_password"))
+	v.BindPFlag("database.protocol", pflag.Lookup("database_protocol"))
+	v.BindPFlag("database.host", pflag.Lookup("database_host"))
+	v.BindPFlag("database.port", pflag.Lookup("database_port"))
+	v.BindPFlag("database.dbname", pflag.Lookup("database_dbname"))
+	v.BindPFlag("mynautique.api.key", pflag.Lookup("mynautique_api_key"))
+	pflag.Parse()
 }
 
 // maybeConnectDatabase creates a new database client based on the provided configuration.
 // It tries to connect to the database but will return an
-// unconnected database client if the connection cannot be established.
-func maybeConnectDatabase(c *config.Config) database.DBMysql {
+// empty database client if the connection cannot be established.
+func maybeConnectDatabase(c *config.Config) (database.DBMysql, error) {
 	user, _ := c.GetString("database.user")
 	password, _ := c.GetString("database.password")
 	protocol, _ := c.GetString("database.protocol")
@@ -79,104 +84,46 @@ func maybeConnectDatabase(c *config.Config) database.DBMysql {
 	}
 	slog.Info("Connecting database client to:", slog.String("address", db.String()))
 	if err := db.Connect(); err != nil {
-		slog.Warn(fmt.Sprintf("Database is not properly setup or not reachable. Error returned from Connect(): %s", err))
-	} else {
-		slog.Info("Connected to database", slog.String("name", dbname))
+		slog.Warn(fmt.Sprintf("Database connection failed: %s", err))
+		return database.DBMysql{}, err
 	}
-	return db
+	slog.Info("Connected to database", slog.String("name", dbname))
+	return db, nil
 }
 
-func main() {
+func setupLogger() {
 	lh := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		AddSource: true,
 	})
 	logger := slog.New(lh)
 	slog.SetDefault(logger)
+}
 
-	// Get startup configuration.
-	v := viper.New()
-	getFlags(v)
-	conf, err := config.NewConfig(v)
-	if err != nil {
-		slog.Error("Invalid config", slog.String("error", err.Error()))
+func registerUploadsServer(mux *http.ServeMux, c *config.Config) {
+	// File server to serve uploaded files
+	uploadPath, _ := c.GetString("http.uploadpath")
+	if uploadPath == "" {
+		slog.Warn("http.uploadpath is not set, not serving uploaded files")
+		return
+	}
+	if !filepath.IsAbs(uploadPath) {
+		slog.Warn("http.uploadpath should be an absolute path")
+	}
+	if strings.Contains(uploadPath, "..") {
+		slog.Warn("http.uploadpath cannot not contain '..'")
 		os.Exit(1)
 	}
-	uploadPath, _ := conf.GetString("http.uploadpath")
-
-	// If requested, print config and exit.
-	if *printConfig {
-		fmt.Println(conf.ToStringFull())
-		os.Exit(0)
+	absUploadPath, err := filepath.Abs(uploadPath)
+	if err != nil {
+		slog.Warn("http.uploadpath cannot be converted to an absolute path")
+		os.Exit(1)
 	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	var wg sync.WaitGroup
-
-	db := maybeConnectDatabase(conf)
-	hp := handlers.HandlerParams{
-		Database:      &db,
-		Configuration: conf,
-	}
-	h := handlers.NewHandler(hp)
-	conf.SetDB(&db)
-
-	// We want to know about config file updates, because the
-	// database configuration might change.
-	chConfigFileUpdate := conf.WatchFile()
-	// chPropertyChange := make(chan struct{})
-
-	// Watch for changes in the properties.
-	wg.Add(1)
-	go func() {
-		slog.Info("Watch properties routine started.")
-		conf.WatchProperties(ctx, nil /*chPropertyChange*/)
-		slog.Info("Watch properties routine done.")
-		wg.Done()
-	}()
-
-	// Auto(re)connect database, e.g. if database is not up
-	// when started, or configuration is not present yet.
-	wg.Add(1)
-	go func() {
-		slog.Info("Auto reconnect routine started.")
-		ticker := time.NewTicker(10 * time.Second)
-		for {
-			select {
-			case <-ctx.Done():
-				ticker.Stop()
-				wg.Done()
-				slog.Info("Auto reconnect routine done.")
-				return
-			case <-ticker.C:
-				if db.Ping() != nil {
-					slog.Info("Schedule connection attempt to db.")
-					db = maybeConnectDatabase(conf)
-					h.SetDB(&db)
-					conf.SetDB(&db)
-				}
-			case <-chConfigFileUpdate:
-				slog.Info("Reconnect database after config change.")
-				db = maybeConnectDatabase(conf)
-				h.SetDB(&db)
-				conf.SetDB(&db)
-				conf.ReadConfigProperties()
-				uploadPath, _ = conf.GetString("http.uploadpath")
-			}
-		}
-	}()
-
-	mux := http.NewServeMux()
-	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", v.GetUint16("http.port")),
-		Handler: mux,
-	}
-
-	// File server to serve uploaded files
-	fs := http.FileServer(http.Dir(uploadPath))
+	fs := http.FileServer(http.Dir(absUploadPath))
 	mux.Handle("/uploads/", http.StripPrefix("/uploads/", fs))
+	slog.Info("Serving uploaded files from", slog.String("path", absUploadPath))
+}
 
-	// Register all handlers
+func registerHandlers(mux *http.ServeMux, h *handlers.Handler) {
 	mux.Handle("/api/v2/health/status", http.HandlerFunc(h.HealthStatus))
 
 	mux.Handle("/api/v2/ping", http.HandlerFunc(h.Ping))
@@ -255,10 +202,92 @@ func main() {
 	mux.Handle("/api/v2/admin/configuration/set", http.HandlerFunc(h.WithAuthentication(h.SetConfiguration)))
 	mux.Handle("/api/v2/admin/logs", http.HandlerFunc(h.WithAuthentication(h.GetLogs)))
 	mux.Handle("/api/v2/admin/upload/logo", http.HandlerFunc(h.WithAuthentication(h.UploadLogoFile)))
+}
+
+func main() {
+	setupLogger()
+
+	// Get startup configuration.
+	v := viper.New()
+	getFlags(v)
+	conf, err := config.NewConfig(v)
+	if err != nil {
+		slog.Error("Invalid config", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+
+	// If requested, print config and exit.
+	if *printConfig {
+		fmt.Println(conf.ToStringFull())
+		os.Exit(0)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	var wg sync.WaitGroup
+
+	db, _ := maybeConnectDatabase(conf)
+	hp := handlers.HandlerParams{
+		Database:      &db,
+		Configuration: conf,
+	}
+	h := handlers.NewHandler(hp)
+	conf.SetDB(&db)
+
+	// We want to know about config file updates, because the
+	// database configuration might change.
+	chConfigFileUpdate := conf.WatchFile()
+
+	// Watch for changes in the properties.
+	wg.Add(1)
+	go func() {
+		slog.Info("Watch properties routine started.")
+		conf.WatchProperties(ctx, nil /*chPropertyChange*/)
+		slog.Info("Watch properties routine done.")
+		wg.Done()
+	}()
+
+	// Auto(re)connect database, e.g. if database is not up
+	// when started, or configuration is not present yet.
+	wg.Add(1)
+	go func() {
+		slog.Info("Auto reconnect routine started.")
+		ticker := time.NewTicker(10 * time.Second)
+		for {
+			select {
+			case <-ctx.Done():
+				ticker.Stop()
+				wg.Done()
+				slog.Info("Auto reconnect routine done.")
+				return
+			case <-ticker.C:
+				if db.Ping() != nil {
+					slog.Info("Schedule connection attempt to db.")
+					newDB, _ := maybeConnectDatabase(conf)
+					h.SetDB(&newDB)
+					conf.SetDB(&newDB)
+				}
+			case <-chConfigFileUpdate:
+				slog.Info("Reconnect database after config change.")
+				newDB, _ := maybeConnectDatabase(conf)
+				h.SetDB(&newDB)
+				conf.SetDB(&newDB)
+				conf.ReadConfigProperties()
+			}
+		}
+	}()
+
+	mux := http.NewServeMux()
+	server := &http.Server{
+		Addr:    fmt.Sprintf(":%d", v.GetUint16("http.port")),
+		Handler: mux,
+	}
+	registerUploadsServer(mux, conf)
+	registerHandlers(mux, h)
 
 	// TODO remove
-	jss := http.FileServer(http.Dir("../../../frontend/dist/"))
-	mux.Handle("/", jss)
+	// jss := http.FileServer(http.Dir("../../../frontend/dist/"))
+	// mux.Handle("/", jss)
 
 	wg.Add(1)
 	go func() {
