@@ -27,12 +27,12 @@
           timezone defined by these settings, also sunrise and sunset will be
           calculated based on these settings.
         </div>
-        <input-text
-          id="timezone"
-          label="Timezone"
-          description="e.g., Europe/Zurich"
-          size="small"
+        <InputSelect
+          :options="allTimezones"
           v-model="form.timezone"
+          label="Timezone"
+          size="small"
+          description="e.g., Europe/Zurich"
         />
         <input-text
           id="longitude"
@@ -243,6 +243,7 @@ export default {
         { value: "hh.h", text: "hh.h  - such as 9.7" },
         { value: "hh:mm", text: "hh:mm - such as 9:42" },
       ],
+      allTimezones: this.getAllTimezones(),
     };
   },
   computed: {
@@ -260,6 +261,19 @@ export default {
         console.log("emit change", configuration);
         this.$emit("change", configuration);
       }
+    },
+    getAllTimezones: function () {
+      let timezones = [];
+      if (typeof Intl === 'object' && typeof Intl.supportedValuesOf === 'function') {
+        timezones = Intl.supportedValuesOf('timeZone');
+      } else {
+        console.warn("Intl.supportedValuesOf('timeZone') not supported by this browser/Node.js version.");
+        timezones = []; // Fallback or suggest a polyfill/alternative
+      }
+      const selectTimezones = timezones.map(str => {
+        return { value: str, text: str };
+      });
+      return selectTimezones;
     },
     getSanitizedConfiguration: function () {
       // extract correct URL from mapIframe

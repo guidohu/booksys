@@ -2,7 +2,7 @@
   <subpage-container title="Settings">
     <warning-box v-if="errors.length > 0" :errors="errors" />
     <show-for-desktop>
-      <settings-card
+      <SettingsCard
         class="mx-1"
         :show-controls="false"
         @save="save"
@@ -10,7 +10,7 @@
       />
     </show-for-desktop>
     <show-for-mobile>
-      <settings-card
+      <SettingsCard
         class="mx-1"
         :show-controls="true"
         @saved="navigateBack"
