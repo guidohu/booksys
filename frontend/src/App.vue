@@ -1,6 +1,6 @@
 <template>
   <div id="app-content">
-    <alert-message
+    <AlertMessage
       v-if="backendReachable == false"
       :alert-message="backendNotReachableAlertMsg"
     />

@@ -34,53 +34,42 @@
   </subpage-container>
 </template>
 
-<script>
-import { mapActions } from "vuex";
+<script setup>
+import { ref } from "vue";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 import SettingsCard from "@/components/SettingsCard";
 import SubpageContainer from "@/components/bricks/SubpageContainer";
 import ShowForDesktop from "@/components/bricks/ShowForDesktop.vue";
 import ShowForMobile from "@/components/bricks/ShowForMobile.vue";
 import WarningBox from "../../components/WarningBox.vue";
 
-export default {
-  name: "WSSettings",
-  components: {
-    SettingsCard,
-    SubpageContainer,
-    ShowForDesktop,
-    ShowForMobile,
-    WarningBox,
-  },
-  data() {
-    return {
-      settings: null,
-      errors: [],
-    };
-  },
-  methods: {
-    ...mapActions("configuration", ["setConfiguration"]),
-    change: function (settings) {
-      this.settings = settings;
-    },
-    save: function () {
-      if (this.settings == null) {
-        this.navigateBack();
-        return;
-      }
+const store = useStore();
+const router = useRouter();
 
-      this.setConfiguration(this.settings)
-        .then(() => {
-          this.errors = [];
-          this.navigateBack();
-        })
-        .catch((errors) => (this.errors = errors));
-    },
-    cancel: function () {
-      this.navigateBack();
-    },
-    navigateBack: function () {
-      this.$router.push("/admin");
-    },
-  },
+const settings = ref(null);
+const errors = ref([]);
+
+const change = (newSettings) => {
+  settings.value = newSettings;
+};
+
+const save = () => {
+  if (settings.value == null) {
+    navigateBack();
+    return;
+  }
+
+  store
+    .dispatch("configuration/setConfiguration", settings.value)
+    .then(() => {
+      errors.value = [];
+      navigateBack();
+    })
+    .catch((err) => (errors.value = err));
+};
+
+const navigateBack = () => {
+  router.push("/admin");
 };
 </script>

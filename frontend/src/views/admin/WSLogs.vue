@@ -10,17 +10,9 @@
   </subpage-container>
 </template>
 
-<script>
+<script setup>
 import LogCard from "@/components/LogCard";
 import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
-
-export default {
-  name: "WSLogs",
-  components: {
-    LogCard,
-    SubpageContainer,
-  },
-};
 </script>
 
 <style scoped>

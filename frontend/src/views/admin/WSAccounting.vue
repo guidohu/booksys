@@ -12,19 +12,10 @@
   </subpage-container>
 </template>
 
-<script>
+<script setup>
 import AccountingTabs from "@/components/AccountingTabs";
 import CardModule from "@/components/bricks/CardModule.vue";
 import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
-
-export default {
-  name: "WSAccounting",
-  components: {
-    AccountingTabs,
-    CardModule,
-    SubpageContainer,
-  },
-};
 </script>
 
 <style scoped>
