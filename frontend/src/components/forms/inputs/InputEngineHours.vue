@@ -23,7 +23,15 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import {
+  defineProps,
+  defineEmits,
+  ref,
+  computed,
+  watch,
+  onMounted,
+} from "vue";
 import {
   formatEngineHourLabel,
   formatEngineHour,
@@ -31,74 +39,75 @@ import {
   convertEngineHour,
 } from "@/libs/formatters";
 
-export default {
-  name: "InputEngineHours",
-  props: [
-    "id",
-    "label",
-    "modelValue",
-    "description",
-    "disabled",
-    "displayFormat",
-    "placeholder",
-    "size",
-  ],
-  data() {
-    return {
-      formValue: null,
-      formPlaceholder: null,
-      state: null,
-    };
-  },
-  emits: ["update:modelValue"],
-  methods: {
-    changeHandler(value) {
-      if (this.formValue != null) {
-        this.$emit("update:modelValue", convertEngineHour(value));
-      } else {
-        this.$emit("update:modelValue", null);
-      }
-    },
-    inputGroupClass() {
-      if (this.size == null) {
-        return "input-group";
-      }
-      if (this.size == "small") {
-        return "input-group input-group-sm";
-      }
-      if (this.size == "large") {
-        return "input-group input-group-lg";
-      }
-    },
-  },
-  computed: {
-    unitText: function () {
-      return formatEngineHourLabel(this.displayFormat);
-    },
-  },
-  watch: {
-    modelValue: function () {
-      this.formValue = formatEngineHour(this.modelValue, this.displayFormat);
-    },
-    formValue: function () {
-      if (this.formValue == null || this.formValue == "") {
-        this.state = null;
-      } else if (!isValidEngineHour(this.formValue, this.displayFormat)) {
-        this.state = false;
-      } else {
-        this.state = null;
-      }
-    },
-  },
-  created() {
-    this.formValue = formatEngineHour(this.modelValue, this.displayFormat);
+const props = defineProps([
+  "id",
+  "label",
+  "modelValue",
+  "description",
+  "disabled",
+  "displayFormat",
+  "placeholder",
+  "size",
+]);
 
-    if (this.placeholder != null) {
-      this.formPlaceholder = formatEngineHour(
-        this.placeholder,
-        this.displayFormat
-      );
-    }
-  },
+const emit = defineEmits(["update:modelValue"]);
+
+const formValue = ref(null);
+const formPlaceholder = ref(null);
+const state = ref(null);
+
+const changeHandler = (value) => {
+  if (formValue.value != null) {
+    emit("update:modelValue", convertEngineHour(value));
+  } else {
+    emit("update:modelValue", null);
+  }
 };
+
+const inputGroupClass = () => {
+  if (props.size == null) {
+    return "input-group";
+  }
+  if (props.size == "small") {
+    return "input-group input-group-sm";
+  }
+  if (props.size == "large") {
+    return "input-group input-group-lg";
+  }
+};
+
+const unitText = computed(() => {
+  return formatEngineHourLabel(props.displayFormat);
+});
+
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    formValue.value = formatEngineHour(newValue, props.displayFormat);
+  }
+);
+
+watch(
+  () => formValue.value,
+  (newValue) => {
+    if (newValue == null || newValue == "") {
+      state.value = null;
+    } else if (!isValidEngineHour(newValue, props.displayFormat)) {
+      state.value = false;
+    } else {
+      state.value = null;
+    }
+  }
+);
+
+onMounted(() => {
+  formValue.value = formatEngineHour(props.modelValue, props.displayFormat);
+
+  if (props.placeholder != null) {
+    formPlaceholder.value = formatEngineHour(
+      props.placeholder,
+      props.displayFormat
+    );
+  }
+});
 </script>

@@ -44,77 +44,71 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "InputSelect",
-  props: [
-    "id",
-    "label",
-    "modelValue",
-    "options",
-    "disabled",
-    "size",
-    "selectMode",
-    "selectSize",
-    "description",
-  ],
-  emits: ["update:modelValue", "changed"],
-  data() {
-    return {
-      selectedValue: 0,
-    };
-  },
-  watch: {
-    modelValue: function (newValue) {
-      this.selectedValue = newValue;
-    },
-  },
-  methods: {
-    changeHandler(event) {
-      console.log(event);
-      if (this.selectMode != "multiple") {
-        const value = event.target.value;
-        console.log("selected value", value);
-        this.$emit("update:modelValue", value);
-      } else {
-        let array = [];
-        const options = event.target.selectedOptions;
-        for (let i = 0; i < options.length; i++) {
-          array.push(options[i].value);
-        }
-        console.log("selected values", array);
-        this.$emit("update:modelValue", array);
-      }
-      this.$emit("changed");
-    },
-    isSelected: function (option) {
-      return option.value == this.modelValue;
-    },
-    inputGroupClass() {
-      if (this.size == null) {
-        return "input-group";
-      }
-      if (this.size == "small") {
-        return "input-group input-group-sm";
-      }
-      if (this.size == "large") {
-        return "input-group input-group-lg";
-      }
-    },
-    formSelectClass() {
-      if (this.size == null) {
-        return "form-select";
-      }
-      if (this.size == "small") {
-        return "form-select form-select-sm";
-      }
-      if (this.size == "large") {
-        return "form-select form-select-lg";
-      }
-    },
-  },
-  created() {
-    this.selectedValue = this.modelValue;
-  },
+<script setup>
+import { defineProps, defineEmits, ref, watch } from "vue";
+
+const props = defineProps([
+  "id",
+  "label",
+  "modelValue",
+  "options",
+  "disabled",
+  "size",
+  "selectMode",
+  "selectSize",
+  "description",
+]);
+
+const emit = defineEmits(["update:modelValue", "changed"]);
+
+const selectedValue = ref(props.modelValue);
+
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    selectedValue.value = newValue;
+  }
+);
+
+const changeHandler = (event) => {
+  console.log(event);
+  if (props.selectMode != "multiple") {
+    const value = event.target.value;
+    console.log("selected value", value);
+    emit("update:modelValue", value);
+  } else {
+    let array = [];
+    const options = event.target.selectedOptions;
+    for (let i = 0; i < options.length; i++) {
+      array.push(options[i].value);
+    }
+    console.log("selected values", array);
+    emit("update:modelValue", array);
+  }
+  emit("changed");
+};
+
+const inputGroupClass = () => {
+  if (props.size == null) {
+    return "input-group";
+  }
+  if (props.size == "small") {
+    return "input-group input-group-sm";
+  }
+  if (props.size == "large") {
+    return "input-group input-group-lg";
+  }
+};
+
+const formSelectClass = () => {
+  if (props.size == null) {
+    return "form-select";
+  }
+  if (props.size == "small") {
+    return "form-select form-select-sm";
+  }
+  if (props.size == "large") {
+    return "form-select form-select-lg";
+  }
 };
 </script>

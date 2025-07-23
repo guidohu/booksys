@@ -17,27 +17,27 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "InputNumber",
-  props: ["id", "label", "modelValue", "disabled", "size", "suffix"],
-  emits: ["update:modelValue"],
-  methods: {
-    changeHandler(value) {
-      console.log("updateValue to:", value);
-      this.$emit("update:modelValue", value);
-    },
-    inputGroupClass() {
-      if (this.size == null) {
-        return "input-group";
-      }
-      if (this.size == "small") {
-        return "input-group input-group-sm";
-      }
-      if (this.size == "large") {
-        return "input-group input-group-lg";
-      }
-    },
-  },
+<script setup>
+import { defineProps, defineEmits } from "vue";
+
+const props = defineProps(["id", "label", "modelValue", "disabled", "size", "suffix"]);
+
+const emit = defineEmits(["update:modelValue"]);
+
+const changeHandler = (value) => {
+  console.log("updateValue to:", value);
+  emit("update:modelValue", value);
+};
+
+const inputGroupClass = () => {
+  if (props.size == null) {
+    return "input-group";
+  }
+  if (props.size == "small") {
+    return "input-group input-group-sm";
+  }
+  if (props.size == "large") {
+    return "input-group input-group-lg";
+  }
 };
 </script>

@@ -23,44 +23,36 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "InputToggle",
-  data() {
-    return {
-      formOffLabel: "off",
-      formOnLabel: "on",
-      formValue: false,
-    };
-  },
-  props: ["id", "label", "offLabel", "onLabel", "modelValue"],
-  emits: ["update:modelValue", "change"],
-  methods: {
-    update() {
-      this.formValue = !this.formValue;
-      this.$emit("update:modelValue", this.formValue);
-      this.$emit("change");
-    },
-  },
-  watch: {
-    modelValue: function (newValue) {
-      this.formValue = newValue;
-    },
-  },
-  computed: {
-    formSelectedLabel: function () {
-      if (this.formValue == false) {
-        return this.formOffLabel;
-      }
-      return this.formOnLabel;
-    },
-  },
-  created() {
-    this.formOffLabel = this.offLabel;
-    this.formOnLabel = this.onLabel;
-    this.formValue = this.modelValue;
-  },
+<script setup>
+import { defineProps, defineEmits, ref, computed, watch } from "vue";
+
+const props = defineProps(["id", "label", "offLabel", "onLabel", "modelValue"]);
+
+const emit = defineEmits(["update:modelValue", "change"]);
+
+const formValue = ref(props.modelValue);
+const formOffLabel = ref(props.offLabel || "off");
+const formOnLabel = ref(props.onLabel || "on");
+
+const update = () => {
+  formValue.value = !formValue.value;
+  emit("update:modelValue", formValue.value);
+  emit("change");
 };
+
+watch(
+  () => props.modelValue,
+  (newValue) => {
+    formValue.value = newValue;
+  }
+);
+
+const formSelectedLabel = computed(() => {
+  if (formValue.value == false) {
+    return formOffLabel.value;
+  }
+  return formOnLabel.value;
+});
 </script>
 
 <style scoped>

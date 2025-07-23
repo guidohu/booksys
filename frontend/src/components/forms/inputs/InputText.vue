@@ -22,38 +22,38 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "InputText",
-  props: [
-    "id",
-    "label",
-    "modelValue",
-    "type",
-    "disabled",
-    "size",
-    "suffix",
-    "placeholder",
-    "description",
-    "autocomplete",
-  ],
-  emits: ["update:modelValue", "input"],
-  methods: {
-    changeHandler(value) {
-      this.$emit("update:modelValue", value);
-      this.$emit("input");
-    },
-    inputGroupClass() {
-      if (this.size == null) {
-        return "input-group";
-      }
-      if (this.size == "small") {
-        return "input-group input-group-sm";
-      }
-      if (this.size == "large") {
-        return "input-group input-group-lg";
-      }
-    },
-  },
+<script setup>
+import { defineProps, defineEmits } from "vue";
+
+const props = defineProps([
+  "id",
+  "label",
+  "modelValue",
+  "type",
+  "disabled",
+  "size",
+  "suffix",
+  "placeholder",
+  "description",
+  "autocomplete",
+]);
+
+const emit = defineEmits(["update:modelValue", "input"]);
+
+const changeHandler = (value) => {
+  emit("update:modelValue", value);
+  emit("input");
+};
+
+const inputGroupClass = () => {
+  if (props.size == null) {
+    return "input-group";
+  }
+  if (props.size == "small") {
+    return "input-group input-group-sm";
+  }
+  if (props.size == "large") {
+    return "input-group input-group-lg";
+  }
 };
 </script>

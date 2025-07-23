@@ -21,36 +21,36 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "InputFile",
-  props: [
-    "id",
-    "label",
-    "modelValue",
-    "disabled",
-    "size",
-    "suffix",
-    "accept",
-    "placeholder",
-    "description",
-  ],
-  emits: ["update:modelValue"],
-  methods: {
-    changeHandler(event) {
-      this.$emit("update:modelValue", event.target.files[0]);
-    },
-    inputGroupClass() {
-      if (this.size == null) {
-        return "input-group";
-      }
-      if (this.size == "small") {
-        return "input-group input-group-sm";
-      }
-      if (this.size == "large") {
-        return "input-group input-group-lg";
-      }
-    },
-  },
+<script setup>
+import { defineProps, defineEmits } from "vue";
+
+const props = defineProps([
+  "id",
+  "label",
+  "modelValue",
+  "disabled",
+  "size",
+  "suffix",
+  "accept",
+  "placeholder",
+  "description",
+]);
+
+const emit = defineEmits(["update:modelValue"]);
+
+const changeHandler = (event) => {
+  emit("update:modelValue", event.target.files[0]);
+};
+
+const inputGroupClass = () => {
+  if (props.size == null) {
+    return "input-group";
+  }
+  if (props.size == "small") {
+    return "input-group input-group-sm";
+  }
+  if (props.size == "large") {
+    return "input-group input-group-lg";
+  }
 };
 </script>
