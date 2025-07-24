@@ -31,36 +31,25 @@
   </modal-container>
 </template>
 
-<script>
+<script setup>
 import ModalBody from "@/components/bricks/ModalBody.vue";
 import ModalContainer from "../ModalContainer.vue";
 import ModalFooter from "../ModalFooter.vue";
 import ModalHeader from "../ModalHeader.vue";
+import { ref } from "vue";
 
-export default {
-  name: "ConfirmDialog",
-  props: ["title", "message", "textConfirm", "textDeny"],
-  data() {
-    return {
-      visible: true,
-    };
-  },
-  emits: ["confirm"],
-  components: {
-    ModalHeader,
-    ModalBody,
-    ModalContainer,
-    ModalFooter,
-  },
-  methods: {
-    close: function () {
-      this.$emit("confirm", false);
-      return true;
-    },
-    confirm: function () {
-      this.$emit("confirm", true);
-      return true;
-    },
-  },
-};
+defineProps(["title", "message", "textConfirm", "textDeny"]);
+const emit = defineEmits(["confirm"]);
+
+const visible = ref(true);
+
+function close() {
+  emit("confirm", false);
+  return true;
+}
+
+function confirm() {
+  emit("confirm", true);
+  return true;
+}
 </script>

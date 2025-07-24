@@ -7,16 +7,9 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
+<script setup>
 import Loading from "vue-loading-overlay";
 import 'vue-loading-overlay/dist/css/index.css';
 
-export default defineComponent({
-  name: "OverlaySpinner",
-  components: {
-    Loading,
-  },
-  props: ["active", "fullPage"],
-});
+defineProps(["active", "fullPage"]);
 </script>

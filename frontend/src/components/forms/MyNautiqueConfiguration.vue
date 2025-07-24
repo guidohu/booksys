@@ -44,39 +44,31 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import InputText from "./inputs/InputText.vue";
 import InputPassword from "./inputs/InputPassword.vue";
 import InputToggle from "./inputs/InputToggle.vue";
+import { ref, watch } from "vue";
 
-export default {
-  name: "MyNautiqueConfiguration",
-  components: {
-    InputText,
-    InputPassword,
-    InputToggle,
+const props = defineProps(["settingsData"]);
+
+const emit = defineEmits(["save", "update:settings"]);
+
+const form = ref({});
+
+watch(
+  () => props.settingsData,
+  (newVal) => {
+    form.value = { ...newVal };
   },
-  emits: ["save", "update:settings"],
-  props: ["settingsData"],
-  data() {
-    return {
-      form: {
-        enabled: false,
-        user: "",
-        password: "",
-      },
-    };
-  },
-  methods: {
-    save: function () {
-      this.$emit("save", this.form);
-    },
-    update: function () {
-      this.$emit("update:settings", this.form);
-    },
-  },
-  created() {
-    this.form = this.$props.settingsData;
-  },
+  { immediate: true, deep: true }
+);
+
+const save = () => {
+  emit("save", form.value);
+};
+
+const update = () => {
+  emit("update:settings", form.value);
 };
 </script>

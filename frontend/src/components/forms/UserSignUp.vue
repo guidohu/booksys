@@ -87,57 +87,53 @@
   </form>
 </template>
 
-<script>
+<script setup>
 import InputToggle from "@/components/forms/inputs/InputToggle.vue";
 import InputText from "@/components/forms/inputs/InputText.vue";
 import InputPassword from "@/components/forms/inputs/InputPassword.vue";
+import { ref, watch, onMounted } from "vue";
 
-export default {
-  name: "UserSignUp",
-  components: {
-    InputToggle,
-    InputText,
-    InputPassword,
+const props = defineProps(["userData", "showDisclaimer"]);
+const emit = defineEmits(["save", "update:user"]);
+
+const signUpData = ref({});
+const licenseToggleState = ref(false);
+const ownRiskToggleState = ref(false);
+
+watch(
+  () => props.userData,
+  (newVal) => {
+    signUpData.value = newVal;
   },
-  props: ["userData", "showDisclaimer"],
-  data() {
-    return {
-      signUpData: {},
-      toggleWidth: 50,
-      licenseToggleState: false,
-      ownRiskToggleState: false,
-    };
-  },
-  mounted() {
-    if (this.signUpData.license == true) {
-      this.licenseToggleState = true;
-    }
-    if (this.signUpData.ownRisk == true) {
-      this.ownRiskToggleState = true;
-    }
-  },
-  created() {
-    // if we already get data provided upon initialization,
-    // we use it
-    this.signUpData = this.$props.userData;
-  },
-  methods: {
-    save: function () {
-      this.$emit("save");
-    },
-    update: function () {
-      this.$emit("update:user", this.signUpData);
-    },
-    licenseToggleHandler: function () {
-      this.signUpData.license = !this.signUpData.license;
-      this.licenseToggleState = this.signUpData.license;
-      this.update();
-    },
-    ownRiskToggleHandler: function () {
-      this.signUpData.ownRisk = !this.signUpData.ownRisk;
-      this.ownRiskToggleState = this.signUpData.ownRisk;
-      this.update();
-    },
-  },
+  { immediate: true, deep: true }
+);
+
+onMounted(() => {
+  if (signUpData.value.license == true) {
+    licenseToggleState.value = true;
+  }
+  if (signUpData.value.ownRisk == true) {
+    ownRiskToggleState.value = true;
+  }
+});
+
+const save = () => {
+  emit("save");
+};
+
+const update = () => {
+  emit("update:user", signUpData.value);
+};
+
+const licenseToggleHandler = () => {
+  signUpData.value.license = !signUpData.value.license;
+  licenseToggleState.value = signUpData.value.license;
+  update();
+};
+
+const ownRiskToggleHandler = () => {
+  signUpData.value.ownRisk = !signUpData.value.ownRisk;
+  ownRiskToggleState.value = signUpData.value.ownRisk;
+  update();
 };
 </script>

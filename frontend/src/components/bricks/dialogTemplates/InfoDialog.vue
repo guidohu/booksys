@@ -22,32 +22,20 @@
   </modal-container>
 </template>
 
-<script>
+<script setup>
 import ModalBody from "@/components/bricks/ModalBody.vue";
 import ModalContainer from "../ModalContainer.vue";
 import ModalFooter from "../ModalFooter.vue";
 import ModalHeader from "../ModalHeader.vue";
+import { ref } from "vue";
 
-export default {
-  name: "InfoDialog",
-  props: ["title", "message", "textConfirm"],
-  data() {
-    return {
-      visible: true,
-    };
-  },
-  emits: ["confirm"],
-  components: {
-    ModalHeader,
-    ModalBody,
-    ModalContainer,
-    ModalFooter,
-  },
-  methods: {
-    confirm: function () {
-      this.$emit("confirm", true);
-      return true;
-    },
-  },
-};
+defineProps(["title", "message", "textConfirm"]);
+const emit = defineEmits(["confirm"]);
+
+const visible = ref(true);
+
+function confirm() {
+  emit("confirm", true);
+  return true;
+}
 </script>

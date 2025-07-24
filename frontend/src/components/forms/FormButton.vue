@@ -14,25 +14,23 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "FormButton",
-  props: ["type", "btnStyle", "btnSize"],
-  emits: ["click"],
-  computed: {
-    getClass: function () {
-      const style =
-        this.btnStyle == null
-          ? "btn-outline-info"
-          : "btn-outline-" + this.btnStyle;
-      const size =
-        this.btnSize == "small"
-          ? "btn-sm"
-          : this.btnSize == "large"
-          ? "btn-lg"
-          : "";
-      return "btn " + style + " " + size;
-    },
-  },
-};
+<script setup>
+import { computed } from "vue";
+
+const props = defineProps(["type", "btnStyle", "btnSize"]);
+defineEmits(["click"]);
+
+const getClass = computed(() => {
+  const style =
+    props.btnStyle == null
+      ? "btn-outline-info"
+      : "btn-outline-" + props.btnStyle;
+  const size =
+    props.btnSize == "small"
+      ? "btn-sm"
+      : props.btnSize == "large"
+      ? "btn-lg"
+      : "";
+  return "btn " + style + " " + size;
+});
 </script>
