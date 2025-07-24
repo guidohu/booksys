@@ -84,8 +84,9 @@
   </modal-container>
 </template>
 
-<script>
-import { defineAsyncComponent } from "vue";
+<script setup>
+import { defineAsyncComponent, ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { getBackendStatus } from "@/api/backend";
 import Configuration from "@/api/configuration";
 import User from "@/api/user";
@@ -103,208 +104,195 @@ const DatabaseConfiguration = defineAsyncComponent(() =>
 const UserSignUp = defineAsyncComponent(() =>
   import(/* webpackChunkName: "user-sign-up" */ "@/components/forms/UserSignUp")
 );
-const MyNautiqueConfiguration = defineAsyncComponent(() =>
-  import(
-    /* webpackChunkName: "my-nautique-set-up" */ "@/components/forms/MyNautiqueConfiguration"
-  )
-);
 const WarningBox = defineAsyncComponent(() =>
   import(/* webpackChunkName: "warning-box" */ "@/components/WarningBox")
 );
 
-export default {
-  name: "WSSetupPage",
-  components: {
-    DatabaseConfiguration,
-    WarningBox,
-    UserSignUp,
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
+const router = useRouter();
+
+const errors = ref([]);
+const title = ref("Setup");
+const isLoading = ref(false);
+const dbConfig = ref({});
+const adminUserConfig = ref({});
+const setupStep = ref(0);
+const setupSteps = ref([
+  {
+    id: 0,
+    name: "db",
+    title: "Setup Database",
   },
-  data() {
-    return {
-      errors: [],
-      title: "Setup",
-      isLoading: false,
-      dbConfig: {},
-      adminUserConfig: {},
-      setupStep: 0,
-      setupSteps: [
-        {
-          id: 0,
-          name: "db",
-          title: "Setup Database",
-        },
-        {
-          id: 1,
-          name: "administrator",
-          title: "Setup User",
-        },
-        {
-          id: 2,
-          name: "done",
-          title: "Setup Done",
-        },
-      ],
-    };
+  {
+    id: 1,
+    name: "administrator",
+    title: "Setup User",
   },
-  computed: {
-    progress: function () {
-      let value = "width: ";
-      value += parseInt(((this.setupStep + 1) / this.setupSteps.length) * 100);
-      value += "%";
-      return value;
-    },
+  {
+    id: 2,
+    name: "done",
+    title: "Setup Done",
   },
-  mounted() {
-    this.isLoading = true;
-    this.getBackendStatus();
-  },
-  methods: {
-    dbConfigInputHandler: function (config) {
-      this.dbConfig = config;
-    },
-    setDbSettings: function () {
-      console.log("setDB called:", this.dbConfig);
-      this.isLoading = true;
+]);
 
-      Configuration.setDbConfig(this.dbConfig)
-        .then(() => {
-          this.isLoading = false;
-          this.getBackendStatus();
-        })
-        .catch((errors) => {
-          this.errors = errors;
-          this.isLoading = false;
-        });
-    },
-    handleUserUpdate: function (u) {
-      this.adminUserConfig.email = u.email;
-      this.adminUserConfig.password = u.password;
-      this.adminUserConfig.passwordConfirm = u.passwordConfirm;
-      this.adminUserConfig.firstName = u.firstName;
-      this.adminUserConfig.lastName = u.lastName;
-      this.adminUserConfig.street = u.street;
-      this.adminUserConfig.zip = u.zip;
-      this.adminUserConfig.city = u.city;
-      this.adminUserConfig.phone = u.phone;
-      this.adminUserConfig.ownRisk = u.ownRisk;
-      this.adminUserConfig.license = u.license;
-    },
-    addAdminUser: function () {
-      // check for obvious validation errors
-      const errors = this.validateAdminUser();
-      if (errors.length > 0) {
-        this.errors = errors;
-        return;
-      }
+const progress = computed(() => {
+  let value = "width: ";
+  value += parseInt(((setupStep.value + 1) / setupSteps.value.length) * 100);
+  value += "%";
+  return value;
+});
 
-      this.isLoading = true;
-
-      User.signUp(this.adminUserConfig)
-        .then((user) => {
-          this.errors = [];
-          this.makeUserAdmin(user.user_id);
-        })
-        .catch((errors) => {
-          this.errors = errors;
-          this.isLoading = false;
-        });
-    },
-    makeUserAdmin: function (userId) {
-      User.makeAdmin(userId)
-        .then(() => {
-          this.errors = [];
-          this.isLoading = false;
-          this.getBackendStatus();
-        })
-        .catch((errors) => {
-          this.errors = errors;
-          this.isLoading = false;
-        });
-    },
-    close: function () {
-      console.log("Navigate to login");
-      console.log(this.$router);
-      this.$router.push("/login");
-    },
-    validateAdminUser: function () {
-      const errors = [];
-      if (
-        typeof this.adminUserConfig.password == "undefined" ||
-        typeof this.adminUserConfig.email == "undefined" ||
-        typeof this.adminUserConfig.passwordConfirm == "undefined"
-      ) {
-        errors.push("Fields cannot be empty");
-        return errors
-      }
-
-      if (
-        this.adminUserConfig.password != this.adminUserConfig.passwordConfirm
-      ) {
-        errors.push("Password and Password Confirmation are not identical.");
-      }
-      if (this.adminUserConfig.password.length <= 8) {
-        errors.push("Please use a password longer than 8 characters.");
-      }
-      if (
-        this.adminUserConfig.recaptchaResponse == null &&
-        this.getRecaptchaKey
-      ) {
-        errors.push("Please tick `I'm not a robot`.");
-      }
-
-      // password strength
-      const pwUpperRegex = /[A-Z]+/;
-      const pwLowerRegex = /[a-z]+/;
-      const pwDigitRegex = /[0-9]+/;
-      if (this.adminUserConfig.password.match(pwUpperRegex) == null) {
-        errors.push(
-          "The password needs to contain at least one upper case letter (A-Z)"
-        );
-      }
-      if (this.adminUserConfig.password.match(pwLowerRegex) == null) {
-        errors.push(
-          "The password needs to contain at least one lower case letter (a-z)"
-        );
-      }
-      if (this.adminUserConfig.password.match(pwDigitRegex) == null) {
-        errors.push("The password needs to contain at least one digit (0-9)");
-      }
-
-      return errors;
-    },
-    getBackendStatus: function () {
-      // reset errors
-      this.errors = [];
-
-      getBackendStatus()
-        .then((status) => {
-          if (status.configFile == false) {
-            // no configuration at all yet
-            this.setupStep = 0;
-          } else if (status.configDb == false) {
-            // no database configuration
-            this.setupStep = 0;
-          } else if (status.dbReachable == false) {
-            // cannot reach database, thus allow to change settings
-            this.setupStep = 0;
-          } else if (status.usersExist == false) {
-            // database is up, but there is no (admin) user yet
-            this.setupStep = 1;
-          } else {
-            // setup is done
-            this.setupStep = 2;
-          }
-          this.isLoading = false;
-        })
-        .catch((errors) => {
-          this.errors = errors;
-          this.isLoading = false;
-        });
-    },
-  },
+const dbConfigInputHandler = (config) => {
+  dbConfig.value = config;
 };
+
+const setDbSettings = () => {
+  console.log("setDB called:", dbConfig.value);
+  isLoading.value = true;
+
+  Configuration.setDbConfig(dbConfig.value)
+    .then(() => {
+      isLoading.value = false;
+      getBackendStatusInternal();
+    })
+    .catch((err) => {
+      errors.value = err;
+      isLoading.value = false;
+    });
+};
+
+const handleUserUpdate = (u) => {
+  adminUserConfig.value.email = u.email;
+  adminUserConfig.value.password = u.password;
+  adminUserConfig.value.passwordConfirm = u.passwordConfirm;
+  adminUserConfig.value.firstName = u.firstName;
+  adminUserConfig.value.lastName = u.lastName;
+  adminUserConfig.value.street = u.street;
+  adminUserConfig.value.zip = u.zip;
+  adminUserConfig.value.city = u.city;
+  adminUserConfig.value.phone = u.phone;
+  adminUserConfig.value.ownRisk = u.ownRisk;
+  adminUserConfig.value.license = u.license;
+};
+
+const addAdminUser = () => {
+  // check for obvious validation errors
+  const validationErrors = validateAdminUser();
+  if (validationErrors.length > 0) {
+    errors.value = validationErrors;
+    return;
+  }
+
+  isLoading.value = true;
+
+  User.signUp(adminUserConfig.value)
+    .then((user) => {
+      errors.value = [];
+      makeUserAdmin(user.user_id);
+    })
+    .catch((err) => {
+      errors.value = err;
+      isLoading.value = false;
+    });
+};
+
+const makeUserAdmin = (userId) => {
+  User.makeAdmin(userId)
+    .then(() => {
+      errors.value = [];
+      isLoading.value = false;
+      getBackendStatusInternal();
+    })
+    .catch((err) => {
+      errors.value = err;
+      isLoading.value = false;
+    });
+};
+
+const close = () => {
+  console.log("Navigate to login");
+  console.log(router);
+  router.push("/login");
+};
+
+const validateAdminUser = () => {
+  const validationErrors = [];
+  if (
+    typeof adminUserConfig.value.password == "undefined" ||
+    typeof adminUserConfig.value.email == "undefined" ||
+    typeof adminUserConfig.value.passwordConfirm == "undefined"
+  ) {
+    validationErrors.push("Fields cannot be empty");
+    return validationErrors;
+  }
+
+  if (
+    adminUserConfig.value.password != adminUserConfig.value.passwordConfirm
+  ) {
+    validationErrors.push("Password and Password Confirmation are not identical.");
+  }
+  if (adminUserConfig.value.password.length <= 8) {
+    validationErrors.push("Please use a password longer than 8 characters.");
+  }
+  if (
+    adminUserConfig.value.recaptchaResponse == null &&
+    getRecaptchaKey.value
+  ) {
+    validationErrors.push("Please tick `I'm not a robot`.");
+  }
+
+  // password strength
+  const pwUpperRegex = /[A-Z]+/;
+  const pwLowerRegex = /[a-z]+/;
+  const pwDigitRegex = /[0-9]+/;
+  if (adminUserConfig.value.password.match(pwUpperRegex) == null) {
+    validationErrors.push(
+      "The password needs to contain at least one upper case letter (A-Z)"
+    );
+  }
+  if (adminUserConfig.value.password.match(pwLowerRegex) == null) {
+    validationErrors.push(
+      "The password needs to contain at least one lower case letter (a-z)"
+    );
+  }
+  if (adminUserConfig.value.password.match(pwDigitRegex) == null) {
+    validationErrors.push("The password needs to contain at least one digit (0-9)");
+  }
+
+  return validationErrors;
+};
+
+const getBackendStatusInternal = () => {
+  // reset errors
+  errors.value = [];
+
+  getBackendStatus()
+    .then((status) => {
+      if (status.configFile == false) {
+        // no configuration at all yet
+        setupStep.value = 0;
+      } else if (status.configDb == false) {
+        // no database configuration
+        setupStep.value = 0;
+      } else if (status.dbReachable == false) {
+        // cannot reach database, thus allow to change settings
+        setupStep.value = 0;
+      } else if (status.usersExist == false) {
+        // database is up, but there is no (admin) user yet
+        setupStep.value = 1;
+      } else {
+        // setup is done
+        setupStep.value = 2;
+      }
+      isLoading.value = false;
+    })
+    .catch((err) => {
+      errors.value = err;
+      isLoading.value = false;
+    });
+};
+
+onMounted(() => {
+  isLoading.value = true;
+  getBackendStatusInternal();
+});
 </script>

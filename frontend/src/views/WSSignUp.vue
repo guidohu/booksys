@@ -66,11 +66,12 @@
   </modal-container>
 </template>
 
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { ref, computed, onMounted, defineAsyncComponent } from "vue";
+import { useStore, mapGetters, mapActions } from "vuex";
+import { useRouter } from "vue-router";
 import WarningBox from "@/components/WarningBox";
 import User from "@/api/user";
-import { defineAsyncComponent } from "vue";
 import ModalContainer from "@/components/bricks/ModalContainer.vue";
 import ModalHeader from "@/components/bricks/ModalHeader.vue";
 import ModalBody from "@/components/bricks/ModalBody.vue";
@@ -81,104 +82,101 @@ const UserSignUp = defineAsyncComponent(() =>
   import(/* webpackChunkName: "user-sign-up" */ "@/components/forms/UserSignUp")
 );
 
-export default {
-  name: "WSSignUp",
-  components: {
-    WarningBox,
-    UserSignUp,
-    VueRecaptcha,
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-  },
-  data() {
-    return {
-      errors: [],
-      isSignedUp: false,
-      form: {
-        license: false,
-        ownRisk: false,
-        recaptchaResponse: null,
-      },
-      visible: true,
-    };
-  },
-  computed: {
-    ...mapGetters("configuration", ["getRecaptchaKey"]),
-  },
-  methods: {
-    ...mapActions("configuration", ["queryRecaptchaKey"]),
-    recaptchaVerifiedHandler: function (response) {
-      this.form.recaptchaResponse = response;
-    },
-    handleUserUpdate: function (userData) {
-      this.form.email = userData.email;
-      this.form.password = userData.password;
-      this.form.passwordConfirm = userData.passwordConfirm;
-      this.form.firstName = userData.firstName;
-      this.form.lastName = userData.lastName;
-      this.form.street = userData.street;
-      this.form.zip = userData.zip;
-      this.form.city = userData.city;
-      this.form.phone = userData.phone;
-      this.form.ownRisk = userData.ownRisk;
-      this.form.license = userData.license;
-    },
-    validateForm: function () {
-      const errors = [];
+const store = useStore();
+const router = useRouter();
 
-      if (this.form.ownRisk == false) {
-        errors.push(
-          "To sign-up you need to agree that the activities are performed at your own risk."
-        );
-      }
-      if (this.form.password != this.form.passwordConfirm) {
-        errors.push("Password and Password Confirmation are not identical.");
-      }
-      if (this.form.password.length <= 8) {
-        errors.push("Please use a password longer than 8 characters.");
-      }
-      if (this.form.recaptchaResponse == null && this.getRecaptchaKey) {
-        errors.push("Please tick `I'm not a robot`.");
-      }
+const errors = ref([]);
+const isSignedUp = ref(false);
+const form = ref({
+  license: false,
+  ownRisk: false,
+  recaptchaResponse: null,
+});
+const visible = ref(true);
 
-      // password strength
-      const pwUpperRegex = /[A-Z]+/;
-      const pwLowerRegex = /[a-z]+/;
-      const pwDigitRegex = /[0-9]+/;
-      if (this.form.password.match(pwUpperRegex) == null) {
-        errors.push(
-          "The password needs to contain at least one upper case letter (A-Z)"
-        );
-      }
-      if (this.form.password.match(pwLowerRegex) == null) {
-        errors.push(
-          "The password needs to contain at least one lower case letter (a-z)"
-        );
-      }
-      if (this.form.password.match(pwDigitRegex) == null) {
-        errors.push("The password needs to contain at least one digit (0-9)");
-      }
+const getRecaptchaKey = computed(
+  mapGetters("configuration", ["getRecaptchaKey"]).getRecaptchaKey.bind({
+    $store: store,
+  })
+);
 
-      return errors;
-    },
-    save: function () {
-      this.errors = this.validateForm();
-      if (this.errors.length > 0) {
-        return;
-      }
+const queryRecaptchaKey = mapActions("configuration", [
+  "queryRecaptchaKey",
+]).queryRecaptchaKey.bind({ $store: store });
 
-      User.signUp(this.form)
-        .then(() => (this.isSignedUp = true))
-        .catch((errors) => (this.errors = errors));
-    },
-    close: function () {
-      this.$router.push("/");
-    },
-  },
-  created() {
-    this.queryRecaptchaKey();
-  },
+const recaptchaVerifiedHandler = (response) => {
+  form.value.recaptchaResponse = response;
 };
+
+const handleUserUpdate = (userData) => {
+  form.value.email = userData.email;
+  form.value.password = userData.password;
+  form.value.passwordConfirm = userData.passwordConfirm;
+  form.value.firstName = userData.firstName;
+  form.value.lastName = userData.lastName;
+  form.value.street = userData.street;
+  form.value.zip = userData.zip;
+  form.value.city = userData.city;
+  form.value.phone = userData.phone;
+  form.value.ownRisk = userData.ownRisk;
+  form.value.license = userData.license;
+};
+
+const validateForm = () => {
+  const validationErrors = [];
+
+  if (form.value.ownRisk == false) {
+    validationErrors.push(
+      "To sign-up you need to agree that the activities are performed at your own risk."
+    );
+  }
+  if (form.value.password != form.value.passwordConfirm) {
+    validationErrors.push("Password and Password Confirmation are not identical.");
+  }
+  if (form.value.password.length <= 8) {
+    validationErrors.push("Please use a password longer than 8 characters.");
+  }
+  if (form.value.recaptchaResponse == null && getRecaptchaKey.value) {
+    validationErrors.push("Please tick `I'm not a robot`.");
+  }
+
+  // password strength
+  const pwUpperRegex = /[A-Z]+/;
+  const pwLowerRegex = /[a-z]+/;
+  const pwDigitRegex = /[0-9]+/;
+  if (form.value.password.match(pwUpperRegex) == null) {
+    validationErrors.push(
+      "The password needs to contain at least one upper case letter (A-Z)"
+    );
+  }
+  if (form.value.password.match(pwLowerRegex) == null) {
+    validationErrors.push(
+      "The password needs to contain at least one lower case letter (a-z)"
+    );
+  }
+  if (form.value.password.match(pwDigitRegex) == null) {
+    validationErrors.push("The password needs to contain at least one digit (0-9)");
+  }
+
+  return validationErrors;
+};
+
+const save = () => {
+  errors.value = validateForm();
+  if (errors.value.length > 0) {
+    return;
+  }
+
+  User.signUp(form.value)
+    .then(() => (isSignedUp.value = true))
+    .catch((err) => (errors.value = err));
+};
+
+const close = () => {
+  router.push("/");
+};
+
+onMounted(() => {
+  queryRecaptchaKey();
+});
 </script>

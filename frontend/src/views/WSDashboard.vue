@@ -39,9 +39,10 @@
   </div>
 </template>
 
-<script>
-import { defineAsyncComponent } from "vue";
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { defineAsyncComponent, computed, onMounted } from "vue";
+import { useStore, mapGetters } from "vuex";
+import { useRouter } from "vue-router";
 import ShowForMobile from "@/components/bricks/ShowForMobile.vue";
 import ShowForDesktop from "@/components/bricks/ShowForDesktop.vue";
 import * as dayjs from "dayjs";
@@ -82,49 +83,42 @@ const DashboardGuestMobile = defineAsyncComponent(() =>
   )
 );
 
-export default {
-  name: "WSDashboard",
-  components: {
-    DashboardAdmin,
-    DashboardMember,
-    DashboardGuest,
-    DashboardAdminMobile,
-    DashboardMemberMobile,
-    DashboardGuestMobile,
-    ShowForDesktop,
-    ShowForMobile,
-  },
-  computed: {
-    ...mapGetters("login", ["userInfo", "role"]),
-    ...mapGetters("loginStatus", ["isLoggedIn"]),
-    ...mapGetters("sessions", ["getSessions"]),
-  },
-  methods: {
-    ...mapActions("login", ["getUserInfo"]),
-    ...mapActions("sessions", ["querySessions"]),
-    getTimeZone: function () {
-      return "Europe/Zurich";
-    },
-    getSessionInfo() {
-      const dateStart = dayjs().tz(this.getTimeZone()).startOf("day");
-      const dateEnd = dayjs().tz(this.getTimeZone()).endOf("day");
-      console.log("Query sessions from", dateStart, "to", dateEnd);
-      this.querySessions({ start: dateStart, end: dateEnd });
-    },
-  },
-  created() {
-    // load user info into store
-    this.getUserInfo()
-      .then(() => {
-        console.log("Get session info.");
-        this.getSessionInfo();
-      })
-      .catch((errors) => {
-        console.log("Cannot get user info (probably not logged in)");
-        if (errors[0] == "login required") {
-          this.$router.push("/login");
-        }
-      });
-  },
+const store = useStore();
+const router = useRouter();
+
+const userInfo = computed(mapGetters("login", ["userInfo"]).userInfo.bind({ $store: store }));
+const role = computed(mapGetters("login", ["role"]).role.bind({ $store: store }));
+const isLoggedIn = computed(
+  mapGetters("loginStatus", ["isLoggedIn"]).isLoggedIn.bind({ $store: store })
+);
+const getSessions = computed(
+  mapGetters("sessions", ["getSessions"]).getSessions.bind({ $store: store })
+);
+
+const getTimeZone = () => {
+  return "Europe/Zurich";
 };
+
+const getSessionInfo = () => {
+  const dateStart = dayjs().tz(getTimeZone()).startOf("day");
+  const dateEnd = dayjs().tz(getTimeZone()).endOf("day");
+  console.log("Query sessions from", dateStart, "to", dateEnd);
+  store.dispatch("sessions/querySessions", { start: dateStart, end: dateEnd });
+};
+
+onMounted(() => {
+  // load user info into store
+  store
+    .dispatch("login/getUserInfo")
+    .then(() => {
+      console.log("Get session info.");
+      getSessionInfo();
+    })
+    .catch((errors) => {
+      console.log("Cannot get user info (probably not logged in)");
+      if (errors[0] == "login required") {
+        router.push("/login");
+      }
+    });
+});
 </script>

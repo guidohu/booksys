@@ -35,8 +35,9 @@
   </subpage-container>
 </template>
 
-<script>
-import { mapActions, mapGetters } from "vuex";
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import { useStore, mapGetters } from "vuex";
 import ConditionInfoCard from "@/components/ConditionInfoCard";
 import SessionMonthCard from "@/components/SessionMonthCard";
 import SessionsOverview from "@/components/SessionsOverview";
@@ -52,80 +53,73 @@ dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);
 dayjs.extend(dayjsCustomParseFormat);
 
-export default {
-  name: "WSCalendar",
-  components: {
-    ConditionInfoCard,
-    SessionMonthCard,
-    SessionsOverview,
-    ShowForMobile,
-    ShowForDesktop,
-    SubpageContainer,
-  },
-  data() {
-    return {
-      month: null,
-      errors: [],
-      sunrise: null,
-      sunset: null,
-      sessionsOverview: null,
-      // selectedSession: null
-    };
-  },
-  computed: {
-    ...mapGetters("configuration", ["getTimezone"]),
-    ...mapGetters("sessions", ["getSessionsCalendar"]),
-  },
-  methods: {
-    ...mapActions("configuration", ["queryConfiguration"]),
-    ...mapActions("sessions", ["querySessionsCalendar"]),
-    prevMonth: function () {
-      this.month = dayjs(this.month).add(-1, "month").format();
-      this.querySessionsForMonth();
-      console.log("month changed to", this.month);
-    },
-    nextMonth: function () {
-      this.month = dayjs(this.month).add(1, "month").format();
-      this.querySessionsForMonth();
-      console.log("month changed to", this.month);
-    },
-    querySessionsForMonth: function () {
-      // query get_booking_day
-      this.querySessionsCalendar(this.month)
-        .then(() => {
-          console.log("Calendar ready");
-        })
-        .catch((errors) => (this.errors = errors));
-    },
-    mouseOverDayHandler: function (day) {
-      this.sunrise = dayjs(day.sunrise).format('X');
-      this.sunset = dayjs(day.sunset).format('X');
+const store = useStore();
 
-      this.sessionsOverview = day;
-    },
-  },
-  created() {
-    // needed to know the timezone
-    this.queryConfiguration();
-    // TODO block till we have the config
-    // then when promise resolved, call
-    // a function that sets the date
+const month = ref(null);
+const errors = ref([]);
+const sunrise = ref(null);
+const sunset = ref(null);
+const sessionsOverview = ref(null);
 
-    // get day from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlDate = urlParams.get("date");
-    if (urlDate != null) {
-      const urlDateParsed = dayjs(urlDate, "YYYY-MM-DD")
-        .tz(this.getTimezone)
-        .startOf("month")
-        .format();
-      this.month = urlDateParsed;
-    } else {
-      this.month = dayjs().tz(this.getTimezone).startOf("month").format();
-      console.log("calculated month to be:", this.month);
-    }
+const getTimezone = computed(
+  mapGetters("configuration", ["getTimezone"]).getTimezone.bind({ $store: store })
+);
+const getSessionsCalendar = computed(
+  mapGetters("sessions", ["getSessionsCalendar"]).getSessionsCalendar.bind({
+    $store: store,
+  })
+);
 
-    this.querySessionsForMonth();
-  },
+const prevMonth = () => {
+  month.value = dayjs(month.value).add(-1, "month").format();
+  querySessionsForMonth();
+  console.log("month changed to", month.value);
 };
+
+const nextMonth = () => {
+  month.value = dayjs(month.value).add(1, "month").format();
+  querySessionsForMonth();
+  console.log("month changed to", month.value);
+};
+
+const querySessionsForMonth = () => {
+  // query get_booking_day
+  store
+    .dispatch("sessions/querySessionsCalendar", month.value)
+    .then(() => {
+      console.log("Calendar ready");
+    })
+    .catch((err) => (errors.value = err));
+};
+
+const mouseOverDayHandler = (day) => {
+  sunrise.value = dayjs(day.sunrise).format("X");
+  sunset.value = dayjs(day.sunset).format("X");
+
+  sessionsOverview.value = day;
+};
+
+onMounted(() => {
+  // needed to know the timezone
+  store.dispatch("configuration/queryConfiguration");
+  // TODO block till we have the config
+  // then when promise resolved, call
+  // a function that sets the date
+
+  // get day from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlDate = urlParams.get("date");
+  if (urlDate != null) {
+    const urlDateParsed = dayjs(urlDate, "YYYY-MM-DD")
+      .tz(getTimezone.value)
+      .startOf("month")
+      .format();
+    month.value = urlDateParsed;
+  } else {
+    month.value = dayjs().tz(getTimezone.value).startOf("month").format();
+    console.log("calculated month to be:", month.value);
+  }
+
+  querySessionsForMonth();
+});
 </script>

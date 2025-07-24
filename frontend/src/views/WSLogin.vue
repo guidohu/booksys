@@ -29,85 +29,80 @@
   </div>
 </template>
 
-<script>
-import { mapActions, mapGetters } from "vuex";
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import { useStore, mapGetters } from "vuex";
+import { useRouter, useRoute } from "vue-router";
 import LoginForm from "@/components/LoginForm.vue";
 import OverlaySpinner from "@/components/styling/OverlaySpinner.vue";
 
-export default {
-  name: "WSLogin",
-  components: {
-    LoginForm,
-    OverlaySpinner,
-  },
-  data() {
-    return {
-      isLoading: true,
-      showLogin: false,
-      status: null,
-    };
-  },
-  computed: {
-    ...mapGetters("login", ["username"]),
-    ...mapGetters("configuration", ["getLogoUri"]),
-  },
-  methods: {
-    ...mapActions("login", ["getIsLoggedIn", "login"]),
-    ...mapActions("configuration", ["queryLogoFile"]),
-    handleLogin: function (username, password) {
-      this.isLoading = true;
-      this.login({
-        username: username,
-        password: password,
-      })
-        .then(() => {
-          if (this.$route.query != null && this.$route.query.target != null) {
-            this.$router.push(this.$route.query.target);
-          } else {
-            this.$router.push({ name: "Dashboard" });
-          }
-          this.isLoading = false;
-        })
-        .catch((errors) => {
-          console.error("login failed:", errors);
-          if (errors.length > 0) {
-            this.status = errors[0];
-          }
-          this.isLoading = false;
-        });
-    },
-  },
-  created() {
-    this.isLoading = true;
+const store = useStore();
+const router = useRouter();
+const route = useRoute();
 
-    this.queryLogoFile()
-      .catch((errors) => console.log(errors));
+const isLoading = ref(true);
+const showLogin = ref(false);
+const status = ref(null);
 
-    this.getIsLoggedIn()
-      .then((loggedIn) => {
-        if (loggedIn == true) {
-          console.log("User is logged in: redirect to content");
-          console.log(this.$route);
-          if (this.$route.query != null && this.$route.query.target != null) {
-            console.log("Redirect to:", this.$route.query.target);
-            this.$router.push(this.$route.query.target);
-          } else {
-            console.log("Redirect to: /dashboard");
-            this.$router.push("/dashboard");
-          }
-        } else {
-          console.log("User not logged in: show login");
-          this.showLogin = true;
-        }
-        this.isLoading = false;
-      })
-      .catch((errors) => {
-        this.isLoading = false;
-        this.showLogin = true;
-        console.error("Errors while getIsLoggedIn was called:", errors);
-      });
-  },
+const username = computed(mapGetters("login", ["username"]).username.bind({ $store: store }));
+const getLogoUri = computed(
+  mapGetters("configuration", ["getLogoUri"]).getLogoUri.bind({ $store: store })
+);
+
+const handleLogin = (username, password) => {
+  isLoading.value = true;
+  store
+    .dispatch("login/login", {
+      username: username,
+      password: password,
+    })
+    .then(() => {
+      if (route.query != null && route.query.target != null) {
+        router.push(route.query.target);
+      } else {
+        router.push({ name: "Dashboard" });
+      }
+      isLoading.value = false;
+    })
+    .catch((errors) => {
+      console.error("login failed:", errors);
+      if (errors.length > 0) {
+        status.value = errors[0];
+      }
+      isLoading.value = false;
+    });
 };
+
+onMounted(() => {
+  isLoading.value = true;
+
+  store.dispatch("configuration/queryLogoFile").catch((errors) => console.log(errors));
+
+  store
+    .dispatch("login/getIsLoggedIn")
+    .then((loggedIn) => {
+      if (loggedIn == true) {
+        console.log("User is logged in: redirect to content");
+        console.log(route);
+        if (route.query != null && route.query.target != null) {
+          console.log("Redirect to:", route.query.target);
+          router.push(route.query.target);
+        } else {
+          console.log("Redirect to: /dashboard");
+          router.push("/dashboard");
+        }
+      } else {
+        console.log("User not logged in: show login");
+        showLogin.value = true;
+      }
+      isLoading.value = false;
+    })
+    .catch((errors) => {
+      isLoading.value = false;
+      showLogin.value = true;
+      console.error("Errors while getIsLoggedIn was called:", errors);
+    });
+});
 </script>
 
 <style scoped>

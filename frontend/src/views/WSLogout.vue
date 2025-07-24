@@ -11,20 +11,14 @@
   </div>
 </template>
 
-<script>
-import { mapActions } from "vuex";
+<script setup>
+import { useStore } from "vuex";
+import { onMounted } from "vue";
 import CardModule from "@/components/bricks/CardModule.vue";
 
-export default {
-  name: "WSLogout",
-  components: {
-    CardModule,
-  },
-  created() {
-    this.logout().catch(() => console.error("Logout failed."));
-  },
-  methods: {
-    ...mapActions("login", ["logout"]),
-  },
-};
+const store = useStore();
+
+onMounted(() => {
+  store.dispatch("login/logout").catch(() => console.error("Logout failed."));
+});
 </script>

@@ -82,9 +82,10 @@
   </subpage-container>
 </template>
 
-<script>
-import { defineAsyncComponent } from "vue";
-import { mapActions, mapGetters } from "vuex";
+<script setup>
+import { defineAsyncComponent, ref, computed, onMounted, watch } from "vue";
+import { useStore, mapGetters, mapActions } from "vuex";
+import { useRouter } from "vue-router";
 import ConditionInfoCard from "@/components/ConditionInfoCard";
 import SessionDayCard from "@/components/SessionDayCard";
 import SessionDetailsCard from "@/components/SessionDetailsCard";
@@ -111,153 +112,157 @@ const SessionDeleteModal = defineAsyncComponent(() =>
 dayjs.extend(dayjsUTC);
 dayjs.extend(dayjsTimezone);
 
-export default {
-  name: "WSRide",
-  components: {
-    ConditionInfoCard,
-    SessionDayCard,
-    SessionDetailsCard,
-    SessionEditorModal,
-    SessionDeleteModal,
-    ShowForMobile,
-    ShowForDesktop,
-    SubpageContainer,
-  },
-  computed: {
-    ...mapGetters("configuration", ["getTimezone"]),
-    ...mapGetters("sessions", ["getSessions"]),
-    ...mapGetters("stopwatch", ["getIsRunning", "getSessionId"]),
-    sunrise: function () {
-      const sessions = this.getSessions;
-      if (sessions == null) {
-        return null;
-      } else {
-        return dayjs(sessions.sunrise).format('X');
-      }
-    },
-    sunset: function () {
-      const sessions = this.getSessions;
-      if (sessions == null) {
-        return null;
-      } else {
-        return dayjs(sessions.sunset).format('X');
-      }
-    },
-  },
-  methods: {
-    ...mapActions("configuration", ["queryConfiguration"]),
-    ...mapActions("sessions", ["querySessions", "createSession"]),
-    querySessionsForDate: function () {
-      const dateStart = dayjs(this.date).startOf("day").format();
-      const dateEnd = dayjs(this.date).endOf("day").format();
+const store = useStore();
+const router = useRouter();
 
-      // query get_booking_day
-      this.querySessions({
-        start: dateStart,
-        end: dateEnd,
-      });
-    },
-    selectSlot: function (selectedSession) {
-      const sessionWithSelectedId = this.getSessions.sessions.find(
-        (s) => selectedSession.id == s.id
-      );
-      if (sessionWithSelectedId == null) {
-        this.selectedSession = new Session(
-          selectedSession.id,
-          null,
-          null,
-          selectedSession.start,
-          selectedSession.end
-        );
-      } else {
-        this.selectedSession = sessionWithSelectedId;
-      }
-    },
-    sessionDeletedHandler: function () {
-      this.selectedSession = null;
-    },
-    showCreateSession: function () {
-      this.showSessionEditorModal = true;
-    },
-    showDeleteSession: function () {
-      this.showSessionDeleteModal = true;
-    },
-  },
-  watch: {
-    getSessions: function (newInfo, oldInfo) {
-      // in case we get an update affecting the sessions
-      // we will update our selected session too
-      if (
-        this.selectedSession != null &&
-        this.selectedSession.id != null &&
-        newInfo.sessions.map((s) => s.id).includes(this.selectedSession.id)
-      ) {
-        this.selectedSession = newInfo.sessions.filter(
-          (s) => s.id == this.selectedSession.id
-        )[0];
-      }
+const date = ref(null);
+const selectedSession = ref(null);
+const showSessionEditorModal = ref(false);
+const showSessionDeleteModal = ref(false);
 
-      // in case a new session has been created, we select it
-      if (
-        newInfo.sessions != null &&
-        (oldInfo == null ||
-          oldInfo.sessions == null ||
-          newInfo.sessions.length > oldInfo.sessions.length)
-      ) {
-        // find the session that is new
-        const newIds = newInfo.sessions.map((s) => s.id);
-        const oldIds =
-          oldInfo == null || oldInfo.session == null
-            ? []
-            : oldInfo.sessions.map((s) => s.id);
-        const diff = difference(newIds, oldIds);
-        if (diff.length == 1) {
-          this.selectedSession = newInfo.sessions.find((s) => s.id == diff[0]);
-        } else {
-          console.error(
-            "old and new session info differs by more than one session"
-          );
-        }
-      } else if (newInfo.sessions.length < oldInfo.sessions.length) {
-        // a session has been deleted -> reset selected session
-        this.selectedSession = null;
-      }
-    },
-  },
-  data() {
-    return {
-      date: null,
-      selectedSession: null,
-      showSessionEditorModal: false,
-      showSessionDeleteModal: false,
-    };
-  },
-  created() {
-    // needed to know the timezone
-    this.queryConfiguration();
-    // TODO block till we have the config
-    // then when promise resolved, call
-    // a function that sets the date
+const getTimezone = computed(
+  mapGetters("configuration", ["getTimezone"]).getTimezone.bind({ $store: store })
+);
+const getSessions = computed(
+  mapGetters("sessions", ["getSessions"]).getSessions.bind({ $store: store })
+);
+const getIsRunning = computed(
+  mapGetters("stopwatch", ["getIsRunning"]).getIsRunning.bind({ $store: store })
+);
+const getSessionId = computed(
+  mapGetters("stopwatch", ["getSessionId"]).getSessionId.bind({ $store: store })
+);
 
-    // get day from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlDate = urlParams.get("date");
-    if (urlDate != null) {
-      const urlDateParsed = dayjs(urlDate, "YYYY-MM-DD")
-        .tz(this.getTimezone)
-        .startOf("day")
-        .format();
-      this.date = urlDateParsed;
-    } else {
-      this.date = dayjs().tz(this.getTimezone).startOf("day").format();
-    }
+const sunrise = computed(() => {
+  const sessions = getSessions.value;
+  if (sessions == null) {
+    return null;
+  } else {
+    return dayjs(sessions.sunrise).format("X");
+  }
+});
 
-    this.querySessionsForDate();
+const sunset = computed(() => {
+  const sessions = getSessions.value;
+  if (sessions == null) {
+    return null;
+  } else {
+    return dayjs(sessions.sunset).format("X");
+  }
+});
 
-    // check if the watch is running currently -> then go to watch
-    if (this.getIsRunning == true) {
-      this.$router.push("/watch?sessionId=" + this.getSessionId);
-    }
-  },
+const queryConfiguration = mapActions("configuration", [
+  "queryConfiguration",
+]).queryConfiguration.bind({ $store: store });
+const querySessions = mapActions("sessions", ["querySessions"]).querySessions.bind({
+  $store: store,
+});
+
+const querySessionsForDate = () => {
+  const dateStart = dayjs(date.value).startOf("day").format();
+  const dateEnd = dayjs(date.value).endOf("day").format();
+
+  // query get_booking_day
+  querySessions({
+    start: dateStart,
+    end: dateEnd,
+  });
 };
+
+const selectSlot = (session) => {
+  const sessionWithSelectedId = getSessions.value.sessions.find(
+    (s) => session.id == s.id
+  );
+  if (sessionWithSelectedId == null) {
+    selectedSession.value = new Session(
+      session.id,
+      null,
+      null,
+      session.start,
+      session.end
+    );
+  } else {
+    selectedSession.value = sessionWithSelectedId;
+  }
+};
+
+const sessionDeletedHandler = () => {
+  selectedSession.value = null;
+};
+
+const showCreateSession = () => {
+  showSessionEditorModal.value = true;
+};
+
+const showDeleteSession = () => {
+  showSessionDeleteModal.value = true;
+};
+
+watch(getSessions, (newInfo, oldInfo) => {
+  // in case we get an update affecting the sessions
+  // we will update our selected session too
+  if (
+    selectedSession.value != null &&
+    selectedSession.value.id != null &&
+    newInfo.sessions.map((s) => s.id).includes(selectedSession.value.id)
+  ) {
+    selectedSession.value = newInfo.sessions.filter(
+      (s) => s.id == selectedSession.value.id
+    )[0];
+  }
+
+  // in case a new session has been created, we select it
+  if (
+    newInfo.sessions != null &&
+    (oldInfo == null ||
+      oldInfo.sessions == null ||
+      newInfo.sessions.length > oldInfo.sessions.length)
+  ) {
+    // find the session that is new
+    const newIds = newInfo.sessions.map((s) => s.id);
+    const oldIds =
+      oldInfo == null || oldInfo.session == null
+        ? []
+        : oldInfo.sessions.map((s) => s.id);
+    const diff = difference(newIds, oldIds);
+    if (diff.length == 1) {
+      selectedSession.value = newInfo.sessions.find((s) => s.id == diff[0]);
+    } else {
+      console.error(
+        "old and new session info differs by more than one session"
+      );
+    }
+  } else if (newInfo.sessions.length < oldInfo.sessions.length) {
+    // a session has been deleted -> reset selected session
+    selectedSession.value = null;
+  }
+});
+
+onMounted(() => {
+  // needed to know the timezone
+  queryConfiguration();
+  // TODO block till we have the config
+  // then when promise resolved, call
+  // a function that sets the date
+
+  // get day from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlDate = urlParams.get("date");
+  if (urlDate != null) {
+    const urlDateParsed = dayjs(urlDate, "YYYY-MM-DD")
+      .tz(getTimezone.value)
+      .startOf("day")
+      .format();
+    date.value = urlDateParsed;
+  } else {
+    date.value = dayjs().tz(getTimezone.value).startOf("day").format();
+  }
+
+  querySessionsForDate();
+
+  // check if the watch is running currently -> then go to watch
+  if (getIsRunning.value == true) {
+    router.push("/watch?sessionId=" + getSessionId.value);
+  }
+});
 </script>

@@ -43,43 +43,46 @@
   </subpage-container>
 </template>
 
-<script>
-import { mapActions, mapGetters } from "vuex";
+<script setup>
+import { useStore, mapGetters } from "vuex";
+import { onMounted, computed } from "vue";
 import { BooksysBrowser } from "@/libs/browser";
 import CardModule from "@/components/bricks/CardModule.vue";
 import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
 
-export default {
-  name: "WSInfo",
-  components: {
-    CardModule,
-    SubpageContainer,
-  },
-  computed: {
-    ...mapGetters("configuration", ["getLocationAddress", "getLocationMap"]),
-    mapHeight: function () {
-      if (BooksysBrowser.isMobileResponsive()) {
-        return 350;
-      } else {
-        return 300;
-      }
-    },
-    mapWidth: function () {
-      if (BooksysBrowser.isMobileResponsive()) {
-        return 340;
-      } else {
-        return 600;
-      }
-    },
-  },
-  methods: {
-    ...mapActions("configuration", ["queryConfiguration"]),
-  },
-  created() {
-    console.log("Info.vue: Try to get all information required");
-    this.queryConfiguration();
-  },
-};
+const store = useStore();
+
+const getLocationAddress = computed(
+  mapGetters("configuration", ["getLocationAddress"]).getLocationAddress.bind({
+    $store: store,
+  })
+);
+const getLocationMap = computed(
+  mapGetters("configuration", ["getLocationMap"]).getLocationMap.bind({
+    $store: store,
+  })
+);
+
+const mapHeight = computed(() => {
+  if (BooksysBrowser.isMobileResponsive()) {
+    return 350;
+  } else {
+    return 300;
+  }
+});
+
+const mapWidth = computed(() => {
+  if (BooksysBrowser.isMobileResponsive()) {
+    return 340;
+  } else {
+    return 600;
+  }
+});
+
+onMounted(() => {
+  console.log("Info.vue: Try to get all information required");
+  store.dispatch("configuration/queryConfiguration");
+});
 </script>
 
 <style scoped>

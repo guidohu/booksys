@@ -143,8 +143,10 @@
   </modal-container>
 </template>
 
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import { useStore, mapGetters, mapActions } from "vuex";
+import { useRouter } from "vue-router";
 import User from "@/api/user";
 import WarningBox from "@/components/WarningBox";
 import ModalContainer from "../components/bricks/ModalContainer.vue";
@@ -155,140 +157,137 @@ import InputText from "../components/forms/inputs/InputText.vue";
 import InputPassword from "../components/forms/inputs/InputPassword.vue";
 import { VueRecaptcha } from 'vue-recaptcha';
 
-export default {
-  name: "WSPasswordReset",
-  components: {
-    VueRecaptcha,
-    WarningBox,
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    InputText,
-    InputPassword,
-  },
-  data() {
-    return {
-      isLoading: false,
-      showEmailDialog: true,
-      showTokenDialog: false,
-      showSuccessInfo: false,
-      errors: [],
-      form: {
-        email: null,
-        recaptchaResponse: null,
-      },
-    };
-  },
-  computed: {
-    ...mapGetters("configuration", ["getRecaptchaKey"]),
-  },
-  methods: {
-    ...mapActions("configuration", ["queryRecaptchaKey"]),
-    verifiedHandler: function (response) {
-      this.form.recaptchaResponse = response;
-    },
-    validatePassword: function () {
-      const errors = [];
+const store = useStore();
+const router = useRouter();
 
-      if (this.form.password != this.form.passwordConfirm) {
-        errors.push("Password and Password Confirmation are not identical.");
-      }
-      if (this.form.password.length <= 8) {
-        errors.push("Please use a password longer than 8 characters.");
-      }
+const isLoading = ref(false);
+const showEmailDialog = ref(true);
+const showTokenDialog = ref(false);
+const showSuccessInfo = ref(false);
+const errors = ref([]);
+const form = ref({
+  email: null,
+  recaptchaResponse: null,
+});
 
-      // password strength
-      const pwUpperRegex = /[A-Z]+/;
-      const pwLowerRegex = /[a-z]+/;
-      const pwDigitRegex = /[0-9]+/;
-      if (this.form.password.match(pwUpperRegex) == null) {
-        errors.push(
-          "The password needs to contain at least one upper case letter (A-Z)"
-        );
-      }
-      if (this.form.password.match(pwLowerRegex) == null) {
-        errors.push(
-          "The password needs to contain at least one lower case letter (a-z)"
-        );
-      }
-      if (this.form.password.match(pwDigitRegex) == null) {
-        errors.push("The password needs to contain at least one digit (0-9)");
-      }
+const getRecaptchaKey = computed(
+  mapGetters("configuration", ["getRecaptchaKey"]).getRecaptchaKey.bind({
+    $store: store,
+  })
+);
 
-      return errors;
-    },
-    requestToken: function (event) {
-      if (event != null) {
-        event.preventDefault();
-      }
+const queryRecaptchaKey = mapActions("configuration", [
+  "queryRecaptchaKey",
+]).queryRecaptchaKey.bind({ $store: store });
 
-      this.isLoading = true;
-
-      const request = {
-        email: this.form.email,
-        recaptchaResponse: this.form.recaptchaResponse,
-      };
-
-      User.requestPasswordResetToken(request)
-        .then(() => {
-          this.isLoading = false;
-          this.errors = [];
-          this.showSuccessInfo = false;
-          this.showEmailDialog = false;
-          this.showTokenDialog = true;
-        })
-        .catch((errors) => {
-          this.errors = errors;
-          this.isLoading = false;
-        });
-    },
-    setPassword: function (event) {
-      if (event != null) {
-        event.preventDefault();
-      }
-
-      this.isLoading = true;
-
-      const errors = this.validatePassword();
-      if (errors != null && errors.length != 0) {
-        this.errors = errors;
-        this.isLoading = false;
-        return;
-      }
-
-      const request = {
-        email: this.form.email,
-        password: this.form.password,
-        token: this.form.token,
-      };
-
-      User.changeUserPasswordByToken(request)
-        .then(() => {
-          this.errors = [];
-          this.isLoading = false;
-          this.showEmailDialog = false;
-          this.showTokenDialog = false;
-          this.showSuccessInfo = true;
-        })
-        .catch((errors) => {
-          this.isLoading = false;
-          this.errors = errors;
-        });
-    },
-    close: function () {
-      this.$router.push("/");
-    },
-    showEmail: function () {
-      this.errors = [];
-      this.isLoading = false;
-      this.showEmailDialog = true;
-      this.showTokenDialog = false;
-      this.showSuccessInfo = false;
-    },
-  },
-  created() {
-    this.queryRecaptchaKey();
-  },
+const verifiedHandler = (response) => {
+  form.value.recaptchaResponse = response;
 };
+
+const validatePassword = () => {
+  const validationErrors = [];
+
+  if (form.value.password !== form.value.passwordConfirm) {
+    validationErrors.push("Password and Password Confirmation are not identical.");
+  }
+  if (form.value.password.length <= 8) {
+    validationErrors.push("Please use a password longer than 8 characters.");
+  }
+
+  // password strength
+  const pwUpperRegex = /[A-Z]+/;
+  const pwLowerRegex = /[a-z]+/;
+  const pwDigitRegex = /[0-9]+/;
+  if (form.value.password.match(pwUpperRegex) == null) {
+    validationErrors.push(
+      "The password needs to contain at least one upper case letter (A-Z)"
+    );
+  }
+  if (form.value.password.match(pwLowerRegex) == null) {
+    validationErrors.push(
+      "The password needs to contain at least one lower case letter (a-z)"
+    );
+  }
+  if (form.value.password.match(pwDigitRegex) == null) {
+    validationErrors.push("The password needs to contain at least one digit (0-9)");
+  }
+
+  return validationErrors;
+};
+
+const requestToken = (event) => {
+  if (event) {
+    event.preventDefault();
+  }
+
+  isLoading.value = true;
+
+  const request = {
+    email: form.value.email,
+    recaptchaResponse: form.value.recaptchaResponse,
+  };
+
+  User.requestPasswordResetToken(request)
+    .then(() => {
+      isLoading.value = false;
+      errors.value = [];
+      showSuccessInfo.value = false;
+      showEmailDialog.value = false;
+      showTokenDialog.value = true;
+    })
+    .catch((error) => {
+      errors.value = error;
+      isLoading.value = false;
+    });
+};
+
+const setPassword = (event) => {
+  if (event) {
+    event.preventDefault();
+  }
+
+  isLoading.value = true;
+
+  const validationErrors = validatePassword();
+  if (validationErrors.length > 0) {
+    errors.value = validationErrors;
+    isLoading.value = false;
+    return;
+  }
+
+  const request = {
+    email: form.value.email,
+    password: form.value.password,
+    token: form.value.token,
+  };
+
+  User.changeUserPasswordByToken(request)
+    .then(() => {
+      errors.value = [];
+      isLoading.value = false;
+      showEmailDialog.value = false;
+      showTokenDialog.value = false;
+      showSuccessInfo.value = true;
+    })
+    .catch((error) => {
+      isLoading.value = false;
+      errors.value = error;
+    });
+};
+
+const close = () => {
+  router.push("/");
+};
+
+const showEmail = () => {
+  errors.value = [];
+  isLoading.value = false;
+  showEmailDialog.value = true;
+  showTokenDialog.value = false;
+  showSuccessInfo.value = false;
+};
+
+onMounted(() => {
+  queryRecaptchaKey();
+});
 </script>

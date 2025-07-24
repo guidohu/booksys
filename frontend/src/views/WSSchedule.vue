@@ -12,17 +12,8 @@
   </subpage-container>
 </template>
 
-<script>
+<script setup>
 import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
 import CardModule from "@/components/bricks/CardModule.vue";
 import UserSessionTabs from "@/components/UserSessionTabs.vue";
-
-export default {
-  name: "WSSchedule",
-  components: {
-    SubpageContainer,
-    UserSessionTabs,
-    CardModule,
-  },
-};
 </script>

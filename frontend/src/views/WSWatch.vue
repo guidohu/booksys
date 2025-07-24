@@ -44,8 +44,9 @@
   </subpage-container>
 </template>
 
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import { useStore, mapGetters, mapActions } from "vuex";
 import WarningBox from "@/components/WarningBox";
 import StopWatchCard from "@/components/StopWatchCard";
 import SessionHeatListCard from "@/components/SessionHeatListCard";
@@ -54,43 +55,34 @@ import ShowForMobile from "../components/bricks/ShowForMobile.vue";
 import ShowForDesktop from "../components/bricks/ShowForDesktop.vue";
 import SubpageContainer from "../components/bricks/SubpageContainer.vue";
 
-export default {
-  name: "WSWatch",
-  components: {
-    WarningBox,
-    StopWatchCard,
-    SessionHeatListCard,
-    ConditionInfoCard,
-    ShowForMobile,
-    ShowForDesktop,
-    SubpageContainer,
-  },
-  data() {
-    return {
-      sessionId: null,
-      errors: [],
-    };
-  },
-  computed: {
-    ...mapGetters("sessions", ["getSessionConditionInfo"]),
-  },
-  methods: {
-    ...mapActions("sessions", ["querySessionMetadata"]),
-  },
-  created() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = Number(urlParams.get("sessionId"));
-    if (sessionId == null || !Number(sessionId) > 0) {
-      this.errors = ["No session parameter given in URL"];
-    } else {
-      this.sessionId = sessionId;
-    }
+const store = useStore();
 
-    this.querySessionMetadata(sessionId)
+const sessionId = ref(null);
+const errors = ref([]);
+
+const getSessionConditionInfo = computed(
+  mapGetters("sessions", ["getSessionConditionInfo"]).getSessionConditionInfo.bind({
+    $store: store,
+  })
+);
+
+const querySessionMetadata = mapActions("sessions", [
+  "querySessionMetadata",
+]).querySessionMetadata.bind({ $store: store });
+
+onMounted(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = Number(urlParams.get("sessionId"));
+  if (id == null || !Number(id) > 0) {
+    errors.value = ["No session parameter given in URL"];
+  } else {
+    sessionId.value = id;
+  }
+
+  querySessionMetadata(sessionId.value)
     .then(() => console.log("queried session metadata"))
-    .catch((errors) => (this.errors = errors));
-  },
-};
+    .catch((err) => (errors.value = err));
+});
 </script>
 
 <style>

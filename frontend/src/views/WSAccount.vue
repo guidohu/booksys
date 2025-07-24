@@ -12,29 +12,17 @@
   </subpage-container>
 </template>
 
-<script>
-import { mapActions, mapGetters } from "vuex";
+<script setup>
+import { useStore } from "vuex";
+import { onMounted } from "vue";
 import UserProfileCard from "@/components/UserProfileCard";
 import UserStatisticsCard from "@/components/UserStatisticsCard";
 import UserBalanceCard from "@/components/UserBalanceCard";
 import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
 
-export default {
-  name: "WSAccount",
-  components: {
-    UserProfileCard,
-    UserStatisticsCard,
-    UserBalanceCard,
-    SubpageContainer,
-  },
-  computed: {
-    ...mapGetters("login", ["userInfo"]),
-  },
-  methods: {
-    ...mapActions("user", ["queryHeatHistory"]),
-  },
-  created() {
-    this.queryHeatHistory();
-  },
-};
+const store = useStore();
+
+onMounted(() => {
+  store.dispatch("user/queryHeatHistory");
+});
 </script>

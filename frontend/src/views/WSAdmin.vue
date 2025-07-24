@@ -60,15 +60,7 @@
   </subpage-container>
 </template>
 
-<script>
+<script setup>
 import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
 import DashboardButton from "@/components/bricks/DashboardButton.vue";
-
-export default {
-  name: "WSAdmin",
-  components: {
-    SubpageContainer,
-    DashboardButton,
-  },
-};
 </script>

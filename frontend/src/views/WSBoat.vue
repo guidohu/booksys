@@ -12,17 +12,8 @@
   </subpage-container>
 </template>
 
-<script>
+<script setup>
 import BoatTabs from "@/components/BoatTabs";
 import CardModule from "@/components/bricks/CardModule.vue";
 import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
-
-export default {
-  name: "WSBoat",
-  components: {
-    BoatTabs,
-    CardModule,
-    SubpageContainer,
-  },
-};
 </script>
