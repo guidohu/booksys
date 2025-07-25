@@ -13,9 +13,9 @@
 </template>
 
 <script setup>
-import UserManagementTabs from "@/components/UserManagementTabs";
-import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
-import CardModule from "@/components/bricks/CardModule.vue";
+import UserManagementTabs from "booksys/components/UserManagementTabs.vue";
+import SubpageContainer from "booksys/components/bricks/SubpageContainer.vue";
+import CardModule from "booksys/components/bricks/CardModule.vue";
 </script>
 
 <style scoped>

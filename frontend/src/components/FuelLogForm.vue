@@ -13,8 +13,8 @@
 
 <script>
 import { mapGetters } from "vuex";
-import FormButton from "@/components/forms/FormButton.vue";
-import FuelRefuelModal from "@/components/FuelRefuelModal.vue";
+import FormButton from "booksys/components/forms/FormButton.vue";
+import FuelRefuelModal from "booksys/components/FuelRefuelModal.vue";
 
 export default {
   name: "FuelLogForm",

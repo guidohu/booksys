@@ -84,8 +84,8 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import uniq from "lodash/uniq";
-import WarningBox from "@/components/WarningBox";
-import { UserPointer } from "@/dataTypes/user";
+import WarningBox from "booksys/components/WarningBox.vue";
+import { UserPointer } from "booksys/dataTypes/user";
 import ModalContainer from "./bricks/ModalContainer.vue";
 import ModalHeader from "./bricks/ModalHeader.vue";
 import ModalBody from "./bricks/ModalBody.vue";

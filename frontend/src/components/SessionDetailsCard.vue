@@ -115,9 +115,9 @@
 <script>
 import { mapActions } from "vuex";
 import * as dayjs from "dayjs";
-import { UserPointer } from "@/dataTypes/user";
-import RiderSelectionModal from "@/components/RiderSelectionModal";
-import SectionedCardModule from "@/components/bricks/SectionedCardModule.vue";
+import { UserPointer } from "booksys/dataTypes/user";
+import RiderSelectionModal from "booksys/components/RiderSelectionModal.vue";
+import SectionedCardModule from "booksys/components/bricks/SectionedCardModule.vue";
 
 export default {
   name: "SessionDetailsCard",

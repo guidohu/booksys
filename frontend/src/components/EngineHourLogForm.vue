@@ -56,11 +56,11 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import InputEngineHours from "@/components/forms/inputs/InputEngineHours.vue";
-import InputText from "@/components/forms/inputs/InputText.vue";
-import InputToggle from "@/components/forms/inputs/InputToggle.vue";
-import FormButton from "@/components/forms/FormButton.vue";
-import WarningBox from "@/components/WarningBox.vue";
+import InputEngineHours from "booksys/components/forms/inputs/InputEngineHours.vue";
+import InputText from "booksys/components/forms/inputs/InputText.vue";
+import InputToggle from "booksys/components/forms/inputs/InputToggle.vue";
+import FormButton from "booksys/components/forms/FormButton.vue";
+import WarningBox from "booksys/components/WarningBox.vue";
 
 export default {
   name: "EngineHourLogForm",

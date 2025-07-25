@@ -68,8 +68,8 @@
 
 <script>
 import { mapGetters } from "vuex";
-import UserEditModal from "./UserEditModal";
-import UserPasswordEditModal from "./UserPasswordEditModal";
+import UserEditModal from "./UserEditModal.vue";
+import UserPasswordEditModal from "./UserPasswordEditModal.vue";
 import SectionedCardModule from "./bricks/SectionedCardModule.vue";
 
 export default {

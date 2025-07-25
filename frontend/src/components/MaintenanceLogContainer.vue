@@ -6,8 +6,8 @@
 </template>
 
 <script>
-import MaintenanceLogForm from "@/components/MaintenanceLogForm";
-import MaintenanceLogList from "@/components/MaintenanceLogList";
+import MaintenanceLogForm from "booksys/components/MaintenanceLogForm.vue";
+import MaintenanceLogList from "booksys/components/MaintenanceLogList.vue";
 
 export default {
   name: "MaintenanceLogContainer",

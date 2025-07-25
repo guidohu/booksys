@@ -1,4 +1,4 @@
-import Accounting from "@/api/accounting";
+import Accounting from "booksys/api/accounting";
 import { round } from "lodash";
 
 const state = () => ({

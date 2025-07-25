@@ -54,7 +54,7 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import UserSessionsTable from "@/components/UserSessionsTable.vue";
+import UserSessionsTable from "booksys/components/UserSessionsTable.vue";
 
 export default {
   name: "UserSessionTabs",

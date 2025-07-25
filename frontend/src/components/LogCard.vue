@@ -9,10 +9,10 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import CardModule from "@/components/bricks/CardModule.vue";
+import CardModule from "booksys/components/bricks/CardModule.vue";
 import TableModule from "./bricks/TableModule.vue";
-import WarningBox from "@/components/WarningBox";
-import OverlaySpinner from "@/components/styling/OverlaySpinner.vue";
+import WarningBox from "booksys/components/WarningBox.vue";
+import OverlaySpinner from "booksys/components/styling/OverlaySpinner.vue";
 
 export default {
   name: "LogCard",

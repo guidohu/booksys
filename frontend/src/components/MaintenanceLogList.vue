@@ -13,9 +13,9 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import * as dayjs from "dayjs";
-import WarningBox from "@/components/WarningBox";
-import { formatEngineHour } from "@/libs/formatters";
-import TableModule from "@/components/bricks/TableModule.vue";
+import WarningBox from "booksys/components/WarningBox.vue";
+import { formatEngineHour } from "booksys/libs/formatters";
+import TableModule from "booksys/components/bricks/TableModule.vue";
 
 export default {
   name: "MaintenanceLogList",

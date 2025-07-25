@@ -61,6 +61,6 @@
 </template>
 
 <script setup>
-import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
-import DashboardButton from "@/components/bricks/DashboardButton.vue";
+import SubpageContainer from "booksys/components/bricks/SubpageContainer.vue";
+import DashboardButton from "booksys/components/bricks/DashboardButton.vue";
 </script>

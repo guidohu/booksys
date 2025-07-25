@@ -1,4 +1,4 @@
-import { BooksysBrowser } from "@/libs/browser.js";
+import { BooksysBrowser } from "booksys/libs/browser.js";
 
 // initial state
 const state = () => ({

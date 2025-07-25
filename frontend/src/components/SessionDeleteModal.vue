@@ -31,11 +31,11 @@
 
 <script>
 import { mapActions } from "vuex";
-import WarningBox from "@/components/WarningBox";
-import ModalContainer from "@/components/bricks/ModalContainer.vue";
-import ModalHeader from "@/components/bricks/ModalHeader.vue";
-import ModalBody from "@/components/bricks/ModalBody.vue";
-import ModalFooter from "@/components/bricks/ModalFooter.vue";
+import WarningBox from "booksys/components/WarningBox.vue";
+import ModalContainer from "booksys/components/bricks/ModalContainer.vue";
+import ModalHeader from "booksys/components/bricks/ModalHeader.vue";
+import ModalBody from "booksys/components/bricks/ModalBody.vue";
+import ModalFooter from "booksys/components/bricks/ModalFooter.vue";
 
 export default {
   name: "SessionDeleteModal",

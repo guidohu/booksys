@@ -100,8 +100,8 @@
 </template>
 
 <script>
-import WarningBox from "@/components/WarningBox";
-import { uploadLogo } from "@/api/resources";
+import WarningBox from "booksys/components/WarningBox.vue";
+import { uploadLogo } from "booksys/api/resources";
 import { mapGetters, mapActions } from "vuex";
 import InputFile from "./forms/inputs/InputFile.vue";
 import OverlaySpinner from "./styling/OverlaySpinner.vue";

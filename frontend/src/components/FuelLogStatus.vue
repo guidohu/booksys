@@ -62,7 +62,7 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import WarningBox from "@/components/WarningBox";
+import WarningBox from "booksys/components/WarningBox.vue";
 import { min } from "lodash";
 import { sprintf } from "sprintf-js";
 

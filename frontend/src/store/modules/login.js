@@ -1,4 +1,4 @@
-import ApiLogin from "@/api/login";
+import ApiLogin from "booksys/api/login";
 
 // initial state
 const state = () => ({

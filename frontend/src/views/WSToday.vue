@@ -87,10 +87,10 @@
 <script setup>
 import { defineAsyncComponent, ref, computed, onMounted, watch } from "vue";
 import { useStore, mapGetters, mapActions } from "vuex";
-import ConditionInfoCard from "@/components/ConditionInfoCard";
-import SessionDayCard from "@/components/SessionDayCard";
-import SessionDetailsCard from "@/components/SessionDetailsCard";
-import Session from "@/dataTypes/session";
+import ConditionInfoCard from "booksys/components/ConditionInfoCard.vue";
+import SessionDayCard from "booksys/components/SessionDayCard.vue";
+import SessionDetailsCard from "booksys/components/SessionDetailsCard.vue";
+import Session from "booksys/dataTypes/session";
 import * as dayjs from "dayjs";
 import * as dayjsCustomParseFormat from "dayjs/plugin/customParseFormat";
 import * as dayjsUTC from "dayjs/plugin/utc";
@@ -102,10 +102,10 @@ import ShowForMobile from "../components/bricks/ShowForMobile.vue";
 import ShowForDesktop from "../components/bricks/ShowForDesktop.vue";
 
 const SessionEditorModal = defineAsyncComponent(() =>
-  import("@/components/SessionEditorModal")
+  import("booksys/components/SessionEditorModal.vue")
 );
 const SessionDeleteModal = defineAsyncComponent(() =>
-  import("@/components/SessionDeleteModal")
+  import("booksys/components/SessionDeleteModal.vue")
 );
 
 dayjs.extend(dayjsCustomParseFormat);

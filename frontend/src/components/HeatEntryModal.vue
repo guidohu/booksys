@@ -89,11 +89,11 @@
 import { mapGetters, mapActions } from "vuex";
 import * as dayjs from "dayjs";
 import { sprintf } from "sprintf-js";
-import WarningBox from "@/components/WarningBox";
-import ModalContainer from "@/components/bricks/ModalContainer.vue";
-import ModalHeader from "@/components/bricks/ModalHeader.vue";
-import ModalBody from "@/components/bricks/ModalBody.vue";
-import ModalFooter from "@/components/bricks/ModalFooter.vue";
+import WarningBox from "booksys/components/WarningBox.vue";
+import ModalContainer from "booksys/components/bricks/ModalContainer.vue";
+import ModalHeader from "booksys/components/bricks/ModalHeader.vue";
+import ModalBody from "booksys/components/bricks/ModalBody.vue";
+import ModalFooter from "booksys/components/bricks/ModalFooter.vue";
 import InputText from "./forms/inputs/InputText.vue";
 import InputTextMultiline from "./forms/inputs/InputTextMultiline.vue";
 import InputDateTimeLocal from "./forms/inputs/InputDateTimeLocal.vue";

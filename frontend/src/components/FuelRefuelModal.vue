@@ -53,14 +53,14 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import WarningBox from "@/components/WarningBox";
+import WarningBox from "booksys/components/WarningBox.vue";
 import ModalContainer from "./bricks/ModalContainer.vue";
 import ModalHeader from "./bricks/ModalHeader.vue";
 import ModalBody from "./bricks/ModalBody.vue";
 import ModalFooter from "./bricks/ModalFooter.vue";
-import InputEngineHours from "@/components/forms/inputs/InputEngineHours";
-import InputCurrency from "@/components/forms/inputs/InputCurrency.vue";
-import InputFuel from "@/components/forms/inputs/InputFuel.vue";
+import InputEngineHours from "booksys/components/forms/inputs/InputEngineHours.vue";
+import InputCurrency from "booksys/components/forms/inputs/InputCurrency.vue";
+import InputFuel from "booksys/components/forms/inputs/InputFuel.vue";
 
 export default {
   name: "FuelRefuelModal",

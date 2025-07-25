@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-import BoatTabs from "@/components/BoatTabs";
-import CardModule from "@/components/bricks/CardModule.vue";
-import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
+import BoatTabs from "booksys/components/BoatTabs.vue";
+import CardModule from "booksys/components/bricks/CardModule.vue";
+import SubpageContainer from "booksys/components/bricks/SubpageContainer.vue";
 </script>

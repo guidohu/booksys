@@ -29,7 +29,7 @@
 import { mapGetters, mapActions } from "vuex";
 import SectionedCardModule from "./bricks/SectionedCardModule.vue";
 import PaymentInfoModal from "./PaymentInfoModal.vue";
-import { formatCost } from "@/libs/formatters";
+import { formatCost } from "booksys/libs/formatters";
 
 export default {
   name: "UserBalanceCard",

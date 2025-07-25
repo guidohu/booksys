@@ -14,7 +14,7 @@
 <script setup>
 import { useStore } from "vuex";
 import { onMounted } from "vue";
-import CardModule from "@/components/bricks/CardModule.vue";
+import CardModule from "booksys/components/bricks/CardModule.vue";
 
 const store = useStore();
 

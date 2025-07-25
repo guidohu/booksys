@@ -65,7 +65,7 @@
 <script>
 import BooksysPie from "./Pie.vue";
 import * as dayjs from "dayjs";
-import { BooksysBrowser } from "@/libs/browser";
+import { BooksysBrowser } from "booksys/libs/browser";
 import SectionedCardModule from "../components/bricks/SectionedCardModule.vue";
 
 export default {

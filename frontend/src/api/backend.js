@@ -1,4 +1,4 @@
-import Request from "@/api/common/request.js";
+import Request from "api/common/request.js";
 
 export const getBackendStatus = () => {
   console.debug("backend/getBackendStatus called");

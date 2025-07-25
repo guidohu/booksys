@@ -80,10 +80,10 @@
 import { mapGetters, mapActions } from "vuex";
 import reverse from "lodash/reverse";
 import * as dayjs from "dayjs";
-import WarningBox from "@/components/WarningBox";
-import CardModule from "@/components/bricks/CardModule";
-import InputSelect from "@/components/forms/inputs/InputSelect.vue";
-import { formatNumber } from "@/libs/formatters.js";
+import WarningBox from "booksys/components/WarningBox.vue";
+import CardModule from "booksys/components/bricks/CardModule.vue";
+import InputSelect from "booksys/components/forms/inputs/InputSelect.vue";
+import { formatNumber } from "booksys/libs/formatters.js";
 
 export default {
   name: "PaymentDetails",

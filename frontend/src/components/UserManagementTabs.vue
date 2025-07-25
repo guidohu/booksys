@@ -71,10 +71,10 @@
 </template>
 
 <script>
-import UserTable from "@/components/UserTable";
-import UserGroupTable from "@/components/UserGroupTable";
-import ShowForMobile from "@/components/bricks/ShowForMobile.vue";
-import ShowForDesktop from "@/components/bricks/ShowForDesktop.vue";
+import UserTable from "booksys/components/UserTable.vue";
+import UserGroupTable from "booksys/components/UserGroupTable.vue";
+import ShowForMobile from "booksys/components/bricks/ShowForMobile.vue";
+import ShowForDesktop from "booksys/components/bricks/ShowForDesktop.vue";
 
 export default {
   name: "UserManagementTabs",

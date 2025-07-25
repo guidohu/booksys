@@ -1,4 +1,4 @@
-import Configuration from "@/api/configuration";
+import Configuration from "booksys/api/configuration";
 
 const state = () => ({
   ADMIN_CONFIG_LOADED: false,

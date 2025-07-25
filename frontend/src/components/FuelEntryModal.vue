@@ -108,23 +108,23 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import WarningBox from "@/components/WarningBox";
+import WarningBox from "booksys/components/WarningBox.vue";
 import {
   formatCurrency,
   formatFuelConsumption,
   formatFuel,
-} from "@/libs/formatters";
+} from "booksys/libs/formatters";
 import * as dayjs from "dayjs";
-import ModalContainer from "@/components/bricks/ModalContainer.vue";
-import ModalHeader from "@/components/bricks/ModalHeader.vue";
-import ModalBody from "@/components/bricks/ModalBody.vue";
-import ModalFooter from "@/components/bricks/ModalFooter.vue";
-import InputDateTimeLocal from "@/components/forms/inputs/InputDateTimeLocal.vue";
-import InputText from "@/components/forms/inputs/InputText.vue";
-import InputEngineHours from "@/components/forms/inputs/InputEngineHours.vue";
-import InputFuel from "@/components/forms/inputs/InputFuel.vue";
-import InputCurrency from "@/components/forms/inputs/InputCurrency.vue";
-import InputToggle from "@/components/forms/inputs/InputToggle.vue";
+import ModalContainer from "booksys/components/bricks/ModalContainer.vue";
+import ModalHeader from "booksys/components/bricks/ModalHeader.vue";
+import ModalBody from "booksys/components/bricks/ModalBody.vue";
+import ModalFooter from "booksys/components/bricks/ModalFooter.vue";
+import InputDateTimeLocal from "booksys/components/forms/inputs/InputDateTimeLocal.vue";
+import InputText from "booksys/components/forms/inputs/InputText.vue";
+import InputEngineHours from "booksys/components/forms/inputs/InputEngineHours.vue";
+import InputFuel from "booksys/components/forms/inputs/InputFuel.vue";
+import InputCurrency from "booksys/components/forms/inputs/InputCurrency.vue";
+import InputToggle from "booksys/components/forms/inputs/InputToggle.vue";
 
 export default {
   name: "FuelEntryModal",

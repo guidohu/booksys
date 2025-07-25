@@ -13,9 +13,9 @@
 </template>
 
 <script setup>
-import AccountingTabs from "@/components/AccountingTabs";
-import CardModule from "@/components/bricks/CardModule.vue";
-import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
+import AccountingTabs from "booksys/components/AccountingTabs.vue";
+import CardModule from "booksys/components/bricks/CardModule.vue";
+import SubpageContainer from "booksys/components/bricks/SubpageContainer.vue";
 </script>
 
 <style scoped>

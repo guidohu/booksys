@@ -38,9 +38,9 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useStore, mapGetters } from "vuex";
-import ConditionInfoCard from "@/components/ConditionInfoCard";
-import SessionMonthCard from "@/components/SessionMonthCard";
-import SessionsOverview from "@/components/SessionsOverview";
+import ConditionInfoCard from "booksys/components/ConditionInfoCard.vue";
+import SessionMonthCard from "booksys/components/SessionMonthCard.vue";
+import SessionsOverview from "booksys/components/SessionsOverview.vue";
 import * as dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";

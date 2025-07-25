@@ -1,8 +1,8 @@
 import values from "lodash/values";
 import sortBy from "lodash/sortBy";
 import Login from "./login";
-import Request from "@/api/common/request.js";
-import { UserPointer } from "@/dataTypes/user";
+import Request from "booksys/api/common/request.js";
+import { UserPointer } from "booksys/dataTypes/user";
 
 export default class User {
   static getHeats() {

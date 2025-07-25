@@ -27,7 +27,7 @@ import ModalHeader from "./bricks/ModalHeader.vue";
 import ModalBody from "./bricks/ModalBody.vue";
 import ModalFooter from "./bricks/ModalFooter.vue";
 import TableModule from "./bricks/TableModule.vue";
-import { formatCost } from "@/libs/formatters";
+import { formatCost } from "booksys/libs/formatters";
 
 export default {
   name: "UserHeatsModal",

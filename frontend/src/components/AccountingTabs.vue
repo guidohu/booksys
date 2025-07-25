@@ -71,10 +71,10 @@
 </template>
 
 <script>
-import PaymentTable from "@/components/PaymentTable";
-import ShowForMobile from "@/components/bricks/ShowForMobile.vue";
-import ShowForDesktop from "@/components/bricks/ShowForDesktop.vue";
-import PaymentStatistics from "@/components/PaymentStatistics";
+import PaymentTable from "booksys/components/PaymentTable.vue";
+import ShowForMobile from "booksys/components/bricks/ShowForMobile.vue";
+import ShowForDesktop from "booksys/components/bricks/ShowForDesktop.vue";
+import PaymentStatistics from "booksys/components/PaymentStatistics.vue";
 
 export default {
   name: "AccountingTabs",

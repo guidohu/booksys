@@ -39,8 +39,8 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import SectionedCardModule from "./bricks/SectionedCardModule.vue";
-import UserHeatsModal from "./UserHeatsModal";
-import { formatDurationString, formatNumber } from "@/libs/formatters";
+import UserHeatsModal from "./UserHeatsModal.vue";
+import { formatDurationString, formatNumber } from "booksys/libs/formatters";
 
 export default {
   name: "UserStatisticsCard",

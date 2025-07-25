@@ -29,8 +29,8 @@
 </template>
 
 <script>
-import NavbarMobile from "@/components/NavbarMobile.vue";
-import DashboardButton from "@/components/bricks/DashboardButton.vue";
+import NavbarMobile from "booksys/components/NavbarMobile.vue";
+import DashboardButton from "booksys/components/bricks/DashboardButton.vue";
 
 export default {
   name: "DashboardMemberMobile",

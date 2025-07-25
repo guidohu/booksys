@@ -66,18 +66,18 @@ import { defineAsyncComponent } from "vue";
 import { mapGetters, mapActions } from "vuex";
 import reverse from "lodash/reverse";
 import * as dayjs from "dayjs";
-import { formatCurrency } from "@/libs/formatters";
-import WarningBox from "@/components/WarningBox";
+import { formatCurrency } from "booksys/libs/formatters";
+import WarningBox from "booksys/components/WarningBox.vue";
 import TableModule from "./bricks/TableModule.vue";
 import InputSelect from "./forms/inputs/InputSelect.vue";
 import OverlaySpinner from "./styling/OverlaySpinner.vue";
-import { confirm } from "@/components/bricks/DialogModal";
+import { confirm } from "booksys/components/bricks/DialogModal.js";
 
 const IncomeModal = defineAsyncComponent(() =>
-  import(/* webpackChunkName: "income-modal" */ "@/components/IncomeModal")
+  import(/* webpackChunkName: "income-modal" */ "booksys/components/IncomeModal.vue")
 );
 const ExpenseModal = defineAsyncComponent(() =>
-  import(/* webpackChunkName: "expense-modal" */ "@/components/ExpenseModal")
+  import(/* webpackChunkName: "expense-modal" */ "booksys/components/ExpenseModal.vue")
 );
 
 export default {

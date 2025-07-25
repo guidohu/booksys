@@ -10,8 +10,8 @@ import "bootstrap/dist/js/bootstrap.esm";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 // Override bootstrap styling
-import "@/assets/bootstrap/css/bootstrap-theme-bc.css";
-import "@/assets/css/style.css";
+import "assets/bootstrap/css/bootstrap-theme-bc.css";
+import "assets/css/style.css";
 
 // Deactivate normal logging in production
 if (process.env.NODE_ENV === "production") {
@@ -21,7 +21,6 @@ if (process.env.NODE_ENV === "production") {
 // Setup App
 const app = createApp(App);
 app.config.devtools = (process.env.NODE_ENV === "development");
-app.config.devtools = true;
 app.config.performance = true;
 app.use(router);
 app.use(store);

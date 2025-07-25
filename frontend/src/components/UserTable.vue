@@ -86,10 +86,10 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import { sprintf } from "sprintf-js";
-import WarningBox from "@/components/WarningBox";
+import WarningBox from "booksys/components/WarningBox.vue";
 import TableModule from "./bricks/TableModule.vue";
 import InputSelect from "./forms/inputs/InputSelect.vue";
-import { confirm, info } from "@/components/bricks/DialogModal";
+import { confirm, info } from "booksys/components/bricks/DialogModal.js";
 
 export default {
   name: "UserTable",

@@ -6,8 +6,8 @@
 </template>
 
 <script>
-import EngineHourLogForm from "@/components/EngineHourLogForm";
-import EngineHourLogList from "@/components/EngineHourLogList";
+import EngineHourLogForm from "booksys/components/EngineHourLogForm.vue";
+import EngineHourLogList from "booksys/components/EngineHourLogList.vue";
 
 export default {
   name: "EngineHourLogContainer",

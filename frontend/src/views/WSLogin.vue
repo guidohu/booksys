@@ -33,8 +33,8 @@
 import { ref, computed, onMounted } from "vue";
 import { useStore, mapGetters } from "vuex";
 import { useRouter, useRoute } from "vue-router";
-import LoginForm from "@/components/LoginForm.vue";
-import OverlaySpinner from "@/components/styling/OverlaySpinner.vue";
+import LoginForm from "booksys/components/LoginForm.vue";
+import OverlaySpinner from "booksys/components/styling/OverlaySpinner.vue";
 
 const store = useStore();
 const router = useRouter();

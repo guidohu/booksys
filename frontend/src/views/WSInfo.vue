@@ -46,9 +46,9 @@
 <script setup>
 import { useStore, mapGetters } from "vuex";
 import { onMounted, computed } from "vue";
-import { BooksysBrowser } from "@/libs/browser";
-import CardModule from "@/components/bricks/CardModule.vue";
-import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
+import { BooksysBrowser } from "booksys/libs/browser";
+import CardModule from "booksys/components/bricks/CardModule.vue";
+import SubpageContainer from "booksys/components/bricks/SubpageContainer.vue";
 
 const store = useStore();
 

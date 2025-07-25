@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import ModalBody from "@/components/bricks/ModalBody.vue";
+import ModalBody from "booksys/components/bricks/ModalBody.vue";
 import ModalContainer from "../ModalContainer.vue";
 import ModalFooter from "../ModalFooter.vue";
 import ModalHeader from "../ModalHeader.vue";

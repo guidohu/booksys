@@ -36,9 +36,9 @@
 </template>
 
 <script>
-import EngineHourLogContainer from "@/components/EngineHourLogContainer";
-import FuelLogContainer from "@/components/FuelLogContainer";
-import MaintenanceLogContainer from "@/components/MaintenanceLogContainer";
+import EngineHourLogContainer from "booksys/components/EngineHourLogContainer.vue";
+import FuelLogContainer from "booksys/components/FuelLogContainer.vue";
+import MaintenanceLogContainer from "booksys/components/MaintenanceLogContainer.vue";
 import { Tab } from 'bootstrap';
 
 export default {

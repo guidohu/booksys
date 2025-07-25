@@ -203,9 +203,9 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import WarningBox from "@/components/WarningBox";
-import LogoUpload from "@/components/LogoUpload";
-import SectionedCardModule from "@/components/bricks/SectionedCardModule.vue";
+import WarningBox from "booksys/components/WarningBox.vue";
+import LogoUpload from "booksys/components/LogoUpload.vue";
+import SectionedCardModule from "booksys/components/bricks/SectionedCardModule.vue";
 import InputText from "./forms/inputs/InputText.vue";
 import InputPassword from "./forms/inputs/InputPassword.vue";
 import InputTextMultiline from "./forms/inputs/InputTextMultiline.vue";

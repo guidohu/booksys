@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import MainTitle from "@/components/MainTitle.vue";
+import MainTitle from "booksys/components/MainTitle.vue";
 
 export default {
   name: "SubpageDesktop",

@@ -86,10 +86,10 @@
 import { defineAsyncComponent, ref, computed, onMounted, watch } from "vue";
 import { useStore, mapGetters, mapActions } from "vuex";
 import { useRouter } from "vue-router";
-import ConditionInfoCard from "@/components/ConditionInfoCard";
-import SessionDayCard from "@/components/SessionDayCard";
-import SessionDetailsCard from "@/components/SessionDetailsCard";
-import Session from "@/dataTypes/session";
+import ConditionInfoCard from "booksys/components/ConditionInfoCard.vue";
+import SessionDayCard from "booksys/components/SessionDayCard.vue";
+import SessionDetailsCard from "booksys/components/SessionDetailsCard.vue";
+import Session from "booksys/dataTypes/session";
 import * as dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
@@ -100,12 +100,12 @@ import ShowForMobile from "../components/bricks/ShowForMobile.vue";
 
 const SessionEditorModal = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "session-editor-modal" */ "@/components/SessionEditorModal"
+    /* webpackChunkName: "session-editor-modal" */ "booksys/components/SessionEditorModal.vue"
   )
 );
 const SessionDeleteModal = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "session-delete-modal" */ "@/components/SessionDeleteModal"
+    /* webpackChunkName: "session-delete-modal" */ "booksys/components/SessionDeleteModal.vue"
   )
 );
 

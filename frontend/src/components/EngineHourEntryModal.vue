@@ -79,16 +79,16 @@
 
 <script>
 import { mapActions } from "vuex";
-import WarningBox from "@/components/WarningBox";
-import ModalContainer from "@/components/bricks/ModalContainer.vue";
-import ModalHeader from "@/components/bricks/ModalHeader.vue";
-import ModalBody from "@/components/bricks/ModalBody.vue";
-import ModalFooter from "@/components/bricks/ModalFooter.vue";
+import WarningBox from "booksys/components/WarningBox.vue";
+import ModalContainer from "booksys/components/bricks/ModalContainer.vue";
+import ModalHeader from "booksys/components/bricks/ModalHeader.vue";
+import ModalBody from "booksys/components/bricks/ModalBody.vue";
+import ModalFooter from "booksys/components/bricks/ModalFooter.vue";
 import * as dayjs from "dayjs";
-import InputDateTimeLocal from "@/components/forms/inputs/InputDateTimeLocal.vue";
-import InputText from "@/components/forms/inputs/InputText.vue";
-import InputEngineHours from "@/components/forms/inputs/InputEngineHours.vue";
-import InputToggle from "@/components/forms/inputs/InputToggle.vue";
+import InputDateTimeLocal from "booksys/components/forms/inputs/InputDateTimeLocal.vue";
+import InputText from "booksys/components/forms/inputs/InputText.vue";
+import InputEngineHours from "booksys/components/forms/inputs/InputEngineHours.vue";
+import InputToggle from "booksys/components/forms/inputs/InputToggle.vue";
 
 export default {
   name: "EngineHourEntryModal",

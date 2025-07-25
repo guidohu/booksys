@@ -11,8 +11,8 @@
 </template>
 
 <script setup>
-import LogCard from "@/components/LogCard";
-import SubpageContainer from "@/components/bricks/SubpageContainer.vue";
+import LogCard from "booksys/components/LogCard.vue";
+import SubpageContainer from "booksys/components/bricks/SubpageContainer.vue";
 </script>
 
 <style scoped>

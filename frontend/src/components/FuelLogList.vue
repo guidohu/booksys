@@ -19,22 +19,22 @@
 <script>
 import { defineAsyncComponent } from "vue";
 import { mapActions, mapGetters } from "vuex";
-import WarningBox from "@/components/WarningBox";
-// import FuelEntryModal from "@/components/FuelEntryModal";
-import { BooksysBrowser } from "@/libs/browser";
+import WarningBox from "booksys/components/WarningBox.vue";
+// import FuelEntryModal from "booksys/components/FuelEntryModal.vue";
+import { BooksysBrowser } from "booksys/libs/browser";
 import remove from "lodash/remove";
 import {
   formatEngineHour,
   formatCurrency,
   formatFuel,
   formatFuelConsumption,
-} from "@/libs/formatters";
+} from "booksys/libs/formatters";
 import * as dayjs from "dayjs";
-import TableModule from "@/components/bricks/TableModule.vue";
+import TableModule from "booksys/components/bricks/TableModule.vue";
 
 const FuelEntryModal = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "fuel-entry-modal" */ "@/components/FuelEntryModal"
+    /* webpackChunkName: "fuel-entry-modal" */ "booksys/components/FuelEntryModal.vue"
   )
 );
 

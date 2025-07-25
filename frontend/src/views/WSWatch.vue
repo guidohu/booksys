@@ -47,10 +47,10 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useStore, mapGetters, mapActions } from "vuex";
-import WarningBox from "@/components/WarningBox";
-import StopWatchCard from "@/components/StopWatchCard";
-import SessionHeatListCard from "@/components/SessionHeatListCard";
-import ConditionInfoCard from "@/components/ConditionInfoCard";
+import WarningBox from "booksys/components/WarningBox.vue";
+import StopWatchCard from "booksys/components/StopWatchCard.vue";
+import SessionHeatListCard from "booksys/components/SessionHeatListCard.vue";
+import ConditionInfoCard from "booksys/components/ConditionInfoCard.vue";
 import ShowForMobile from "../components/bricks/ShowForMobile.vue";
 import ShowForDesktop from "../components/bricks/ShowForDesktop.vue";
 import SubpageContainer from "../components/bricks/SubpageContainer.vue";

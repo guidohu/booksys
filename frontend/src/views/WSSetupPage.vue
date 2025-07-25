@@ -87,9 +87,9 @@
 <script setup>
 import { defineAsyncComponent, ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { getBackendStatus } from "@/api/backend";
-import Configuration from "@/api/configuration";
-import User from "@/api/user";
+import { getBackendStatus } from "booksys/api/backend";
+import Configuration from "booksys/api/configuration";
+import User from "booksys/api/user";
 import ModalContainer from "../components/bricks/ModalContainer.vue";
 import ModalHeader from "../components/bricks/ModalHeader.vue";
 import ModalBody from "../components/bricks/ModalBody.vue";
@@ -98,14 +98,14 @@ import ModalFooter from "../components/bricks/ModalFooter.vue";
 // Lazy loaded components
 const DatabaseConfiguration = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "database-configuration" */ "@/components/DatabaseConfiguration"
+    /* webpackChunkName: "database-configuration" */ "booksys/components/DatabaseConfiguration.vue"
   )
 );
 const UserSignUp = defineAsyncComponent(() =>
-  import(/* webpackChunkName: "user-sign-up" */ "@/components/forms/UserSignUp")
+  import(/* webpackChunkName: "user-sign-up" */ "booksys/components/forms/UserSignUp.vue")
 );
 const WarningBox = defineAsyncComponent(() =>
-  import(/* webpackChunkName: "warning-box" */ "@/components/WarningBox")
+  import(/* webpackChunkName: "warning-box" */ "booksys/components/WarningBox.vue")
 );
 
 const router = useRouter();

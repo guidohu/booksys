@@ -1,4 +1,4 @@
-import Sessions from "@/api/sessions";
+import Sessions from "booksys/api/sessions";
 import * as dayjs from "dayjs";
 
 const state = () => ({

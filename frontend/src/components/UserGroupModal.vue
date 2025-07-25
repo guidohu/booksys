@@ -108,7 +108,7 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import { sprintf } from "sprintf-js";
-import WarningBox from "@/components/WarningBox";
+import WarningBox from "booksys/components/WarningBox.vue";
 import InputText from "./forms/inputs/InputText.vue";
 import InputSelect from "./forms/inputs/InputSelect.vue";
 import ModalContainer from "./bricks/ModalContainer.vue";
@@ -116,7 +116,7 @@ import ModalHeader from "./bricks/ModalHeader.vue";
 import ModalBody from "./bricks/ModalBody.vue";
 import InputCurrency from "./forms/inputs/InputCurrency.vue";
 import ModalFooter from "./bricks/ModalFooter.vue";
-import { confirm } from "@/components/bricks/DialogModal";
+import { confirm } from "booksys/components/bricks/DialogModal.js";
 
 export default {
   name: "UserGroupModal",

@@ -25,12 +25,12 @@
 
 <script>
 import { defineAsyncComponent } from "vue";
-import FuelLogStatus from "@/components/FuelLogStatus";
-import FuelLogForm from "@/components/FuelLogForm";
-import FuelLogList from "@/components/FuelLogList";
+import FuelLogStatus from "booksys/components/FuelLogStatus.vue";
+import FuelLogForm from "booksys/components/FuelLogForm.vue";
+import FuelLogList from "booksys/components/FuelLogList.vue";
 
 const FuelLogChart = defineAsyncComponent(() =>
-  import(/* webpackChunkName: "fuel-log-chart" */ "@/components/FuelLogChart")
+  import(/* webpackChunkName: "fuel-log-chart" */ "booksys/components/FuelLogChart.vue")
 );
 
 export default {

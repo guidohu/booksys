@@ -82,11 +82,11 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import WarningBox from "@/components/WarningBox";
+import WarningBox from "booksys/components/WarningBox.vue";
 import Session, {
   SESSION_TYPE_OPEN,
   SESSION_TYPE_PRIVATE,
-} from "@/dataTypes/session";
+} from "booksys/dataTypes/session";
 import * as dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";

@@ -41,6 +41,13 @@ export default class Request {
       });
   }
 
+  /**
+   * Handles the response from a fetch request.
+   *
+   * @param {string} url The URL of the request.
+   * @param {Function} resolve will return the received data.
+   * @param {Function} reject will return an array of error strings.
+   */
   static getRequest(url) {
     console.debug("GET", url);
     return new Promise((resolve, reject) => {

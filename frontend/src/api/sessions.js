@@ -2,8 +2,8 @@ import * as dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
 import * as dayjsAdvancedFormat from "dayjs/plugin/advancedFormat";
-import Session from "@/dataTypes/session";
-import Request from "@/api/common/request";
+import Session from "booksys/dataTypes/session";
+import Request from "booksys/api/common/request";
 
 export default class Sessions {
   /**

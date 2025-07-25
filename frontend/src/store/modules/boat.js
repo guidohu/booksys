@@ -1,4 +1,4 @@
-import Boat from "@/api/boat";
+import Boat from "booksys/api/boat";
 import { sortBy, reverse, forEach, round } from "lodash";
 
 const state = () => ({

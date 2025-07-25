@@ -21,8 +21,8 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import { sprintf } from "sprintf-js";
-import WarningBox from "@/components/WarningBox";
-import HeatEntryModal from "@/components/HeatEntryModal";
+import WarningBox from "booksys/components/WarningBox.vue";
+import HeatEntryModal from "booksys/components/HeatEntryModal.vue";
 import SectionedCardModule from "./bricks/SectionedCardModule.vue";
 import TableModule from "./bricks/TableModule.vue";
 

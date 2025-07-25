@@ -70,16 +70,16 @@
 import { ref, computed, onMounted, defineAsyncComponent } from "vue";
 import { useStore, mapGetters, mapActions } from "vuex";
 import { useRouter } from "vue-router";
-import WarningBox from "@/components/WarningBox";
-import User from "@/api/user";
-import ModalContainer from "@/components/bricks/ModalContainer.vue";
-import ModalHeader from "@/components/bricks/ModalHeader.vue";
-import ModalBody from "@/components/bricks/ModalBody.vue";
-import ModalFooter from "@/components/bricks/ModalFooter.vue";
+import WarningBox from "booksys/components/WarningBox.vue";
+import User from "booksys/api/user";
+import ModalContainer from "booksys/components/bricks/ModalContainer.vue";
+import ModalHeader from "booksys/components/bricks/ModalHeader.vue";
+import ModalBody from "booksys/components/bricks/ModalBody.vue";
+import ModalFooter from "booksys/components/bricks/ModalFooter.vue";
 import { VueRecaptcha } from 'vue-recaptcha';
 
 const UserSignUp = defineAsyncComponent(() =>
-  import(/* webpackChunkName: "user-sign-up" */ "@/components/forms/UserSignUp")
+  import(/* webpackChunkName: "user-sign-up" */ "booksys/components/forms/UserSignUp.vue")
 );
 
 const store = useStore();

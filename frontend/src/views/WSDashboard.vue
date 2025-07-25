@@ -43,8 +43,8 @@
 import { defineAsyncComponent, computed, onMounted } from "vue";
 import { useStore, mapGetters } from "vuex";
 import { useRouter } from "vue-router";
-import ShowForMobile from "@/components/bricks/ShowForMobile.vue";
-import ShowForDesktop from "@/components/bricks/ShowForDesktop.vue";
+import ShowForMobile from "booksys/components/bricks/ShowForMobile.vue";
+import ShowForDesktop from "booksys/components/bricks/ShowForDesktop.vue";
 import * as dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
@@ -54,32 +54,32 @@ dayjs.extend(dayjsTimezone);
 
 const DashboardAdmin = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-admin" */ "@/components/DashboardAdmin.vue"
+    /* webpackChunkName: "dashboard-admin" */ "booksys/components/DashboardAdmin.vue"
   )
 );
 const DashboardMember = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-member" */ "@/components/DashboardMember.vue"
+    /* webpackChunkName: "dashboard-member" */ "booksys/components/DashboardMember.vue"
   )
 );
 const DashboardGuest = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-guest" */ "@/components/DashboardGuest.vue"
+    /* webpackChunkName: "dashboard-guest" */ "booksys/components/DashboardGuest.vue"
   )
 );
 const DashboardAdminMobile = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-admin-mobile" */ "@/components/DashboardAdminMobile.vue"
+    /* webpackChunkName: "dashboard-admin-mobile" */ "booksys/components/DashboardAdminMobile.vue"
   )
 );
 const DashboardMemberMobile = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-member-mobile" */ "@/components/DashboardMemberMobile.vue"
+    /* webpackChunkName: "dashboard-member-mobile" */ "booksys/components/DashboardMemberMobile.vue"
   )
 );
 const DashboardGuestMobile = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-guest-mobile" */ "@/components/DashboardGuestMobile.vue"
+    /* webpackChunkName: "dashboard-guest-mobile" */ "booksys/components/DashboardGuestMobile.vue"
   )
 );
 

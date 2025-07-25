@@ -37,7 +37,7 @@ import {
   formatEngineHour,
   isValidEngineHour,
   convertEngineHour,
-} from "@/libs/formatters";
+} from "booksys/libs/formatters";
 
 const props = defineProps([
   "id",

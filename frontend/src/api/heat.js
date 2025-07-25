@@ -1,4 +1,4 @@
-import Request from "@/api/common/request";
+import Request from "booksys/api/common/request";
 
 export default class Heat {
   /**

@@ -36,10 +36,10 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import WarningBox from "@/components/WarningBox";
-import InputEngineHours from "@/components/forms/inputs/InputEngineHours";
-import InputTextMultiline from "@/components/forms/inputs/InputTextMultiline";
-import FormButton from "@/components/forms/FormButton.vue";
+import WarningBox from "booksys/components/WarningBox.vue";
+import InputEngineHours from "booksys/components/forms/inputs/InputEngineHours.vue";
+import InputTextMultiline from "booksys/components/forms/inputs/InputTextMultiline.vue";
+import FormButton from "booksys/components/forms/FormButton.vue";
 
 export default {
   name: "MaintenanceLogForm",

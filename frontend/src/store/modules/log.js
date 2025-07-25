@@ -1,4 +1,4 @@
-import Log from "@/api/log";
+import Log from "booksys/api/log";
 
 const state = () => ({
   logLines: [],

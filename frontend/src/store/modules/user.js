@@ -1,4 +1,4 @@
-import User from "@/api/user";
+import User from "booksys/api/user";
 import values from "lodash/values";
 
 const state = () => ({

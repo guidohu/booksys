@@ -13,15 +13,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, defineAsyncComponent } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-import { getBackendStatus } from "@/api/backend";
-
-// Lazy imports
-const AlertMessage = defineAsyncComponent(() =>
-  import("@/components/AlertMessage")
-);
+import { getBackendStatus } from "./api/backend";
+import AlertMessage from "booksys/components/AlertMessage.vue";
 
 const store = useStore();
 const router = useRouter();

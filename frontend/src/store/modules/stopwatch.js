@@ -1,6 +1,6 @@
 import { sprintf } from "sprintf-js";
 import keys from "lodash/keys";
-import Heat from "@/api/heat";
+import Heat from "booksys/api/heat";
 import * as dayjs from "dayjs";
 
 const state = () => ({

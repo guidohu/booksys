@@ -1,38 +1,38 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { loadStoreModules, store } from "@/store";
+import { loadStoreModules, store } from "store";
 
 // Lazy import of all the Views used by the router
-const Login = () => import(/* webpackChunkName: "login" */ "@/views/WSLogin");
+const Login = () => import("booksys/views/WSLogin.vue");
 const Logout = () =>
-  import(/* webpackChunkName: "logout" */ "@/views/WSLogout");
+  import("booksys/views/WSLogout.vue");
 const SignUp = () =>
-  import(/* webpackChunkName: "signup" */ "@/views/WSSignUp");
+  import("booksys/views/WSSignUp.vue");
 const Dashboard = () =>
-  import(/* webpackChunkName: "dashboard" */ "@/views/WSDashboard");
+  import("booksys/views/WSDashboard.vue");
 const Account = () =>
-  import(/* webpackChunkName: "account" */ "@/views/WSAccount");
-const Info = () => import(/* webpackChunkName: "info" */ "@/views/WSInfo");
+  import("booksys/views/WSAccount.vue");
+const Info = () => import("booksys/views/WSInfo.vue");
 const Schedule = () =>
-  import(/* webpackChunkName: "schedule" */ "@/views/WSSchedule");
-const Today = () => import(/* webpackChunkName: "today" */ "@/views/WSToday");
+  import("booksys/views/WSSchedule.vue");
+const Today = () => import("booksys/views/WSToday.vue");
 const Calendar = () =>
-  import(/* webpackChunkName: "calendar" */ "@/views/WSCalendar");
-const Boat = () => import(/* webpackChunkName: "boat" */ "@/views/WSBoat");
-const Ride = () => import(/* webpackChunkName: "ride" */ "@/views/WSRide");
-const Watch = () => import(/* webpackChunkName: "watch" */ "@/views/WSWatch");
-const Admin = () => import(/* webpackChunkName: "admin" */ "@/views/WSAdmin");
+  import("booksys/views/WSCalendar.vue");
+const Boat = () => import("booksys/views/WSBoat.vue");
+const Ride = () => import("booksys/views/WSRide.vue");
+const Watch = () => import("booksys/views/WSWatch.vue");
+const Admin = () => import("booksys/views/WSAdmin.vue");
 const Users = () =>
-  import(/* webpackChunkName: "users" */ "@/views/admin/WSUsers");
+  import("booksys/views/admin/WSUsers.vue");
 const Accounting = () =>
-  import(/* webpackChunkName: "accounting" */ "@/views/admin/WSAccounting");
+  import("booksys/views/admin/WSAccounting.vue");
 const Settings = () =>
-  import(/* webpackChunkName: "settings" */ "@/views/admin/WSSettings");
+  import("booksys/views/admin/WSSettings.vue");
 const Logs = () =>
-  import(/* webpackChunkName: "logs" */ "@/views/admin/WSLogs");
+  import( "booksys/views/admin/WSLogs.vue");
 const PasswordReset = () =>
-  import(/* webpackChunkName: "password-reset" */ "@/views/WSPasswordReset");
+  import( "booksys/views/WSPasswordReset.vue");
 const Setup = () =>
-  import(/* webpackChunkName: "setup" */ "@/views/WSSetupPage");
+  import( "booksys/views/WSSetupPage.vue");
 
 const loginEnforced = (to, from, next) => {
   if (!store.state.loginStatus.isLoggedIn) {
@@ -243,7 +243,7 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(),
-  base: process.env.BASE_URL,
+  base: import.meta.env.BASE_URL,
   routes,
 });
 

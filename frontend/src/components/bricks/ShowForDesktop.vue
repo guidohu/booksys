@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { BooksysBrowser } from "@/libs/browser";
+import { BooksysBrowser } from "booksys/libs/browser";
 export default {
   name: "ShowForDesktop",
   props: ["minWidth"],

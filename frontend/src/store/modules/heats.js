@@ -1,4 +1,4 @@
-import Heat from "@/api/heat";
+import Heat from "booksys/api/heat";
 
 const state = () => ({
   sessionId: null,

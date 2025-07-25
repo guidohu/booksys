@@ -25,7 +25,7 @@
 
 <script>
 import * as dayjs from "dayjs";
-import SectionedCardModule from "@/components/bricks/SectionedCardModule.vue";
+import SectionedCardModule from "booksys/components/bricks/SectionedCardModule.vue";
 
 export default {
   name: "ConditionInfoCard",

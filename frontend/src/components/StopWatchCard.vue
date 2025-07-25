@@ -118,8 +118,8 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import WarningBox from "@/components/WarningBox";
-import HeatCommentModal from "@/components/HeatCommentModal";
+import WarningBox from "booksys/components/WarningBox.vue";
+import HeatCommentModal from "booksys/components/HeatCommentModal.vue";
 import CardModule from "./bricks/CardModule.vue";
 import InputSelect from "./forms/inputs/InputSelect.vue";
 

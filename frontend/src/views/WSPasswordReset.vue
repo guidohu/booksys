@@ -147,8 +147,8 @@
 import { ref, computed, onMounted } from "vue";
 import { useStore, mapGetters, mapActions } from "vuex";
 import { useRouter } from "vue-router";
-import User from "@/api/user";
-import WarningBox from "@/components/WarningBox";
+import User from "booksys/api/user";
+import WarningBox from "booksys/components/WarningBox.vue";
 import ModalContainer from "../components/bricks/ModalContainer.vue";
 import ModalHeader from "../components/bricks/ModalHeader.vue";
 import ModalBody from "../components/bricks/ModalBody.vue";

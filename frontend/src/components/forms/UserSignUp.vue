@@ -88,9 +88,9 @@
 </template>
 
 <script setup>
-import InputToggle from "@/components/forms/inputs/InputToggle.vue";
-import InputText from "@/components/forms/inputs/InputText.vue";
-import InputPassword from "@/components/forms/inputs/InputPassword.vue";
+import InputToggle from "booksys/components/forms/inputs/InputToggle.vue";
+import InputText from "booksys/components/forms/inputs/InputText.vue";
+import InputPassword from "booksys/components/forms/inputs/InputPassword.vue";
 import { ref, watch, onMounted } from "vue";
 
 const props = defineProps(["userData", "showDisclaimer"]);

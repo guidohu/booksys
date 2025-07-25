@@ -1,4 +1,4 @@
-import Request from "@/api/common/request.js";
+import Request from "booksys/api/common/request.js";
 
 export default class Accounting {
   /**

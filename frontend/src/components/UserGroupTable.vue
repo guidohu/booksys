@@ -72,10 +72,10 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import { sprintf } from "sprintf-js";
-import WarningBox from "@/components/WarningBox";
+import WarningBox from "booksys/components/WarningBox.vue";
 import TableModule from "./bricks/TableModule.vue";
-import { confirm } from "@/components/bricks/DialogModal";
-import UserGroupModal from "@/components/UserGroupModal";
+import { confirm } from "booksys/components/bricks/DialogModal.js";
+import UserGroupModal from "booksys/components/UserGroupModal.vue";
 
 export default {
   name: "UserGroupTable",

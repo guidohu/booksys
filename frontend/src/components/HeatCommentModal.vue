@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import WarningBox from "@/components/WarningBox";
+import WarningBox from "booksys/components/WarningBox.vue";
 import ModalContainer from "./bricks/ModalContainer.vue";
 import ModalHeader from "./bricks/ModalHeader.vue";
 import ModalBody from "./bricks/ModalBody.vue";
