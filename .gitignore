@@ -4,6 +4,7 @@ ISSUES
 linecounter.txt
 .env
 .DS_Store
+backend/api/v2/uploads
 backend/api/v2/server
 backend/api/v2/main
 !backend/api/v2/main.go
