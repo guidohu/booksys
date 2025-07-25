@@ -4,7 +4,7 @@
 
 <script>
 import BooksysPie from "../libs/pie";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 
 export default {
   name: "BooksysPie",

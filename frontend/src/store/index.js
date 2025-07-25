@@ -1,6 +1,6 @@
 import { createStore } from "vuex";
-import loginStatus from "store/modules/loginStatus";
-import screenSize from "store/modules/screenSize";
+import loginStatus from "booksys/store/modules/loginStatus";
+import screenSize from "booksys/store/modules/screenSize";
 
 export const store = createStore({
   modules: {
@@ -15,7 +15,7 @@ export const loadStoreModules = (moduleNames, callback) => {
   const loaded = [];
   moduleNames.forEach(function (moduleName) {
     if (!store.hasModule(moduleName)) {
-      const importPromise = import(/* @vite-ignore */ "@/store/modules/" + moduleName).then(
+      const importPromise = import("booksys/store/modules/" + moduleName).then(
         (module) => {
           // register the imported module
           if (!store.hasModule(moduleName)) {

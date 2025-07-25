@@ -45,7 +45,7 @@ import { useStore, mapGetters } from "vuex";
 import { useRouter } from "vue-router";
 import ShowForMobile from "booksys/components/bricks/ShowForMobile.vue";
 import ShowForDesktop from "booksys/components/bricks/ShowForDesktop.vue";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
 

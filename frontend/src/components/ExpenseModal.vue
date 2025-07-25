@@ -90,7 +90,7 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import WarningBox from "booksys/components/WarningBox.vue";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import orderBy from "lodash/orderBy";
 import ModalContainer from "./bricks/ModalContainer.vue";
 import ModalHeader from "./bricks/ModalHeader.vue";

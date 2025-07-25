@@ -1,0 +1,4 @@
+- Change config to be consistant and use "enabled" for all features.
+- Move to fixed decimal for currency (check other floats)
+- Change sessions status from 0 to 1 and 1 to 2 everywhere in the code
+- TODO get all the riders for each of my session (GetMySessions)

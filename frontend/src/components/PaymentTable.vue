@@ -65,7 +65,7 @@
 import { defineAsyncComponent } from "vue";
 import { mapGetters, mapActions } from "vuex";
 import reverse from "lodash/reverse";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import { formatCurrency } from "booksys/libs/formatters";
 import WarningBox from "booksys/components/WarningBox.vue";
 import TableModule from "./bricks/TableModule.vue";

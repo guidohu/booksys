@@ -87,7 +87,7 @@ import Session, {
   SESSION_TYPE_OPEN,
   SESSION_TYPE_PRIVATE,
 } from "booksys/dataTypes/session";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
 import ModalContainer from "./bricks/ModalContainer.vue";

@@ -12,7 +12,7 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import WarningBox from "booksys/components/WarningBox.vue";
 import { formatEngineHour } from "booksys/libs/formatters";
 import TableModule from "booksys/components/bricks/TableModule.vue";

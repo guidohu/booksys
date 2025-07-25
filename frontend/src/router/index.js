@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { loadStoreModules, store } from "store";
+import { loadStoreModules, store } from "booksys/store";
 
 // Lazy import of all the Views used by the router
 const Login = () => import("booksys/views/WSLogin.vue");

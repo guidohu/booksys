@@ -91,7 +91,7 @@ import ConditionInfoCard from "booksys/components/ConditionInfoCard.vue";
 import SessionDayCard from "booksys/components/SessionDayCard.vue";
 import SessionDetailsCard from "booksys/components/SessionDetailsCard.vue";
 import Session from "booksys/dataTypes/session";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import * as dayjsCustomParseFormat from "dayjs/plugin/customParseFormat";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";

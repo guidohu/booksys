@@ -41,7 +41,7 @@ import { useStore, mapGetters } from "vuex";
 import ConditionInfoCard from "booksys/components/ConditionInfoCard.vue";
 import SessionMonthCard from "booksys/components/SessionMonthCard.vue";
 import SessionsOverview from "booksys/components/SessionsOverview.vue";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import * as dayjsUTC from "dayjs/plugin/utc";
 import * as dayjsTimezone from "dayjs/plugin/timezone";
 import * as dayjsCustomParseFormat from "dayjs/plugin/customParseFormat";

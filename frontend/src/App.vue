@@ -16,7 +16,7 @@
 import { ref, computed, watch, onMounted } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-import { getBackendStatus } from "./api/backend";
+import { getBackendStatus } from "booksys/api/backend";
 import AlertMessage from "booksys/components/AlertMessage.vue";
 
 const store = useStore();

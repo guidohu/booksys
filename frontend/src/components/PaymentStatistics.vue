@@ -79,7 +79,7 @@
 <script>
 import { mapGetters, mapActions } from "vuex";
 import reverse from "lodash/reverse";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import WarningBox from "booksys/components/WarningBox.vue";
 import CardModule from "booksys/components/bricks/CardModule.vue";
 import InputSelect from "booksys/components/forms/inputs/InputSelect.vue";

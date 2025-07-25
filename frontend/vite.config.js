@@ -18,7 +18,7 @@ export default defineConfig({
     }),
     // Add the visualizer plugin
     visualizer({
-      open: true,
+      open: false,
       gzipSize: true,
       brotliSize: true,
       filename: 'bundle-analysis.html',
@@ -37,11 +37,6 @@ export default defineConfig({
   resolve: {
     alias: {
       // Map 'assets' to the absolute path of your assets directory
-      'api': path.resolve(__dirname, './src/api'),
-      'assets': path.resolve(__dirname, './src/assets'),
-      'libs': path.resolve(__dirname, './src/libs'),
-      'store': path.resolve(__dirname, './src/store'),
-      'views': path.resolve(__dirname, './src/views'),
       'booksys': path.resolve(__dirname, './src'),
       // If you also use an '@' alias for 'src', add it here too:
       // '@': path.resolve(__dirname, './src'),

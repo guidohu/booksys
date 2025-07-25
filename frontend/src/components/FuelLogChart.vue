@@ -12,7 +12,7 @@ import { ClassicBlue7 } from "chartjs-plugin-colorschemes/src/colorschemes/color
 import groupBy from "lodash/groupBy";
 import max from "lodash/max";
 import sum from "lodash/sum";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import * as dayjsDayOfYear from "dayjs/plugin/dayOfYear";
 
 dayjs.extend(dayjsDayOfYear);

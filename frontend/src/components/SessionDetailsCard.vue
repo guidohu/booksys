@@ -114,7 +114,7 @@
 
 <script>
 import { mapActions } from "vuex";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import { UserPointer } from "booksys/dataTypes/user";
 import RiderSelectionModal from "booksys/components/RiderSelectionModal.vue";
 import SectionedCardModule from "booksys/components/bricks/SectionedCardModule.vue";

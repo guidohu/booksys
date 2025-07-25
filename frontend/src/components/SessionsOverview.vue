@@ -92,7 +92,7 @@
 </template>
 
 <script>
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import SectionedCardModule from "./bricks/SectionedCardModule.vue";
 
 export default {

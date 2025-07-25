@@ -114,7 +114,7 @@ import {
   formatFuelConsumption,
   formatFuel,
 } from "booksys/libs/formatters";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import ModalContainer from "booksys/components/bricks/ModalContainer.vue";
 import ModalHeader from "booksys/components/bricks/ModalHeader.vue";
 import ModalBody from "booksys/components/bricks/ModalBody.vue";

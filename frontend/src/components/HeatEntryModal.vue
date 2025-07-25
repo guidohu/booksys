@@ -87,7 +87,7 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import { sprintf } from "sprintf-js";
 import WarningBox from "booksys/components/WarningBox.vue";
 import ModalContainer from "booksys/components/bricks/ModalContainer.vue";

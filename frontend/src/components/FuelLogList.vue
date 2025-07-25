@@ -29,7 +29,7 @@ import {
   formatFuel,
   formatFuelConsumption,
 } from "booksys/libs/formatters";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import TableModule from "booksys/components/bricks/TableModule.vue";
 
 const FuelEntryModal = defineAsyncComponent(() =>

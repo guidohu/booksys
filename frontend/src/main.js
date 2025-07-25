@@ -10,8 +10,8 @@ import "bootstrap/dist/js/bootstrap.esm";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 // Override bootstrap styling
-import "assets/bootstrap/css/bootstrap-theme-bc.css";
-import "assets/css/style.css";
+import "booksys/assets/bootstrap/css/bootstrap-theme-bc.css";
+import "booksys/assets/css/style.css";
 
 // Deactivate normal logging in production
 if (process.env.NODE_ENV === "production") {

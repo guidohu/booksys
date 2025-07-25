@@ -64,7 +64,7 @@
 
 <script>
 import BooksysPie from "./Pie.vue";
-import * as dayjs from "dayjs";
+import  dayjs from "dayjs";
 import { BooksysBrowser } from "booksys/libs/browser";
 import SectionedCardModule from "../components/bricks/SectionedCardModule.vue";
 

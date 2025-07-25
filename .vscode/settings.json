@@ -1,0 +1,18 @@
+{
+    "files.watcherExclude": {
+        "**/target": true
+    },
+    "LineCount.excludes": [
+        "**/.vscode/**",
+        "**/node_modules/**",
+        "**/frontend/dist/**",
+        "**/frontend/package-lock.json",
+        "**/Docker/dev_dummy/db/testdata_anonym.sql",
+        "**/Docker/booksys_dummy_db/testdata_anonym.sql",
+        "**/backend/etc/php.ini",
+        "**/frontend/src/assets/bootstrap/css/bootstrap-theme.css",
+        "**/frontend/src/assets/bootstrap/css/bootstrap-theme.min.css",
+        "**/frontend/src/assets/bootstrap/css/glyphicons-bc.svg"
+    ],
+    "LineCount.sort": "code"
+}

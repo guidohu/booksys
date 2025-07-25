@@ -1,3 +1,7 @@
+v4.0.0
+- port backend to Go
+- database management with gorm
+
 v3.4.0
 - display the host of a session
 
