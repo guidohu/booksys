@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { loadStoreModules, store } from "booksys/store";
+import { store } from "booksys/store";
 
 // Lazy import of all the Views used by the router
 const Login = () => import("booksys/views/WSLogin.vue");
@@ -64,41 +64,46 @@ const routes = [
   {
     path: "/login",
     name: "Login",
-    beforeEnter: (to, from, next) => {
-      loadStoreModules(["login", "configuration"], next);
+    beforeEnter: async (to, from, next) => {
+      await store.loadModules(["login", "configuration"], to, from);
+      next();
     },
     component: Login,
   },
   {
     path: "/logout",
     name: "Logout",
-    beforeEnter: (to, from, next) => {
-      loadStoreModules(["login"], next);
+    beforeEnter: async (to, from, next) => {
+      await store.loadModules(["login"], to, from);
+      next();
     },
     component: Logout,
   },
   {
     path: "/signup",
     name: "SignUp",
-    beforeEnter: (to, from, next) => {
-      loadStoreModules(["configuration"], next);
+    beforeEnter: async (to, from, next) => {
+      await store.loadModules(["configuration"], to, from);
+      next();
     },
     component: SignUp,
   },
   {
     path: "/password/reset",
     name: "PasswordReset",
-    beforeEnter: (to, from, next) => {
-      loadStoreModules(["configuration"], next);
+    beforeEnter: async (to, from, next) => {
+      await store.loadModules(["configuration"], to, from);
+      next();
     },
     component: PasswordReset,
   },
   {
     path: "/today",
     name: "Today",
-    beforeEnter: (to, from, next) => {
+    beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        loadStoreModules(["configuration", "sessions", "user"], next);
+        await store.loadModules(["configuration", "sessions", "user"], to, from);
+        next();
       }
     },
     component: Today,
@@ -106,9 +111,10 @@ const routes = [
   {
     path: "/dashboard",
     name: "Dashboard",
-    beforeEnter: (to, from, next) => {
+    beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        loadStoreModules(["sessions", "configuration", "login"], next);
+        await store.loadModules(["sessions", "configuration", "login"], to, from);
+        next();
       }
     },
     component: Dashboard,
@@ -116,9 +122,10 @@ const routes = [
   {
     path: "/account",
     name: "Account",
-    beforeEnter: (to, from, next) => {
+    beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        loadStoreModules(["user", "configuration", "login"], next);
+        await store.loadModules(["user", "configuration", "login"], to, from);
+        next();
       }
     },
     component: Account,
@@ -126,9 +133,10 @@ const routes = [
   {
     path: "/info",
     name: "Info",
-    beforeEnter: (to, from, next) => {
+    beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        loadStoreModules(["configuration"], next);
+        await store.loadModules(["configuration"], to, from);
+        next();
       }
     },
     component: Info,
@@ -136,9 +144,10 @@ const routes = [
   {
     path: "/schedule",
     name: "Schedule",
-    beforeEnter: (to, from, next) => {
+    beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        loadStoreModules(["configuration", "user"], next);
+        await store.loadModules(["configuration", "user"], to, from);
+        next();
       }
     },
     component: Schedule,
@@ -146,9 +155,10 @@ const routes = [
   {
     path: "/calendar",
     name: "Calendar",
-    beforeEnter: (to, from, next) => {
+    beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        loadStoreModules(["sessions", "configuration"], next);
+        await store.loadModules(["sessions", "configuration"], to, from);
+        next();
       }
     },
     component: Calendar,
@@ -156,9 +166,10 @@ const routes = [
   {
     path: "/boat/:tab?",
     name: "Boat",
-    beforeEnter: (to, from, next) => {
+    beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        loadStoreModules(["boat", "configuration", "login"], next);
+        await store.loadModules(["boat", "configuration", "login"], to, from);
+        next();
       }
     },
     component: Boat,
@@ -166,12 +177,10 @@ const routes = [
   {
     path: "/ride",
     name: "Ride",
-    beforeEnter: (to, from, next) => {
+    beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        loadStoreModules(
-          ["sessions", "configuration", "stopwatch", "user"],
-          next
-        );
+        await store.loadModules(["sessions", "configuration", "stopwatch", "user"], to, from);
+        next();
       }
     },
     component: Ride,
@@ -179,12 +188,10 @@ const routes = [
   {
     path: "/watch",
     name: "Watch",
-    beforeEnter: (to, from, next) => {
+    beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        loadStoreModules(
-          ["sessions", "configuration", "stopwatch", "heats"],
-          next
-        );
+        await store.loadModules(["sessions", "configuration", "stopwatch", "heats"], to, from);
+        next();
       }
     },
     component: Watch,
@@ -202,9 +209,10 @@ const routes = [
   {
     path: "/users",
     name: "Users",
-    beforeEnter: (to, from, next) => {
+    beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        loadStoreModules(["user", "configuration"], next);
+        await store.loadModules(["user", "configuration"], to, from);
+        next();
       }
     },
     component: Users,
@@ -212,9 +220,10 @@ const routes = [
   {
     path: "/accounting",
     name: "Accounting",
-    beforeEnter: (to, from, next) => {
+    beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        loadStoreModules(["configuration", "accounting", "user", "boat"], next);
+        await store.loadModules(["configuration", "accounting", "user", "boat"], to, from);
+        next();
       }
     },
     component: Accounting,
@@ -222,9 +231,10 @@ const routes = [
   {
     path: "/settings",
     name: "Settings",
-    beforeEnter: (to, from, next) => {
+    beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        loadStoreModules(["configuration"], next);
+        await store.loadModules(["configuration"], to, from);
+        next();
       }
     },
     component: Settings,
@@ -232,9 +242,10 @@ const routes = [
   {
     path: "/logs",
     name: "Logs",
-    beforeEnter: (to, from, next) => {
+    beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        loadStoreModules(["log"], next);
+        await store.loadModules(["log"], to, from);
+        next();
       }
     },
     component: Logs,
