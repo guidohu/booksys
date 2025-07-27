@@ -20,11 +20,7 @@
             v-if="getLocationMap != null && getLocationMap.length > 0"
             :src="getLocationMap"
             frameborder="0"
-            style="
-              {
-                border: 0;
-              }
-            "
+            style="border: 0;"
             :width="mapWidth"
             :height="mapHeight"
           />

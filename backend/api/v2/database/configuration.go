@@ -60,10 +60,7 @@ type EmailConfiguration struct {
 }
 
 func (e *EmailConfiguration) Empty() bool {
-	if reflect.DeepEqual(e, &EmailConfiguration{}) {
-		return true
-	}
-	return false
+	return reflect.DeepEqual(e, &EmailConfiguration{})
 }
 
 func (d *DBMysql) GetPropertyValue(key string) (Configuration, error) {

@@ -16,7 +16,7 @@ func (d *DBMysql) CreateUserGroup(us UserStatus, p Pricing) error {
 			return err
 		}
 		if len(groups) > 0 {
-			return fmt.Errorf("user group already exists with that ID or name.")
+			return fmt.Errorf("user group already exists with that ID or name")
 		}
 
 		// check that the user role exists
@@ -37,7 +37,7 @@ func (d *DBMysql) CreateUserGroup(us UserStatus, p Pricing) error {
 
 		// add the pricing for the user group
 		p.UserStatusID = us.ID
-		tx.Create(&p)
+		err = tx.Create(&p).Error
 		if err != nil {
 			return err
 		}
@@ -85,7 +85,7 @@ func (d *DBMysql) ChangeUserGroup(us UserStatus, p Pricing) error {
 		}
 
 		// change the pricing for the user group
-		tx.Save(&p)
+		err = tx.Save(&p).Error
 		if err != nil {
 			return err
 		}
