@@ -16,14 +16,13 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import MainTitle from "booksys/components/MainTitle.vue";
 
-export default {
-  name: "SubpageDesktop",
-  props: ["title"],
-  components: {
-    MainTitle,
+defineProps({
+  title: {
+    type: String,
+    required: true,
   },
-};
+});
 </script>

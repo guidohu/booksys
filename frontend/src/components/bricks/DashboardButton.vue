@@ -6,29 +6,38 @@
   </div>
 </template>
 
-<script>
-import { defineComponent } from "vue";
+<script setup>
+import { computed } from "vue";
 
-export default defineComponent({
-  name: "DashboardButton",
-  props: ["to", "colWidth", "offsetWidth"],
-  computed: {
-    colClass: function () {
-      if (this.colWidth == null) {
-        return "col-12 text-center";
-      }
-      if (this.colWidth != null && this.offsetWidth == null) {
-        return "col-" + this.colWidth + " text-center";
-      }
-      return (
-        "col-" +
-        this.colWidth +
-        " " +
-        "offset-sm-" +
-        this.offsetWidth +
-        " text-center"
-      );
-    },
+const props = defineProps({
+  to: {
+    type: String,
+    required: true,
   },
+  colWidth: {
+    type: String,
+    required: false,
+  },
+  offsetWidth: {
+    type: String,
+    required: false,
+  },
+});
+
+const colClass = computed(() => {
+  if (props.colWidth == null) {
+    return "col-12 text-center";
+  }
+  if (props.colWidth != null && props.offsetWidth == null) {
+    return "col-" + props.colWidth + " text-center";
+  }
+  return (
+    "col-" +
+    props.colWidth +
+    " " +
+    "offset-sm-" +
+    props.offsetWidth +
+    " text-center"
+  );
 });
 </script>

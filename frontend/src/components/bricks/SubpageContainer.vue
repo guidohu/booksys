@@ -34,22 +34,18 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import SubpageDesktop from "booksys/components/bricks/SubpageDesktop.vue";
 import NavbarMobile from "booksys/components/NavbarMobile.vue";
 import ShowForDesktop from "booksys/components/bricks/ShowForDesktop.vue";
 import ShowForMobile from "booksys/components/bricks/ShowForMobile.vue";
 
-export default {
-  name: "SubpageContainer",
-  props: ["title"],
-  components: {
-    ShowForDesktop,
-    ShowForMobile,
-    SubpageDesktop,
-    NavbarMobile,
+defineProps({
+  title: {
+    type: String,
+    required: true,
   },
-};
+});
 </script>
 
 <style scoped>

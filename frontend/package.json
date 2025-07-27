@@ -36,7 +36,8 @@
     "prettier": "^3.2.5",
     "rollup-plugin-visualizer": "^6.0.3",
     "vite": "^7.0.6",
-    "vite-plugin-html": "^3.2.2"
+    "vite-plugin-html": "^3.2.2",
+    "vite-plugin-pwa": "^1.0.2"
   },
   "eslintConfig": {
     "root": true,

@@ -15,20 +15,27 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "SectionedCardModule",
-  props: ["scrollable", "title"],
-  methods: {
-    getBodyClass: function () {
-      let style = "card-body margin padding";
-      if (this.scrollable) {
-        style += " scrollable";
-      }
-      return style;
-    },
+<script setup>
+import { computed } from "vue";
+
+const props = defineProps({
+  scrollable: {
+    type: Boolean,
+    required: false,
   },
-};
+  title: {
+    type: String,
+    required: false,
+  },
+});
+
+const getBodyClass = computed(() => {
+  let style = "card-body margin padding";
+  if (props.scrollable) {
+    style += " scrollable";
+  }
+  return style;
+});
 </script>
 
 <style scoped>

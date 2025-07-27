@@ -4,36 +4,37 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted, onUnmounted, onBeforeUpdate } from "vue";
 import { BooksysBrowser } from "booksys/libs/browser";
-export default {
-  name: "ShowForDesktop",
-  props: ["minWidth"],
-  data() {
-    return {
-      isDesktop: false,
-    };
+
+const props = defineProps({
+  minWidth: {
+    type: String,
+    required: false,
   },
-  methods: {
-    calculateDesktop: function () {
-      if (this.minWidth != null){
-        this.isDesktop = !BooksysBrowser.isMobileResponsive(this.minWidth);
-      }else{
-        this.isDesktop = !BooksysBrowser.isMobileResponsive();
-      }
-    },
-  },
-  mounted() {
-    window.addEventListener("resize", this.calculateDesktop);
-  },
-  unmounted() {
-    window.removeEventListener("resize", this.calculateDesktop);
-  },
-  beforeUpdate() {
-    this.calculateDesktop();
-  },
-  created() {
-    this.calculateDesktop();
-  },
+});
+
+const isDesktop = ref(false);
+
+const calculateDesktop = () => {
+  if (props.minWidth != null) {
+    isDesktop.value = !BooksysBrowser.isMobileResponsive(props.minWidth);
+  } else {
+    isDesktop.value = !BooksysBrowser.isMobileResponsive();
+  }
 };
+
+onMounted(() => {
+  window.addEventListener("resize", calculateDesktop);
+  calculateDesktop();
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", calculateDesktop);
+});
+
+onBeforeUpdate(() => {
+  calculateDesktop();
+});
 </script>

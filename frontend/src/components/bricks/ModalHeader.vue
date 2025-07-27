@@ -16,16 +16,22 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "ModalHeader",
-  props: ["closable", "title"],
-  emits: ["close"],
-  methods: {
-    closeHandler: function () {
-      console.log("closeHandler of modal-header called");
-      this.$emit("close");
-    },
+<script setup>
+const emit = defineEmits(["close"]);
+
+defineProps({
+  closable: {
+    type: Boolean,
+    required: false,
   },
+  title: {
+    type: String,
+    required: false,
+  },
+});
+
+const closeHandler = () => {
+  console.log("closeHandler of modal-header called");
+  emit("close");
 };
 </script>

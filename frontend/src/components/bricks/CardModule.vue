@@ -12,9 +12,15 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "CardModule",
-  props: ["title", "nobody"],
-};
+<script setup>
+defineProps({
+  title: {
+    type: String,
+    required: false,
+  },
+  nobody: {
+    type: Boolean,
+    required: false,
+  },
+});
 </script>

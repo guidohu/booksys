@@ -4,8 +4,5 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "ModalFooter",
-};
+<script setup>
 </script>

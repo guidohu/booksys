@@ -4,36 +4,37 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted, onUnmounted, onBeforeUpdate } from "vue";
 import { BooksysBrowser } from "booksys/libs/browser";
-export default {
-  name: "ShowFoMobile",
-  props: ["maxWidth"],
-  data() {
-    return {
-      isMobile: false,
-    };
+
+const props = defineProps({
+  maxWidth: {
+    type: String,
+    required: false,
   },
-  methods: {
-    calculateMobile: function () {
-      if (this.maxWidth != null){
-        this.isMobile = BooksysBrowser.isMobileResponsive(this.maxWidth);
-      }else{
-        this.isMobile = BooksysBrowser.isMobileResponsive();
-      }
-    },
-  },
-  mounted() {
-    window.addEventListener("resize", this.calculateMobile);
-  },
-  unmounted() {
-    window.removeEventListener("resize", this.calculateMobile);
-  },
-  beforeUpdate() {
-    this.calculateMobile();
-  },
-  created() {
-    this.calculateMobile();
-  },
+});
+
+const isMobile = ref(false);
+
+const calculateMobile = () => {
+  if (props.maxWidth != null) {
+    isMobile.value = BooksysBrowser.isMobileResponsive(props.maxWidth);
+  } else {
+    isMobile.value = BooksysBrowser.isMobileResponsive();
+  }
 };
+
+onMounted(() => {
+  window.addEventListener("resize", calculateMobile);
+  calculateMobile();
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", calculateMobile);
+});
+
+onBeforeUpdate(() => {
+  calculateMobile();
+});
 </script>

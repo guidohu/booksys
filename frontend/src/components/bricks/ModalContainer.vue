@@ -1,7 +1,7 @@
 <template>
   <div
     class="modal fade"
-    :ref="name"
+    ref="modalRef"
     :id="name"
     data-bs-target="static"
     aria-hidden="false"
@@ -15,29 +15,50 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { Modal } from "bootstrap";
+import { onMounted, onUnmounted, watch, ref, nextTick } from "vue";
 
-export default {
-  name: "ModalContainer",
-  props: ["visible", "name"],
-  mounted() {
-    this.modal = new Modal(this.$refs[this.name]);
-    if (this.visible) {
-      this.modal.show();
+const props = defineProps({
+  visible: {
+    type: Boolean,
+    required: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+});
+
+const modalRef = ref(null);
+let modal = null;
+
+onMounted(() => {
+  if(modalRef.value != null) {
+    modal = new Modal(modalRef.value);
+    if (props.visible) {
+      modal.show();
     }
-  },
-  unmounted() {
-    this.modal.hide();
-  },
-  watch: {
-    visible: function (newValue) {
-      if (newValue) {
-        this.modal.show();
-      } else {
-        this.modal.hide();
+  } else {
+    console.error('Modal element (modalRef) not found on mount!');
+  }
+});
+
+onUnmounted(() => {
+  modal.hide();
+  modal.dispose();
+});
+
+watch(
+  () => props.visible, 
+  (newValue) => {
+    if (newValue) {
+      if (modal != null) {
+        modal.show();
       }
-    },
-  },
-};
+    } else {
+      modal.hide();
+    }
+  }, { immediate: true }
+);
 </script>
