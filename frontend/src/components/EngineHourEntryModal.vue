@@ -77,85 +77,83 @@
   </modal-container>
 </template>
 
-<script>
-import { mapActions } from "vuex";
+<script setup>
+import { ref, watch, computed } from "vue";
+import { useStore } from "vuex";
 import WarningBox from "booksys/components/WarningBox.vue";
 import ModalContainer from "booksys/components/bricks/ModalContainer.vue";
 import ModalHeader from "booksys/components/bricks/ModalHeader.vue";
 import ModalBody from "booksys/components/bricks/ModalBody.vue";
 import ModalFooter from "booksys/components/bricks/ModalFooter.vue";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 import InputDateTimeLocal from "booksys/components/forms/inputs/InputDateTimeLocal.vue";
 import InputText from "booksys/components/forms/inputs/InputText.vue";
 import InputEngineHours from "booksys/components/forms/inputs/InputEngineHours.vue";
 import InputToggle from "booksys/components/forms/inputs/InputToggle.vue";
 
-export default {
-  name: "EngineHourEntryModal",
-  components: {
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    InputDateTimeLocal,
-    InputText,
-    InputEngineHours,
-    InputToggle,
-    WarningBox,
+const props = defineProps({
+  engineHourEntry: {
+    type: Object,
+    required: true,
   },
-  props: ["engineHourEntry", "visible", "displayFormat"],
-  data() {
-    return {
-      errors: [],
-      form: {
-        date: null,
-      },
+  visible: {
+    type: Boolean,
+    required: true,
+  },
+  displayFormat: {
+    type: String,
+    required: true,
+  },
+});
+
+const emit = defineEmits(["update:visible"]);
+const store = useStore();
+
+const errors = ref([]);
+const form = ref({ date: null });
+
+const toggleWidth = computed(() => 70);
+
+watch(
+  () => props.engineHourEntry,
+  (newValue) => {
+    console.debug("EngineHourEntryModal: new engineHourEntry", newValue);
+    setFormContent(newValue);
+  }
+);
+
+const setFormContent = (entry) => {
+  if (entry != null) {
+    form.value = {
+      id: entry.id,
+      date: dayjs.unix(entry.timestamp).format("YYYY-MM-DDTHH:mm"),
+      driver: entry.user_first_name,
+      beforeHours: entry.before_hours,
+      afterHours: entry.after_hours,
+      deltaHours: entry.delta_hours,
+      type: entry.type == 1 ? false : true,
     };
-  },
-  computed: {
-    toggleWidth: function () {
-      return 70;
-    },
-  },
-  watch: {
-    engineHourEntry: function (newValue) {
-      console.debug("EngineHourEntryModal: new engineHourEntry", newValue);
-      this.setFormContent(newValue);
-    },
-  },
-  methods: {
-    setFormContent: function (entry) {
-      if (entry != null) {
-        this.form = {
-          id: entry.id,
-          date: dayjs.unix(entry.timestamp).format("YYYY-MM-DDTHH:mm"),
-          driver: entry.user_first_name,
-          beforeHours: entry.before_hours,
-          afterHours: entry.after_hours,
-          deltaHours: entry.delta_hours,
-          type: entry.type == 1 ? false : true,
-        };
-      }
-    },
-    toggleType: function () {
-      this.form.type = !this.form.type;
-    },
-    close: function () {
-      this.$emit("update:visible", false);
-    },
-    save: function () {
-      const update = {
-        id: this.form.id,
-        type: this.form.type == true ? 2 : 1,
-      };
-      this.updateEngineHours(update)
-        .then(() => this.close())
-        .catch((errors) => (this.errors = errors));
-    },
-    ...mapActions("boat", ["updateEngineHours"]),
-  },
-  created() {
-    this.setFormContent(this.engineHourEntry);
-  },
+  }
 };
+
+const toggleType = () => {
+  form.value.type = !form.value.type;
+};
+
+const close = () => {
+  emit("update:visible", false);
+};
+
+const save = () => {
+  const update = {
+    id: form.value.id,
+    type: form.value.type == true ? 2 : 1,
+  };
+  store
+    .dispatch("boat/updateEngineHours", update)
+    .then(() => close())
+    .catch((error) => (errors.value = error));
+};
+
+setFormContent(props.engineHourEntry);
 </script>

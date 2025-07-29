@@ -91,8 +91,8 @@ import SessionDayCard from "booksys/components/SessionDayCard.vue";
 import SessionDetailsCard from "booksys/components/SessionDetailsCard.vue";
 import Session from "booksys/dataTypes/session";
 import dayjs from "dayjs";
-import * as dayjsUTC from "dayjs/plugin/utc";
-import * as dayjsTimezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import difference from "lodash/difference";
 import SubpageContainer from "../components/bricks/SubpageContainer.vue";
 import ShowForDesktop from "../components/bricks/ShowForDesktop.vue";
@@ -109,8 +109,8 @@ const SessionDeleteModal = defineAsyncComponent(() =>
   )
 );
 
-dayjs.extend(dayjsUTC);
-dayjs.extend(dayjsTimezone);
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const store = useStore();
 const router = useRouter();

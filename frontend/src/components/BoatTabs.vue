@@ -35,43 +35,33 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import EngineHourLogContainer from "booksys/components/EngineHourLogContainer.vue";
 import FuelLogContainer from "booksys/components/FuelLogContainer.vue";
 import MaintenanceLogContainer from "booksys/components/MaintenanceLogContainer.vue";
 import { Tab } from 'bootstrap';
+import { onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
-export default {
-  name: "BoatTabs",
-  data() {
-    return {
-      selectedTab: null,
-    }
-  },
-  components: {
-    EngineHourLogContainer,
-    FuelLogContainer,
-    MaintenanceLogContainer,
-  },
-  methods: {
-    selectTab: function(tabName) {
-      this.$router.push('/boat/'+tabName);
-    }
-  },
-  created() {
-    this.selectedTab = this.$route.params.tab;
-  },
-  mounted() {
-    if(this.selectedTab == "engine-hours" || this.selectedTab == "fuel" || this.selectedTab == "maintenance") {
-      // show specific tab
-      let tabTrigger = document.querySelector("[href='#"+this.selectedTab+"']");
-      console.log(tabTrigger);
-      let tab = new Tab(tabTrigger);
-      console.log(tab);
-      tab.show();
-    }
+const route = useRoute();
+const router = useRouter();
+
+const selectedTab = ref(null);
+
+const selectTab = (tabName) => {
+  router.push('/boat/'+tabName);
+}
+
+selectedTab.value = route.params.tab;
+
+onMounted(() => {
+  if(selectedTab.value == "engine-hours" || selectedTab.value == "fuel" || selectedTab.value == "maintenance") {
+    // show specific tab
+    let tabTrigger = document.querySelector("[href='#"+selectedTab.value+"']");
+    let tab = new Tab(tabTrigger);
+    tab.show();
   }
-};
+});
 </script>
 
 <style scoped>

@@ -1,7 +1,7 @@
-import * as dayjs from "dayjs";
-import * as dayjsUTC from "dayjs/plugin/utc";
-import * as dayjsTimezone from "dayjs/plugin/timezone";
-import * as dayjsAdvancedFormat from "dayjs/plugin/advancedFormat";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import advancedFormat from "dayjs/plugin/advancedFormat";
 import Session from "booksys/dataTypes/session";
 import Request from "booksys/api/common/request";
 
@@ -11,9 +11,9 @@ export default class Sessions {
    * @param {ISO date} month a day within the month
    */
   static getSessionsCalendar(month) {
-    dayjs.extend(dayjsUTC);
-    dayjs.extend(dayjsTimezone);
-    dayjs.extend(dayjsAdvancedFormat);
+    dayjs.extend(utc);
+    dayjs.extend(timezone);
+    dayjs.extend(advancedFormat);
 
     let dateIterator = dayjs(month).startOf("month");
 
@@ -105,9 +105,9 @@ export default class Sessions {
   }
 
   static getSessions(dateStart, dateEnd) {
-    dayjs.extend(dayjsUTC);
-    dayjs.extend(dayjsTimezone);
-    dayjs.extend(dayjsAdvancedFormat);
+    dayjs.extend(utc);
+    dayjs.extend(timezone);
+    dayjs.extend(advancedFormat);
 
     const query = {
       start: parseInt(dayjs(dateStart).format("X")),
@@ -234,7 +234,7 @@ export default class Sessions {
   }
 
   static editSession(sessionData) {
-    dayjs.extend(dayjsAdvancedFormat);
+    dayjs.extend(advancedFormat);
 
     // build request body
     const session = {

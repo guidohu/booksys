@@ -1,5 +1,5 @@
 import Sessions from "booksys/api/sessions";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 
 const state = () => ({
   sessions: null,

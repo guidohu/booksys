@@ -42,16 +42,16 @@ import ConditionInfoCard from "booksys/components/ConditionInfoCard.vue";
 import SessionMonthCard from "booksys/components/SessionMonthCard.vue";
 import SessionsOverview from "booksys/components/SessionsOverview.vue";
 import dayjs from "dayjs";
-import * as dayjsUTC from "dayjs/plugin/utc";
-import * as dayjsTimezone from "dayjs/plugin/timezone";
-import * as dayjsCustomParseFormat from "dayjs/plugin/customParseFormat";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import ShowForMobile from "../components/bricks/ShowForMobile.vue";
 import ShowForDesktop from "../components/bricks/ShowForDesktop.vue";
 import SubpageContainer from "../components/bricks/SubpageContainer.vue";
 
-dayjs.extend(dayjsUTC);
-dayjs.extend(dayjsTimezone);
-dayjs.extend(dayjsCustomParseFormat);
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(customParseFormat);
 
 const store = useStore();
 

@@ -59,29 +59,24 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import BooksysPie from "./Pie.vue";
 import NavbarMobile from "booksys/components/NavbarMobile.vue";
 import DashboardButton from "booksys/components/bricks/DashboardButton.vue";
+import { ref } from "vue";
 
-export default {
-  name: "DashboardAdminMobile",
-  components: {
-    BooksysPie,
-    NavbarMobile,
-    DashboardButton,
+const props = defineProps({
+  sessionData: {
+    type: Object,
+    required: true,
   },
-  props: ["sessionData"],
-  data() {
-    return {
-      properties: {
-        containerWidth: 80,
-        containerHeight: 85,
-        animate: false,
-      },
-    };
-  },
-};
+});
+
+const properties = ref({
+  containerWidth: 80,
+  containerHeight: 85,
+  animate: false,
+});
 </script>
 
 <style scoped>

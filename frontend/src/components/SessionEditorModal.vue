@@ -88,8 +88,8 @@ import Session, {
   SESSION_TYPE_PRIVATE,
 } from "booksys/dataTypes/session";
 import dayjs from "dayjs";
-import * as dayjsUTC from "dayjs/plugin/utc";
-import * as dayjsTimezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import ModalContainer from "./bricks/ModalContainer.vue";
 import ModalHeader from "./bricks/ModalHeader.vue";
 import ModalBody from "./bricks/ModalBody.vue";
@@ -100,8 +100,8 @@ import InputToggle from "./forms/inputs/InputToggle.vue";
 import InputTextMultiline from "./forms/inputs/InputTextMultiline.vue";
 import InputDateTimeLocal from "./forms/inputs/InputDateTimeLocal.vue";
 
-dayjs.extend(dayjsUTC);
-dayjs.extend(dayjsTimezone);
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export default {
   name: "SessionEditorModal",

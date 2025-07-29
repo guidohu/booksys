@@ -23,68 +23,52 @@
   </sectioned-card-module>
 </template>
 
-<script>
-import * as dayjs from "dayjs";
+<script setup>
+import dayjs from "dayjs";
 import SectionedCardModule from "booksys/components/bricks/SectionedCardModule.vue";
+import { ref, watch } from "vue";
 
-export default {
-  name: "ConditionInfoCard",
-  components: {
-    SectionedCardModule,
+const props = defineProps({
+  sunrise: {
+    type: Number,
+    required: true,
   },
-  data() {
-    return {
-      sunriseString: "n/a",
-      sunsetString: "n/a",
-    }
+  sunset: {
+    type: Number,
+    required: true,
   },
-  props: ["sunrise", "sunset"],
-  watch: {
-    sunrise: function(newVal, oldVal) {
-      console.debug("ConditionInfoCard: sunrise changed to", newVal)
-      this.setSunrise(newVal);
-    },
-    sunset: function(newVal, oldVal) {
-      console.debug("ConditionInfoCard: sunset changed to", newVal)
-      this.setSunset(newVal);
-    },
-  },
-  methods: {
-    setSunrise: function(time) {
-      if (time === null) {
-        this.sunriseString = "n/a";
-        return;
-      }
-      this.sunriseString = dayjs.unix(time).format("HH:mm");
-      console.debug("ConditionInfoCard: new sunriseString", this.sunriseString);
-    },
-    setSunset: function(time) {
-      if (time === null) {
-        this.sunsetString = "n/a";
-        return;
-      }
-      this.sunsetString = dayjs.unix(time).format("HH:mm");
-      console.debug("ConditionInfoCard: new sunsetString", this.sunsetString);
-    }
-  },
-  created() {
-    console.debug("ConditionInfoCard: sunrise", this.sunrise, "sunset", this.sunset);
-    this.setSunrise(this.sunrise);
-    this.setSunset(this.sunset);
+});
+
+const sunriseString = ref("n/a");
+const sunsetString = ref("n/a");
+
+const setSunrise = (time) => {
+  if (time === null) {
+    sunriseString.value = "n/a";
+    return;
   }
-  // computed: {
-  //   sunriseString: function () {
-  //     if (this.sunrise == null) {
-  //       return "n/a";
-  //     }
-  //     return dayjs(this.sunrise).format("HH:mm");
-  //   },
-  //   sunsetString: function () {
-  //     if (this.sunset == null) {
-  //       return "n/a";
-  //     }
-  //     return dayjs(this.sunset).format("HH:mm");
-  //   },
-  // },
+  sunriseString.value = dayjs.unix(time).format("HH:mm");
 };
+
+const setSunset = (time) => {
+  if (time === null) {
+    sunsetString.value = "n/a";
+    return;
+  }
+  sunsetString.value = dayjs.unix(time).format("HH:mm");
+};
+
+watch(() => props.sunrise, (newVal) => {
+  console.debug("ConditionInfoCard: sunrise changed to", newVal);
+  setSunrise(newVal);
+});
+
+watch(() => props.sunset, (newVal) => {
+  console.debug("ConditionInfoCard: sunset changed to", newVal);
+  setSunset(newVal);
+});
+
+console.debug("ConditionInfoCard: sunrise", props.sunrise, "sunset", props.sunset);
+setSunrise(props.sunrise);
+setSunset(props.sunset);
 </script>

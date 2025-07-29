@@ -46,46 +46,37 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import InputText from "./forms/inputs/InputText.vue";
 import InputPassword from "./forms/inputs/InputPassword.vue";
+import { ref, watch } from "vue";
 
-export default {
-  name: "DatabaseConfiguration",
-  components: {
-    InputText,
-    InputPassword,
+const props = defineProps({
+  dbconfig: {
+    type: Object,
+    required: true,
   },
-  emits: ["save", "config-change"],
-  props: ["dbconfig"],
-  data() {
-    return {
-      conf: {
-        host: "",
-        name: "",
-        user: "",
-        password: "",
-      },
-    };
-  },
-  watch: {
-    conf: {
-      handler() {
-        this.$emit("config-change", this.conf);
-      },
-      deep: true,
-    },
-  },
-  created() {
-    this.conf.host = this.dbconfig.host;
-    this.conf.name = this.dbconfig.name;
-    this.conf.user = this.dbconfig.user;
-    this.conf.password = this.dbconfig.password;
-  },
-  methods: {
-    save: function () {
-      this.$emit("save", this.conf);
-    },
-  },
+});
+
+const emit = defineEmits(["save", "config-change"]);
+
+const conf = ref({
+  host: "",
+  name: "",
+  user: "",
+  password: "",
+});
+
+watch(conf, (newVal) => {
+  emit("config-change", newVal);
+}, { deep: true });
+
+conf.value.host = props.dbconfig.host;
+conf.value.name = props.dbconfig.name;
+conf.value.user = props.dbconfig.user;
+conf.value.password = props.dbconfig.password;
+
+const save = () => {
+  emit("save", conf.value);
 };
 </script>

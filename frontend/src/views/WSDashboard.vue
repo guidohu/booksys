@@ -46,11 +46,11 @@ import { useRouter } from "vue-router";
 import ShowForMobile from "booksys/components/bricks/ShowForMobile.vue";
 import ShowForDesktop from "booksys/components/bricks/ShowForDesktop.vue";
 import dayjs from "dayjs";
-import * as dayjsUTC from "dayjs/plugin/utc";
-import * as dayjsTimezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 
-dayjs.extend(dayjsUTC);
-dayjs.extend(dayjsTimezone);
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const DashboardAdmin = defineAsyncComponent(() =>
   import(

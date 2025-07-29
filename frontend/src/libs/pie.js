@@ -1,9 +1,8 @@
 import dayjs from "dayjs";
-import * as dayjsUTC from "dayjs/plugin/utc";
-import * as dayjsTimezone from "dayjs/plugin/timezone";
-import * as dayjsAdvancedFormat from "dayjs/plugin/advancedFormat";
-
-const Raphael = require("raphael");
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+import advancedFormat from "dayjs/plugin/advancedFormat";
+import Raphael from "raphael";
 
 export default class BooksysPie {
   static addPiePlugin = () => {
@@ -186,12 +185,12 @@ export default class BooksysPie {
     BooksysPie.addPiePlugin();
 
     // get timezone
-    dayjs.extend(dayjsUTC);
-    dayjs.extend(dayjsTimezone);
-    dayjs.extend(dayjsAdvancedFormat);
-    let timezone = "UTC";
+    dayjs.extend(utc);
+    dayjs.extend(timezone);
+    dayjs.extend(advancedFormat);
+    let timezoneStr = "UTC";
     if (properties.timezone != null) {
-      timezone = properties.timezone;
+      timezoneStr = properties.timezone;
     }
 
     // define colors (hardcode for now)
@@ -316,9 +315,9 @@ export default class BooksysPie {
     if (pieSessions.length == 0) {
       values.push(dayjs(dayEnd).diff(dayjs(dayStart), "seconds"));
       labels.push(
-        dayjs(dayStart).tz(timezone).format("HH:mm") +
+        dayjs(dayStart).tz(timezoneStr).format("HH:mm") +
           " - " +
-          dayjs(dayEnd).tz(timezone).format("HH:mm")
+          dayjs(dayEnd).tz(timezoneStr).format("HH:mm")
       );
       colors.push(colorNoSlot);
 

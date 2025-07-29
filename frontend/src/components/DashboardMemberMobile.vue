@@ -28,17 +28,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import NavbarMobile from "booksys/components/NavbarMobile.vue";
 import DashboardButton from "booksys/components/bricks/DashboardButton.vue";
-
-export default {
-  name: "DashboardMemberMobile",
-  components: {
-    NavbarMobile,
-    DashboardButton,
-  },
-};
 </script>
 
 <style scoped>

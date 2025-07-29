@@ -6,9 +6,11 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "AlertMessage",
-  props: ["alertMessage"],
-};
+<script setup>
+const props = defineProps({
+  alertMessage: {
+    type: String,
+    required: true,
+  },
+});
 </script>

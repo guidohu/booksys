@@ -1,7 +1,7 @@
 import { sprintf } from "sprintf-js";
 import keys from "lodash/keys";
 import Heat from "booksys/api/heat";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 
 const state = () => ({
   sessionId: null,

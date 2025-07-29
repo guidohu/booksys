@@ -19,13 +19,13 @@
 
 <script>
 import { mapActions, mapGetters } from "vuex";
-import * as dayjs from "dayjs";
-import * as dayjsUTC from "dayjs/plugin/utc";
-import * as dayjsTimezone from "dayjs/plugin/timezone";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import TableModule from "./bricks/TableModule.vue";
 
-dayjs.extend(dayjsUTC);
-dayjs.extend(dayjsTimezone);
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export default {
   name: "UserSessionsTable",

@@ -17,13 +17,6 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import DashboardButton from "./bricks/DashboardButton.vue";
-
-export default {
-  name: "DashboardGuest",
-  components: {
-    DashboardButton,
-  },
-};
 </script>

@@ -13,9 +13,9 @@ import groupBy from "lodash/groupBy";
 import max from "lodash/max";
 import sum from "lodash/sum";
 import dayjs from "dayjs";
-import * as dayjsDayOfYear from "dayjs/plugin/dayOfYear";
+import dayOfYear from "dayjs/plugin/dayOfYear";
 
-dayjs.extend(dayjsDayOfYear);
+dayjs.extend(dayOfYear);
 
 export default {
   name: "FuelLogChart",
