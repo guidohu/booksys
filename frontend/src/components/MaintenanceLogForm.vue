@@ -34,64 +34,50 @@
   </div>
 </template>
 
-<script>
-import { mapActions, mapGetters } from "vuex";
+<script setup>
+import { ref, computed } from "vue";
+import { useStore } from "vuex";
 import WarningBox from "booksys/components/WarningBox.vue";
 import InputEngineHours from "booksys/components/forms/inputs/InputEngineHours.vue";
 import InputTextMultiline from "booksys/components/forms/inputs/InputTextMultiline.vue";
 import FormButton from "booksys/components/forms/FormButton.vue";
 
-export default {
-  name: "MaintenanceLogForm",
-  components: {
-    WarningBox,
-    InputEngineHours,
-    InputTextMultiline,
-    FormButton,
-  },
-  data() {
-    return {
-      errors: [],
-      form: {
-        engineHours: null,
-        description: null,
-      },
-    };
-  },
-  computed: {
-    ...mapGetters("login", ["userInfo"]),
-    ...mapGetters("configuration", ["getEngineHourFormat"]),
-  },
-  methods: {
-    add: function () {
-      if (isNaN(this.form.engineHours) || this.form.engineHours == null){
-        this.errors = [ "Please add a valid number for the engine hours." ];
-        return;
-      }
+const store = useStore();
 
-      const entry = {
-        user_id: this.userInfo.id,
-        engine_hours: this.form.engineHours,
-        description: this.form.description,
-      };
-      this.addMaintenanceEntry(entry)
-        .then(() => {
-          this.resetForm();
-        })
-        .catch((errors) => (this.errors = errors));
-    },
-    resetForm: function () {
-      this.form = {
-        engineHours: null,
-        description: null,
-      };
-      this.errors = [];
-    },
-    ...mapActions("boat", ["addMaintenanceEntry"]),
-    ...mapActions("configuration", ["queryConfiguration"]),
-  },
-  created() {
-    this.queryConfiguration();
-  },
-};
+const errors = ref([]);
+const form = ref({
+  engineHours: null,
+  description: null,
+});
+
+const userInfo = computed(() => store.getters["login/userInfo"]);
+const getEngineHourFormat = computed(() => store.getters["configuration/getEngineHourFormat"]);
+
+function add() {
+  if (isNaN(form.value.engineHours) || form.value.engineHours == null) {
+    errors.value = ["Please add a valid number for the engine hours."];
+    return;
+  }
+
+  const entry = {
+    user_id: userInfo.value.id,
+    engine_hours: form.value.engineHours,
+    description: form.value.description,
+  };
+  store.dispatch("boat/addMaintenanceEntry", entry)
+    .then(() => {
+      resetForm();
+    })
+    .catch((errs) => (errors.value = errs));
+}
+
+function resetForm() {
+  form.value = {
+    engineHours: null,
+    description: null,
+  };
+  errors.value = [];
+}
+
+store.dispatch("configuration/queryConfiguration");
 </script>

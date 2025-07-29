@@ -5,17 +5,9 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import EngineHourLogForm from "booksys/components/EngineHourLogForm.vue";
 import EngineHourLogList from "booksys/components/EngineHourLogList.vue";
-
-export default {
-  name: "EngineHourLogContainer",
-  components: {
-    EngineHourLogForm,
-    EngineHourLogList,
-  },
-};
 </script>
 
 <style scoped>

@@ -85,8 +85,9 @@
   </modal-container>
 </template>
 
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import dayjs from "dayjs";
 import { sprintf } from "sprintf-js";
 import WarningBox from "booksys/components/WarningBox.vue";
@@ -98,118 +99,98 @@ import InputText from "./forms/inputs/InputText.vue";
 import InputTextMultiline from "./forms/inputs/InputTextMultiline.vue";
 import InputDateTimeLocal from "./forms/inputs/InputDateTimeLocal.vue";
 
-export default {
-  name: "HeatEntryModal",
-  components: {
-    WarningBox,
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    InputText,
-    InputTextMultiline,
-    InputDateTimeLocal,
-  },
-  props: ["heat", "visible"],
-  data() {
-    return {
-      errors: [],
-      form: {
-        date: null,
-      },
-    };
-  },
-  computed: {
-    ...mapGetters("configuration", ["getCurrency"]),
-  },
-  watch: {
-    heat: function (newHeat) {
-      this.setFormDefaults(newHeat);
-    },
-  },
-  methods: {
-    setFormDefaults: function (heatData) {
-      this.form = {
-        id: heatData.heat_id,
-        date: dayjs(heatData.timestamp * 1000).format("YYYY-MM-DDTHH:mm"),
-        userId: heatData.user_id,
-        rider: heatData.first_name + " " + heatData.last_name,
-        fare: sprintf("%.2f", heatData.price_per_min),
-        duration: this.formatDuration(heatData.duration_s),
-        cost: heatData.cost,
-        comment: heatData.comment,
-      };
-    },
-    formatDuration: function (durationS) {
-      const seconds = durationS % 60;
-      const minutes = Math.floor((durationS - seconds) / 60);
-      return sprintf("%02d:%02d", minutes, seconds);
-    },
-    durationChangeHandler: function () {
-      console.log("duration changed to:", this.form.duration);
-      if (
-        this.form.duration == null ||
-        !this.form.duration.match(/^\d+:\d+$/)
-      ) {
-        this.form.cost = "...";
-        return;
-      } else {
-        const durationParts = this.form.duration.split(":");
-        const seconds = Number(durationParts[1]);
-        const minutes = Number(durationParts[0]);
-        const durationSeconds = seconds + 60 * minutes;
-        this.form.cost =
-          Math.round(((durationSeconds * this.form.fare) / 60) * 100) / 100;
-        return;
-      }
-    },
-    close: function () {
-      this.$emit("update:visible", false);
-    },
-    remove: function () {
-      this.removeHeat(this.form.id)
-        .then(() => this.close())
-        .catch((errors) => (this.errors = errors));
-    },
-    save: function () {
-      if (this.form.duration == null) {
-        this.errors = ["No duration provided"];
-        return;
-      }
-      const durations = this.form.duration.split(":");
-      if (durations.length != 2) {
-        this.errors = ["Duration does not have a valid format such as 23:15."];
-        return;
-      }
-      const seconds = Number(durations[1]);
-      const minutes = Number(durations[0]);
-      if (isNaN(seconds) || isNaN(minutes)) {
-        this.errors = ["The duration must use numbers such as 23:15."];
-        return;
-      }
+const props = defineProps(["heat", "visible"]);
+const emit = defineEmits(["update:visible"]);
 
-      const durationSeconds = seconds + 60 * minutes;
-      const heatUpdate = {
-        id: this.form.id,
-        userId: this.form.userId,
-        duration: durationSeconds,
-        comment: this.form.comment,
-      };
-      this.updateHeat(heatUpdate)
-        .then(() => {
-          this.errors = [];
-          this.close();
-        })
-        .catch((errors) => (this.errors = errors));
-    },
-    ...mapActions("heats", ["removeHeat", "updateHeat"]),
-  },
-  created() {
-    if (this.heat != null) {
-      this.setFormDefaults(this.heat);
-    }
-  },
-};
+const store = useStore();
+
+const errors = ref([]);
+const form = ref({ date: null });
+
+const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
+
+watch(() => props.heat, (newHeat) => {
+  setFormDefaults(newHeat);
+});
+
+function setFormDefaults(heatData) {
+  form.value = {
+    id: heatData.heat_id,
+    date: dayjs(heatData.timestamp * 1000).format("YYYY-MM-DDTHH:mm"),
+    userId: heatData.user_id,
+    rider: `${heatData.first_name} ${heatData.last_name}`,
+    fare: sprintf("%.2f", heatData.price_per_min),
+    duration: formatDuration(heatData.duration_s),
+    cost: heatData.cost,
+    comment: heatData.comment,
+  };
+}
+
+function formatDuration(durationS) {
+  const seconds = durationS % 60;
+  const minutes = Math.floor((durationS - seconds) / 60);
+  return sprintf("%02d:%02d", minutes, seconds);
+}
+
+function durationChangeHandler() {
+  console.log("duration changed to:", form.value.duration);
+  if (form.value.duration == null || !form.value.duration.match(/^\d+:\d+$/)) {
+    form.value.cost = "...";
+    return;
+  } else {
+    const durationParts = form.value.duration.split(":");
+    const seconds = Number(durationParts[1]);
+    const minutes = Number(durationParts[0]);
+    const durationSeconds = seconds + 60 * minutes;
+    form.value.cost = Math.round(((durationSeconds * form.value.fare) / 60) * 100) / 100;
+  }
+}
+
+function close() {
+  emit("update:visible", false);
+}
+
+function remove() {
+  store.dispatch("heats/removeHeat", form.value.id)
+    .then(() => close())
+    .catch((errs) => (errors.value = errs));
+}
+
+function save() {
+  if (form.value.duration == null) {
+    errors.value = ["No duration provided"];
+    return;
+  }
+  const durations = form.value.duration.split(":");
+  if (durations.length !== 2) {
+    errors.value = ["Duration does not have a valid format such as 23:15."];
+    return;
+  }
+  const seconds = Number(durations[1]);
+  const minutes = Number(durations[0]);
+  if (isNaN(seconds) || isNaN(minutes)) {
+    errors.value = ["The duration must use numbers such as 23:15."];
+    return;
+  }
+
+  const durationSeconds = seconds + 60 * minutes;
+  const heatUpdate = {
+    id: form.value.id,
+    userId: form.value.userId,
+    duration: durationSeconds,
+    comment: form.value.comment,
+  };
+  store.dispatch("heats/updateHeat", heatUpdate)
+    .then(() => {
+      errors.value = [];
+      close();
+    })
+    .catch((errs) => (errors.value = errs));
+}
+
+if (props.heat != null) {
+  setFormDefaults(props.heat);
+}
 </script>
 
 <style scoped>

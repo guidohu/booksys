@@ -37,7 +37,8 @@
   </modal-container>
 </template>
 
-<script>
+<script setup>
+import { ref, watch, onMounted } from "vue";
 import WarningBox from "booksys/components/WarningBox.vue";
 import ModalContainer from "./bricks/ModalContainer.vue";
 import ModalHeader from "./bricks/ModalHeader.vue";
@@ -45,44 +46,32 @@ import ModalBody from "./bricks/ModalBody.vue";
 import ModalFooter from "./bricks/ModalFooter.vue";
 import InputText from "./forms/inputs/InputText.vue";
 
-export default {
-  name: "HeatCommentModal",
-  components: {
-    WarningBox,
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    InputText,
-  },
-  props: ["defaultComment", "visible"],
-  data() {
-    return {
-      errors: [],
-      comment: null,
-    };
-  },
-  watch: {
-    defaultComment: function (newComment) {
-      this.comment = newComment;
-    },
-  },
-  mounted() {
-    this.comment = this.defaultComment;
-  },
-  methods: {
-    saveComment: function () {
-      this.$emit("commentChangeHandler", this.comment);
-      this.close();
-    },
-    removeComment: function () {
-      this.$emit("commentChangeHandler", null);
-      this.close();
-    },
-    close: function () {
-      this.comment = null;
-      this.$emit("update:visible", false);
-    },
-  },
-};
+const props = defineProps(["defaultComment", "visible"]);
+const emit = defineEmits(["update:visible", "commentChangeHandler"]);
+
+const errors = ref([]);
+const comment = ref(null);
+
+watch(() => props.defaultComment, (newComment) => {
+  comment.value = newComment;
+});
+
+onMounted(() => {
+  comment.value = props.defaultComment;
+});
+
+function saveComment() {
+  emit("commentChangeHandler", comment.value);
+  close();
+}
+
+function removeComment() {
+  emit("commentChangeHandler", null);
+  close();
+}
+
+function close() {
+  comment.value = null;
+  emit("update:visible", false);
+}
 </script>

@@ -17,8 +17,9 @@
   </table-module>
 </template>
 
-<script>
-import { mapActions, mapGetters } from "vuex";
+<script setup>
+import { ref, computed, onBeforeMount } from "vue";
+import { useStore } from "vuex";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
@@ -27,59 +28,52 @@ import TableModule from "./bricks/TableModule.vue";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export default {
-  name: "UserSessionsTable",
-  components: {
-    TableModule,
-  },
-  props: ["userSessions", "showCancel"],
-  emits: ["cancel"],
-  data: function () {
-    return {
-      fields: [
-        {
-          key: "start",
-          label: "Date",
-          formatter: (cell, key, row) => {
-            return this.formatTime(row);
-          },
-        },
-        {
-          key: "riders",
-          label: "Riders",
-        },
-      ],
-      items: this.userSessions,
-    };
-  },
-  computed: {
-    ...mapGetters("configuration", ["getConfiguration", "getTimezone"]),
-  },
-  methods: {
-    formatTime: function (item) {
-      return (
-        dayjs.unix(item.start_time).tz(this.getTimezone).format("DD.MM.YYYY HH:mm") +
-        " - " +
-        dayjs.unix(item.end_time).tz(this.getTimezone).format("HH:mm")
-      );
+const props = defineProps(["userSessions", "showCancel"]);
+const emit = defineEmits(["cancel"]);
+
+const store = useStore();
+
+const fields = ref([
+  {
+    key: "start",
+    label: "Date",
+    formatter: (cell, key, row) => {
+      return formatTime(row);
     },
-    cancelSession: function (sessionId) {
-      console.log("Cancel session with id", sessionId);
-      // forward to parent
-      this.$emit("cancel", sessionId);
-    },
-    ...mapActions("configuration", ["queryConfiguration"]),
   },
-  created() {
-    this.queryConfiguration();
+  {
+    key: "riders",
+    label: "Riders",
   },
-  beforeMount() {
-    if (this.$props.showCancel == true) {
-      this.fields.push({
-        key: "action",
-        label: "Action",
-      });
-    }
-  },
-};
+]);
+
+const items = ref(props.userSessions);
+
+const getTimezone = computed(() => store.getters["configuration/getTimezone"]);
+
+const queryConfiguration = () => store.dispatch("configuration/queryConfiguration");
+
+function formatTime(item) {
+  return (
+    dayjs.unix(item.start_time).tz(getTimezone.value).format("DD.MM.YYYY HH:mm") +
+    " - " +
+    dayjs.unix(item.end_time).tz(getTimezone.value).format("HH:mm")
+  );
+}
+
+function cancelSession(sessionId) {
+  console.log("Cancel session with id", sessionId);
+  emit("cancel", sessionId);
+}
+
+queryConfiguration();
+
+onBeforeMount(() => {
+  if (props.showCancel === true) {
+    fields.value.push({
+      key: "action",
+      label: "Action",
+    });
+  }
+});
 </script>

@@ -61,9 +61,9 @@
   </div>
 </template>
 
-<script>
-import { defineAsyncComponent } from "vue";
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { defineAsyncComponent, ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import reverse from "lodash/reverse";
 import dayjs from "dayjs";
 import { formatCurrency } from "booksys/libs/formatters";
@@ -80,142 +80,127 @@ const ExpenseModal = defineAsyncComponent(() =>
   import("booksys/components/ExpenseModal.vue")
 );
 
-export default {
-  name: "PaymentTable",
-  components: {
-    WarningBox,
-    TableModule,
-    InputSelect,
-    OverlaySpinner,
-    IncomeModal,
-    ExpenseModal,
+const store = useStore();
+
+const showExpenseModal = ref(false);
+const showIncomeModal = ref(false);
+const errors = ref([]);
+const isLoading = ref(false);
+const form = ref({
+  years: [],
+  selectedYear: "any",
+});
+
+const getTransactions = computed(() => store.getters["accounting/getTransactions"]);
+const getYears = computed(() => store.getters["accounting/getYears"]);
+const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
+
+const fields = computed(() => [
+  {
+    key: "timestamp",
+    label: "Date",
+    sortable: true,
   },
-  data() {
+  {
+    key: "type_name",
+    label: "Type",
+    sortable: true,
+  },
+  {
+    key: "name",
+    label: "Name",
+    sortable: true,
+    formatter: (value, key, item) => item.fn + " " + item.ln,
+  },
+  {
+    key: "amount",
+    label: "Amount",
+    sortable: true,
+    formatter: (value) => formatCurrency(value, getCurrency.value),
+    tdClass: "text-right",
+    thClass: "text-right",
+  },
+  {
+    key: "comment",
+    label: "Comment",
+    sortable: false,
+  },
+  {
+    key: "action",
+    label: "Action",
+    sortable: false,
+  },
+]);
+
+watch(getYears, (newValue) => {
+  const availableYears = reverse(newValue);
+  console.log(availableYears);
+  form.value.years = availableYears.map((v) => {
     return {
-      showExpenseModal: false,
-      showIncomeModal: false,
-      errors: [],
-      isLoading: false,
-      form: {
-        years: [],
-        selectedYear: "any",
-      },
-      items: [],
-      selectedItems: [],
-      fields: [
-        {
-          key: "timestamp",
-          label: "Date",
-          sortable: true,
-        },
-        {
-          key: "type_name",
-          label: "Type",
-          sortable: true,
-        },
-        {
-          key: "name",
-          label: "Name",
-          sortable: true,
-          formatter: (value, key, item) => item.fn + " " + item.ln,
-        },
-        {
-          key: "amount",
-          label: "Amount",
-          sortable: true,
-          formatter: (value) => formatCurrency(value, this.getCurrency),
-          tdClass: "text-right",
-          thClass: "text-right",
-        },
-        {
-          key: "comment",
-          label: "Comment",
-          sortable: false,
-        },
-        {
-          key: "action",
-          label: "Action",
-          sortable: false,
-        },
-      ],
+      value: v,
+      text: v,
     };
-  },
-  computed: {
-    ...mapGetters("accounting", ["getTransactions", "getYears"]),
-    ...mapGetters("configuration", ["getCurrency"]),
-  },
-  watch: {
-    getYears: function (newValue) {
-      const availableYears = reverse(newValue);
-      console.log(availableYears);
-      this.form.years = availableYears.map((v) => {
-        return {
-          value: v,
-          text: v,
-        };
-      });
-    },
-  },
-  methods: {
-    ...mapActions("accounting", [
-      "queryTransactions",
-      "queryYears",
-      "deleteTransaction",
-    ]),
-    ...mapActions("configuration", ["queryConfiguration"]),
-    showAddIncome: function () {
-      this.showIncomeModal = true;
-    },
-    showAddExpense: function () {
-      this.showExpenseModal = true;
-    },
-    yearSelectionChangeHandler: function () {
-      console.log("year selection has changed to:", this.form.selectedYear);
-      this.isLoading = true;
+  });
+});
 
-      this.queryTransactions(this.form.selectedYear)
-        .then(() => (this.errors = []))
-        .catch((errors) => (this.errors = errors))
-        .then(() => (this.isLoading = false));
-    },
-    deleteEntry: function (transaction) {
-      console.log("Delete transaction:", transaction);
-      confirm({
-        title: "Delete Transaction",
-        message: "Do you really want to delete this transaction?",
-      }).then((value) => {
-        // delete transaction
-        if (value == true) {
-          this.isLoading = true;
-          this.deleteTransaction(transaction)
-            .then(() => {
-              this.errors = [];
-            })
-            .catch((errors) => {
-              this.errors = errors;
-            })
-            .then(() => (this.isLoading = false));
-        }
-      });
-    },
-    dismissedHandler: function () {
-      this.errors = [];
-    },
-  },
-  created() {
-    this.isLoading = true;
-    this.queryConfiguration().catch((errors) => (this.errors = errors));
+const queryTransactions = (year) => store.dispatch("accounting/queryTransactions", year);
+const queryYears = () => store.dispatch("accounting/queryYears");
+const deleteTransaction = (transaction) => store.dispatch("accounting/deleteTransaction", transaction);
+const queryConfiguration = () => store.dispatch("configuration/queryConfiguration");
 
-    this.queryYears().catch((errors) => (this.errors = errors));
+function showAddIncome() {
+  showIncomeModal.value = true;
+}
 
-    const currentYear = dayjs().year();
-    this.form.selectedYear = currentYear;
+function showAddExpense() {
+  showExpenseModal.value = true;
+}
 
-    this.queryTransactions(currentYear)
-      .then(() => (this.isLoading = false))
-      .catch((errors) => (this.errors = errors));
-  },
-};
+function yearSelectionChangeHandler() {
+  console.log("year selection has changed to:", form.value.selectedYear);
+  isLoading.value = true;
+
+  queryTransactions(form.value.selectedYear)
+    .then(() => (errors.value = []))
+    .catch((errs) => (errors.value = errs))
+    .finally(() => (isLoading.value = false));
+}
+
+function deleteEntry(transaction) {
+  console.log("Delete transaction:", transaction);
+  confirm({
+    title: "Delete Transaction",
+    message: "Do you really want to delete this transaction?",
+  }).then((value) => {
+    if (value == true) {
+      isLoading.value = true;
+      deleteTransaction(transaction)
+        .then(() => {
+          errors.value = [];
+        })
+        .catch((errs) => {
+          errors.value = errs;
+        })
+        .finally(() => (isLoading.value = false));
+    }
+  });
+}
+
+function dismissedHandler() {
+  errors.value = [];
+}
+
+isLoading.value = true;
+queryConfiguration().catch((errs) => (errors.value = errs));
+
+queryYears().catch((errs) => (errors.value = errs));
+
+const currentYear = dayjs().year();
+form.value.selectedYear = currentYear;
+
+queryTransactions(currentYear)
+  .catch((errs) => (errors.value = errs))
+  .finally(() => (isLoading.value = false));
 </script>
 
 <style scoped>

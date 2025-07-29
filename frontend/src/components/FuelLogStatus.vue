@@ -60,106 +60,76 @@
   </div>
 </template>
 
-<script>
-import { mapActions, mapGetters } from "vuex";
+<script setup>
+import { ref, computed, onCreated, onBeforeUnmount } from "vue";
+import { useStore } from "vuex";
 import WarningBox from "booksys/components/WarningBox.vue";
 import { min } from "lodash";
 import { sprintf } from "sprintf-js";
 
-export default {
-  name: "FuelLogStatus",
-  components: {
-    WarningBox,
-  },
-  data() {
-    return {
-      errors: [],
-      fuelLevel: 0,
-      timer: null,
-    };
-  },
-  computed: {
-    ...mapGetters("login", ["userInfo"]),
-    ...mapGetters("configuration", [
-      "getCurrency",
-      "getEngineHourFormat",
-      "getMyNautiqueEnabled",
-      "getMyNautiqueBoatId",
-    ]),
-    ...mapGetters("boat", [
-      "getAvgFuelConsumption",
-      "getMyNautiqueFuelLevel",
-      "getMyNautiqueFuelCapacity",
-    ]),
-    fuelLevelStyle: function () {
-      return "width: " + this.getMyNautiqueFuelLevel + "%";
-    },
-    fuelConsumptionStyle: function () {
-      if (this.getAvgFuelConsumption == null) {
-        return "width: 0%";
-      }
-      return (
-        "width: " + min([(this.getAvgFuelConsumption / 35) * 100, 100]) + "%"
-      );
-    },
-    timeTillEmpty: function () {
-      if (this.getAvgFuelConsumption == null) {
-        return "N/A hours";
-      }
-      if (this.getMyNautiqueEnabled == true) {
-        const hours =
-          ((this.getMyNautiqueFuelLevel / 100) *
-            this.getMyNautiqueFuelCapacity) /
-          this.getAvgFuelConsumption;
-        const hoursFloor = parseInt(hours);
-        const minutes = parseInt((hours - hoursFloor) * 60);
-        return sprintf("up to %d h %02d min left", hoursFloor, minutes);
-      }
-      return "N/A hours";
-    },
-  },
-  methods: {
-    startAutoRefresh: function () {
-      this.timer = setInterval(
-        this.refresh,
-        5000
-      );
-      // make sure we stop auto refresh again at
-      // some point (15min)
-      setTimeout(this.stopAutoRefresh, 900000);
-    },
-    stopAutoRefresh: function () {
-      if (this.timer != null) {
-        console.log("myNautique auto refresh stopped");
-        clearInterval(this.timer);
-      }
-    },
-    refresh: function () {
-      if(this.getMyNautiqueEnabled && this.getMyNautiqueBoatId) {
-        this.queryMyNautiqueInfo(this.getMyNautiqueBoatId);
-      }
-    },
-    ...mapActions("boat", ["queryMyNautiqueInfo"]),
-    ...mapActions("configuration", ["queryConfiguration"]),
-  },
-  created() {
-    this.queryConfiguration()
-      .then(() => {
-        // query myNautique if enabled
-        if (this.getMyNautiqueEnabled) {
-          console.log("query myNautique with boat ID", this.getMyNautiqueBoatId);
-          this.queryMyNautiqueInfo(this.getMyNautiqueBoatId)
-            .then(() => {
-              console.log("enable myNautique auto refresh");
-              this.startAutoRefresh();
-            })
-            .catch((errors) => (this.errors = errors));
-        }
-      })
-      .catch((errors) => (this.errors = errors));
-  },
-  beforeUnmount() {
-    this.stopAutoRefresh();
+const store = useStore();
+
+const errors = ref([]);
+const timer = ref(null);
+
+const getMyNautiqueEnabled = computed(() => store.getters["configuration/getMyNautiqueEnabled"]);
+const getMyNautiqueBoatId = computed(() => store.getters["configuration/getMyNautiqueBoatId"]);
+const getAvgFuelConsumption = computed(() => store.getters["boat/getAvgFuelConsumption"]);
+const getMyNautiqueFuelLevel = computed(() => store.getters["boat/getMyNautiqueFuelLevel"]);
+const getMyNautiqueFuelCapacity = computed(() => store.getters["boat/getMyNautiqueFuelCapacity"]);
+
+const fuelLevelStyle = computed(() => `width: ${getMyNautiqueFuelLevel.value}%`);
+
+const fuelConsumptionStyle = computed(() => {
+  if (getAvgFuelConsumption.value == null) {
+    return "width: 0%";
   }
-};
+  return `width: ${min([(getAvgFuelConsumption.value / 35) * 100, 100])}%`;
+});
+
+const timeTillEmpty = computed(() => {
+  if (getAvgFuelConsumption.value == null || !getMyNautiqueEnabled.value) {
+    return "N/A hours";
+  }
+  const hours = ((getMyNautiqueFuelLevel.value / 100) * getMyNautiqueFuelCapacity.value) / getAvgFuelConsumption.value;
+  const hoursFloor = parseInt(hours);
+  const minutes = parseInt((hours - hoursFloor) * 60);
+  return sprintf("up to %d h %02d min left", hoursFloor, minutes);
+});
+
+function startAutoRefresh() {
+  timer.value = setInterval(refresh, 5000);
+  setTimeout(stopAutoRefresh, 900000);
+}
+
+function stopAutoRefresh() {
+  if (timer.value != null) {
+    console.log("myNautique auto refresh stopped");
+    clearInterval(timer.value);
+  }
+}
+
+function refresh() {
+  if (getMyNautiqueEnabled.value && getMyNautiqueBoatId.value) {
+    store.dispatch("boat/queryMyNautiqueInfo", getMyNautiqueBoatId.value);
+  }
+}
+
+store.dispatch("configuration/queryConfiguration")
+  .then(() => {
+    if (getMyNautiqueEnabled.value) {
+      console.log("query myNautique with boat ID", getMyNautiqueBoatId.value);
+      store.dispatch("boat/queryMyNautiqueInfo", getMyNautiqueBoatId.value)
+        .then(() => {
+          console.log("enable myNautique auto refresh");
+          startAutoRefresh();
+        })
+        .catch((errs) => (errors.value = errs));
+    }
+  })
+  .catch((errs) => (errors.value = errs));
+
+onBeforeUnmount(() => {
+  stopAutoRefresh();
+});
 </script>

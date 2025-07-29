@@ -11,36 +11,14 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from "vuex";
+<script setup>
+import { ref } from "vue";
 import FormButton from "booksys/components/forms/FormButton.vue";
 import FuelRefuelModal from "booksys/components/FuelRefuelModal.vue";
 
-export default {
-  name: "FuelLogForm",
-  components: {
-    FuelRefuelModal,
-    FormButton,
-  },
-  data() {
-    return {
-      errors: [],
-      form: {
-        engineHours: null,
-        cost: null,
-        liters: null,
-      },
-      visibleRefuelModal: false,
-    };
-  },
-  computed: {
-    ...mapGetters("login", ["userInfo"]),
-    ...mapGetters("configuration", ["getCurrency", "getEngineHourFormat"]),
-  },
-  methods: {
-    showRefuelModal: function () {
-      this.visibleRefuelModal = true;
-    },
-  },
-};
+const visibleRefuelModal = ref(false);
+
+function showRefuelModal() {
+  visibleRefuelModal.value = true;
+}
 </script>

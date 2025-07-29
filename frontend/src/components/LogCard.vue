@@ -7,52 +7,38 @@
   </card-module>
 </template>
 
-<script>
-import { mapActions, mapGetters } from "vuex";
+<script setup>
+import { ref, computed } from "vue";
+import { useStore } from "vuex";
 import CardModule from "booksys/components/bricks/CardModule.vue";
 import TableModule from "./bricks/TableModule.vue";
 import WarningBox from "booksys/components/WarningBox.vue";
 import OverlaySpinner from "booksys/components/styling/OverlaySpinner.vue";
 
-export default {
-  name: "LogCard",
-  components: {
-    CardModule,
-    WarningBox,
-    TableModule,
-    OverlaySpinner,
+const store = useStore();
+
+const showOverlay = ref(false);
+const errors = ref([]);
+const columns = ref([
+  {
+    key: "time",
+    label: "Time",
   },
-  data() {
-    return {
-      showOverlay: false,
-      errors: [],
-      columns: [
-        {
-          key: "time",
-          label: "Time",
-        },
-        {
-          key: "log",
-          label: "Message",
-        },
-      ],
-      rows: [],
-    };
+  {
+    key: "log",
+    label: "Message",
   },
-  computed: {
-    ...mapGetters("log", ["getLogLines"]),
-  },
-  methods: {
-    ...mapActions("log", ["queryLogLines"]),
-  },
-  created() {
-    this.showOverlay = true;
-    this.queryLogLines()
-      .then(() => (this.showOverlay = false))
-      .catch((errors) => {
-        this.showOverlay = false;
-        this.errors = errors;
-      });
-  },
-};
+]);
+
+const getLogLines = computed(() => store.getters["log/getLogLines"]);
+
+const queryLogLines = () => store.dispatch("log/queryLogLines");
+
+showOverlay.value = true;
+queryLogLines()
+  .then(() => (showOverlay.value = false))
+  .catch((errs) => {
+    showOverlay.value = false;
+    errors.value = errs;
+  });
 </script>

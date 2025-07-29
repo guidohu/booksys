@@ -17,143 +17,128 @@
   </div>
 </template>
 
-<script>
-import { defineAsyncComponent } from "vue";
-import { mapActions, mapGetters } from "vuex";
+<script setup>
+import { defineAsyncComponent, ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import dayjs from "dayjs";
 import WarningBox from "booksys/components/WarningBox.vue";
 import { formatEngineHour } from "booksys/libs/formatters";
 import TableModule from "booksys/components/bricks/TableModule.vue";
 
 const EngineHourEntryModal = defineAsyncComponent(() =>
-  import(
-    "booksys/components/EngineHourEntryModal.vue"
-  )
+  import("booksys/components/EngineHourEntryModal.vue")
 );
 
-export default {
-  name: "EngineHourLogList",
-  components: {
-    WarningBox,
-    TableModule,
-    EngineHourEntryModal,
-  },
-  data() {
-    return {
-      items: [],
-      columns: [],
-      errors: [],
-      selectedEngineHourLogEntry: null,
-      showEntryHourModal: false,
-    };
-  },
-  computed: {
-    ...mapGetters("boat", ["getEngineHourLog"]),
-    ...mapGetters("configuration", ["getEngineHourFormat"]),
-  },
-  watch: {
-    getEngineHourLog: function (newEntries) {
-      console.log("getEngineHourLog just changed to", newEntries);
-      this.setItems(newEntries);
-    },
-    getEngineHourFormat: function (newFormat, oldFormat) {
-      if (newFormat != oldFormat) {
-        this.setColumns();
-      }
-    },
-  },
-  methods: {
-    ...mapActions("boat", ["queryEngineHourLog"]),
-    ...mapActions("configuration", ["queryConfiguration"]),
-    setItems: function (logs) {
-      this.items = [];
-      logs.slice(0, 200).forEach((l) => {
-        this.items.push(l);
-      });
-    },
-    setColumns: function () {
-      this.columns = [
-        {
-          key: "timestamp",
-          label: "Date",
-          sortable: true,
-          formatter: (value) => {
-            return dayjs.unix(value).format("DD.MM.YYYY HH:mm");
-          },
-        },
-        {
-          key: "user_first_name",
-          label: "Driver",
-          sortable: true,
-          formatter: (value, key, item) => {
-            return item.user_first_name;
-          },
-        },
-        {
-          key: "before_hours",
-          label: "Before",
-          sortable: true,
-          class: "text-end",
-          formatter: (value) => {
-            return formatEngineHour(value, this.getEngineHourFormat);
-          },
-        },
-        {
-          key: "after_hours",
-          label: "After",
-          sortable: true,
-          class: "text-end",
-          formatter: (value, key, item) => {
-            if (parseFloat(item.after_hours) <= 0.001) {
-              return "-"
-            }
-            return formatEngineHour(value, this.getEngineHourFormat);
-          },
-        },
-        {
-          key: "delta_hours",
-          label: "Diff",
-          sortable: true,
-          class: "text-end",
-          formatter: (value, key, item) => {
-            if (parseFloat(item.after_hours) <= 0.001 && parseFloat(value) <= 0.001) {
-              return '-'
-            }
-            return formatEngineHour(value, this.getEngineHourFormat);
-          },
-        },
-      ];
-    },
-    rowClick: function (item) {
-      this.selectedEngineHourLogEntry = item;
-      this.showEntryHourModal = true;
-    },
-    rowClass: function (item) {
-      // Type: 1 default session
-      // Type: 2 course session
-      if (item.type == 1) {
-        return "clickable";
-      } else {
-        return "highlight clickable";
-      }
-    },
-  },
-  created() {
-    this.queryConfiguration();
+const store = useStore();
 
-    // generate header of table
-    this.setColumns();
+const items = ref([]);
+const columns = ref([]);
+const errors = ref([]);
+const selectedEngineHourLogEntry = ref(null);
+const showEntryHourModal = ref(false);
 
-    // query content
-    this.queryEngineHourLog()
-      .then(() => {
-        this.setItems(this.getEngineHourLog);
-      })
-      .catch((errors) => {
-        this.errors = errors;
-      });
-  },
-};
+const getEngineHourLog = computed(() => store.getters["boat/getEngineHourLog"]);
+const getEngineHourFormat = computed(() => store.getters["configuration/getEngineHourFormat"]);
+
+watch(getEngineHourLog, (newEntries) => {
+  console.log("getEngineHourLog just changed to", newEntries);
+  setItems(newEntries);
+});
+
+watch(getEngineHourFormat, (newFormat, oldFormat) => {
+  if (newFormat !== oldFormat) {
+    setColumns();
+  }
+});
+
+const queryEngineHourLog = () => store.dispatch("boat/queryEngineHourLog");
+const queryConfiguration = () => store.dispatch("configuration/queryConfiguration");
+
+function setItems(logs) {
+  items.value = [];
+  logs.slice(0, 200).forEach((l) => {
+    items.value.push(l);
+  });
+}
+
+function setColumns() {
+  columns.value = [
+    {
+      key: "timestamp",
+      label: "Date",
+      sortable: true,
+      formatter: (value) => {
+        return dayjs.unix(value).format("DD.MM.YYYY HH:mm");
+      },
+    },
+    {
+      key: "user_first_name",
+      label: "Driver",
+      sortable: true,
+      formatter: (value, key, item) => {
+        return item.user_first_name;
+      },
+    },
+    {
+      key: "before_hours",
+      label: "Before",
+      sortable: true,
+      class: "text-end",
+      formatter: (value) => {
+        return formatEngineHour(value, getEngineHourFormat.value);
+      },
+    },
+    {
+      key: "after_hours",
+      label: "After",
+      sortable: true,
+      class: "text-end",
+      formatter: (value, key, item) => {
+        if (parseFloat(item.after_hours) <= 0.001) {
+          return "-";
+        }
+        return formatEngineHour(value, getEngineHourFormat.value);
+      },
+    },
+    {
+      key: "delta_hours",
+      label: "Diff",
+      sortable: true,
+      class: "text-end",
+      formatter: (value, key, item) => {
+        if (parseFloat(item.after_hours) <= 0.001 && parseFloat(value) <= 0.001) {
+          return '-';
+        }
+        return formatEngineHour(value, getEngineHourFormat.value);
+      },
+    },
+  ];
+}
+
+function rowClick(item) {
+  selectedEngineHourLogEntry.value = item;
+  showEntryHourModal.value = true;
+}
+
+function rowClass(item) {
+  // Type: 1 default session
+  // Type: 2 course session
+  if (item.type == 1) {
+    return "clickable";
+  } else {
+    return "highlight clickable";
+  }
+}
+
+queryConfiguration();
+setColumns();
+queryEngineHourLog()
+  .then(() => {
+    setItems(getEngineHourLog.value);
+  })
+  .catch((errs) => {
+    errors.value = errs;
+  });
 </script>
 
 <style>

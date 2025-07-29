@@ -56,33 +56,32 @@
   </form>
 </template>
 
-<script>
-export default {
-  name: "LoginForm",
-  props: ["statusMessage", "initialUsername"],
-  data: function () {
-    return {
-      notifications: [],
-      form: {
-        username: null,
-        password: null,
-      },
-    };
-  },
-  mounted() {
-    this.focusUsername();
-    this.form.username = this.initialUsername;
-  },
-  methods: {
-    login: function (e) {
-      this.$emit("login", this.form.username, this.form.password);
-      e.preventDefault();
-    },
-    focusUsername() {
-      this.$refs.username.focus();
-    },
-  },
-};
+<script setup>
+import { ref, onMounted } from "vue";
+
+const props = defineProps(["statusMessage", "initialUsername"]);
+const emit = defineEmits(["login"]);
+
+const form = ref({
+  username: null,
+  password: null,
+});
+
+const username = ref(null);
+
+onMounted(() => {
+  focusUsername();
+  form.value.username = props.initialUsername;
+});
+
+function login(e) {
+  emit("login", form.value.username, form.value.password);
+  e.preventDefault();
+}
+
+function focusUsername() {
+  username.value.focus();
+}
 </script>
 
 <style scoped>

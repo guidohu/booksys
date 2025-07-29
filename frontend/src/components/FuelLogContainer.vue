@@ -23,8 +23,8 @@
   </div>
 </template>
 
-<script>
-import { defineAsyncComponent } from "vue";
+<script setup>
+import { defineAsyncComponent, ref, watch } from "vue";
 import FuelLogStatus from "booksys/components/FuelLogStatus.vue";
 import FuelLogForm from "booksys/components/FuelLogForm.vue";
 import FuelLogList from "booksys/components/FuelLogList.vue";
@@ -33,36 +33,21 @@ const FuelLogChart = defineAsyncComponent(() =>
   import("booksys/components/FuelLogChart.vue")
 );
 
-export default {
-  name: "FuelLogContainer",
-  components: {
-    FuelLogStatus,
-    FuelLogForm,
-    FuelLogChart,
-    FuelLogList,
-  },
-  data() {
-    return {
-      showChart: false,
-      visualizationLabel: "Show Visualization",
-    };
-  },
-  watch: {
-    showChart: function () {
-      console.log("showChart changed");
-      if (this.showChart == false) {
-        this.visualizationLabel = "Show Visualization";
-      } else {
-        this.visualizationLabel = "Hide Visualization";
-      }
-    },
-  },
-  methods: {
-    toggleChart: function () {
-      this.showChart = !this.showChart;
-    },
-  },
-};
+const showChart = ref(false);
+const visualizationLabel = ref("Show Visualization");
+
+watch(showChart, (newValue) => {
+  console.log("showChart changed");
+  if (newValue === false) {
+    visualizationLabel.value = "Show Visualization";
+  } else {
+    visualizationLabel.value = "Hide Visualization";
+  }
+});
+
+function toggleChart() {
+  showChart.value = !showChart.value;
+}
 </script>
 
 <style scoped>

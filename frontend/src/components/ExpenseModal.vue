@@ -87,8 +87,9 @@
   </modal-container>
 </template>
 
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import WarningBox from "booksys/components/WarningBox.vue";
 import dayjs from "dayjs";
 import orderBy from "lodash/orderBy";
@@ -103,244 +104,173 @@ import InputDateTimeLocal from "./forms/inputs/InputDateTimeLocal.vue";
 import InputFuel from "./forms/inputs/InputFuel.vue";
 import InputEngineHours from "./forms/inputs/InputEngineHours.vue";
 
-export default {
-  name: "ExpenseModal",
-  components: {
-    WarningBox,
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    InputSelect,
-    InputCurrency,
-    InputTextMultiline,
-    InputDateTimeLocal,
-    InputFuel,
-    InputEngineHours,
-  },
-  props: ["visible"],
-  data() {
-    return {
-      isLoading: false,
-      errors: [],
-      expenseTypes: [],
-      users: [],
-      userLabel: "User",
-      userDescription: "",
-      typeDescription: "",
-      form: {
-        type: null,
-        user: null,
-        date: null,
-      },
+const props = defineProps(["visible"]);
+const emit = defineEmits(["update:visible"]);
+
+const store = useStore();
+
+const isLoading = ref(false);
+const errors = ref([]);
+const expenseTypes = ref([]);
+const users = ref([]);
+const userLabel = ref("User");
+const userDescription = ref("");
+const typeDescription = ref("");
+const form = ref({
+  type: null,
+  user: null,
+  date: null,
+});
+
+const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
+const getEngineHourFormat = computed(() => store.getters["configuration/getEngineHourFormat"]);
+const getFuelPaymentType = computed(() => store.getters["configuration/getFuelPaymentType"]);
+const userList = computed(() => store.getters["user/userList"]);
+const getExpenseTypes = computed(() => store.getters["accounting/getExpenseTypes"]);
+
+watch(getExpenseTypes, (newValues) => {
+  buildTypeSelect(newValues);
+});
+
+watch(userList, (newValues) => {
+  buildUserSelect(newValues);
+});
+
+watch(() => form.value.type, (newValue, oldValue) => {
+  if (newValue !== oldValue) {
+    const typeActions = {
+      1: { userLabel: "Driver", userDescription: "Driver that fueled the boat", typeDescription: "Add a fuel entry." },
+      10: { userLabel: "Payer", userDescription: "Pays the bill", typeDescription: "Fuel bill" },
+      4: { userLabel: "Payee", userDescription: "Payee or internal reference.", typeDescription: "" },
+      2: { userLabel: "Payee", userDescription: "Payee or internal reference.", typeDescription: "Expenses related to maintenance" },
+      3: { userLabel: "Payee / Payer", userDescription: "Payee or internal reference.", typeDescription: "Expenses related to aquired parts." },
+      5: { userLabel: "Account", userDescription: "Refund to this account.", typeDescription: "Refund of payments." },
+      7: { userLabel: "Account", userDescription: "Refund to this account.", typeDescription: "Refund of payments." },
+      6: { userLabel: "Payee", userDescription: "Payee or internal reference", typeDescription: "everything that does not fit another category" },
+      8: { userLabel: "Driver", userDescription: "Driver that we pay a compensation.", typeDescription: "Compensation payments" },
+      9: { userLabel: "Payee", userDescription: "Owner that gets a refund.", typeDescription: "" },
     };
-  },
-  computed: {
-    ...mapGetters("configuration", [
-      "getCurrency",
-      "getEngineHourFormat",
-      "getFuelPaymentType",
-    ]),
-    ...mapGetters("user", ["userList"]),
-    ...mapGetters("accounting", ["getExpenseTypes"]),
-  },
-  watch: {
-    getExpenseTypes: function (newValues) {
-      this.buildTypeSelect(newValues);
-    },
-    userList: function (newValues) {
-      // console.log("TODO, add userList:", newValues);
-      this.buildUserSelect(newValues);
-    },
-    "form.type": function (newValue, oldValue) {
-      console.log(newValue, oldValue);
-      if (newValue != oldValue) {
-        // if the type is either
-        if ([1].includes(Number(newValue))) {
-          // 1: fuel
-          this.userLabel = "Driver";
-          this.userDescription = "Driver that fueled the boat";
-          this.typeDescription = "Add a fuel entry.";
-        } else if ([10].includes(Number(newValue))) {
-          // 10: fuel bill
-          this.userLabel = "Payer";
-          this.userDescription = "Pays the bill";
-          this.typeDescription = "Fuel bill";
-        } else if ([4].includes(Number(newValue))) {
-          // 4: invest
-          this.userLabel = "Payee";
-          this.userDescription = "Payee or internal reference.";
-          this.typeDescription = "";
-        } else if ([2].includes(Number(newValue))) {
-          // 2: maintenance
-          this.userLabel = "Payee";
-          this.userDescription = "Payee or internal reference.";
-          this.typeDescription = "Expenses related to maintenance";
-        } else if ([3].includes(Number(newValue))) {
-          // 3: material
-          this.userLabel = "Payee / Payer";
-          this.userDescription = "Payee or internal reference.";
-          this.typeDescription = "Expenses related to aquired parts.";
-        } else if ([7, 5].includes(Number(newValue))) {
-          // 7: membership fee
-          // 5: session
-          this.userLabel = "Account";
-          this.userDescription = "Refund to this account.";
-          this.typeDescription = "Refund of payments.";
-        } else if ([6].includes(Number(newValue))) {
-          // 6: other
-          this.userLabel = "Payee";
-          this.userDescription = "Payee or internal reference";
-          this.typeDescription =
-            "everything that does not fit another category";
-        } else if ([8].includes(Number(newValue))) {
-          // 8: salary
-          this.userLabel = "Driver";
-          this.userDescription = "Driver that we pay a compensation.";
-          this.typeDescription = "Compensation payments";
-        } else if ([9].includes(Number(newValue))) {
-          // 9: owners refund
-          this.userLabel = "Payee";
-          this.userDescription = "Owner that gets a refund.";
-          this.typeDescription = "";
-        } else {
-          // Default case
-          this.userLabel = "Payee";
-          this.userDescription = "";
-          this.typeDescription = "";
-        }
-      }
-    },
-  },
-  methods: {
-    ...mapActions("configuration", ["queryConfiguration"]),
-    ...mapActions("user", ["queryUserList"]),
-    ...mapActions("accounting", [
-      "queryTransactions",
-      "queryStatistics",
-      "queryExpenseTypes",
-      "addExpense",
-    ]),
-    ...mapActions("boat", ["addFuelEntry"]),
-    buildTypeSelect: function (types) {
-      this.expenseTypes = types.map((t) => {
-        return {
-          value: t.id,
-          text: t.name,
-        };
-      });
-      this.expenseTypes = orderBy(this.expenseTypes, ["text"], ["asc"]);
-      this.expenseTypes.unshift({ value: null, text: "Please select" });
-    },
-    buildUserSelect: function (users) {
-      this.users = users.map((u) => {
-        return {
-          value: u.id,
-          text: u.firstName + " " + u.lastName,
-          lastName: u.lastName,
-          firstName: u.firstName,
-        };
-      });
-      this.users = orderBy(this.users, ["text"], ["asc"]);
-      this.users.unshift({ value: null, text: "Please select" });
-    },
-    clearForm: function () {
-      this.form = {
-        amount: null,
-        engineHours: null,
-        fuelLiters: null,
-        type: null,
-        date: dayjs().format("YYYY-MM-DD"),
-        user: null,
-        description: null,
-      };
-      this.isLoading = false;
-    },
-    addDefault: function () {
-      this.isLoading = true;
-      const expense = {
-        amount: Number(this.form.amount),
-        typeId: Number(this.form.type),
-        date: this.form.date,
-        userId: Number(this.form.user),
-        comment: this.form.description,
-      };
+    const action = typeActions[Number(newValue)] || { userLabel: "Payee", userDescription: "", typeDescription: "" };
+    userLabel.value = action.userLabel;
+    userDescription.value = action.userDescription;
+    typeDescription.value = action.typeDescription;
+  }
+});
 
-      this.addExpense(expense)
-        .then(() => {
-          this.errors = [];
-          this.close();
+const queryConfiguration = () => store.dispatch("configuration/queryConfiguration");
+const queryUserList = () => store.dispatch("user/queryUserList");
+const queryTransactions = () => store.dispatch("accounting/queryTransactions");
+const queryStatistics = () => store.dispatch("accounting/queryStatistics");
+const queryExpenseTypes = () => store.dispatch("accounting/queryExpenseTypes");
+const addExpense = (expense) => store.dispatch("accounting/addExpense", expense);
+const addFuelEntry = (fuelEntry) => store.dispatch("boat/addFuelEntry", fuelEntry);
+
+function buildTypeSelect(types) {
+  let mappedTypes = types.map((t) => ({ value: t.id, text: t.name }));
+  mappedTypes = orderBy(mappedTypes, ["text"], ["asc"]);
+  mappedTypes.unshift({ value: null, text: "Please select" });
+  expenseTypes.value = mappedTypes;
+}
+
+function buildUserSelect(usersData) {
+  let mappedUsers = usersData.map((u) => ({
+    value: u.id,
+    text: `${u.firstName} ${u.lastName}`,
+    lastName: u.lastName,
+    firstName: u.firstName,
+  }));
+  mappedUsers = orderBy(mappedUsers, ["text"], ["asc"]);
+  mappedUsers.unshift({ value: null, text: "Please select" });
+  users.value = mappedUsers;
+}
+
+function clearForm() {
+  form.value = {
+    amount: null,
+    engineHours: null,
+    fuelLiters: null,
+    type: null,
+    date: dayjs().format("YYYY-MM-DD"),
+    user: null,
+    description: null,
+  };
+  isLoading.value = false;
+}
+
+function addDefault() {
+  isLoading.value = true;
+  const expense = {
+    amount: Number(form.value.amount),
+    typeId: Number(form.value.type),
+    date: form.value.date,
+    userId: Number(form.value.user),
+    comment: form.value.description,
+  };
+
+  addExpense(expense)
+    .then(() => {
+      errors.value = [];
+      close();
+    })
+    .catch((errs) => {
+      errors.value = errs;
+      isLoading.value = false;
+    });
+}
+
+function addFuel() {
+  isLoading.value = true;
+  const fuelEntry = {
+    user_id: Number(form.value.user),
+    engine_hours: Number(form.value.engineHours),
+    liters: Number(form.value.fuelLiters),
+    cost: Number(form.value.amount),
+    date: form.value.date,
+  };
+
+  addFuelEntry(fuelEntry)
+    .then(() => {
+      errors.value = [];
+      queryStatistics();
+      queryTransactions()
+        .catch((errs) => {
+          console.error("Updating transactions logged the following error(s):", errs);
         })
-        .catch((errors) => {
-          this.errors = errors;
-          this.isLoading = false;
-        });
-    },
-    addFuel: function () {
-      this.isLoading = true;
-      const fuelEntry = {
-        user_id: Number(this.form.user),
-        engine_hours: Number(this.form.engineHours),
-        liters: Number(this.form.fuelLiters),
-        cost: Number(this.form.amount),
-        date: this.form.date,
-      };
+        .finally(() => close());
+    })
+    .catch((errs) => {
+      errors.value = errs;
+      isLoading.value = false;
+    });
+}
 
-      this.addFuelEntry(fuelEntry)
-        .then(() => {
-          this.errors = [];
+function add() {
+  if (form.value.type == null) {
+    return;
+  }
+  if (Number(form.value.type) === 1) {
+    addFuel();
+  } else {
+    addDefault();
+  }
+}
 
-          // refresh the expenses in statistics and transaction views
-          // - this is a special case as we add a fuel entry from within accounting
-          // - this could also be handled by the boat module in vuex.
-          this.queryStatistics();
-          this.queryTransactions()
-            .catch((errors) => {
-              console.error(
-                "Updating transactions logged the following error(s):",
-                errors
-              );
-              this.close();
-            })
-            .then(() => this.close());
-        })
-        .catch((errors) => {
-          this.errors = errors;
-          this.isLoading = false;
-        });
-    },
-    add: function () {
-      if (this.form.type == null) {
-        return;
-      }
+function save() {
+  add();
+}
 
-      // fuel case
-      if (Number(this.form.type) == 1) {
-        this.addFuel();
-      } else {
-        this.addDefault();
-      }
-    },
-    save: function () {
-      this.add();
-    },
-    close: function () {
-      this.clearForm();
-      this.$emit("update:visible", false);
-    },
-  },
-  created() {
-    this.queryConfiguration();
+function close() {
+  clearForm();
+  emit("update:visible", false);
+}
 
-    this.queryUserList()
-      .then(() => this.buildUserSelect(this.userList))
-      .catch((errors) => this.errors.push(...errors));
+queryConfiguration();
+queryUserList()
+  .then(() => buildUserSelect(userList.value))
+  .catch((errs) => errors.value.push(...errs));
+queryExpenseTypes()
+  .then(() => buildTypeSelect(getExpenseTypes.value))
+  .catch((errs) => errors.value.push(...errs));
 
-    this.queryExpenseTypes()
-      .then(() => this.buildTypeSelect(this.getExpenseTypes))
-      .catch((errors) => this.errors.push(...errors));
-
-    this.form.date = dayjs().format("YYYY-MM-DD");
-  },
-};
+form.value.date = dayjs().format("YYYY-MM-DD");
 </script>

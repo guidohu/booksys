@@ -51,95 +51,75 @@
   </modal-container>
 </template>
 
-<script>
-import { mapActions, mapGetters } from "vuex";
+<script setup>
+import { ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import WarningBox from "booksys/components/WarningBox.vue";
 import ModalContainer from "./bricks/ModalContainer.vue";
 import ModalHeader from "./bricks/ModalHeader.vue";
 import ModalBody from "./bricks/ModalBody.vue";
 import ModalFooter from "./bricks/ModalFooter.vue";
 import InputEngineHours from "booksys/components/forms/inputs/InputEngineHours.vue";
-import InputCurrency from "booksys/components/forms/inputs/InputCurrency.vue";
-import InputFuel from "booksys/components/forms/inputs/InputFuel.vue";
+import InputCurrency from "./forms/inputs/InputCurrency.vue";
+import InputFuel from "./forms/inputs/InputFuel.vue";
 
-export default {
-  name: "FuelRefuelModal",
-  components: {
-    WarningBox,
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    InputEngineHours,
-    InputCurrency,
-    InputFuel,
-  },
-  data() {
-    return {
-      errors: [],
-      form: {
-        engineHours: 0,
-        cost: 0,
-        liters: 0,
-      },
-      engineHourDescription: null,
-    };
-  },
-  props: ["visible"],
-  emits: ["saved", "update:visible"],
-  computed: {
-    ...mapGetters("login", ["userInfo"]),
-    ...mapGetters("boat", ["getMyNautiqueEngineHours"]),
-    ...mapGetters("configuration", ["getCurrency", "getEngineHourFormat"]),
-  },
-  watch: {
-    getMyNautiqueEngineHours: function (newValue) {
-      if (this.form.engineHours == null || this.form.engineHours == "") {
-        this.form.engineHours = newValue;
-        this.engineHourDescription = "prefilled by myNautique";
-      }
-    },
-  },
-  methods: {
-    saveFuel: function () {
-      const engineHours = isNaN(this.form.engineHours) || this.form.engineHours === "" ? null : this.form.engineHours;
-      const liters = isNaN(this.form.liters) || this.form.liters === "" ? null : this.form.liters;
-      const cost = isNaN(this.form.cost) || this.form.cost === "" ? null : this.form.cost;
-      const entry = {
-        user_id: parseInt(this.userInfo.id),
-        engine_hours: engineHours,
-        liters: liters,
-        cost: cost,
-      };
-      this.addFuelEntry(entry)
-        .then(() => {
-          this.resetForm();
-          this.close();
-        })
-        .catch((errors) => (this.errors = errors));
-    },
-    resetForm: function () {
-      this.form.engineHours = "";
-      this.form.cost = "";
-      this.form.liters = "";
-    },
-    close: function () {
-      this.$emit("update:visible", false);
-    },
-    ...mapActions("boat", ["addFuelEntry"]),
-    ...mapActions("configuration", ["queryConfiguration"]),
-  },
-  created() {
-    this.queryConfiguration();
+const props = defineProps(["visible"]);
+const emit = defineEmits(["saved", "update:visible"]);
 
-    // set engine hours if known through myNautique
-    if (
-      this.getMyNautiqueEngineHours != null &&
-      this.getMyNautiqueEngineHours > 0
-    ) {
-      this.form.engineHours = this.getMyNautiqueEngineHours;
-      this.engineHourDescription = "prefilled by myNautique";
-    }
-  },
-};
+const store = useStore();
+
+const errors = ref([]);
+const form = ref({
+  engineHours: 0,
+  cost: 0,
+  liters: 0,
+});
+const engineHourDescription = ref(null);
+
+const userInfo = computed(() => store.getters["login/userInfo"]);
+const getMyNautiqueEngineHours = computed(() => store.getters["boat/getMyNautiqueEngineHours"]);
+const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
+const getEngineHourFormat = computed(() => store.getters["configuration/getEngineHourFormat"]);
+
+watch(getMyNautiqueEngineHours, (newValue) => {
+  if (form.value.engineHours == null || form.value.engineHours === "") {
+    form.value.engineHours = newValue;
+    engineHourDescription.value = "prefilled by myNautique";
+  }
+});
+
+function saveFuel() {
+  const engineHours = isNaN(form.value.engineHours) || form.value.engineHours === "" ? null : form.value.engineHours;
+  const liters = isNaN(form.value.liters) || form.value.liters === "" ? null : form.value.liters;
+  const cost = isNaN(form.value.cost) || form.value.cost === "" ? null : form.value.cost;
+  const entry = {
+    user_id: parseInt(userInfo.value.id),
+    engine_hours: engineHours,
+    liters: liters,
+    cost: cost,
+  };
+  store.dispatch("boat/addFuelEntry", entry)
+    .then(() => {
+      resetForm();
+      close();
+    })
+    .catch((errs) => (errors.value = errs));
+}
+
+function resetForm() {
+  form.value.engineHours = "";
+  form.value.cost = "";
+  form.value.liters = "";
+}
+
+function close() {
+  emit("update:visible", false);
+}
+
+store.dispatch("configuration/queryConfiguration");
+
+if (getMyNautiqueEngineHours.value != null && getMyNautiqueEngineHours.value > 0) {
+  form.value.engineHours = getMyNautiqueEngineHours.value;
+  engineHourDescription.value = "prefilled by myNautique";
+}
 </script>

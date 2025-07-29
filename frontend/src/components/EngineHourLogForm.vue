@@ -54,180 +54,152 @@
   </div>
 </template>
 
-<script>
-import { mapActions, mapGetters } from "vuex";
+<script setup>
+import { ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import InputEngineHours from "booksys/components/forms/inputs/InputEngineHours.vue";
 import InputText from "booksys/components/forms/inputs/InputText.vue";
 import InputToggle from "booksys/components/forms/inputs/InputToggle.vue";
 import FormButton from "booksys/components/forms/FormButton.vue";
 import WarningBox from "booksys/components/WarningBox.vue";
 
-export default {
-  name: "EngineHourLogForm",
-  components: {
-    InputEngineHours,
-    InputText,
-    InputToggle,
-    FormButton,
-    WarningBox,
-  },
-  data() {
-    return {
-      form: {
-        driverId: null,
-        driverName: "",
-        beforeHours: null,
-        afterHours: null,
-        type: false,
-      },
-      beforeDescription: null,
-      afterDescription: null,
-      disableBefore: false,
-      showAfter: false,
-      errors: [],
-    };
-  },
-  computed: {
-    ...mapGetters("boat", [
-      "getEngineHourLogLatest",
-      "getMyNautiqueEngineHours",
-    ]),
-    ...mapGetters("login", ["userInfo"]),
-    ...mapGetters("configuration", [
-      "getEngineHourFormat",
-      "getMyNautiqueEnabled",
-      "getMyNautiqueBoatId",
-    ]),
-  },
-  watch: {
-    userInfo: function () {
-      this.setDriver();
-    },
-    getEngineHourLogLatest: function (newData) {
-      console.log("engineHourLatest just changed", newData);
-      if (newData.id === 0 && parseFloat(newData.before_hours) === 0.0) {
-        // no engineHourLatest so far
-        this.form.beforeHours = null;
-        this.form.beforeDescription = null;
-        this.prefillBefore();
-        this.form.afterHours = null;
-      } else if (parseFloat(newData.before_hours) > 0 && parseFloat(newData.after_hours) > 0) {
-        // the latest engine entry is complete
-        // (has before and after)
-        this.form.beforeHours = null;
-        this.form.type = false;
-        this.prefillBefore();
-        this.form.afterHours = null;
-      } else {
-        this.form.beforeHours = newData.before_hours;
-        this.form.afterHours = null;
-        this.prefillAfter();
-      }
+const store = useStore();
 
-      this.setDriver();
-      this.setDisableBefore();
-      this.setShowAfter();
-    },
-    watchMyNautiqueBoatId: function (boatId) {
-      this.queryMyNautiqueInfo(boatId);
-    },
-    getMyNautiqueEngineHours: function (newEngineHours) {
-      if (this.disableBefore == false) {
-        this.prefillBefore();
-      } else {
-        this.prefillAfter();
-      }
-    },
-  },
-  methods: {
-    ...mapActions("boat", [
-      "queryEngineHourLogLatest",
-      "addEngineHours",
-      "queryMyNautiqueInfo",
-    ]),
-    ...mapActions("configuration", ["queryConfiguration"]),
-    prefillBefore: function () {
-      if (this.getMyNautiqueEnabled && this.getMyNautiqueEngineHours != null) {
-        this.form.beforeHours = this.getMyNautiqueEngineHours;
-        this.beforeDescription = "prefilled by myNautique";
-        this.afterDescription = null;
-      }
-    },
-    prefillAfter: function () {
-      if (this.getMyNautiqueEnabled && this.getMyNautiqueEngineHours != null) {
-        this.form.afterHours = this.getMyNautiqueEngineHours;
-        this.beforeDescription = null;
-        this.afterDescription = "prefilled by myNautique";
-      }
-    },
-    setDisableBefore: function () {
-      if (this.getEngineHourLogLatest == null) {
-        this.disableBefore = false;
-        return;
-      } else if (
-        parseFloat(this.getEngineHourLogLatest.after_hours) > 0
-      ) {
-        this.disableBefore = false;
-        return;
-      }
-      this.disableBefore = true;
-    },
-    setShowAfter: function () {
-      if (
-        this.getEngineHourLogLatest != null &&
-        parseFloat(this.getEngineHourLogLatest.after_hours) === 0.0
-      ) {
-        this.showAfter = true;
-        return;
-      }
-      this.showAfter = false;
-    },
-    setDriver: function () {
-      if (
-        parseFloat(this.getEngineHourLogLatest != null && this.getEngineHourLogLatest.after_hours) === 0.0
-      ) {
-        this.form.driverName =
-          this.getEngineHourLogLatest.user_first_name +
-          " " +
-          this.getEngineHourLogLatest.user_last_name;
-        this.form.driverId = this.getEngineHourLogLatest.user_id;
-      } else if (this.userInfo != null) {
-        this.form.driverName =
-          this.userInfo.first_name + " " + this.userInfo.last_name;
-        this.form.driverId = this.userInfo.id;
-      } else {
-        this.form.driverName = "unknown";
-        this.form.driverId = null;
-      }
-    },
-    add: function () {
-      // get the type
-      // 1: private
-      // 2: course
-      const type = this.form.type ? 2 : 1;
+const form = ref({
+  driverId: null,
+  driverName: "",
+  beforeHours: null,
+  afterHours: null,
+  type: false,
+});
 
-      const data = {
-        user_id: this.form.driverId,
-        engine_hours_before: this.form.beforeHours,
-        engine_hours_after: this.form.afterHours,
-        type: type,
-      };
-      this.addEngineHours(data)
-        .then(() => {
-          this.errors = [];
-        })
-        .catch((errors) => (this.errors = errors));
-    },
-  },
-  created() {
-    this.queryConfiguration();
-    this.setDriver();
-    this.queryEngineHourLogLatest();
-    if (this.getMyNautiqueEnabled && this.getMyNautiqueBoatId) {
-      this.queryMyNautiqueInfo(this.getMyNautiqueBoatId);
-    }
-    this.setDisableBefore();
-    this.setShowAfter();
-  },
-};
+const beforeDescription = ref(null);
+const afterDescription = ref(null);
+const disableBefore = ref(false);
+const showAfter = ref(false);
+const errors = ref([]);
+
+const getEngineHourLogLatest = computed(() => store.getters["boat/getEngineHourLogLatest"]);
+const getMyNautiqueEngineHours = computed(() => store.getters["boat/getMyNautiqueEngineHours"]);
+const userInfo = computed(() => store.getters["login/userInfo"]);
+const getEngineHourFormat = computed(() => store.getters["configuration/getEngineHourFormat"]);
+const getMyNautiqueEnabled = computed(() => store.getters["configuration/getMyNautiqueEnabled"]);
+const getMyNautiqueBoatId = computed(() => store.getters["configuration/getMyNautiqueBoatId"]);
+
+watch(userInfo, () => {
+  setDriver();
+});
+
+watch(getEngineHourLogLatest, (newData) => {
+  console.log("engineHourLatest just changed", newData);
+  if (newData.id === 0 && parseFloat(newData.before_hours) === 0.0) {
+    form.value.beforeHours = null;
+    beforeDescription.value = null;
+    prefillBefore();
+    form.value.afterHours = null;
+  } else if (parseFloat(newData.before_hours) > 0 && parseFloat(newData.after_hours) > 0) {
+    form.value.beforeHours = null;
+    form.value.type = false;
+    prefillBefore();
+    form.value.afterHours = null;
+  } else {
+    form.value.beforeHours = newData.before_hours;
+    form.value.afterHours = null;
+    prefillAfter();
+  }
+
+  setDriver();
+  setDisableBefore();
+  setShowAfter();
+});
+
+watch(getMyNautiqueBoatId, (boatId) => {
+  queryMyNautiqueInfo(boatId);
+});
+
+watch(getMyNautiqueEngineHours, () => {
+  if (disableBefore.value == false) {
+    prefillBefore();
+  } else {
+    prefillAfter();
+  }
+});
+
+const queryEngineHourLogLatest = () => store.dispatch("boat/queryEngineHourLogLatest");
+const addEngineHours = (data) => store.dispatch("boat/addEngineHours", data);
+const queryMyNautiqueInfo = (boatId) => store.dispatch("boat/queryMyNautiqueInfo", boatId);
+const queryConfiguration = () => store.dispatch("configuration/queryConfiguration");
+
+function prefillBefore() {
+  if (getMyNautiqueEnabled.value && getMyNautiqueEngineHours.value != null) {
+    form.value.beforeHours = getMyNautiqueEngineHours.value;
+    beforeDescription.value = "prefilled by myNautique";
+    afterDescription.value = null;
+  }
+}
+
+function prefillAfter() {
+  if (getMyNautiqueEnabled.value && getMyNautiqueEngineHours.value != null) {
+    form.value.afterHours = getMyNautiqueEngineHours.value;
+    beforeDescription.value = null;
+    afterDescription.value = "prefilled by myNautique";
+  }
+}
+
+function setDisableBefore() {
+  if (getEngineHourLogLatest.value == null) {
+    disableBefore.value = false;
+    return;
+  } else if (parseFloat(getEngineHourLogLatest.value.after_hours) > 0) {
+    disableBefore.value = false;
+    return;
+  }
+  disableBefore.value = true;
+}
+
+function setShowAfter() {
+  if (getEngineHourLogLatest.value != null && parseFloat(getEngineHourLogLatest.value.after_hours) === 0.0) {
+    showAfter.value = true;
+    return;
+  }
+  showAfter.value = false;
+}
+
+function setDriver() {
+  if (getEngineHourLogLatest.value != null && parseFloat(getEngineHourLogLatest.value.after_hours) === 0.0) {
+    form.value.driverName = `${getEngineHourLogLatest.value.user_first_name} ${getEngineHourLogLatest.value.user_last_name}`;
+    form.value.driverId = getEngineHourLogLatest.value.user_id;
+  } else if (userInfo.value != null) {
+    form.value.driverName = `${userInfo.value.first_name} ${userInfo.value.last_name}`;
+    form.value.driverId = userInfo.value.id;
+  } else {
+    form.value.driverName = "unknown";
+    form.value.driverId = null;
+  }
+}
+
+function add() {
+  const type = form.value.type ? 2 : 1;
+
+  const data = {
+    user_id: form.value.driverId,
+    engine_hours_before: form.value.beforeHours,
+    engine_hours_after: form.value.afterHours,
+    type: type,
+  };
+  addEngineHours(data)
+    .then(() => {
+      errors.value = [];
+    })
+    .catch((errs) => (errors.value = errs));
+}
+
+queryConfiguration();
+setDriver();
+queryEngineHourLogLatest();
+if (getMyNautiqueEnabled.value && getMyNautiqueBoatId.value) {
+  queryMyNautiqueInfo(getMyNautiqueBoatId.value);
+}
+setDisableBefore();
+setShowAfter();
 </script>

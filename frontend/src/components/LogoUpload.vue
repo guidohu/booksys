@@ -99,10 +99,11 @@
   </form>
 </template>
 
-<script>
+<script setup>
+import { ref, computed } from "vue";
+import { useStore } from "vuex";
 import WarningBox from "booksys/components/WarningBox.vue";
 import { uploadLogo } from "booksys/api/resources";
-import { mapGetters, mapActions } from "vuex";
 import InputFile from "./forms/inputs/InputFile.vue";
 import OverlaySpinner from "./styling/OverlaySpinner.vue";
 
@@ -114,112 +115,95 @@ const States = Object.freeze({
   UPLOADREADY: Symbol("UPLOADREADY"),
 });
 
-export default {
-  name: "LogoUpload",
-  components: {
-    WarningBox,
-    InputFile,
-    OverlaySpinner,
-  },
-  data() {
-    return {
-      States,
-      errors: [],
-      isUploading: false,
-      form: {
-        logoFile: null,
-      },
-      newLogoUri: null,
-      logoRemoved: false,
-      logoState: States.UNKNOWN,
-    };
-  },
-  computed: {
-    ...mapGetters("configuration", ["getLogoUri"]),
-  },
-  methods: {
-    uploadLabel: function () {
-      if (this.logoState == States.NOLOGO) {
-        return "Upload Logo";
-      } else if (this.logoState == States.REPLACE) {
-        return "New Logo";
-      }
-      return "";
-    },
-    hasReplacementLogo: function () {
-      if (this.newLogoUri != null) {
-        return true;
-      }
-      return false;
-    },
-    hasExistingLogo: function () {
-      if (this.getLogoUri != null && this.logoRemoved == false) {
-        return true;
-      }
-      return false;
-    },
-    uploadNewLogo: function () {
-      this.isUploading = true;
+const store = useStore();
+const emit = defineEmits(["logoChanged"]);
 
-      uploadLogo(this.form.logoFile)
-        .then((data) => {
-          this.newLogoUri = data.uri;
-          const filename = data.filename;
-          this.isUploading = false;
-          console.log("Logo uploaded successfully: ", filename);
-          this.$emit("logoChanged", filename);
-          this.errors = [];
-          if (this.logoState == States.REPLACE) {
-            this.logoState = States.REPLACEMENTREADY;
-          } else if (this.logoState == States.NOLOGO) {
-            this.logoState = States.UPLOADREADY;
-          }
-        })
-        .catch((errors) => {
-          this.errors = errors;
-          this.isUploading = false;
-        });
-    },
-    removeLogo: function () {
-      this.form.logoFile = null;
-      this.newLogoUri = null;
-      this.$emit("logoChanged", null);
-      this.logoState = States.NOLOGO;
-      this.logoRemoved = true;
-    },
-    removeReplacement: function () {
-      this.form.newLogoUri = null;
-      this.form.logoFile = null;
-      this.newLogoUri = null;
-      this.$emit("logoChanged", null);
-      if (this.logoState == States.REPLACEMENTREADY) {
-        this.logoState = States.HASLOGO;
-      } else {
-        this.logoState = States.NOLOGO;
+const errors = ref([]);
+const isUploading = ref(false);
+const form = ref({ logoFile: null });
+const newLogoUri = ref(null);
+const logoRemoved = ref(false);
+const logoState = ref(States.UNKNOWN);
+
+const getLogoUri = computed(() => store.getters["configuration/getLogoUri"]);
+
+function uploadLabel() {
+  if (logoState.value === States.NOLOGO) {
+    return "Upload Logo";
+  } else if (logoState.value === States.REPLACE) {
+    return "New Logo";
+  }
+  return "";
+}
+
+function hasReplacementLogo() {
+  return newLogoUri.value != null;
+}
+
+function hasExistingLogo() {
+  return getLogoUri.value != null && !logoRemoved.value;
+}
+
+function uploadNewLogo() {
+  isUploading.value = true;
+  uploadLogo(form.value.logoFile)
+    .then((data) => {
+      newLogoUri.value = data.uri;
+      const filename = data.filename;
+      isUploading.value = false;
+      console.log("Logo uploaded successfully: ", filename);
+      emit("logoChanged", filename);
+      errors.value = [];
+      if (logoState.value === States.REPLACE) {
+        logoState.value = States.REPLACEMENTREADY;
+      } else if (logoState.value === States.NOLOGO) {
+        logoState.value = States.UPLOADREADY;
       }
-    },
-    showReplaceLogo: function () {
-      this.form.logoFile = null;
-      this.newLogoUri = null;
-      this.logoState = States.REPLACE;
-    },
-    ...mapActions("configuration", ["queryAdminConfiguration"]),
-  },
-  created() {
-    this.queryAdminConfiguration()
-      .then(() => {
-        if (this.getLogoUri == null) {
-          this.logoState = States.NOLOGO;
-        } else {
-          this.logoState = States.HASLOGO;
-        }
-      })
-      .catch((errors) => {
-        console.error("failed to load configuration", errors);
-        logoState = States.UNKNOWN;
-      });
-  },
-};
+    })
+    .catch((errs) => {
+      errors.value = errs;
+      isUploading.value = false;
+    });
+}
+
+function removeLogo() {
+  form.value.logoFile = null;
+  newLogoUri.value = null;
+  emit("logoChanged", null);
+  logoState.value = States.NOLOGO;
+  logoRemoved.value = true;
+}
+
+function removeReplacement() {
+  form.value.newLogoUri = null;
+  form.value.logoFile = null;
+  newLogoUri.value = null;
+  emit("logoChanged", null);
+  if (logoState.value === States.REPLACEMENTREADY) {
+    logoState.value = States.HASLOGO;
+  } else {
+    logoState.value = States.NOLOGO;
+  }
+}
+
+function showReplaceLogo() {
+  form.value.logoFile = null;
+  newLogoUri.value = null;
+  logoState.value = States.REPLACE;
+}
+
+store.dispatch("configuration/queryAdminConfiguration")
+  .then(() => {
+    if (getLogoUri.value == null) {
+      logoState.value = States.NOLOGO;
+    } else {
+      logoState.value = States.HASLOGO;
+    }
+  })
+  .catch((errs) => {
+    console.error("failed to load configuration", errs);
+    logoState.value = States.UNKNOWN;
+  });
 </script>
 
 <style scoped>

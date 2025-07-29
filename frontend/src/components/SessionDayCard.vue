@@ -59,8 +59,9 @@
   </sectioned-card-module>
 </template>
 
-<script>
-import { mapGetters } from "vuex";
+<script setup>
+import { computed } from "vue";
+import { useStore } from "vuex";
 import BooksysPie from "./Pie.vue";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -70,43 +71,23 @@ import SectionedCardModule from "booksys/components/bricks/SectionedCardModule.v
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export default {
-  name: "SessionDayCard",
-  data() {
-    return {
-      properties: {
-        containerWidth: 700,
-        containerHeight: 350,
-        circleX: 300,
-        circleY: 170,
-        circleRadius: 100,
-        animate: true,
-        labels: true,
-      },
-    };
-  },
-  computed: {
-    ...mapGetters("configuration", ["getTimezone"]),
-    dateString: function () {
-      console.log("sessionData", this.sessionData);
-      return dayjs(this.sessionData.window_start).format("dddd DD.MM.YYYY");
-    },
-    isToday: function () {
-      console.log(this.getTimezone);
-      const today = dayjs().tz(this.getTimezone).startOf("day").format();
-      const sessionDay = dayjs(this.sessionData.window_start)
-        .tz(this.getTimezone)
-        .startOf("day")
-        .format();
-      if (today == sessionDay) {
-        return true;
-      }
-      return false;
-    },
-  },
-  created() {
-    if (this.isMobile != null && this.isMobile == true) {
-      this.properties = {
+const props = defineProps([
+  "isMobile",
+  "sessionData",
+  "selectedSession",
+  "timezone",
+  "disableDayBrowsing",
+]);
+
+const emit = defineEmits(["prevDay", "nextDay", "selectSessionHandler"]);
+
+const store = useStore();
+
+const getTimezone = computed(() => store.getters["configuration/getTimezone"]);
+
+const properties = computed(() => {
+  const baseProps = props.isMobile
+    ? {
         containerHeight: 300,
         containerWidth: 350,
         circleX: 175,
@@ -114,40 +95,50 @@ export default {
         circleRadius: 90,
         animation: false,
         labels: true,
+      }
+    : {
+        containerWidth: 700,
+        containerHeight: 350,
+        circleX: 300,
+        circleY: 170,
+        circleRadius: 100,
+        animate: true,
+        labels: true,
       };
-    }
-    if (this.timezone != null) {
-      this.properties.timezone = this.timezone;
-    } else {
-      this.properties.timezone = "UTC";
-    }
-  },
-  methods: {
-    prevDay: function () {
-      this.$emit("prevDay");
-    },
-    nextDay: function () {
-      this.$emit("nextDay");
-    },
-    selectSession: function (slot) {
-      this.$emit("selectSessionHandler", slot);
-    },
-    navigateSessionStart: function () {
-      window.location.href = "/watch?sessionId=" + this.selectedSession.id;
-    },
-  },
-  components: {
-    BooksysPie,
-    SectionedCardModule,
-  },
-  props: [
-    "isMobile",
-    "sessionData",
-    "selectedSession",
-    "timezone",
-    "disableDayBrowsing",
-  ],
-};
+  baseProps.timezone = props.timezone || "UTC";
+  return baseProps;
+});
+
+const dateString = computed(() => {
+  console.log("sessionData", props.sessionData);
+  return dayjs(props.sessionData.window_start).format("dddd DD.MM.YYYY");
+});
+
+const isToday = computed(() => {
+  console.log(getTimezone.value);
+  const today = dayjs().tz(getTimezone.value).startOf("day").format();
+  const sessionDay = dayjs(props.sessionData.window_start)
+    .tz(getTimezone.value)
+    .startOf("day")
+    .format();
+  return today === sessionDay;
+});
+
+function prevDay() {
+  emit("prevDay");
+}
+
+function nextDay() {
+  emit("nextDay");
+}
+
+function selectSession(slot) {
+  emit("selectSessionHandler", slot);
+}
+
+function navigateSessionStart() {
+  window.location.href = "/watch?sessionId=" + props.selectedSession.id;
+}
 </script>
 
 <style scoped>

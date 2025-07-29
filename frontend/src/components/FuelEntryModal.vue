@@ -106,8 +106,9 @@
   </modal-container>
 </template>
 
-<script>
-import { mapActions, mapGetters } from "vuex";
+<script setup>
+import { ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import WarningBox from "booksys/components/WarningBox.vue";
 import {
   formatCurrency,
@@ -126,114 +127,79 @@ import InputFuel from "booksys/components/forms/inputs/InputFuel.vue";
 import InputCurrency from "booksys/components/forms/inputs/InputCurrency.vue";
 import InputToggle from "booksys/components/forms/inputs/InputToggle.vue";
 
-export default {
-  name: "FuelEntryModal",
-  components: {
-    WarningBox,
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    InputDateTimeLocal,
-    InputText,
-    InputEngineHours,
-    InputFuel,
-    InputCurrency,
-    InputToggle,
-  },
-  props: ["fuelEntry", "visible"],
-  data() {
-    return {
-      errors: [],
-      form: {
-        date: null,
-      },
+const props = defineProps(["fuelEntry", "visible"]);
+const emit = defineEmits(["update:visible"]);
+
+const store = useStore();
+
+const errors = ref([]);
+const form = ref({ date: null });
+
+const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
+const getEngineHourFormat = computed(() => store.getters["configuration/getEngineHourFormat"]);
+
+watch(() => props.fuelEntry, (newValue) => {
+  setFormContent(newValue);
+});
+
+function setFormContent(entry) {
+  if (entry != null) {
+    const costGross = entry.is_discounted == false ? entry.cost : entry.cost_brutto;
+    const costNet = entry.is_discounted == false ? null : entry.cost;
+    const cost = entry.is_discounted == false ? entry.cost : entry.cost_brutto;
+
+    form.value = {
+      id: entry.id,
+      date: dayjs(entry.timestamp * 1000).format("YYYY-MM-DDTHH:mm"),
+      isDiscounted: entry.is_discounted,
+      cost: formatCurrency(cost, null),
+      costGross: formatCurrency(costGross, null),
+      costNet: formatCurrency(costNet, null),
+      engineHours: entry.engine_hours,
+      fuel: formatFuel(entry.liters),
+      driver: entry.user_first_name,
+      averageFuelPerHour: formatFuelConsumption(entry.avg_liters_per_hour),
     };
-  },
-  computed: {
-    toggleWidth: function () {
-      return 100;
-    },
-    ...mapGetters("configuration", ["getCurrency", "getEngineHourFormat"]),
-  },
-  watch: {
-    fuelEntry: function (newValue) {
-      this.setFormContent(newValue);
-    },
-  },
-  methods: {
-    setFormContent: function (entry) {
-      if (entry != null) {
-        // apply some logic depending on the backend data to get the right values for
-        // net/gross and cost
-        const costGross = entry.is_discounted == false ? entry.cost : entry.cost_brutto;
-        const costNet = entry.is_discounted == false ? null : entry.cost;
-        const cost = entry.is_discounted == false ? entry.cost : entry.cost_brutto;
+  }
+}
 
-        this.form = {
-          id: entry.id,
-          date: dayjs(entry.timestamp * 1000).format("YYYY-MM-DDTHH:mm"),
-          isDiscounted: entry.is_discounted,
-          cost: formatCurrency(cost, null),
-          costGross: formatCurrency(costGross, null),
-          costNet: formatCurrency(costNet, null),
-          engineHours: entry.engine_hours,
-          fuel: formatFuel(entry.liters),
-          driver: entry.user_first_name,
-          averageFuelPerHour: formatFuelConsumption(entry.avg_liters_per_hour),
-        };
-      }
-    },
-    toggleDiscount: function () {
-      this.form.isDiscounted = !this.form.isDiscounted;
-    },
-    costChange: function () {
-      this.form.costGross = this.form.cost;
-    },
-    costGrossChange: function () {
-      this.form.cost = this.form.costGross;
-    },
-    close: function () {
-      this.$emit("update:visible", false);
-    },
-    save: function () {
-      if (this.form.isDiscounted && this.form.costNet == null) {
-        this.errors = ["Cost (net) cannot be empty if you select a discount."];
-        return;
-      }
+function close() {
+  emit("update:visible", false);
+}
 
-      let cost = 0;
-      let costBrutto = null;
-      let isDiscounted = false;
-      if (this.form.isDiscounted) {
-        cost = this.form.costNet;
-        costBrutto = this.form.costGross;
-        isDiscounted = true;
-      } else {
-        cost = this.form.cost;
-        costBrutto = null;
-        isDiscounted = false
-      }
+function save() {
+  if (form.value.isDiscounted && form.value.costNet == null) {
+    errors.value = ["Cost (net) cannot be empty if you select a discount."];
+    return;
+  }
 
-      const updatedEntry = {
-        id: this.form.id,
-        engine_hours: this.form.engineHours,
-        liters: this.form.fuel,
-        cost: cost,
-        cost_brutto: costBrutto,
-        is_discounted: isDiscounted,
-      };
+  let cost = 0;
+  let costBrutto = null;
+  let isDiscounted = false;
+  if (form.value.isDiscounted) {
+    cost = form.value.costNet;
+    costBrutto = form.value.costGross;
+    isDiscounted = true;
+  } else {
+    cost = form.value.cost;
+    costBrutto = null;
+    isDiscounted = false;
+  }
 
-      this.updateFuelEntry(updatedEntry)
-        .then(() => this.close())
-        .catch((errors) => (this.errors = errors));
-    },
-    ...mapActions("boat", ["updateFuelEntry"]),
-    ...mapActions("configuration", ["queryConfiguration"]),
-  },
-  created() {
-    this.setFormContent(this.fuelEntry);
-    this.queryConfiguration();
-  },
-};
+  const updatedEntry = {
+    id: form.value.id,
+    engine_hours: form.value.engineHours,
+    liters: form.value.fuel,
+    cost: cost,
+    cost_brutto: costBrutto,
+    is_discounted: isDiscounted,
+  };
+
+  store.dispatch("boat/updateFuelEntry", updatedEntry)
+    .then(() => close())
+    .catch((errs) => (errors.value = errs));
+}
+
+setFormContent(props.fuelEntry);
+store.dispatch("configuration/queryConfiguration");
 </script>

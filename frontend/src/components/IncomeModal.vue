@@ -63,8 +63,9 @@
   </modal-container>
 </template>
 
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import WarningBox from "booksys/components/WarningBox.vue";
 import dayjs from "dayjs";
 import orderBy from "lodash/orderBy";
@@ -77,145 +78,117 @@ import InputTextMultiline from "./forms/inputs/InputTextMultiline.vue";
 import InputCurrency from "./forms/inputs/InputCurrency.vue";
 import InputDateTimeLocal from "./forms/inputs/InputDateTimeLocal.vue";
 
-export default {
-  name: "IncomeModal",
-  components: {
-    WarningBox,
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    InputSelect,
-    InputCurrency,
-    InputTextMultiline,
-    InputDateTimeLocal,
-  },
-  props: ["visible"],
-  data() {
-    return {
-      errors: [],
-      incomeTypes: [],
-      users: [],
-      userLabel: "User",
-      userDescription: "",
-      form: {
-        type: null,
-        user: null,
-        date: null,
-        comment: null,
-      },
+const props = defineProps(["visible"]);
+const emit = defineEmits(["update:visible"]);
+
+const store = useStore();
+
+const errors = ref([]);
+const incomeTypes = ref([]);
+const users = ref([]);
+const userLabel = ref("User");
+const userDescription = ref("");
+const form = ref({
+  type: null,
+  user: null,
+  date: null,
+  comment: null,
+});
+
+const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
+const userList = computed(() => store.getters["user/userList"]);
+const getIncomeTypes = computed(() => store.getters["accounting/getIncomeTypes"]);
+
+watch(getIncomeTypes, (newValues) => {
+  buildTypeSelect(newValues);
+});
+
+watch(userList, (newValues) => {
+  buildUserSelect(newValues);
+});
+
+watch(() => form.value.type, (newValue, oldValue) => {
+  if (newValue !== oldValue) {
+    const typeActions = {
+      6: { userLabel: "Account", userDescription: "User that paid for sessions or membership." },
+      4: { userLabel: "Account", userDescription: "User that paid for sessions or membership." },
+      3: { userLabel: "User", userDescription: "Payer or internal reference" },
+      5: { userLabel: "User", userDescription: "Payer or internal reference" },
+      7: { userLabel: "Driver", userDescription: "Driver that got paid for a session." },
     };
-  },
-  computed: {
-    ...mapGetters("configuration", ["getCurrency"]),
-    ...mapGetters("user", ["userList"]),
-    ...mapGetters("accounting", ["getIncomeTypes"]),
-  },
-  watch: {
-    getIncomeTypes: function (newValues) {
-      this.buildTypeSelect(newValues);
-    },
-    userList: function (newValues) {
-      // console.log("TODO, add userList:", newValues);
-      this.buildUserSelect(newValues);
-    },
-    "form.type": function (newValue, oldValue) {
-      console.log(newValue, oldValue);
-      if (newValue != oldValue) {
-        // if the type is either
-        if ([6, 4].includes(Number(newValue))) {
-          // 6: membership fee
-          // 4: session
-          this.userLabel = "Account";
-          this.userDescription = "User that paid for sessions or membership.";
-        } else if ([3, 5].includes(Number(newValue))) {
-          // 3: invest
-          // 5: other
-          this.userLabel = "User";
-          this.userDescription = "Payer or internal reference";
-        } else if ([7].includes(Number(newValue))) {
-          // 7: salary
-          this.userLabel = "Driver";
-          this.userDescription = "Driver that got paid for a session.";
-        } else {
-          // Default case
-          this.userLabel = "User";
-          this.userDescription = "";
-        }
-      }
-    },
-  },
-  methods: {
-    ...mapActions("configuration", ["queryConfiguration"]),
-    ...mapActions("user", ["queryUserList"]),
-    ...mapActions("accounting", ["queryIncomeTypes", "addIncome"]),
-    buildTypeSelect: function (types) {
-      this.incomeTypes = types.map((t) => {
-        return {
-          value: t.id,
-          text: t.name,
-        };
-      });
-      this.incomeTypes = orderBy(this.incomeTypes, ["text"], ["asc"]);
-      this.incomeTypes.unshift({ value: null, text: "Please select" });
-    },
-    buildUserSelect: function (users) {
-      this.users = users.map((u) => {
-        return {
-          value: u.id,
-          text: u.firstName + " " + u.lastName,
-          lastName: u.lastName,
-          firstName: u.firstName,
-        };
-      });
-      this.users = orderBy(this.users, ["text"], ["asc"]);
-      this.users.unshift({ value: null, text: "Please select" });
-    },
-    clearForm: function () {
-      this.form = {
-        amount: null,
-        type: null,
-        date: dayjs().format("YYYY-MM-DDTHH:mm"),
-        user: null,
-        comment: null,
-      };
-    },
-    add: function () {
-      const income = {
-        amount: Number(this.form.amount),
-        typeId: Number(this.form.type),
-        date: this.form.date,
-        userId: Number(this.form.user),
-        comment: this.form.comment,
-      };
+    const action = typeActions[Number(newValue)] || { userLabel: "User", userDescription: "" };
+    userLabel.value = action.userLabel;
+    userDescription.value = action.userDescription;
+  }
+});
 
-      this.addIncome(income)
-        .then(() => {
-          this.errors = [];
-          this.close();
-        })
-        .catch((errors) => (this.errors = errors));
-    },
-    save: function () {
-      this.add();
-    },
-    close: function () {
-      this.clearForm();
-      this.$emit("update:visible", false);
-    },
-  },
-  created() {
-    this.queryConfiguration();
+const queryConfiguration = () => store.dispatch("configuration/queryConfiguration");
+const queryUserList = () => store.dispatch("user/queryUserList");
+const queryIncomeTypes = () => store.dispatch("accounting/queryIncomeTypes");
+const addIncome = (income) => store.dispatch("accounting/addIncome", income);
 
-    this.queryUserList()
-      .then(() => this.buildUserSelect(this.userList))
-      .catch((errors) => this.errors.push(...errors));
+function buildTypeSelect(types) {
+  let mappedTypes = types.map((t) => ({ value: t.id, text: t.name }));
+  mappedTypes = orderBy(mappedTypes, ["text"], ["asc"]);
+  mappedTypes.unshift({ value: null, text: "Please select" });
+  incomeTypes.value = mappedTypes;
+}
 
-    this.queryIncomeTypes()
-      .then(() => this.buildTypeSelect(this.getIncomeTypes))
-      .catch((errors) => this.errors.push(...errors));
+function buildUserSelect(usersData) {
+  let mappedUsers = usersData.map((u) => ({
+    value: u.id,
+    text: `${u.firstName} ${u.lastName}`,
+    lastName: u.lastName,
+    firstName: u.firstName,
+  }));
+  mappedUsers = orderBy(mappedUsers, ["text"], ["asc"]);
+  mappedUsers.unshift({ value: null, text: "Please select" });
+  users.value = mappedUsers;
+}
 
-    this.form.date = dayjs().format("YYYY-MM-DD");
-  },
-};
+function clearForm() {
+  form.value = {
+    amount: null,
+    type: null,
+    date: dayjs().format("YYYY-MM-DDTHH:mm"),
+    user: null,
+    comment: null,
+  };
+}
+
+function add() {
+  const income = {
+    amount: Number(form.value.amount),
+    typeId: Number(form.value.type),
+    date: form.value.date,
+    userId: Number(form.value.user),
+    comment: form.value.comment,
+  };
+
+  addIncome(income)
+    .then(() => {
+      errors.value = [];
+      close();
+    })
+    .catch((errs) => (errors.value = errs));
+}
+
+function save() {
+  add();
+}
+
+function close() {
+  clearForm();
+  emit("update:visible", false);
+}
+
+queryConfiguration();
+queryUserList()
+  .then(() => buildUserSelect(userList.value))
+  .catch((errs) => errors.value.push(...errs));
+queryIncomeTypes()
+  .then(() => buildTypeSelect(getIncomeTypes.value))
+  .catch((errs) => errors.value.push(...errs));
+
+form.value.date = dayjs().format("YYYY-MM-DD");
 </script>
