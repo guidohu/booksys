@@ -27,7 +27,7 @@ import TableModule from "booksys/components/bricks/TableModule.vue";
 
 const EngineHourEntryModal = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "engine-hour-entry-modal" */ "booksys/components/EngineHourEntryModal.vue"
+    "booksys/components/EngineHourEntryModal.vue"
   )
 );
 

@@ -30,7 +30,7 @@ import FuelLogForm from "booksys/components/FuelLogForm.vue";
 import FuelLogList from "booksys/components/FuelLogList.vue";
 
 const FuelLogChart = defineAsyncComponent(() =>
-  import(/* webpackChunkName: "fuel-log-chart" */ "booksys/components/FuelLogChart.vue")
+  import("booksys/components/FuelLogChart.vue")
 );
 
 export default {

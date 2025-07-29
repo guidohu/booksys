@@ -34,7 +34,7 @@ import TableModule from "booksys/components/bricks/TableModule.vue";
 
 const FuelEntryModal = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "fuel-entry-modal" */ "booksys/components/FuelEntryModal.vue"
+    "booksys/components/FuelEntryModal.vue"
   )
 );
 

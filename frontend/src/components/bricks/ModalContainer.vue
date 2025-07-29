@@ -57,7 +57,9 @@ watch(
         modal.show();
       }
     } else {
-      modal.hide();
+      if (modal != null) {
+        modal.hide();
+      }
     }
   }, { immediate: true }
 );

@@ -100,12 +100,12 @@ import ShowForMobile from "../components/bricks/ShowForMobile.vue";
 
 const SessionEditorModal = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "session-editor-modal" */ "booksys/components/SessionEditorModal.vue"
+    "booksys/components/SessionEditorModal.vue"
   )
 );
 const SessionDeleteModal = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "session-delete-modal" */ "booksys/components/SessionDeleteModal.vue"
+    "booksys/components/SessionDeleteModal.vue"
   )
 );
 

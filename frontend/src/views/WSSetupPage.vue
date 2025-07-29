@@ -98,14 +98,14 @@ import ModalFooter from "../components/bricks/ModalFooter.vue";
 // Lazy loaded components
 const DatabaseConfiguration = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "database-configuration" */ "booksys/components/DatabaseConfiguration.vue"
+    "booksys/components/DatabaseConfiguration.vue"
   )
 );
 const UserSignUp = defineAsyncComponent(() =>
-  import(/* webpackChunkName: "user-sign-up" */ "booksys/components/forms/UserSignUp.vue")
+  import("booksys/components/forms/UserSignUp.vue")
 );
 const WarningBox = defineAsyncComponent(() =>
-  import(/* webpackChunkName: "warning-box" */ "booksys/components/WarningBox.vue")
+  import("booksys/components/WarningBox.vue")
 );
 
 const router = useRouter();

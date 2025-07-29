@@ -74,10 +74,10 @@ import OverlaySpinner from "./styling/OverlaySpinner.vue";
 import { confirm } from "booksys/components/bricks/DialogModal.js";
 
 const IncomeModal = defineAsyncComponent(() =>
-  import(/* webpackChunkName: "income-modal" */ "booksys/components/IncomeModal.vue")
+  import("booksys/components/IncomeModal.vue")
 );
 const ExpenseModal = defineAsyncComponent(() =>
-  import(/* webpackChunkName: "expense-modal" */ "booksys/components/ExpenseModal.vue")
+  import("booksys/components/ExpenseModal.vue")
 );
 
 export default {

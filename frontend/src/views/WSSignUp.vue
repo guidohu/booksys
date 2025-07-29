@@ -79,7 +79,7 @@ import ModalFooter from "booksys/components/bricks/ModalFooter.vue";
 import { VueRecaptcha } from 'vue-recaptcha';
 
 const UserSignUp = defineAsyncComponent(() =>
-  import(/* webpackChunkName: "user-sign-up" */ "booksys/components/forms/UserSignUp.vue")
+  import("booksys/components/forms/UserSignUp.vue")
 );
 
 const store = useStore();

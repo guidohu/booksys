@@ -54,32 +54,32 @@ dayjs.extend(timezone);
 
 const DashboardAdmin = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-admin" */ "booksys/components/DashboardAdmin.vue"
+    "booksys/components/DashboardAdmin.vue"
   )
 );
 const DashboardMember = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-member" */ "booksys/components/DashboardMember.vue"
+    "booksys/components/DashboardMember.vue"
   )
 );
 const DashboardGuest = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-guest" */ "booksys/components/DashboardGuest.vue"
+    "booksys/components/DashboardGuest.vue"
   )
 );
 const DashboardAdminMobile = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-admin-mobile" */ "booksys/components/DashboardAdminMobile.vue"
+    "booksys/components/DashboardAdminMobile.vue"
   )
 );
 const DashboardMemberMobile = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-member-mobile" */ "booksys/components/DashboardMemberMobile.vue"
+    "booksys/components/DashboardMemberMobile.vue"
   )
 );
 const DashboardGuestMobile = defineAsyncComponent(() =>
   import(
-    /* webpackChunkName: "dashboard-guest-mobile" */ "booksys/components/DashboardGuestMobile.vue"
+    "booksys/components/DashboardGuestMobile.vue"
   )
 );
 
