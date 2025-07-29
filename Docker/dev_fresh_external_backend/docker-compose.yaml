@@ -6,7 +6,7 @@ services:
           - "--api.insecure=true"
           - "--api.dashboard=true"
           - "--accesslog=true"
-          - "--log.level=DEBUG"
+        #   - "--log.level=DEBUG"
           - "--providers.docker=true"
           - "--providers.docker.exposedbydefault=false"
           - "--entrypoints.web.address=:80"
@@ -33,22 +33,6 @@ services:
             MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
             MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
         ports:
-            - '3306:3306'
+            - '127.0.0.1:3306:3306'
         expose:
             - '3306'
-    frontend:
-        build: "./frontend"
-        container_name: "fresh_ext_backend_frontend"
-        user: "node"
-        working_dir: /home/node/app
-        environment:
-            - NODE_ENV=development
-        volumes:
-            - ../../frontend:/home/node/app
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.frontend.entrypoints=web"
-            - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
-            - "traefik.http.services.frontend.loadbalancer.server.port=8080"
-        command: "npm run serve"
-    

@@ -5,8 +5,17 @@ http:
         - "web"
       rule: "PathPrefix(`/api/v2`) || PathPrefix(`/uploads`)"
       service: "external-backend-service"
+    external-frontend:
+      entryPoints:
+        - "web"
+      rule: "PathPrefix(`/`)"
+      service: "external-frontend-service"
   services:
     external-backend-service:
       loadBalancer:
         servers:
           - url: "http://host.docker.internal:9090"
+    external-frontend-service:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8080"
