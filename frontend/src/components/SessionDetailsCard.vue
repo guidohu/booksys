@@ -112,102 +112,108 @@
   </sectioned-card-module>
 </template>
 
-<script>
-import { mapActions } from "vuex";
+<script setup>
+import { ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import dayjs from "dayjs";
 import { UserPointer } from "booksys/dataTypes/user";
 import RiderSelectionModal from "booksys/components/RiderSelectionModal.vue";
 import SectionedCardModule from "booksys/components/bricks/SectionedCardModule.vue";
 
-export default {
-  name: "SessionDetailsCard",
-  components: {
-    SectionedCardModule,
-    RiderSelectionModal,
-  },
-  props: ["date", "session"],
-  data() {
-    return {
-      showRiderSelectionModal: false,
-      sessionSelected: false,
-    };
-  },
-  computed: {
-    dateString: function () {
-      const newDate = this.date;
-      return dayjs(newDate).format("DD.MM.YYYY");
-    },
-    timeString: function () {
-      if (this.session == null) {
-        return "no session selected";
-      }
+const props = defineProps(["date", "session"]);
+const emit = defineEmits([
+  "createSessionHandler",
+  "editSessionHandler",
+  "deleteSessionHandler",
+]);
 
-      const start = this.session.start;
-      const end = this.session.end;
-      return dayjs(start).format("HH:mm") + " - " + dayjs(end).format("HH:mm");
-    },
-    showCreateSession: function () {
-      if (this.session != null && this.session.id == null) {
-        return true;
-      }
-      return false;
-    },
-    showDeleteSession: function () {
-      if (this.session != null && this.session.id != null) {
-        return true;
-      }
-      return false;
-    },
-    showAddRiders: function () {
-      if (this.session != null && this.session.id != null) {
-        return true;
-      }
-      return false;
-    },
-    showRiders: function () {
-      if (
-        this.session != null &&
-        this.session.riders != null &&
-        this.session.riders.length > 0
-      ) {
-        return true;
-      }
-      return false;
-    },
-  },
-  watch: {
-    timeString: function () {
-      if (this.session == null) {
-        this.sessionSelected = false;
-      } else {
-        this.sessionSelected = true;
-      }
-    },
-  },
-  methods: {
-    createSession: function () {
-      this.$emit("createSessionHandler");
-    },
-    editSession: function () {
-      this.$emit("editSessionHandler");
-    },
-    deleteSession: function () {
-      this.$emit("deleteSessionHandler", { id: this.session.id });
-    },
-    addRiders: function () {
-      this.showRiderSelectionModal = true;
-    },
-    ...mapActions("sessions", ["deleteUserFromSession"]),
-    removeRider: function (id) {
-      this.deleteUserFromSession({
-        sessionId: this.session.id,
-        user: new UserPointer(id),
-      }).catch((errors) => {
-        console.error("Cannot delete user:", errors);
-      });
-    },
-  },
-};
+const store = useStore();
+
+const showRiderSelectionModal = ref(false);
+const sessionSelected = ref(false);
+
+const dateString = computed(() => {
+  const newDate = props.date;
+  return dayjs(newDate).format("DD.MM.YYYY");
+});
+
+const timeString = computed(() => {
+  if (props.session == null) {
+    return "no session selected";
+  }
+
+  const start = props.session.start;
+  const end = props.session.end;
+  return dayjs(start).format("HH:mm") + " - " + dayjs(end).format("HH:mm");
+});
+
+const showCreateSession = computed(() => {
+  if (props.session != null && props.session.id == null) {
+    return true;
+  }
+  return false;
+});
+
+const showDeleteSession = computed(() => {
+  if (props.session != null && props.session.id != null) {
+    return true;
+  }
+  return false;
+});
+
+const showAddRiders = computed(() => {
+  if (props.session != null && props.session.id != null) {
+    return true;
+  }
+  return false;
+});
+
+const showRiders = computed(() => {
+  if (
+    props.session != null &&
+    props.session.riders != null &&
+    props.session.riders.length > 0
+  ) {
+    return true;
+  }
+  return false;
+});
+
+watch(timeString, () => {
+  if (props.session == null) {
+    sessionSelected.value = false;
+  } else {
+    sessionSelected.value = true;
+  }
+});
+
+function createSession() {
+  emit("createSessionHandler");
+}
+
+function editSession() {
+  emit("editSessionHandler");
+}
+
+function deleteSession() {
+  emit("deleteSessionHandler", { id: props.session.id });
+}
+
+function addRiders() {
+  showRiderSelectionModal.value = true;
+}
+
+const deleteUserFromSession = (data) =>
+  store.dispatch("sessions/deleteUserFromSession", data);
+
+function removeRider(id) {
+  deleteUserFromSession({
+    sessionId: props.session.id,
+    user: new UserPointer(id),
+  }).catch((errors) => {
+    console.error("Cannot delete user:", errors);
+  });
+}
 </script>
 
 <style scoped>

@@ -62,29 +62,22 @@
   </modal-container>
 </template>
 
-<script>
-import { mapGetters } from "vuex";
+<script setup>
+import { computed } from "vue";
+import { useStore } from "vuex";
 import ModalContainer from "./bricks/ModalContainer.vue";
 import ModalHeader from "./bricks/ModalHeader.vue";
 import ModalBody from "./bricks/ModalBody.vue";
 import ModalFooter from "./bricks/ModalFooter.vue";
 
-export default {
-  name: "PaymentInfoModal",
-  components: {
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-  },
-  props: ["visible"],
-  computed: {
-    ...mapGetters("configuration", ["getConfiguration"]),
-  },
-  methods: {
-    close: function () {
-      this.$emit("update:visible", false);
-    },
-  },
-};
+const store = useStore();
+const emit = defineEmits(["update:visible"]);
+
+const getConfiguration = computed(
+  () => store.getters["configuration/getConfiguration"]
+);
+
+function close() {
+  emit("update:visible", false);
+}
 </script>

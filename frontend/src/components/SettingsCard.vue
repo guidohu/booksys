@@ -201,8 +201,9 @@
   </sectioned-card-module>
 </template>
 
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { ref, computed, watch, onMounted } from "vue";
+import { useStore } from "vuex";
 import WarningBox from "booksys/components/WarningBox.vue";
 import LogoUpload from "booksys/components/LogoUpload.vue";
 import SectionedCardModule from "booksys/components/bricks/SectionedCardModule.vue";
@@ -213,191 +214,189 @@ import InputSelect from "./forms/inputs/InputSelect.vue";
 import InputToggle from "./forms/inputs/InputToggle.vue";
 import InputFuel from "./forms/inputs/InputFuel.vue";
 
-export default {
-  name: "SettingsCard",
-  components: {
-    WarningBox,
-    LogoUpload,
-    SectionedCardModule,
-    InputToggle,
-    InputText,
-    InputPassword,
-    InputTextMultiline,
-    InputSelect,
-    InputFuel,
-  },
-  props: ["showControls"],
-  emits: ["save", "saved", "cancelled", "change"],
-  data() {
-    return {
-      errors: [],
-      form: {
-        logoFile: null,
-        fuelPaymentType: "instant",
-      },
-      fuelPaymentTypes: [
-        { value: "instant", text: "pay directly" },
-        { value: "billed", text: "pay by bill" },
-      ],
-      engineHourLogFormats: [
-        { value: "hh.h", text: "hh.h  - such as 9.7" },
-        { value: "hh:mm", text: "hh:mm - such as 9:42" },
-      ],
-      allTimezones: this.getAllTimezones(),
-    };
-  },
-  computed: {
-    ...mapGetters("configuration", ["getAdminConfiguration"]),
-  },
-  methods: {
-    ...mapActions("configuration", ["queryAdminConfiguration", "setConfiguration"]),
-    logoChangeHandler: function (logoFilename) {
-      console.debug("logoChangeHandler", logoFilename);
-      this.form.logoFile = logoFilename;
-    },
-    configChangeHandler: function () {
-      const configuration = this.getSanitizedConfiguration();
-      if (configuration != null) {
-        console.log("emit change", configuration);
-        this.$emit("change", configuration);
-      }
-    },
-    getAllTimezones: function () {
-      let timezones = [];
-      if (typeof Intl === 'object' && typeof Intl.supportedValuesOf === 'function') {
-        timezones = Intl.supportedValuesOf('timeZone');
-      } else {
-        console.warn("Intl.supportedValuesOf('timeZone') not supported by this browser/Node.js version.");
-        timezones = []; // Fallback or suggest a polyfill/alternative
-      }
-      const selectTimezones = timezones.map(str => {
-        return { value: str, text: str };
-      });
-      return selectTimezones;
-    },
-    getSanitizedConfiguration: function () {
-      // extract correct URL from mapIframe
-      const v = this.form;
-      let mapUrl = [];
-      if (v.mapIframe != null && v.mapIframe != "") {
-        const mapUrlRegex =
-          /https:\/\/www\.google\.com\/maps\/embed\?pb=[^"\s]+/;
-        mapUrl = v.mapIframe.match(mapUrlRegex);
-        if (mapUrl == null || mapUrl.length != 1) {
-          this.errors = ["Google Maps Iframe URL is not in a valid format."];
-          return;
-        }
-      }
+const props = defineProps(["showControls"]);
+const emit = defineEmits(["save", "saved", "cancelled", "change"]);
 
-      const newConfiguration = {
-        logo_file: v.logoFile,
-        engine_hour_format: v.engineHourFormat,
-        fuel_payment_type: v.fuelPaymentType,
-        location_time_zone: v.timezone,
-        location_longitude: Number(v.longitude),
-        location_latitude: Number(v.latitude),
-        location_map: mapUrl[0],
-        location_address: v.address,
-        currency: v.currency,
-        payment_account_owner: v.accountOwner,
-        payment_account_iban: v.iban,
-        payment_account_bic: v.bic,
-        payment_account_comment: v.comment,
-        smtp_sender: v.smtpSender,
-        smtp_server: v.smtpServer,
-        smtp_username: v.smtpUsername,
-        smtp_password: v.smtpPassword,
-        recaptcha_privatekey: v.recaptchaPrivateKey,
-        recaptcha_publickey: v.recaptchaPublicKey,
-        mynautique_enabled: v.myNautiqueEnabled,
-        mynautique_user: v.myNautiqueUser,
-        mynautique_password: v.myNautiquePassword,
-        mynautique_boat_id: v.myNautiqueBoatId,
-        mynautique_fuel_capacity: v.myNautiqueFuelCapacity,
-      };
+const store = useStore();
 
-      return newConfiguration;
-    },
-    save: function () {
-      const newConfiguration = this.getSanitizedConfiguration();
-      if (newConfiguration == null) {
-        return;
-      }
+const errors = ref([]);
+const form = ref({
+  logoFile: null,
+  fuelPaymentType: "instant",
+});
+const fuelPaymentTypes = ref([
+  { value: "instant", text: "pay directly" },
+  { value: "billed", text: "pay by bill" },
+]);
+const engineHourLogFormats = ref([
+  { value: "hh.h", text: "hh.h  - such as 9.7" },
+  { value: "hh:mm", text: "hh:mm - such as 9:42" },
+]);
+const allTimezones = ref(getAllTimezones());
 
-      // if not responsible for data controlling -> just emit signal
-      if (this.showControls == false) {
-        this.$emit("save", newConfiguration);
-        return;
-      }
+const getAdminConfiguration = computed(
+  () => store.getters["configuration/getAdminConfiguration"]
+);
 
-      // handle save otherwise
-      this.setConfiguration(newConfiguration)
-        .then(() => {
-          this.errors = [];
-          this.$emit("saved", newConfiguration);
-        })
-        .catch((errors) => (this.errors = errors));
-    },
-    cancel: function () {
-      this.$emit("cancelled");
-    },
-    setFormDefaults: function (defaultValues) {
-      if (defaultValues == null) {
-        this.form = {};
-        return;
-      }
+const queryAdminConfiguration = () =>
+  store.dispatch("configuration/queryAdminConfiguration");
+const setConfiguration = (config) =>
+  store.dispatch("configuration/setConfiguration", config);
 
-      console.log("set form to defaults:", defaultValues);
-      this.form = {
-        logoFile: defaultValues.logo_file,
-        engineHourFormat: defaultValues.engine_hour_format,
-        fuelPaymentType: defaultValues.fuel_payment_type,
-        timezone: defaultValues.location_time_zone,
-        longitude: defaultValues.location_longitude,
-        latitude: defaultValues.location_latitude,
-        mapIframe: defaultValues.location_map,
-        address: defaultValues.location_address,
-        currency: defaultValues.currency,
-        accountOwner: defaultValues.payment_account_owner,
-        iban: defaultValues.payment_account_iban,
-        bic: defaultValues.payment_account_bic,
-        comment: defaultValues.payment_account_comment,
-        smtpSender: defaultValues.smtp_sender,
-        smtpServer: defaultValues.smtp_server,
-        smtpUsername: defaultValues.smtp_username,
-        smtpPassword: defaultValues.smtp_password,
-        recaptchaPrivateKey: defaultValues.recaptcha_privatekey,
-        recaptchaPublicKey: defaultValues.recaptcha_publickey,
-        myNautiqueEnabled: defaultValues.mynautique_enabled,
-        myNautiqueUser: defaultValues.mynautique_user,
-        myNautiquePassword: defaultValues.mynautique_password,
-        myNautiqueBoatId: defaultValues.mynautique_boat_id,
-        myNautiqueFuelCapacity: defaultValues.mynautique_fuel_capacity,
-      };
-    },
+function logoChangeHandler(logoFilename) {
+  console.debug("logoChangeHandler", logoFilename);
+  form.value.logoFile = logoFilename;
+}
+
+function configChangeHandler() {
+  const configuration = getSanitizedConfiguration();
+  if (configuration != null) {
+    console.log("emit change", configuration);
+    emit("change", configuration);
+  }
+}
+
+function getAllTimezones() {
+  let timezones = [];
+  if (typeof Intl === "object" && typeof Intl.supportedValuesOf === "function") {
+    timezones = Intl.supportedValuesOf("timeZone");
+  } else {
+    console.warn(
+      "Intl.supportedValuesOf('timeZone') not supported by this browser/Node.js version."
+    );
+    timezones = []; // Fallback or suggest a polyfill/alternative
+  }
+  const selectTimezones = timezones.map((str) => {
+    return { value: str, text: str };
+  });
+  return selectTimezones;
+}
+
+function getSanitizedConfiguration() {
+  // extract correct URL from mapIframe
+  const v = form.value;
+  let mapUrl = [];
+  if (v.mapIframe != null && v.mapIframe != "") {
+    const mapUrlRegex =
+      /https:\/\/www\.google\.com\/maps\/embed\?pb=[^"\s]+/;
+    mapUrl = v.mapIframe.match(mapUrlRegex);
+    if (mapUrl == null || mapUrl.length != 1) {
+      errors.value = ["Google Maps Iframe URL is not in a valid format."];
+      return;
+    }
+  }
+
+  const newConfiguration = {
+    logo_file: v.logoFile,
+    engine_hour_format: v.engineHourFormat,
+    fuel_payment_type: v.fuelPaymentType,
+    location_time_zone: v.timezone,
+    location_longitude: Number(v.longitude),
+    location_latitude: Number(v.latitude),
+    location_map: mapUrl[0],
+    location_address: v.address,
+    currency: v.currency,
+    payment_account_owner: v.accountOwner,
+    payment_account_iban: v.iban,
+    payment_account_bic: v.bic,
+    payment_account_comment: v.comment,
+    smtp_sender: v.smtpSender,
+    smtp_server: v.smtpServer,
+    smtp_username: v.smtpUsername,
+    smtp_password: v.smtpPassword,
+    recaptcha_privatekey: v.recaptchaPrivateKey,
+    recaptcha_publickey: v.recaptchaPublicKey,
+    mynautique_enabled: v.myNautiqueEnabled,
+    mynautique_user: v.myNautiqueUser,
+    mynautique_password: v.myNautiquePassword,
+    mynautique_boat_id: v.myNautiqueBoatId,
+    mynautique_fuel_capacity: v.myNautiqueFuelCapacity,
+  };
+
+  return newConfiguration;
+}
+
+function save() {
+  const newConfiguration = getSanitizedConfiguration();
+  if (newConfiguration == null) {
+    return;
+  }
+
+  // if not responsible for data controlling -> just emit signal
+  if (props.showControls == false) {
+    emit("save", newConfiguration);
+    return;
+  }
+
+  // handle save otherwise
+  setConfiguration(newConfiguration)
+    .then(() => {
+      errors.value = [];
+      emit("saved", newConfiguration);
+    })
+    .catch((errs) => (errors.value = errs));
+}
+
+function cancel() {
+  emit("cancelled");
+}
+
+function setFormDefaults(defaultValues) {
+  if (defaultValues == null) {
+    form.value = {};
+    return;
+  }
+
+  console.log("set form to defaults:", defaultValues);
+  form.value = {
+    logoFile: defaultValues.logo_file,
+    engineHourFormat: defaultValues.engine_hour_format,
+    fuelPaymentType: defaultValues.fuel_payment_type,
+    timezone: defaultValues.location_time_zone,
+    longitude: defaultValues.location_longitude,
+    latitude: defaultValues.location_latitude,
+    mapIframe: defaultValues.location_map,
+    address: defaultValues.location_address,
+    currency: defaultValues.currency,
+    accountOwner: defaultValues.payment_account_owner,
+    iban: defaultValues.payment_account_iban,
+    bic: defaultValues.payment_account_bic,
+    comment: defaultValues.payment_account_comment,
+    smtpSender: defaultValues.smtp_sender,
+    smtpServer: defaultValues.smtp_server,
+    smtpUsername: defaultValues.smtp_username,
+    smtpPassword: defaultValues.smtp_password,
+    recaptchaPrivateKey: defaultValues.recaptcha_privatekey,
+    recaptchaPublicKey: defaultValues.recaptcha_publickey,
+    myNautiqueEnabled: defaultValues.mynautique_enabled,
+    myNautiqueUser: defaultValues.mynautique_user,
+    myNautiquePassword: defaultValues.mynautique_password,
+    myNautiqueBoatId: defaultValues.mynautique_boat_id,
+    myNautiqueFuelCapacity: defaultValues.mynautique_fuel_capacity,
+  };
+}
+
+watch(getAdminConfiguration, (newValues) => {
+  console.debug("getAdminConfiguration() updated to new values:", newValues);
+  setFormDefaults(newValues);
+});
+
+watch(
+  form,
+  () => {
+    console.log("config changed");
+    configChangeHandler();
   },
-  watch: {
-    getAdminConfiguration: function (newValues) {
-      console.debug("getAdminConfiguration() updated to new values:", newValues);
-      this.setFormDefaults(newValues);
-    },
-    form: {
-      deep: true,
-      handler() {
-        console.log("config changed");
-        this.configChangeHandler();
-      },
-    },
-  },
-  created() {
-    this.queryAdminConfiguration()
-    .then(() => console.debug("settings loaded"))
-    .catch((errors) => console.error("failed to load settings:", errors));
-  },
-  mounted() {
-    this.setFormDefaults(this.getAdminConfiguration);
-  },
-};
+  { deep: true }
+);
+
+queryAdminConfiguration()
+  .then(() => console.debug("settings loaded"))
+  .catch((errs) => console.error("failed to load settings:", errs));
+
+onMounted(() => {
+  setFormDefaults(getAdminConfiguration.value);
+});
 </script>
 
 <style>

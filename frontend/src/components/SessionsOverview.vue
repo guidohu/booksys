@@ -91,39 +91,33 @@
   </sectioned-card-module>
 </template>
 
-<script>
+<script setup>
+import { computed } from "vue";
 import dayjs from "dayjs";
 import SectionedCardModule from "./bricks/SectionedCardModule.vue";
 
-export default {
-  name: "SessionsOverview",
-  components: {
-    SectionedCardModule,
-  },
-  props: ["sessions"],
-  computed: {
-    date: function () {
-      if (this.sessions != null && this.sessions.window_start != null) {
-        return dayjs(this.sessions.window_start).format("ddd DD.MM.YYYY");
-      }
-      return "no date selected";
-    },
-  },
-  methods: {
-    getTitle: function (session) {
-      if (session.title) {
-        return session.title;
-      } else {
-        return "-";
-      }
-    },
-    getTime: function (session) {
-      const startStr = dayjs(session.start).format("HH:mm");
-      const endStr = dayjs(session.end).format("HH:mm");
-      return startStr + " - " + endStr;
-    },
-  },
-};
+const props = defineProps(["sessions"]);
+
+const date = computed(() => {
+  if (props.sessions != null && props.sessions.window_start != null) {
+    return dayjs(props.sessions.window_start).format("ddd DD.MM.YYYY");
+  }
+  return "no date selected";
+});
+
+function getTitle(session) {
+  if (session.title) {
+    return session.title;
+  } else {
+    return "-";
+  }
+}
+
+function getTime(session) {
+  const startStr = dayjs(session.start).format("HH:mm");
+  const endStr = dayjs(session.end).format("HH:mm");
+  return startStr + " - " + endStr;
+}
 </script>
 
 <style scoped>

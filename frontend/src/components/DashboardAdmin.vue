@@ -50,7 +50,7 @@
 </template>
 
 <script setup>
-import BooksysPie from "./Pie.vue";
+import BooksysPie from "./BooksysPie.vue";
 import DashboardButton from "./bricks/DashboardButton.vue";
 import { ref } from "vue";
 

@@ -60,7 +60,7 @@
 </template>
 
 <script setup>
-import BooksysPie from "./Pie.vue";
+import BooksysPie from "./BooksysPie.vue";
 import NavbarMobile from "booksys/components/NavbarMobile.vue";
 import DashboardButton from "booksys/components/bricks/DashboardButton.vue";
 import { ref } from "vue";

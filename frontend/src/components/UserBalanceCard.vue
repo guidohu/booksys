@@ -25,39 +25,31 @@
   </sectioned-card-module>
 </template>
 
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { ref, computed } from "vue";
+import { useStore } from "vuex";
 import SectionedCardModule from "./bricks/SectionedCardModule.vue";
 import PaymentInfoModal from "./PaymentInfoModal.vue";
 import { formatCost } from "booksys/libs/formatters";
 
-export default {
-  name: "UserBalanceCard",
-  components: {
-    PaymentInfoModal,
-    SectionedCardModule,
-  },
-  data() {
-    return {
-      showPaymentInfoModal: false,
-    };
-  },
-  computed: {
-    ...mapGetters("login", ["userInfo"]),
-    ...mapGetters("configuration", ["getCurrency"]),
-    ...mapGetters("user", ["balanceRounded"]),
-  },
-  methods: {
-    ...mapActions("configuration", ["queryConfiguration"]),
-    showPaymentInfo: function () {
-      this.showPaymentInfoModal = true;
-    },
-    formatBalance: function(value) {
-      return formatCost(value, this.getCurrency);
-    }
-  },
-  created() {
-    this.queryConfiguration();
-  },
-};
+const store = useStore();
+
+const showPaymentInfoModal = ref(false);
+
+const userInfo = computed(() => store.getters["login/userInfo"]);
+const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
+const balanceRounded = computed(() => store.getters["user/balanceRounded"]);
+
+const queryConfiguration = () =>
+  store.dispatch("configuration/queryConfiguration");
+
+function showPaymentInfo() {
+  showPaymentInfoModal.value = true;
+}
+
+function formatBalance(value) {
+  return formatCost(value, getCurrency.value);
+}
+
+queryConfiguration();
 </script>

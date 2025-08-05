@@ -19,67 +19,53 @@
   </modal-container>
 </template>
 
-<script>
-import { sprintf } from "sprintf-js";
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { computed } from "vue";
+import { useStore } from "vuex";
 import ModalContainer from "./bricks/ModalContainer.vue";
 import ModalHeader from "./bricks/ModalHeader.vue";
 import ModalBody from "./bricks/ModalBody.vue";
 import ModalFooter from "./bricks/ModalFooter.vue";
 import TableModule from "./bricks/TableModule.vue";
-import { formatCost } from "booksys/libs/formatters";
+import { formatCost as formatCostFormatter } from "booksys/libs/formatters";
 
-export default {
-  name: "UserHeatsModal",
-  components: {
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    TableModule,
+defineProps(["visible"]);
+const emit = defineEmits(["update:visible"]);
+
+const store = useStore();
+
+const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
+const heatHistory = computed(() => store.getters["user/heatHistory"]);
+
+const fields = computed(() => [
+  {
+    key: "date",
+    label: "Date",
   },
-  props: ["visible"],
-  data: function () {
-    return {
-      fields: [
-        {
-          key: "date",
-          label: "Date",
-        },
-        {
-          key: "cost",
-          label: "Cost",
-          formatter: (value) => {
-            return this.formatCost(value);
-          },
-        },
-        {
-          key: "duration",
-          label: "Duration",
-          formatter: (value) => {
-            return value;
-          },
-        },
-      ],
-    };
+  {
+    key: "cost",
+    label: "Cost",
+    formatter: (value) => formatCost(value),
   },
-  computed: {
-    ...mapGetters("configuration", ["getConfiguration", "getCurrency"]),
-    ...mapGetters("user", ["heatHistory"]),
+  {
+    key: "duration",
+    label: "Duration",
+    formatter: (value) => value,
   },
-  methods: {
-    ...mapActions("configuration", ["queryConfiguration"]),
-    close: function () {
-      this.$emit("update:visible", false);
-    },
-    formatCost: function (value) {
-      return formatCost(value, this.getCurrency);
-    },
-  },
-  created() {
-    this.queryConfiguration();
-  },
-};
+]);
+
+const queryConfiguration = () =>
+  store.dispatch("configuration/queryConfiguration");
+
+function close() {
+  emit("update:visible", false);
+}
+
+function formatCost(value) {
+  return formatCostFormatter(value, getCurrency.value);
+}
+
+queryConfiguration();
 </script>
 
 <style>

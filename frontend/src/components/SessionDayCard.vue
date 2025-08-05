@@ -62,7 +62,7 @@
 <script setup>
 import { computed } from "vue";
 import { useStore } from "vuex";
-import BooksysPie from "./Pie.vue";
+import BooksysPie from "./BooksysPie.vue";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";

@@ -76,77 +76,78 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import reverse from "lodash/reverse";
 import dayjs from "dayjs";
 import WarningBox from "booksys/components/WarningBox.vue";
 import CardModule from "booksys/components/bricks/CardModule.vue";
 import InputSelect from "booksys/components/forms/inputs/InputSelect.vue";
-import { formatNumber } from "booksys/libs/formatters.js";
+import { formatNumber as formatNumberLib } from "booksys/libs/formatters.js";
 
-export default {
-  name: "PaymentDetails",
-  components: {
-    WarningBox,
-    CardModule,
-    InputSelect,
-  },
-  data() {
+const store = useStore();
+
+const errors = ref([]);
+const form = ref({
+  years: [],
+  selectedYear: "any",
+});
+
+const getYears = computed(() => store.getters["accounting/getYears"]);
+const getBalance = computed(() => store.getters["accounting/getBalance"]);
+const getTotalPayments = computed(
+  () => store.getters["accounting/getTotalPayments"]
+);
+const getTotalExpenditures = computed(
+  () => store.getters["accounting/getTotalExpenditures"]
+);
+const getTotalSessionPayments = computed(
+  () => store.getters["accounting/getTotalSessionPayments"]
+);
+const getSessionsBalance = computed(
+  () => store.getters["accounting/getSessionsBalance"]
+);
+const getSessionProfit = computed(
+  () => store.getters["accounting/getSessionProfit"]
+);
+const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
+
+watch(getYears, (newValue) => {
+  const availableYears = reverse(newValue);
+  console.log(availableYears);
+  form.value.years = availableYears.map((v) => {
     return {
-      errors: [],
-      form: {
-        years: [],
-        selectedYear: "any",
-      },
+      value: v,
+      text: v,
     };
-  },
-  computed: {
-    ...mapGetters("accounting", [
-      "getYears",
-      "getBalance",
-      "getTotalPayments",
-      "getTotalExpenditures",
-      "getTotalSessionPayments",
-      "getSessionsBalance",
-      "getSessionProfit",
-    ]),
-    ...mapGetters("configuration", ["getCurrency"]),
-  },
-  watch: {
-    getYears: function (newValue) {
-      const availableYears = reverse(newValue);
-      console.log(availableYears);
-      this.form.years = availableYears.map((v) => {
-        return {
-          value: v,
-          text: v,
-        };
-      });
-    },
-  },
-  methods: {
-    ...mapActions("accounting", ["queryYears", "queryStatistics"]),
-    ...mapActions("configuration", ["queryConfiguration"]),
-    yearSelectionChangeHandler: function () {
-      this.queryStatistics(this.form.selectedYear).catch((errors) => (this.errors = errors));
-    },
-    formatNumber: function(number) {
-      return formatNumber(number);
-    }
-  },
-  created() {
-    this.queryConfiguration();
+  });
+});
 
-    this.queryYears().catch((errors) => (this.errors = errors));
+const queryYears = () => store.dispatch("accounting/queryYears");
+const queryStatistics = (year) => store.dispatch("accounting/queryStatistics", year);
+const queryConfiguration = () =>
+  store.dispatch("configuration/queryConfiguration");
 
-    // get current year
-    const currentYear = dayjs().year();
-    this.form.selectedYear = currentYear;
+function yearSelectionChangeHandler() {
+  queryStatistics(form.value.selectedYear).catch(
+    (errs) => (errors.value = errs)
+  );
+}
 
-    this.queryStatistics(currentYear).catch((errors) => (this.errors = errors));
-  },
-};
+function formatNumber(number) {
+  return formatNumberLib(number);
+}
+
+queryConfiguration();
+
+queryYears().catch((errs) => (errors.value = errs));
+
+// get current year
+const currentYear = dayjs().year();
+form.value.selectedYear = currentYear;
+
+queryStatistics(currentYear).catch((errs) => (errors.value = errs));
 </script>
 
 <style scoped>

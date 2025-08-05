@@ -18,119 +18,114 @@
   </sectioned-card-module>
 </template>
 
-<script>
-import { mapActions, mapGetters } from "vuex";
+<script setup>
+import { ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import { sprintf } from "sprintf-js";
 import WarningBox from "booksys/components/WarningBox.vue";
 import HeatEntryModal from "booksys/components/HeatEntryModal.vue";
 import SectionedCardModule from "./bricks/SectionedCardModule.vue";
 import TableModule from "./bricks/TableModule.vue";
 
-export default {
-  name: "SessionHeatListCard",
-  components: {
-    WarningBox,
-    HeatEntryModal,
-    SectionedCardModule,
-    TableModule,
-  },
-  props: ["sessionId"],
-  data() {
-    return {
-      showHeatEntryModal: false,
-      errors: [],
-      columns: [],
-      rows: [{ time: "12" }],
-      selectedHeat: null,
-    };
-  },
-  computed: {
-    ...mapGetters("heats", ["getHeatsForSession"]),
-    ...mapGetters("configuration", ["getCurrency"]),
-  },
-  watch: {
-    getHeatsForSession: function (newHeats) {
-      // depending whether we have comments or not, we display the column or not
-      console.log("SessionHeatListCard, heats changed to", newHeats);
-      this.setColumns();
-    },
-    getCurrency: function (newCurrency) {
-      // if currency changed -> new formatter
-      this.setColumns();
-      console.log(newCurrency);
-    },
-  },
-  methods: {
-    ...mapActions("heats", ["queryHeatsForSession"]),
-    ...mapActions("configuration", ["queryConfiguration"]),
-    formatDuration: function (durationS) {
-      const seconds = durationS % 60;
-      const minutes = Math.floor(((durationS - seconds) % 3600) / 60);
-      const hours = Math.floor(
-        (durationS - seconds * 60 - minutes * 3600) / 3600
-      );
+const props = defineProps(["sessionId"]);
 
-      if (hours > 0) {
-        return sprintf("%02d:%02d:%02d", hours, minutes, seconds);
-      } else {
-        return sprintf("%02d:%02d", minutes, seconds);
-      }
-    },
-    setColumns: function () {
-      this.columns = [
-        {
-          key: "first_name",
-          label: "Name",
-          formatter: (value, key, item) => {
-            return item.first_name + " " + item.last_name.substring(0, 1) + ".";
-          },
-        },
-        {
-          key: "duration_s",
-          label: "Duration",
-          formatter: (value) => {
-            return this.formatDuration(value);
-          },
-        },
-        {
-          key: "cost",
-          label: "Cost",
-          formatter: (value) => value + " " + this.getCurrency,
-        },
-      ];
+const store = useStore();
 
-      // if any of the entries has a comment, also show the comment column
-      const heatsWithComments = this.getHeatsForSession.filter(
-        (h) => h.comment != null && h.comment.length > 0
-      );
-      if (heatsWithComments.length > 0) {
-        this.columns.push({
-          key: "comment",
-          label: "Comment",
-        });
-      }
-      console.log("Columns:", this.columns);
+const showHeatEntryModal = ref(false);
+const errors = ref([]);
+const columns = ref([]);
+const rows = ref([{ time: "12" }]);
+const selectedHeat = ref(null);
+
+const getHeatsForSession = computed(
+  () => store.getters["heats/getHeatsForSession"]
+);
+const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
+
+watch(getHeatsForSession, (newHeats) => {
+  // depending whether we have comments or not, we display the column or not
+  console.log("SessionHeatListCard, heats changed to", newHeats);
+  setColumns();
+});
+
+watch(getCurrency, (newCurrency) => {
+  // if currency changed -> new formatter
+  setColumns();
+  console.log(newCurrency);
+});
+
+const queryHeatsForSession = (sessionId) =>
+  store.dispatch("heats/queryHeatsForSession", sessionId);
+const queryConfiguration = () =>
+  store.dispatch("configuration/queryConfiguration");
+
+function formatDuration(durationS) {
+  const seconds = durationS % 60;
+  const minutes = Math.floor(((durationS - seconds) % 3600) / 60);
+  const hours = Math.floor(
+    (durationS - seconds * 60 - minutes * 3600) / 3600
+  );
+
+  if (hours > 0) {
+    return sprintf("%02d:%02d:%02d", hours, minutes, seconds);
+  } else {
+    return sprintf("%02d:%02d", minutes, seconds);
+  }
+}
+
+function setColumns() {
+  columns.value = [
+    {
+      key: "first_name",
+      label: "Name",
+      formatter: (value, key, item) => {
+        return item.first_name + " " + item.last_name.substring(0, 1) + ".";
+      },
     },
-    rowClick: function (item) {
-      console.log("clicked on item", item);
-      this.selectedHeat = item;
-      this.showHeatEntryModal = true;
+    {
+      key: "duration_s",
+      label: "Duration",
+      formatter: (value) => {
+        return formatDuration(value);
+      },
     },
-  },
-  created() {
-    // get heats
-    if (this.sessionId != null) {
-      this.queryConfiguration();
-      this.queryHeatsForSession(this.sessionId)
-        .then(() => this.setColumns())
-        .catch((errors) => (this.errors = errors));
-    } else {
-      console.error(
-        "Cannot query heats for session, as no sessionId is provided"
-      );
-    }
-  },
-};
+    {
+      key: "cost",
+      label: "Cost",
+      formatter: (value) => value + " " + getCurrency.value,
+    },
+  ];
+
+  // if any of the entries has a comment, also show the comment column
+  const heatsWithComments = getHeatsForSession.value.filter(
+    (h) => h.comment != null && h.comment.length > 0
+  );
+  if (heatsWithComments.length > 0) {
+    columns.value.push({
+      key: "comment",
+      label: "Comment",
+    });
+  }
+  console.log("Columns:", columns.value);
+}
+
+function rowClick(item) {
+  console.log("clicked on item", item);
+  selectedHeat.value = item;
+  showHeatEntryModal.value = true;
+}
+
+// get heats
+if (props.sessionId != null) {
+  queryConfiguration();
+  queryHeatsForSession(props.sessionId)
+    .then(() => setColumns())
+    .catch((errs) => (errors.value = errs));
+} else {
+  console.error(
+    "Cannot query heats for session, as no sessionId is provided"
+  );
+}
 </script>
 
 <style>

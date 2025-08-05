@@ -66,38 +66,25 @@
   </sectioned-card-module>
 </template>
 
-<script>
-import { mapGetters } from "vuex";
+<script setup>
+import { ref, computed } from "vue";
+import { useStore } from "vuex";
 import UserEditModal from "./UserEditModal.vue";
 import UserPasswordEditModal from "./UserPasswordEditModal.vue";
 import SectionedCardModule from "./bricks/SectionedCardModule.vue";
 
-export default {
-  name: "UserProfileCard",
-  components: {
-    UserEditModal,
-    UserPasswordEditModal,
-    SectionedCardModule,
-  },
-  data() {
-    return {
-      showPasswordEditModal: false,
-      showUserEditModal: false,
-    };
-  },
-  computed: {
-    ...mapGetters("login", ["userInfo"]),
-  },
-  methods: {
-    showUserEdit: function () {
-      this.showUserEditModal = true;
-    },
-    showPasswordEdit: function () {
-      this.showPasswordEditModal = true;
-    },
-  },
-  created() {
-    console.log("created: ", this.userInfo);
-  },
-};
+const store = useStore();
+
+const showPasswordEditModal = ref(false);
+const showUserEditModal = ref(false);
+
+const userInfo = computed(() => store.getters["login/userInfo"]);
+
+function showUserEdit() {
+  showUserEditModal.value = true;
+}
+
+function showPasswordEdit() {
+  showPasswordEditModal.value = true;
+}
 </script>

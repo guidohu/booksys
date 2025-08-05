@@ -80,8 +80,9 @@
   </modal-container>
 </template>
 
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import WarningBox from "booksys/components/WarningBox.vue";
 import Session, {
   SESSION_TYPE_OPEN,
@@ -103,155 +104,102 @@ import InputDateTimeLocal from "./forms/inputs/InputDateTimeLocal.vue";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-export default {
-  name: "SessionEditorModal",
-  components: {
-    WarningBox,
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    InputDateTimeLocal,
-    InputText,
-    InputTextMultiline,
-    InputNumber,
-    InputToggle,
-  },
-  props: ["defaultValues", "visible"],
-  data() {
-    return {
-      title: "",
-      errors: [],
-      form: {
-        id: null,
-        title: null,
-        description: null,
-        startDate: null,
-        endDate: null,
-        maximumRiders: null,
-        type: null,
-      },
-    };
-  },
-  computed: {
-    getMaximumRidersLabel: function () {
-      if (this.form.id == null) {
-        return "Maximum Riders";
-      } else {
-        return "Additional Slots for Riders";
-      }
-    },
-    ...mapGetters("configuration", ["getTimezone", "getMaximumNumberOfRiders"]),
-  },
-  methods: {
-    ...mapActions("sessions", ["createSession", "editSession"]),
-    save: function (event) {
-      event.preventDefault();
-      console.log("SessionEditorModal, save:", this.form);
+const props = defineProps(["defaultValues", "visible"]);
+const emit = defineEmits(["update:visible", "sessionCreatedHandler", "sessionEditedHandler"]);
 
-      const type =
-        this.form.type == true ? SESSION_TYPE_PRIVATE : SESSION_TYPE_OPEN;
+const store = useStore();
 
-      const session = new Session(
-        this.form.id,
-        this.form.title,
-        this.form.description,
-        dayjs.tz(this.form.startDate, this.getTimezone).format(),
-        dayjs.tz(this.form.endDate, this.getTimezone).format(),
-        this.form.maximumRiders,
-        type
-      );
+const title = ref("");
+const errors = ref([]);
+const form = ref({
+  id: null,
+  title: null,
+  description: null,
+  startDate: null,
+  endDate: null,
+  maximumRiders: null,
+  type: null,
+});
 
-      console.log("SessionEditorModal, save session dataType:", session);
-      if (session.id == null) {
-        this.createSession(session)
-          .then((response) => {
-            this.$emit("sessionCreatedHandler", response.session_id);
-            this.close();
-          })
-          .catch((err) => {
-            console.warn("Error received:", err)
-            this.errors = err;
-          });
-      } else {
-        this.editSession(session)
-          .then(() => {
-            this.$emit("sessionEditedHandler", session.id);
-            this.close();
-          })
-          .catch((err) => {
-            this.errors = err;
-          });
-      }
-    },
-    close: function () {
-      this.errors = [];
-      this.$emit("update:visible", false);
-    },
-    setFormContent: function () {
-      console.log("SessionEditorModal: Set defaults to:", this.defaultValues);
+const getTimezone = computed(() => store.getters["configuration/getTimezone"]);
+const getMaximumNumberOfRiders = computed(() => store.getters["configuration/getMaximumNumberOfRiders"]);
 
-      // set ID
-      this.form.id =
-        this.defaultValues != null && this.defaultValues.id != null
-          ? this.defaultValues.id
-          : null;
+const getMaximumRidersLabel = computed(() => {
+  return form.value.id == null ? "Maximum Riders" : "Additional Slots for Riders";
+});
 
-      if (this.form.id != null) {
-        this.title = "Edit Session";
-      } else {
-        this.title = "Create Session";
-      }
+const createSession = (session) => store.dispatch("sessions/createSession", session);
+const editSession = (session) => store.dispatch("sessions/editSession", session);
 
-      // set title
-      this.form.title =
-        this.defaultValues != null && this.defaultValues.title != null
-          ? this.defaultValues.title
-          : null;
+function save(event) {
+  event.preventDefault();
+  console.log("SessionEditorModal, save:", form.value);
 
-      // set description
-      this.form.description =
-        this.defaultValues != null && this.defaultValues.description != null
-          ? this.defaultValues.description
-          : null;
+  const type = form.value.type ? SESSION_TYPE_PRIVATE : SESSION_TYPE_OPEN;
 
-      // set times
-      this.form.startDate =
-        this.defaultValues != null && this.defaultValues.start != null
-          ? dayjs(this.defaultValues.start).format("YYYY-MM-DDTHH:mm")
-          : dayjs().tz(this.getTimezone).format("YYYY-MM-DDTHH:mm");
-      this.form.endDate =
-        this.defaultValues != null && this.defaultValues.end != null
-          ? dayjs(this.defaultValues.end).format("YYYY-MM-DDTHH:mm")
-          : dayjs()
-              .tz(this.getTimezone)
-              .add(1, "hour")
-              .format("YYYY-MM-DDTHH:mm");
+  const session = new Session(
+    form.value.id,
+    form.value.title,
+    form.value.description,
+    dayjs.tz(form.value.startDate, getTimezone.value).format(),
+    dayjs.tz(form.value.endDate, getTimezone.value).format(),
+    form.value.maximumRiders,
+    type
+  );
 
-      // set maximum riders
-      this.form.maximumRiders =
-        this.defaultValues != null && this.defaultValues.maximumRiders != null
-          ? this.defaultValues.maximumRiders
-          : this.getMaximumNumberOfRiders;
+  console.log("SessionEditorModal, save session dataType:", session);
+  if (session.id == null) {
+    createSession(session)
+      .then((response) => {
+        emit("sessionCreatedHandler", response.session_id);
+        close();
+      })
+      .catch((err) => {
+        console.warn("Error received:", err);
+        errors.value = err;
+      });
+  } else {
+    editSession(session)
+      .then(() => {
+        emit("sessionEditedHandler", session.id);
+        close();
+      })
+      .catch((err) => {
+        errors.value = err;
+      });
+  }
+}
 
-      // set session type
-      this.form.type =
-        this.defaultValues != null && this.defaultValues.type != null
-          ? this.defaultValues.type
-          : null;
+function close() {
+  errors.value = [];
+  emit("update:visible", false);
+}
 
-      console.log("SessionEditorModal: Form values are now:", this.form);
-    },
-  },
-  watch: {
-    defaultValues: function () {
-      // set form content whenever the default props change
-      this.setFormContent();
-    },
-  },
-  created() {
-    // set form content based on props
-    this.setFormContent();
-  },
-};
+function setFormContent() {
+  console.log("SessionEditorModal: Set defaults to:", props.defaultValues);
+
+  form.value.id = props.defaultValues?.id || null;
+
+  title.value = form.value.id != null ? "Edit Session" : "Create Session";
+
+  form.value.title = props.defaultValues?.title || null;
+  form.value.description = props.defaultValues?.description || null;
+
+  form.value.startDate = props.defaultValues?.start
+    ? dayjs(props.defaultValues.start).format("YYYY-MM-DDTHH:mm")
+    : dayjs().tz(getTimezone.value).format("YYYY-MM-DDTHH:mm");
+  form.value.endDate = props.defaultValues?.end
+    ? dayjs(props.defaultValues.end).format("YYYY-MM-DDTHH:mm")
+    : dayjs().tz(getTimezone.value).add(1, "hour").format("YYYY-MM-DDTHH:mm");
+
+  form.value.maximumRiders = props.defaultValues?.maximumRiders || getMaximumNumberOfRiders.value;
+
+  form.value.type = props.defaultValues?.type || null;
+
+  console.log("SessionEditorModal: Form values are now:", form.value);
+}
+
+watch(() => props.defaultValues, () => {
+  setFormContent();
+}, { deep: true, immediate: true });
 </script>

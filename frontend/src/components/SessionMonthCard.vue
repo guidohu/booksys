@@ -62,88 +62,86 @@
   </sectioned-card-module>
 </template>
 
-<script>
-import BooksysPie from "./Pie.vue";
-import  dayjs from "dayjs";
+<script setup>
+import { ref, computed, onMounted } from "vue";
+import BooksysPie from "./BooksysPie.vue";
+import dayjs from "dayjs";
 import { BooksysBrowser } from "booksys/libs/browser";
 import SectionedCardModule from "../components/bricks/SectionedCardModule.vue";
 
-export default {
-  name: "SessionMonthCard",
-  components: {
-    BooksysPie,
-    SectionedCardModule,
-  },
-  props: ["sessionData", "month"],
-  data() {
-    return {
-      properties: {
-        containerWidth: 85,
-        containerHeight: 63,
-        circleX: 45,
-        circleY: 34,
-        circleRadius: 23,
-        animate: false,
-        labels: false,
-      },
-    };
-  },
-  computed: {
-    monthString: function () {
-      return dayjs(this.month).format("MMMM YYYY");
-    },
-  },
-  mounted() {
-    // TODO make this depending on screen size and not isMobile or not
-    const totalWidth = this.$refs.calendarBody.clientWidth - 15;
-    const cardWidth = totalWidth / 7;
-    let cardHeight = cardWidth * 0.75;
-    if (this.isMobile()) {
-      cardHeight = cardWidth * 1.5;
-    }
-    const radius = (Math.min(cardWidth, cardHeight) / 2) * 0.7;
-    this.properties = {
-      containerHeight: cardHeight,
-      containerWidth: cardWidth,
-      circleX: (cardWidth - 3) / 2,
-      circleY: cardHeight / 2,
-      circleRadius: radius,
-      animate: false,
-      labels: false,
-    };
-  },
-  methods: {
-    prevMonth: function () {
-      this.$emit("prevMonth");
-    },
-    nextMonth: function () {
-      this.$emit("nextMonth");
-    },
-    getDay: function (isoTime) {
-      return dayjs(isoTime).format("DD");
-    },
-    isMobile: function () {
-      return BooksysBrowser.isMobileResponsive();
-    },
-    getCalendarDayBoxClass: function (daySessionData) {
-      const boxMonth = dayjs(daySessionData.window_start)
-        .startOf("month")
-        .format();
-      if (this.month == boxMonth) {
-        return "calendar-day-box";
-      }
-      return "different-month";
-    },
-    navigateTo: function (daySessionData) {
-      window.location.href =
-        "/today?date=" +
-        dayjs(daySessionData.window_start).format("YYYY-MM-DD");
-    },
-    mouseOver: function (daySessionData) {
-      this.$emit("mouseOverHandler", daySessionData);
-    },
-  },
-};
+const props = defineProps(["sessionData", "month"]);
+const emit = defineEmits(["prevMonth", "nextMonth", "mouseOverHandler"]);
+
+const calendarBody = ref(null);
+const properties = ref({
+  containerWidth: 85,
+  containerHeight: 63,
+  circleX: 45,
+  circleY: 34,
+  circleRadius: 23,
+  animate: false,
+  labels: false,
+});
+
+const monthString = computed(() => {
+  return dayjs(props.month).format("MMMM YYYY");
+});
+
+onMounted(() => {
+  // TODO make this depending on screen size and not isMobile or not
+  const totalWidth = calendarBody.value.clientWidth - 15;
+  const cardWidth = totalWidth / 7;
+  let cardHeight = cardWidth * 0.75;
+  if (isMobile()) {
+    cardHeight = cardWidth * 1.5;
+  }
+  const radius = (Math.min(cardWidth, cardHeight) / 2) * 0.7;
+  properties.value = {
+    containerHeight: cardHeight,
+    containerWidth: cardWidth,
+    circleX: (cardWidth - 3) / 2,
+    circleY: cardHeight / 2,
+    circleRadius: radius,
+    animate: false,
+    labels: false,
+  };
+});
+
+function prevMonth() {
+  emit("prevMonth");
+}
+
+function nextMonth() {
+  emit("nextMonth");
+}
+
+function getDay(isoTime) {
+  return dayjs(isoTime).format("DD");
+}
+
+function isMobile() {
+  return BooksysBrowser.isMobileResponsive();
+}
+
+function getCalendarDayBoxClass(daySessionData) {
+  const boxMonth = dayjs(daySessionData.window_start)
+    .startOf("month")
+    .format();
+  if (props.month == boxMonth) {
+    return "calendar-day-box";
+  }
+  return "different-month";
+}
+
+function navigateTo(daySessionData) {
+  window.location.href =
+    "/today?date=" +
+    dayjs(daySessionData.window_start).format("YYYY-MM-DD");
+}
+
+function mouseOver(daySessionData) {
+  emit("mouseOverHandler", daySessionData);
+}
 </script>
 
 <style scoped>

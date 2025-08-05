@@ -36,48 +36,37 @@
   </sectioned-card-module>
 </template>
 
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { ref, computed } from "vue";
+import { useStore } from "vuex";
 import SectionedCardModule from "./bricks/SectionedCardModule.vue";
 import UserHeatsModal from "./UserHeatsModal.vue";
 import { formatDurationString, formatNumber } from "booksys/libs/formatters";
 
-export default {
-  name: "UserStatisticsCard",
-  components: {
-    UserHeatsModal,
-    SectionedCardModule,
-  },
-  data() {
-    return {
-      showUserHeatsModal: false,
-    };
-  },
-  computed: {
-    ...mapGetters("login", ["userInfo"]),
-    ...mapGetters("configuration", ["getCurrency"]),
-    ...mapGetters("user", [
-      "heatHistory",
-      "heatTimeMinutes",
-      "heatTimeMinutesYTD",
-      "heatCost",
-      "heatCostYTD",
-    ]),
-  },
-  methods: {
-    ...mapActions("configuration", ["queryConfiguration"]),
-    showLatestHeats: function () {
-      this.showUserHeatsModal = true;
-    },
-    formatDuration: function(minutes) {
-      return formatDurationString(minutes*60, false);
-    },
-    formatCost: function(cost) {
-      return formatNumber(cost) + " " + this.getCurrency;
-    }
-  },
-  created() {
-    this.queryConfiguration();
-  },
-};
+const store = useStore();
+
+const showUserHeatsModal = ref(false);
+
+const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
+const heatTimeMinutes = computed(() => store.getters["user/heatTimeMinutes"]);
+const heatTimeMinutesYTD = computed(() => store.getters["user/heatTimeMinutesYTD"]);
+const heatCost = computed(() => store.getters["user/heatCost"]);
+const heatCostYTD = computed(() => store.getters["user/heatCostYTD"]);
+
+const queryConfiguration = () =>
+  store.dispatch("configuration/queryConfiguration");
+
+function showLatestHeats() {
+  showUserHeatsModal.value = true;
+}
+
+function formatDuration(minutes) {
+  return formatDurationString(minutes * 60, false);
+}
+
+function formatCost(cost) {
+  return formatNumber(cost) + " " + getCurrency.value;
+}
+
+queryConfiguration();
 </script>

@@ -21,23 +21,12 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "WarningBox",
+<script setup>
+import { computed } from "vue";
 
-  props: ["errors", "dismissible"],
-  computed: {
-    isDismissible: function () {
-      return this.dismissible != null && this.dismissible == "true";
-    },
-  },
-  mounted() {
-    console.log("warningbox:", this.errors);
-  },
-  // methods: {
-  //   dismissedHandler: function () {
-  //     this.$emit("dismissed");
-  //   },
-  // },
-};
+const props = defineProps(["errors", "dismissible"]);
+
+const isDismissible = computed(() => {
+  return props.dismissible != null && props.dismissible == "true";
+});
 </script>

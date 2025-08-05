@@ -105,8 +105,9 @@
   </modal-container>
 </template>
 
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import { sprintf } from "sprintf-js";
 import WarningBox from "booksys/components/WarningBox.vue";
 import InputText from "./forms/inputs/InputText.vue";
@@ -118,141 +119,142 @@ import InputCurrency from "./forms/inputs/InputCurrency.vue";
 import ModalFooter from "./bricks/ModalFooter.vue";
 import { confirm } from "booksys/components/bricks/DialogModal.js";
 
-export default {
-  name: "UserGroupModal",
-  components: {
-    WarningBox,
-    InputText,
-    InputSelect,
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    InputCurrency,
-    ModalFooter,
-  },
-  props: ["userGroup", "editMode", "visible"],
-  emits: ["update:visible", "save"],
-  data() {
+const props = defineProps(["userGroup", "editMode", "visible"]);
+const emit = defineEmits(["update:visible", "save"]);
+
+const store = useStore();
+
+const errors = ref([]);
+const userRoleList = ref([]);
+const form = ref({});
+const isEditMode = ref(false);
+const title = ref("User Group");
+
+const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
+const userRoles = computed(() => store.getters["user/userRoles"]);
+
+const userRoleDescription = computed(() => {
+  if (form.value.user_role_id == null) {
+    return "";
+  }
+  const role = userRoles.value.find(
+    (ur) => ur.user_role_id == form.value.user_role_id
+  );
+  return role.user_role_description;
+});
+
+watch(
+  () => props.userGroup,
+  () => {
+    reloadProps();
+  }
+);
+
+watch(
+  () => props.editMode,
+  (newValue) => {
+    isEditMode.value = newValue;
+    setTitle();
+  }
+);
+
+watch(userRoles, (newValue) => {
+  userRolesToList(newValue);
+});
+
+watch(
+  () => props.visible,
+  () => {
+    reloadProps();
+  }
+);
+
+const queryConfiguration = () =>
+  store.dispatch("configuration/queryConfiguration");
+const queryUserRoles = () => store.dispatch("user/queryUserRoles");
+const saveUserGroup = (group) => store.dispatch("user/saveUserGroup", group);
+const deleteUserGroup = (id) => store.dispatch("user/deleteUserGroup", id);
+
+function reloadProps() {
+  isEditMode.value = props.editMode;
+  if (props.userGroup != null) {
+    form.value = { ...props.userGroup };
+    form.value.price_min = sprintf("%.2f", props.userGroup.price_min);
+  } else {
+    form.value = {};
+  }
+  setTitle();
+}
+
+function save() {
+  saveUserGroup(form.value)
+    .then(() => {
+      errors.value = [];
+      emit("save", form.value);
+      form.value = {};
+      close();
+    })
+    .catch((errs) => (errors.value = errs));
+}
+
+function close() {
+  emit("update:visible", false);
+}
+
+function remove() {
+  const name = form.value.user_group_name;
+  const id = form.value.user_group_id;
+  confirm({
+    title: "Delete User Group",
+    message: "Do you really want to delete user group " + name + "?",
+  })
+    .then((value) => {
+      // delete user group
+      if (value == true) {
+        deleteUserGroup(id)
+          .then(() => close())
+          .catch((errs) => (errors.value = errs));
+      }
+    })
+    .catch((err) => {
+      errors.value = [err];
+    });
+}
+
+function enableEditMode() {
+  isEditMode.value = true;
+  setTitle();
+}
+
+function setTitle() {
+  if (isEditMode.value == true && form.value.user_group_id == null) {
+    title.value = "New User Group";
+  } else if (isEditMode.value == true) {
+    title.value = "Edit User Group";
+  } else {
+    title.value = "User Group";
+  }
+}
+
+function userRolesToList(roles) {
+  if (roles == null) {
+    roles = userRoles.value;
+  }
+  userRoleList.value = roles.map((ur) => {
     return {
-      errors: [],
-      userRoleList: [],
-      form: {},
-      isEditMode: false,
-      title: "User Group",
+      value: ur.user_role_id,
+      text: ur.user_role_name,
     };
-  },
-  computed: {
-    ...mapGetters("configuration", ["getCurrency"]),
-    ...mapGetters("user", ["userRoles"]),
-    userRoleDescription: function () {
-      if (this.form.user_role_id == null) {
-        return "";
-      }
-      const role = this.userRoles.find(
-        (ur) => ur.user_role_id == this.form.user_role_id
-      );
-      return role.user_role_description;
-    },
-  },
-  watch: {
-    userGroup: function () {
-      this.reloadProps();
-    },
-    editMode: function (newValue) {
-      this.isEditMode = newValue;
-      this.setTitle();
-    },
-    userRoles: function (newValue) {
-      this.userRolesToList(newValue);
-    },
-    visible: function () {
-      this.reloadProps();
-    },
-  },
-  methods: {
-    reloadProps: function () {
-      this.isEditMode = this.editMode;
-      if (this.userGroup != null) {
-        this.form = { ...this.userGroup };
-        this.form.price_min = sprintf("%.2f", this.userGroup.price_min);
-      } else {
-        this.form = {};
-      }
-      this.setTitle();
-    },
-    save: function () {
-      this.saveUserGroup(this.form)
-        .then(() => {
-          this.errors = [];
-          this.$emit("save", this.form);
-          this.form = {};
-          this.close();
-        })
-        .catch((errors) => (this.errors = errors));
-    },
-    close: function () {
-      this.$emit("update:visible", false);
-    },
-    remove: function () {
-      const name = this.form.user_group_name;
-      const id = this.form.user_group_id;
-      confirm({
-        title: "Delete User Group",
-        message: "Do you really want to delete user group " + name + "?",
-      })
-        .then((value) => {
-          // delete user group
-          if (value == true) {
-            this.deleteUserGroup(id)
-              .then(() => this.close())
-              .catch((errors) => (this.errors = errors));
-          }
-        })
-        .catch((err) => {
-          this.errors = [err];
-        });
-    },
-    ...mapActions("configuration", ["queryConfiguration"]),
-    ...mapActions("user", [
-      "queryUserRoles",
-      "saveUserGroup",
-      "deleteUserGroup",
-    ]),
-    enableEditMode: function () {
-      this.isEditMode = true;
-      this.setTitle();
-    },
-    setTitle: function () {
-      if (this.isEditMode == true && this.form.user_group_id == null) {
-        this.title = "New User Group";
-      } else if (this.isEditMode == true) {
-        this.title = "Edit User Group";
-      } else {
-        this.title = "User Group";
-      }
-    },
-    userRolesToList: function (userRoles) {
-      if (userRoles == null) {
-        userRoles = this.userRoles;
-      }
-      this.userRoleList = userRoles.map((ur) => {
-        return {
-          value: ur.user_role_id,
-          text: ur.user_role_name,
-        };
-      });
-    },
-  },
-  created() {
-    this.queryConfiguration();
+  });
+}
 
-    this.queryUserRoles()
-      .then(() => this.userRolesToList())
-      .catch((errors) => this.errors.append(...errors));
+queryConfiguration();
 
-    this.reloadProps();
-  },
-};
+queryUserRoles()
+  .then(() => userRolesToList())
+  .catch((errs) => errors.value.push(...errs));
+
+reloadProps();
 </script>
 
 <style scoped>

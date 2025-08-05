@@ -52,48 +52,40 @@
   </div>
 </template>
 
-<script>
-import { mapActions, mapGetters } from "vuex";
+<script setup>
+import { computed } from "vue";
+import { useStore } from "vuex";
 import UserSessionsTable from "booksys/components/UserSessionsTable.vue";
 
-export default {
-  name: "UserSessionTabs",
-  components: {
-    UserSessionsTable,
-  },
-  computed: {
-    ...mapGetters("user", ["userSchedule"]),
-    upcomingSessions: function () {
-      if (this.userSchedule.sessions != null) {
-        return this.userSchedule.sessions;
-      }
-      return [];
-    },
-    pastSessions: function () {
-      if (this.userSchedule.sessions_old != null) {
-        return this.userSchedule.sessions_old;
-      }
-      return [];
-    },
-  },
-  methods: {
-    ...mapActions("user", ["queryUserSchedule", "cancelSession"]),
-    cancelSessionHandler(value) {
-      console.log("Cancel session with ID:", value, "in parent");
-      this.cancelSession(value);
-    },
-  },
-  created() {
-    this.queryUserSchedule()
-      .then(() => {
-        console.log("Retrieved userSchedule");
-        console.debug(this.userSchedule);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  },
-};
+const store = useStore();
+
+const userSchedule = computed(() => store.getters["user/userSchedule"]);
+
+const upcomingSessions = computed(() => {
+  if (userSchedule.value.sessions != null) {
+    return userSchedule.value.sessions;
+  }
+  return [];
+});
+
+const pastSessions = computed(() => {
+  if (userSchedule.value.sessions_old != null) {
+    return userSchedule.value.sessions_old;
+  }
+  return [];
+});
+
+const queryUserSchedule = () => store.dispatch("user/queryUserSchedule");
+const cancelSession = (sessionId) =>
+  store.dispatch("user/cancelSession", sessionId);
+
+function cancelSessionHandler(value) {
+  cancelSession(value);
+}
+
+queryUserSchedule().catch((error) => {
+  console.error(error);
+});
 </script>
 
 <style scoped>

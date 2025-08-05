@@ -69,126 +69,111 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import { sprintf } from "sprintf-js";
 import WarningBox from "booksys/components/WarningBox.vue";
 import TableModule from "./bricks/TableModule.vue";
 import { confirm } from "booksys/components/bricks/DialogModal.js";
 import UserGroupModal from "booksys/components/UserGroupModal.vue";
 
-export default {
-  name: "UserGroupTable",
-  components: {
-    WarningBox,
-    TableModule,
-    UserGroupModal,
-  },
-  data() {
-    return {
-      errors: [],
-      userGroupList: [],
-      items: [],
-      selectedItems: [],
-      fields: [
-        {
-          key: "user_group_name",
-          label: "User Group",
-          sortable: true,
-        },
-        {
-          key: "user_role_description",
-          label: "User Role",
-          sortable: true,
-        },
-        {
-          key: "price_min",
-          label: "Price " + this.getCurrency + "/min",
-          sortable: true,
-          sortKey: "price_min",
-          formatter: (value) => {
-            return sprintf("%.2f", value);
-          },
-        },
-      ],
-      userGroupEditMode: false,
-      showUserGroupModal: false,
-    };
-  },
-  computed: {
-    ...mapGetters("user", ["userListDetailed", "userGroups"]),
-    ...mapGetters("configuration", ["getCurrency"]),
-  },
-  watch: {
-    userGroups: function (newUserGroups) {
-      this.setRows(newUserGroups);
-    },
-    getCurrency: function (currency) {
-      this.fields[2].label = "Price " + currency + "/min";
-    },
-  },
-  methods: {
-    ...mapActions("user", [
-      "queryUserListDetailed",
-      "queryUserGroups",
-      "deleteUserGroup",
-      "setUserGroup",
-    ]),
-    ...mapActions("configuration", ["queryConfiguration"]),
-    dismissedHandler: function () {
-      this.errors = [];
-    },
-    setRows: function () {
-      this.items = this.userGroups;
-    },
-    rowSelected: function (rows) {
-      this.selectedItems = rows;
-    },
-    isSelected: function () {
-      return this.selectedItems.length > 0;
-    },
-    showDeleteUserGroupDialog: function () {
-      const name = this.selectedItems[0].user_group_name;
-      const id = this.selectedItems[0].user_group_id;
-      confirm({
-        title: "Delete User Group",
-        message: "Do you really want to delete user group " + name + "?",
-      })
-        .then((value) => {
-          // delete user group
-          if (value == true) {
-            this.deleteUserGroup(id).catch((errors) => (this.errors = errors));
-          }
-        })
-        .catch((err) => {
-          this.errors = [err];
-        });
-    },
-    showDetails: function () {
-      this.userGroupEditMode = false;
-      this.showUserGroupModal = true;
-    },
-    editGroup: function () {
-      this.userGroupEditMode = true;
-      this.showUserGroupModal = true;
-    },
-    newGroup: function () {
-      this.userGroupEditMode = true;
-      this.selectedItems = [];
-      this.showUserGroupModal = true;
-    },
-    resetSelection: function () {
-      this.selectedItems = [];
-    },
-  },
-  created() {
-    this.queryConfiguration().catch((errors) => this.errors.push(...errors));
+const store = useStore();
 
-    this.queryUserGroups()
-      .then(() => this.setRows())
-      .catch((errors) => this.errors.push(...errors));
+const errors = ref([]);
+const items = ref([]);
+const selectedItems = ref([]);
+const userGroupEditMode = ref(false);
+const showUserGroupModal = ref(false);
+
+const userGroups = computed(() => store.getters["user/userGroups"]);
+const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
+
+const fields = computed(() => [
+  {
+    key: "user_group_name",
+    label: "User Group",
+    sortable: true,
   },
-};
+  {
+    key: "user_role_description",
+    label: "User Role",
+    sortable: true,
+  },
+  {
+    key: "price_min",
+    label: `Price ${getCurrency.value}/min`,
+    sortable: true,
+    sortKey: "price_min",
+    formatter: (value) => {
+      return sprintf("%.2f", value);
+    },
+  },
+]);
+
+watch(userGroups, () => {
+  setRows();
+});
+
+const queryUserGroups = () => store.dispatch("user/queryUserGroups");
+const deleteUserGroup = (id) => store.dispatch("user/deleteUserGroup", id);
+const queryConfiguration = () =>
+  store.dispatch("configuration/queryConfiguration");
+
+function dismissedHandler() {
+  errors.value = [];
+}
+
+function setRows() {
+  items.value = userGroups.value;
+}
+
+function rowSelected(rows) {
+  selectedItems.value = rows;
+}
+
+function showDeleteUserGroupDialog() {
+  const name = selectedItems.value[0].user_group_name;
+  const id = selectedItems.value[0].user_group_id;
+  confirm({
+    title: "Delete User Group",
+    message: `Do you really want to delete user group ${name}?`,
+  })
+    .then((value) => {
+      if (value == true) {
+        deleteUserGroup(id).catch((errs) => (errors.value = errs));
+      }
+    })
+    .catch((err) => {
+      errors.value = [err];
+    });
+}
+
+function showDetails() {
+  userGroupEditMode.value = false;
+  showUserGroupModal.value = true;
+}
+
+function editGroup() {
+  userGroupEditMode.value = true;
+  showUserGroupModal.value = true;
+}
+
+function newGroup() {
+  userGroupEditMode.value = true;
+  selectedItems.value = [];
+  showUserGroupModal.value = true;
+}
+
+function resetSelection() {
+  selectedItems.value = [];
+}
+
+queryConfiguration().catch((errs) => errors.value.push(...errs));
+
+queryUserGroups()
+  .then(() => setRows())
+  .catch((errs) => errors.value.push(...errs));
 </script>
 
 <style scoped>

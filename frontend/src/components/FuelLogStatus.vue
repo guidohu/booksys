@@ -61,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onCreated, onBeforeUnmount } from "vue";
+import { ref, computed, onBeforeUnmount } from "vue";
 import { useStore } from "vuex";
 import WarningBox from "booksys/components/WarningBox.vue";
 import { min } from "lodash";

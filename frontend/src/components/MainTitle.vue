@@ -10,11 +10,8 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "MainTitle",
-  props: ["titleName"],
-};
+<script setup>
+const props = defineProps(["titleName"]);
 </script>
 
 <style>

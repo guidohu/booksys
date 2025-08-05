@@ -83,196 +83,177 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import { sprintf } from "sprintf-js";
 import WarningBox from "booksys/components/WarningBox.vue";
 import TableModule from "./bricks/TableModule.vue";
 import InputSelect from "./forms/inputs/InputSelect.vue";
 import { confirm, info } from "booksys/components/bricks/DialogModal.js";
 
-export default {
-  name: "UserTable",
-  components: {
-    WarningBox,
-    TableModule,
-    InputSelect,
-  },
-  data() {
-    return {
-      errors: [],
-      userGroupList: [],
-      items: [],
-      selectedItems: [],
-      fields: [
-        {
-          key: "first_name",
-          label: "First Name",
-          sortable: true,
-        },
-        {
-          key: "last_name",
-          label: "Surname",
-          sortable: true,
-        },
-        {
-          key: "mobile",
-          label: "Mobile",
-        },
-        {
-          key: "email",
-          label: "Email",
-        },
-        {
-          key: "license",
-          label: "License",
-          sortable: true,
-        },
-        {
-          key: "balance",
-          label: "Balance",
-          sortable: true,
-          sortKey: "balance",
-          //formatter: (value, key, item) => { return sprintf("%.2f%s", (item.total_payment - item.total_heat_cost), this.getCurrency) }
-        },
-        {
-          key: "status",
-          sortable: true,
-          label: "User Group",
-        },
-        {
-          key: "locked",
-          sortable: true,
-          label: "Locked",
-        },
-      ],
-    };
-  },
-  computed: {
-    ...mapGetters("user", ["userListDetailed", "userGroups"]),
-    ...mapGetters("configuration", ["getCurrency"]),
-  },
-  watch: {
-    userGroups: function (newUserGroups) {
-      this.userGroupToList(newUserGroups);
-    },
-    userListDetailed: function (newUserListDetailed) {
-      // precalculate the balance as a separate field
-      // to simplify sorting
-      const userList = newUserListDetailed.map((e) => {
-        e.balance = e.total_payment - e.total_heat_cost;
-        return e;
-      });
-      this.items = userList;
-    },
-  },
-  methods: {
-    ...mapActions("user", [
-      "queryUserListDetailed",
-      "queryUserGroups",
-      "lockUser",
-      "deleteUser",
-      "setUserGroup",
-    ]),
-    ...mapActions("configuration", ["queryConfiguration"]),
-    dismissedHandler: function () {
-      this.errors = [];
-    },
-    setRows: function () {
-      this.items = this.userListDetailed;
-    },
-    getBalance: function (row) {
-      return sprintf(
-        "%.2f %s",
-        row.total_payment - row.total_heat_cost,
-        this.getCurrency
-      );
-    },
-    rowSelected: function (rows) {
-      this.selectedItems = rows;
-    },
-    isSelected: function () {
-      return this.selectedItems.length > 0;
-    },
-    lock: function (user) {
-      this.lockUser({ 'user': user.id, 'locked': true}).catch((errors) => (this.errors = errors));
-    },
-    unlock: function (user) {
-      this.lockUser({ 'user': user.id, 'locked': false}).catch((errors) => (this.errors = errors));
-    },
-    groupChangeHandler: function (userGroupId, userId) {
-      console.log("Change to: userGroupId", userGroupId, "for user", userId);
-      const userGroupUpdate = {
-        userId: userId,
-        userGroupId: userGroupId,
-      };
-      this.setUserGroup(userGroupUpdate)
-        .then(() => (this.errors = []))
-        .catch((errors) => (this.errors = errors));
-    },
-    showDeleteUserDialog: function () {
-      const name =
-        this.selectedItems[0].first_name +
-        " " +
-        this.selectedItems[0].last_name;
-      confirm({
-        title: "Delete User",
-        message: "Do you really want to delete user " + name + "?",
-      })
-        .then((value) => {
-          console.log("Returned with", value);
-          // delete user
-          if (value == true) {
-            this.deleteUser(this.selectedItems[0].id).catch(
-              (errors) => (this.errors = errors)
-            );
-          }
-        })
-        .catch((error) => {
-          console.warn("Dialog returned error", error);
-          this.errors = [error];
-        });
-    },
-    showDetails: function () {
-      info({
-        title: "Not implemented.",
-        message: "This functionality is still missing.",
-      });
-    },
-    userGroupToList: function (userGroups) {
-      if (userGroups == null) {
-        userGroups = this.userGroups;
-      }
-      this.userGroupList = userGroups.map((ug) => {
-        return {
-          value: ug.user_group_id,
-          text: ug.user_group_name,
-        };
-      });
-    },
-  },
-  created() {
-    this.queryConfiguration().catch((errors) => this.errors.push(...errors));
+const store = useStore();
 
-    // TODO get user groups
-    this.queryUserGroups()
-      .then(() => this.userGroupToList())
-      .catch((errors) => {
-        console.log("UserTable (queryUserGroups) got errors:", this.errors);
-        this.errors.push(...errors);
-      });
+const errors = ref([]);
+const userGroupList = ref([]);
+const items = ref([]);
+const selectedItems = ref([]);
 
-    this.queryUserListDetailed()
-      .then(() => this.setRows())
-      .catch((errors) => {
-        console.log(
-          "UserTable (queryUserListDetailed) got errors:",
-          this.errors
+const fields = ref([
+  {
+    key: "first_name",
+    label: "First Name",
+    sortable: true,
+  },
+  {
+    key: "last_name",
+    label: "Surname",
+    sortable: true,
+  },
+  {
+    key: "mobile",
+    label: "Mobile",
+  },
+  {
+    key: "email",
+    label: "Email",
+  },
+  {
+    key: "license",
+    label: "License",
+    sortable: true,
+  },
+  {
+    key: "balance",
+    label: "Balance",
+    sortable: true,
+    sortKey: "balance",
+  },
+  {
+    key: "status",
+    sortable: true,
+    label: "User Group",
+  },
+  {
+    key: "locked",
+    sortable: true,
+    label: "Locked",
+  },
+]);
+
+const userListDetailed = computed(() => store.getters["user/userListDetailed"]);
+const userGroups = computed(() => store.getters["user/userGroups"]);
+const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
+
+watch(userGroups, (newUserGroups) => {
+  userGroupToList(newUserGroups);
+});
+
+watch(userListDetailed, (newUserListDetailed) => {
+  const userList = newUserListDetailed.map((e) => {
+    e.balance = e.total_payment - e.total_heat_cost;
+    return e;
+  });
+  items.value = userList;
+});
+
+const queryUserListDetailed = () => store.dispatch("user/queryUserListDetailed");
+const queryUserGroups = () => store.dispatch("user/queryUserGroups");
+const lockUser = (data) => store.dispatch("user/lockUser", data);
+const deleteUser = (id) => store.dispatch("user/deleteUser", id);
+const setUserGroup = (data) => store.dispatch("user/setUserGroup", data);
+const queryConfiguration = () =>
+  store.dispatch("configuration/queryConfiguration");
+
+function dismissedHandler() {
+  errors.value = [];
+}
+
+function getBalance(row) {
+  return sprintf(
+    "%.2f %s",
+    row.total_payment - row.total_heat_cost,
+    getCurrency.value
+  );
+}
+
+function rowSelected(rows) {
+  selectedItems.value = rows;
+}
+
+function lock(user) {
+  lockUser({ user: user.id, locked: true }).catch(
+    (errs) => (errors.value = errs)
+  );
+}
+
+function unlock(user) {
+  lockUser({ user: user.id, locked: false }).catch(
+    (errs) => (errors.value = errs)
+  );
+}
+
+function groupChangeHandler(userGroupId, userId) {
+  const userGroupUpdate = {
+    userId: userId,
+    userGroupId: userGroupId,
+  };
+  setUserGroup(userGroupUpdate)
+    .then(() => (errors.value = []))
+    .catch((errs) => (errors.value = errs));
+}
+
+function showDeleteUserDialog() {
+  const name =
+    selectedItems.value[0].first_name + " " + selectedItems.value[0].last_name;
+  confirm({
+    title: "Delete User",
+    message: `Do you really want to delete user ${name}?`,
+  })
+    .then((value) => {
+      if (value == true) {
+        deleteUser(selectedItems.value[0].id).catch(
+          (errs) => (errors.value = errs)
         );
-        this.errors.push(...errors);
-      });
-  },
-};
+      }
+    })
+    .catch((error) => {
+      errors.value = [error];
+    });
+}
+
+function showDetails() {
+  info({
+    title: "Not implemented.",
+    message: "This functionality is still missing.",
+  });
+}
+
+function userGroupToList(groups) {
+  if (groups == null) {
+    groups = userGroups.value;
+  }
+  userGroupList.value = groups.map((ug) => {
+    return {
+      value: ug.user_group_id,
+      text: ug.user_group_name,
+    };
+  });
+}
+
+queryConfiguration().catch((errs) => errors.value.push(...errs));
+
+queryUserGroups()
+  .then(() => userGroupToList())
+  .catch((errs) => {
+    errors.value.push(...errs);
+  });
+
+queryUserListDetailed()
+  .then(() => (items.value = userListDetailed.value))
+  .catch((errs) => {
+    errors.value.push(...errs);
+  });
 </script>
 
 <style scoped>

@@ -48,8 +48,9 @@
   </modal-container>
 </template>
 
-<script>
-import { mapActions } from "vuex";
+<script setup>
+import { ref } from "vue";
+import { useStore } from "vuex";
 import WarningBox from "booksys/components/WarningBox.vue";
 import ModalContainer from "./bricks/ModalContainer.vue";
 import ModalHeader from "./bricks/ModalHeader.vue";
@@ -57,70 +58,54 @@ import ModalBody from "./bricks/ModalBody.vue";
 import ModalFooter from "./bricks/ModalFooter.vue";
 import InputPassword from "./forms/inputs/InputPassword.vue";
 
-export default {
-  name: "UserPasswordEditModal",
-  components: {
-    WarningBox,
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    InputPassword,
-  },
-  props: ["visible"],
-  ModalContainer,
-  data() {
-    return {
-      form: {
-        oldPassword: "",
-        newPassword: "",
-        newPasswordConfirm: "",
-      },
-      errors: [],
-      isLoading: false,
-    };
-  },
-  methods: {
-    close: function () {
-      this.$emit("update:visible", false);
-    },
-    save: function (event) {
-      event.preventDefault();
+defineProps(["visible"]);
+const emit = defineEmits(["update:visible"]);
 
-      if (this.form.oldPassword == this.form.newPassword) {
-        this.errors = ["Old and new password cannot be identical."];
-        return;
-      }
-      if (this.form.newPassword != this.form.newPasswordConfirm) {
-        this.errors = [
-          "The new passwords do not match. Please enter the same values for the new passwords.",
-        ];
-        return;
-      }
+const store = useStore();
 
-      this.isLoading = true;
-      console.log(
-        "change password from",
-        this.form.oldPassword,
-        "to",
-        this.form.newPassword
-      );
+const form = ref({
+  oldPassword: "",
+  newPassword: "",
+  newPasswordConfirm: "",
+});
+const errors = ref([]);
+const isLoading = ref(false);
 
-      this.changeUserPassword({
-        oldPassword: this.form.oldPassword,
-        newPassword: this.form.newPassword,
-      })
-        .then(() => {
-          this.isLoading = false;
-          this.errors = [];
-          this.close();
-        })
-        .catch((errors) => {
-          this.isLoading = false;
-          this.errors = errors;
-        });
-    },
-    ...mapActions("user", ["changeUserPassword"]),
-  },
-};
+const changeUserPassword = (data) =>
+  store.dispatch("user/changeUserPassword", data);
+
+function close() {
+  emit("update:visible", false);
+}
+
+function save(event) {
+  event.preventDefault();
+
+  if (form.value.oldPassword == form.value.newPassword) {
+    errors.value = ["Old and new password cannot be identical."];
+    return;
+  }
+  if (form.value.newPassword != form.value.newPasswordConfirm) {
+    errors.value = [
+      "The new passwords do not match. Please enter the same values for the new passwords.",
+    ];
+    return;
+  }
+
+  isLoading.value = true;
+
+  changeUserPassword({
+    oldPassword: form.value.oldPassword,
+    newPassword: form.value.newPassword,
+  })
+    .then(() => {
+      isLoading.value = false;
+      errors.value = [];
+      close();
+    })
+    .catch((errs) => {
+      isLoading.value = false;
+      errors.value = errs;
+    });
+}
 </script>

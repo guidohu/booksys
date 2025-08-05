@@ -29,49 +29,42 @@
   </modal-container>
 </template>
 
-<script>
-import { mapActions } from "vuex";
+<script setup>
+import { ref } from "vue";
+import { useStore } from "vuex";
 import WarningBox from "booksys/components/WarningBox.vue";
 import ModalContainer from "booksys/components/bricks/ModalContainer.vue";
 import ModalHeader from "booksys/components/bricks/ModalHeader.vue";
 import ModalBody from "booksys/components/bricks/ModalBody.vue";
 import ModalFooter from "booksys/components/bricks/ModalFooter.vue";
 
-export default {
-  name: "SessionDeleteModal",
-  components: {
-    WarningBox,
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-  },
-  props: ["session", "visible"],
-  data() {
-    return {
-      errors: [],
-    };
-  },
-  methods: {
-    ...mapActions("sessions", ["deleteSession"]),
-    confirm: function (event) {
-      if (event != null) {
-        event.preventDefault();
-      }
+const props = defineProps(["session", "visible"]);
+const emit = defineEmits(["sessionDeletedHandler", "update:visible"]);
 
-      this.deleteSession(this.session)
-        .then(() => {
-          this.$emit("sessionDeletedHandler");
-          this.close();
-        })
-        .catch((err) => {
-          this.errors = err;
-        });
-    },
-    close: function () {
-      this.errors = [];
-      this.$emit("update:visible", false);
-    },
-  },
-};
+const store = useStore();
+
+const errors = ref([]);
+
+const deleteSession = (session) =>
+  store.dispatch("sessions/deleteSession", session);
+
+function confirm(event) {
+  if (event != null) {
+    event.preventDefault();
+  }
+
+  deleteSession(props.session)
+    .then(() => {
+      emit("sessionDeletedHandler");
+      close();
+    })
+    .catch((err) => {
+      errors.value = err;
+    });
+}
+
+function close() {
+  errors.value = [];
+  emit("update:visible", false);
+}
 </script>

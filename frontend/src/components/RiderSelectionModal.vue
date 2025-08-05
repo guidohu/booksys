@@ -81,8 +81,9 @@
   </modal-container>
 </template>
 
-<script>
-import { mapActions, mapGetters } from "vuex";
+<script setup>
+import { ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import uniq from "lodash/uniq";
 import WarningBox from "booksys/components/WarningBox.vue";
 import { UserPointer } from "booksys/dataTypes/user";
@@ -95,125 +96,117 @@ import InputSelect from "./forms/inputs/InputSelect.vue";
 import ShowForDesktop from "./bricks/ShowForDesktop.vue";
 import ShowForMobile from "./bricks/ShowForMobile.vue";
 
-export default {
-  name: "RiderSelectionModal",
-  components: {
-    WarningBox,
-    ModalContainer,
-    ModalHeader,
-    ModalFooter,
-    ModalBody,
-    InputText,
-    InputSelect,
-    ShowForDesktop,
-    ShowForMobile,
-  },
-  props: ["session", "visible"],
-  data() {
-    return {
-      errors: [],
-      userIds: [],
-      form: {},
-      selected: [],
-      search: "",
-      filteredOptions: [],
-      usersToAdd: [],
-    };
-  },
-  computed: {
-    ...mapGetters("user", ["userList"]),
-    userOptions: function () {
-      let users = [];
-      this.userList.forEach((u) => {
-        users.push({
-          value: u.id,
-          text: u.firstName + " " + u.lastName,
-        });
-      });
+const props = defineProps(["session", "visible"]);
+const emit = defineEmits(["update:visible"]);
 
-      users = users.filter(
-        (u) => !this.usersToAdd.map((uta) => uta.id).includes(u.value)
-      );
-      return users;
-    },
-  },
-  watch: {
-    search: function (newSearch) {
-      // filteredOptions are the ones that
-      this.filteredOptions = this.userOptions.filter((u) =>
-        u.text.toLowerCase().includes(newSearch.toLowerCase())
-      );
-    },
-    userOptions: function (newOptions) {
-      this.filteredOptions = newOptions;
-    },
-    selected: function (newSelected) {
-      console.log("newSelected", newSelected);
-    },
-    usersToAdd: function (newUsersToAdd) {
-      console.log("usersToAdd", newUsersToAdd);
-    },
-  },
-  methods: {
-    ...mapActions("user", ["queryUserList"]),
-    ...mapActions("sessions", ["addUsersToSession"]),
-    add: function () {
-      console.log("add Called");
-      console.log("selected", this.selected);
+const store = useStore();
 
-      if (this.selected.length > 0) {
-        console.log("Users to add", this.userList.filter((u) => this.selected.includes(u.id.toString())))
-        this.usersToAdd.push(
-          ...this.userList.filter((u) => this.selected.includes(u.id.toString()))
-        );
-      } else if (
-        this.selected.length == 0 &&
-        this.filteredOptions.length == 1
-      ) {
-        this.usersToAdd.push(
-          ...this.userList.filter((u) => u.id == this.filteredOptions[0].value)
-        );
-      }
+const errors = ref([]);
+const userIds = ref([]);
+const form = ref({});
+const selected = ref([]);
+const search = ref("");
+const filteredOptions = ref([]);
+const usersToAdd = ref([]);
 
-      // de-duplicate selection
-      this.usersToAdd = uniq(this.usersToAdd);
-    },
-    remove: function (id) {
-      this.usersToAdd = this.usersToAdd.filter((u) => u.id != id);
-      console.log("Removed user from the selection:", id);
-    },
-    save: function () {
-      console.log(this.session);
-      this.addUsersToSession({
-        sessionId: this.session.id,
-        users: this.usersToAdd,
-      })
-        .then(() => this.close())
-        .catch((errs) => (this.errors = errs));
-    },
-    saveMobile: function () {
-      console.log(this.selected);
-      this.addUsersToSession({
-        sessionId: this.session.id,
-        users: this.selected.map((i) => new UserPointer(Number(i))),
-      })
-        .then(() => this.close())
-        .catch((errors) => (this.errors = errors));
-    },
-    close: function () {
-      this.usersToAdd = [];
-      this.$emit("update:visible", false);
-    },
-  },
-  created() {
-    this.queryUserList()
-      .then(() => {
-        console.log("userList received");
-      })
-      .catch((error) => {
-        console.log("errors");
-        this.errors = error;
-      });
-  },
-};
+const userList = computed(() => store.getters["user/userList"]);
+
+const userOptions = computed(() => {
+  let users = [];
+  userList.value.forEach((u) => {
+    users.push({
+      value: u.id,
+      text: u.firstName + " " + u.lastName,
+    });
+  });
+
+  users = users.filter(
+    (u) => !usersToAdd.value.map((uta) => uta.id).includes(u.value)
+  );
+  return users;
+});
+
+watch(search, (newSearch) => {
+  // filteredOptions are the ones that
+  filteredOptions.value = userOptions.value.filter((u) =>
+    u.text.toLowerCase().includes(newSearch.toLowerCase())
+  );
+});
+
+watch(userOptions, (newOptions) => {
+  filteredOptions.value = newOptions;
+});
+
+watch(selected, (newSelected) => {
+  console.log("newSelected", newSelected);
+});
+
+watch(usersToAdd, (newUsersToAdd) => {
+  console.log("usersToAdd", newUsersToAdd);
+});
+
+const queryUserList = () => store.dispatch("user/queryUserList");
+const addUsersToSession = (data) =>
+  store.dispatch("sessions/addUsersToSession", data);
+
+function add() {
+  console.log("add Called");
+  console.log("selected", selected.value);
+
+  if (selected.value.length > 0) {
+    console.log(
+      "Users to add",
+      userList.value.filter((u) => selected.value.includes(u.id.toString()))
+    );
+    usersToAdd.value.push(
+      ...userList.value.filter((u) => selected.value.includes(u.id.toString()))
+    );
+  } else if (selected.value.length == 0 && filteredOptions.value.length == 1) {
+    usersToAdd.value.push(
+      ...userList.value.filter((u) => u.id == filteredOptions.value[0].value)
+    );
+  }
+
+  // de-duplicate selection
+  usersToAdd.value = uniq(usersToAdd.value);
+}
+
+function remove(id) {
+  usersToAdd.value = usersToAdd.value.filter((u) => u.id != id);
+  console.log("Removed user from the selection:", id);
+}
+
+function save() {
+  console.log(props.session);
+  addUsersToSession({
+    sessionId: props.session.id,
+    users: usersToAdd.value,
+  })
+    .then(() => close())
+    .catch((errs) => (errors.value = errs));
+}
+
+function saveMobile() {
+  console.log(selected.value);
+  addUsersToSession({
+    sessionId: props.session.id,
+    users: selected.value.map((i) => new UserPointer(Number(i))),
+  })
+    .then(() => close())
+    .catch((errs) => (errors.value = errs));
+}
+
+function close() {
+  usersToAdd.value = [];
+  emit("update:visible", false);
+}
+
+queryUserList()
+  .then(() => {
+    console.log("userList received");
+  })
+  .catch((error) => {
+    console.log("errors");
+    errors.value = error;
+  });
 </script>

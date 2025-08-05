@@ -58,10 +58,6 @@
   </nav>
 </template>
 
-<script>
-export default {
-  name: "NavbarMobile",
-  components: {},
-  props: ["title", "role"],
-};
+<script setup>
+const props = defineProps(["title", "role"]);
 </script>

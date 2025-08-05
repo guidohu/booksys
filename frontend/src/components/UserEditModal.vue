@@ -52,8 +52,9 @@
   </modal-container>
 </template>
 
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script setup>
+import { ref, computed, watch } from "vue";
+import { useStore } from "vuex";
 import WarningBox from "booksys/components/WarningBox.vue";
 import ModalContainer from "./bricks/ModalContainer.vue";
 import ModalHeader from "./bricks/ModalHeader.vue";
@@ -62,85 +63,70 @@ import ModalFooter from "./bricks/ModalFooter.vue";
 import InputText from "./forms/inputs/InputText.vue";
 import InputToggle from "./forms/inputs/InputToggle.vue";
 
-export default {
-  name: "UserEditModal",
-  components: {
-    WarningBox,
-    ModalContainer,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    InputText,
-    InputToggle,
-  },
-  props: ["visible"],
-  data() {
-    return {
-      form: {
-        license: null,
-      },
-      errors: [],
-    };
-  },
-  computed: {
-    ...mapGetters("login", ["userInfo"]),
-  },
-  methods: {
-    close: function () {
-      this.$emit("update:visible", false);
-    },
-    save: function () {
-      if(isNaN(this.form.zip)){
-        this.errors = [ "Zip Code needs to be a number."];
-        return;
-      }
-      this.changeUserProfile({
-        first_name: this.form.firstName,
-        last_name: this.form.lastName,
-        address: this.form.street,
-        plz: Number(this.form.zip),
-        city: this.form.city,
-        email: this.form.email,
-        mobile: this.form.phone,
-        license: this.form.license == true,
-      })
-        .then(() => {
-          this.errors = [];
-          this.close();
-        })
-        .catch((errors) => {
-          this.errors = errors;
-        });
-    },
-    setFormData: function (data) {
-      const license = data.license != null && data.license == 1 ? true : false;
-      this.form = {
-        firstName: data.first_name,
-        lastName: data.last_name,
-        street: data.address,
-        zip: data.plz,
-        city: data.city,
-        email: data.email,
-        phone: data.mobile,
-        license: license,
-      };
-    },
-    ...mapActions("user", ["changeUserProfile"]),
-  },
-  watch: {
-    userInfo: function (newUserInfo) {
-      console.log("userInfo changed, new value", newUserInfo);
-      this.setFormData(newUserInfo);
-    },
-  },
-  created() {
-    if (this.userInfo != null) {
-      console.log("Created with userInfo");
-      this.setFormData(this.userInfo);
-      return;
-    }
-    console.log("Created without userInfo");
+const props = defineProps(["visible"]);
+const emit = defineEmits(["update:visible"]);
+
+const store = useStore();
+
+const form = ref({
+  license: null,
+});
+const errors = ref([]);
+
+const userInfo = computed(() => store.getters["login/userInfo"]);
+
+const changeUserProfile = (data) =>
+  store.dispatch("user/changeUserProfile", data);
+
+function close() {
+  emit("update:visible", false);
+}
+
+function save() {
+  if (isNaN(form.value.zip)) {
+    errors.value = ["Zip Code needs to be a number."];
     return;
-  },
-};
+  }
+  changeUserProfile({
+    first_name: form.value.firstName,
+    last_name: form.value.lastName,
+    address: form.value.street,
+    plz: Number(form.value.zip),
+    city: form.value.city,
+    email: form.value.email,
+    mobile: form.value.phone,
+    license: form.value.license == true,
+  })
+    .then(() => {
+      errors.value = [];
+      close();
+    })
+    .catch((errs) => {
+      errors.value = errs;
+    });
+}
+
+function setFormData(data) {
+  const license = data.license != null && data.license == 1 ? true : false;
+  form.value = {
+    firstName: data.first_name,
+    lastName: data.last_name,
+    street: data.address,
+    zip: data.plz,
+    city: data.city,
+    email: data.email,
+    phone: data.mobile,
+    license: license,
+  };
+}
+
+watch(userInfo, (newUserInfo) => {
+  console.log("userInfo changed, new value", newUserInfo);
+  setFormData(newUserInfo);
+});
+
+if (userInfo.value != null) {
+  console.log("Created with userInfo");
+  setFormData(userInfo.value);
+}
 </script>
