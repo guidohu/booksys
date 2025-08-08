@@ -28,34 +28,38 @@
     <template v-slot:body>
       <div ref="calendarBody">
         <table>
-          <tr>
-            <th class="table-title-text">Mon</th>
-            <th class="table-title-text">Tue</th>
-            <th class="table-title-text">Wed</th>
-            <th class="table-title-text">Thu</th>
-            <th class="table-title-text">Fri</th>
-            <th class="table-title-text">Sat</th>
-            <th class="table-title-text">Sun</th>
-          </tr>
-          <tr v-for="i in Array.from(Array(6).keys())" :key="i">
-            <td
-              v-for="j in Array.from(Array(7).keys())"
-              :key="j"
-              @click="navigateTo(sessionData[i * 7 + j])"
-              @mouseover="mouseOver(sessionData[i * 7 + j])"
-            >
-              <div :class="getCalendarDayBoxClass(sessionData[i * 7 + j])">
-                <booksys-pie
-                  :session-data="sessionData[i * 7 + j]"
-                  :properties="properties"
-                  :pie-id="i * 7 + j"
-                />
-                <div class="day-number">
-                  {{ getDay(sessionData[i * 7 + j].window_start) }}
+          <thead>
+            <tr>
+              <th class="table-title-text">Mon</th>
+              <th class="table-title-text">Tue</th>
+              <th class="table-title-text">Wed</th>
+              <th class="table-title-text">Thu</th>
+              <th class="table-title-text">Fri</th>
+              <th class="table-title-text">Sat</th>
+              <th class="table-title-text">Sun</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="i in Array.from(Array(6).keys())" :key="i">
+              <td
+                v-for="j in Array.from(Array(7).keys())"
+                :key="j"
+                @click="navigateTo(sessionData[i * 7 + j])"
+                @mouseover="mouseOver(sessionData[i * 7 + j])"
+              >
+                <div :class="getCalendarDayBoxClass(sessionData[i * 7 + j])">
+                  <booksys-pie
+                    :session-data="sessionData[i * 7 + j]"
+                    :properties="properties"
+                    :pie-id="i * 7 + j"
+                  />
+                  <div class="day-number">
+                    {{ getDay(sessionData[i * 7 + j].window_start) }}
+                  </div>
                 </div>
-              </div>
-            </td>
-          </tr>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </template>

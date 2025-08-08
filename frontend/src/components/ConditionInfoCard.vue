@@ -43,7 +43,7 @@ const sunriseString = ref("n/a");
 const sunsetString = ref("n/a");
 
 const setSunrise = (time) => {
-  if (time === null) {
+  if (time === null || time == 0) {
     sunriseString.value = "n/a";
     return;
   }

@@ -5,19 +5,19 @@
       <div class="row">
         <div class="col-6">
           <div class="row">
-            <div class="col-12">Riding Time: {{ this.formatDuration(heatTimeMinutesYTD) }}</div>
+            <div class="col-12">Riding Time: {{ formatDuration(heatTimeMinutesYTD) }}</div>
           </div>
           <div class="row">
             <div class="col-12">
-              Riding Time (all-time): {{ this.formatDuration(heatTimeMinutes) }}
+              Riding Time (all-time): {{ formatDuration(heatTimeMinutes) }}
             </div>
           </div>
           <div class="row">
-            <div class="col-12">Cost: {{ this.formatCost(heatCostYTD) }}</div>
+            <div class="col-12">Cost: {{ formatCost(heatCostYTD) }}</div>
           </div>
           <div class="row">
             <div class="col-12">
-              Cost (all-time): {{ this.formatCost(heatCost) }}
+              Cost (all-time): {{ formatCost(heatCost) }}
             </div>
           </div>
         </div>

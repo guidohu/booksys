@@ -200,16 +200,19 @@ func (d *DBMysql) migrationPreflight() error {
 
 func (d *DBMysql) migrationPostflight() error {
 	// Remove the id column in the Configuration table if present.
-	idColumnResult := []struct {
-		column_name string
-	}{}
+	var idColumnResults []string
 	var c Configuration
-	d.orm.Raw(`SELECT column_name
-	   FROM information_schema.COLUMNS
-	   WHERE TABLE_SCHEMA = ? 
-	   AND TABLE_NAME = ?
-	   AND COLUMN_NAME = ?;`, d.DBName, c.TableName(), "id").Scan(&idColumnResult)
-	if len(idColumnResult) > 0 {
+	err := d.orm.Table("information_schema.COLUMNS").
+		Select("column_name").
+		Where("TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?", d.DBName, c.TableName(), "id").
+		Pluck("column_name", &idColumnResults).
+		Error
+	if err != nil {
+		slog.Error("migration postflight table `configuration` - failed to query", slog.String("error", err.Error()))
+		return err
+	}
+
+	if len(idColumnResults) > 0 {
 		slog.Info("migration postflight table `configuration` - ALTER TABLE")
 		err := d.orm.Exec("ALTER TABLE configuration DROP COLUMN id").Error
 		if err != nil {

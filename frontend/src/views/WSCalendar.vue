@@ -16,8 +16,8 @@
           <sessions-overview :sessions="sessionsOverview" />
           <condition-info-card
             class="mt-2"
-            :sunrise="sunrise"
-            :sunset="sunset"
+            :sunrise="sunriseUnix"
+            :sunset="sunsetUnix"
           />
         </div>
       </div>
@@ -57,8 +57,8 @@ const store = useStore();
 
 const month = ref(null);
 const errors = ref([]);
-const sunrise = ref(null);
-const sunset = ref(null);
+const sunriseUnix = ref(0);
+const sunsetUnix = ref(0);
 const sessionsOverview = ref(null);
 
 const getTimezone = computed(
@@ -93,9 +93,18 @@ const querySessionsForMonth = () => {
 };
 
 const mouseOverDayHandler = (day) => {
-  sunrise.value = dayjs(day.sunrise).format("X");
-  sunset.value = dayjs(day.sunset).format("X");
-
+  const sunrise = parseInt(dayjs(day.sunrise).format("X"));
+  if (Number.isNaN(sunrise)) {
+    sunriseUnix.value = 0;
+  } else {
+    sunriseUnix.value = sunrise;
+  }
+  const sunset = parseInt(dayjs(day.sunset).format("X"));
+  if (Number.isNaN(sunset)) {
+    sunsetUnix.value = 0;
+  } else {
+    sunsetUnix.value = sunset;
+  }
   sessionsOverview.value = day;
 };
 
