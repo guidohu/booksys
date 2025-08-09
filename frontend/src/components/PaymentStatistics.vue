@@ -17,7 +17,8 @@
       <div class="row box-flex-content text-end">
         <div class="col-6 col-md-4">
           <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{ formatNumber(getTotalPayments) }}</span> {{ getCurrency }}
+            <span class="lead">{{ formatNumber(getTotalPayments) }}</span>
+            {{ getCurrency }}
             <br />
             Income
             <span v-if="form.selectedYear != 'any'"
@@ -38,7 +39,9 @@
         </div>
         <div class="col-6 col-md-4">
           <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{ formatNumber(getTotalSessionPayments) }}</span>
+            <span class="lead">{{
+              formatNumber(getTotalSessionPayments)
+            }}</span>
             {{ getCurrency }}
             <br />
             Sessions Income
@@ -49,21 +52,24 @@
         </div>
         <div class="col-6 col-md-4">
           <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{ formatNumber(getSessionsBalance) }}</span> {{ getCurrency }}
+            <span class="lead">{{ formatNumber(getSessionsBalance) }}</span>
+            {{ getCurrency }}
             <br />
             Sessions Credits
           </card-module>
         </div>
         <div class="col-6 col-md-4">
           <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{ formatNumber(getBalance) }}</span> {{ getCurrency }}
+            <span class="lead">{{ formatNumber(getBalance) }}</span>
+            {{ getCurrency }}
             <br />
             Balance
           </card-module>
         </div>
         <div class="col-6 col-md-4">
           <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{ formatNumber(getSessionProfit) }}</span> {{ getCurrency }}
+            <span class="lead">{{ formatNumber(getSessionProfit) }}</span>
+            {{ getCurrency }}
             <br />
             Session Profit
             <span v-if="form.selectedYear != 'any'"
@@ -97,19 +103,19 @@ const form = ref({
 const getYears = computed(() => store.getters["accounting/getYears"]);
 const getBalance = computed(() => store.getters["accounting/getBalance"]);
 const getTotalPayments = computed(
-  () => store.getters["accounting/getTotalPayments"]
+  () => store.getters["accounting/getTotalPayments"],
 );
 const getTotalExpenditures = computed(
-  () => store.getters["accounting/getTotalExpenditures"]
+  () => store.getters["accounting/getTotalExpenditures"],
 );
 const getTotalSessionPayments = computed(
-  () => store.getters["accounting/getTotalSessionPayments"]
+  () => store.getters["accounting/getTotalSessionPayments"],
 );
 const getSessionsBalance = computed(
-  () => store.getters["accounting/getSessionsBalance"]
+  () => store.getters["accounting/getSessionsBalance"],
 );
 const getSessionProfit = computed(
-  () => store.getters["accounting/getSessionProfit"]
+  () => store.getters["accounting/getSessionProfit"],
 );
 const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
 
@@ -125,13 +131,14 @@ watch(getYears, (newValue) => {
 });
 
 const queryYears = () => store.dispatch("accounting/queryYears");
-const queryStatistics = (year) => store.dispatch("accounting/queryStatistics", year);
+const queryStatistics = (year) =>
+  store.dispatch("accounting/queryStatistics", year);
 const queryConfiguration = () =>
   store.dispatch("configuration/queryConfiguration");
 
 function yearSelectionChangeHandler() {
   queryStatistics(form.value.selectedYear).catch(
-    (errs) => (errors.value = errs)
+    (errs) => (errors.value = errs),
   );
 }
 

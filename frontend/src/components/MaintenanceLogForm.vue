@@ -51,7 +51,9 @@ const form = ref({
 });
 
 const userInfo = computed(() => store.getters["login/userInfo"]);
-const getEngineHourFormat = computed(() => store.getters["configuration/getEngineHourFormat"]);
+const getEngineHourFormat = computed(
+  () => store.getters["configuration/getEngineHourFormat"],
+);
 
 function add() {
   if (isNaN(form.value.engineHours) || form.value.engineHours == null) {
@@ -64,7 +66,8 @@ function add() {
     engine_hours: form.value.engineHours,
     description: form.value.description,
   };
-  store.dispatch("boat/addMaintenanceEntry", entry)
+  store
+    .dispatch("boat/addMaintenanceEntry", entry)
     .then(() => {
       resetForm();
     })

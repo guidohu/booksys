@@ -31,8 +31,8 @@ import {
 import dayjs from "dayjs";
 import TableModule from "booksys/components/bricks/TableModule.vue";
 
-const FuelEntryModal = defineAsyncComponent(() =>
-  import("booksys/components/FuelEntryModal.vue")
+const FuelEntryModal = defineAsyncComponent(
+  () => import("booksys/components/FuelEntryModal.vue"),
 );
 
 const store = useStore();
@@ -44,7 +44,9 @@ const selectedFuelEntry = ref(null);
 const showFuelEntryModal = ref(false);
 
 const getFuelLog = computed(() => store.getters["boat/getFuelLog"]);
-const getEngineHourFormat = computed(() => store.getters["configuration/getEngineHourFormat"]);
+const getEngineHourFormat = computed(
+  () => store.getters["configuration/getEngineHourFormat"],
+);
 
 const queryFuelLog = () => store.dispatch("boat/queryFuelLog");
 

@@ -44,9 +44,13 @@ const isLoading = ref(true);
 const showLogin = ref(false);
 const status = ref(null);
 
-const username = computed(mapGetters("login", ["username"]).username.bind({ $store: store }));
+const username = computed(
+  mapGetters("login", ["username"]).username.bind({ $store: store }),
+);
 const getLogoUri = computed(
-  mapGetters("configuration", ["getLogoUri"]).getLogoUri.bind({ $store: store })
+  mapGetters("configuration", ["getLogoUri"]).getLogoUri.bind({
+    $store: store,
+  }),
 );
 
 const handleLogin = (username, password) => {
@@ -76,7 +80,9 @@ const handleLogin = (username, password) => {
 onMounted(() => {
   isLoading.value = true;
 
-  store.dispatch("configuration/queryLogoFile").catch((errors) => console.log(errors));
+  store
+    .dispatch("configuration/queryLogoFile")
+    .catch((errors) => console.log(errors));
 
   store
     .dispatch("login/getIsLoggedIn")

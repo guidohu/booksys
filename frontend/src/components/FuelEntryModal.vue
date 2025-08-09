@@ -136,15 +136,21 @@ const errors = ref([]);
 const form = ref({ date: null });
 
 const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
-const getEngineHourFormat = computed(() => store.getters["configuration/getEngineHourFormat"]);
+const getEngineHourFormat = computed(
+  () => store.getters["configuration/getEngineHourFormat"],
+);
 
-watch(() => props.fuelEntry, (newValue) => {
-  setFormContent(newValue);
-});
+watch(
+  () => props.fuelEntry,
+  (newValue) => {
+    setFormContent(newValue);
+  },
+);
 
 function setFormContent(entry) {
   if (entry != null) {
-    const costGross = entry.is_discounted == false ? entry.cost : entry.cost_brutto;
+    const costGross =
+      entry.is_discounted == false ? entry.cost : entry.cost_brutto;
     const costNet = entry.is_discounted == false ? null : entry.cost;
     const cost = entry.is_discounted == false ? entry.cost : entry.cost_brutto;
 
@@ -195,7 +201,8 @@ function save() {
     is_discounted: isDiscounted,
   };
 
-  store.dispatch("boat/updateFuelEntry", updatedEntry)
+  store
+    .dispatch("boat/updateFuelEntry", updatedEntry)
     .then(() => close())
     .catch((errs) => (errors.value = errs));
 }

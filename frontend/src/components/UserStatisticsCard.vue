@@ -5,7 +5,9 @@
       <div class="row">
         <div class="col-6">
           <div class="row">
-            <div class="col-12">Riding Time: {{ formatDuration(heatTimeMinutesYTD) }}</div>
+            <div class="col-12">
+              Riding Time: {{ formatDuration(heatTimeMinutesYTD) }}
+            </div>
           </div>
           <div class="row">
             <div class="col-12">
@@ -49,7 +51,9 @@ const showUserHeatsModal = ref(false);
 
 const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
 const heatTimeMinutes = computed(() => store.getters["user/heatTimeMinutes"]);
-const heatTimeMinutesYTD = computed(() => store.getters["user/heatTimeMinutesYTD"]);
+const heatTimeMinutesYTD = computed(
+  () => store.getters["user/heatTimeMinutesYTD"],
+);
 const heatCost = computed(() => store.getters["user/heatCost"]);
 const heatCostYTD = computed(() => store.getters["user/heatCostYTD"]);
 

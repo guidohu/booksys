@@ -38,7 +38,7 @@ const rows = ref([{ time: "12" }]);
 const selectedHeat = ref(null);
 
 const getHeatsForSession = computed(
-  () => store.getters["heats/getHeatsForSession"]
+  () => store.getters["heats/getHeatsForSession"],
 );
 const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
 
@@ -62,9 +62,7 @@ const queryConfiguration = () =>
 function formatDuration(durationS) {
   const seconds = durationS % 60;
   const minutes = Math.floor(((durationS - seconds) % 3600) / 60);
-  const hours = Math.floor(
-    (durationS - seconds * 60 - minutes * 3600) / 3600
-  );
+  const hours = Math.floor((durationS - seconds * 60 - minutes * 3600) / 3600);
 
   if (hours > 0) {
     return sprintf("%02d:%02d:%02d", hours, minutes, seconds);
@@ -98,7 +96,7 @@ function setColumns() {
 
   // if any of the entries has a comment, also show the comment column
   const heatsWithComments = getHeatsForSession.value.filter(
-    (h) => h.comment != null && h.comment.length > 0
+    (h) => h.comment != null && h.comment.length > 0,
   );
   if (heatsWithComments.length > 0) {
     columns.value.push({
@@ -122,9 +120,7 @@ if (props.sessionId != null) {
     .then(() => setColumns())
     .catch((errs) => (errors.value = errs));
 } else {
-  console.error(
-    "Cannot query heats for session, as no sessionId is provided"
-  );
+  console.error("Cannot query heats for session, as no sessionId is provided");
 }
 </script>
 

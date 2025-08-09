@@ -71,39 +71,43 @@ const actions = {
   },
   queryConfiguration({ commit, state }) {
     if (state.CONFIG_LOADED == true) {
-      console.debug("Configuration is already loaded. Skip query for configuration on backend.");
+      console.debug(
+        "Configuration is already loaded. Skip query for configuration on backend.",
+      );
       return;
     }
 
     return new Promise((resolve, reject) => {
       Configuration.getConfiguration()
-      .then((config) => {
-        commit("setConfiguration", config);
-        resolve(config);
-      })
-      .catch((errors) => {
-        commit("setConfiguration", null);
-        reject(errors);
-      })
-    })
+        .then((config) => {
+          commit("setConfiguration", config);
+          resolve(config);
+        })
+        .catch((errors) => {
+          commit("setConfiguration", null);
+          reject(errors);
+        });
+    });
   },
   queryAdminConfiguration({ commit, state }) {
     if (state.ADMIN_CONFIG_LOADED == true) {
-      console.debug("Admin Configuration is already loaded. Skip query for configuration on backend.");
+      console.debug(
+        "Admin Configuration is already loaded. Skip query for configuration on backend.",
+      );
       return;
     }
 
     return new Promise((resolve, reject) => {
       Configuration.getAdminConfiguration()
-      .then((config) => {
-        commit("setAdminConfiguration", config);
-        resolve(config);
-      })
-      .catch((errors) => {
-        commit("setAdminConfiguration", null);
-        reject(errors);
-      })
-    })
+        .then((config) => {
+          commit("setAdminConfiguration", config);
+          resolve(config);
+        })
+        .catch((errors) => {
+          commit("setAdminConfiguration", null);
+          reject(errors);
+        });
+    });
   },
   queryRecaptchaKey({ commit }) {
     return new Promise((resolve, reject) => {

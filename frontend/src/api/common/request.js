@@ -5,20 +5,29 @@ export default class Request {
     if (response.status != 200) {
       console.warn(method, url, "error", response.status);
       // handle a few specific error messages
-      response.text().then((bodyText) => {
-        if (response.status === 500 && bodyText.includes("Proxy erro")) {
-          reject(["Internal Server Error: Your request cannot be proxied to the backend. Is the API backend reachable?"]);
-        }
-        reject(["Error: Your request could not be handled. There is an issue with your request or with the backend."]);
-      })
-      .catch((error) => {
-        console.log("Error, cannot get response body", error);
-        reject(["Error: Your request could not be handled. There is an issue with your request or with the backend."]);
-      })
+      response
+        .text()
+        .then((bodyText) => {
+          if (response.status === 500 && bodyText.includes("Proxy erro")) {
+            reject([
+              "Internal Server Error: Your request cannot be proxied to the backend. Is the API backend reachable?",
+            ]);
+          }
+          reject([
+            "Error: Your request could not be handled. There is an issue with your request or with the backend.",
+          ]);
+        })
+        .catch((error) => {
+          console.log("Error, cannot get response body", error);
+          reject([
+            "Error: Your request could not be handled. There is an issue with your request or with the backend.",
+          ]);
+        });
       return; // Stop further processing
     }
 
-    response.json()
+    response
+      .json()
       .then((data) => {
         console.debug(method, url, "response data:", data);
         // Combined check: data.ok is primary, data.status.ok is secondary
@@ -32,12 +41,14 @@ export default class Request {
         }
       })
       .catch((error) => {
-          console.warn(method, url, "cannot parse server response", error);
-          if (error.toString().includes("SyntaxError")) {
-            reject(["Make sure your frontend can talk to the API backend. The returned response is not an expected JSON object but maybe a regular HTML file."]);
-            return;
-          }
-          reject([error]);
+        console.warn(method, url, "cannot parse server response", error);
+        if (error.toString().includes("SyntaxError")) {
+          reject([
+            "Make sure your frontend can talk to the API backend. The returned response is not an expected JSON object but maybe a regular HTML file.",
+          ]);
+          return;
+        }
+        reject([error]);
       });
   }
 

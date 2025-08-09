@@ -16,9 +16,9 @@ const getters = {
 // actions
 const actions = {
   initScreenSize({ commit, state, dispatch }) {
-    if(! state._handlerPresent){
+    if (!state._handlerPresent) {
       state._handlerPresent = true;
-      window.addEventListener("resize", function(){
+      window.addEventListener("resize", function () {
         dispatch("refreshScreenSize");
       });
       commit("setIsMobile", BooksysBrowser.isMobileResponsive());

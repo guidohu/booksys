@@ -42,21 +42,83 @@ export default class Sessions {
     console.log("getSessionsCalendar:", query);
     return new Promise((resolve, reject) => {
       Request.postRequest("/api/v2/booking/series/list", query)
-      .then((days) => {
-        let monthSessions = [];
-        for (let i = 0; i < days.length; i++) {
-          let res = days[i];
+        .then((days) => {
+          let monthSessions = [];
+          for (let i = 0; i < days.length; i++) {
+            let res = days[i];
+            let timezone = res.timezone;
+            const winStart = res.window_start;
+            // const winEnd     = res.window_end;
+            res.window_start = dayjs
+              .unix(res.window_start)
+              .tz(timezone)
+              .format();
+            res.window_end = dayjs.unix(res.window_end).tz(timezone).format();
+            res.sunrise = dayjs.unix(res.sunrise).tz(timezone).format();
+            res.sunset = dayjs.unix(res.sunset).tz(timezone).format();
+            const busDayStart = res.business_day_start.split(":");
+            const busDayEnd = res.business_day_end.split(":");
+            res.business_day_start = dayjs
+              .unix(winStart)
+              .tz(timezone)
+              .set("hour", busDayStart[0])
+              .set("minutes", busDayStart[1])
+              .set("seconds", busDayStart[2])
+              .format();
+            res.business_day_end = dayjs
+              .unix(winStart)
+              .tz(timezone)
+              .set("hour", busDayEnd[0])
+              .set("minutes", busDayEnd[1])
+              .set("seconds", busDayEnd[2])
+              .format();
+
+            // convert session times to ISO time
+            for (let i = 0; i < res.sessions.length; i++) {
+              const s = res.sessions[i];
+              const session = new Session(
+                s.id,
+                s.title,
+                s.comment,
+                dayjs.unix(s.start).tz(timezone).format(),
+                dayjs.unix(s.end).tz(timezone).format(),
+                s.free,
+                s.type,
+                s.creator_id,
+                s.creator_first_name,
+                s.creator_last_name,
+              );
+              session.addRiders(s.riders);
+              res.sessions[i] = session;
+            }
+            monthSessions.push(res);
+          }
+          resolve(monthSessions);
+        })
+        .catch((errors) => {
+          reject(errors);
+        });
+    });
+  }
+
+  static getSessions(dateStart, dateEnd) {
+    dayjs.extend(utc);
+    dayjs.extend(timezone);
+    dayjs.extend(advancedFormat);
+
+    const query = {
+      start: parseInt(dayjs(dateStart).format("X")),
+      end: parseInt(dayjs(dateEnd).format("X")),
+    };
+
+    return new Promise((resolve, reject) => {
+      Request.postRequest("/api/v2/booking/day/list", query)
+        .then((res) => {
           let timezone = res.timezone;
           const winStart = res.window_start;
           // const winEnd     = res.window_end;
-          res.window_start = dayjs
-            .unix(res.window_start)
-            .tz(timezone)
-            .format();
-          res.window_end = dayjs
-            .unix(res.window_end)
-            .tz(timezone)
-            .format();
+          res.window_start = dayjs.unix(res.window_start).tz(timezone).format();
+          res.window_end = dayjs.unix(res.window_end).tz(timezone).format();
           res.sunrise = dayjs.unix(res.sunrise).tz(timezone).format();
           res.sunset = dayjs.unix(res.sunset).tz(timezone).format();
           const busDayStart = res.business_day_start.split(":");
@@ -89,86 +151,15 @@ export default class Sessions {
               s.type,
               s.creator_id,
               s.creator_first_name,
-              s.creator_last_name
+              s.creator_last_name,
             );
             session.addRiders(s.riders);
             res.sessions[i] = session;
           }
-          monthSessions.push(res);
-        }
-        resolve(monthSessions);
-      })
-      .catch((errors) => {
-        reject(errors);
-      })
-    });
-  }
 
-  static getSessions(dateStart, dateEnd) {
-    dayjs.extend(utc);
-    dayjs.extend(timezone);
-    dayjs.extend(advancedFormat);
-
-    const query = {
-      start: parseInt(dayjs(dateStart).format("X")),
-      end: parseInt(dayjs(dateEnd).format("X")),
-    };
-
-    return new Promise((resolve, reject) => {
-      Request.postRequest("/api/v2/booking/day/list", query)
-      .then((res) => {
-        let timezone = res.timezone;
-        const winStart = res.window_start;
-        // const winEnd     = res.window_end;
-        res.window_start = dayjs
-          .unix(res.window_start)
-          .tz(timezone)
-          .format();
-        res.window_end = dayjs
-          .unix(res.window_end)
-          .tz(timezone)
-          .format();
-        res.sunrise = dayjs.unix(res.sunrise).tz(timezone).format();
-        res.sunset = dayjs.unix(res.sunset).tz(timezone).format();
-        const busDayStart = res.business_day_start.split(":");
-        const busDayEnd = res.business_day_end.split(":");
-        res.business_day_start = dayjs
-          .unix(winStart)
-          .tz(timezone)
-          .set("hour", busDayStart[0])
-          .set("minutes", busDayStart[1])
-          .set("seconds", busDayStart[2])
-          .format();
-        res.business_day_end = dayjs
-          .unix(winStart)
-          .tz(timezone)
-          .set("hour", busDayEnd[0])
-          .set("minutes", busDayEnd[1])
-          .set("seconds", busDayEnd[2])
-          .format();
-
-        // convert session times to ISO time
-        for (let i = 0; i < res.sessions.length; i++) {
-          const s = res.sessions[i];
-          const session = new Session(
-            s.id,
-            s.title,
-            s.comment,
-            dayjs.unix(s.start).tz(timezone).format(),
-            dayjs.unix(s.end).tz(timezone).format(),
-            s.free,
-            s.type,
-            s.creator_id,
-            s.creator_first_name,
-            s.creator_last_name
-          );
-          session.addRiders(s.riders);
-          res.sessions[i] = session;
-        }
-
-        resolve(res);
-      })
-      .catch((errors) => reject(errors));
+          resolve(res);
+        })
+        .catch((errors) => reject(errors));
     });
   }
 
@@ -186,7 +177,7 @@ export default class Sessions {
             dayjs.unix(sR.start_time).format(),
             dayjs.unix(sR.end_time).format(),
             sR.riders_max,
-            sR.type
+            sR.type,
           );
           session.addRiders(sR.riders);
           resolve({

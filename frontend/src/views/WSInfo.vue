@@ -20,13 +20,11 @@
             v-if="getLocationMap != null && getLocationMap.length > 0"
             :src="getLocationMap"
             frameborder="0"
-            style="border: 0;"
+            style="border: 0"
             :width="mapWidth"
             :height="mapHeight"
           />
-          <div class="main-color" v-else>
-            [ no map configured ]
-          </div>
+          <div class="main-color" v-else>[ no map configured ]</div>
         </div>
       </div>
     </card-module>
@@ -51,12 +49,12 @@ const store = useStore();
 const getLocationAddress = computed(
   mapGetters("configuration", ["getLocationAddress"]).getLocationAddress.bind({
     $store: store,
-  })
+  }),
 );
 const getLocationMap = computed(
   mapGetters("configuration", ["getLocationMap"]).getLocationMap.bind({
     $store: store,
-  })
+  }),
 );
 
 const mapHeight = computed(() => {

@@ -34,13 +34,13 @@ const modalRef = ref(null);
 let modal = null;
 
 onMounted(() => {
-  if(modalRef.value != null) {
+  if (modalRef.value != null) {
     modal = new Modal(modalRef.value);
     if (props.visible) {
       modal.show();
     }
   } else {
-    console.error('Modal element (modalRef) not found on mount!');
+    console.error("Modal element (modalRef) not found on mount!");
   }
 });
 
@@ -50,7 +50,7 @@ onUnmounted(() => {
 });
 
 watch(
-  () => props.visible, 
+  () => props.visible,
   (newValue) => {
     if (newValue) {
       if (modal != null) {
@@ -61,6 +61,7 @@ watch(
         modal.hide();
       }
     }
-  }, { immediate: true }
+  },
+  { immediate: true },
 );
 </script>

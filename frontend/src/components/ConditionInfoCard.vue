@@ -58,17 +58,28 @@ const setSunset = (time) => {
   sunsetString.value = dayjs.unix(time).format("HH:mm");
 };
 
-watch(() => props.sunrise, (newVal) => {
-  console.debug("ConditionInfoCard: sunrise changed to", newVal);
-  setSunrise(newVal);
-});
+watch(
+  () => props.sunrise,
+  (newVal) => {
+    console.debug("ConditionInfoCard: sunrise changed to", newVal);
+    setSunrise(newVal);
+  },
+);
 
-watch(() => props.sunset, (newVal) => {
-  console.debug("ConditionInfoCard: sunset changed to", newVal);
-  setSunset(newVal);
-});
+watch(
+  () => props.sunset,
+  (newVal) => {
+    console.debug("ConditionInfoCard: sunset changed to", newVal);
+    setSunset(newVal);
+  },
+);
 
-console.debug("ConditionInfoCard: sunrise", props.sunrise, "sunset", props.sunset);
+console.debug(
+  "ConditionInfoCard: sunrise",
+  props.sunrise,
+  "sunset",
+  props.sunset,
+);
 setSunrise(props.sunrise);
 setSunset(props.sunset);
 </script>

@@ -99,9 +99,7 @@ const actions = {
   queryMyNautiqueInfo({ commit, state }, boatId) {
     console.log("Trigger queryMyNautiqueInfo for boatId:", boatId);
     return new Promise((resolve, reject) => {
-      Boat.getMyNautiqueInfo(
-        boatId,
-      )
+      Boat.getMyNautiqueInfo(boatId)
         .then((response) => {
           commit("setMyNautiqueInfo", response);
           resolve();
@@ -194,7 +192,7 @@ const mutations = {
     const sortedLog = reverse(
       sortBy(value, function (v) {
         return v.timestamp;
-      })
+      }),
     );
 
     let i = 0;
@@ -228,7 +226,9 @@ const mutations = {
 
     state.myNautique.boat.fuelLevel = parseFloat(value.telemetry.fuel_level);
     state.myNautique.boat.fuelCapacity = parseFloat(value.fuel_capacity);
-    state.myNautique.boat.engineHours = parseFloat(value.telemetry.engine_hours);
+    state.myNautique.boat.engineHours = parseFloat(
+      value.telemetry.engine_hours,
+    );
   },
 };
 

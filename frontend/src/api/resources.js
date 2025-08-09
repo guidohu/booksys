@@ -1,6 +1,6 @@
 /**
  * Uploads a logo file to the server.
- * @param {} file 
+ * @param {} file
  * @returns the URI to the file.
  */
 export const uploadLogo = (file) => {
@@ -24,7 +24,7 @@ export const uploadLogo = (file) => {
             } else {
               console.log(
                 "resources/uploadLogo: issue while uploading logo:",
-                data.msg
+                data.msg,
               );
               reject([data.msg]);
             }

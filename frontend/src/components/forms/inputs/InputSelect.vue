@@ -67,7 +67,7 @@ watch(
   () => props.modelValue,
   (newValue) => {
     selectedValue.value = newValue;
-  }
+  },
 );
 
 const changeHandler = (event) => {

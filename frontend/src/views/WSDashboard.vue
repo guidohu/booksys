@@ -52,47 +52,39 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const DashboardAdmin = defineAsyncComponent(() =>
-  import(
-    "booksys/components/DashboardAdmin.vue"
-  )
+const DashboardAdmin = defineAsyncComponent(
+  () => import("booksys/components/DashboardAdmin.vue"),
 );
-const DashboardMember = defineAsyncComponent(() =>
-  import(
-    "booksys/components/DashboardMember.vue"
-  )
+const DashboardMember = defineAsyncComponent(
+  () => import("booksys/components/DashboardMember.vue"),
 );
-const DashboardGuest = defineAsyncComponent(() =>
-  import(
-    "booksys/components/DashboardGuest.vue"
-  )
+const DashboardGuest = defineAsyncComponent(
+  () => import("booksys/components/DashboardGuest.vue"),
 );
-const DashboardAdminMobile = defineAsyncComponent(() =>
-  import(
-    "booksys/components/DashboardAdminMobile.vue"
-  )
+const DashboardAdminMobile = defineAsyncComponent(
+  () => import("booksys/components/DashboardAdminMobile.vue"),
 );
-const DashboardMemberMobile = defineAsyncComponent(() =>
-  import(
-    "booksys/components/DashboardMemberMobile.vue"
-  )
+const DashboardMemberMobile = defineAsyncComponent(
+  () => import("booksys/components/DashboardMemberMobile.vue"),
 );
-const DashboardGuestMobile = defineAsyncComponent(() =>
-  import(
-    "booksys/components/DashboardGuestMobile.vue"
-  )
+const DashboardGuestMobile = defineAsyncComponent(
+  () => import("booksys/components/DashboardGuestMobile.vue"),
 );
 
 const store = useStore();
 const router = useRouter();
 
-const userInfo = computed(mapGetters("login", ["userInfo"]).userInfo.bind({ $store: store }));
-const role = computed(mapGetters("login", ["role"]).role.bind({ $store: store }));
+const userInfo = computed(
+  mapGetters("login", ["userInfo"]).userInfo.bind({ $store: store }),
+);
+const role = computed(
+  mapGetters("login", ["role"]).role.bind({ $store: store }),
+);
 const isLoggedIn = computed(
-  mapGetters("loginStatus", ["isLoggedIn"]).isLoggedIn.bind({ $store: store })
+  mapGetters("loginStatus", ["isLoggedIn"]).isLoggedIn.bind({ $store: store }),
 );
 const getSessions = computed(
-  mapGetters("sessions", ["getSessions"]).getSessions.bind({ $store: store })
+  mapGetters("sessions", ["getSessions"]).getSessions.bind({ $store: store }),
 );
 
 const getTimeZone = () => {

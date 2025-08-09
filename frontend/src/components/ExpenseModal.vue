@@ -123,10 +123,16 @@ const form = ref({
 });
 
 const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
-const getEngineHourFormat = computed(() => store.getters["configuration/getEngineHourFormat"]);
-const getFuelPaymentType = computed(() => store.getters["configuration/getFuelPaymentType"]);
+const getEngineHourFormat = computed(
+  () => store.getters["configuration/getEngineHourFormat"],
+);
+const getFuelPaymentType = computed(
+  () => store.getters["configuration/getFuelPaymentType"],
+);
 const userList = computed(() => store.getters["user/userList"]);
-const getExpenseTypes = computed(() => store.getters["accounting/getExpenseTypes"]);
+const getExpenseTypes = computed(
+  () => store.getters["accounting/getExpenseTypes"],
+);
 
 watch(getExpenseTypes, (newValues) => {
   buildTypeSelect(newValues);
@@ -136,34 +142,84 @@ watch(userList, (newValues) => {
   buildUserSelect(newValues);
 });
 
-watch(() => form.value.type, (newValue, oldValue) => {
-  if (newValue !== oldValue) {
-    const typeActions = {
-      1: { userLabel: "Driver", userDescription: "Driver that fueled the boat", typeDescription: "Add a fuel entry." },
-      10: { userLabel: "Payer", userDescription: "Pays the bill", typeDescription: "Fuel bill" },
-      4: { userLabel: "Payee", userDescription: "Payee or internal reference.", typeDescription: "" },
-      2: { userLabel: "Payee", userDescription: "Payee or internal reference.", typeDescription: "Expenses related to maintenance" },
-      3: { userLabel: "Payee / Payer", userDescription: "Payee or internal reference.", typeDescription: "Expenses related to aquired parts." },
-      5: { userLabel: "Account", userDescription: "Refund to this account.", typeDescription: "Refund of payments." },
-      7: { userLabel: "Account", userDescription: "Refund to this account.", typeDescription: "Refund of payments." },
-      6: { userLabel: "Payee", userDescription: "Payee or internal reference", typeDescription: "everything that does not fit another category" },
-      8: { userLabel: "Driver", userDescription: "Driver that we pay a compensation.", typeDescription: "Compensation payments" },
-      9: { userLabel: "Payee", userDescription: "Owner that gets a refund.", typeDescription: "" },
-    };
-    const action = typeActions[Number(newValue)] || { userLabel: "Payee", userDescription: "", typeDescription: "" };
-    userLabel.value = action.userLabel;
-    userDescription.value = action.userDescription;
-    typeDescription.value = action.typeDescription;
-  }
-});
+watch(
+  () => form.value.type,
+  (newValue, oldValue) => {
+    if (newValue !== oldValue) {
+      const typeActions = {
+        1: {
+          userLabel: "Driver",
+          userDescription: "Driver that fueled the boat",
+          typeDescription: "Add a fuel entry.",
+        },
+        10: {
+          userLabel: "Payer",
+          userDescription: "Pays the bill",
+          typeDescription: "Fuel bill",
+        },
+        4: {
+          userLabel: "Payee",
+          userDescription: "Payee or internal reference.",
+          typeDescription: "",
+        },
+        2: {
+          userLabel: "Payee",
+          userDescription: "Payee or internal reference.",
+          typeDescription: "Expenses related to maintenance",
+        },
+        3: {
+          userLabel: "Payee / Payer",
+          userDescription: "Payee or internal reference.",
+          typeDescription: "Expenses related to aquired parts.",
+        },
+        5: {
+          userLabel: "Account",
+          userDescription: "Refund to this account.",
+          typeDescription: "Refund of payments.",
+        },
+        7: {
+          userLabel: "Account",
+          userDescription: "Refund to this account.",
+          typeDescription: "Refund of payments.",
+        },
+        6: {
+          userLabel: "Payee",
+          userDescription: "Payee or internal reference",
+          typeDescription: "everything that does not fit another category",
+        },
+        8: {
+          userLabel: "Driver",
+          userDescription: "Driver that we pay a compensation.",
+          typeDescription: "Compensation payments",
+        },
+        9: {
+          userLabel: "Payee",
+          userDescription: "Owner that gets a refund.",
+          typeDescription: "",
+        },
+      };
+      const action = typeActions[Number(newValue)] || {
+        userLabel: "Payee",
+        userDescription: "",
+        typeDescription: "",
+      };
+      userLabel.value = action.userLabel;
+      userDescription.value = action.userDescription;
+      typeDescription.value = action.typeDescription;
+    }
+  },
+);
 
-const queryConfiguration = () => store.dispatch("configuration/queryConfiguration");
+const queryConfiguration = () =>
+  store.dispatch("configuration/queryConfiguration");
 const queryUserList = () => store.dispatch("user/queryUserList");
 const queryTransactions = () => store.dispatch("accounting/queryTransactions");
 const queryStatistics = () => store.dispatch("accounting/queryStatistics");
 const queryExpenseTypes = () => store.dispatch("accounting/queryExpenseTypes");
-const addExpense = (expense) => store.dispatch("accounting/addExpense", expense);
-const addFuelEntry = (fuelEntry) => store.dispatch("boat/addFuelEntry", fuelEntry);
+const addExpense = (expense) =>
+  store.dispatch("accounting/addExpense", expense);
+const addFuelEntry = (fuelEntry) =>
+  store.dispatch("boat/addFuelEntry", fuelEntry);
 
 function buildTypeSelect(types) {
   let mappedTypes = types.map((t) => ({ value: t.id, text: t.name }));
@@ -234,7 +290,10 @@ function addFuel() {
       queryStatistics();
       queryTransactions()
         .catch((errs) => {
-          console.error("Updating transactions logged the following error(s):", errs);
+          console.error(
+            "Updating transactions logged the following error(s):",
+            errs,
+          );
         })
         .finally(() => close());
     })

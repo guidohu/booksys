@@ -20,7 +20,14 @@
 <script setup>
 import { defineProps, defineEmits } from "vue";
 
-const props = defineProps(["id", "label", "modelValue", "disabled", "size", "suffix"]);
+const props = defineProps([
+  "id",
+  "label",
+  "modelValue",
+  "disabled",
+  "size",
+  "suffix",
+]);
 
 const emit = defineEmits(["update:modelValue"]);
 

@@ -44,7 +44,7 @@ watch(
   () => props.modelValue,
   (newValue) => {
     formValue.value = newValue;
-  }
+  },
 );
 
 const formSelectedLabel = computed(() => {

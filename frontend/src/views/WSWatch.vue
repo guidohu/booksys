@@ -61,9 +61,11 @@ const sessionId = ref(null);
 const errors = ref([]);
 
 const getSessionConditionInfo = computed(
-  mapGetters("sessions", ["getSessionConditionInfo"]).getSessionConditionInfo.bind({
+  mapGetters("sessions", [
+    "getSessionConditionInfo",
+  ]).getSessionConditionInfo.bind({
     $store: store,
-  })
+  }),
 );
 
 const querySessionMetadata = mapActions("sessions", [

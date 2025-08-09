@@ -73,11 +73,11 @@ import InputSelect from "./forms/inputs/InputSelect.vue";
 import OverlaySpinner from "./styling/OverlaySpinner.vue";
 import { confirm } from "booksys/components/bricks/DialogModal.js";
 
-const IncomeModal = defineAsyncComponent(() =>
-  import("booksys/components/IncomeModal.vue")
+const IncomeModal = defineAsyncComponent(
+  () => import("booksys/components/IncomeModal.vue"),
 );
-const ExpenseModal = defineAsyncComponent(() =>
-  import("booksys/components/ExpenseModal.vue")
+const ExpenseModal = defineAsyncComponent(
+  () => import("booksys/components/ExpenseModal.vue"),
 );
 
 const store = useStore();
@@ -91,7 +91,9 @@ const form = ref({
   selectedYear: "any",
 });
 
-const getTransactions = computed(() => store.getters["accounting/getTransactions"]);
+const getTransactions = computed(
+  () => store.getters["accounting/getTransactions"],
+);
 const getYears = computed(() => store.getters["accounting/getYears"]);
 const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
 
@@ -143,10 +145,13 @@ watch(getYears, (newValue) => {
   });
 });
 
-const queryTransactions = (year) => store.dispatch("accounting/queryTransactions", year);
+const queryTransactions = (year) =>
+  store.dispatch("accounting/queryTransactions", year);
 const queryYears = () => store.dispatch("accounting/queryYears");
-const deleteTransaction = (transaction) => store.dispatch("accounting/deleteTransaction", transaction);
-const queryConfiguration = () => store.dispatch("configuration/queryConfiguration");
+const deleteTransaction = (transaction) =>
+  store.dispatch("accounting/deleteTransaction", transaction);
+const queryConfiguration = () =>
+  store.dispatch("configuration/queryConfiguration");
 
 function showAddIncome() {
   showIncomeModal.value = true;

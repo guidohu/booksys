@@ -6,7 +6,7 @@ export default class Configuration {
    */
   static getRecaptchaKey() {
     console.log("configuration/getRecaptchaKey called");
-    return Request.getRequest('/api/v2/configuration/recaptcha-key');
+    return Request.getRequest("/api/v2/configuration/recaptcha-key");
   }
 
   /**
@@ -14,7 +14,7 @@ export default class Configuration {
    */
   static getLogoFile() {
     console.log("configuration/getLogoFile called");
-    return Request.getRequest('/api/v2/configuration/logo');
+    return Request.getRequest("/api/v2/configuration/logo");
   }
 
   // static getDbConfig() {
@@ -68,11 +68,14 @@ export default class Configuration {
     };
 
     if (params.mynautique_enabled === true) {
-      request['mynautique_user'] = params.mynautique_user
-      request['mynautique_password'] = params.mynautique_password
-      request['mynautique_boat_id'] = parseInt(params.mynautique_boat_id, 10)
-      request['mynautique_fuel_capacity'] = parseInt(params.mynautique_fuel_capacity, 10)
-      request['mynautique_api_key'] = params.mynautique_api_key
+      request["mynautique_user"] = params.mynautique_user;
+      request["mynautique_password"] = params.mynautique_password;
+      request["mynautique_boat_id"] = parseInt(params.mynautique_boat_id, 10);
+      request["mynautique_fuel_capacity"] = parseInt(
+        params.mynautique_fuel_capacity,
+        10,
+      );
+      request["mynautique_api_key"] = params.mynautique_api_key;
     }
 
     // only set the myNautique password in case it is given
@@ -91,7 +94,9 @@ export default class Configuration {
       mynautique_password: config.mynautiquePassword,
     };
 
-    return Request.postRequest("/api/v2/mynautique/credentials/setup", requestData);
+    return Request.postRequest(
+      "/api/v2/mynautique/credentials/setup",
+      requestData,
+    );
   }
-
 }

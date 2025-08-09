@@ -137,7 +137,9 @@ const comment = ref(null);
 const displayTime = ref("00:00");
 const errors = ref([]);
 
-const getDisplayTime = computed(() => store.getters["stopwatch/getDisplayTime"]);
+const getDisplayTime = computed(
+  () => store.getters["stopwatch/getDisplayTime"],
+);
 const getIsPaused = computed(() => store.getters["stopwatch/getIsPaused"]);
 const getIsRunning = computed(() => store.getters["stopwatch/getIsRunning"]);
 const getUserId = computed(() => store.getters["stopwatch/getUserId"]);

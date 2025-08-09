@@ -15,7 +15,7 @@ export default class BooksysPie {
       colors,
       stroke,
       animate,
-      clickCallBack
+      clickCallBack,
     ) {
       var paper = this,
         rad = Math.PI / 180,
@@ -110,7 +110,7 @@ export default class BooksysPie {
             .text(
               cx + (r + delta + 55) * Math.cos(-popangle * rad),
               cy + (r + delta + 25) * Math.sin(-popangle * rad),
-              labels[j]
+              labels[j],
             )
             .attr({
               fill: colors[j],
@@ -126,7 +126,7 @@ export default class BooksysPie {
             p.stop().animate(
               { transform: "s1.15 1.15 " + cx + " " + cy },
               ms,
-              "elastic"
+              "elastic",
             );
             if (labels[j]) {
               txt.stop().animate({ opacity: 1 }, ms, "elastic");
@@ -154,7 +154,7 @@ export default class BooksysPie {
               p.stop().animate(
                 { transform: "s1.15 1.15 " + cx + " " + cy },
                 ms,
-                "elastic"
+                "elastic",
               );
             });
           }
@@ -295,7 +295,7 @@ export default class BooksysPie {
       labels.push(
         dayjs(sessions[i].start).format("HH:mm") +
           " - " +
-          dayjs(sessions[i].end).format("HH:mm")
+          dayjs(sessions[i].end).format("HH:mm"),
       );
       colors.push(color);
 
@@ -317,7 +317,7 @@ export default class BooksysPie {
       labels.push(
         dayjs(dayStart).tz(timezoneStr).format("HH:mm") +
           " - " +
-          dayjs(dayEnd).tz(timezoneStr).format("HH:mm")
+          dayjs(dayEnd).tz(timezoneStr).format("HH:mm"),
       );
       colors.push(colorNoSlot);
 
@@ -344,7 +344,7 @@ export default class BooksysPie {
       labels.unshift(
         dayjs(data.window_start).format("HH:mm") +
           " - " +
-          dayjs(session.start).add(-1, "minute").format("HH:mm")
+          dayjs(session.start).add(-1, "minute").format("HH:mm"),
       );
       colors.unshift(colorOffHour);
 
@@ -366,7 +366,7 @@ export default class BooksysPie {
       labels.push(
         dayjs(session.end).add(1, "minute").format("HH:mm") +
           " - " +
-          dayjs(dayEnd).format("HH:mm")
+          dayjs(dayEnd).format("HH:mm"),
       );
       colors.push(colorNoSlot);
 
@@ -391,7 +391,7 @@ export default class BooksysPie {
       labels.push(
         dayjs(session.end).add(1, "minute").format("HH:mm") +
           " - " +
-          dayjs(data.window_end).format("HH:mm")
+          dayjs(data.window_end).format("HH:mm"),
       );
       colors.push(colorOffHour);
 
@@ -415,7 +415,7 @@ export default class BooksysPie {
     } else {
       containerHeight = Math.min(
         Math.min(location.offsetHeight, window.innerWidth) * 0.75,
-        400
+        400,
       );
     }
     if (properties != null && properties.containerWidth != null) {
@@ -459,7 +459,7 @@ export default class BooksysPie {
       colors,
       "#fff",
       animate,
-      callback
+      callback,
     );
 
     return pieSessions;

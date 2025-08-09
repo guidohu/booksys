@@ -24,9 +24,11 @@ const items = ref([]);
 const columns = ref([]);
 const errors = ref([]);
 
-const getMaintenanceLog = computed(() => store.getters["boat/getMaintenanceLog"]);
+const getMaintenanceLog = computed(
+  () => store.getters["boat/getMaintenanceLog"],
+);
 const getEngineHourFormat = computed(
-  () => store.getters["configuration/getEngineHourFormat"]
+  () => store.getters["configuration/getEngineHourFormat"],
 );
 
 watch(getMaintenanceLog, (newEntries) => {

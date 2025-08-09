@@ -7,7 +7,12 @@ import { ref, computed, watch, onMounted } from "vue";
 import BooksysPie from "../libs/pie";
 import dayjs from "dayjs";
 
-const props = defineProps(["sessionData", "selectedSession", "properties", "pieId"]);
+const props = defineProps([
+  "sessionData",
+  "selectedSession",
+  "properties",
+  "pieId",
+]);
 const emit = defineEmits(["selectHandler"]);
 
 const pieSessions = ref([]);
@@ -27,7 +32,7 @@ watch(
   () => {
     // repaint the pie upon any change
     repaint();
-  }
+  },
 );
 
 watch(
@@ -46,14 +51,14 @@ watch(
         }
       }
     }
-  }
+  },
 );
 
 watch(
   () => props.properties,
   () => {
     repaint();
-  }
+  },
 );
 
 onMounted(() => {
@@ -64,7 +69,7 @@ onMounted(() => {
     el,
     props.sessionData,
     selectHandler,
-    props.properties
+    props.properties,
   );
 });
 
@@ -83,7 +88,7 @@ function repaint() {
     el,
     props.sessionData,
     selectHandler,
-    props.properties
+    props.properties,
   );
 }
 </script>

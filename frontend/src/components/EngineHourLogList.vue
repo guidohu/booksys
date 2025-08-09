@@ -25,8 +25,8 @@ import WarningBox from "booksys/components/WarningBox.vue";
 import { formatEngineHour } from "booksys/libs/formatters";
 import TableModule from "booksys/components/bricks/TableModule.vue";
 
-const EngineHourEntryModal = defineAsyncComponent(() =>
-  import("booksys/components/EngineHourEntryModal.vue")
+const EngineHourEntryModal = defineAsyncComponent(
+  () => import("booksys/components/EngineHourEntryModal.vue"),
 );
 
 const store = useStore();
@@ -38,7 +38,9 @@ const selectedEngineHourLogEntry = ref(null);
 const showEntryHourModal = ref(false);
 
 const getEngineHourLog = computed(() => store.getters["boat/getEngineHourLog"]);
-const getEngineHourFormat = computed(() => store.getters["configuration/getEngineHourFormat"]);
+const getEngineHourFormat = computed(
+  () => store.getters["configuration/getEngineHourFormat"],
+);
 
 watch(getEngineHourLog, (newEntries) => {
   console.log("getEngineHourLog just changed to", newEntries);
@@ -52,7 +54,8 @@ watch(getEngineHourFormat, (newFormat, oldFormat) => {
 });
 
 const queryEngineHourLog = () => store.dispatch("boat/queryEngineHourLog");
-const queryConfiguration = () => store.dispatch("configuration/queryConfiguration");
+const queryConfiguration = () =>
+  store.dispatch("configuration/queryConfiguration");
 
 function setItems(logs) {
   items.value = [];
@@ -106,8 +109,11 @@ function setColumns() {
       sortable: true,
       class: "text-end",
       formatter: (value, key, item) => {
-        if (parseFloat(item.after_hours) <= 0.001 && parseFloat(value) <= 0.001) {
-          return '-';
+        if (
+          parseFloat(item.after_hours) <= 0.001 &&
+          parseFloat(value) <= 0.001
+        ) {
+          return "-";
         }
         return formatEngineHour(value, getEngineHourFormat.value);
       },

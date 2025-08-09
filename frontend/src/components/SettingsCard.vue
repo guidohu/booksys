@@ -235,7 +235,7 @@ const engineHourLogFormats = ref([
 const allTimezones = ref(getAllTimezones());
 
 const getAdminConfiguration = computed(
-  () => store.getters["configuration/getAdminConfiguration"]
+  () => store.getters["configuration/getAdminConfiguration"],
 );
 
 const queryAdminConfiguration = () =>
@@ -258,11 +258,14 @@ function configChangeHandler() {
 
 function getAllTimezones() {
   let timezones = [];
-  if (typeof Intl === "object" && typeof Intl.supportedValuesOf === "function") {
+  if (
+    typeof Intl === "object" &&
+    typeof Intl.supportedValuesOf === "function"
+  ) {
     timezones = Intl.supportedValuesOf("timeZone");
   } else {
     console.warn(
-      "Intl.supportedValuesOf('timeZone') not supported by this browser/Node.js version."
+      "Intl.supportedValuesOf('timeZone') not supported by this browser/Node.js version.",
     );
     timezones = []; // Fallback or suggest a polyfill/alternative
   }
@@ -277,8 +280,7 @@ function getSanitizedConfiguration() {
   const v = form.value;
   let mapUrl = [];
   if (v.mapIframe != null && v.mapIframe != "") {
-    const mapUrlRegex =
-      /https:\/\/www\.google\.com\/maps\/embed\?pb=[^"\s]+/;
+    const mapUrlRegex = /https:\/\/www\.google\.com\/maps\/embed\?pb=[^"\s]+/;
     mapUrl = v.mapIframe.match(mapUrlRegex);
     if (mapUrl == null || mapUrl.length != 1) {
       errors.value = ["Google Maps Iframe URL is not in a valid format."];
@@ -387,7 +389,7 @@ watch(
     console.log("config changed");
     configChangeHandler();
   },
-  { deep: true }
+  { deep: true },
 );
 
 queryAdminConfiguration()

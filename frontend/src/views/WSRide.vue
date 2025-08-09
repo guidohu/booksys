@@ -98,15 +98,11 @@ import SubpageContainer from "../components/bricks/SubpageContainer.vue";
 import ShowForDesktop from "../components/bricks/ShowForDesktop.vue";
 import ShowForMobile from "../components/bricks/ShowForMobile.vue";
 
-const SessionEditorModal = defineAsyncComponent(() =>
-  import(
-    "booksys/components/SessionEditorModal.vue"
-  )
+const SessionEditorModal = defineAsyncComponent(
+  () => import("booksys/components/SessionEditorModal.vue"),
 );
-const SessionDeleteModal = defineAsyncComponent(() =>
-  import(
-    "booksys/components/SessionDeleteModal.vue"
-  )
+const SessionDeleteModal = defineAsyncComponent(
+  () => import("booksys/components/SessionDeleteModal.vue"),
 );
 
 dayjs.extend(utc);
@@ -121,42 +117,59 @@ const showSessionEditorModal = ref(false);
 const showSessionDeleteModal = ref(false);
 
 const getTimezone = computed(
-  mapGetters("configuration", ["getTimezone"]).getTimezone.bind({ $store: store })
+  mapGetters("configuration", ["getTimezone"]).getTimezone.bind({
+    $store: store,
+  }),
 );
 const getSessions = computed(
-  mapGetters("sessions", ["getSessions"]).getSessions.bind({ $store: store })
+  mapGetters("sessions", ["getSessions"]).getSessions.bind({ $store: store }),
 );
 const getIsRunning = computed(
-  mapGetters("stopwatch", ["getIsRunning"]).getIsRunning.bind({ $store: store })
+  mapGetters("stopwatch", ["getIsRunning"]).getIsRunning.bind({
+    $store: store,
+  }),
 );
 const getSessionId = computed(
-  mapGetters("stopwatch", ["getSessionId"]).getSessionId.bind({ $store: store })
+  mapGetters("stopwatch", ["getSessionId"]).getSessionId.bind({
+    $store: store,
+  }),
 );
 
 const sunrise = computed(() => {
   const sessions = getSessions.value;
   if (sessions == null) {
-    return null;
+    return 0;
   } else {
-    return dayjs(sessions.sunrise).format("X");
+    return getUnixTime(sessions.sunrise);
   }
 });
 
 const sunset = computed(() => {
   const sessions = getSessions.value;
   if (sessions == null) {
-    return null;
+    return 0;
   } else {
-    return dayjs(sessions.sunset).format("X");
+    return getUnixTime(sessions.sunset);
   }
 });
 
 const queryConfiguration = mapActions("configuration", [
   "queryConfiguration",
 ]).queryConfiguration.bind({ $store: store });
-const querySessions = mapActions("sessions", ["querySessions"]).querySessions.bind({
+const querySessions = mapActions("sessions", [
+  "querySessions",
+]).querySessions.bind({
   $store: store,
 });
+
+// Parses time with dayjs and returns unix time as a number. Or 0 if invalid.
+const getUnixTime = (time) => {
+  const t = parseInt(dayjs(time).format("X"));
+  if (Number.isNaN(t)) {
+    return 0;
+  }
+  return t;
+};
 
 const querySessionsForDate = () => {
   const dateStart = dayjs(date.value).startOf("day").format();
@@ -171,7 +184,7 @@ const querySessionsForDate = () => {
 
 const selectSlot = (session) => {
   const sessionWithSelectedId = getSessions.value.sessions.find(
-    (s) => session.id == s.id
+    (s) => session.id == s.id,
   );
   if (sessionWithSelectedId == null) {
     selectedSession.value = new Session(
@@ -179,7 +192,7 @@ const selectSlot = (session) => {
       null,
       null,
       session.start,
-      session.end
+      session.end,
     );
   } else {
     selectedSession.value = sessionWithSelectedId;
@@ -207,7 +220,7 @@ watch(getSessions, (newInfo, oldInfo) => {
     newInfo.sessions.map((s) => s.id).includes(selectedSession.value.id)
   ) {
     selectedSession.value = newInfo.sessions.filter(
-      (s) => s.id == selectedSession.value.id
+      (s) => s.id == selectedSession.value.id,
     )[0];
   }
 
@@ -229,7 +242,7 @@ watch(getSessions, (newInfo, oldInfo) => {
       selectedSession.value = newInfo.sessions.find((s) => s.id == diff[0]);
     } else {
       console.error(
-        "old and new session info differs by more than one session"
+        "old and new session info differs by more than one session",
       );
     }
   } else if (newInfo.sessions.length < oldInfo.sessions.length) {

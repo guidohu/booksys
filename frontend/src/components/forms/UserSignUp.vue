@@ -105,7 +105,7 @@ watch(
   (newVal) => {
     signUpData.value = newVal;
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 onMounted(() => {

@@ -74,7 +74,7 @@ const store = useStore();
 const emit = defineEmits(["update:visible"]);
 
 const getConfiguration = computed(
-  () => store.getters["configuration/getConfiguration"]
+  () => store.getters["configuration/getConfiguration"],
 );
 
 function close() {

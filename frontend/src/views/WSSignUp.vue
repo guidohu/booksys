@@ -76,10 +76,10 @@ import ModalContainer from "booksys/components/bricks/ModalContainer.vue";
 import ModalHeader from "booksys/components/bricks/ModalHeader.vue";
 import ModalBody from "booksys/components/bricks/ModalBody.vue";
 import ModalFooter from "booksys/components/bricks/ModalFooter.vue";
-import { VueRecaptcha } from 'vue-recaptcha';
+import { VueRecaptcha } from "vue-recaptcha";
 
-const UserSignUp = defineAsyncComponent(() =>
-  import("booksys/components/forms/UserSignUp.vue")
+const UserSignUp = defineAsyncComponent(
+  () => import("booksys/components/forms/UserSignUp.vue"),
 );
 
 const store = useStore();
@@ -97,7 +97,7 @@ const visible = ref(true);
 const getRecaptchaKey = computed(
   mapGetters("configuration", ["getRecaptchaKey"]).getRecaptchaKey.bind({
     $store: store,
-  })
+  }),
 );
 
 const queryRecaptchaKey = mapActions("configuration", [
@@ -127,11 +127,13 @@ const validateForm = () => {
 
   if (form.value.ownRisk == false) {
     validationErrors.push(
-      "To sign-up you need to agree that the activities are performed at your own risk."
+      "To sign-up you need to agree that the activities are performed at your own risk.",
     );
   }
   if (form.value.password != form.value.passwordConfirm) {
-    validationErrors.push("Password and Password Confirmation are not identical.");
+    validationErrors.push(
+      "Password and Password Confirmation are not identical.",
+    );
   }
   if (form.value.password.length <= 8) {
     validationErrors.push("Please use a password longer than 8 characters.");
@@ -146,16 +148,18 @@ const validateForm = () => {
   const pwDigitRegex = /[0-9]+/;
   if (form.value.password.match(pwUpperRegex) == null) {
     validationErrors.push(
-      "The password needs to contain at least one upper case letter (A-Z)"
+      "The password needs to contain at least one upper case letter (A-Z)",
     );
   }
   if (form.value.password.match(pwLowerRegex) == null) {
     validationErrors.push(
-      "The password needs to contain at least one lower case letter (a-z)"
+      "The password needs to contain at least one lower case letter (a-z)",
     );
   }
   if (form.value.password.match(pwDigitRegex) == null) {
-    validationErrors.push("The password needs to contain at least one digit (0-9)");
+    validationErrors.push(
+      "The password needs to contain at least one digit (0-9)",
+    );
   }
 
   return validationErrors;

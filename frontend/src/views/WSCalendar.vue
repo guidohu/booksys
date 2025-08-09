@@ -62,12 +62,14 @@ const sunsetUnix = ref(0);
 const sessionsOverview = ref(null);
 
 const getTimezone = computed(
-  mapGetters("configuration", ["getTimezone"]).getTimezone.bind({ $store: store })
+  mapGetters("configuration", ["getTimezone"]).getTimezone.bind({
+    $store: store,
+  }),
 );
 const getSessionsCalendar = computed(
   mapGetters("sessions", ["getSessionsCalendar"]).getSessionsCalendar.bind({
     $store: store,
-  })
+  }),
 );
 
 const prevMonth = () => {

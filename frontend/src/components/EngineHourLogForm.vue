@@ -79,12 +79,22 @@ const disableBefore = ref(false);
 const showAfter = ref(false);
 const errors = ref([]);
 
-const getEngineHourLogLatest = computed(() => store.getters["boat/getEngineHourLogLatest"]);
-const getMyNautiqueEngineHours = computed(() => store.getters["boat/getMyNautiqueEngineHours"]);
+const getEngineHourLogLatest = computed(
+  () => store.getters["boat/getEngineHourLogLatest"],
+);
+const getMyNautiqueEngineHours = computed(
+  () => store.getters["boat/getMyNautiqueEngineHours"],
+);
 const userInfo = computed(() => store.getters["login/userInfo"]);
-const getEngineHourFormat = computed(() => store.getters["configuration/getEngineHourFormat"]);
-const getMyNautiqueEnabled = computed(() => store.getters["configuration/getMyNautiqueEnabled"]);
-const getMyNautiqueBoatId = computed(() => store.getters["configuration/getMyNautiqueBoatId"]);
+const getEngineHourFormat = computed(
+  () => store.getters["configuration/getEngineHourFormat"],
+);
+const getMyNautiqueEnabled = computed(
+  () => store.getters["configuration/getMyNautiqueEnabled"],
+);
+const getMyNautiqueBoatId = computed(
+  () => store.getters["configuration/getMyNautiqueBoatId"],
+);
 
 watch(userInfo, () => {
   setDriver();
@@ -97,7 +107,10 @@ watch(getEngineHourLogLatest, (newData) => {
     beforeDescription.value = null;
     prefillBefore();
     form.value.afterHours = null;
-  } else if (parseFloat(newData.before_hours) > 0 && parseFloat(newData.after_hours) > 0) {
+  } else if (
+    parseFloat(newData.before_hours) > 0 &&
+    parseFloat(newData.after_hours) > 0
+  ) {
     form.value.beforeHours = null;
     form.value.type = false;
     prefillBefore();
@@ -125,10 +138,13 @@ watch(getMyNautiqueEngineHours, () => {
   }
 });
 
-const queryEngineHourLogLatest = () => store.dispatch("boat/queryEngineHourLogLatest");
+const queryEngineHourLogLatest = () =>
+  store.dispatch("boat/queryEngineHourLogLatest");
 const addEngineHours = (data) => store.dispatch("boat/addEngineHours", data);
-const queryMyNautiqueInfo = (boatId) => store.dispatch("boat/queryMyNautiqueInfo", boatId);
-const queryConfiguration = () => store.dispatch("configuration/queryConfiguration");
+const queryMyNautiqueInfo = (boatId) =>
+  store.dispatch("boat/queryMyNautiqueInfo", boatId);
+const queryConfiguration = () =>
+  store.dispatch("configuration/queryConfiguration");
 
 function prefillBefore() {
   if (getMyNautiqueEnabled.value && getMyNautiqueEngineHours.value != null) {
@@ -158,7 +174,10 @@ function setDisableBefore() {
 }
 
 function setShowAfter() {
-  if (getEngineHourLogLatest.value != null && parseFloat(getEngineHourLogLatest.value.after_hours) === 0.0) {
+  if (
+    getEngineHourLogLatest.value != null &&
+    parseFloat(getEngineHourLogLatest.value.after_hours) === 0.0
+  ) {
     showAfter.value = true;
     return;
   }
@@ -166,7 +185,10 @@ function setShowAfter() {
 }
 
 function setDriver() {
-  if (getEngineHourLogLatest.value != null && parseFloat(getEngineHourLogLatest.value.after_hours) === 0.0) {
+  if (
+    getEngineHourLogLatest.value != null &&
+    parseFloat(getEngineHourLogLatest.value.after_hours) === 0.0
+  ) {
     form.value.driverName = `${getEngineHourLogLatest.value.user_first_name} ${getEngineHourLogLatest.value.user_last_name}`;
     form.value.driverId = getEngineHourLogLatest.value.user_id;
   } else if (userInfo.value != null) {

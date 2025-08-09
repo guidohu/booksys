@@ -35,7 +35,7 @@
           You do not have any upcoming sessions scheduled.
         </div>
       </div>
-      <div :class="'tab-pane ' + tabClass" id="past-sessions">
+      <div class="tab-pane" id="past-sessions">
         <user-sessions-table
           v-if="pastSessions.length > 0"
           :user-sessions="pastSessions"
@@ -89,7 +89,6 @@ queryUserSchedule().catch((error) => {
 </script>
 
 <style scoped>
-
 .tab-limited-height {
   max-height: 400px;
   height: 400px;

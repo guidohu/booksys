@@ -128,9 +128,7 @@ function isMobile() {
 }
 
 function getCalendarDayBoxClass(daySessionData) {
-  const boxMonth = dayjs(daySessionData.window_start)
-    .startOf("month")
-    .format();
+  const boxMonth = dayjs(daySessionData.window_start).startOf("month").format();
   if (props.month == boxMonth) {
     return "calendar-day-box";
   }
@@ -139,8 +137,7 @@ function getCalendarDayBoxClass(daySessionData) {
 
 function navigateTo(daySessionData) {
   window.location.href =
-    "/today?date=" +
-    dayjs(daySessionData.window_start).format("YYYY-MM-DD");
+    "/today?date=" + dayjs(daySessionData.window_start).format("YYYY-MM-DD");
 }
 
 function mouseOver(daySessionData) {

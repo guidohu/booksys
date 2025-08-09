@@ -43,8 +43,7 @@ const options = ref({
             tooltipItem.index
           ].x.format("DD. MMM");
         let liters =
-          data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index]
-            .y;
+          data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index].y;
         liters = Math.round(liters * 10) / 10;
         return time + " - " + liters + " L";
       },
@@ -106,7 +105,7 @@ function setDatasets(fuelLog) {
   }
 
   const fuelLogByYear = groupBy(fuelLog, (x) =>
-    Number(dayjs.unix(x.timestamp).format("YYYY"))
+    Number(dayjs.unix(x.timestamp).format("YYYY")),
   );
 
   const years = Object.keys(fuelLogByYear).sort().reverse();
@@ -117,7 +116,7 @@ function setDatasets(fuelLog) {
     const year = displayYears[i];
     const fuelValues = fuelLogByYear[year];
     const fuelValuesPerDay = groupBy(fuelValues, (x) =>
-      dayjs.unix(x.timestamp).dayOfYear()
+      dayjs.unix(x.timestamp).dayOfYear(),
     );
 
     const dataset = {
@@ -135,10 +134,10 @@ function setDatasets(fuelLog) {
       const fuelEntries = fuelValuesPerDay[dayNumber];
 
       const engineHours = max(
-        fuelEntries.map((entry) => Number(entry.engine_hours))
+        fuelEntries.map((entry) => Number(entry.engine_hours)),
       );
       const fuelConsumption = sum(
-        fuelEntries.map((entry) => Number(entry.liters))
+        fuelEntries.map((entry) => Number(entry.liters)),
       );
 
       if (lastEngineHours === 0) {
@@ -161,7 +160,7 @@ function setDatasets(fuelLog) {
 
       dataset.data.push({
         x: dayjs(
-          dayjs.unix(fuelEntries[0].timestamp).set("year", 1970)
+          dayjs.unix(fuelEntries[0].timestamp).set("year", 1970),
         ).toDate(),
         y: fuelConsumptionPerHour,
       });

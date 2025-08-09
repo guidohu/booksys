@@ -52,9 +52,12 @@ const emit = defineEmits(["update:visible", "commentChangeHandler"]);
 const errors = ref([]);
 const comment = ref(null);
 
-watch(() => props.defaultComment, (newComment) => {
-  comment.value = newComment;
-});
+watch(
+  () => props.defaultComment,
+  (newComment) => {
+    comment.value = newComment;
+  },
+);
 
 onMounted(() => {
   comment.value = props.defaultComment;

@@ -1,5 +1,5 @@
 import { createStore } from "vuex";
-import { nextTick } from 'vue';
+import { nextTick } from "vue";
 import loginStatus from "booksys/store/modules/loginStatus";
 import screenSize from "booksys/store/modules/screenSize";
 
@@ -12,22 +12,26 @@ export const store = createStore({
   },
 });
 
-const allStoreModules = import.meta.glob('./modules/*.js'); // Adjust path to be relative to index.js
+const allStoreModules = import.meta.glob("./modules/*.js"); // Adjust path to be relative to index.js
 
 // Function to dynamically load and register specific modules
 store.loadModules = async function (moduleNames, to, from) {
-  console.log(`Attempt to load modules ${moduleNames} while navigating to ${to.path}`);
+  console.log(
+    `Attempt to load modules ${moduleNames} while navigating to ${to.path}`,
+  );
   for (const moduleName of moduleNames) {
     // Construct the expected path within the glob result
     // The key will be relative to the project root for aliases, or relative to the current file for relative paths
     let modulePath;
-    if (allStoreModules[`./modules/${moduleName}.js`]) { // If using relative path glob
+    if (allStoreModules[`./modules/${moduleName}.js`]) {
+      // If using relative path glob
       modulePath = `./modules/${moduleName}.js`;
-    } else if (allStoreModules[`booksys/store/modules/${moduleName}.js`]) { // If using 'booksys' alias glob
-       modulePath = `booksys/store/modules/${moduleName}.js`;
+    } else if (allStoreModules[`booksys/store/modules/${moduleName}.js`]) {
+      // If using 'booksys' alias glob
+      modulePath = `booksys/store/modules/${moduleName}.js`;
     } else {
-       console.warn(`Module '${moduleName}' not found in glob pattern.`);
-       continue;
+      console.warn(`Module '${moduleName}' not found in glob pattern.`);
+      continue;
     }
 
     if (!store.hasModule(moduleName) && allStoreModules[modulePath]) {

@@ -2,11 +2,11 @@ import Request from "booksys/api/common/request.js";
 
 export default class Boat {
   static getEngineHourLog() {
-    return Request.getRequest('/api/v2/boat/engine-hours/list');
+    return Request.getRequest("/api/v2/boat/engine-hours/list");
   }
 
   static getEngineHourLogLatest() {
-    return Request.getRequest('/api/v2/boat/engine-hour/latest/get');
+    return Request.getRequest("/api/v2/boat/engine-hour/latest/get");
   }
 
   /**
@@ -20,7 +20,10 @@ export default class Boat {
    * }
    */
   static addEngineHours(engineHourEntry) {
-    return Request.postRequest('/api/v2/boat/engine-hour/update', engineHourEntry);
+    return Request.postRequest(
+      "/api/v2/boat/engine-hour/update",
+      engineHourEntry,
+    );
   }
 
   /**
@@ -32,11 +35,14 @@ export default class Boat {
    * }
    */
   static updateEngineHours(engineHourEntryUpdate) {
-    return Request.postRequest('/api/v2/boat/engine-hour/entry/update', engineHourEntryUpdate);
+    return Request.postRequest(
+      "/api/v2/boat/engine-hour/entry/update",
+      engineHourEntryUpdate,
+    );
   }
 
   static getFuelLog() {
-    return Request.getRequest('/api/v2/boat/fuel-entries/get');
+    return Request.getRequest("/api/v2/boat/fuel-entries/get");
   }
 
   /**
@@ -69,7 +75,7 @@ export default class Boat {
   }
 
   static getMaintenanceLog() {
-    return Request.getRequest('/api/v2/boat/maintenance-entries/get');
+    return Request.getRequest("/api/v2/boat/maintenance-entries/get");
   }
 
   /**
@@ -82,13 +88,19 @@ export default class Boat {
    * }
    */
   static addMaintenanceEntry(maintenanceEntry) {
-    return Request.postRequest("/api/v2/boat/maintenance-entry/add", maintenanceEntry);
+    return Request.postRequest(
+      "/api/v2/boat/maintenance-entry/add",
+      maintenanceEntry,
+    );
   }
 
   static getMyNautiqueInfo(boatId, token, tokenExpiry) {
     const request = {
       boat_id: boatId,
     };
-    return Request.postRequest("/api/v2/boat/mynautique/telemetry/get", request);
+    return Request.postRequest(
+      "/api/v2/boat/mynautique/telemetry/get",
+      request,
+    );
   }
 }

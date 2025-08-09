@@ -103,12 +103,10 @@ export const formatFuelConsumption = (value) => {
 };
 
 /**
- * Formats seconds to be displayed as hh:mm:ss or mm:ss 
+ * Formats seconds to be displayed as hh:mm:ss or mm:ss
  * @param {*} value seconds
  */
-export const formatHHMMSS = (value) => {
-  
-};
+export const formatHHMMSS = (value) => {};
 
 /**
  * Formats a duration in seconds into a string of
@@ -123,18 +121,34 @@ export const formatDurationString = (value, displaySeconds) => {
   const fmtMinutes = minutes % 60;
   // hours
   minutes = minutes - fmtMinutes;
-  const fmtHours =  (minutes / 60) % 24;
+  const fmtHours = (minutes / 60) % 24;
   // days
-  minutes = minutes - (fmtHours * 60);
-  const fmtDays = (minutes / 60 / 24);
+  minutes = minutes - fmtHours * 60;
+  const fmtDays = minutes / 60 / 24;
   // return value
   switch (true) {
     case displaySeconds == true && fmtDays > 0:
-      return sprintf("%d days %d hours %d minutes %d seconds", fmtDays, fmtHours, fmtMinutes, fmtSeconds);
+      return sprintf(
+        "%d days %d hours %d minutes %d seconds",
+        fmtDays,
+        fmtHours,
+        fmtMinutes,
+        fmtSeconds,
+      );
     case displaySeconds == true:
-      return sprintf("%d hours %d minutes %d seconds", fmtHours, fmtMinutes, fmtSeconds);
+      return sprintf(
+        "%d hours %d minutes %d seconds",
+        fmtHours,
+        fmtMinutes,
+        fmtSeconds,
+      );
     case fmtDays > 0:
-      return sprintf("%d days %d hours %d minutes", fmtDays, fmtHours, fmtMinutes);
+      return sprintf(
+        "%d days %d hours %d minutes",
+        fmtDays,
+        fmtHours,
+        fmtMinutes,
+      );
     default:
       return sprintf("%d hours %d minutes", fmtHours, fmtMinutes);
   }
@@ -142,28 +156,28 @@ export const formatDurationString = (value, displaySeconds) => {
 
 /**
  * Formats a number into the Locale representation.
- * @param {} number 
- * @returns 
+ * @param {} number
+ * @returns
  */
 export const formatNumber = (number) => {
   const c = Number(number);
   // TODO: make this configurable.
-  return c.toLocaleString('de-CH');
-}
+  return c.toLocaleString("de-CH");
+};
 
 /**
  * Formats a number into number followed by the currency. It
  * uses formatNumber() internally.
- * @param {*} value 
- * @param {*} currency 
- * @returns 
+ * @param {*} value
+ * @param {*} currency
+ * @returns
  */
 export const formatCost = (value, currency) => {
   const v = parseFloat(value);
-  if(isNaN(v)) {
+  if (isNaN(v)) {
     return "NaN" + " " + currency;
   }
   const n = formatNumber(v);
   // TODO make this configurable.
   return sprintf("%.02f %s", n, currency);
-}
+};

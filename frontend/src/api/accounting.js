@@ -6,7 +6,7 @@ export default class Accounting {
    */
   static getYears() {
     console.log("/api/v2/accounting/years/list called");
-    return Request.getRequest('/api/v2/accounting/years/list');
+    return Request.getRequest("/api/v2/accounting/years/list");
   }
 
   /**
@@ -14,7 +14,7 @@ export default class Accounting {
    */
   static getExpenseTypes() {
     console.log("/api/v2/accounting/expense_types/list");
-    return Request.getRequest('/api/v2/accounting/expense_types/list');
+    return Request.getRequest("/api/v2/accounting/expense_types/list");
   }
 
   /**
@@ -22,7 +22,7 @@ export default class Accounting {
    */
   static getIncomeTypes() {
     console.log("/api/v2/accounting/income_types/list called");
-    return Request.getRequest('/api/v2/accounting/income_types/list');
+    return Request.getRequest("/api/v2/accounting/income_types/list");
   }
 
   /**
@@ -38,7 +38,10 @@ export default class Accounting {
       year: parseInt(year),
     };
 
-    return Request.postRequest("/api/v2/accounting/statistics/get", requestData);
+    return Request.postRequest(
+      "/api/v2/accounting/statistics/get",
+      requestData,
+    );
   }
 
   /**
@@ -56,7 +59,10 @@ export default class Accounting {
       year: parseInt(year),
     };
 
-    return Request.postRequest("/api/v2/accounting/transactions/get", requestData);
+    return Request.postRequest(
+      "/api/v2/accounting/transactions/get",
+      requestData,
+    );
   }
 
   /**
@@ -64,12 +70,18 @@ export default class Accounting {
    * @param {*} transaction
    */
   static deleteTransaction(transaction) {
-    console.log("/api/v2/accounting/transactions/delete called with:", transaction);
+    console.log(
+      "/api/v2/accounting/transactions/delete called with:",
+      transaction,
+    );
     const requestData = {
       table_id: parseInt(transaction.tbl),
       row_id: parseInt(transaction.id),
     };
-    return Request.postRequest("/api/v2/accounting/transactions/delete", requestData);
+    return Request.postRequest(
+      "/api/v2/accounting/transactions/delete",
+      requestData,
+    );
   }
 
   /**
@@ -84,7 +96,10 @@ export default class Accounting {
    * }
    */
   static addIncome(incomeTransaction) {
-    console.log("/api/v2/accounting/income/add called with:", incomeTransaction);
+    console.log(
+      "/api/v2/accounting/income/add called with:",
+      incomeTransaction,
+    );
     const requestData = {
       amount: incomeTransaction.amount,
       type_id: incomeTransaction.typeId,
@@ -107,7 +122,10 @@ export default class Accounting {
    * }
    */
   static addExpense(expenseTransaction) {
-    console.log("/api/v2/accounting/expense/add called with:", expenseTransaction);
+    console.log(
+      "/api/v2/accounting/expense/add called with:",
+      expenseTransaction,
+    );
     const requestData = {
       amount: expenseTransaction.amount,
       type_id: expenseTransaction.typeId,

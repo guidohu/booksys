@@ -119,7 +119,7 @@ watch(
   (newValue) => {
     console.debug("EngineHourEntryModal: new engineHourEntry", newValue);
     setFormContent(newValue);
-  }
+  },
 );
 
 const setFormContent = (entry) => {

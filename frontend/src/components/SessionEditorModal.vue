@@ -105,7 +105,11 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const props = defineProps(["defaultValues", "visible"]);
-const emit = defineEmits(["update:visible", "sessionCreatedHandler", "sessionEditedHandler"]);
+const emit = defineEmits([
+  "update:visible",
+  "sessionCreatedHandler",
+  "sessionEditedHandler",
+]);
 
 const store = useStore();
 
@@ -122,14 +126,20 @@ const form = ref({
 });
 
 const getTimezone = computed(() => store.getters["configuration/getTimezone"]);
-const getMaximumNumberOfRiders = computed(() => store.getters["configuration/getMaximumNumberOfRiders"]);
+const getMaximumNumberOfRiders = computed(
+  () => store.getters["configuration/getMaximumNumberOfRiders"],
+);
 
 const getMaximumRidersLabel = computed(() => {
-  return form.value.id == null ? "Maximum Riders" : "Additional Slots for Riders";
+  return form.value.id == null
+    ? "Maximum Riders"
+    : "Additional Slots for Riders";
 });
 
-const createSession = (session) => store.dispatch("sessions/createSession", session);
-const editSession = (session) => store.dispatch("sessions/editSession", session);
+const createSession = (session) =>
+  store.dispatch("sessions/createSession", session);
+const editSession = (session) =>
+  store.dispatch("sessions/editSession", session);
 
 function save(event) {
   event.preventDefault();
@@ -144,7 +154,7 @@ function save(event) {
     dayjs.tz(form.value.startDate, getTimezone.value).format(),
     dayjs.tz(form.value.endDate, getTimezone.value).format(),
     form.value.maximumRiders,
-    type
+    type,
   );
 
   console.log("SessionEditorModal, save session dataType:", session);
@@ -192,14 +202,19 @@ function setFormContent() {
     ? dayjs(props.defaultValues.end).format("YYYY-MM-DDTHH:mm")
     : dayjs().tz(getTimezone.value).add(1, "hour").format("YYYY-MM-DDTHH:mm");
 
-  form.value.maximumRiders = props.defaultValues?.maximumRiders || getMaximumNumberOfRiders.value;
+  form.value.maximumRiders =
+    props.defaultValues?.maximumRiders || getMaximumNumberOfRiders.value;
 
   form.value.type = props.defaultValues?.type || null;
 
   console.log("SessionEditorModal: Form values are now:", form.value);
 }
 
-watch(() => props.defaultValues, () => {
-  setFormContent();
-}, { deep: true, immediate: true });
+watch(
+  () => props.defaultValues,
+  () => {
+    setFormContent();
+  },
+  { deep: true, immediate: true },
+);
 </script>

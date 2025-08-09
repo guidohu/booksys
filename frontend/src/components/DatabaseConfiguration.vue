@@ -67,9 +67,13 @@ const conf = ref({
   password: "",
 });
 
-watch(conf, (newVal) => {
-  emit("config-change", newVal);
-}, { deep: true });
+watch(
+  conf,
+  (newVal) => {
+    emit("config-change", newVal);
+  },
+  { deep: true },
+);
 
 conf.value.host = props.dbconfig.host;
 conf.value.name = props.dbconfig.name;

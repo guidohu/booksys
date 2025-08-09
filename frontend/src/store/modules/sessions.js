@@ -59,7 +59,7 @@ const actions = {
       Sessions.getSessions(
         time.start,
         time.end,
-        rootState.configuration.timezone
+        rootState.configuration.timezone,
       )
         .then((sessions) => {
           commit("setSessions", { sessions: sessions, timeWindow: time });
@@ -85,7 +85,7 @@ const actions = {
         });
     });
   },
-  querySessionMetadata({ commit}, sessionId) {
+  querySessionMetadata({ commit }, sessionId) {
     console.log("Trigger querySessionMetadata with:", sessionId);
     return new Promise((resolve, reject) => {
       Sessions.getSessionMetadata(sessionId)

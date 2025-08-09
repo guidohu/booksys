@@ -29,7 +29,9 @@
     "vuex": "^4.1.0"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.28.0",
     "@vitejs/plugin-vue": "^6.0.0",
+    "@vue/cli-plugin-babel": "^5.0.8",
     "@vue/eslint-config-prettier": "^9.0.0",
     "depcheck": "^1.4.7",
     "eslint": "^8.11.0",
@@ -52,7 +54,7 @@
       "plugin:vue/vue3-essential"
     ],
     "parserOptions": {
-      "parser": "babel-eslint"
+      "parser": "@babel/eslint-parser"
     },
     "ignorePatterns": [
       "browser.js",

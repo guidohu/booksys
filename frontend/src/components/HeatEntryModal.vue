@@ -109,9 +109,12 @@ const form = ref({ date: null });
 
 const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
 
-watch(() => props.heat, (newHeat) => {
-  setFormDefaults(newHeat);
-});
+watch(
+  () => props.heat,
+  (newHeat) => {
+    setFormDefaults(newHeat);
+  },
+);
 
 function setFormDefaults(heatData) {
   form.value = {
@@ -142,7 +145,8 @@ function durationChangeHandler() {
     const seconds = Number(durationParts[1]);
     const minutes = Number(durationParts[0]);
     const durationSeconds = seconds + 60 * minutes;
-    form.value.cost = Math.round(((durationSeconds * form.value.fare) / 60) * 100) / 100;
+    form.value.cost =
+      Math.round(((durationSeconds * form.value.fare) / 60) * 100) / 100;
   }
 }
 
@@ -151,7 +155,8 @@ function close() {
 }
 
 function remove() {
-  store.dispatch("heats/removeHeat", form.value.id)
+  store
+    .dispatch("heats/removeHeat", form.value.id)
     .then(() => close())
     .catch((errs) => (errors.value = errs));
 }
@@ -180,7 +185,8 @@ function save() {
     duration: durationSeconds,
     comment: form.value.comment,
   };
-  store.dispatch("heats/updateHeat", heatUpdate)
+  store
+    .dispatch("heats/updateHeat", heatUpdate)
     .then(() => {
       errors.value = [];
       close();

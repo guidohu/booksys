@@ -138,7 +138,7 @@ const userRoleDescription = computed(() => {
     return "";
   }
   const role = userRoles.value.find(
-    (ur) => ur.user_role_id == form.value.user_role_id
+    (ur) => ur.user_role_id == form.value.user_role_id,
   );
   return role.user_role_description;
 });
@@ -147,7 +147,7 @@ watch(
   () => props.userGroup,
   () => {
     reloadProps();
-  }
+  },
 );
 
 watch(
@@ -155,7 +155,7 @@ watch(
   (newValue) => {
     isEditMode.value = newValue;
     setTitle();
-  }
+  },
 );
 
 watch(userRoles, (newValue) => {
@@ -166,7 +166,7 @@ watch(
   () => props.visible,
   () => {
     reloadProps();
-  }
+  },
 );
 
 const queryConfiguration = () =>

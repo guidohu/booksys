@@ -72,13 +72,25 @@ const store = useStore();
 const errors = ref([]);
 const timer = ref(null);
 
-const getMyNautiqueEnabled = computed(() => store.getters["configuration/getMyNautiqueEnabled"]);
-const getMyNautiqueBoatId = computed(() => store.getters["configuration/getMyNautiqueBoatId"]);
-const getAvgFuelConsumption = computed(() => store.getters["boat/getAvgFuelConsumption"]);
-const getMyNautiqueFuelLevel = computed(() => store.getters["boat/getMyNautiqueFuelLevel"]);
-const getMyNautiqueFuelCapacity = computed(() => store.getters["boat/getMyNautiqueFuelCapacity"]);
+const getMyNautiqueEnabled = computed(
+  () => store.getters["configuration/getMyNautiqueEnabled"],
+);
+const getMyNautiqueBoatId = computed(
+  () => store.getters["configuration/getMyNautiqueBoatId"],
+);
+const getAvgFuelConsumption = computed(
+  () => store.getters["boat/getAvgFuelConsumption"],
+);
+const getMyNautiqueFuelLevel = computed(
+  () => store.getters["boat/getMyNautiqueFuelLevel"],
+);
+const getMyNautiqueFuelCapacity = computed(
+  () => store.getters["boat/getMyNautiqueFuelCapacity"],
+);
 
-const fuelLevelStyle = computed(() => `width: ${getMyNautiqueFuelLevel.value}%`);
+const fuelLevelStyle = computed(
+  () => `width: ${getMyNautiqueFuelLevel.value}%`,
+);
 
 const fuelConsumptionStyle = computed(() => {
   if (getAvgFuelConsumption.value == null) {
@@ -91,7 +103,9 @@ const timeTillEmpty = computed(() => {
   if (getAvgFuelConsumption.value == null || !getMyNautiqueEnabled.value) {
     return "N/A hours";
   }
-  const hours = ((getMyNautiqueFuelLevel.value / 100) * getMyNautiqueFuelCapacity.value) / getAvgFuelConsumption.value;
+  const hours =
+    ((getMyNautiqueFuelLevel.value / 100) * getMyNautiqueFuelCapacity.value) /
+    getAvgFuelConsumption.value;
   const hoursFloor = parseInt(hours);
   const minutes = parseInt((hours - hoursFloor) * 60);
   return sprintf("up to %d h %02d min left", hoursFloor, minutes);
@@ -115,11 +129,13 @@ function refresh() {
   }
 }
 
-store.dispatch("configuration/queryConfiguration")
+store
+  .dispatch("configuration/queryConfiguration")
   .then(() => {
     if (getMyNautiqueEnabled.value) {
       console.log("query myNautique with boat ID", getMyNautiqueBoatId.value);
-      store.dispatch("boat/queryMyNautiqueInfo", getMyNautiqueBoatId.value)
+      store
+        .dispatch("boat/queryMyNautiqueInfo", getMyNautiqueBoatId.value)
         .then(() => {
           console.log("enable myNautique auto refresh");
           startAutoRefresh();

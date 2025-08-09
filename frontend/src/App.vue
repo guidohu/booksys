@@ -25,7 +25,7 @@ const router = useRouter();
 const errors = ref([]);
 const backendReachable = ref(true);
 const backendNotReachableAlertMsg = ref(
-  "The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible. You might try to simply refresh the page if you feel lucky."
+  "The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible. You might try to simply refresh the page if you feel lucky.",
 );
 
 const isLoggedIn = computed(() => store.getters["loginStatus/isLoggedIn"]);

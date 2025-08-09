@@ -88,17 +88,17 @@ const actions = {
         console.log(
           "stoppedTime",
           dayjs.unix(stoppedTime).format(),
-          stoppedTime
+          stoppedTime,
         );
         console.log(
           "startTime",
           dayjs.unix(state._startTime).format(),
-          state._startTime
+          state._startTime,
         );
         console.log(
           "offset",
           dayjs.unix(state._timeOffset).format(),
-          state._timeOffset
+          state._timeOffset,
         );
         const duration = stoppedTime - startTime - offset;
 
@@ -122,8 +122,8 @@ const actions = {
         commit("setIsDisplayUpdaterActive", false);
 
         const heats = {
-          heats: [newHeat]
-        }
+          heats: [newHeat],
+        };
 
         Heat.addHeats(heats)
           .then((response) => {
@@ -133,7 +133,7 @@ const actions = {
             // check if the heat that was just added, was added successfully
             const allUids = keys(response);
             const failedHeatUids = allUids.filter(
-              (id) => response[id].ok != true
+              (id) => response[id].ok != true,
             );
             if (failedHeatUids.length != 0) {
               dispatch("heats/queryHeatsForSession", state.sessionId, {

@@ -96,16 +96,14 @@ import ModalBody from "../components/bricks/ModalBody.vue";
 import ModalFooter from "../components/bricks/ModalFooter.vue";
 
 // Lazy loaded components
-const DatabaseConfiguration = defineAsyncComponent(() =>
-  import(
-    "booksys/components/DatabaseConfiguration.vue"
-  )
+const DatabaseConfiguration = defineAsyncComponent(
+  () => import("booksys/components/DatabaseConfiguration.vue"),
 );
-const UserSignUp = defineAsyncComponent(() =>
-  import("booksys/components/forms/UserSignUp.vue")
+const UserSignUp = defineAsyncComponent(
+  () => import("booksys/components/forms/UserSignUp.vue"),
 );
-const WarningBox = defineAsyncComponent(() =>
-  import("booksys/components/WarningBox.vue")
+const WarningBox = defineAsyncComponent(
+  () => import("booksys/components/WarningBox.vue"),
 );
 
 const router = useRouter();
@@ -225,10 +223,10 @@ const validateAdminUser = () => {
     return validationErrors;
   }
 
-  if (
-    adminUserConfig.value.password != adminUserConfig.value.passwordConfirm
-  ) {
-    validationErrors.push("Password and Password Confirmation are not identical.");
+  if (adminUserConfig.value.password != adminUserConfig.value.passwordConfirm) {
+    validationErrors.push(
+      "Password and Password Confirmation are not identical.",
+    );
   }
   if (adminUserConfig.value.password.length <= 8) {
     validationErrors.push("Please use a password longer than 8 characters.");
@@ -246,16 +244,18 @@ const validateAdminUser = () => {
   const pwDigitRegex = /[0-9]+/;
   if (adminUserConfig.value.password.match(pwUpperRegex) == null) {
     validationErrors.push(
-      "The password needs to contain at least one upper case letter (A-Z)"
+      "The password needs to contain at least one upper case letter (A-Z)",
     );
   }
   if (adminUserConfig.value.password.match(pwLowerRegex) == null) {
     validationErrors.push(
-      "The password needs to contain at least one lower case letter (a-z)"
+      "The password needs to contain at least one lower case letter (a-z)",
     );
   }
   if (adminUserConfig.value.password.match(pwDigitRegex) == null) {
-    validationErrors.push("The password needs to contain at least one digit (0-9)");
+    validationErrors.push(
+      "The password needs to contain at least one digit (0-9)",
+    );
   }
 
   return validationErrors;

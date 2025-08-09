@@ -61,7 +61,7 @@ watch(
   (newVal) => {
     form.value = { ...newVal };
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 const save = () => {

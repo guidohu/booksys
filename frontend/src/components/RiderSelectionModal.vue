@@ -121,7 +121,7 @@ const userOptions = computed(() => {
   });
 
   users = users.filter(
-    (u) => !usersToAdd.value.map((uta) => uta.id).includes(u.value)
+    (u) => !usersToAdd.value.map((uta) => uta.id).includes(u.value),
   );
   return users;
 });
@@ -129,7 +129,7 @@ const userOptions = computed(() => {
 watch(search, (newSearch) => {
   // filteredOptions are the ones that
   filteredOptions.value = userOptions.value.filter((u) =>
-    u.text.toLowerCase().includes(newSearch.toLowerCase())
+    u.text.toLowerCase().includes(newSearch.toLowerCase()),
   );
 });
 
@@ -156,14 +156,14 @@ function add() {
   if (selected.value.length > 0) {
     console.log(
       "Users to add",
-      userList.value.filter((u) => selected.value.includes(u.id.toString()))
+      userList.value.filter((u) => selected.value.includes(u.id.toString())),
     );
     usersToAdd.value.push(
-      ...userList.value.filter((u) => selected.value.includes(u.id.toString()))
+      ...userList.value.filter((u) => selected.value.includes(u.id.toString())),
     );
   } else if (selected.value.length == 0 && filteredOptions.value.length == 1) {
     usersToAdd.value.push(
-      ...userList.value.filter((u) => u.id == filteredOptions.value[0].value)
+      ...userList.value.filter((u) => u.id == filteredOptions.value[0].value),
     );
   }
 

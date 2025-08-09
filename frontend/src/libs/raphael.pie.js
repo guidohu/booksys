@@ -14,7 +14,7 @@ Raphael.fn.pieChart = function (
   colors,
   stroke,
   animate,
-  clickCallBack
+  clickCallBack,
 ) {
   var paper = this,
     rad = Math.PI / 180,
@@ -125,7 +125,7 @@ Raphael.fn.pieChart = function (
           .text(
             cx + (r + delta + 55) * Math.cos(-popangle * rad),
             cy + (r + delta + 25) * Math.sin(-popangle * rad),
-            labels[j]
+            labels[j],
           )
           .attr({
             fill: colors[j],
@@ -141,7 +141,7 @@ Raphael.fn.pieChart = function (
           p.stop().animate(
             { transform: "s1.15 1.15 " + cx + " " + cy },
             ms,
-            "elastic"
+            "elastic",
           );
           if (labels[j]) {
             txt.stop().animate({ opacity: 1 }, ms, "elastic");
@@ -169,7 +169,7 @@ Raphael.fn.pieChart = function (
             p.stop().animate(
               { transform: "s1.15 1.15 " + cx + " " + cy },
               ms,
-              "elastic"
+              "elastic",
             );
           });
         }

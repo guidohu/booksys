@@ -65,7 +65,7 @@ const actions = {
         })
         .catch((error) => {
           reject(error);
-        })
+        });
       User.getHeatStats()
         .then((response) => {
           commit("setHeatStats", response);
@@ -73,7 +73,7 @@ const actions = {
         })
         .catch((error) => {
           reject(error);
-        })
+        });
       User.getBalance()
         .then((response) => {
           commit("setUserBalance", response);
@@ -81,7 +81,7 @@ const actions = {
         })
         .catch((error) => {
           reject(error);
-        })
+        });
     });
   },
   changeUserProfile({ dispatch }, profileData) {
@@ -248,7 +248,7 @@ const actions = {
         })
         .catch((error) => {
           reject(error);
-        })
+        });
     });
   },
 };

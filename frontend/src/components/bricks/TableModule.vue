@@ -156,7 +156,7 @@ watch(
 
     tRows.value = newRows;
     sort();
-  }
+  },
 );
 
 watch(
@@ -172,7 +172,7 @@ watch(
 
     tColumns.value = newCols;
     return;
-  }
+  },
 );
 
 const calculateRowKey = (row) => {
@@ -188,7 +188,11 @@ const sortByCol = (col, changeSorting = true) => {
     return;
   }
 
-  if (changeSorting && sortCol.value != null && sortCol.value.label == col.label) {
+  if (
+    changeSorting &&
+    sortCol.value != null &&
+    sortCol.value.label == col.label
+  ) {
     sortOrder.value = (sortOrder.value + 1) % 2;
   } else if (changeSorting && sortCol.value != null) {
     sortOrder.value = 0;
@@ -244,10 +248,7 @@ const getRowClass = (row) => {
 const rowClickHandler = (row) => {
   console.log("row clicked", row);
   if (props.selectable == true && props.selectMode == "single") {
-    if (
-      selectedRows.value.length == 1 &&
-      isEqual(row, selectedRows.value[0])
-    ) {
+    if (selectedRows.value.length == 1 && isEqual(row, selectedRows.value[0])) {
       selectedRows.value = [];
       emit("select-row", []);
     } else {
@@ -275,7 +276,6 @@ if (props.rows != null && props.rows.length > 0) {
 </script>
 
 <style>
-
 .table-size {
   overflow-y: scroll;
   width: 100%;
@@ -298,7 +298,7 @@ thead th {
   border-top: 1.5px solid currentColor;
 }
 
-.table>:not(caption)>*>* {
+.table > :not(caption) > * > * {
   /* to remove any bootstrap background styling */
   background-color: rgba(0, 0, 0, 0);
 }

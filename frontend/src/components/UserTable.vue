@@ -157,7 +157,8 @@ watch(userListDetailed, (newUserListDetailed) => {
   items.value = userList;
 });
 
-const queryUserListDetailed = () => store.dispatch("user/queryUserListDetailed");
+const queryUserListDetailed = () =>
+  store.dispatch("user/queryUserListDetailed");
 const queryUserGroups = () => store.dispatch("user/queryUserGroups");
 const lockUser = (data) => store.dispatch("user/lockUser", data);
 const deleteUser = (id) => store.dispatch("user/deleteUser", id);
@@ -173,7 +174,7 @@ function getBalance(row) {
   return sprintf(
     "%.2f %s",
     row.total_payment - row.total_heat_cost,
-    getCurrency.value
+    getCurrency.value,
   );
 }
 
@@ -183,13 +184,13 @@ function rowSelected(rows) {
 
 function lock(user) {
   lockUser({ user: user.id, locked: true }).catch(
-    (errs) => (errors.value = errs)
+    (errs) => (errors.value = errs),
   );
 }
 
 function unlock(user) {
   lockUser({ user: user.id, locked: false }).catch(
-    (errs) => (errors.value = errs)
+    (errs) => (errors.value = errs),
   );
 }
 
@@ -213,7 +214,7 @@ function showDeleteUserDialog() {
     .then((value) => {
       if (value == true) {
         deleteUser(selectedItems.value[0].id).catch(
-          (errs) => (errors.value = errs)
+          (errs) => (errors.value = errs),
         );
       }
     })

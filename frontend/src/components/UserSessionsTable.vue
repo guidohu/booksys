@@ -51,11 +51,15 @@ const items = ref(props.userSessions);
 
 const getTimezone = computed(() => store.getters["configuration/getTimezone"]);
 
-const queryConfiguration = () => store.dispatch("configuration/queryConfiguration");
+const queryConfiguration = () =>
+  store.dispatch("configuration/queryConfiguration");
 
 function formatTime(item) {
   return (
-    dayjs.unix(item.start_time).tz(getTimezone.value).format("DD.MM.YYYY HH:mm") +
+    dayjs
+      .unix(item.start_time)
+      .tz(getTimezone.value)
+      .format("DD.MM.YYYY HH:mm") +
     " - " +
     dayjs.unix(item.end_time).tz(getTimezone.value).format("HH:mm")
   );

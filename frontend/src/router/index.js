@@ -3,36 +3,24 @@ import { store } from "booksys/store";
 
 // Lazy import of all the Views used by the router
 const Login = () => import("booksys/views/WSLogin.vue");
-const Logout = () =>
-  import("booksys/views/WSLogout.vue");
-const SignUp = () =>
-  import("booksys/views/WSSignUp.vue");
-const Dashboard = () =>
-  import("booksys/views/WSDashboard.vue");
-const Account = () =>
-  import("booksys/views/WSAccount.vue");
+const Logout = () => import("booksys/views/WSLogout.vue");
+const SignUp = () => import("booksys/views/WSSignUp.vue");
+const Dashboard = () => import("booksys/views/WSDashboard.vue");
+const Account = () => import("booksys/views/WSAccount.vue");
 const Info = () => import("booksys/views/WSInfo.vue");
-const Schedule = () =>
-  import("booksys/views/WSSchedule.vue");
+const Schedule = () => import("booksys/views/WSSchedule.vue");
 const Today = () => import("booksys/views/WSToday.vue");
-const Calendar = () =>
-  import("booksys/views/WSCalendar.vue");
+const Calendar = () => import("booksys/views/WSCalendar.vue");
 const Boat = () => import("booksys/views/WSBoat.vue");
 const Ride = () => import("booksys/views/WSRide.vue");
 const Watch = () => import("booksys/views/WSWatch.vue");
 const Admin = () => import("booksys/views/WSAdmin.vue");
-const Users = () =>
-  import("booksys/views/admin/WSUsers.vue");
-const Accounting = () =>
-  import("booksys/views/admin/WSAccounting.vue");
-const Settings = () =>
-  import("booksys/views/admin/WSSettings.vue");
-const Logs = () =>
-  import( "booksys/views/admin/WSLogs.vue");
-const PasswordReset = () =>
-  import( "booksys/views/WSPasswordReset.vue");
-const Setup = () =>
-  import( "booksys/views/WSSetupPage.vue");
+const Users = () => import("booksys/views/admin/WSUsers.vue");
+const Accounting = () => import("booksys/views/admin/WSAccounting.vue");
+const Settings = () => import("booksys/views/admin/WSSettings.vue");
+const Logs = () => import("booksys/views/admin/WSLogs.vue");
+const PasswordReset = () => import("booksys/views/WSPasswordReset.vue");
+const Setup = () => import("booksys/views/WSSetupPage.vue");
 
 const loginEnforced = (to, from, next) => {
   if (!store.state.loginStatus.isLoggedIn) {
@@ -102,7 +90,11 @@ const routes = [
     name: "Today",
     beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        await store.loadModules(["configuration", "sessions", "user"], to, from);
+        await store.loadModules(
+          ["configuration", "sessions", "user"],
+          to,
+          from,
+        );
         next();
       }
     },
@@ -113,7 +105,11 @@ const routes = [
     name: "Dashboard",
     beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        await store.loadModules(["sessions", "configuration", "login"], to, from);
+        await store.loadModules(
+          ["sessions", "configuration", "login"],
+          to,
+          from,
+        );
         next();
       }
     },
@@ -179,7 +175,11 @@ const routes = [
     name: "Ride",
     beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        await store.loadModules(["sessions", "configuration", "stopwatch", "user"], to, from);
+        await store.loadModules(
+          ["sessions", "configuration", "stopwatch", "user"],
+          to,
+          from,
+        );
         next();
       }
     },
@@ -190,7 +190,11 @@ const routes = [
     name: "Watch",
     beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        await store.loadModules(["sessions", "configuration", "stopwatch", "heats"], to, from);
+        await store.loadModules(
+          ["sessions", "configuration", "stopwatch", "heats"],
+          to,
+          from,
+        );
         next();
       }
     },
@@ -222,7 +226,11 @@ const routes = [
     name: "Accounting",
     beforeEnter: async (to, from, next) => {
       if (loginEnforced(to, from, next)) {
-        await store.loadModules(["configuration", "accounting", "user", "boat"], to, from);
+        await store.loadModules(
+          ["configuration", "accounting", "user", "boat"],
+          to,
+          from,
+        );
         next();
       }
     },

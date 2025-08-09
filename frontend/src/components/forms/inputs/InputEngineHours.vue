@@ -24,14 +24,7 @@
 </template>
 
 <script setup>
-import {
-  defineProps,
-  defineEmits,
-  ref,
-  computed,
-  watch,
-  onMounted,
-} from "vue";
+import { defineProps, defineEmits, ref, computed, watch, onMounted } from "vue";
 import {
   formatEngineHourLabel,
   formatEngineHour,
@@ -84,7 +77,7 @@ watch(
   () => props.modelValue,
   (newValue) => {
     formValue.value = formatEngineHour(newValue, props.displayFormat);
-  }
+  },
 );
 
 watch(
@@ -97,7 +90,7 @@ watch(
     } else {
       state.value = null;
     }
-  }
+  },
 );
 
 onMounted(() => {
@@ -106,7 +99,7 @@ onMounted(() => {
   if (props.placeholder != null) {
     formPlaceholder.value = formatEngineHour(
       props.placeholder,
-      props.displayFormat
+      props.displayFormat,
     );
   }
 });

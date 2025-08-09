@@ -7,10 +7,7 @@
     </div>
     <overlay-spinner :active="isUploading">
       <!-- The existing logo -->
-      <div
-        class="row"
-        v-if="hasExistingLogo()"
-      >
+      <div class="row" v-if="hasExistingLogo()">
         <label class="col-3 col-form-label">Current Logo</label>
         <div class="col-9">
           <img
@@ -43,10 +40,7 @@
         </div>
       </div>
       <!-- The replacement logo -->
-      <div
-        class="row"
-        v-if="hasReplacementLogo()"
-      >
+      <div class="row" v-if="hasReplacementLogo()">
         <label class="col-3 col-form-label">New Logo</label>
         <div class="col-9">
           <img
@@ -192,7 +186,8 @@ function showReplaceLogo() {
   logoState.value = States.REPLACE;
 }
 
-store.dispatch("configuration/queryAdminConfiguration")
+store
+  .dispatch("configuration/queryAdminConfiguration")
   .then(() => {
     if (getLogoUri.value == null) {
       logoState.value = States.NOLOGO;

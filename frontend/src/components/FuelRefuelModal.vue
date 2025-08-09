@@ -77,9 +77,13 @@ const form = ref({
 const engineHourDescription = ref(null);
 
 const userInfo = computed(() => store.getters["login/userInfo"]);
-const getMyNautiqueEngineHours = computed(() => store.getters["boat/getMyNautiqueEngineHours"]);
+const getMyNautiqueEngineHours = computed(
+  () => store.getters["boat/getMyNautiqueEngineHours"],
+);
 const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
-const getEngineHourFormat = computed(() => store.getters["configuration/getEngineHourFormat"]);
+const getEngineHourFormat = computed(
+  () => store.getters["configuration/getEngineHourFormat"],
+);
 
 watch(getMyNautiqueEngineHours, (newValue) => {
   if (form.value.engineHours == null || form.value.engineHours === "") {
@@ -89,16 +93,24 @@ watch(getMyNautiqueEngineHours, (newValue) => {
 });
 
 function saveFuel() {
-  const engineHours = isNaN(form.value.engineHours) || form.value.engineHours === "" ? null : form.value.engineHours;
-  const liters = isNaN(form.value.liters) || form.value.liters === "" ? null : form.value.liters;
-  const cost = isNaN(form.value.cost) || form.value.cost === "" ? null : form.value.cost;
+  const engineHours =
+    isNaN(form.value.engineHours) || form.value.engineHours === ""
+      ? null
+      : form.value.engineHours;
+  const liters =
+    isNaN(form.value.liters) || form.value.liters === ""
+      ? null
+      : form.value.liters;
+  const cost =
+    isNaN(form.value.cost) || form.value.cost === "" ? null : form.value.cost;
   const entry = {
     user_id: parseInt(userInfo.value.id),
     engine_hours: engineHours,
     liters: liters,
     cost: cost,
   };
-  store.dispatch("boat/addFuelEntry", entry)
+  store
+    .dispatch("boat/addFuelEntry", entry)
     .then(() => {
       resetForm();
       close();
@@ -118,7 +130,10 @@ function close() {
 
 store.dispatch("configuration/queryConfiguration");
 
-if (getMyNautiqueEngineHours.value != null && getMyNautiqueEngineHours.value > 0) {
+if (
+  getMyNautiqueEngineHours.value != null &&
+  getMyNautiqueEngineHours.value > 0
+) {
   form.value.engineHours = getMyNautiqueEngineHours.value;
   engineHourDescription.value = "prefilled by myNautique";
 }

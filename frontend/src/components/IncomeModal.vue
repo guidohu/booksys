@@ -97,7 +97,9 @@ const form = ref({
 
 const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
 const userList = computed(() => store.getters["user/userList"]);
-const getIncomeTypes = computed(() => store.getters["accounting/getIncomeTypes"]);
+const getIncomeTypes = computed(
+  () => store.getters["accounting/getIncomeTypes"],
+);
 
 watch(getIncomeTypes, (newValues) => {
   buildTypeSelect(newValues);
@@ -107,22 +109,44 @@ watch(userList, (newValues) => {
   buildUserSelect(newValues);
 });
 
-watch(() => form.value.type, (newValue, oldValue) => {
-  if (newValue !== oldValue) {
-    const typeActions = {
-      6: { userLabel: "Account", userDescription: "User that paid for sessions or membership." },
-      4: { userLabel: "Account", userDescription: "User that paid for sessions or membership." },
-      3: { userLabel: "User", userDescription: "Payer or internal reference" },
-      5: { userLabel: "User", userDescription: "Payer or internal reference" },
-      7: { userLabel: "Driver", userDescription: "Driver that got paid for a session." },
-    };
-    const action = typeActions[Number(newValue)] || { userLabel: "User", userDescription: "" };
-    userLabel.value = action.userLabel;
-    userDescription.value = action.userDescription;
-  }
-});
+watch(
+  () => form.value.type,
+  (newValue, oldValue) => {
+    if (newValue !== oldValue) {
+      const typeActions = {
+        6: {
+          userLabel: "Account",
+          userDescription: "User that paid for sessions or membership.",
+        },
+        4: {
+          userLabel: "Account",
+          userDescription: "User that paid for sessions or membership.",
+        },
+        3: {
+          userLabel: "User",
+          userDescription: "Payer or internal reference",
+        },
+        5: {
+          userLabel: "User",
+          userDescription: "Payer or internal reference",
+        },
+        7: {
+          userLabel: "Driver",
+          userDescription: "Driver that got paid for a session.",
+        },
+      };
+      const action = typeActions[Number(newValue)] || {
+        userLabel: "User",
+        userDescription: "",
+      };
+      userLabel.value = action.userLabel;
+      userDescription.value = action.userDescription;
+    }
+  },
+);
 
-const queryConfiguration = () => store.dispatch("configuration/queryConfiguration");
+const queryConfiguration = () =>
+  store.dispatch("configuration/queryConfiguration");
 const queryUserList = () => store.dispatch("user/queryUserList");
 const queryIncomeTypes = () => store.dispatch("accounting/queryIncomeTypes");
 const addIncome = (income) => store.dispatch("accounting/addIncome", income);

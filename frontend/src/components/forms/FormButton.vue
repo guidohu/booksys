@@ -29,8 +29,8 @@ const getClass = computed(() => {
     props.btnSize == "small"
       ? "btn-sm"
       : props.btnSize == "large"
-      ? "btn-lg"
-      : "";
+        ? "btn-lg"
+        : "";
   return "btn " + style + " " + size;
 });
 </script>

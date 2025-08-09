@@ -49,25 +49,27 @@ const actions = {
   logout({ commit, dispatch }) {
     return new Promise((resolve, reject) => {
       ApiLogin.logout()
-      .then(() => {
-        commit("setUserInfo", null);
-        commit("setIsLoggedIn", false);
-        dispatch("loginStatus/setIsLoggedIn", false, { root: true });
-        resolve();
-        console.log("Logout successful");
-      })
-      .catch((errors) => {
-        console.error("Logout failed:", errors);
-        reject(errors);
-      })
-    })
+        .then(() => {
+          commit("setUserInfo", null);
+          commit("setIsLoggedIn", false);
+          dispatch("loginStatus/setIsLoggedIn", false, { root: true });
+          resolve();
+          console.log("Logout successful");
+        })
+        .catch((errors) => {
+          console.error("Logout failed:", errors);
+          reject(errors);
+        });
+    });
   },
   getIsLoggedIn({ commit, dispatch }) {
     return new Promise((resolve, reject) => {
       ApiLogin.isLoggedIn()
         .then((status) => {
           commit("setIsLoggedIn", status.loggedIn);
-          dispatch("loginStatus/setIsLoggedIn", status.loggedIn, { root: true });
+          dispatch("loginStatus/setIsLoggedIn", status.loggedIn, {
+            root: true,
+          });
           if (status.loggedIn == true) {
             dispatch("getUserInfo");
           }

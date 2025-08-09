@@ -20,22 +20,22 @@ export default class Login {
       };
 
       Request.postRequest("/api/v2/auth/login", request)
-      .then((response) => resolve(response))
-      .catch((error) => reject(error));
+        .then((response) => resolve(response))
+        .catch((error) => reject(error));
     });
   }
 
   static logout() {
     console.log("Login/logout called");
-    return Request.getRequest('/api/v2/auth/logout');
+    return Request.getRequest("/api/v2/auth/logout");
   }
 
   static getMyUser() {
-    return Request.getRequest('/api/v2/auth/user');
+    return Request.getRequest("/api/v2/auth/user");
   }
 
   static isLoggedIn() {
     console.log("Login/isLoggedIn called");
-    return Request.getRequest('/api/v2/auth/isloggedin');
+    return Request.getRequest("/api/v2/auth/isloggedin");
   }
 }

@@ -1,6 +1,9 @@
 <template>
   <div class="container text-left">
-    <fuel-refuel-modal v-if="visibleRefuelModal" v-model:visible="visibleRefuelModal" />
+    <fuel-refuel-modal
+      v-if="visibleRefuelModal"
+      v-model:visible="visibleRefuelModal"
+    />
     <form-button
       type="button"
       btn-style="info"
