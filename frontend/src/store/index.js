@@ -50,5 +50,3 @@ store.loadModules = async function (moduleNames, to, from) {
     }
   }
 };
-
-export default store;
