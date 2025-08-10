@@ -103,12 +103,6 @@ export const formatFuelConsumption = (value) => {
 };
 
 /**
- * Formats seconds to be displayed as hh:mm:ss or mm:ss
- * @param {*} value seconds
- */
-export const formatHHMMSS = (value) => {};
-
-/**
  * Formats a duration in seconds into a string of
  * "A days B hours C minutes D seconds".
  * @param {*} value seconds

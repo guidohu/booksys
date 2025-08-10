@@ -1,4 +1,4 @@
-import Sessions from "booksys/api/sessions";
+import Sessions from "../../api/sessions";
 import dayjs from "dayjs";
 
 const state = () => ({
@@ -99,7 +99,7 @@ const actions = {
     });
   },
   createSession({ dispatch }, sessionObj) {
-    console.log("Trigger createSession action with", sessionObj);
+    console.log("Store createSession: with", sessionObj);
     return new Promise((resolve, reject) => {
       Sessions.createSession(sessionObj)
         .then((response) => {

@@ -2,6 +2,7 @@
   <modal-container
     name="session-delete-modal"
     :visible="visible"
+    :inert="!visible"
     @hide="$emit('update:visible', false)"
     @show="$emit('update:visible', true)"
   >

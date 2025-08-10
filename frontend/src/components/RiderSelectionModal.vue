@@ -1,7 +1,7 @@
 <template>
   <modal-container
     name="rider-selection-modal"
-    :visible="visible"
+    v-bind:visible="visible"
     @hide="$emit('update:visible', false)"
     @show="$emit('update:visible', true)"
   >

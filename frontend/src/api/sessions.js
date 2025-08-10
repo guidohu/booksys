@@ -209,7 +209,7 @@ export default class Sessions {
   }
 
   static createSession(sessionData) {
-    dayjs.extend(dayjsAdvancedFormat);
+    dayjs.extend(advancedFormat);
 
     // build request body
     const session = {

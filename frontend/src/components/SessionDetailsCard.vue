@@ -45,6 +45,7 @@
     <template v-slot:body>
       <rider-selection-modal
         v-model:visible="showRiderSelectionModal"
+        :inert="!showRiderSelectionModal"
         :session="session"
       />
       <div v-if="session != null && session.title != null" class="row">
@@ -123,9 +124,9 @@
 import { ref, computed, watch } from "vue";
 import { useStore } from "vuex";
 import dayjs from "dayjs";
-import { UserPointer } from "booksys/dataTypes/user";
-import RiderSelectionModal from "booksys/components/RiderSelectionModal.vue";
-import SectionedCardModule from "booksys/components/bricks/SectionedCardModule.vue";
+import { UserPointer } from "../dataTypes/user";
+import RiderSelectionModal from "../components/RiderSelectionModal.vue";
+import SectionedCardModule from "../components/bricks/SectionedCardModule.vue";
 
 const props = defineProps(["date", "session"]);
 const emit = defineEmits([
