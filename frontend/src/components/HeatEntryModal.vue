@@ -3,6 +3,7 @@
     name="heatEntryModal"
     title="Heat Entry"
     :visible="visible"
+    :inert="!visible"
     @hide="$emit('update:visible', false)"
     @show="$emit('update:visible', true)"
   >
@@ -124,7 +125,7 @@ function setFormDefaults(heatData) {
     rider: `${heatData.first_name} ${heatData.last_name}`,
     fare: sprintf("%.2f", heatData.price_per_min),
     duration: formatDuration(heatData.duration_s),
-    cost: heatData.cost,
+    cost: sprintf("%.2f", heatData.cost),
     comment: heatData.comment,
   };
 }

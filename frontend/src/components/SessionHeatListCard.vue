@@ -22,8 +22,8 @@
 import { ref, computed, watch } from "vue";
 import { useStore } from "vuex";
 import { sprintf } from "sprintf-js";
-import WarningBox from "booksys/components/WarningBox.vue";
-import HeatEntryModal from "booksys/components/HeatEntryModal.vue";
+import WarningBox from "../components/WarningBox.vue";
+import HeatEntryModal from "../components/HeatEntryModal.vue";
 import SectionedCardModule from "./bricks/SectionedCardModule.vue";
 import TableModule from "./bricks/TableModule.vue";
 
@@ -71,6 +71,11 @@ function formatDuration(durationS) {
   }
 }
 
+function formatCost(cost) {
+  return sprintf("%.2f", cost) + " " + getCurrency.value;
+}
+
+
 function setColumns() {
   columns.value = [
     {
@@ -90,7 +95,9 @@ function setColumns() {
     {
       key: "cost",
       label: "Cost",
-      formatter: (value) => value + " " + getCurrency.value,
+      formatter: (value) => {
+        return formatCost(value);
+      },
     },
   ];
 

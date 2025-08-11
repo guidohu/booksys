@@ -2,6 +2,7 @@
   <card-module nobody>
     <heat-comment-modal
       v-model:visible="isVisibleHeatCommentModal"
+      :inert="!isVisibleHeatCommentModal"
       :default-comment="comment"
       @commentChangeHandler="changeComment"
     />
