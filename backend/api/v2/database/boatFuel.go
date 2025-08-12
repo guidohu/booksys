@@ -23,3 +23,10 @@ func (d *DBMysql) AddFuelEntry(e BoatFuel) error {
 func (d *DBMysql) ChangeFuelEntry(e BoatFuel) error {
 	return d.orm.Save(&e).Error
 }
+
+func (d *DBMysql) RemoveFuelEntry(id uint) error {
+	b := &BoatFuel{
+		ID: id,
+	}
+	return d.orm.Delete(b).Error
+}

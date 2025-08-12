@@ -73,6 +73,7 @@ type BoatFuelTable interface {
 	GetFuelEntry(id uint) (BoatFuel, error)
 	AddFuelEntry(e BoatFuel) error
 	ChangeFuelEntry(e BoatFuel) error
+	RemoveFuelEntry(id uint) error
 }
 
 type BoatMaintenanceTable interface {

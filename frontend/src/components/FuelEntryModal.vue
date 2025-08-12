@@ -1,5 +1,5 @@
 <template>
-  <modal-container name="fuelEntrymodal" :visible="visible">
+  <modal-container name="fuelEntrymodal" :visible="visible" :inert="!visible">
     <modal-header
       :closable="true"
       title="Fuel Entry"
@@ -85,23 +85,37 @@
         />
       </form>
     </modal-body>
-    <modal-footer>
-      <button
-        type="submit"
-        class="btn btn-outline-info"
-        @click.prevent.self="save"
-      >
-        <i class="bi bi-check"></i>
-        Save
-      </button>
-      <button
-        type="button"
-        class="btn btn-outline-danger"
-        @click.prevent.self="close"
-      >
-        <i class="bi bi-x"></i>
-        Cancel
-      </button>
+    <modal-footer class="block-footer">
+      <div class="row">
+        <div class="col-4 text-start">
+          <button
+            type="button"
+            class="btn btn-outline-danger"
+            @click.stop="remove"
+          >
+            <i class="bi bi-trash"></i>
+            Delete
+          </button>
+        </div>
+        <div class="col-8 text-end">
+          <button
+            type="submit"
+            class="btn btn-outline-info me-2"
+            @click.prevent.self="save"
+          >
+            <i class="bi bi-check"></i>
+            Save
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-danger"
+            @click.prevent.self="close"
+          >
+            <i class="bi bi-x"></i>
+            Cancel
+          </button>
+        </div>
+      </div>
     </modal-footer>
   </modal-container>
 </template>
@@ -207,6 +221,19 @@ function save() {
     .catch((errs) => (errors.value = errs));
 }
 
+function remove() {
+  store
+    .dispatch("boat/removeFuelEntry", form.value.id)
+    .then(() => close())
+    .catch((errs) => (errors.value = errs));
+}
+
 setFormContent(props.fuelEntry);
 store.dispatch("configuration/queryConfiguration");
 </script>
+
+<style scoped>
+.block-footer {
+  display: block;
+}
+</style>

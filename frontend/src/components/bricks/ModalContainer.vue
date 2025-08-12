@@ -17,7 +17,7 @@
 
 <script setup>
 import { Modal } from "bootstrap";
-import { onMounted, onUnmounted, watch, ref, nextTick } from "vue";
+import { onMounted, onUnmounted, watch, ref } from "vue";
 
 const props = defineProps({
   visible: {
@@ -45,7 +45,9 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  modal.hide();
+  if (modal == null) {
+    return;
+  }
   modal.dispose();
 });
 

@@ -92,6 +92,10 @@ type ChangeFuelEntryRequest struct {
 	IsDiscounted bool             `json:"is_discounted"`
 }
 
+type RemoveFuelEntryRequest struct {
+	ID uint `json:"id" validate:"required"`
+}
+
 type GetMaintenanceEntriesResponse struct {
 	ID            uint            `json:"id"`
 	Description   string          `json:"description"`
@@ -417,6 +421,36 @@ func (h *Handler) ChangeFuelEntry(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		slog.Warn("Cannot change fuel entry", slog.Uint64("id", uint64(req.ID)), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot change existing fuel entry.", w)
+		return
+	}
+	WriteSuccessResponse("fuel entry saved", nil, w)
+}
+
+func (h *Handler) RemoveFuelEntry(w http.ResponseWriter, r *http.Request) {
+	session := GetSessionFromContext(r)
+	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+		return
+	}
+	req := &RemoveFuelEntryRequest{}
+	err := ReadBodyAndValidate(r, req, FuelEntryValidationErrors)
+	if err != nil {
+		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
+	}
+
+	dbh := h.GetDB()
+	entry, err := dbh.GetFuelEntry(req.ID)
+	if err != nil {
+		slog.Warn("Cannot find fuel entry", slog.Uint64("id", uint64(req.ID)), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot find existing fuel entry.", w)
+		return
+	}
+
+	err = dbh.RemoveFuelEntry(entry.ID)
+	if err != nil {
+		slog.Warn("Cannot remove fuel entry", slog.Uint64("id", uint64(req.ID)), slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot remove existing fuel entry.", w)
 		return
 	}
 	WriteSuccessResponse("fuel entry saved", nil, w)

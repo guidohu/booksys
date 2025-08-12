@@ -1,5 +1,5 @@
 import Boat from "booksys/api/boat";
-import { sortBy, reverse, forEach, round } from "lodash";
+import { sortBy, reverse, forEach, round, remove } from "lodash";
 
 const state = () => ({
   avgFuelConsumption: null,
@@ -173,6 +173,19 @@ const actions = {
         .catch((error) => {
           reject(error);
         });
+    });
+  },
+  removeFuelEntry({ dispatch }, id) {
+    console.log("Trigger removeFuelEntry, with", id);
+    return new Promise((resolve, reject) => {
+      Boat.removeFuelEntry(id)
+      .then(() => {
+        dispatch("queryFuelLog");
+        resolve();
+      })
+      .catch((error) => {
+        reject(error);
+      });
     });
   },
 };

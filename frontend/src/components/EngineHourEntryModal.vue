@@ -1,5 +1,5 @@
 <template>
-  <modal-container name="engineHourentryModal" :visible="visible">
+  <modal-container name="engineHourentryModal" :visible="visible" :inert="!visible">
     <modal-header
       :closable="true"
       title="Engine Hour Entry"

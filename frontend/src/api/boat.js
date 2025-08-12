@@ -74,6 +74,12 @@ export default class Boat {
     return Request.postRequest("/api/v2/boat/fuel-entry/edit", fuelEntry);
   }
 
+  static removeFuelEntry(id) {
+    return Request.postRequest("/api/v2/boat/fuel-entry/remove", {
+      id: id,
+    });
+  }
+
   static getMaintenanceLog() {
     return Request.getRequest("/api/v2/boat/maintenance-entries/get");
   }

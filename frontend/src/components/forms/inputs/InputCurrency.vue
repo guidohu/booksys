@@ -35,7 +35,6 @@ const props = defineProps([
 const emit = defineEmits(["update:modelValue"]);
 
 const changeHandler = (value) => {
-  console.log("updateValue to:", value);
   emit("update:modelValue", value);
 };
 
