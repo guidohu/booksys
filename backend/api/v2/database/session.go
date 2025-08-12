@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"server/generics"
 	"sort"
 	"time"
 
@@ -53,8 +52,19 @@ func (d *DBMysql) GetSessionsByUser(userID uint) ([]Session, error) {
 	}
 
 	var sessions []Session
-	sessions = append(creatorSessions, memberSessions...)
-	sessions = generics.Unique(sessions)
+	var sessionsMap = make(map[uint]bool)
+	for _, s := range creatorSessions {
+		if _, ok := sessionsMap[s.ID]; !ok {
+			sessionsMap[s.ID] = true
+			sessions = append(sessions, s)
+		}
+	}
+	for _, s := range memberSessions {
+		if _, ok := sessionsMap[s.ID]; !ok {
+			sessionsMap[s.ID] = true
+			sessions = append(sessions, s)
+		}
+	}
 	sort.Sort(SessionByTime(sessions))
 	return sessions, nil
 }

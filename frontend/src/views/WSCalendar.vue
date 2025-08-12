@@ -13,7 +13,7 @@
           />
         </div>
         <div class="col-4">
-          <SessionOverview :sessions="sessionsOverview" />
+          <SessionsOverview :sessions="sessionsOverview" />
           <condition-info-card
             class="mt-2"
             :sunrise="sunriseUnix"
