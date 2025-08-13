@@ -47,7 +47,7 @@ func (d *DBMysql) GetLogs() ([]Log, error) {
 			   CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, 
 					  ' paid for sessions ', FORMAT(p.amount_chf, 2), ' %s') as log_message 
 			FROM user u, payment p 
-			WHERE u.id = p.user_id AND p.type_id = 4
+			WHERE u.id = p.user_id AND p.type_id = 5
 		UNION ALL
 		SELECT bf.id as id, "boat_fuel" as type, bf.timestamp as time, 
 			   CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, ' added ', 
