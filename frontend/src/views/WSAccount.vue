@@ -15,10 +15,10 @@
 <script setup>
 import { useStore } from "vuex";
 import { onMounted } from "vue";
-import UserProfileCard from "booksys/components/UserProfileCard.vue";
-import UserStatisticsCard from "booksys/components/UserStatisticsCard.vue";
-import UserBalanceCard from "booksys/components/UserBalanceCard.vue";
-import SubpageContainer from "booksys/components/bricks/SubpageContainer.vue";
+import UserProfileCard from "../components/UserProfileCard.vue";
+import UserStatisticsCard from "../components/UserStatisticsCard.vue";
+import UserBalanceCard from "../components/UserBalanceCard.vue";
+import SubpageContainer from "../components/bricks/SubpageContainer.vue";
 
 const store = useStore();
 

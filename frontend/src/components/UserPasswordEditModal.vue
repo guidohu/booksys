@@ -1,5 +1,5 @@
 <template>
-  <modal-container name="user-password-edit-modal" :visible="visible">
+  <modal-container name="user-password-edit-modal" :visible="visible" :inert="!visible">
     <modal-header
       :closable="true"
       title="Change Password"

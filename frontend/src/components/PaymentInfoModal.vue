@@ -1,5 +1,5 @@
 <template>
-  <modal-container name="user-heats-modal" :visible="visible">
+  <modal-container name="user-heats-modal" :visible="visible" :inert="!visible">
     <modal-header
       :closable="true"
       title="Payment Information"
@@ -72,6 +72,7 @@ import ModalFooter from "./bricks/ModalFooter.vue";
 
 const store = useStore();
 const emit = defineEmits(["update:visible"]);
+const props = defineProps(["visible"]);
 
 const getConfiguration = computed(
   () => store.getters["configuration/getConfiguration"],

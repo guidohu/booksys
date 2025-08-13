@@ -1,5 +1,5 @@
 <template>
-  <modal-container name="user-edit-modal" :visible="visible">
+  <modal-container name="user-edit-modal" :visible="visible" :inert="!visible">
     <modal-header
       :closable="true"
       title="Profile"

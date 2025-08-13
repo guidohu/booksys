@@ -30,7 +30,7 @@ import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import SectionedCardModule from "./bricks/SectionedCardModule.vue";
 import PaymentInfoModal from "./PaymentInfoModal.vue";
-import { formatCost } from "booksys/libs/formatters";
+import { formatCost } from "../libs/formatters";
 
 const store = useStore();
 
