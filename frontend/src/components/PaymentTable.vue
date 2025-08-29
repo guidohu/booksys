@@ -66,6 +66,7 @@ import { defineAsyncComponent, ref, computed, watch } from "vue";
 import { useStore } from "vuex";
 import reverse from "lodash/reverse";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import { formatCurrency } from "booksys/libs/formatters";
 import WarningBox from "booksys/components/WarningBox.vue";
 import TableModule from "./bricks/TableModule.vue";
@@ -79,6 +80,8 @@ const IncomeModal = defineAsyncComponent(
 const ExpenseModal = defineAsyncComponent(
   () => import("booksys/components/ExpenseModal.vue"),
 );
+
+dayjs.extend(utc);
 
 const store = useStore();
 
@@ -102,6 +105,7 @@ const fields = computed(() => [
     key: "timestamp",
     label: "Date",
     sortable: true,
+    formatter: (value, key, item) => dayjs.utc(value).format("DD.MM.YYYY"),
   },
   {
     key: "type_name",

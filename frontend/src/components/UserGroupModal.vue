@@ -1,5 +1,5 @@
 <template>
-  <modal-container name="user-group-modal" :visible="visible">
+  <modal-container name="user-group-modal" :visible="visible" :inert="!visible">
     <modal-header
       :closable="true"
       :title="title"

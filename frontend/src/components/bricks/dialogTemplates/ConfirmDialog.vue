@@ -1,5 +1,5 @@
 <template>
-  <modal-container name="confirm-dialog" :visible="visible">
+  <modal-container name="confirm-dialog" :visible="visible" :inert="!visible">
     <modal-header v-if="title != null && title != ''">
       {{ title }}
     </modal-header>
@@ -12,7 +12,6 @@
       <button
         class="btn btn-outline-info"
         type="button"
-        data-bs-dismiss="modal"
         @click.stop="confirm"
       >
         <i class="bi bi-check"></i>

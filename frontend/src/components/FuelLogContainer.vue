@@ -25,9 +25,9 @@
 
 <script setup>
 import { defineAsyncComponent, ref, watch } from "vue";
-import FuelLogStatus from "booksys/components/FuelLogStatus.vue";
-import FuelLogForm from "booksys/components/FuelLogForm.vue";
-import FuelLogList from "booksys/components/FuelLogList.vue";
+import FuelLogStatus from "../components/FuelLogStatus.vue";
+import FuelLogForm from "../components/FuelLogForm.vue";
+import FuelLogList from "../components/FuelLogList.vue";
 
 const FuelLogChart = defineAsyncComponent(
   () => import("booksys/components/FuelLogChart.vue"),

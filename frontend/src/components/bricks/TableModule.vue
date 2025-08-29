@@ -145,7 +145,6 @@ const tableClass = computed(() => {
 watch(
   () => props.rows,
   (newRows) => {
-    console.log("rows changed to:", newRows);
     selectedRows.value = [];
     emit("select-row", []);
 

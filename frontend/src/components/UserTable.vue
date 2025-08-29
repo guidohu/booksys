@@ -90,7 +90,7 @@ import { sprintf } from "sprintf-js";
 import WarningBox from "booksys/components/WarningBox.vue";
 import TableModule from "./bricks/TableModule.vue";
 import InputSelect from "./forms/inputs/InputSelect.vue";
-import { confirm, info } from "booksys/components/bricks/DialogModal.js";
+import { confirm, info } from "./bricks/DialogModal.js";
 
 const store = useStore();
 
