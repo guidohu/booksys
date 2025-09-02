@@ -284,6 +284,8 @@ func (h *Handler) GetAccountingTransactions(w http.ResponseWriter, r *http.Reque
 	resp, err = dbh.GetTransactions(req.Year)
 	if err != nil {
 		slog.Warn("Cannot get transactions", slog.String("error", err.Error()))
+		WriteFailureResponse(err.Error(), w)
+		return
 	}
 
 	WriteSuccessResponse("accounting transactions", resp, w)
