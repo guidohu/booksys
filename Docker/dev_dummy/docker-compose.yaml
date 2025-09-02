@@ -53,7 +53,7 @@ services:
     api_v2:
         build:
             context: ../../backend
-            dockerfile: Dockerfile_api_v2
+            dockerfile: Dockerfile
         container_name: dev_dummy_backend_api_v2
         depends_on:
             - db
