@@ -288,11 +288,43 @@ func NewConfig(flagConfig *viper.Viper) (*Config, error) {
 	return c, nil
 }
 
+func findConfigFile() string {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		slog.Error("Cannot get user home directory", slog.String("error", err.Error()))
+	}
+	pathsToSearch := []string{
+		filepath.Join(homeDir, ".booksys"),
+		filepath.Join(".", "config.yaml"),
+		"/etc/booksys/config.yaml",
+	}
+	// Iterate through the paths and check for existence and readability.
+	for _, path := range pathsToSearch {
+		info, err := os.Stat(path)
+		if err == nil {
+			if !info.IsDir() {
+				return path
+			}
+		}
+	}
+
+	// No configuration file was found in any of the specified locations.
+	return ""
+}
+
 func (c *Config) ReadConfigFile() error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	configFile, _ := c.GetString("config")
+	// If the configuration file is not provided try to be smart
+	// and get the configuration from the following files:
+	// - ~/.booksys
+	// - ${PWD}/config.yaml
+	// - /etc/booksys/config.yaml
+	if configFile == "" {
+		configFile = findConfigFile()
+	}
 	if configFile != "" {
 		slog.Info("Read config from", slog.String("config", configFile))
 		_, err := os.Stat(configFile)

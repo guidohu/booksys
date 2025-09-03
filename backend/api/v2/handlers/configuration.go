@@ -148,8 +148,8 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 	// We only want to allow setup for the DB, if DB settings are not
 	// already present in the configuration.
 	if h.config.IsDBConfigured() {
-		slog.Warn("SetupDB called but database settings are already provided.")
-		WriteFailureResponse("Invalid request. Database config was created.", w)
+		slog.Warn("SetupDB called but database settings are already configured.")
+		WriteFailureResponse("Invalid request. Database config was created already and cannot be overwritten that way.", w)
 		return
 	}
 
@@ -282,7 +282,7 @@ func (h *Handler) GetPublicConfiguration(w http.ResponseWriter, r *http.Request)
 		LocationTimeZone:       pMap["location.timezone"],
 		LogoFilePath:           pMap["logo.file"],
 		MyNautiqueEnabled:      mynautiqueEnabled,
-		MyNautiqueBoatID: mynautiqueBoatID,
+		MyNautiqueBoatID:       mynautiqueBoatID,
 		MyNautiqueFuelCapacity: mynautiqueFuelCapacity,
 		PaymentAccountBIC:      pMap["payment.account.bic"],
 		PaymentAccountComment:  pMap["payment.account.comment"],

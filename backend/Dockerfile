@@ -1,14 +1,22 @@
-FROM golang:1.24
+FROM golang:1.24-alpine AS builder
 
-WORKDIR /usr/src/app
+# Set environment variables
+ENV CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64
 
-# pre-copy/cache go.mod for pre-downloading dependencies and only redownloading them in subsequent builds if they change
+WORKDIR /build
+
 COPY api/v2 api/v2
-COPY api/v2/sample_config.yaml /config.yaml
+COPY api/v2/sample_config.yaml /sample_config.yaml
 RUN cd api/v2; go mod download && go mod verify
+RUN cd api/v2; go build -v -o /build/app ./main.go
 
-RUN ls ./api/v2
-RUN cd api/v2; go build -v -o /usr/local/bin/app ./main.go
+FROM alpine:3.21 AS final
+
+COPY --from=builder /build/app /bin/booksys
+COPY --from=builder /sample_config.yaml /etc/booksys/sample_config.yaml
+RUN mkdir -p /var/lib/booksys/uploads
 EXPOSE 9090
 
-CMD ["app", "--http_port", "9090"]
+CMD ["/bin/booksys", "--http_port", "9090"]

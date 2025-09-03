@@ -7,5 +7,7 @@ database:
   password: userpassword
   dbName: booksys
 http:
+  port: 9090
   sessionInactivityTimeout: 604800
   sessionTimeout: 31536000
+  uploadPath: /var/lib/booksys/uploads
