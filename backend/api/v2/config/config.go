@@ -226,7 +226,7 @@ var MandatoryConfigKeys = []string{
 }
 
 var ConfigDefaults map[string]string = map[string]string{
-	"config":                        "./config.yaml",
+	"config":                        "",
 	"http.port":                     "80",
 	"http.sessioninactivitytimeout": "604800",
 	"http.sessiontimeout":           "31536000",
@@ -346,6 +346,8 @@ func (c *Config) ReadConfigFile() error {
 			slog.Error("Invalid configuration. Cannot decode configuration.", slog.String("error", err.Error()))
 			return err
 		}
+	} else {
+		slog.Info("No config file provided, not reading config from any file.", slog.String("config", configFile))
 	}
 	return nil
 }
@@ -495,7 +497,11 @@ func (c *Config) ToStringFull() string {
 
 	// print file content
 	configFile, _ := c.GetString("config")
-	s.WriteString(fmt.Sprintf("\nConfig File '%s':\n", configFile))
+	if configFile == "" {
+		s.WriteString(fmt.Sprintf("\nConfig File '%s':\n", "<not set>"))
+	} else {
+		s.WriteString(fmt.Sprintf("\nConfig File '%s':\n", configFile))
+	}
 	s.WriteString("-----------\n")
 	printerFunc(c.file)
 

@@ -1,6 +1,6 @@
 <template>
   <modal-container name="setup-modal" :visible="true">
-    <modal-header :title="setupSteps[setupStep].title" />
+    <modal-header v-if="setupStep!=3" :title="setupSteps[setupStep].title" />
     <modal-body>
       <div class="progress mb-3" style="height: 2px">
         <div
@@ -9,7 +9,7 @@
           :style="progress"
         ></div>
       </div>
-      <warning-box v-if="errors.length > 0" class="mt-4" :errors="errors" />
+      <warning-box v-if="errors.length > 0 && setupStep != 3" class="mt-4" :errors="errors" />
       <!-- Database setup -->
       <database-configuration
         v-if="setupSteps[setupStep].name == 'db'"
@@ -39,10 +39,20 @@
           <p>Please go back to the login page and login.</p>
         </div>
       </div>
+      <!-- Error -->
+      <div v-if="setupSteps[setupStep].name == 'error'" class="row text-center">
+        <div class="col-12">
+          <p class="h4 mb-2">
+            <i class="bi bi-x text-danger" />
+            Error.
+          </p>
+          <warning-box :errors="errors" :dismissible="false" :hide-label="true"/>
+        </div>
+      </div>
     </modal-body>
     <modal-footer>
       <button
-        v-if="setupSteps[setupStep].name != 'done'"
+        v-if="setupSteps[setupStep].name != 'done' && setupStep != 3"
         class="btn btn-outline-danger me-1"
         type="button"
         @click="close"
@@ -80,6 +90,16 @@
         <i class="bi bi-check" />
         Done
       </button>
+      <button
+        v-if="setupStep == 3"
+        class="btn btn-outline-info me-1"
+        type="button"
+        variant="outline-success"
+        @click="close"
+      >
+        <i class="bi bi-check" />
+        OK
+      </button>
     </modal-footer>
   </modal-container>
 </template>
@@ -87,9 +107,9 @@
 <script setup>
 import { defineAsyncComponent, ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { getBackendStatus } from "booksys/api/backend";
-import Configuration from "booksys/api/configuration";
-import User from "booksys/api/user";
+import { getBackendStatus } from "../api/backend";
+import Configuration from "../api/configuration";
+import User from "../api/user";
 import ModalContainer from "../components/bricks/ModalContainer.vue";
 import ModalHeader from "../components/bricks/ModalHeader.vue";
 import ModalBody from "../components/bricks/ModalBody.vue";
@@ -97,19 +117,18 @@ import ModalFooter from "../components/bricks/ModalFooter.vue";
 
 // Lazy loaded components
 const DatabaseConfiguration = defineAsyncComponent(
-  () => import("booksys/components/DatabaseConfiguration.vue"),
+  () => import("../components/DatabaseConfiguration.vue"),
 );
 const UserSignUp = defineAsyncComponent(
-  () => import("booksys/components/forms/UserSignUp.vue"),
+  () => import("../components/forms/UserSignUp.vue"),
 );
 const WarningBox = defineAsyncComponent(
-  () => import("booksys/components/WarningBox.vue"),
+  () => import("../components/WarningBox.vue"),
 );
 
 const router = useRouter();
 
 const errors = ref([]);
-const title = ref("Setup");
 const isLoading = ref(false);
 const dbConfig = ref({});
 const adminUserConfig = ref({});
@@ -119,22 +138,32 @@ const setupSteps = ref([
     id: 0,
     name: "db",
     title: "Setup Database",
+    progress: 33,
   },
   {
     id: 1,
     name: "administrator",
     title: "Setup User",
+    progress: 66,
   },
   {
     id: 2,
     name: "done",
     title: "Setup Done",
+    progress: 100,
   },
+  {
+    id: 3,
+    name: "error",
+    title: "Error",
+    progress: 0,
+  }
 ]);
 
 const progress = computed(() => {
+  const step = setupStep.value
   let value = "width: ";
-  value += parseInt(((setupStep.value + 1) / setupSteps.value.length) * 100);
+  value += parseInt(setupSteps.value[step].progress);
   value += "%";
   return value;
 });
@@ -207,8 +236,6 @@ const makeUserAdmin = (userId) => {
 };
 
 const close = () => {
-  console.log("Navigate to login");
-  console.log(router);
   router.push("/login");
 };
 
@@ -267,21 +294,27 @@ const getBackendStatusInternal = () => {
 
   getBackendStatus()
     .then((status) => {
-      if (status.configFile == false) {
-        // no configuration at all yet
-        setupStep.value = 0;
-      } else if (status.configDb == false) {
+      console.log("status", status);
+      if (status.configDb == false) {
         // no database configuration
         setupStep.value = 0;
+        console.log("setupStep: 0");
       } else if (status.dbReachable == false) {
-        // cannot reach database, thus allow to change settings
-        setupStep.value = 0;
-      } else if (status.usersExist == false) {
+        // database not reachable but database configured
+        // -> error
+        setupStep.value = 3;
+        console.log("setupStep: 4");
+        errors.value = [
+          "Cannot connect to the database."
+        ]
+      }  else if (status.usersExist == false) {
         // database is up, but there is no (admin) user yet
         setupStep.value = 1;
-      } else {
+        console.log("setupStep: 1");
+      }else {
         // setup is done
         setupStep.value = 2;
+        console.log("setupStep: 2");
       }
       isLoading.value = false;
     })
