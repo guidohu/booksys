@@ -269,16 +269,22 @@ func (d *DBMysql) Connect() error {
 }
 
 func (d *DBMysql) Disconnect() {
-	// ormDB, err := d.orm.DB()
-	// if err != nil {
-	// 	slog.Error("Cannot close orm database handle", slog.String("error", err.Error()))
-	// } else {
-	// 	ormDB.Close()
-	// }
-	if d.db == nil {
+	if d.orm != nil {
+		db, err := d.orm.DB()
+		if err != nil {
+			slog.Warn("Cannot get db handler to close database", slog.String("error", err.Error()))
+			return
+		}
+		db.Close()
+		slog.Info("Closed database connection (gorm)")
 		return
 	}
-	d.db.Close()
+	if d.db != nil {
+		d.db.Close()
+		slog.Info("Closed database connection (direct)")
+		return
+	}
+	slog.Warn("No database connection to close")
 }
 
 // Returns an error if db is not connected and connection cannot be established.

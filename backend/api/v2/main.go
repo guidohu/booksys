@@ -267,6 +267,8 @@ func main() {
 					newDB, _ := maybeConnectDatabase(conf)
 					h.SetDB(&newDB)
 					conf.SetDB(&newDB)
+					db.Disconnect()
+					db = newDB
 				}
 			case <-chConfigFileUpdate:
 				slog.Info("Reconnect database after config change.")

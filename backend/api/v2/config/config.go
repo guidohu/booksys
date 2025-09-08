@@ -609,8 +609,8 @@ func (c *Config) WatchProperties(ctx context.Context, notifyCh chan struct{}) {
 				c.mu.Unlock()
 				continue
 			}
-			if c.db.Ping() != nil {
-				slog.Warn("WatchProperties: database unresponsive.")
+			if err := c.db.Ping(); err != nil {
+				slog.Warn("WatchProperties: database unresponsive", slog.String("error", err.Error()))
 				c.mu.Unlock()
 				continue
 			}
