@@ -6,6 +6,7 @@ import (
 	"server/database"
 	"strconv"
 	"time"
+	_ "time/tzdata"
 
 	sunrise "github.com/nathan-osman/go-sunrise"
 	"golang.org/x/exp/slog"
