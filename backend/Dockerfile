@@ -14,9 +14,15 @@ RUN cd api/v2; go build -v -o /build/app ./main.go
 
 FROM alpine:3.21 AS final
 
+RUN addgroup -S booksys && adduser -S -G booksys booksys
+
 COPY --from=builder /build/app /bin/booksys
 COPY --from=builder /sample_config.yaml /etc/booksys/sample_config.yaml
-RUN mkdir -p /var/lib/booksys/uploads
-EXPOSE 9090
+RUN mkdir -p /var/lib/booksys/uploads && chown -R booksys:booksys /var/lib/booksys
 
-CMD ["/bin/booksys", "--http_port", "9090"]
+USER booksys
+
+ENV BOOKSYS_HTTP_PORT=9090
+EXPOSE ${BOOKSYS_HTTP_PORT}
+
+CMD ["/bin/booksys", "--http_port", "${BOOKSYS_HTTP_PORT}"]
