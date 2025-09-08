@@ -22,7 +22,6 @@ RUN mkdir -p /var/lib/booksys/uploads && chown -R booksys:booksys /var/lib/books
 
 USER booksys
 
-ENV BOOKSYS_HTTP_PORT=9090
-EXPOSE ${BOOKSYS_HTTP_PORT}
+EXPOSE 9090
 
-CMD ["/bin/booksys", "--http_port", "${BOOKSYS_HTTP_PORT}"]
+CMD ["/bin/booksys", "--http_port", "9090"]
