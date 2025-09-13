@@ -48,6 +48,10 @@ var (
 	printConfig = pflag.Bool("print_config", false, "Prints the config an exits.")
 )
 
+var (
+	mu sync.Mutex
+)
+
 func getFlags(v *viper.Viper) {
 	v.BindPFlag("config", pflag.Lookup("config"))
 	v.BindPFlag("http.port", pflag.Lookup("http_port"))
@@ -64,17 +68,14 @@ func getFlags(v *viper.Viper) {
 	pflag.Parse()
 }
 
-// maybeConnectDatabase creates a new database client based on the provided configuration.
-// It tries to connect to the database but will return an
-// empty database client if the connection cannot be established.
-func maybeConnectDatabase(c *config.Config) (database.DBMysql, error) {
+func getDBSettings(c *config.Config) database.Settings {
 	user, _ := c.GetString("database.user")
 	password, _ := c.GetString("database.password")
 	protocol, _ := c.GetString("database.protocol")
 	host, _ := c.GetString("database.host")
 	port, _ := c.GetString("database.port")
 	dbname, _ := c.GetString("database.dbname")
-	db := database.DBMysql{
+	return database.Settings{
 		User:     user,
 		Password: password,
 		Protocol: protocol,
@@ -82,13 +83,15 @@ func maybeConnectDatabase(c *config.Config) (database.DBMysql, error) {
 		Port:     port,
 		DBName:   dbname,
 	}
-	slog.Info("Connecting database client to:", slog.String("address", db.String()))
-	if err := db.Connect(); err != nil {
-		slog.Warn(fmt.Sprintf("Database connection failed: %s", err))
-		return database.DBMysql{}, err
+}
+
+func maybeConnectedDatabaseManager(c *config.Config) *database.Manager {
+	settings := getDBSettings(c)
+	dbm := database.NewManager(settings)
+	if err := dbm.Connect(nil); err != nil {
+		slog.Warn("Could not connect to database", slog.String("error", err.Error()))
 	}
-	slog.Info("Connected to database", slog.String("name", dbname))
-	return db, nil
+	return dbm
 }
 
 func setupLogger() {
@@ -227,19 +230,21 @@ func main() {
 	defer cancel()
 	var wg sync.WaitGroup
 
-	db, _ := maybeConnectDatabase(conf)
+	dbm := maybeConnectedDatabaseManager(conf)
 	hp := handlers.HandlerParams{
-		Database:      &db,
+		Database:      dbm,
 		Configuration: conf,
 	}
 	h := handlers.NewHandler(hp)
-	conf.SetDB(&db)
+	conf.SetDB(dbm)
 
 	// We want to know about config file updates, because the
-	// database configuration might change.
+	// database configuration in there might change.
 	chConfigFileUpdate := conf.WatchFile()
 
 	// Watch for changes in the properties.
+	// TODO: If we really do not provide a channel, we do not
+	// really need to poll the configuration?
 	wg.Add(1)
 	go func() {
 		slog.Info("Watch properties routine started.")
@@ -262,20 +267,26 @@ func main() {
 				slog.Info("Auto reconnect routine done.")
 				return
 			case <-ticker.C:
-				if db.Ping() != nil {
+				db, done := dbm.GetHandler()
+				if db == nil || db.Ping() != nil {
 					slog.Info("Schedule connection attempt to db.")
-					newDB, _ := maybeConnectDatabase(conf)
-					h.SetDB(&newDB)
-					conf.SetDB(&newDB)
-					db.Disconnect()
-					db = newDB
+					err = dbm.ConnectAndReplace(nil)
+					if err != nil {
+						slog.Warn("Cannot reconnect database", slog.String("error", err.Error()))
+					} else {
+						slog.Info("Reconnected database.")
+					}
+					// TODO update conf with latest DB values
 				}
+				done()
 			case <-chConfigFileUpdate:
 				slog.Info("Reconnect database after config change.")
-				newDB, _ := maybeConnectDatabase(conf)
-				h.SetDB(&newDB)
-				conf.SetDB(&newDB)
-				conf.ReadConfigProperties()
+				dbSettings := getDBSettings(conf)
+				err = dbm.ConnectAndReplace(&dbSettings)
+				if err != nil {
+					slog.Warn("Cannot connect with new database settings after config file update", slog.String("error", err.Error()))
+				}
+				// TODO inform conf to load data from database in case it caches config
 			}
 		}
 	}()

@@ -14,7 +14,7 @@ type Log struct {
 	Type       string `json:"type"`
 }
 
-func (d *DBMysql) GetLogs() ([]Log, error) {
+func (d *Mysql) GetLogs() ([]Log, error) {
 	currency, err := d.GetPropertyValue("currency")
 	if err != nil {
 		slog.Warn("Cannot get currency from configuration table", slog.String("error", err.Error()))

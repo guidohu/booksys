@@ -169,15 +169,14 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Connect to database and initialize.
-	db := &database.DBMysql{
+	err = h.Database.ConnectAndReplace(&database.Settings{
 		User:     req.DBUser,
 		Password: req.DBPassword,
 		Protocol: "tcp",
 		Host:     host,
 		Port:     port,
 		DBName:   req.DBName,
-	}
-	err = db.Connect()
+	})
 	if err != nil {
 		slog.Warn(fmt.Sprintf("New database parameters are not valid. Error returned from Connet(): %s", err))
 		WriteFailureResponse("Cannot connect to database. Please make sure that the credentials are correct and the database is accepting connections.", w)
@@ -198,8 +197,7 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	slog.Info("New database configuration has been written to", slog.String("config", configFile))
-	h.config.SetDB(db)
-	h.SetDB(db)
+	h.config.SetDB(h.Database)
 	WriteSuccessResponse("config written", nil, w)
 }
 
@@ -227,7 +225,13 @@ func (h *Handler) GetPublicConfiguration(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	properties, err := dbh.GetAllPropertyValues()
 	if err != nil {
 		slog.Error("Cannot get configuration properties from database", slog.String("error", err.Error()))
@@ -301,7 +305,13 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	properties, err := dbh.GetAllPropertyValues()
 	if err != nil {
 		slog.Error("Cannot get configuration properties from database", slog.String("error", err.Error()))
@@ -494,7 +504,13 @@ func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request) {
 			Value:    req.SMTPUsername,
 		},
 	}
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	err = dbh.UpdateOrInsertPropertyValues(props)
 	if err != nil {
 		slog.Warn("Cannot update configuration", slog.String("error", err.Error()))
@@ -614,7 +630,13 @@ func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetLogoPath(w http.ResponseWriter, r *http.Request) {
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	conf, err := dbh.GetPropertyValue("logo.file")
 	if err != nil {
 		slog.Warn("Cannot get logo file", slog.String("error", err.Error()))
@@ -635,7 +657,13 @@ func (h *Handler) GetLogoPath(w http.ResponseWriter, r *http.Request) {
 // TODO implement file removal
 
 func (h *Handler) GetRecaptchaKey(w http.ResponseWriter, r *http.Request) {
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	conf, err := dbh.GetPropertyValue("recaptcha.publickey")
 	if err != nil {
 		slog.Warn("Cannot get recaptcha public key", slog.String("error", err.Error()))

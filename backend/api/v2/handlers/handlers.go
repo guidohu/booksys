@@ -25,31 +25,23 @@ type HandlerContext uint
 const SessionContextKey HandlerContext = 1
 
 type Handler struct {
-	db               atomic.Pointer[database.Database]
+	Database         *database.Manager
 	config           *config.Config
 	emailClient      atomic.Pointer[email.Client]
 	myNautiqueClient atomic.Pointer[mynautique.Client]
 }
 
 type HandlerParams struct {
-	Database      database.Database
+	Database      *database.Manager
 	Configuration *config.Config
 }
 
 func NewHandler(params HandlerParams) *Handler {
 	h := &Handler{
-		config: params.Configuration,
+		config:   params.Configuration,
+		Database: params.Database,
 	}
-	h.db.Store(&params.Database)
 	return h
-}
-
-func (h *Handler) SetDB(db database.Database) {
-	h.db.Store(&db)
-}
-
-func (h *Handler) GetDB() database.Database {
-	return *(h.db.Load())
 }
 
 func (h *Handler) SetEmailClient(e email.Client) {
@@ -85,7 +77,13 @@ func (h *Handler) WithAuthentication(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		dbh := h.GetDB()
+		dbh, done := h.Database.GetHandler()
+		defer done()
+		if dbh == nil {
+			slog.Warn("No database connection is available.")
+			WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+			return
+		}
 		session, err := dbh.GetBrowserSession(cookie.Value)
 		if err != nil || session == nil {
 			slog.Warn("No session found for given cookie", slog.String("error", err.Error()))

@@ -99,7 +99,12 @@ func (h *Handler) GetBookingSeries(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getBooking(start time.Time, end time.Time) (GetBookingResponse, error) {
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		return GetBookingResponse{}, fmt.Errorf("no database connection available")
+	}
 	location, err := h.getLocation()
 	if err != nil {
 		slog.Warn("Cannot get timezone for sunrise/sunset calculations", slog.String("error", err.Error()))
@@ -172,7 +177,12 @@ func (h *Handler) getBooking(start time.Time, end time.Time) (GetBookingResponse
 
 func (h *Handler) getRiders(sessionID uint) ([]database.User, error) {
 	users := []database.User{}
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		return users, fmt.Errorf("no database connection available")
+	}
 	usersToSession, err := dbh.GetUsersForSession(sessionID)
 	if err != nil {
 		slog.Warn("Cannot retrieve users for", slog.Uint64("session", uint64(sessionID)), slog.String("error", err.Error()))
@@ -185,7 +195,12 @@ func (h *Handler) getRiders(sessionID uint) ([]database.User, error) {
 }
 
 func (h *Handler) getSunriseSunset(date time.Time, timezone *time.Location) (time.Time, time.Time) {
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		return time.Time{}, time.Time{}
+	}
 	latProperty, err := dbh.GetPropertyValue("location.latitude")
 	if err != nil {
 		return time.Time{}, time.Time{}
@@ -213,7 +228,12 @@ func (h *Handler) getSunriseSunset(date time.Time, timezone *time.Location) (tim
 }
 
 func (h *Handler) getLocation() (*time.Location, error) {
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		return nil, fmt.Errorf("no database connection available")
+	}
 	timezone, err := dbh.GetPropertyValue("location.timezone")
 	if err != nil {
 		slog.Warn("Cannot retrieve location.timezone from the database", slog.String("error", err.Error()))

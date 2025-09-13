@@ -6,9 +6,9 @@ import (
 	"math/rand"
 	"net/http"
 	"server/database"
-	"server/util/hash"
 	"server/notifications/email"
 	"server/recaptcha"
+	"server/util/hash"
 	"strconv"
 	"time"
 
@@ -264,7 +264,13 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	// Get recaptcha keys (resp, entire configuration).
 	config, err := dbh.GetAllPropertyValuesMap()
 	if err != nil {
@@ -339,7 +345,13 @@ func (h *Handler) MakeAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	// check if an admin user exists already
 	// only the very first user can become an admin
 	if dbh.CountAdminUsers() > 0 {
@@ -388,7 +400,13 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	user, err := dbh.GetUserById(req.UserID)
 	if err != nil {
 		slog.Warn("Cannot find", slog.Int("user_id", int(req.UserID)), ":", err.Error())
@@ -463,7 +481,13 @@ func (h *Handler) UpdateMyUser(w http.ResponseWriter, r *http.Request) {
 		IsDeleted:     false, // will not be set
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	err = dbh.UpdateUser(session.UserID, user)
 	if err != nil {
 		slog.Warn("Cannot update user", slog.Uint64("userID", uint64(session.UserID)), slog.String("error", err.Error()))
@@ -489,7 +513,13 @@ func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	// verify that old password is correct
 	user, err := dbh.GetUserById(session.UserID)
 	if err != nil {
@@ -538,7 +568,13 @@ func (h *Handler) GetMySessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	sessions, err := dbh.GetSessionsByUser(session.UserID)
 	if err != nil {
 		slog.Error("Cannot get user sessions", slog.String("error", err.Error()))
@@ -596,7 +632,13 @@ func (h *Handler) GetMyHeats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	heats, err := dbh.GetUserHeats(session.UserID, 100)
 	if err != nil {
 		slog.Error("Cannot get user heats", slog.String("error", err.Error()))
@@ -629,7 +671,13 @@ func (h *Handler) GetMyHeatStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	now := time.Now()
 	duration, cost, err := dbh.GetUserHeatStats(session.UserID, time.Time{}, now)
 	if err != nil {
@@ -683,7 +731,13 @@ func (h *Handler) GetAllUsersShort(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	users, err := dbh.GetUsers( /*includeDeleted=*/ false)
 	if err != nil {
 		slog.Error("Cannot get users", slog.String("error", err.Error()))
@@ -708,7 +762,13 @@ func (h *Handler) GetAllUsersDetailed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	users, err := dbh.GetUsers( /*includeDeleted=*/ false)
 	if err != nil {
 		slog.Error("Cannot get users", slog.String("error", err.Error()))
@@ -764,7 +824,13 @@ func (h *Handler) GetUserGroups(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	pricings, err := dbh.GetPricings()
 	if err != nil {
 		slog.Error("Cannot get user groups", slog.String("error", err.Error()))
@@ -815,7 +881,13 @@ func (h *Handler) CreateUserGroup(w http.ResponseWriter, r *http.Request) {
 		Comment:        req.PriceDescription,
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	err = dbh.CreateUserGroup(u, p)
 	if err != nil {
 		slog.Error("Cannot create new user group", slog.String("error", err.Error()))
@@ -853,7 +925,13 @@ func (h *Handler) ChangeUserGroup(w http.ResponseWriter, r *http.Request) {
 		PricePerMinute: req.PricePerMinute,
 		Comment:        req.PriceDescription,
 	}
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	err = dbh.ChangeUserGroup(u, p)
 	if err != nil {
 		slog.Error("Cannot update user group", slog.String("error", err.Error()))
@@ -877,7 +955,13 @@ func (h *Handler) DeleteUserGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	err = dbh.DeleteUserGroup(req.UserGroupID)
 	if err != nil {
 		slog.Error("Cannot delete user group", slog.String("error", err.Error()))
@@ -901,7 +985,13 @@ func (h *Handler) SetUserGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	user, err := dbh.GetUserById(req.UserID)
 	if err != nil {
 		slog.Error("Cannot find user", slog.String("error", err.Error()))
@@ -956,7 +1046,13 @@ func (h *Handler) GetUserRoles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	roles, err := dbh.GetUserRoles()
 	if err != nil {
 		slog.Error("Cannot get user roles", slog.String("error", err.Error()))
@@ -989,7 +1085,13 @@ func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	user, err := dbh.GetUserById(req.UserID)
 	if err != nil {
 		slog.Error("Cannot find user", slog.String("error", err.Error()))
@@ -1020,7 +1122,11 @@ func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getUserBalance(userID uint) (*GetMyBalanceResponse, error) {
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		return nil, errors.New("No database connection is available.")
+	}
 	now := time.Now()
 	_, cost, err := dbh.GetUserHeatStats(userID, time.Time{}, now)
 	if err != nil {
@@ -1057,7 +1163,13 @@ func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	// Check whether recaptcha is enabled.
 	config, err := dbh.GetAllPropertyValuesMap()
 	if err != nil {
@@ -1134,7 +1246,13 @@ func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	// Get user by email
 	user, err := dbh.GetUserByName(req.UserEmail)
 	if err != nil {

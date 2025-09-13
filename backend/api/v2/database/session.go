@@ -9,7 +9,7 @@ import (
 )
 
 // GetSessionsBetween get sessions between start and end
-func (d *DBMysql) GetSessionsBetween(start, end time.Time) ([]Session, error) {
+func (d *Mysql) GetSessionsBetween(start, end time.Time) ([]Session, error) {
 	var sessions []Session
 	// Find sessions that
 	// 1. start after 'start' and start before 'end'
@@ -32,7 +32,7 @@ func (d *DBMysql) GetSessionsBetween(start, end time.Time) ([]Session, error) {
 	return sessions, err
 }
 
-func (d *DBMysql) GetSessionsByUser(userID uint) ([]Session, error) {
+func (d *Mysql) GetSessionsByUser(userID uint) ([]Session, error) {
 	var creatorSessions []Session
 	// Get sessions where the user is creator
 	err := d.orm.Model(&Session{}).Where("creator_id = ?", userID).Find(&creatorSessions).Error
@@ -69,7 +69,7 @@ func (d *DBMysql) GetSessionsByUser(userID uint) ([]Session, error) {
 	return sessions, nil
 }
 
-func (d *DBMysql) GetUsersForSession(id uint) ([]UserToSession, error) {
+func (d *Mysql) GetUsersForSession(id uint) ([]UserToSession, error) {
 	var users []UserToSession
 	err := d.orm.Model(&UserToSession{}).
 		Where("session_id = ?", id).
@@ -79,30 +79,30 @@ func (d *DBMysql) GetUsersForSession(id uint) ([]UserToSession, error) {
 	return users, err
 }
 
-func (d *DBMysql) CreateSession(s Session) (uint, error) {
+func (d *Mysql) CreateSession(s Session) (uint, error) {
 	err := d.orm.Create(&s).Error
 	return s.ID, err
 }
 
-func (d *DBMysql) GetSession(sessionID uint) (Session, error) {
+func (d *Mysql) GetSession(sessionID uint) (Session, error) {
 	var session Session
 	err := d.orm.First(&session, sessionID).Error
 	return session, err
 }
 
-func (d *DBMysql) UpdateSession(s Session) error {
+func (d *Mysql) UpdateSession(s Session) error {
 	return d.orm.Save(&s).Error
 }
 
-func (d *DBMysql) DeleteUsersFromSession(sessionID uint) error {
+func (d *Mysql) DeleteUsersFromSession(sessionID uint) error {
 	return d.orm.Exec("DELETE FROM user_to_session WHERE session_id = ?", sessionID).Error
 }
 
-func (d *DBMysql) DeleteSession(sessionID uint) error {
+func (d *Mysql) DeleteSession(sessionID uint) error {
 	return d.orm.Exec("DELETE FROM session WHERE id = ?", sessionID).Error
 }
 
-func (d *DBMysql) AddSessionToUserEntry(u UserToSession) error {
+func (d *Mysql) AddSessionToUserEntry(u UserToSession) error {
 	return d.orm.Transaction(func(tx *gorm.DB) error {
 		err := tx.Where(UserToSession{UserID: u.UserID, SessionID: u.SessionID}).
 			FirstOrCreate(&u).Error
@@ -121,7 +121,7 @@ func (d *DBMysql) AddSessionToUserEntry(u UserToSession) error {
 	})
 }
 
-func (d *DBMysql) DeleteSessionToUserEntry(userID uint, sessionID uint) error {
+func (d *Mysql) DeleteSessionToUserEntry(userID uint, sessionID uint) error {
 	return d.orm.Transaction(func(tx *gorm.DB) error {
 		err := d.orm.Exec("DELETE FROM user_to_session WHERE user_id = ? AND session_id = ?", userID, sessionID).Error
 		if err != nil {

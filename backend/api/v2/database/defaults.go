@@ -12,7 +12,7 @@ import (
 // - Run a schema update by auto migrate.
 // - Set the default values.
 // - Remove all configuration settings that are no longer supported.
-func (d *DBMysql) Migrate() error {
+func (d *Mysql) Migrate() error {
 	// prepare database for migration
 	err := d.migrationPreflight()
 	if err != nil {
@@ -52,7 +52,7 @@ func (d *DBMysql) Migrate() error {
 	return nil
 }
 
-func (d *DBMysql) Initialize() error {
+func (d *Mysql) Initialize() error {
 	// create schema
 	err := d.autoMigrate()
 	if err != nil {
@@ -72,7 +72,7 @@ func (d *DBMysql) Initialize() error {
 
 // migrationPreflight is some ugly code that make existing DBs compatible
 // with the gorm based schema management.
-func (d *DBMysql) migrationPreflight() error {
+func (d *Mysql) migrationPreflight() error {
 	// change all session_type occurrences to have ID 1 and 2 instead of 0 and 1
 	count := 0
 	err := d.db.QueryRow("SELECT COUNT(*) FROM session_type WHERE ID = 0").Scan(&count)
@@ -198,7 +198,7 @@ func (d *DBMysql) migrationPreflight() error {
 	return nil
 }
 
-func (d *DBMysql) migrationPostflight() error {
+func (d *Mysql) migrationPostflight() error {
 	// Remove the id column in the Configuration table if present.
 	var idColumnResults []string
 	var c Configuration
@@ -233,7 +233,7 @@ func (d *DBMysql) migrationPostflight() error {
 	return nil
 }
 
-func (d *DBMysql) autoMigrate() error {
+func (d *Mysql) autoMigrate() error {
 	tables := []interface{}{
 		&User{},
 		&BoatEngineHour{},
@@ -259,7 +259,7 @@ func (d *DBMysql) autoMigrate() error {
 	return d.orm.AutoMigrate(tables...)
 }
 
-func (d *DBMysql) initializeContent() error {
+func (d *Mysql) initializeContent() error {
 	defaultValues := [][]interface{}{
 		{DefaultUserRoles},
 		{DefaultUserStatus},
@@ -303,7 +303,7 @@ func (d *DBMysql) initializeContent() error {
 	return nil
 }
 
-func (d *DBMysql) cleanup() error {
+func (d *Mysql) cleanup() error {
 
 	// set is_discounted where a discount was provided
 	// for boat_fuel

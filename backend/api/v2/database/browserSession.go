@@ -8,7 +8,7 @@ import (
 )
 
 // AddBrowserSession adds a browser session to the table.
-func (d *DBMysql) AddBrowserSession(b BrowserSession) (string, error) {
+func (d *Mysql) AddBrowserSession(b BrowserSession) (string, error) {
 	err := d.orm.Create(&b).Error
 	if err != nil {
 		slog.Error("Cannot add browser session", slog.String("error", err.Error()))
@@ -20,7 +20,7 @@ func (d *DBMysql) AddBrowserSession(b BrowserSession) (string, error) {
 
 // GetBrowserSession returns the session or nil and an error in case it cannot
 // be found.
-func (d *DBMysql) GetBrowserSession(id string) (*BrowserSession, error) {
+func (d *Mysql) GetBrowserSession(id string) (*BrowserSession, error) {
 	b := &BrowserSession{
 		SessionSecret: id,
 	}
@@ -36,10 +36,10 @@ func (d *DBMysql) GetBrowserSession(id string) (*BrowserSession, error) {
 	return b, nil
 }
 
-func (d *DBMysql) UpdateBrowserSession(b BrowserSession) error {
+func (d *Mysql) UpdateBrowserSession(b BrowserSession) error {
 	return d.orm.Save(b).Error
 }
 
-func (d *DBMysql) DeleteBrowserSession(b BrowserSession) error {
+func (d *Mysql) DeleteBrowserSession(b BrowserSession) error {
 	return d.orm.Delete(&b).Error
 }

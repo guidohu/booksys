@@ -15,7 +15,7 @@ import (
 
 type Database interface {
 	Connect() error
-	Disconnect()
+	Disconnect() error
 	Ping() error
 	IsConfigured() bool
 	// views
@@ -194,10 +194,7 @@ type UserTable interface {
 	GetUsers(includeDeleted bool) ([]User, error)
 }
 
-type DBMysql struct {
-	// config   mysql.Config
-	db       *sql.DB
-	orm      *gorm.DB
+type Settings struct {
 	User     string
 	Password string
 	Protocol string
@@ -206,11 +203,18 @@ type DBMysql struct {
 	DBName   string
 }
 
-func (d *DBMysql) String() string {
+type Mysql struct {
+	// config   mysql.Config
+	db  *sql.DB
+	orm *gorm.DB
+	Settings
+}
+
+func (d *Mysql) String() string {
 	return d.getDSN( /*hidePassword=*/ true)
 }
 
-func (d *DBMysql) getDSN(hidePassword bool) string {
+func (d *Mysql) getDSN(hidePassword bool) string {
 	password := d.Password
 	if hidePassword {
 		password = "***hidden***"
@@ -218,7 +222,13 @@ func (d *DBMysql) getDSN(hidePassword bool) string {
 	return fmt.Sprintf("%s:%s@%s(%s:%s)/%s?charset=utf8&parseTime=True&loc=UTC", d.User, password, d.Protocol, d.Host, d.Port, d.DBName)
 }
 
-func (d *DBMysql) Connect() error {
+func NewDBMysql(settings Settings) *Mysql {
+	return &Mysql{
+		Settings: settings,
+	}
+}
+
+func (d *Mysql) Connect() error {
 	// Premigration steps if needed
 	// - TODO change all session_type occurrences to have ID 1 and 2 instead of 0 and 1
 
@@ -237,6 +247,8 @@ func (d *DBMysql) Connect() error {
 		slog.Warn("Cannot connect with gorm", slog.String("error", err.Error()))
 		return err
 	}
+	// TODO: Explicitly configure connection pools:
+	// https://gorm.io/docs/connecting_to_the_database.html#Connection-Pool
 	d.orm = orm
 	d.db, err = orm.DB()
 	if err != nil {
@@ -268,34 +280,33 @@ func (d *DBMysql) Connect() error {
 	return d.db.Ping()
 }
 
-func (d *DBMysql) Disconnect() {
+func (d *Mysql) Disconnect() error {
 	if d.orm != nil {
-		db, err := d.orm.DB()
-		if err != nil {
-			slog.Warn("Cannot get db handler to close database", slog.String("error", err.Error()))
-			return
+		db, _ := d.orm.DB()
+		if db != nil {
+			slog.Info("Closing database handle (orm)")
+			d.orm = nil
+			return db.Close()
 		}
-		db.Close()
-		slog.Info("Closed database connection (gorm)")
-		return
 	}
 	if d.db != nil {
-		d.db.Close()
-		slog.Info("Closed database connection (direct)")
-		return
+		slog.Info("Closing database handle (direct)")
+		d.db = nil
+		return d.db.Close()
 	}
-	slog.Warn("No database connection to close")
+	slog.Info("No database to be closed (nil pointers only).")
+	return nil
 }
 
 // Returns an error if db is not connected and connection cannot be established.
-func (d *DBMysql) Ping() error {
+func (d *Mysql) Ping() error {
 	if d.db == nil {
 		return errors.New("no db connection available")
 	}
 	return d.db.Ping()
 }
 
-func (d *DBMysql) IsConfigured() bool {
+func (d *Mysql) IsConfigured() bool {
 	switch {
 	case d.User == "":
 		return false
@@ -314,7 +325,7 @@ func (d *DBMysql) IsConfigured() bool {
 	return true
 }
 
-func (d *DBMysql) tableExists(tableName string) (bool, error) {
+func (d *Mysql) tableExists(tableName string) (bool, error) {
 	if d.DBName == "" {
 		return false, errors.New("database name not provided")
 	}

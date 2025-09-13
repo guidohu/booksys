@@ -258,12 +258,6 @@ const validateAdminUser = () => {
   if (adminUserConfig.value.password.length <= 8) {
     validationErrors.push("Please use a password longer than 8 characters.");
   }
-  if (
-    adminUserConfig.value.recaptchaResponse == null &&
-    getRecaptchaKey.value
-  ) {
-    validationErrors.push("Please tick `I'm not a robot`.");
-  }
 
   // password strength
   const pwUpperRegex = /[A-Z]+/;

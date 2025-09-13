@@ -88,7 +88,13 @@ func (h *Handler) GetAccountingYears(w http.ResponseWriter, r *http.Request) {
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return
 	}
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	years, err := dbh.GetYears()
 	if err != nil {
 		slog.Warn("Cannot get accounting years.", nil)
@@ -108,7 +114,13 @@ func (h *Handler) GetExpenseTypes(w http.ResponseWriter, r *http.Request) {
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return
 	}
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	expenseTypes, err := dbh.GetExpenseTypes()
 	if err != nil {
 		slog.Error("Cannot get expense types", slog.String("error", err.Error()))
@@ -126,7 +138,13 @@ func (h *Handler) GetIncomeTypes(w http.ResponseWriter, r *http.Request) {
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return
 	}
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	expenseTypes, err := dbh.GetExpenseTypes()
 	if err != nil {
 		slog.Error("Cannot get expense types", slog.String("error", err.Error()))
@@ -171,7 +189,13 @@ func (h *Handler) GetAccountingStatistics(w http.ResponseWriter, r *http.Request
 	resp := &GetAccountingStatisticsResponse{}
 
 	// Get total payments.
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	payments, err := dbh.GetPaymentTotal(0)
 	if err != nil {
 		slog.Warn("Cannot get payments total", slog.String("error", err.Error()))
@@ -279,7 +303,13 @@ func (h *Handler) GetAccountingTransactions(w http.ResponseWriter, r *http.Reque
 	}
 	slog.Info("GetAccountingTransactions for", slog.Uint64("year", req.Year))
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	var resp GetAccountingTransactionsResponse
 	resp, err = dbh.GetTransactions(req.Year)
 	if err != nil {
@@ -303,7 +333,13 @@ func (h *Handler) DeleteTransaction(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse(err.Error(), w)
 		return
 	}
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	err = dbh.DeleteTransaction(req.TableID, req.RowID)
 	if err != nil {
 		slog.Warn("Cannot get transactions", slog.String("error", err.Error()))
@@ -335,7 +371,13 @@ func (h *Handler) AddIncome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if user exists.
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	_, err = dbh.GetUserById(uint(req.UserID))
 	if err != nil {
 		slog.Warn("Cannot find user with", slog.Uint64("user_id", req.UserID))
@@ -405,7 +447,13 @@ func (h *Handler) AddExpense(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if user exists.
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	_, err = dbh.GetUserById(uint(req.UserID))
 	if err != nil {
 		slog.Warn("Cannot find user with", slog.Uint64("user_id", req.UserID))

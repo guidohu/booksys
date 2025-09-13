@@ -63,19 +63,19 @@ func (e *EmailConfiguration) Empty() bool {
 	return reflect.DeepEqual(e, &EmailConfiguration{})
 }
 
-func (d *DBMysql) GetPropertyValue(key string) (Configuration, error) {
+func (d *Mysql) GetPropertyValue(key string) (Configuration, error) {
 	var value Configuration
 	err := d.orm.Where("property = ?", key).First(&value).Error
 	return value, err
 }
 
-func (d *DBMysql) GetAllPropertyValues() ([]Configuration, error) {
+func (d *Mysql) GetAllPropertyValues() ([]Configuration, error) {
 	var values []Configuration
 	err := d.orm.Find(&values).Error
 	return values, err
 }
 
-func (d *DBMysql) GetAllPropertyValuesMap() (map[string]Configuration, error) {
+func (d *Mysql) GetAllPropertyValuesMap() (map[string]Configuration, error) {
 	values, err := d.GetAllPropertyValues()
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func GetPropertyValuesMapFromConfiguration(c []Configuration) map[string]Configu
 	return configMap
 }
 
-func (d *DBMysql) UpdateOrInsertPropertyValues(conf []Configuration) error {
+func (d *Mysql) UpdateOrInsertPropertyValues(conf []Configuration) error {
 	err := d.orm.Transaction(func(tx *gorm.DB) error {
 		for _, c := range conf {
 			if _, exists := AllowedProperties[c.Property]; !exists {
@@ -140,7 +140,7 @@ func (d *DBMysql) UpdateOrInsertPropertyValues(conf []Configuration) error {
 	return nil
 }
 
-func (d *DBMysql) GetTimezoneLocation() (*time.Location, error) {
+func (d *Mysql) GetTimezoneLocation() (*time.Location, error) {
 	s, err := d.GetPropertyValue("location.timezone")
 	if err != nil {
 		slog.Error("Cannot get location.timezone", slog.String("error", err.Error()))
@@ -149,7 +149,7 @@ func (d *DBMysql) GetTimezoneLocation() (*time.Location, error) {
 	return time.LoadLocation(s.Value)
 }
 
-func (d *DBMysql) GetEmailConfiguration() (EmailConfiguration, error) {
+func (d *Mysql) GetEmailConfiguration() (EmailConfiguration, error) {
 	config := EmailConfiguration{}
 	properties, err := d.GetAllPropertyValues()
 	if err != nil {
@@ -177,7 +177,7 @@ func (d *DBMysql) GetEmailConfiguration() (EmailConfiguration, error) {
 	return config, nil
 }
 
-func (d *DBMysql) GetMyNautiqueConfiguration() (MyNautiqueConfiguration, error) {
+func (d *Mysql) GetMyNautiqueConfiguration() (MyNautiqueConfiguration, error) {
 	config := MyNautiqueConfiguration{}
 	valid := true
 	enabled, _ := d.GetPropertyValue("mynautique.enabled")

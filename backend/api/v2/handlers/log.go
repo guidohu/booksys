@@ -15,7 +15,13 @@ func (h *Handler) GetLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	logs, err := dbh.GetLogs()
 	if err != nil {
 		slog.Warn("cannot get logs", slog.String("error", err.Error()))

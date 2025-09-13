@@ -46,7 +46,7 @@ var TableIDMap = map[uint64]struct {
 	},
 }
 
-func (d *DBMysql) GetYears() ([]uint64, error) {
+func (d *Mysql) GetYears() ([]uint64, error) {
 	var years []uint64
 	err := d.orm.Raw(`
 		SELECT year(timestamp) AS year FROM payment
@@ -61,7 +61,7 @@ func (d *DBMysql) GetYears() ([]uint64, error) {
 
 // GetPaymentTotal returns the total payments for a given year. If year
 // is 0 it will return the total of all payments.
-func (d *DBMysql) GetPaymentTotal(year uint64) (decimal.Decimal, error) {
+func (d *Mysql) GetPaymentTotal(year uint64) (decimal.Decimal, error) {
 	return d.getSingleDecimalResult(`
 		SELECT coalesce(sum(amount_chf), 0) as result
 		FROM payment
@@ -69,7 +69,7 @@ func (d *DBMysql) GetPaymentTotal(year uint64) (decimal.Decimal, error) {
 	`, year, year)
 }
 
-func (d *DBMysql) GetExpenseTotal(year uint64) (decimal.Decimal, error) {
+func (d *Mysql) GetExpenseTotal(year uint64) (decimal.Decimal, error) {
 	return d.getSingleDecimalResult(`
 		SELECT SUM(t.tot) as result
 		FROM
@@ -86,7 +86,7 @@ func (d *DBMysql) GetExpenseTotal(year uint64) (decimal.Decimal, error) {
 	`, year, year, year, year)
 }
 
-func (d *DBMysql) GetExpenseNoRefundsTotal(year uint64) (decimal.Decimal, error) {
+func (d *Mysql) GetExpenseNoRefundsTotal(year uint64) (decimal.Decimal, error) {
 	return d.getSingleDecimalResult(`
 		SELECT SUM(t.tot) as result
 		FROM
@@ -104,14 +104,14 @@ func (d *DBMysql) GetExpenseNoRefundsTotal(year uint64) (decimal.Decimal, error)
 	`, year, year, ExpenseTypeOwnersRefund, year, year)
 }
 
-func (d *DBMysql) GetHeatCostTotal(year uint64) (decimal.Decimal, error) {
+func (d *Mysql) GetHeatCostTotal(year uint64) (decimal.Decimal, error) {
 	return d.getSingleDecimalResult(`
 		SELECT coalesce(sum(cost_chf),0) as result
 		FROM heat WHERE year(timestamp) = ? OR 0 = ?
 	`, year, year)
 }
 
-func (d *DBMysql) GetSessionPaymentTotal(year uint64) (decimal.Decimal, error) {
+func (d *Mysql) GetSessionPaymentTotal(year uint64) (decimal.Decimal, error) {
 	return d.getSingleDecimalResult(`
 		SELECT coalesce(sum(amount_chf),0) as result
 		FROM payment WHERE type_id = ? 
@@ -119,7 +119,7 @@ func (d *DBMysql) GetSessionPaymentTotal(year uint64) (decimal.Decimal, error) {
 	`, ExpenseTypeSession, year, year)
 }
 
-func (d *DBMysql) GetSessionRefundsTotal(year uint64) (decimal.Decimal, error) {
+func (d *Mysql) GetSessionRefundsTotal(year uint64) (decimal.Decimal, error) {
 	return d.getSingleDecimalResult(`
 		SELECT coalesce(sum(amount_chf),0) as result
 		FROM expenditure WHERE type_id = ? 
@@ -127,7 +127,7 @@ func (d *DBMysql) GetSessionRefundsTotal(year uint64) (decimal.Decimal, error) {
 	`, ExpenseTypeSession, year, year)
 }
 
-func (d *DBMysql) GetTransactions(year uint64) ([]TransactionRow, error) {
+func (d *Mysql) GetTransactions(year uint64) ([]TransactionRow, error) {
 	r := []TransactionRow{}
 	// Table IDs are
 	// 0: expenditure
@@ -160,7 +160,7 @@ func (d *DBMysql) GetTransactions(year uint64) ([]TransactionRow, error) {
 	return r, err
 }
 
-func (d *DBMysql) DeleteTransaction(tableID uint64, rowID uint64) error {
+func (d *Mysql) DeleteTransaction(tableID uint64, rowID uint64) error {
 	switch tableID {
 	case TableIdExpenditure:
 		e := Expense{
@@ -182,15 +182,15 @@ func (d *DBMysql) DeleteTransaction(tableID uint64, rowID uint64) error {
 	}
 }
 
-func (d *DBMysql) AddIncome(data Income) error {
+func (d *Mysql) AddIncome(data Income) error {
 	return d.orm.Create(&data).Error
 }
 
-func (d *DBMysql) AddExpense(data Expense) error {
+func (d *Mysql) AddExpense(data Expense) error {
 	return d.orm.Create(&data).Error
 }
 
-func (d *DBMysql) getSingleDecimalResult(rawQuery string, values ...interface{}) (decimal.Decimal, error) {
+func (d *Mysql) getSingleDecimalResult(rawQuery string, values ...interface{}) (decimal.Decimal, error) {
 	p := struct {
 		Result *decimal.Decimal
 	}{

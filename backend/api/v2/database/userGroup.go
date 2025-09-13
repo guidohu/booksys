@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func (d *DBMysql) CreateUserGroup(us UserStatus, p Pricing) error {
+func (d *Mysql) CreateUserGroup(us UserStatus, p Pricing) error {
 	return d.orm.Transaction(func(tx *gorm.DB) error {
 		// check that group does not exist already
 		var groups []UserStatus
@@ -46,7 +46,7 @@ func (d *DBMysql) CreateUserGroup(us UserStatus, p Pricing) error {
 	})
 }
 
-func (d *DBMysql) ChangeUserGroup(us UserStatus, p Pricing) error {
+func (d *Mysql) ChangeUserGroup(us UserStatus, p Pricing) error {
 	return d.orm.Transaction(func(tx *gorm.DB) error {
 		// check that group does exist
 		var group UserStatus
@@ -94,7 +94,7 @@ func (d *DBMysql) ChangeUserGroup(us UserStatus, p Pricing) error {
 	})
 }
 
-func (d *DBMysql) DeleteUserGroup(id uint) error {
+func (d *Mysql) DeleteUserGroup(id uint) error {
 	return d.orm.Transaction(func(tx *gorm.DB) error {
 		// check that group does exist
 		var group UserStatus
@@ -131,6 +131,6 @@ func (d *DBMysql) DeleteUserGroup(id uint) error {
 	})
 }
 
-func (d *DBMysql) SetUserGroup(userID uint, groupID uint) error {
+func (d *Mysql) SetUserGroup(userID uint, groupID uint) error {
 	return d.orm.Model(&User{}).Where("id = ?", userID).Update("status", groupID).Error
 }

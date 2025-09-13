@@ -1,6 +1,6 @@
 package database
 
-func (d *DBMysql) GetEngineHourLatest() (BoatEngineHour, error) {
+func (d *Mysql) GetEngineHourLatest() (BoatEngineHour, error) {
 	var b BoatEngineHour
 	err := d.orm.Model(&BoatEngineHour{}).
 		Preload("User").
@@ -10,13 +10,13 @@ func (d *DBMysql) GetEngineHourLatest() (BoatEngineHour, error) {
 	return b, err
 }
 
-func (d *DBMysql) GetEngineHoursEntry(id uint) (BoatEngineHour, error) {
+func (d *Mysql) GetEngineHoursEntry(id uint) (BoatEngineHour, error) {
 	var b BoatEngineHour
 	err := d.orm.Model(&BoatEngineHour{}).Where("id = ?", id).Preload("User").First(&b).Error
 	return b, err
 }
 
-func (d *DBMysql) GetEngineHours() ([]BoatEngineHour, error) {
+func (d *Mysql) GetEngineHours() ([]BoatEngineHour, error) {
 	var b []BoatEngineHour
 	err := d.orm.Model(&BoatEngineHour{}).
 		Preload("User").
@@ -26,10 +26,10 @@ func (d *DBMysql) GetEngineHours() ([]BoatEngineHour, error) {
 	return b, err
 }
 
-func (d *DBMysql) AddEngineHours(b BoatEngineHour) error {
+func (d *Mysql) AddEngineHours(b BoatEngineHour) error {
 	return d.orm.Create(&b).Error
 }
 
-func (d *DBMysql) UpdateEngineHours(b BoatEngineHour) error {
+func (d *Mysql) UpdateEngineHours(b BoatEngineHour) error {
 	return d.orm.Save(&b).Error
 }

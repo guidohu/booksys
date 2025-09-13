@@ -175,7 +175,7 @@ func (c *Config) IsDBConfigured() bool {
 	return true
 }
 
-func LoadDBConfig(v *viper.Viper, db *database.DBMysql) error {
+func LoadDBConfig(v *viper.Viper, db *database.Mysql) error {
 	p, err := db.GetAllPropertyValues()
 	if err != nil {
 		slog.Error("Cannot retrieve configuration from database", slog.String("error", err.Error()))
@@ -205,7 +205,7 @@ type Config struct {
 	environment *viper.Viper
 	file        *viper.Viper
 	defaults    *viper.Viper
-	db          *database.DBMysql
+	db          *database.Manager
 }
 
 type DBConfigWatcher struct {
@@ -353,7 +353,7 @@ func (c *Config) ReadConfigFile() error {
 }
 
 // Set the database that should be used for the configuration.
-func (c *Config) SetDB(db *database.DBMysql) {
+func (c *Config) SetDB(db *database.Manager) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.db = db
@@ -375,7 +375,12 @@ func (c *Config) SetPropertyValue(key string, value string) error {
 			Value:    value,
 		},
 	}
-	err := c.db.UpdateOrInsertPropertyValues(properties)
+	db, done := c.db.GetHandler()
+	if db == nil {
+		return fmt.Errorf("no database connection available")
+	}
+	defer done()
+	err := db.UpdateOrInsertPropertyValues(properties)
 	return err
 }
 
@@ -443,13 +448,18 @@ func (c *Config) ReadConfigProperties() error {
 // caller MUST hold mu.
 func (c *Config) readConfigProperties() error {
 	if c.db == nil {
+		return fmt.Errorf("no database manager present yet")
+	}
+	db, done := c.db.GetHandler()
+	defer done()
+	if db == nil {
 		return fmt.Errorf("no database configured")
 	}
-	err := c.db.Ping()
+	err := db.Ping()
 	if err != nil {
 		return err
 	}
-	props, err := c.db.GetAllPropertyValuesMap()
+	props, err := db.GetAllPropertyValuesMap()
 	if err != nil {
 		return err
 	}
@@ -604,22 +614,33 @@ func (c *Config) WatchProperties(ctx context.Context, notifyCh chan struct{}) {
 		case <-ticker.C:
 			slog.Info("WatchProperties: attempt to read properties from database.")
 			c.mu.Lock()
-			if c.db == nil {
-				slog.Warn("WatchProperties: no database connection available.")
+			dbm := c.db
+			if dbm == nil {
+				slog.Warn("WatchProperties: no database manager available.")
 				c.mu.Unlock()
 				continue
 			}
-			if err := c.db.Ping(); err != nil {
-				slog.Warn("WatchProperties: database unresponsive", slog.String("error", err.Error()))
+			db, done := dbm.GetHandler()
+			if db == nil {
+				slog.Warn("WatchProperties: no database available.")
 				c.mu.Unlock()
 				continue
 			}
-			version, err := c.db.GetConfigurationVersion()
+			// if err := db.Ping(); err != nil {
+			// 	slog.Warn("WatchProperties: database unresponsive", slog.String("error", err.Error()))
+			// 	c.mu.Unlock()
+			// 	done()
+			// 	continue
+			// }
+			version, err := db.GetConfigurationVersion()
 			if err != nil {
 				slog.Warn("WatchProperties: cannot retrieve configuration version from database", slog.String("error", err.Error()))
 				// TODO this could be because there is no db connection
+				c.mu.Unlock()
+				done()
 				continue
 			}
+			done()
 
 			if lastVersion.Version != version.Version || len(c.properties) == 0 {
 				if version.Timestamp == nil {
@@ -633,7 +654,6 @@ func (c *Config) WatchProperties(ctx context.Context, notifyCh chan struct{}) {
 					continue
 				}
 				lastVersion = version
-				slog.Info("DEBUG: version assigned")
 				select {
 				case notifyCh <- struct{}{}:
 					// write was successful
@@ -641,7 +661,6 @@ func (c *Config) WatchProperties(ctx context.Context, notifyCh chan struct{}) {
 					// channel is not ready to receive update
 					break
 				}
-				slog.Info("DEBUG: config properties have been read")
 			} else {
 				slog.Info("WatchProperties: no changes")
 			}
@@ -660,7 +679,7 @@ func NewDBConfigWatcher() *DBConfigWatcher {
 	return &DBConfigWatcher{}
 }
 
-func (w *DBConfigWatcher) Watch(ctx context.Context, db *database.DBMysql, notifyCh chan struct{}) {
+func (w *DBConfigWatcher) Watch(ctx context.Context, db *database.Mysql, notifyCh chan struct{}) {
 	// cancel previous watchers
 	w.mu.Lock()
 	slog.Info("Cancel any previous DBConfigWatcher.")
@@ -676,7 +695,7 @@ func (w *DBConfigWatcher) Watch(ctx context.Context, db *database.DBMysql, notif
 	w.watchInternal(wCtx, db, notifyCh)
 }
 
-func (w *DBConfigWatcher) watchInternal(ctx context.Context, db *database.DBMysql, notifyCh chan struct{}) {
+func (w *DBConfigWatcher) watchInternal(ctx context.Context, db *database.Mysql, notifyCh chan struct{}) {
 	ticker := time.NewTicker(10 * time.Second)
 	lastVersion := database.ConfigurationVersion{}
 	for {

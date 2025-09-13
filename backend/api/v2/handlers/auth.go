@@ -51,7 +51,13 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get user from database
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	lookupUser, err := dbh.GetUserByName(req.Username)
 	if err != nil {
 		slog.Warn("User not found", slog.String("username", req.Username), slog.String("error", err.Error()))
@@ -139,7 +145,13 @@ func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	// Check if we know of that session and whether it is not expired yet
 	session, err := dbh.GetBrowserSession(cookie.Value)
 	if err != nil || !session.Valid() {
@@ -168,7 +180,13 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	err := dbh.DeleteBrowserSession(session)
 	if err != nil {
 		slog.Error("Cannot delete browser session", slog.String("error", err.Error()))
@@ -185,7 +203,13 @@ func (h *Handler) User(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	user, err := dbh.GetUserById(session.UserID)
 	if err != nil {
 		slog.Error("Cannot retrieve user information", slog.String("error", err.Error()))

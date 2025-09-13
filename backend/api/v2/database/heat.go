@@ -6,7 +6,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func (d *DBMysql) GetUserHeats(userID uint, size int) ([]Heat, error) {
+func (d *Mysql) GetUserHeats(userID uint, size int) ([]Heat, error) {
 	var h []Heat
 	err := d.orm.Where("user_id = ?", userID).
 		Order("timestamp desc").
@@ -17,7 +17,7 @@ func (d *DBMysql) GetUserHeats(userID uint, size int) ([]Heat, error) {
 	return h, err
 }
 
-func (d *DBMysql) GetUserHeatsBySession(sessionID uint, userID uint, size int) ([]Heat, error) {
+func (d *Mysql) GetUserHeatsBySession(sessionID uint, userID uint, size int) ([]Heat, error) {
 	var h []Heat
 	err := d.orm.Where("user_id = ?", userID).
 		Where("session_id = ?", sessionID).
@@ -30,7 +30,7 @@ func (d *DBMysql) GetUserHeatsBySession(sessionID uint, userID uint, size int) (
 }
 
 // GetUserHeatStats returns total duration seconds and total cost
-func (d *DBMysql) GetUserHeatStats(userID uint, start time.Time, end time.Time) (int64, decimal.Decimal, error) {
+func (d *Mysql) GetUserHeatStats(userID uint, start time.Time, end time.Time) (int64, decimal.Decimal, error) {
 	type Stats struct {
 		Duration int64
 		Cost     decimal.Decimal
@@ -46,13 +46,13 @@ func (d *DBMysql) GetUserHeatStats(userID uint, start time.Time, end time.Time) 
 	return s.Duration, s.Cost, err
 }
 
-func (d *DBMysql) GetHeatInSessionCount(sessionID uint) (int, error) {
+func (d *Mysql) GetHeatInSessionCount(sessionID uint) (int, error) {
 	var count int
 	err := d.orm.Raw("SELECT count(*) FROM heat WHERE session_id = ?", sessionID).Scan(&count).Error
 	return count, err
 }
 
-func (d *DBMysql) GetHeatsInSession(sessionID uint) ([]Heat, error) {
+func (d *Mysql) GetHeatsInSession(sessionID uint) ([]Heat, error) {
 	var heats []Heat
 	err := d.orm.Model(&Heat{}).
 		Where("session_id = ?", sessionID).
@@ -62,20 +62,20 @@ func (d *DBMysql) GetHeatsInSession(sessionID uint) ([]Heat, error) {
 	return heats, err
 }
 
-func (d *DBMysql) AddHeat(h *Heat) error {
+func (d *Mysql) AddHeat(h *Heat) error {
 	return d.orm.Create(h).Error
 }
 
-func (d *DBMysql) DeleteHeat(heatID uint) error {
+func (d *Mysql) DeleteHeat(heatID uint) error {
 	return d.orm.Exec("DELETE FROM heat WHERE id = ?", heatID).Error
 }
 
-func (d *DBMysql) GetHeat(heatID uint) (Heat, error) {
+func (d *Mysql) GetHeat(heatID uint) (Heat, error) {
 	var h Heat
 	err := d.orm.Where("id = ?", heatID).First(&h).Error
 	return h, err
 }
 
-func (d *DBMysql) ChangeHeat(h *Heat) error {
+func (d *Mysql) ChangeHeat(h *Heat) error {
 	return d.orm.Save(h).Error
 }

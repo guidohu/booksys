@@ -123,7 +123,13 @@ func (h *Handler) GetEngineHourLatest(w http.ResponseWriter, r *http.Request) {
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return
 	}
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	b, err := dbh.GetEngineHourLatest()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Warn("Cannot get latest engine hour entry", slog.String("error", err.Error()))
@@ -150,7 +156,13 @@ func (h *Handler) GetEngineHoursList(w http.ResponseWriter, r *http.Request) {
 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
 		return
 	}
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	engineHours, err := dbh.GetEngineHours()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Warn("Cannot get engine hours", slog.String("error", err.Error()))
@@ -189,7 +201,13 @@ func (h *Handler) UpdateEngineHours(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	// check that user is an admin user
 	isAdmin, _ := dbh.IsAdminUser(req.UserID)
 	if !isAdmin {
@@ -272,7 +290,13 @@ func (h *Handler) UpdateEngineHoursEntry(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	entry, err := dbh.GetEngineHoursEntry(req.ID)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Warn("Cannot get engine hour entry", slog.String("error", err.Error()))
@@ -296,7 +320,13 @@ func (h *Handler) GetFuelEntries(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	fuelEntries, err := dbh.GetFuelEntries()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Warn("Cannot get fuel entries", slog.String("error", err.Error()))
@@ -351,7 +381,13 @@ func (h *Handler) AddFuelEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	// Check that user is an admin user
 	isAdmin, _ := dbh.IsAdminUser(req.UserID)
 	if !isAdmin {
@@ -398,7 +434,13 @@ func (h *Handler) ChangeFuelEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	entry, err := dbh.GetFuelEntry(req.ID)
 	if err != nil {
 		slog.Warn("Cannot find fuel entry", slog.Uint64("id", uint64(req.ID)), slog.String("error", err.Error()))
@@ -439,7 +481,13 @@ func (h *Handler) RemoveFuelEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	entry, err := dbh.GetFuelEntry(req.ID)
 	if err != nil {
 		slog.Warn("Cannot find fuel entry", slog.Uint64("id", uint64(req.ID)), slog.String("error", err.Error()))
@@ -462,7 +510,13 @@ func (h *Handler) GetMaintenanceEntries(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	logs, err := dbh.GetMaintenance()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Warn("Cannot get fuel entries", slog.String("error", err.Error()))
@@ -498,7 +552,13 @@ func (h *Handler) AddMaintenanceEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	if !dbh.UserExists(req.UserID) {
 		slog.Warn("Request payload is not valid", slog.String("error", "user does not exist"))
 		WriteFailureResponse("Please provide a valid user ID.", w)

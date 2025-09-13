@@ -41,7 +41,13 @@ func (h *Handler) HealthStatus(w http.ResponseWriter, r *http.Request) {
 	if healthStatus.ConfigDB {
 		// Check whether the database handler is configured and
 		// able to connect.
-		dbh := h.GetDB()
+		dbh, done := h.Database.GetHandler()
+		defer done()
+		if dbh == nil {
+			slog.Warn("No database connection is available.")
+			WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+			return
+		}
 		if !dbh.IsConfigured() {
 			slog.Warn("Database handler is not configured.")
 		} else if err := dbh.Ping(); err != nil {

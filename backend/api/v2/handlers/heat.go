@@ -68,7 +68,12 @@ func (h *Handler) AddHeats(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) addHeat(heat AddHeatRequest) error {
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		return fmt.Errorf("no database connection available")
+	}
 	// Get user
 	user, err := dbh.GetUserById(heat.UserID)
 	if err != nil {
@@ -152,7 +157,13 @@ func (h *Handler) DeleteHeat(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("Invalid request.", w)
 		return
 	}
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	err = dbh.DeleteHeat(req.HeatID)
 	if err != nil {
 		slog.Warn("Could not delete heat", slog.String("error", err.Error()))
@@ -175,7 +186,13 @@ func (h *Handler) ChangeHeat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	// Get user
 	user, err := dbh.GetUserById(req.UserID)
 	if err != nil {

@@ -102,7 +102,13 @@ func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	s, err := dbh.GetSession(uint(req.SessionID))
 	if err != nil {
 		slog.Warn("Cannot get session", slog.Uint64("sessionID", req.SessionID), slog.String("error", err.Error()))
@@ -155,7 +161,13 @@ func (h *Handler) GetSessionMetadata(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	s, err := dbh.GetSession(uint(req.SessionID))
 	if err != nil {
 		slog.Warn("Cannot get session", slog.Uint64("sessionID", req.SessionID), slog.String("error", err.Error()))
@@ -189,7 +201,13 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	start := time.Unix(req.Start, 0)
 	end := time.Unix(req.End, 0)
 	collidingSessions, err := dbh.GetSessionsBetween(start, end)
@@ -239,7 +257,13 @@ func (h *Handler) EditSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	oldSession, err := dbh.GetSession(req.SessionID)
 	if err != nil {
 		slog.Warn("Cannot check existence of session", slog.String("error", err.Error()))
@@ -296,7 +320,13 @@ func (h *Handler) DeleteSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	// check if session does not have heats
 	heats, err := dbh.GetHeatInSessionCount(req.SessionID)
 	if err != nil {
@@ -342,7 +372,13 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	// check if session exists
 	s, err := dbh.GetSession(req.SessionID)
 	if err != nil {
@@ -439,7 +475,13 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	// Get the user.
 	user, err := dbh.GetUserById(req.UserID)
 	if err != nil {
@@ -514,7 +556,13 @@ func (h *Handler) RemoveMyUserFromSession(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	// Get users for this session
 	users, err := dbh.GetUsersForSession(req.SessionID)
 	if err != nil {
@@ -567,7 +615,13 @@ func (h *Handler) GetSessionHeats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh := h.GetDB()
+	dbh, done := h.Database.GetHandler()
+	defer done()
+	if dbh == nil {
+		slog.Warn("No database connection is available.")
+		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+		return
+	}
 	heats, err := dbh.GetHeatsInSession(req.SessionID)
 	if err != nil {
 		slog.Warn("Cannot get heats for session", slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))

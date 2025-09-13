@@ -1,12 +1,12 @@
 package database
 
-func (d *DBMysql) GetFuelEntries() ([]BoatFuel, error) {
+func (d *Mysql) GetFuelEntries() ([]BoatFuel, error) {
 	var b []BoatFuel
 	err := d.orm.Model(&BoatFuel{}).Preload("User").Order("timestamp DESC").Find(&b).Error
 	return b, err
 }
 
-func (d *DBMysql) GetFuelEntry(id uint) (BoatFuel, error) {
+func (d *Mysql) GetFuelEntry(id uint) (BoatFuel, error) {
 	var b BoatFuel
 	err := d.orm.Model(&BoatFuel{}).
 		Where("id = ?", id).
@@ -16,15 +16,15 @@ func (d *DBMysql) GetFuelEntry(id uint) (BoatFuel, error) {
 	return b, err
 }
 
-func (d *DBMysql) AddFuelEntry(e BoatFuel) error {
+func (d *Mysql) AddFuelEntry(e BoatFuel) error {
 	return d.orm.Create(&e).Error
 }
 
-func (d *DBMysql) ChangeFuelEntry(e BoatFuel) error {
+func (d *Mysql) ChangeFuelEntry(e BoatFuel) error {
 	return d.orm.Save(&e).Error
 }
 
-func (d *DBMysql) RemoveFuelEntry(id uint) error {
+func (d *Mysql) RemoveFuelEntry(id uint) error {
 	b := &BoatFuel{
 		ID: id,
 	}

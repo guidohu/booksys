@@ -1,6 +1,6 @@
 package database
 
-func (d *DBMysql) GetPricings() ([]Pricing, error) {
+func (d *Mysql) GetPricings() ([]Pricing, error) {
 	var pricing []Pricing
 	err := d.orm.Model(&Pricing{}).
 		Preload("UserStatus").
@@ -9,7 +9,7 @@ func (d *DBMysql) GetPricings() ([]Pricing, error) {
 	return pricing, err
 }
 
-func (d *DBMysql) GetUserStatusToPricingsMap() (map[uint]Pricing, error) {
+func (d *Mysql) GetUserStatusToPricingsMap() (map[uint]Pricing, error) {
 	pMap := map[uint]Pricing{}
 	pricings, err := d.GetPricings()
 	if err != nil {
