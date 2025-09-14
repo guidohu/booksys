@@ -293,8 +293,11 @@ func main() {
 
 	mux := http.NewServeMux()
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", v.GetUint16("http.port")),
-		Handler: mux,
+		Addr:         fmt.Sprintf(":%d", v.GetUint16("http.port")),
+		Handler:      mux,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  30 * time.Second,
 	}
 	registerUploadsServer(mux, conf)
 	registerHandlers(mux, h)
