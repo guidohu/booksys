@@ -48,10 +48,6 @@ var (
 	printConfig = pflag.Bool("print_config", false, "Prints the config an exits.")
 )
 
-var (
-	mu sync.Mutex
-)
-
 func getFlags(v *viper.Viper) {
 	v.BindPFlag("config", pflag.Lookup("config"))
 	v.BindPFlag("http.port", pflag.Lookup("http_port"))
@@ -243,8 +239,6 @@ func main() {
 	chConfigFileUpdate := conf.WatchFile()
 
 	// Watch for changes in the properties.
-	// TODO: If we really do not provide a channel, we do not
-	// really need to poll the configuration?
 	wg.Add(1)
 	go func() {
 		slog.Info("Watch properties routine started.")

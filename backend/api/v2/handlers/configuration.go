@@ -197,6 +197,8 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	slog.Info("New database configuration has been written to", slog.String("config", configFile))
+	// TODO: The database manager should just be calles with a ConnectAndReplace like above
+	// and we should be good and not need this part here.
 	h.config.SetDB(h.Database)
 	WriteSuccessResponse("config written", nil, w)
 }
