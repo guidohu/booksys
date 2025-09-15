@@ -52,6 +52,8 @@ func (d *Mysql) Migrate() error {
 	return nil
 }
 
+// Initialize creates a new schema for the database with
+// default content.
 func (d *Mysql) Initialize() error {
 	// create schema
 	err := d.autoMigrate()
@@ -234,7 +236,7 @@ func (d *Mysql) migrationPostflight() error {
 }
 
 func (d *Mysql) autoMigrate() error {
-	tables := []interface{}{
+	tables := []any{
 		&User{},
 		&BoatEngineHour{},
 		&BoatFuel{},
@@ -260,7 +262,7 @@ func (d *Mysql) autoMigrate() error {
 }
 
 func (d *Mysql) initializeContent() error {
-	defaultValues := [][]interface{}{
+	defaultValues := [][]any{
 		{DefaultUserRoles},
 		{DefaultUserStatus},
 		{DefaultSessionTypes},
@@ -304,10 +306,10 @@ func (d *Mysql) initializeContent() error {
 }
 
 func (d *Mysql) cleanup() error {
-
 	// set is_discounted where a discount was provided
 	// for boat_fuel
-	err := d.orm.Exec(`UPDATE boat_fuel 
+	err := d.orm.Exec(`
+	    UPDATE boat_fuel 
 		SET is_discounted = 1
 		WHERE 
 			cost_chf_brutto IS NOT NULL 
@@ -321,16 +323,11 @@ func (d *Mysql) cleanup() error {
 	return nil
 }
 
-func SetupInitialValues() error {
-	return nil
-}
-
-func SetupUpserts() error {
-	return nil
-}
+type UserRoleType uint
 
 const (
-	UserRoleGuest = iota + 1
+	UserRoleUnknown UserRoleType = iota
+	UserRoleGuest
 	UserRoleMember
 	UserRoleAdmin
 )

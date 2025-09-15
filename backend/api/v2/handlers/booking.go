@@ -67,7 +67,13 @@ func (h *Handler) GetBookingDay(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("Request payload not valid", w)
 		return
 	}
-	b, err := h.getBooking(time.Unix(req.Start, 0), time.Unix(req.End, 0))
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
+		return
+	}
+	dbh := hCtx.Database
+	b, err := h.getBooking(dbh, time.Unix(req.Start, 0), time.Unix(req.End, 0))
 	if err != nil {
 		slog.Warn("Cannot retrieve bookings", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot get bookings", w)
@@ -84,9 +90,15 @@ func (h *Handler) GetBookingSeries(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("Request payload not valid", w)
 		return
 	}
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
+		return
+	}
+	dbh := hCtx.Database
 	resp := []GetBookingResponse{}
 	for _, window := range req.TimeWindows {
-		b, err := h.getBooking(time.Unix(window.Start, 0), time.Unix(window.End, 0))
+		b, err := h.getBooking(dbh, time.Unix(window.Start, 0), time.Unix(window.End, 0))
 		if err != nil {
 			slog.Warn("Cannot retrieve bookings for window", slog.Int64("start", window.Start), slog.Int64("end", window.End), slog.String("error", err.Error()))
 			b = GetBookingResponse{}
@@ -98,25 +110,19 @@ func (h *Handler) GetBookingSeries(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("bookings", &response, w)
 }
 
-func (h *Handler) getBooking(start time.Time, end time.Time) (GetBookingResponse, error) {
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		return GetBookingResponse{}, fmt.Errorf("no database connection available")
-	}
+func (h *Handler) getBooking(db database.Database, start time.Time, end time.Time) (GetBookingResponse, error) {
 	location, err := h.getLocation()
 	if err != nil {
 		slog.Warn("Cannot get timezone for sunrise/sunset calculations", slog.String("error", err.Error()))
 		return GetBookingResponse{}, err
 	}
 	sunrise, sunset := h.getSunriseSunset(start, location)
-	businessDayStart, err := dbh.GetPropertyValue("business.day.start")
+	businessDayStart, err := db.GetPropertyValue("business.day.start")
 	if err != nil {
 		slog.Warn("Cannot retrieve business.day.start from the database", slog.String("error", err.Error()))
 		return GetBookingResponse{}, err
 	}
-	businessDayEnd, err := dbh.GetPropertyValue("business.day.end")
+	businessDayEnd, err := db.GetPropertyValue("business.day.end")
 	if err != nil {
 		slog.Warn("Cannot retrieve business.day.end from the database", slog.String("error", err.Error()))
 		return GetBookingResponse{}, err
@@ -137,7 +143,7 @@ func (h *Handler) getBooking(start time.Time, end time.Time) (GetBookingResponse
 	}
 
 	// get sessions for that timeframe
-	s, err := dbh.GetSessionsBetween(start, end)
+	s, err := db.GetSessionsBetween(start, end)
 	if err != nil {
 		slog.Warn("Cannot retrieve the sessions from the database", slog.String("error", err.Error()))
 		return GetBookingResponse{}, err

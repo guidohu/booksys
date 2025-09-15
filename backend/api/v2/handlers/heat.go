@@ -37,10 +37,6 @@ type ChangeHeatRequest struct {
 }
 
 func (h *Handler) AddHeats(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := AddHeatsRequest{}
 	err := ReadBodyAndValidate(r, &req)
 	if err != nil {
@@ -49,9 +45,16 @@ func (h *Handler) AddHeats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
+		return
+	}
+	dbh := hCtx.Database
+
 	resp := AddHeatsRequestResponse{}
 	for _, heat := range []AddHeatRequest(req.Heats) {
-		err = h.addHeat(heat)
+		err = h.addHeat(dbh, heat)
 		if err != nil {
 			resp[heat.UID] = Status{
 				OK:  false,
@@ -67,13 +70,7 @@ func (h *Handler) AddHeats(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("added heats, check individual responses", &resp, w)
 }
 
-func (h *Handler) addHeat(heat AddHeatRequest) error {
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		return fmt.Errorf("no database connection available")
-	}
+func (h *Handler) addHeat(dbh database.Database, heat AddHeatRequest) error {
 	// Get user
 	user, err := dbh.GetUserById(heat.UserID)
 	if err != nil {
@@ -125,10 +122,6 @@ func (h *Handler) addHeat(heat AddHeatRequest) error {
 }
 
 func (h *Handler) AddHeat(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &AddHeatRequest{}
 	err := ReadBodyAndValidate(r, req)
 	if err != nil {
@@ -136,7 +129,13 @@ func (h *Handler) AddHeat(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("Invalid request.", w)
 		return
 	}
-	err = h.addHeat(*req)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
+		return
+	}
+	dbh := hCtx.Database
+	err = h.addHeat(dbh, *req)
 	if err != nil {
 		slog.Warn("Could not add heat", slog.String("error", err.Error()))
 		WriteFailureResponse(err.Error(), w)
@@ -146,10 +145,6 @@ func (h *Handler) AddHeat(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) DeleteHeat(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &DeleteHeatRequest{}
 	err := ReadBodyAndValidate(r, req)
 	if err != nil {
@@ -157,13 +152,12 @@ func (h *Handler) DeleteHeat(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("Invalid request.", w)
 		return
 	}
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	err = dbh.DeleteHeat(req.HeatID)
 	if err != nil {
 		slog.Warn("Could not delete heat", slog.String("error", err.Error()))
@@ -174,10 +168,6 @@ func (h *Handler) DeleteHeat(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ChangeHeat(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &ChangeHeatRequest{}
 	err := ReadBodyAndValidate(r, req)
 	if err != nil {
@@ -186,13 +176,12 @@ func (h *Handler) ChangeHeat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	// Get user
 	user, err := dbh.GetUserById(req.UserID)
 	if err != nil {

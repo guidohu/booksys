@@ -84,17 +84,12 @@ var AddTransactionValidationErrors = map[string]string{
 }
 
 func (h *Handler) GetAccountingYears(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	years, err := dbh.GetYears()
 	if err != nil {
 		slog.Warn("Cannot get accounting years.", nil)
@@ -110,17 +105,12 @@ func (h *Handler) GetAccountingYears(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetExpenseTypes(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	expenseTypes, err := dbh.GetExpenseTypes()
 	if err != nil {
 		slog.Error("Cannot get expense types", slog.String("error", err.Error()))
@@ -134,17 +124,12 @@ func (h *Handler) GetExpenseTypes(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetIncomeTypes(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	expenseTypes, err := dbh.GetExpenseTypes()
 	if err != nil {
 		slog.Error("Cannot get expense types", slog.String("error", err.Error()))
@@ -173,10 +158,6 @@ func (h *Handler) GetIncomeTypes(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetAccountingStatistics(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &GetAccountingStatisticsRequest{}
 	err := ReadBodyAndValidate(r, req, GetAccountingStatisticsValidationErrors)
 	if err != nil {
@@ -189,13 +170,12 @@ func (h *Handler) GetAccountingStatistics(w http.ResponseWriter, r *http.Request
 	resp := &GetAccountingStatisticsResponse{}
 
 	// Get total payments.
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	payments, err := dbh.GetPaymentTotal(0)
 	if err != nil {
 		slog.Warn("Cannot get payments total", slog.String("error", err.Error()))
@@ -290,10 +270,6 @@ func (h *Handler) GetAccountingStatistics(w http.ResponseWriter, r *http.Request
 }
 
 func (h *Handler) GetAccountingTransactions(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &GetAccountingTransactionsRequest{}
 	err := ReadBodyAndValidate(r, req, GetAccountingTransactionsValidationErrors)
 	if err != nil {
@@ -303,13 +279,12 @@ func (h *Handler) GetAccountingTransactions(w http.ResponseWriter, r *http.Reque
 	}
 	slog.Info("GetAccountingTransactions for", slog.Uint64("year", req.Year))
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	var resp GetAccountingTransactionsResponse
 	resp, err = dbh.GetTransactions(req.Year)
 	if err != nil {
@@ -322,10 +297,6 @@ func (h *Handler) GetAccountingTransactions(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *Handler) DeleteTransaction(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &DeleteTransactionRequest{}
 	err := ReadBodyAndValidate(r, req, DeleteTransactionValidationErrors)
 	if err != nil {
@@ -333,13 +304,12 @@ func (h *Handler) DeleteTransaction(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse(err.Error(), w)
 		return
 	}
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	err = dbh.DeleteTransaction(req.TableID, req.RowID)
 	if err != nil {
 		slog.Warn("Cannot get transactions", slog.String("error", err.Error()))
@@ -351,10 +321,6 @@ func (h *Handler) DeleteTransaction(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AddIncome(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &AddTransactionRequest{}
 	err := ReadBodyAndValidate(r, req, AddTransactionValidationErrors)
 	if err != nil {
@@ -371,13 +337,12 @@ func (h *Handler) AddIncome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if user exists.
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	_, err = dbh.GetUserById(uint(req.UserID))
 	if err != nil {
 		slog.Warn("Cannot find user with", slog.Uint64("user_id", req.UserID))
@@ -427,10 +392,6 @@ func (h *Handler) AddIncome(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AddExpense(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &AddTransactionRequest{}
 	err := ReadBodyAndValidate(r, req, AddTransactionValidationErrors)
 	if err != nil {
@@ -447,13 +408,12 @@ func (h *Handler) AddExpense(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if user exists.
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	_, err = dbh.GetUserById(uint(req.UserID))
 	if err != nil {
 		slog.Warn("Cannot find user with", slog.Uint64("user_id", req.UserID))

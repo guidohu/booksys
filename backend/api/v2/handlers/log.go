@@ -10,18 +10,12 @@ import (
 type GetLogsResponse []database.Log
 
 func (h *Handler) GetLogs(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	logs, err := dbh.GetLogs()
 	if err != nil {
 		slog.Warn("cannot get logs", slog.String("error", err.Error()))

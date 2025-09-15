@@ -85,40 +85,28 @@ func GetKeysMap() map[string]bool {
 // IsDBConfigured returns false in case any of the mandatory database settings is not provided
 // through the configuration.
 func (c *Config) IsDBConfigured() bool {
-	if c.IsSet("database.protocol") {
+	if !c.IsSet("database.protocol") {
 		slog.Info("Database protocol is not set in configuration")
 		return false
 	}
-	if c.IsSet("database.user") {
+	if !c.IsSet("database.user") {
 		slog.Info("Databse user is not set in configuration")
 		return false
 	}
-	if c.IsSet("database.host") {
+	if !c.IsSet("database.host") {
 		slog.Info("Database host is not set in configuration")
 		return false
 	}
-	if c.IsSet("database.port") {
+	if !c.IsSet("database.port") {
 		slog.Info("Database port is not set in configuration")
 		return false
 	}
-	if c.IsSet("database.dbname") {
+	if !c.IsSet("database.dbname") {
 		slog.Info("Database name is not set in configuration")
 		return false
 	}
 	return true
 }
-
-// func LoadDBConfig(v *viper.Viper, db *database.Mysql) error {
-// 	p, err := db.GetAllPropertyValues()
-// 	if err != nil {
-// 		slog.Error("Cannot retrieve configuration from database", slog.String("error", err.Error()))
-// 		return err
-// 	}
-// 	for _, property := range p {
-// 		v.Set(property.Property, property.Value)
-// 	}
-// 	return nil
-// }
 
 type ConfigSource int
 
@@ -442,7 +430,7 @@ func (c *Config) ToStringFull() string {
 	s.WriteString("\nDatabase properties:\n")
 	s.WriteString("-----------\n")
 	dbKeys := []string{}
-	for key, _ := range database.AllowedProperties {
+	for key := range database.AllowedProperties {
 		dbKeys = append(dbKeys, key)
 	}
 	sort.Strings(dbKeys)

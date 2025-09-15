@@ -1,5 +1,6 @@
 package generics
 
+// Unique removes duplicates from a slice and returns it.
 func Unique[T comparable](s []T) []T {
 	inResult := make(map[T]bool)
 	var result []T

@@ -220,20 +220,12 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 // }
 
 func (h *Handler) GetPublicConfiguration(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if !session.Valid() {
-		slog.Warn("Call to GetConfiguration without authentication")
-		WriteFailureResponse("Not authenticated", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	properties, err := dbh.GetAllPropertyValues()
 	if err != nil {
 		slog.Error("Cannot get configuration properties from database", slog.String("error", err.Error()))
@@ -302,18 +294,12 @@ func (h *Handler) GetPublicConfiguration(w http.ResponseWriter, r *http.Request)
 // TODO create public and non public version of this
 // E.g. Public version should not contain private info like mynautique, db, ... things.
 func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	properties, err := dbh.GetAllPropertyValues()
 	if err != nil {
 		slog.Error("Cannot get configuration properties from database", slog.String("error", err.Error()))
@@ -390,11 +376,6 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
-
 	var req ConfigurationMessage
 	err := ReadBodyAndValidate(r, &req, ConfigurationMessageValidationErrors)
 	if err != nil {
@@ -506,13 +487,12 @@ func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request) {
 			Value:    req.SMTPUsername,
 		},
 	}
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	err = dbh.UpdateOrInsertPropertyValues(props)
 	if err != nil {
 		slog.Warn("Cannot update configuration", slog.String("error", err.Error()))
@@ -526,8 +506,8 @@ func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) SetupMyNautiqueCredentials(w http.ResponseWriter, r *http.Request) {
 	// in case the configuration is already present, we do not
 	// allow to edit it
-	session := GetSessionFromContext(r)
-	if h.config.IsSet("mynautique.enabled") && AuthenticatedAsAdminOrFailure(session, w) != nil {
+	if h.config.IsSet("mynautique.enabled") {
+		slog.Warn("mynautique.enabled is already set, not allowing call to setup my nautique credentials.")
 		return
 	}
 
@@ -561,12 +541,6 @@ func (h *Handler) SetupMyNautiqueCredentials(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
-	// only admins are supposed to upload a logo file
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
-
 	file, fileHeader, err := r.FormFile("logo")
 	if err != nil {
 		slog.Warn("cannot access the form file", slog.String("position", "logo"))
@@ -632,13 +606,12 @@ func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetLogoPath(w http.ResponseWriter, r *http.Request) {
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	conf, err := dbh.GetPropertyValue("logo.file")
 	if err != nil {
 		slog.Warn("Cannot get logo file", slog.String("error", err.Error()))
@@ -659,13 +632,12 @@ func (h *Handler) GetLogoPath(w http.ResponseWriter, r *http.Request) {
 // TODO implement file removal
 
 func (h *Handler) GetRecaptchaKey(w http.ResponseWriter, r *http.Request) {
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	conf, err := dbh.GetPropertyValue("recaptcha.publickey")
 	if err != nil {
 		slog.Warn("Cannot get recaptcha public key", slog.String("error", err.Error()))

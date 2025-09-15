@@ -90,10 +90,6 @@ type GetSessionHeatsResponse struct {
 }
 
 func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &GetSessionRequest{}
 	err := ReadBodyAndValidate(r, req)
 	if err != nil {
@@ -102,13 +98,12 @@ func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	s, err := dbh.GetSession(uint(req.SessionID))
 	if err != nil {
 		slog.Warn("Cannot get session", slog.Uint64("sessionID", req.SessionID), slog.String("error", err.Error()))
@@ -149,10 +144,6 @@ func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetSessionMetadata(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &GetSessionRequest{}
 	err := ReadBodyAndValidate(r, req)
 	if err != nil {
@@ -161,13 +152,12 @@ func (h *Handler) GetSessionMetadata(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	s, err := dbh.GetSession(uint(req.SessionID))
 	if err != nil {
 		slog.Warn("Cannot get session", slog.Uint64("sessionID", req.SessionID), slog.String("error", err.Error()))
@@ -189,10 +179,6 @@ func (h *Handler) GetSessionMetadata(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &CreateSessionRequest{}
 	err := ReadBodyAndValidate(r, req, SessionValidationErrors)
 	if err != nil {
@@ -201,13 +187,12 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	start := time.Unix(req.Start, 0)
 	end := time.Unix(req.End, 0)
 	collidingSessions, err := dbh.GetSessionsBetween(start, end)
@@ -230,7 +215,7 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 		Comment:       req.Comment,
 		SessionTypeID: uint(req.Type),
 		FreeSpaces:    uint(req.MaxRiders),
-		CreatorID:     session.UserID,
+		CreatorID:     hCtx.ValidSession.UserID,
 	}
 	id, err := dbh.CreateSession(newSession)
 	if err != nil {
@@ -245,10 +230,6 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) EditSession(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &EditSessionRequest{}
 	err := ReadBodyAndValidate(r, req, SessionValidationErrors)
 	if err != nil {
@@ -257,13 +238,12 @@ func (h *Handler) EditSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	oldSession, err := dbh.GetSession(req.SessionID)
 	if err != nil {
 		slog.Warn("Cannot check existence of session", slog.String("error", err.Error()))
@@ -308,10 +288,6 @@ func (h *Handler) EditSession(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) DeleteSession(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &DeleteSessionRequest{}
 	err := ReadBodyAndValidate(r, req, DeleteSessionValidationErrors)
 	if err != nil {
@@ -320,13 +296,12 @@ func (h *Handler) DeleteSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	// check if session does not have heats
 	heats, err := dbh.GetHeatInSessionCount(req.SessionID)
 	if err != nil {
@@ -360,10 +335,6 @@ func (h *Handler) DeleteSession(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &AddSessionUserRequest{}
 	err := ReadBodyAndValidate(r, req)
 	if err != nil {
@@ -372,13 +343,12 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	// check if session exists
 	s, err := dbh.GetSession(req.SessionID)
 	if err != nil {
@@ -463,10 +433,6 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &RemoveSessionUserRequest{}
 	err := ReadBodyAndValidate(r, req)
 	if err != nil {
@@ -475,13 +441,12 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	// Get the user.
 	user, err := dbh.GetUserById(req.UserID)
 	if err != nil {
@@ -500,6 +465,7 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request) 
 
 	// A user is not allowed to be removed from a session in case
 	// there are already heats.
+	session := hCtx.ValidSession
 	heats, err := dbh.GetUserHeatsBySession(req.SessionID, user.ID, 0)
 	if err != nil {
 		slog.Warn("Cannot get heats for session and user", slog.Uint64("session", uint64(req.SessionID)), slog.Uint64("user", uint64(session.UserID)), slog.String("error", err.Error()))
@@ -547,22 +513,21 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *Handler) RemoveMyUserFromSession(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
+		return
+	}
+	session := hCtx.ValidSession
 	req := &RemoveSessionMyUserRequest{}
-	err := ReadBodyAndValidate(r, req)
+	err = ReadBodyAndValidate(r, req)
 	if err != nil {
 		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
 		WriteFailureResponse("Invalid request.", w)
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	// Get users for this session
 	users, err := dbh.GetUsersForSession(req.SessionID)
 	if err != nil {
@@ -603,10 +568,6 @@ func (h *Handler) RemoveMyUserFromSession(w http.ResponseWriter, r *http.Request
 }
 
 func (h *Handler) GetSessionHeats(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &GetSessionHeatsRequest{}
 	err := ReadBodyAndValidate(r, req)
 	if err != nil {
@@ -615,13 +576,12 @@ func (h *Handler) GetSessionHeats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	heats, err := dbh.GetHeatsInSession(req.SessionID)
 	if err != nil {
 		slog.Warn("Cannot get heats for session", slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))

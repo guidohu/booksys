@@ -24,21 +24,21 @@ type IsLoggedInResponse struct {
 }
 
 type UserResponse struct {
-	ID            uint   `json:"id"`
-	Username      string `json:"username"`
-	FirstName     string `json:"first_name"`
-	LastName      string `json:"last_name"`
-	Address       string `json:"address"`
-	City          string `json:"city"`
-	ZipCode       int    `json:"plz"`
-	MobilePhoneNr string `json:"mobile"`
-	Email         string `json:"email"`
-	BoatLicense   bool   `json:"license"`
-	Status        uint   `json:"status"`
-	UserRoleId    uint   `json:"user_role_id"`
-	UserRoleName  string `json:"user_role_name"`
-	Locked        bool   `json:"locked"`
-	Comment       string `json:"comment"`
+	ID            uint                  `json:"id"`
+	Username      string                `json:"username"`
+	FirstName     string                `json:"first_name"`
+	LastName      string                `json:"last_name"`
+	Address       string                `json:"address"`
+	City          string                `json:"city"`
+	ZipCode       int                   `json:"plz"`
+	MobilePhoneNr string                `json:"mobile"`
+	Email         string                `json:"email"`
+	BoatLicense   bool                  `json:"license"`
+	Status        uint                  `json:"status"`
+	UserRoleId    database.UserRoleType `json:"user_role_id"`
+	UserRoleName  string                `json:"user_role_name"`
+	Locked        bool                  `json:"locked"`
+	Comment       string                `json:"comment"`
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -51,13 +51,12 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get user from database
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	lookupUser, err := dbh.GetUserByName(req.Username)
 	if err != nil {
 		slog.Warn("User not found", slog.String("username", req.Username), slog.String("error", err.Error()))
@@ -136,7 +135,6 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 	resp := IsLoggedInResponse{}
-
 	// Get cookie SESSION
 	cookie, err := r.Cookie("SESSION")
 	if err != nil {
@@ -145,13 +143,13 @@ func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
+
 	// Check if we know of that session and whether it is not expired yet
 	session, err := dbh.GetBrowserSession(cookie.Value)
 	if err != nil || !session.Valid() {
@@ -174,49 +172,35 @@ func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 
 // Logout logs out a user
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedOrFailure(session, w) != nil {
-		slog.Warn("Logout without authentication rejected")
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
-	err := dbh.DeleteBrowserSession(session)
+	dbh := hCtx.Database
+	err = dbh.DeleteBrowserSession(*hCtx.ValidSession)
 	if err != nil {
 		slog.Error("Cannot delete browser session", slog.String("error", err.Error()))
 	}
 
 	DeleteSessionCookie(w)
 	WriteSuccessResponse("logged out", nil, w)
-	slog.Info("User logged out", slog.String("user", session.Username))
+	slog.Info("User logged out", slog.String("user", hCtx.ValidSession.Username))
 }
 
 func (h *Handler) User(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedOrFailure(session, w) != nil {
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
-	user, err := dbh.GetUserById(session.UserID)
+	dbh := hCtx.Database
+	user, err := dbh.GetUserById(hCtx.ValidSession.UserID)
 	if err != nil {
 		slog.Error("Cannot retrieve user information", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot retrieve user informaiton", w)
 		return
 	}
-
 	// build response
 	resp := UserResponse{
 		ID:            user.ID,

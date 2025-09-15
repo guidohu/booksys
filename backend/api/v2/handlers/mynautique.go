@@ -32,11 +32,6 @@ type Telemetry struct {
 }
 
 func (h *Handler) GetBoatTelemetry(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
-
 	req := &GetBoatInfoRequest{}
 	err := ReadBodyAndValidate(r, req)
 	if err != nil {

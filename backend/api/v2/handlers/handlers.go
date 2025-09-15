@@ -20,9 +20,17 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-type HandlerContext uint
+type HandlerContextID uint
 
-const SessionContextKey HandlerContext = 1
+const (
+	SessionContextKey HandlerContextID = iota + 1
+	HandlerContextKey
+)
+
+type HandlerCtx struct {
+	ValidSession *database.BrowserSession
+	Database     database.Database
+}
 
 type Handler struct {
 	Database         *database.Manager
@@ -65,42 +73,84 @@ func (h *Handler) GetMyNautiqueClient() *mynautique.Client {
 	return h.myNautiqueClient.Load()
 }
 
+func (h *Handler) WithAdminAuthentication(next http.HandlerFunc) http.HandlerFunc {
+	return h.WithAuthentication(next, database.UserRoleAdmin)
+}
+
+func (h *Handler) WithAnyAuthentication(next http.HandlerFunc) http.HandlerFunc {
+	return h.WithAuthentication(next, database.UserRoleUnknown)
+}
+
+func (h *Handler) WithNoAuthentication(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		dbh, done := h.Database.GetHandler()
+		defer done()
+		if dbh == nil {
+			slog.Warn("No database connection is available.")
+			w.WriteHeader(http.StatusInternalServerError)
+			WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+			return
+		}
+		ctxWithDatabase := context.WithValue(r.Context(), HandlerContextKey, &HandlerCtx{
+			Database: dbh,
+		})
+		next.ServeHTTP(w, r.WithContext(ctxWithDatabase))
+	})
+}
+
 // Authentication middleware that gets the user session and calls the next Handler.
 // It makes sure the user is authenticated and adds this information ready for the next call.
-func (h *Handler) WithAuthentication(next http.HandlerFunc) http.HandlerFunc {
+func (h *Handler) WithAuthentication(next http.HandlerFunc, requiredRole database.UserRoleType) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// get user from cookie
 		cookie, err := r.Cookie("SESSION")
 		if err != nil {
 			slog.Warn("Cannot read cookie", slog.String("error", err.Error()))
+			w.WriteHeader(http.StatusUnauthorized)
 			WriteFailureResponse("not authenticated", w)
 			return
 		}
-
 		dbh, done := h.Database.GetHandler()
 		defer done()
 		if dbh == nil {
 			slog.Warn("No database connection is available.")
+			w.WriteHeader(http.StatusInternalServerError)
 			WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
 			return
 		}
 		session, err := dbh.GetBrowserSession(cookie.Value)
 		if err != nil || session == nil {
 			slog.Warn("No session found for given cookie", slog.String("error", err.Error()))
+			w.WriteHeader(http.StatusUnauthorized)
 			WriteFailureResponse("not authenticated", w)
 			return
 		}
-
-		if session.Expired() {
+		if !session.Valid() {
 			slog.Info("Session expired", slog.String("expiry", session.ValidUntil.String()), slog.String("sessionSecret", session.SessionSecret))
-			WriteFailureResponse("not authenticated", w)
+			w.WriteHeader(http.StatusUnauthorized)
+			WriteFailureResponse("session expired or invalid", w)
 			return
+		}
+		// Check for proper authentication in case we require a specific role.
+		if requiredRole != database.UserRoleUnknown {
+			if session.UserRoleID != requiredRole {
+				slog.Warn("User does not have the required role", slog.String("user", session.Username), slog.Uint64("role", uint64(session.UserRoleID)), slog.Uint64("required_role", uint64(requiredRole)))
+				w.WriteHeader(http.StatusUnauthorized)
+				WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+				return
+			}
 		}
 
 		// Add session information to context
-		ctx := r.WithContext(context.WithValue(r.Context(), SessionContextKey, *session))
+		ctxWithSession := context.WithValue(r.Context(), SessionContextKey, *session)
+		ctxWithSessionAndHandler := context.WithValue(ctxWithSession, HandlerContextKey, &HandlerCtx{
+			ValidSession: session,
+			Database:     dbh,
+		})
 
-		next.ServeHTTP(w, ctx)
+		// ctx := r.WithContext(context.WithValue(r.Context(), SessionContextKey, *session))
+
+		next.ServeHTTP(w, r.WithContext(ctxWithSessionAndHandler))
 	})
 }
 
@@ -116,6 +166,18 @@ func GetSessionFromContext(r *http.Request) database.BrowserSession {
 		return database.BrowserSession{}
 	}
 	return r.Context().Value(SessionContextKey).(database.BrowserSession)
+}
+
+// GetHandlerContext returns the HandlerCtx in case it exists or an error in case it does not.
+// It directly sets a FailureResponse and sets the HTTP Status code to 500.
+func GetHandlerContext(w http.ResponseWriter, r *http.Request) (*HandlerCtx, error) {
+	if r.Context().Value(HandlerContextKey) == nil {
+		slog.Warn("No handler context is available.")
+		w.WriteHeader(http.StatusInternalServerError)
+		WriteFailureResponse("Internal error.", w)
+		return nil, fmt.Errorf("no handler context is available")
+	}
+	return r.Context().Value(HandlerContextKey).(*HandlerCtx), nil
 }
 
 func ReadBodyAndValidate(r *http.Request, s any, errorMap ...map[string]string) error {
@@ -176,7 +238,7 @@ func WriteFailureResponse(message string, w http.ResponseWriter) {
 	io.Copy(w, bytes.NewReader(j))
 }
 
-// AuthenticatedOrFailure writes a failure responsne if the session is not
+// AuthenticatedOrFailure writes a failure response if the session is not
 // authenticated. It returns an error in case the session is not authenticated.
 func AuthenticatedOrFailure(b database.BrowserSession, w http.ResponseWriter) error {
 	if !b.Valid() {

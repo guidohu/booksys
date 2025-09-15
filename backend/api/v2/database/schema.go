@@ -52,17 +52,17 @@ func (BoatMaintenance) TableName() string {
 }
 
 type BrowserSession struct {
-	SessionSecret string    `gorm:"primaryKey;type:varchar(512) NOT NULL"`
-	ValidUntil    time.Time `gorm:"column:valid_thru;type:datetime DEFAULT NULL"`
-	LastActivity  time.Time `gorm:"type:datetime DEFAULT NULL"`
-	UserID        uint      `gorm:"type:mediumint(9) DEFAULT NULL"`
-	User          User      `gorm:"foreignKey:UserID;references:ID"`
-	Username      string    `gorm:"type:varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL"`
-	FirstName     string    `gorm:"type:varchar(255) CHARACTER SET utf8 DEFAULT NULL"`
-	LastName      string    `gorm:"type:varchar(255) CHARACTER SET utf8 DEFAULT NULL"`
-	UserStatus    uint      `gorm:"type:int(11) DEFAULT '0'"`
-	UserRoleID    uint      `gorm:"type:int(11) NOT NULL"`
-	SessionData   string    `gorm:"type:text CHARACTER SET utf8"`
+	SessionSecret string       `gorm:"primaryKey;type:varchar(512) NOT NULL"`
+	ValidUntil    time.Time    `gorm:"column:valid_thru;type:datetime DEFAULT NULL"`
+	LastActivity  time.Time    `gorm:"type:datetime DEFAULT NULL"`
+	UserID        uint         `gorm:"type:mediumint(9) DEFAULT NULL"`
+	User          User         `gorm:"foreignKey:UserID;references:ID"`
+	Username      string       `gorm:"type:varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL"`
+	FirstName     string       `gorm:"type:varchar(255) CHARACTER SET utf8 DEFAULT NULL"`
+	LastName      string       `gorm:"type:varchar(255) CHARACTER SET utf8 DEFAULT NULL"`
+	UserStatus    uint         `gorm:"type:int(11) DEFAULT '0'"`
+	UserRoleID    UserRoleType `gorm:"type:int(11) NOT NULL"`
+	SessionData   string       `gorm:"type:text CHARACTER SET utf8"`
 }
 
 func (BrowserSession) TableName() string {
@@ -249,9 +249,9 @@ func (User) TableName() string {
 }
 
 type UserRole struct {
-	ID          uint   `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
-	Name        string `gorm:"type:text COLLATE utf8_bin NOT NULL"`
-	Description string `gorm:"type:text COLLATE utf8_bin NOT NULL"`
+	ID          UserRoleType `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
+	Name        string       `gorm:"type:text COLLATE utf8_bin NOT NULL"`
+	Description string       `gorm:"type:text COLLATE utf8_bin NOT NULL"`
 }
 
 func (UserRole) TableName() string {
@@ -259,11 +259,11 @@ func (UserRole) TableName() string {
 }
 
 type UserStatus struct {
-	ID          uint     `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
-	Name        string   `gorm:"type:text CHARACTER SET utf8"`
-	Description string   `gorm:"type:text CHARACTER SET utf8"`
-	UserRoleID  uint     `gorm:"type:int(11) NOT NULL"`
-	UserRole    UserRole `gorm:"foreignKey:UserRoleID;references:ID"`
+	ID          uint         `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
+	Name        string       `gorm:"type:text CHARACTER SET utf8"`
+	Description string       `gorm:"type:text CHARACTER SET utf8"`
+	UserRoleID  UserRoleType `gorm:"type:int(11) NOT NULL"`
+	UserRole    UserRole     `gorm:"foreignKey:UserRoleID;references:ID"`
 }
 
 func (UserStatus) TableName() string {

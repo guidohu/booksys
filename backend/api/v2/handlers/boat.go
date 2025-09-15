@@ -119,17 +119,12 @@ var AddMaintenanceEntryValidationErrors = map[string]string{
 }
 
 func (h *Handler) GetEngineHourLatest(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	b, err := dbh.GetEngineHourLatest()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Warn("Cannot get latest engine hour entry", slog.String("error", err.Error()))
@@ -152,17 +147,12 @@ func (h *Handler) GetEngineHourLatest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetEngineHoursList(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	engineHours, err := dbh.GetEngineHours()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Warn("Cannot get engine hours", slog.String("error", err.Error()))
@@ -189,10 +179,6 @@ func (h *Handler) GetEngineHoursList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UpdateEngineHours(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &UpdateEngineHoursRequest{}
 	err := ReadBodyAndValidate(r, req, UpdateEngineHoursValidationErrors)
 	if err != nil {
@@ -201,20 +187,12 @@ func (h *Handler) UpdateEngineHours(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-	// check that user is an admin user
-	isAdmin, _ := dbh.IsAdminUser(req.UserID)
-	if !isAdmin {
-		slog.Warn("Non admin user tried to update engine hours.", slog.Uint64("userID", uint64(req.UserID)))
-		WriteFailureResponse("Non admin user is not allowed to change engine hours.", w)
-		return
-	}
+	dbh := hCtx.Database
 
 	// get latest entry
 	latest, err := dbh.GetEngineHourLatest()
@@ -278,10 +256,6 @@ func (h *Handler) UpdateEngineHours(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UpdateEngineHoursEntry(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &UpdateEngineHoursEntryRequest{}
 	err := ReadBodyAndValidate(r, req, UpdateEngineHoursEntryValidationErrors)
 	if err != nil {
@@ -290,13 +264,12 @@ func (h *Handler) UpdateEngineHoursEntry(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	entry, err := dbh.GetEngineHoursEntry(req.ID)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Warn("Cannot get engine hour entry", slog.String("error", err.Error()))
@@ -315,18 +288,12 @@ func (h *Handler) UpdateEngineHoursEntry(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *Handler) GetFuelEntries(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	fuelEntries, err := dbh.GetFuelEntries()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Warn("Cannot get fuel entries", slog.String("error", err.Error()))
@@ -369,10 +336,6 @@ func (h *Handler) GetFuelEntries(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) AddFuelEntry(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &AddFuelEntryRequest{}
 	err := ReadBodyAndValidate(r, req, FuelEntryValidationErrors)
 	if err != nil {
@@ -381,13 +344,12 @@ func (h *Handler) AddFuelEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	// Check that user is an admin user
 	isAdmin, _ := dbh.IsAdminUser(req.UserID)
 	if !isAdmin {
@@ -422,10 +384,6 @@ func (h *Handler) AddFuelEntry(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ChangeFuelEntry(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &ChangeFuelEntryRequest{}
 	err := ReadBodyAndValidate(r, req, FuelEntryValidationErrors)
 	if err != nil {
@@ -434,13 +392,12 @@ func (h *Handler) ChangeFuelEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	entry, err := dbh.GetFuelEntry(req.ID)
 	if err != nil {
 		slog.Warn("Cannot find fuel entry", slog.Uint64("id", uint64(req.ID)), slog.String("error", err.Error()))
@@ -469,10 +426,6 @@ func (h *Handler) ChangeFuelEntry(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) RemoveFuelEntry(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &RemoveFuelEntryRequest{}
 	err := ReadBodyAndValidate(r, req, FuelEntryValidationErrors)
 	if err != nil {
@@ -481,13 +434,12 @@ func (h *Handler) RemoveFuelEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	entry, err := dbh.GetFuelEntry(req.ID)
 	if err != nil {
 		slog.Warn("Cannot find fuel entry", slog.Uint64("id", uint64(req.ID)), slog.String("error", err.Error()))
@@ -505,18 +457,12 @@ func (h *Handler) RemoveFuelEntry(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetMaintenanceEntries(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	logs, err := dbh.GetMaintenance()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		slog.Warn("Cannot get fuel entries", slog.String("error", err.Error()))
@@ -540,10 +486,6 @@ func (h *Handler) GetMaintenanceEntries(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *Handler) AddMaintenanceEntry(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 	req := &AddMaintenanceEntryRequest{}
 	err := ReadBodyAndValidate(r, req, AddMaintenanceEntryValidationErrors)
 	if err != nil {
@@ -552,13 +494,12 @@ func (h *Handler) AddMaintenanceEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	if !dbh.UserExists(req.UserID) {
 		slog.Warn("Request payload is not valid", slog.String("error", "user does not exist"))
 		WriteFailureResponse("Please provide a valid user ID.", w)

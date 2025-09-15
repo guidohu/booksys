@@ -204,16 +204,17 @@ type Settings struct {
 }
 
 type Mysql struct {
-	// config   mysql.Config
 	db  *sql.DB
 	orm *gorm.DB
 	Settings
 }
 
+// String returns a string representation of the connection.
 func (d *Mysql) String() string {
 	return d.getDSN( /*hidePassword=*/ true)
 }
 
+// getDSN returns the DSN of the database connection.
 func (d *Mysql) getDSN(hidePassword bool) string {
 	password := d.Password
 	if hidePassword {
@@ -222,12 +223,15 @@ func (d *Mysql) getDSN(hidePassword bool) string {
 	return fmt.Sprintf("%s:%s@%s(%s:%s)/%s?charset=utf8&parseTime=True&loc=UTC", d.User, password, d.Protocol, d.Host, d.Port, d.DBName)
 }
 
+// NewDBMysql returns a Mysql instange.
 func NewDBMysql(settings Settings) *Mysql {
 	return &Mysql{
 		Settings: settings,
 	}
 }
 
+// Connect establishes a connection to the database. It also starts a DB migration
+// or initialization.
 func (d *Mysql) Connect() error {
 	// Premigration steps if needed
 	// - TODO change all session_type occurrences to have ID 1 and 2 instead of 0 and 1
@@ -247,14 +251,15 @@ func (d *Mysql) Connect() error {
 		slog.Warn("Cannot connect with gorm", slog.String("error", err.Error()))
 		return err
 	}
-	// TODO: Explicitly configure connection pools:
-	// https://gorm.io/docs/connecting_to_the_database.html#Connection-Pool
 	d.orm = orm
 	d.db, err = orm.DB()
 	if err != nil {
 		slog.Error("Cannot assign db handler", slog.String("error", err.Error()))
 		return err
 	}
+	d.db.SetMaxIdleConns(10)
+	d.db.SetMaxOpenConns(50)
+	d.db.SetConnMaxLifetime(time.Hour)
 
 	// If db exists we migrate otherwise we setup the tables
 	dbIsSetup, err := d.tableExists("user")
@@ -280,6 +285,7 @@ func (d *Mysql) Connect() error {
 	return d.db.Ping()
 }
 
+// Disconnect closes the database connection.
 func (d *Mysql) Disconnect() error {
 	if d.orm != nil {
 		db, _ := d.orm.DB()
@@ -298,7 +304,7 @@ func (d *Mysql) Disconnect() error {
 	return nil
 }
 
-// Returns an error if db is not connected and connection cannot be established.
+// Ping returns an error if db is not connected and connection cannot be established.
 func (d *Mysql) Ping() error {
 	if d.db == nil {
 		return errors.New("no db connection available")
@@ -306,6 +312,8 @@ func (d *Mysql) Ping() error {
 	return d.db.Ping()
 }
 
+// IsConfigured returns true in case all database configuration settings
+// are set.
 func (d *Mysql) IsConfigured() bool {
 	switch {
 	case d.User == "":
@@ -325,6 +333,7 @@ func (d *Mysql) IsConfigured() bool {
 	return true
 }
 
+// tableExists returns whether a specific table exists or not.
 func (d *Mysql) tableExists(tableName string) (bool, error) {
 	if d.DBName == "" {
 		return false, errors.New("database name not provided")

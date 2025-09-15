@@ -154,33 +154,33 @@ type UserDetailed struct {
 }
 
 type GetUserGroupsResponse struct {
-	PriceDescription     string          `json:"price_description"`
-	PriceID              uint            `json:"price_id"`
-	PricePerMinute       decimal.Decimal `json:"price_min"`
-	UserGroupDescription string          `json:"user_group_description"`
-	UserGroupID          uint            `json:"user_group_id"`
-	UserGroupName        string          `json:"user_group_name"`
-	UserRoleDescription  string          `json:"user_role_description"`
-	UserRoleID           uint            `json:"user_role_id"`
-	UserRoleName         string          `json:"user_role_name"`
+	PriceDescription     string                `json:"price_description"`
+	PriceID              uint                  `json:"price_id"`
+	PricePerMinute       decimal.Decimal       `json:"price_min"`
+	UserGroupDescription string                `json:"user_group_description"`
+	UserGroupID          uint                  `json:"user_group_id"`
+	UserGroupName        string                `json:"user_group_name"`
+	UserRoleDescription  string                `json:"user_role_description"`
+	UserRoleID           database.UserRoleType `json:"user_role_id"`
+	UserRoleName         string                `json:"user_role_name"`
 }
 
 type CreateUserGroupsRequest struct {
-	PriceDescription     string          `json:"price_description"`
-	PricePerMinute       decimal.Decimal `json:"price_min" validate:"required"`
-	UserGroupDescription string          `json:"user_group_description"`
-	UserGroupName        string          `json:"user_group_name" validate:"required"`
-	UserRoleID           uint            `json:"user_role_id"`
+	PriceDescription     string                `json:"price_description"`
+	PricePerMinute       decimal.Decimal       `json:"price_min" validate:"required"`
+	UserGroupDescription string                `json:"user_group_description"`
+	UserGroupName        string                `json:"user_group_name" validate:"required"`
+	UserRoleID           database.UserRoleType `json:"user_role_id"`
 }
 
 type ChangeUserGroupRequest struct {
-	PriceDescription     string          `json:"price_description" validate:"required"`
-	PriceID              uint            `json:"price_id" validate:"required"`
-	PricePerMinute       decimal.Decimal `json:"price_min" validate:"required"`
-	UserGroupDescription string          `json:"user_group_description" validate:"required"`
-	UserGroupID          uint            `json:"user_group_id" validate:"required"`
-	UserGroupName        string          `json:"user_group_name" validate:"required"`
-	UserRoleID           uint            `json:"user_role_id" validate:"required"`
+	PriceDescription     string                `json:"price_description" validate:"required"`
+	PriceID              uint                  `json:"price_id" validate:"required"`
+	PricePerMinute       decimal.Decimal       `json:"price_min" validate:"required"`
+	UserGroupDescription string                `json:"user_group_description" validate:"required"`
+	UserGroupID          uint                  `json:"user_group_id" validate:"required"`
+	UserGroupName        string                `json:"user_group_name" validate:"required"`
+	UserRoleID           database.UserRoleType `json:"user_role_id" validate:"required"`
 }
 
 type DeleteUserGroupRequest struct {
@@ -210,9 +210,9 @@ var SetUserGroupsValidationErrors = map[string]string{
 }
 
 type GetUserRolesResponse struct {
-	UserRoleDescription string `json:"user_role_description"`
-	UserRoleID          uint   `json:"user_role_id"`
-	UserRoleName        string `json:"user_role_name"`
+	UserRoleDescription string                `json:"user_role_description"`
+	UserRoleID          database.UserRoleType `json:"user_role_id"`
+	UserRoleName        string                `json:"user_role_name"`
 }
 
 type SetUserLockRequest struct {
@@ -264,13 +264,12 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	// Get recaptcha keys (resp, entire configuration).
 	config, err := dbh.GetAllPropertyValuesMap()
 	if err != nil {
@@ -345,13 +344,12 @@ func (h *Handler) MakeAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	// check if an admin user exists already
 	// only the very first user can become an admin
 	if dbh.CountAdminUsers() > 0 {
@@ -381,10 +379,6 @@ func (h *Handler) MakeAdmin(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	// balance has to be zero
 	// delete user (zeroing out personal info)
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
 
 	req := &DeleteUserRequest{}
 	err := ReadBodyAndValidate(r, req, DeleteUserValidationErrors)
@@ -394,19 +388,19 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if session.UserID == req.UserID {
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
+		return
+	}
+
+	if hCtx.ValidSession.UserID == req.UserID {
 		slog.Info("Skip user deletion, user cannot delete itself.")
 		WriteFailureResponse("You cannot delete yourself.", w)
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	user, err := dbh.GetUserById(req.UserID)
 	if err != nil {
 		slog.Warn("Cannot find", slog.Int("user_id", int(req.UserID)), ":", err.Error())
@@ -420,7 +414,7 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	balance, err := h.getUserBalance(req.UserID)
+	balance, err := h.getUserBalance(dbh, req.UserID)
 	if err != nil {
 		slog.Warn("Cannot get balance for", slog.Int("user_id", int(req.UserID)))
 		WriteFailureResponse("Cannot check for balance to be 0 for this user.", w)
@@ -441,7 +435,12 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UpdateMyUser(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
+		return
+	}
+	session := hCtx.ValidSession
 	if session.UserID == 0 {
 		slog.Warn("Unknown user accessing GetMyHeats")
 		WriteFailureResponse("Not authenticated", w)
@@ -449,7 +448,7 @@ func (h *Handler) UpdateMyUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req := &UpdateMyUserRequest{}
-	err := ReadBodyAndValidate(r, req, UpdateMyUserValidationErrors)
+	err = ReadBodyAndValidate(r, req, UpdateMyUserValidationErrors)
 	if err != nil {
 		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
 		WriteFailureResponse(err.Error(), w)
@@ -481,13 +480,7 @@ func (h *Handler) UpdateMyUser(w http.ResponseWriter, r *http.Request) {
 		IsDeleted:     false, // will not be set
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	err = dbh.UpdateUser(session.UserID, user)
 	if err != nil {
 		slog.Warn("Cannot update user", slog.Uint64("userID", uint64(session.UserID)), slog.String("error", err.Error()))
@@ -498,7 +491,12 @@ func (h *Handler) UpdateMyUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
+		return
+	}
+	session := hCtx.ValidSession
 	if session.UserID == 0 {
 		slog.Warn("Unknown user accessing UpdateMyPassword")
 		WriteFailureResponse("Not authenticated", w)
@@ -506,20 +504,14 @@ func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req := &UpdateMyPasswordRequest{}
-	err := ReadBodyAndValidate(r, req, UpdateMyPasswordValidationErrors)
+	err = ReadBodyAndValidate(r, req, UpdateMyPasswordValidationErrors)
 	if err != nil {
 		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
 		WriteFailureResponse(err.Error(), w)
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	// verify that old password is correct
 	user, err := dbh.GetUserById(session.UserID)
 	if err != nil {
@@ -561,20 +553,19 @@ func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetMySessions(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
+		return
+	}
+	session := hCtx.ValidSession
 	if session.UserID == 0 {
 		slog.Warn("Unknown user accessing GetMyHeats")
 		WriteFailureResponse("Not authenticated", w)
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	sessions, err := dbh.GetSessionsByUser(session.UserID)
 	if err != nil {
 		slog.Error("Cannot get user sessions", slog.String("error", err.Error()))
@@ -625,20 +616,19 @@ func (h *Handler) GetMySessions(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetMyHeats(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
+		return
+	}
+	session := hCtx.ValidSession
 	if session.UserID == 0 {
 		slog.Warn("Unknown user accessing GetMyHeats")
 		WriteFailureResponse("Not authenticated", w)
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	heats, err := dbh.GetUserHeats(session.UserID, 100)
 	if err != nil {
 		slog.Error("Cannot get user heats", slog.String("error", err.Error()))
@@ -664,20 +654,19 @@ func (h *Handler) GetMyHeats(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetMyHeatStats(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
+		return
+	}
+	session := hCtx.ValidSession
 	if session.UserID == 0 {
 		slog.Warn("Unknown user accessing GetMyHeatStats")
 		WriteFailureResponse("Not authenticated", w)
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	now := time.Now()
 	duration, cost, err := dbh.GetUserHeatStats(session.UserID, time.Time{}, now)
 	if err != nil {
@@ -709,14 +698,19 @@ func (h *Handler) GetMyHeatStats(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetMyBalance(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
+		return
+	}
+	session := hCtx.ValidSession
 	if session.UserID == 0 {
 		slog.Warn("Unknown user accessing GetMyBalance")
 		WriteFailureResponse("Not authenticated", w)
 		return
 	}
-
-	resp, err := h.getUserBalance(session.UserID)
+	dbh := hCtx.Database
+	resp, err := h.getUserBalance(dbh, session.UserID)
 	if err != nil {
 		slog.Error("Cannot get user balance", err.Error())
 		WriteFailureResponse("Cannot get user balance.", w)
@@ -726,18 +720,12 @@ func (h *Handler) GetMyBalance(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetAllUsersShort(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	users, err := dbh.GetUsers( /*includeDeleted=*/ false)
 	if err != nil {
 		slog.Error("Cannot get users", slog.String("error", err.Error()))
@@ -757,18 +745,12 @@ func (h *Handler) GetAllUsersShort(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetAllUsersDetailed(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	users, err := dbh.GetUsers( /*includeDeleted=*/ false)
 	if err != nil {
 		slog.Error("Cannot get users", slog.String("error", err.Error()))
@@ -819,18 +801,12 @@ func (h *Handler) GetAllUsersDetailed(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetUserGroups(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	pricings, err := dbh.GetPricings()
 	if err != nil {
 		slog.Error("Cannot get user groups", slog.String("error", err.Error()))
@@ -856,11 +832,6 @@ func (h *Handler) GetUserGroups(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) CreateUserGroup(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
-
 	req := &CreateUserGroupsRequest{}
 	err := ReadBodyAndValidate(r, req, UserGroupsValidationErrors)
 	if err != nil {
@@ -881,13 +852,12 @@ func (h *Handler) CreateUserGroup(w http.ResponseWriter, r *http.Request) {
 		Comment:        req.PriceDescription,
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	err = dbh.CreateUserGroup(u, p)
 	if err != nil {
 		slog.Error("Cannot create new user group", slog.String("error", err.Error()))
@@ -898,11 +868,6 @@ func (h *Handler) CreateUserGroup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ChangeUserGroup(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
-
 	req := &ChangeUserGroupRequest{}
 	err := ReadBodyAndValidate(r, req, UserGroupsValidationErrors)
 	if err != nil {
@@ -925,13 +890,12 @@ func (h *Handler) ChangeUserGroup(w http.ResponseWriter, r *http.Request) {
 		PricePerMinute: req.PricePerMinute,
 		Comment:        req.PriceDescription,
 	}
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	err = dbh.ChangeUserGroup(u, p)
 	if err != nil {
 		slog.Error("Cannot update user group", slog.String("error", err.Error()))
@@ -942,11 +906,6 @@ func (h *Handler) ChangeUserGroup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) DeleteUserGroup(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
-
 	req := &DeleteUserGroupRequest{}
 	err := ReadBodyAndValidate(r, req, UserGroupsValidationErrors)
 	if err != nil {
@@ -955,13 +914,12 @@ func (h *Handler) DeleteUserGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	err = dbh.DeleteUserGroup(req.UserGroupID)
 	if err != nil {
 		slog.Error("Cannot delete user group", slog.String("error", err.Error()))
@@ -972,11 +930,6 @@ func (h *Handler) DeleteUserGroup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) SetUserGroup(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
-
 	req := &SetUserGroupRequest{}
 	err := ReadBodyAndValidate(r, req, SetUserGroupsValidationErrors)
 	if err != nil {
@@ -985,13 +938,12 @@ func (h *Handler) SetUserGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	user, err := dbh.GetUserById(req.UserID)
 	if err != nil {
 		slog.Error("Cannot find user", slog.String("error", err.Error()))
@@ -1041,18 +993,12 @@ func (h *Handler) SetUserGroup(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetUserRoles(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
-
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
-		return
-	}
+	dbh := hCtx.Database
 	roles, err := dbh.GetUserRoles()
 	if err != nil {
 		slog.Error("Cannot get user roles", slog.String("error", err.Error()))
@@ -1072,11 +1018,6 @@ func (h *Handler) GetUserRoles(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request) {
-	session := GetSessionFromContext(r)
-	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-		return
-	}
-
 	req := &SetUserLockRequest{}
 	err := ReadBodyAndValidate(r, req, SetUserLockValidationErrors)
 	if err != nil {
@@ -1085,13 +1026,12 @@ func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	user, err := dbh.GetUserById(req.UserID)
 	if err != nil {
 		slog.Error("Cannot find user", slog.String("error", err.Error()))
@@ -1121,12 +1061,7 @@ func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("user lock set", nil, w)
 }
 
-func (h *Handler) getUserBalance(userID uint) (*GetMyBalanceResponse, error) {
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		return nil, errors.New("No database connection is available.")
-	}
+func (h *Handler) getUserBalance(dbh database.Database, userID uint) (*GetMyBalanceResponse, error) {
 	now := time.Now()
 	_, cost, err := dbh.GetUserHeatStats(userID, time.Time{}, now)
 	if err != nil {
@@ -1163,13 +1098,12 @@ func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	// Check whether recaptcha is enabled.
 	config, err := dbh.GetAllPropertyValuesMap()
 	if err != nil {
@@ -1246,13 +1180,12 @@ func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+	hCtx, err := GetHandlerContext(w, r)
+	if err != nil {
+		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
 		return
 	}
+	dbh := hCtx.Database
 	// Get user by email
 	user, err := dbh.GetUserByName(req.UserEmail)
 	if err != nil {
