@@ -154,6 +154,41 @@ func (h *Handler) WithAuthentication(next http.HandlerFunc, requiredRole databas
 	})
 }
 
+// Next is a generic handler function that gets called by the wrapper.
+// It receives the parsed and validated request body of type T and the handler context.
+type Next[T any] func(w http.ResponseWriter, r *http.Request, body T, hCtx *HandlerCtx)
+
+// WithBody is a generic handler wrapper that handles request body parsing, validation,
+// and error handling.
+func WithRequestBody[T any](next Next[T], validationErrorMessages ...map[string]string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Get handler context
+		hCtx, err := GetHandlerContext(w, r)
+		if err != nil {
+			slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
+			w.WriteHeader(http.StatusInternalServerError)
+			WriteFailureResponse("Internal error.", w)
+			return
+		}
+
+		// Read and validate request body
+		var body T
+		if validationErrorMessages == nil {
+			err = ReadBodyAndValidate(r, &body)
+		} else {
+			err = ReadBodyAndValidate(r, &body, validationErrorMessages[0])
+		}
+		if err != nil {
+			slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+			WriteFailureResponse(err.Error(), w)
+			return
+		}
+
+		// Call the actual handler
+		next(w, r, body, hCtx)
+	}
+}
+
 func (h *Handler) WithLogging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		next.ServeHTTP(w, r)
@@ -236,26 +271,6 @@ func WriteFailureResponse(message string, w http.ResponseWriter) {
 	}
 	w.Header().Set("Conntent-Type", "application/json")
 	io.Copy(w, bytes.NewReader(j))
-}
-
-// AuthenticatedOrFailure writes a failure response if the session is not
-// authenticated. It returns an error in case the session is not authenticated.
-func AuthenticatedOrFailure(b database.BrowserSession, w http.ResponseWriter) error {
-	if !b.Valid() {
-		slog.Warn("Unauthenticated action is not allowed")
-		WriteFailureResponse("unauthenticated action not allowed", w)
-		return fmt.Errorf("action is not authenticated")
-	}
-	return nil
-}
-
-func AuthenticatedAsAdminOrFailure(b database.BrowserSession, w http.ResponseWriter) error {
-	if !b.Valid() || b.UserRoleID != database.UserRoleAdmin {
-		slog.Warn("Non admin role not allowed to call as admin")
-		WriteFailureResponse("unauthenticated action not allowed", w)
-		return fmt.Errorf("admin action is not authorized")
-	}
-	return nil
 }
 
 // WriteSuccessResponse writes a success message that contains data.

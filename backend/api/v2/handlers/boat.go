@@ -335,29 +335,8 @@ func (h *Handler) GetFuelEntries(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("fuel entries", resp, w)
 }
 
-func (h *Handler) AddFuelEntry(w http.ResponseWriter, r *http.Request) {
-	req := &AddFuelEntryRequest{}
-	err := ReadBodyAndValidate(r, req, FuelEntryValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) AddFuelEntry(w http.ResponseWriter, r *http.Request, req AddFuelEntryRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
-	// Check that user is an admin user
-	isAdmin, _ := dbh.IsAdminUser(req.UserID)
-	if !isAdmin {
-		slog.Warn("Non admin user tried to add fuel entry.", slog.Uint64("userID", uint64(req.UserID)))
-		WriteFailureResponse("Non admin user is not allowed to change engine hours.", w)
-		return
-	}
-
 	billType, err := dbh.GetPropertyValue("fuel.payment.type")
 	if err != nil {
 		slog.Warn("Cannot determine whether fuel is billed or paid directly", slog.String("error", err.Error()))
@@ -383,20 +362,7 @@ func (h *Handler) AddFuelEntry(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("fuel entry added", nil, w)
 }
 
-func (h *Handler) ChangeFuelEntry(w http.ResponseWriter, r *http.Request) {
-	req := &ChangeFuelEntryRequest{}
-	err := ReadBodyAndValidate(r, req, FuelEntryValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) ChangeFuelEntry(w http.ResponseWriter, r *http.Request, req ChangeFuelEntryRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	entry, err := dbh.GetFuelEntry(req.ID)
 	if err != nil {
@@ -425,20 +391,7 @@ func (h *Handler) ChangeFuelEntry(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("fuel entry saved", nil, w)
 }
 
-func (h *Handler) RemoveFuelEntry(w http.ResponseWriter, r *http.Request) {
-	req := &RemoveFuelEntryRequest{}
-	err := ReadBodyAndValidate(r, req, FuelEntryValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) RemoveFuelEntry(w http.ResponseWriter, r *http.Request, req RemoveFuelEntryRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	entry, err := dbh.GetFuelEntry(req.ID)
 	if err != nil {
@@ -485,20 +438,7 @@ func (h *Handler) GetMaintenanceEntries(w http.ResponseWriter, r *http.Request) 
 	WriteSuccessResponse("maintenance entries", &resp, w)
 }
 
-func (h *Handler) AddMaintenanceEntry(w http.ResponseWriter, r *http.Request) {
-	req := &AddMaintenanceEntryRequest{}
-	err := ReadBodyAndValidate(r, req, AddMaintenanceEntryValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) AddMaintenanceEntry(w http.ResponseWriter, r *http.Request, req AddMaintenanceEntryRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	if !dbh.UserExists(req.UserID) {
 		slog.Warn("Request payload is not valid", slog.String("error", "user does not exist"))
@@ -513,7 +453,7 @@ func (h *Handler) AddMaintenanceEntry(w http.ResponseWriter, r *http.Request) {
 		EngineHours: req.EngineHours,
 		Description: req.Description,
 	}
-	err = dbh.AddMaintenanceEntry(entry)
+	err := dbh.AddMaintenanceEntry(entry)
 	if err != nil {
 		slog.Warn("Cannot add maintenance entry", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot add maintenance entry.", w)

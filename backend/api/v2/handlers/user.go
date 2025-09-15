@@ -255,20 +255,7 @@ var SetPasswordWithTokenValidationErrors = map[string]string{
 	"Token":     "Please provide the token that was sent to you.",
 }
 
-func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
-	req := &SignUpRequest{}
-	err := ReadBodyAndValidate(r, req, SignUpRequestValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request, req SignUpRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// Get recaptcha keys (resp, entire configuration).
 	config, err := dbh.GetAllPropertyValuesMap()
@@ -335,20 +322,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("success", resp, w)
 }
 
-func (h *Handler) MakeAdmin(w http.ResponseWriter, r *http.Request) {
-	req := &MakeAdminRequest{}
-	err := ReadBodyAndValidate(r, req, nil)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse("Request payload not valid", w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) MakeAdmin(w http.ResponseWriter, r *http.Request, req MakeAdminRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// check if an admin user exists already
 	// only the very first user can become an admin
@@ -359,7 +333,7 @@ func (h *Handler) MakeAdmin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// change the actual user status
-	err = dbh.ChangeUserStatus(uint(req.UserID), database.UserStatusAdmin)
+	err := dbh.ChangeUserStatus(uint(req.UserID), database.UserStatusAdmin)
 	if err != nil {
 		slog.Warn("Cannot make the user an 'administrator', database action failed", slog.String("ID", strconv.Itoa(req.UserID)), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot make user an administrator. Call to DB failed.", w)
@@ -1089,20 +1063,7 @@ func (h *Handler) getUserBalance(dbh database.Database, userID uint) (*GetMyBala
 	return resp, nil
 }
 
-func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request) {
-	req := &GetPasswordResetTokenRequest{}
-	err := ReadBodyAndValidate(r, req, GetPasswordResetTokenValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request, req GetPasswordResetTokenRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// Check whether recaptcha is enabled.
 	config, err := dbh.GetAllPropertyValuesMap()
@@ -1171,20 +1132,7 @@ func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request) 
 	WriteSuccessResponse("Token requested, please check your email inbox.", nil, w)
 }
 
-func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request) {
-	req := &SetPasswordWithTokenRequest{}
-	err := ReadBodyAndValidate(r, req, SetPasswordWithTokenValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request, req SetPasswordWithTokenRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// Get user by email
 	user, err := dbh.GetUserByName(req.UserEmail)

@@ -31,32 +31,11 @@ type Telemetry struct {
 	EngineHours decimal.Decimal `json:"engine_hours"`
 }
 
-func (h *Handler) GetBoatTelemetry(w http.ResponseWriter, r *http.Request) {
-	req := &GetBoatInfoRequest{}
-	err := ReadBodyAndValidate(r, req)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse("Please provide a boat ID.", w)
-		return
-	}
-
-	// dbh := h.GetDB()
-	// config, err := dbh.GetMyNautiqueConfiguration()
-	// if err != nil {
-	// 	slog.Warn("cannot lookup mynautique configuration", slog.String("error", err.Error()))
-	// 	WriteFailureResponse("myNautique is not properly configured", w)
-	// 	return
-	// }
-	// if !config.Enabled {
-	// 	slog.Warn("mynautique is not configured but GetBoatInfo was called")
-	// 	WriteFailureResponse("myNautique is not configured", w)
-	// 	return
-	// }
-
+func (h *Handler) GetBoatTelemetry(w http.ResponseWriter, r *http.Request, req GetBoatInfoRequest, hCtx *HandlerCtx) {
 	client := h.GetMyNautiqueClient()
 	config := Config{}
 	config.Enabled = h.config.GetBool("mynautique.enabled")
-	if config.Enabled == false {
+	if !config.Enabled {
 		slog.Warn("mynautique is not configured but GetBoatInfo was called")
 		WriteFailureResponse("myNautique is not configured", w)
 		return

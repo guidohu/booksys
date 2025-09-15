@@ -59,19 +59,7 @@ type RiderResponse struct {
 	LastName  string `json:"last_name"`
 }
 
-func (h *Handler) GetBookingDay(w http.ResponseWriter, r *http.Request) {
-	var req GetBookingDayRequest
-	err := ReadBodyAndValidate(r, &req)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse("Request payload not valid", w)
-		return
-	}
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) GetBookingDay(w http.ResponseWriter, r *http.Request, req GetBookingDayRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	b, err := h.getBooking(dbh, time.Unix(req.Start, 0), time.Unix(req.End, 0))
 	if err != nil {
@@ -82,19 +70,7 @@ func (h *Handler) GetBookingDay(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("bookings retrieved", &b, w)
 }
 
-func (h *Handler) GetBookingSeries(w http.ResponseWriter, r *http.Request) {
-	var req GetBookingSeriesRequest
-	err := ReadBodyAndValidate(r, &req)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse("Request payload not valid", w)
-		return
-	}
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) GetBookingSeries(w http.ResponseWriter, r *http.Request, req GetBookingSeriesRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	resp := []GetBookingResponse{}
 	for _, window := range req.TimeWindows {

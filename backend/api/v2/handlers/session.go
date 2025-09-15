@@ -512,21 +512,7 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request) 
 	WriteSuccessResponse("user removed", nil, w)
 }
 
-func (h *Handler) RemoveMyUserFromSession(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
-	session := hCtx.ValidSession
-	req := &RemoveSessionMyUserRequest{}
-	err = ReadBodyAndValidate(r, req)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse("Invalid request.", w)
-		return
-	}
-
+func (h *Handler) RemoveMyUserFromSession(w http.ResponseWriter, r *http.Request, req RemoveSessionMyUserRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// Get users for this session
 	users, err := dbh.GetUsersForSession(req.SessionID)
@@ -538,6 +524,7 @@ func (h *Handler) RemoveMyUserFromSession(w http.ResponseWriter, r *http.Request
 
 	// A user is not allowed to remove itself from a session in case
 	// there are already heats.
+	session := hCtx.ValidSession
 	heats, err := dbh.GetUserHeatsBySession(req.SessionID, session.UserID, 0)
 	if err != nil {
 		slog.Warn("Cannot get heats for session and user", slog.Uint64("session", uint64(req.SessionID)), slog.Uint64("user", uint64(session.UserID)), slog.String("error", err.Error()))

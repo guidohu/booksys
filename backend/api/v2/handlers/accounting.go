@@ -157,24 +157,10 @@ func (h *Handler) GetIncomeTypes(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("income types", resp, w)
 }
 
-func (h *Handler) GetAccountingStatistics(w http.ResponseWriter, r *http.Request) {
-	req := &GetAccountingStatisticsRequest{}
-	err := ReadBodyAndValidate(r, req, GetAccountingStatisticsValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-	slog.Info("GetAccountingStatistics for", slog.Uint64("year", req.Year))
-
+func (h *Handler) GetAccountingStatistics(w http.ResponseWriter, r *http.Request, req GetAccountingStatisticsRequest, hCtx *HandlerCtx) {
 	resp := &GetAccountingStatisticsResponse{}
 
 	// Get total payments.
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
 	dbh := hCtx.Database
 	payments, err := dbh.GetPaymentTotal(0)
 	if err != nil {
@@ -269,24 +255,10 @@ func (h *Handler) GetAccountingStatistics(w http.ResponseWriter, r *http.Request
 	WriteSuccessResponse("accounting statistics", resp, w)
 }
 
-func (h *Handler) GetAccountingTransactions(w http.ResponseWriter, r *http.Request) {
-	req := &GetAccountingTransactionsRequest{}
-	err := ReadBodyAndValidate(r, req, GetAccountingTransactionsValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-	slog.Info("GetAccountingTransactions for", slog.Uint64("year", req.Year))
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) GetAccountingTransactions(w http.ResponseWriter, r *http.Request, req GetAccountingStatisticsRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	var resp GetAccountingTransactionsResponse
-	resp, err = dbh.GetTransactions(req.Year)
+	resp, err := dbh.GetTransactions(req.Year)
 	if err != nil {
 		slog.Warn("Cannot get transactions", slog.String("error", err.Error()))
 		WriteFailureResponse(err.Error(), w)
@@ -296,21 +268,9 @@ func (h *Handler) GetAccountingTransactions(w http.ResponseWriter, r *http.Reque
 	WriteSuccessResponse("accounting transactions", resp, w)
 }
 
-func (h *Handler) DeleteTransaction(w http.ResponseWriter, r *http.Request) {
-	req := &DeleteTransactionRequest{}
-	err := ReadBodyAndValidate(r, req, DeleteTransactionValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) DeleteTransaction(w http.ResponseWriter, r *http.Request, req DeleteTransactionRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
-	err = dbh.DeleteTransaction(req.TableID, req.RowID)
+	err := dbh.DeleteTransaction(req.TableID, req.RowID)
 	if err != nil {
 		slog.Warn("Cannot get transactions", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot delete transaction because of an error.", w)
@@ -320,15 +280,7 @@ func (h *Handler) DeleteTransaction(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("transaction deleted", nil, w)
 }
 
-func (h *Handler) AddIncome(w http.ResponseWriter, r *http.Request) {
-	req := &AddTransactionRequest{}
-	err := ReadBodyAndValidate(r, req, AddTransactionValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
+func (h *Handler) AddIncome(w http.ResponseWriter, r *http.Request, req AddTransactionRequest, hCtx *HandlerCtx) {
 	incomeEntry := database.Income{
 		UserID:        uint(req.UserID),
 		Amount:        *req.Amount,
@@ -337,13 +289,8 @@ func (h *Handler) AddIncome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if user exists.
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
 	dbh := hCtx.Database
-	_, err = dbh.GetUserById(uint(req.UserID))
+	_, err := dbh.GetUserById(uint(req.UserID))
 	if err != nil {
 		slog.Warn("Cannot find user with", slog.Uint64("user_id", req.UserID))
 		WriteFailureResponse("Cannot find the selected user", w)
@@ -391,15 +338,7 @@ func (h *Handler) AddIncome(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("income added", nil, w)
 }
 
-func (h *Handler) AddExpense(w http.ResponseWriter, r *http.Request) {
-	req := &AddTransactionRequest{}
-	err := ReadBodyAndValidate(r, req, AddTransactionValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
+func (h *Handler) AddExpense(w http.ResponseWriter, r *http.Request, req AddTransactionRequest, hCtx *HandlerCtx) {
 	expenseEntry := database.Income{
 		UserID:        uint(req.UserID),
 		Amount:        *req.Amount,
@@ -408,13 +347,8 @@ func (h *Handler) AddExpense(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if user exists.
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
 	dbh := hCtx.Database
-	_, err = dbh.GetUserById(uint(req.UserID))
+	_, err := dbh.GetUserById(uint(req.UserID))
 	if err != nil {
 		slog.Warn("Cannot find user with", slog.Uint64("user_id", req.UserID))
 		WriteFailureResponse("Cannot find the selected user", w)

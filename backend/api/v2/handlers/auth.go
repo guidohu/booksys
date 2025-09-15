@@ -41,21 +41,7 @@ type UserResponse struct {
 	Comment       string                `json:"comment"`
 }
 
-func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
-	var req LoginRequest
-	err := ReadBodyAndValidate(r, &req)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse("Invalid request payload", w)
-		return
-	}
-
-	// get user from database
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) Login(w http.ResponseWriter, r *http.Request, req LoginRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	lookupUser, err := dbh.GetUserByName(req.Username)
 	if err != nil {

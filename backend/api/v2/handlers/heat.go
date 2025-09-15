@@ -36,25 +36,12 @@ type ChangeHeatRequest struct {
 	Comment         string `json:"comment"`
 }
 
-func (h *Handler) AddHeats(w http.ResponseWriter, r *http.Request) {
-	req := AddHeatsRequest{}
-	err := ReadBodyAndValidate(r, &req)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse("Invalid request.", w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) AddHeats(w http.ResponseWriter, r *http.Request, req AddHeatsRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 
 	resp := AddHeatsRequestResponse{}
 	for _, heat := range []AddHeatRequest(req.Heats) {
-		err = h.addHeat(dbh, heat)
+		err := h.addHeat(dbh, heat)
 		if err != nil {
 			resp[heat.UID] = Status{
 				OK:  false,
@@ -144,21 +131,9 @@ func (h *Handler) AddHeat(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("heat added", nil, w)
 }
 
-func (h *Handler) DeleteHeat(w http.ResponseWriter, r *http.Request) {
-	req := &DeleteHeatRequest{}
-	err := ReadBodyAndValidate(r, req)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse("Invalid request.", w)
-		return
-	}
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) DeleteHeat(w http.ResponseWriter, r *http.Request, req DeleteHeatRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
-	err = dbh.DeleteHeat(req.HeatID)
+	err := dbh.DeleteHeat(req.HeatID)
 	if err != nil {
 		slog.Warn("Could not delete heat", slog.String("error", err.Error()))
 		WriteFailureResponse("Could not delete heat, heat not valid.", w)
@@ -167,20 +142,7 @@ func (h *Handler) DeleteHeat(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("heat deleted", nil, w)
 }
 
-func (h *Handler) ChangeHeat(w http.ResponseWriter, r *http.Request) {
-	req := &ChangeHeatRequest{}
-	err := ReadBodyAndValidate(r, req)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse("Invalid request.", w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) ChangeHeat(w http.ResponseWriter, r *http.Request, req ChangeHeatRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// Get user
 	user, err := dbh.GetUserById(req.UserID)

@@ -131,29 +131,29 @@ func registerHandlers(mux *http.ServeMux, h *handlers.Handler) {
 
 	// Handlers that unauthenticated users can call
 	//-------------------------------------------------------------------
-	mux.Handle("/api/v2/auth/login", h.WithNoAuthentication(h.Login))
+	mux.Handle("/api/v2/auth/login", h.WithNoAuthentication(handlers.WithRequestBody(h.Login)))
 	mux.Handle("/api/v2/auth/isloggedin", h.WithNoAuthentication(h.IsLoggedIn))
 	mux.Handle("/api/v2/configuration/logo", h.WithNoAuthentication(h.GetLogoPath))
 	mux.Handle("/api/v2/configuration/recaptcha-key", h.WithNoAuthentication(h.GetRecaptchaKey))
-	mux.Handle("/api/v2/user/signup", h.WithNoAuthentication(h.SignUp))
+	mux.Handle("/api/v2/user/signup", h.WithNoAuthentication(handlers.WithRequestBody(h.SignUp, handlers.SignUpRequestValidationErrors)))
 	// TODO protect this by a --self_service flag or similar.
-	mux.Handle("/api/v2/user/create-admin", h.WithNoAuthentication(h.MakeAdmin))
-	mux.Handle("/api/v2/user/password/reset-by-token", h.WithNoAuthentication(h.SetPasswordWithToken))
-	mux.Handle("/api/v2/user/password/token-request", h.WithNoAuthentication(h.GetPasswordResetToken))
+	mux.Handle("/api/v2/user/create-admin", h.WithNoAuthentication(handlers.WithRequestBody(h.MakeAdmin)))
+	mux.Handle("/api/v2/user/password/reset-by-token", h.WithNoAuthentication(handlers.WithRequestBody(h.SetPasswordWithToken, handlers.SetPasswordWithTokenValidationErrors)))
+	mux.Handle("/api/v2/user/password/token-request", h.WithNoAuthentication(handlers.WithRequestBody(h.GetPasswordResetToken, handlers.GetPasswordResetTokenValidationErrors)))
 
 	// Handlers that users need to be authenticated and the role does not matter
 	// or the handler handles the exact role requirements itself.
 	//-------------------------------------------------------------------
 	mux.Handle("/api/v2/auth/logout", h.WithAnyAuthentication(h.Logout))
 	mux.Handle("/api/v2/auth/user", h.WithAnyAuthentication(h.User))
-	mux.Handle("/api/v2/booking/day/list", h.WithAnyAuthentication(h.GetBookingDay))
+	mux.Handle("/api/v2/booking/day/list", h.WithAnyAuthentication(handlers.WithRequestBody(h.GetBookingDay)))
 	mux.Handle("/api/v2/configuration/list", h.WithAnyAuthentication(h.GetPublicConfiguration))
 
 	mux.Handle("/api/v2/user/my/balance", h.WithAnyAuthentication(h.GetMyBalance))
 	mux.Handle("/api/v2/user/my/heats", h.WithAnyAuthentication(h.GetMyHeats))
 	mux.Handle("/api/v2/user/my/heats/statistics", h.WithAnyAuthentication(h.GetMyHeatStats))
 	mux.Handle("/api/v2/user/my/password/update", h.WithAnyAuthentication(h.UpdateMyPassword))
-	mux.Handle("/api/v2/user/my/session/delete", h.WithAnyAuthentication(h.RemoveMyUserFromSession))
+	mux.Handle("/api/v2/user/my/session/delete", h.WithAnyAuthentication(handlers.WithRequestBody(h.RemoveMyUserFromSession)))
 	mux.Handle("/api/v2/user/my/sessions", h.WithAnyAuthentication(h.GetMySessions))
 	mux.Handle("/api/v2/user/my/update", h.WithAnyAuthentication(h.UpdateMyUser))
 
@@ -164,28 +164,28 @@ func registerHandlers(mux *http.ServeMux, h *handlers.Handler) {
 	mux.Handle("/api/v2/boat/engine-hour/latest/get", h.WithAdminAuthentication(h.GetEngineHourLatest))
 	mux.Handle("/api/v2/boat/engine-hours/list", h.WithAdminAuthentication(h.GetEngineHoursList))
 	mux.Handle("/api/v2/boat/fuel-entries/get", h.WithAdminAuthentication(h.GetFuelEntries))
-	mux.Handle("/api/v2/boat/fuel-entry/add", h.WithAdminAuthentication(h.AddFuelEntry))
-	mux.Handle("/api/v2/boat/fuel-entry/edit", h.WithAdminAuthentication(h.ChangeFuelEntry))
-	mux.Handle("/api/v2/boat/fuel-entry/remove", h.WithAdminAuthentication(h.RemoveFuelEntry))
+	mux.Handle("/api/v2/boat/fuel-entry/add", h.WithAdminAuthentication(handlers.WithRequestBody(h.AddFuelEntry, handlers.FuelEntryValidationErrors)))
+	mux.Handle("/api/v2/boat/fuel-entry/edit", h.WithAdminAuthentication(handlers.WithRequestBody(h.ChangeFuelEntry, handlers.FuelEntryValidationErrors)))
+	mux.Handle("/api/v2/boat/fuel-entry/remove", h.WithAdminAuthentication(handlers.WithRequestBody(h.RemoveFuelEntry, handlers.FuelEntryValidationErrors)))
 	mux.Handle("/api/v2/boat/maintenance-entries/get", h.WithAdminAuthentication(h.GetMaintenanceEntries))
-	mux.Handle("/api/v2/boat/maintenance-entry/add", h.WithAdminAuthentication(h.AddMaintenanceEntry))
-	mux.Handle("/api/v2/boat/mynautique/telemetry/get", h.WithAdminAuthentication(h.GetBoatTelemetry))
+	mux.Handle("/api/v2/boat/maintenance-entry/add", h.WithAdminAuthentication(handlers.WithRequestBody(h.AddMaintenanceEntry, handlers.AddMaintenanceEntryValidationErrors)))
+	mux.Handle("/api/v2/boat/mynautique/telemetry/get", h.WithAdminAuthentication(handlers.WithRequestBody(h.GetBoatTelemetry)))
 	// mux.Handle("/api/v2/database/config", http.HandlerFunc(h.WithAuthentication(h.GetDBConfig)))
 
 	mux.Handle("/api/v2/accounting/expense_types/list", h.WithAdminAuthentication(h.GetExpenseTypes))
-	mux.Handle("/api/v2/accounting/expense/add", h.WithAdminAuthentication(h.AddExpense))
+	mux.Handle("/api/v2/accounting/expense/add", h.WithAdminAuthentication(handlers.WithRequestBody(h.AddExpense, handlers.AddTransactionValidationErrors)))
 	mux.Handle("/api/v2/accounting/income_types/list", h.WithAdminAuthentication(h.GetIncomeTypes))
-	mux.Handle("/api/v2/accounting/income/add", h.WithAdminAuthentication(h.AddIncome))
-	mux.Handle("/api/v2/accounting/statistics/get", h.WithAdminAuthentication(h.GetAccountingStatistics))
-	mux.Handle("/api/v2/accounting/transactions/delete", h.WithAdminAuthentication(h.DeleteTransaction))
-	mux.Handle("/api/v2/accounting/transactions/get", h.WithAdminAuthentication(h.GetAccountingTransactions))
+	mux.Handle("/api/v2/accounting/income/add", h.WithAdminAuthentication(handlers.WithRequestBody(h.AddIncome, handlers.AddTransactionValidationErrors)))
+	mux.Handle("/api/v2/accounting/statistics/get", h.WithAdminAuthentication(handlers.WithRequestBody(h.GetAccountingStatistics, handlers.GetAccountingStatisticsValidationErrors)))
+	mux.Handle("/api/v2/accounting/transactions/delete", h.WithAdminAuthentication(handlers.WithRequestBody(h.DeleteTransaction, handlers.DeleteTransactionValidationErrors)))
+	mux.Handle("/api/v2/accounting/transactions/get", h.WithAdminAuthentication(handlers.WithRequestBody(h.GetAccountingTransactions, handlers.GetAccountingTransactionsValidationErrors)))
 	mux.Handle("/api/v2/accounting/years/list", h.WithAdminAuthentication(h.GetAccountingYears))
 
-	mux.Handle("/api/v2/booking/series/list", h.WithAdminAuthentication(h.GetBookingSeries))
+	mux.Handle("/api/v2/booking/series/list", h.WithAdminAuthentication(handlers.WithRequestBody(h.GetBookingSeries)))
 
-	mux.Handle("/api/v2/heat/change", h.WithAdminAuthentication(h.ChangeHeat))
-	mux.Handle("/api/v2/heat/delete", h.WithAdminAuthentication(h.DeleteHeat))
-	mux.Handle("/api/v2/heats/create", h.WithAdminAuthentication(h.AddHeats))
+	mux.Handle("/api/v2/heat/change", h.WithAdminAuthentication(handlers.WithRequestBody(h.ChangeHeat)))
+	mux.Handle("/api/v2/heat/delete", h.WithAdminAuthentication(handlers.WithRequestBody(h.DeleteHeat)))
+	mux.Handle("/api/v2/heats/create", h.WithAdminAuthentication(handlers.WithRequestBody(h.AddHeats)))
 
 	mux.Handle("/api/v2/session/get", h.WithAdminAuthentication(h.GetSession))
 	mux.Handle("/api/v2/session/create", h.WithAdminAuthentication(h.CreateSession))
