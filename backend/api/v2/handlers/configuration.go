@@ -204,73 +204,43 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetPublicConfiguration(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
-	dbh := hCtx.Database
-	properties, err := dbh.GetAllPropertyValues()
-	if err != nil {
-		slog.Error("Cannot get configuration properties from database", slog.String("error", err.Error()))
-		WriteFailureResponse("Cannot get configuration", w)
-		return
-	}
-	pMap := make(map[string]string)
-	for _, p := range properties {
-		pMap[p.Property] = p.Value
-	}
-
-	lat, err := strconv.ParseFloat(pMap["location.latitude"], 32)
-	if err != nil {
-		slog.Error("Cannot convert location.latitude to float", slog.String("error", err.Error()))
-		lat = 0
-	}
-	lon, err := strconv.ParseFloat(pMap["location.longitude"], 32)
-	if err != nil {
-		slog.Error("Cannot convert location.longitude to float", slog.String("error", err.Error()))
-		lon = 0
-	}
-	mynautiqueEnabled, err := strconv.ParseBool(pMap["mynautique.enabled"])
-	if pMap["mynautique.enabled"] == "" {
-		mynautiqueEnabled = false
-	} else if err != nil {
-		slog.Error("Cannot convert mynautique.enabled to bool", slog.String("error", err.Error()))
-		mynautiqueEnabled = false
-	}
-	mynautiqueFuelCapacity, err := strconv.Atoi(pMap["mynautique.fuel.capacity"])
-	if pMap["mynautique.fuel.capacity"] == "" {
-		mynautiqueFuelCapacity = 0
-	} else if err != nil {
-		slog.Error("Cannot convert mynautique.fuel.capacity to int", slog.String("error", err.Error()))
-		mynautiqueFuelCapacity = 0
-	}
-	mynautiqueBoatID, err := strconv.Atoi(pMap["mynautique.boat.id"])
-	if pMap["mynautique.boat.id"] == "" {
-		mynautiqueBoatID = 0
-	} else if err != nil {
-		slog.Error("Cannot convert mynautique.boat.id to int", slog.String("error", err.Error()))
-		mynautiqueBoatID = 0
-	}
-
+	currency, _ := h.config.GetString("currency")
+	engineHourFormat, _ := h.config.GetString("engine.hour.format")
+	fuelPaymentType, _ := h.config.GetString("fuel.payment.type")
+	locationAddress, _ := h.config.GetString("location.address")
+	lat, _ := h.config.GetString("location.latitude")
+	lon, _ := h.config.GetString("location.longitude")
+	lat32, _ := strconv.ParseFloat(lat, 32)
+	lon32, _ := strconv.ParseFloat(lon, 32)
+	locationMap, _ := h.config.GetString("location.map")
+	locationTimeZone, _ := h.config.GetString("location.timezone")
+	logoFilePath, _ := h.config.GetString("logo.file")
+	myNautiqueEnabled := h.config.GetBool("mynautique.enabled")
+	myNautiqueBoatID := h.config.GetInt64("mynautique.boat.id")
+	myNautiqueFuelCapacity := h.config.GetInt64("mynautique.fuel.capacity")
+	paymentAccountBIC, _ := h.config.GetString("payment.account.bic")
+	paymentAccountComment, _ := h.config.GetString("payment.account.comment")
+	paymentAccountIBAN, _ := h.config.GetString("payment.account.iban")
+	paymentAccountOwner, _ := h.config.GetString("payment.account.owner")
+	recaptchePublicKey, _ := h.config.GetString("recaptcha.publickey")
 	resp := &PublicConfigurationMessage{
-		Currency:               pMap["currency"],
-		EngineHourFormat:       pMap["engine.hour.format"],
-		FuelPaymentType:        pMap["fuel.payment.type"],
-		LocationAddress:        pMap["location.address"],
-		LocationLatitude:       float32(lat),
-		LocationLongitude:      float32(lon),
-		LocationMap:            pMap["location.map"],
-		LocationTimeZone:       pMap["location.timezone"],
-		LogoFilePath:           pMap["logo.file"],
-		MyNautiqueEnabled:      mynautiqueEnabled,
-		MyNautiqueBoatID:       mynautiqueBoatID,
-		MyNautiqueFuelCapacity: mynautiqueFuelCapacity,
-		PaymentAccountBIC:      pMap["payment.account.bic"],
-		PaymentAccountComment:  pMap["payment.account.comment"],
-		PaymentAccountIBAN:     pMap["payment.account.iban"],
-		PaymentAccountOwner:    pMap["payment.account.owner"],
-		RecaptchaPublicKey:     pMap["recaptcha.publickey"],
+		Currency:               currency,
+		EngineHourFormat:       engineHourFormat,
+		FuelPaymentType:        fuelPaymentType,
+		LocationAddress:        locationAddress,
+		LocationLatitude:       float32(lat32),
+		LocationLongitude:      float32(lon32),
+		LocationMap:            locationMap,
+		LocationTimeZone:       locationTimeZone,
+		LogoFilePath:           logoFilePath,
+		MyNautiqueEnabled:      myNautiqueEnabled,
+		MyNautiqueBoatID:       int(myNautiqueBoatID),
+		MyNautiqueFuelCapacity: int(myNautiqueFuelCapacity),
+		PaymentAccountBIC:      paymentAccountBIC,
+		PaymentAccountComment:  paymentAccountComment,
+		PaymentAccountIBAN:     paymentAccountIBAN,
+		PaymentAccountOwner:    paymentAccountOwner,
+		RecaptchaPublicKey:     recaptchePublicKey,
 	}
 	WriteSuccessResponse("configuration", resp, w)
 }
@@ -278,80 +248,56 @@ func (h *Handler) GetPublicConfiguration(w http.ResponseWriter, r *http.Request)
 // TODO create public and non public version of this
 // E.g. Public version should not contain private info like mynautique, db, ... things.
 func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
-	dbh := hCtx.Database
-	properties, err := dbh.GetAllPropertyValues()
-	if err != nil {
-		slog.Error("Cannot get configuration properties from database", slog.String("error", err.Error()))
-		WriteFailureResponse("Cannot get configuration", w)
-		return
-	}
+	currency, _ := h.config.GetString("currency")
+	engineHourFormat, _ := h.config.GetString("engine.hour.format")
+	fuelPaymentType, _ := h.config.GetString("fuel.payment.type")
+	locationAddress, _ := h.config.GetString("location.address")
+	lat, _ := h.config.GetString("location.latitude")
+	lon, _ := h.config.GetString("location.longitude")
+	lat32, _ := strconv.ParseFloat(lat, 32)
+	lon32, _ := strconv.ParseFloat(lon, 32)
+	locationMap, _ := h.config.GetString("location.map")
+	locationTimeZone, _ := h.config.GetString("location.timezone")
+	logoFilePath, _ := h.config.GetString("logo.file")
+	myNautiqueEnabled := h.config.GetBool("mynautique.enabled")
+	myNautiqueBoatID := h.config.GetInt64("mynautique.boat.id")
+	myNautiqueFuelCapacity := h.config.GetInt64("mynautique.fuel.capacity")
+	myNautiqueUser, _ := h.config.GetString("mynautique.user")
+	paymentAccountBIC, _ := h.config.GetString("payment.account.bic")
+	paymentAccountComment, _ := h.config.GetString("payment.account.comment")
+	paymentAccountIBAN, _ := h.config.GetString("payment.account.iban")
+	paymentAccountOwner, _ := h.config.GetString("payment.account.owner")
+	recaptchePublicKey, _ := h.config.GetString("recaptcha.publickey")
+	recaptchePrivateKey, _ := h.config.GetString("recaptcha.privatekey")
+	smtpSender, _ := h.config.GetString("smtp.sender")
+	smtpServer, _ := h.config.GetString("smtp.server")
+	smtpUsername, _ := h.config.GetString("smtp.username")
 
-	pMap := make(map[string]string)
-	for _, p := range properties {
-		pMap[p.Property] = p.Value
-	}
-
-	lat, err := strconv.ParseFloat(pMap["location.latitude"], 32)
-	if err != nil {
-		slog.Error("Cannot convert location.latitude to float", slog.String("error", err.Error()))
-		lat = 0
-	}
-	lon, err := strconv.ParseFloat(pMap["location.longitude"], 32)
-	if err != nil {
-		slog.Error("Cannot convert location.longitude to float", slog.String("error", err.Error()))
-		lon = 0
-	}
-	boatid, err := strconv.Atoi(pMap["mynautique.boat.id"])
-	if pMap["mynautique.boat.id"] == "" {
-		boatid = 0
-	} else if err != nil {
-		slog.Error("Cannot convert mynautique.boat.id to int", slog.String("error", err.Error()))
-		boatid = 0
-	}
-	mynautiqueEnabled, err := strconv.ParseBool(pMap["mynautique.enabled"])
-	if pMap["mynautique.enabled"] == "" {
-		mynautiqueEnabled = false
-	} else if err != nil {
-		slog.Error("Cannot convert mynautique.enabled to bool", slog.String("error", err.Error()))
-		mynautiqueEnabled = false
-	}
-	mynautiqueFuelCapacity, err := strconv.Atoi(pMap["mynautique.fuel.capacity"])
-	if pMap["mynautique.fuel.capacity"] == "" {
-		mynautiqueFuelCapacity = 0
-	} else if err != nil {
-		slog.Error("Cannot convert boat.fuel.capacity to int", slog.String("error", err.Error()))
-		mynautiqueFuelCapacity = 0
-	}
 	resp := &ConfigurationMessage{
-		Currency:               pMap["currency"],
-		EngineHourFormat:       pMap["engine.hour.format"],
-		FuelPaymentType:        pMap["fuel.payment.type"],
-		LocationAddress:        pMap["location.address"],
-		LocationLatitude:       float32(lat),
-		LocationLongitude:      float32(lon),
-		LocationMap:            pMap["location.map"],
-		LocationTimeZone:       pMap["location.timezone"],
-		LogoFilePath:           pMap["logo.file"],
-		MyNautiqueBoatID:       boatid,
-		MyNautiqueEnabled:      mynautiqueEnabled,
-		MyNautiqueFuelCapacity: mynautiqueFuelCapacity,
+		Currency:               currency,
+		EngineHourFormat:       engineHourFormat,
+		FuelPaymentType:        fuelPaymentType,
+		LocationAddress:        locationAddress,
+		LocationLatitude:       float32(lat32),
+		LocationLongitude:      float32(lon32),
+		LocationMap:            locationMap,
+		LocationTimeZone:       locationTimeZone,
+		LogoFilePath:           logoFilePath,
+		MyNautiqueBoatID:       int(myNautiqueBoatID),
+		MyNautiqueEnabled:      myNautiqueEnabled,
+		MyNautiqueFuelCapacity: int(myNautiqueFuelCapacity),
 		MyNautiquePassword:     "hidden",
-		MyNautiqueUser:         pMap["mynautique.user"],
-		PaymentAccountBIC:      pMap["payment.account.bic"],
-		PaymentAccountComment:  pMap["payment.account.comment"],
-		PaymentAccountIBAN:     pMap["payment.account.iban"],
-		PaymentAccountOwner:    pMap["payment.account.owner"],
-		RecaptchaPrivateKey:    pMap["recaptcha.privatekey"],
-		RecaptchaPublicKey:     pMap["recaptcha.publickey"],
+		MyNautiqueUser:         myNautiqueUser,
+		PaymentAccountBIC:      paymentAccountBIC,
+		PaymentAccountComment:  paymentAccountComment,
+		PaymentAccountIBAN:     paymentAccountIBAN,
+		PaymentAccountOwner:    paymentAccountOwner,
+		RecaptchaPrivateKey:    recaptchePrivateKey,
+		RecaptchaPublicKey:     recaptchePublicKey,
 		SMTPPassword:           "hidden",
-		SMTPSender:             pMap["smtp.sender"],
-		SMTPServer:             pMap["smtp.server"],
-		SMTPUsername:           pMap["smtp.username"],
+		SMTPSender:             smtpSender,
+		SMTPServer:             smtpServer,
+		SMTPUsername:           smtpUsername,
 	}
 	// TODO return if we have a myNautique API key. This is to
 	// decide whether to show the myNautique settings section in the
