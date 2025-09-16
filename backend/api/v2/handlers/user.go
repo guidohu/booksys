@@ -350,24 +350,9 @@ func (h *Handler) MakeAdmin(w http.ResponseWriter, r *http.Request, req MakeAdmi
 	WriteSuccessResponse("success", nil, w)
 }
 
-func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request, req DeleteUserRequest, hCtx *HandlerCtx) {
 	// balance has to be zero
 	// delete user (zeroing out personal info)
-
-	req := &DeleteUserRequest{}
-	err := ReadBodyAndValidate(r, req, DeleteUserValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
-
 	if hCtx.ValidSession.UserID == req.UserID {
 		slog.Info("Skip user deletion, user cannot delete itself.")
 		WriteFailureResponse("You cannot delete yourself.", w)
@@ -805,15 +790,7 @@ func (h *Handler) GetUserGroups(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("user groups", userGroups, w)
 }
 
-func (h *Handler) CreateUserGroup(w http.ResponseWriter, r *http.Request) {
-	req := &CreateUserGroupsRequest{}
-	err := ReadBodyAndValidate(r, req, UserGroupsValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
+func (h *Handler) CreateUserGroup(w http.ResponseWriter, r *http.Request, req CreateUserGroupsRequest, hCtx *HandlerCtx) {
 	// this request consists of creating a user pricing
 	// and a user group in a single request.
 	u := database.UserStatus{
@@ -826,13 +803,8 @@ func (h *Handler) CreateUserGroup(w http.ResponseWriter, r *http.Request) {
 		Comment:        req.PriceDescription,
 	}
 
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
 	dbh := hCtx.Database
-	err = dbh.CreateUserGroup(u, p)
+	err := dbh.CreateUserGroup(u, p)
 	if err != nil {
 		slog.Error("Cannot create new user group", slog.String("error", err.Error()))
 		WriteFailureResponse("cannot get create new user group", w)
@@ -841,15 +813,7 @@ func (h *Handler) CreateUserGroup(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("user group created", nil, w)
 }
 
-func (h *Handler) ChangeUserGroup(w http.ResponseWriter, r *http.Request) {
-	req := &ChangeUserGroupRequest{}
-	err := ReadBodyAndValidate(r, req, UserGroupsValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
+func (h *Handler) ChangeUserGroup(w http.ResponseWriter, r *http.Request, req ChangeUserGroupRequest, hCtx *HandlerCtx) {
 	// this request consists of creating a user pricing
 	// and a user group in one go
 	u := database.UserStatus{
@@ -864,13 +828,8 @@ func (h *Handler) ChangeUserGroup(w http.ResponseWriter, r *http.Request) {
 		PricePerMinute: req.PricePerMinute,
 		Comment:        req.PriceDescription,
 	}
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
 	dbh := hCtx.Database
-	err = dbh.ChangeUserGroup(u, p)
+	err := dbh.ChangeUserGroup(u, p)
 	if err != nil {
 		slog.Error("Cannot update user group", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot update user group.", w)
@@ -879,22 +838,9 @@ func (h *Handler) ChangeUserGroup(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("user group changed", nil, w)
 }
 
-func (h *Handler) DeleteUserGroup(w http.ResponseWriter, r *http.Request) {
-	req := &DeleteUserGroupRequest{}
-	err := ReadBodyAndValidate(r, req, UserGroupsValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) DeleteUserGroup(w http.ResponseWriter, r *http.Request, req DeleteUserGroupRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
-	err = dbh.DeleteUserGroup(req.UserGroupID)
+	err := dbh.DeleteUserGroup(req.UserGroupID)
 	if err != nil {
 		slog.Error("Cannot delete user group", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot delete user group.", w)
@@ -903,20 +849,7 @@ func (h *Handler) DeleteUserGroup(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("user group deleted", nil, w)
 }
 
-func (h *Handler) SetUserGroup(w http.ResponseWriter, r *http.Request) {
-	req := &SetUserGroupRequest{}
-	err := ReadBodyAndValidate(r, req, SetUserGroupsValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) SetUserGroup(w http.ResponseWriter, r *http.Request, req SetUserGroupRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	user, err := dbh.GetUserById(req.UserID)
 	if err != nil {
@@ -991,20 +924,7 @@ func (h *Handler) GetUserRoles(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("user roles", userRoles, w)
 }
 
-func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request) {
-	req := &SetUserLockRequest{}
-	err := ReadBodyAndValidate(r, req, SetUserLockValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request, req SetUserLockRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	user, err := dbh.GetUserById(req.UserID)
 	if err != nil {

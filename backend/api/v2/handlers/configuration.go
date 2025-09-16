@@ -375,15 +375,7 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("configuration", resp, w)
 }
 
-func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request) {
-	var req ConfigurationMessage
-	err := ReadBodyAndValidate(r, &req, ConfigurationMessageValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
+func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request, req ConfigurationMessage, hCtx *HandlerCtx) {
 	// TODO check smtp.password
 	// - needs to be set in case there is other smtp configuration
 	// - can be empty in case there is a password in the db already
@@ -487,13 +479,8 @@ func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request) {
 			Value:    req.SMTPUsername,
 		},
 	}
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
 	dbh := hCtx.Database
-	err = dbh.UpdateOrInsertPropertyValues(props)
+	err := dbh.UpdateOrInsertPropertyValues(props)
 	if err != nil {
 		slog.Warn("Cannot update configuration", slog.String("error", err.Error()))
 		WriteFailureResponse(err.Error(), w)
@@ -503,7 +490,7 @@ func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("config updated", nil, w)
 }
 
-func (h *Handler) SetupMyNautiqueCredentials(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) SetupMyNautiqueCredentials(w http.ResponseWriter, r *http.Request, req SetupMyNautiqueCredentialsRequest, _ *HandlerCtx) {
 	// in case the configuration is already present, we do not
 	// allow to edit it
 	if h.config.IsSet("mynautique.enabled") {
@@ -511,14 +498,7 @@ func (h *Handler) SetupMyNautiqueCredentials(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	var req SetupMyNautiqueCredentialsRequest
-	err := ReadBodyAndValidate(r, &req)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse("Invalid request payload", w)
-		return
-	}
-	err = h.config.SetPropertyValue("mynautique.enabled", fmt.Sprintf("%t", req.Enabled))
+	err := h.config.SetPropertyValue("mynautique.enabled", fmt.Sprintf("%t", req.Enabled))
 	if err != nil {
 		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
 		WriteFailureResponse("Invalid request payload", w)

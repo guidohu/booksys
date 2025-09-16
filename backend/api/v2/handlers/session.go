@@ -89,20 +89,7 @@ type GetSessionHeatsResponse struct {
 	Comment   string          `json:"comment"`
 }
 
-func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request) {
-	req := &GetSessionRequest{}
-	err := ReadBodyAndValidate(r, req)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse("Request payload is not valid.", w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request, req GetSessionRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	s, err := dbh.GetSession(uint(req.SessionID))
 	if err != nil {
@@ -143,20 +130,7 @@ func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("session info", &resp, w)
 }
 
-func (h *Handler) GetSessionMetadata(w http.ResponseWriter, r *http.Request) {
-	req := &GetSessionRequest{}
-	err := ReadBodyAndValidate(r, req)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse("Request payload is not valid.", w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) GetSessionMetadata(w http.ResponseWriter, r *http.Request, req GetSessionRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	s, err := dbh.GetSession(uint(req.SessionID))
 	if err != nil {
@@ -178,20 +152,7 @@ func (h *Handler) GetSessionMetadata(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("session metadata", resp, w)
 }
 
-func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
-	req := &CreateSessionRequest{}
-	err := ReadBodyAndValidate(r, req, SessionValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request, req CreateSessionRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	start := time.Unix(req.Start, 0)
 	end := time.Unix(req.End, 0)
@@ -229,20 +190,7 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("session created", &resp, w)
 }
 
-func (h *Handler) EditSession(w http.ResponseWriter, r *http.Request) {
-	req := &EditSessionRequest{}
-	err := ReadBodyAndValidate(r, req, SessionValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) EditSession(w http.ResponseWriter, r *http.Request, req EditSessionRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	oldSession, err := dbh.GetSession(req.SessionID)
 	if err != nil {
@@ -287,20 +235,7 @@ func (h *Handler) EditSession(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("session updated", nil, w)
 }
 
-func (h *Handler) DeleteSession(w http.ResponseWriter, r *http.Request) {
-	req := &DeleteSessionRequest{}
-	err := ReadBodyAndValidate(r, req, DeleteSessionValidationErrors)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse(err.Error(), w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) DeleteSession(w http.ResponseWriter, r *http.Request, req DeleteSessionRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// check if session does not have heats
 	heats, err := dbh.GetHeatInSessionCount(req.SessionID)
@@ -334,20 +269,7 @@ func (h *Handler) DeleteSession(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("session removed", nil, w)
 }
 
-func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request) {
-	req := &AddSessionUserRequest{}
-	err := ReadBodyAndValidate(r, req)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse("Invalid request.", w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request, req AddSessionUserRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// check if session exists
 	s, err := dbh.GetSession(req.SessionID)
@@ -432,20 +354,7 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("users added", nil, w)
 }
 
-func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request) {
-	req := &RemoveSessionUserRequest{}
-	err := ReadBodyAndValidate(r, req)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse("Invalid request.", w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request, req RemoveSessionUserRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// Get the user.
 	user, err := dbh.GetUserById(req.UserID)
@@ -554,20 +463,7 @@ func (h *Handler) RemoveMyUserFromSession(w http.ResponseWriter, r *http.Request
 	WriteSuccessResponse("user removed", nil, w)
 }
 
-func (h *Handler) GetSessionHeats(w http.ResponseWriter, r *http.Request) {
-	req := &GetSessionHeatsRequest{}
-	err := ReadBodyAndValidate(r, req)
-	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
-		WriteFailureResponse("Invalid request.", w)
-		return
-	}
-
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+func (h *Handler) GetSessionHeats(w http.ResponseWriter, r *http.Request, req GetSessionHeatsRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	heats, err := dbh.GetHeatsInSession(req.SessionID)
 	if err != nil {
