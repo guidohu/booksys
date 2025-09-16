@@ -203,22 +203,6 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("config written", nil, w)
 }
 
-// func (h *Handler) GetDBConfig(w http.ResponseWriter, r *http.Request) {
-// 	session := GetSessionFromContext(r)
-// 	if AuthenticatedAsAdminOrFailure(session, w) != nil {
-// 		return
-// 	}
-
-// 	resp := GetDBConfigResponse{
-// 		IsConfigured: true,
-// 		DBServer:     fmt.Sprintf("%s:%d", viper.GetString("database.host"), viper.GetUint("database.port")),
-// 		DBName:       viper.GetString("database.dbname"),
-// 		DBUser:       viper.GetString("database.user"),
-// 		DBPassword:   "",
-// 	}
-// 	WriteSuccessResponse("success", resp, w)
-// }
-
 func (h *Handler) GetPublicConfiguration(w http.ResponseWriter, r *http.Request) {
 	hCtx, err := GetHandlerContext(w, r)
 	if err != nil {

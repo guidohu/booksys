@@ -257,16 +257,10 @@ var SetPasswordWithTokenValidationErrors = map[string]string{
 
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request, req SignUpRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
-	// Get recaptcha keys (resp, entire configuration).
-	config, err := dbh.GetAllPropertyValuesMap()
-	if err != nil {
-		slog.Warn("Cannot load internal configuration properties", slog.String("error", err.Error()))
-		WriteFailureResponse("Internal error, cannot sign up user.", w)
-		return
-	}
-	v, exists := config["recaptcha.privatekey"]
-	if exists && v.Value != "" {
-		valid, err := recaptcha.Valid(req.RecaptchaToken, v.Value)
+	// Get recaptcha keys
+	privateKey, _ := h.config.GetString("recaptcha.privatekey")
+	if privateKey != "" {
+		valid, err := recaptcha.Valid(req.RecaptchaToken, privateKey)
 		if err != nil {
 			WriteFailureResponse("Recaptcha check failed, cannot verify token.", w)
 			return
@@ -278,7 +272,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request, req SignUpReque
 	}
 
 	// Check if user already exists to not overwrite it
-	if _, err = dbh.GetUserByName(req.Username); err == nil {
+	if _, err := dbh.GetUserByName(req.Username); err == nil {
 		slog.Warn("Signup an already existing user", slog.String("user", req.Username))
 		WriteFailureResponse("user already exists", w)
 		return
