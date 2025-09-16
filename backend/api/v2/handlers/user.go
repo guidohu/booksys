@@ -980,17 +980,11 @@ func (h *Handler) getUserBalance(dbh database.Database, userID uint) (*GetMyBala
 func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request, req GetPasswordResetTokenRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// Check whether recaptcha is enabled.
-	config, err := dbh.GetAllPropertyValuesMap()
-	if err != nil {
-		slog.Warn("Cannot load internal configuration properties", slog.String("error", err.Error()))
-		WriteFailureResponse("Internal error, cannot send reset token.", w)
-		return
-	}
-	prop, exists := config["recaptcha.privatekey"]
-	if !exists || prop.Value == "" {
+	privateKey, _ := h.config.GetString("recaptcha.privatekey")
+	if privateKey == "" {
 		slog.Warn("Password reset token requests should be protected by recaptcha. Please setup recaptcha in the settings.")
 	} else {
-		valid, err := recaptcha.Valid(req.RecaptchaToken, prop.Value)
+		valid, err := recaptcha.Valid(req.RecaptchaToken, privateKey)
 		if err != nil {
 			WriteFailureResponse("Recaptcha check failed, cannot verify token.", w)
 			return
