@@ -468,19 +468,29 @@ func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contentTypes := fileHeader.Header.Values("Content-Type")
-	if len(contentTypes) == 0 {
-		slog.Warn("Cannot read Content-Type of file")
-		WriteFailureResponse("The uploaded file needs to be an image (e.g., Content-Type image/jpeg)", w)
+	// Check content type. We only accept jpeg, png and gif.
+	// We check the content type based on the file content and not on the
+	// provided content type header.
+	buff := make([]byte, 512)
+	_, err = file.Read(buff)
+	if err != nil {
+		slog.Warn("Cannot read uploaded file to determine content type", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot read the uploaded file.", w)
 		return
 	}
-	contentType := contentTypes[0]
+	contentType := http.DetectContentType(buff)
 	if contentType != "image/png" &&
 		contentType != "image/jpeg" &&
 		contentType != "image/jpg" &&
 		contentType != "image/gif" {
 		slog.Warn("Wrong Content-Type of file", slog.String("content_type", contentType))
-		WriteFailureResponse("The uploaded file needs to be an image (e.g., Content-Type image/jpeg)", w)
+		WriteFailureResponse("The uploaded file needs to be an image of type png, jpg or gif.", w)
+		return
+	}
+	_, err = file.Seek(0, 0)
+	if err != nil {
+		slog.Warn("Reset file pointer", slog.String("error", err.Error()))
+		WriteFailureResponse("Cannot read the uploaded file.", w)
 		return
 	}
 
