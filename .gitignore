@@ -7,6 +7,7 @@ CHANGES
 linecounter.txt
 .env
 .DS_Store
+.vscode
 backend/api/v2/uploads
 backend/api/v2/server
 backend/api/v2/main
