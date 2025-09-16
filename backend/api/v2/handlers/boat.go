@@ -337,9 +337,9 @@ func (h *Handler) GetFuelEntries(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) AddFuelEntry(w http.ResponseWriter, r *http.Request, req AddFuelEntryRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
-	billType, err := dbh.GetPropertyValue("fuel.payment.type")
-	if err != nil {
-		slog.Warn("Cannot determine whether fuel is billed or paid directly", slog.String("error", err.Error()))
+	billType, _ := h.config.GetString("fuel.payment.type")
+	if billType == "" {
+		slog.Warn("Cannot determine whether fuel is billed or paid directly, fuel.payment.type is not configured.")
 		WriteFailureResponse("Cannot determine whether fuel is billed or paid directly.", w)
 		return
 	}
@@ -351,9 +351,9 @@ func (h *Handler) AddFuelEntry(w http.ResponseWriter, r *http.Request, req AddFu
 		Liters:              req.Liters,
 		Cost:                req.Cost,
 		CostBrutto:          nil,
-		ContributeToBalance: billType.Value != "billed",
+		ContributeToBalance: billType != "billed",
 	}
-	err = dbh.AddFuelEntry(entry)
+	err := dbh.AddFuelEntry(entry)
 	if err != nil {
 		slog.Warn("Cannot add fuel entry", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot add fuel entry.", w)
