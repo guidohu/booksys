@@ -35,6 +35,7 @@ var (
 	httpSessionInactivityTimeout = pflag.Uint("http_session_inactivity_timeout", 0, "Time until a HTTP session with no activity will be cancelled and a user gets logged out.")
 	httpSessionTimeout           = pflag.Uint("http_session_timeout", 0, "Time in seconds until a user is logged out.")
 	httpUploadPath               = pflag.String("http_uploadpath", "", "Path where content is uploaded to.")
+	httpWebSetup                 = pflag.Bool("http_websetup", false, "If enabled the application can be setup via the /setup URI.")
 	// Database settings
 	databaseName     = pflag.String("database_dbname", "", "The database name.")
 	databaseHost     = pflag.String("database_host", "", "The IP/hostname of the host the DB is on.")
@@ -54,6 +55,7 @@ func getFlags(v *viper.Viper) {
 	v.BindPFlag("http.sessioninactivitytimeout", pflag.Lookup("http_session_inactivity_timeout"))
 	v.BindPFlag("http.sessiontimeout", pflag.Lookup("http_session_timeout"))
 	v.BindPFlag("http.uploadpath", pflag.Lookup("http_uploadpath"))
+	v.BindPFlag("http.websetup", pflag.Lookup("http_websetup"))
 	v.BindPFlag("database.user", pflag.Lookup("database_user"))
 	v.BindPFlag("database.password", pflag.Lookup("database_password"))
 	v.BindPFlag("database.protocol", pflag.Lookup("database_protocol"))
@@ -272,9 +274,24 @@ func main() {
 				slog.Info("Auto reconnect routine done.")
 				return
 			case <-ticker.C:
-				db, done := dbm.GetHandler()
-				if db == nil || db.Ping() != nil {
-					slog.Info("Schedule connection attempt to db.")
+				func() {
+					db, done := dbm.GetHandler()
+					defer done()
+					reconnect := false
+					if db == nil || db.Ping() != nil {
+						slog.Warn("Connection to database lost. Try to reconnect.")
+						reconnect = true
+					} else {
+						initDone, err := db.IsInitialized()
+						if err != nil || !initDone {
+							slog.Warn("Uninitialized database. Try to reconnect and initialize.")
+							reconnect = true
+						}
+					}
+					if !reconnect {
+						return
+					}
+					slog.Info("Initiate connection attempt to db.")
 					err = dbm.ConnectAndReplace(nil)
 					if err != nil {
 						slog.Warn("Cannot reconnect database", slog.String("error", err.Error()))
@@ -282,8 +299,7 @@ func main() {
 						slog.Info("Reconnected database.")
 					}
 					// TODO update conf with latest DB values
-				}
-				done()
+				}()
 			case <-chConfigFileUpdate:
 				slog.Info("Reconnect database after config change.")
 				dbSettings := getDBSettings(conf)

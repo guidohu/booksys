@@ -34,7 +34,6 @@ type Configuration struct {
 	Database   DBConfig   `yaml:"database"`
 	Http       HttpConfig `yaml:"http"`
 	MyNautique MyNautique `yaml:"mynautique"`
-	params     *BasicParams
 }
 
 type DBConfig struct {
@@ -51,15 +50,11 @@ type HttpConfig struct {
 	SessionInactivityTimeout uint   `yaml:"sessionInactivityTimeout"`
 	SessionTimeout           uint   `yaml:"sessionTimeout"`
 	UploadPath               string `yaml:"uploadPath"`
+	WebSetup                 bool   `yaml:"webSetup"`
 }
 
 type MyNautique struct {
 	APIKey string `yaml:"api.key"`
-}
-
-type BasicParams struct {
-	EnvironmentPrefix string
-	ConfigFilePath    string
 }
 
 // GetKeys returns a sorted list of all the configuration fields that are supported by
@@ -141,6 +136,7 @@ var MandatoryConfigKeys = []string{
 	"http.sessioninactivitytimeout",
 	"http.sessiontimeout",
 	"http.uploadpath",
+	"http.websetup",
 	"database.user",
 	"database.protocol",
 	"database.host",
@@ -156,6 +152,7 @@ var ConfigDefaults map[string]string = map[string]string{
 	"http.sessioninactivitytimeout": "604800",
 	"http.sessiontimeout":           "31536000",
 	"http.uploadpath":               "./uploads",
+	"http.websetup":                 "false",
 	"database.user":                 "",
 	"database.password":             "",
 	"database.protocol":             "tcp",

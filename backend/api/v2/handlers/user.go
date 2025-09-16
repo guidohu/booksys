@@ -317,6 +317,11 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request, req SignUpReque
 }
 
 func (h *Handler) MakeAdmin(w http.ResponseWriter, r *http.Request, req MakeAdminRequest, hCtx *HandlerCtx) {
+	if !h.config.GetBool("http.websetup") {
+		slog.Warn("Admin creation called but http.websetup is not enabled.")
+		WriteFailureResponse("Web based application setup is not enabled", w)
+		return
+	}
 	dbh := hCtx.Database
 	// check if an admin user exists already
 	// only the very first user can become an admin

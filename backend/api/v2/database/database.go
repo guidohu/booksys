@@ -18,6 +18,7 @@ type Database interface {
 	Disconnect() error
 	Ping() error
 	IsConfigured() bool
+	IsInitialized() (bool, error)
 	// views
 	LogsView
 	// collections
@@ -259,7 +260,7 @@ func (d *Mysql) Connect() error {
 	d.db.SetConnMaxLifetime(time.Hour)
 
 	// If db exists we migrate otherwise we setup the tables
-	dbIsSetup, err := d.tableExists("user")
+	dbIsSetup, err := d.IsInitialized()
 	if err != nil {
 		slog.Error("Cannot check if table 'user' exists", slog.String("error", err.Error()))
 		return err
@@ -328,6 +329,10 @@ func (d *Mysql) IsConfigured() bool {
 	}
 
 	return true
+}
+
+func (d *Mysql) IsInitialized() (bool, error) {
+	return d.tableExists("user")
 }
 
 // tableExists returns whether a specific table exists or not.

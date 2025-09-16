@@ -139,6 +139,11 @@ type GetRecaptchaKeyResponse struct {
 }
 
 func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
+	if !h.config.GetBool("http.websetup") {
+		slog.Warn("Setup DB called but http.websetup is not enabled.")
+		WriteFailureResponse("Web based application setup is not enabled", w)
+		return
+	}
 	configFile, _ := h.config.GetString("config")
 	if configFile == "" {
 		slog.Warn("No config file path provided to store configuration. Database setup not possible.")
@@ -197,9 +202,6 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	slog.Info("New database configuration has been written to", slog.String("config", configFile))
-	// TODO: The database manager should just be calles with a ConnectAndReplace like above
-	// and we should be good and not need this part here.
-	h.config.SetDB(h.Database)
 	WriteSuccessResponse("config written", nil, w)
 }
 

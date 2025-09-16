@@ -10,5 +10,5 @@ export BOOKSYS_DATABASE_PASSWORD=${MYSQL_PASSWORD}
 
 dir=`pwd`
 cd ../../backend/api/v2
-go run main.go --http_port 9090
+go run main.go --http_port 9090 --http_websetup
 cd ${dir}
