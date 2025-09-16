@@ -88,16 +88,5 @@ func (h *Handler) GetBoatTelemetry(w http.ResponseWriter, r *http.Request, req G
 }
 
 func (h *Handler) isMyNautiqueConfigured() bool {
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		return false
-	}
-	config, err := dbh.GetPropertyValue("mynautique.enabled")
-	if err != nil {
-		slog.Error("Cannot determine if mynautique.enabled is set orr not")
-		return false
-	}
-	return config.Value == "true"
+	return h.config.GetBool("mynautique.enabled")
 }
