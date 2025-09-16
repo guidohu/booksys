@@ -93,15 +93,15 @@ func (h *Handler) getBooking(db database.Database, start time.Time, end time.Tim
 		return GetBookingResponse{}, err
 	}
 	sunrise, sunset := h.getSunriseSunset(start, location)
-	businessDayStart, err := db.GetPropertyValue("business.day.start")
-	if err != nil {
-		slog.Warn("Cannot retrieve business.day.start from the database", slog.String("error", err.Error()))
-		return GetBookingResponse{}, err
+	businessDayStart, _ := h.config.GetString("business.day.start")
+	businessDayEnd, _ := h.config.GetString("business.day.end")
+	if businessDayStart == "" {
+		slog.Warn("business.day.start not configured")
+		return GetBookingResponse{}, fmt.Errorf("business.day.start not configured")
 	}
-	businessDayEnd, err := db.GetPropertyValue("business.day.end")
-	if err != nil {
-		slog.Warn("Cannot retrieve business.day.end from the database", slog.String("error", err.Error()))
-		return GetBookingResponse{}, err
+	if businessDayEnd == "" {
+		slog.Warn("business.day.end not configured")
+		return GetBookingResponse{}, fmt.Errorf("business.day.end not configured")
 	}
 	b := &GetBookingResponse{
 		Start:            start.Unix(),
@@ -113,8 +113,8 @@ func (h *Handler) getBooking(db database.Database, start time.Time, end time.Tim
 		SunriseText:      sunrise.Format(time.RFC3339),
 		Sunset:           sunset.Unix(),
 		SunsetText:       sunset.Format(time.RFC3339),
-		OpeningHourStart: businessDayStart.Value,
-		OpeningHourEnd:   businessDayEnd.Value,
+		OpeningHourStart: businessDayStart,
+		OpeningHourEnd:   businessDayEnd,
 		Sessions:         []SessionResponse{},
 	}
 
@@ -177,25 +177,13 @@ func (h *Handler) getRiders(sessionID uint) ([]database.User, error) {
 }
 
 func (h *Handler) getSunriseSunset(date time.Time, timezone *time.Location) (time.Time, time.Time) {
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		return time.Time{}, time.Time{}
-	}
-	latProperty, err := dbh.GetPropertyValue("location.latitude")
+	latString, _ := h.config.GetString("location.latitude")
+	lonString, _ := h.config.GetString("location.longitude")
+	lat, err := strconv.ParseFloat(latString, 64)
 	if err != nil {
 		return time.Time{}, time.Time{}
 	}
-	lonProperty, err := dbh.GetPropertyValue("location.longitude")
-	if err != nil {
-		return time.Time{}, time.Time{}
-	}
-	lat, err := strconv.ParseFloat(latProperty.Value, 64)
-	if err != nil {
-		return time.Time{}, time.Time{}
-	}
-	lon, err := strconv.ParseFloat(lonProperty.Value, 64)
+	lon, err := strconv.ParseFloat(lonString, 64)
 	if err != nil {
 		return time.Time{}, time.Time{}
 	}
@@ -210,18 +198,8 @@ func (h *Handler) getSunriseSunset(date time.Time, timezone *time.Location) (tim
 }
 
 func (h *Handler) getLocation() (*time.Location, error) {
-	dbh, done := h.Database.GetHandler()
-	defer done()
-	if dbh == nil {
-		slog.Warn("No database connection is available.")
-		return nil, fmt.Errorf("no database connection available")
-	}
-	timezone, err := dbh.GetPropertyValue("location.timezone")
-	if err != nil {
-		slog.Warn("Cannot retrieve location.timezone from the database", slog.String("error", err.Error()))
-		return nil, err
-	}
-	location, err := time.LoadLocation(timezone.Value)
+	timezone, _ := h.config.GetString("location.timezone")
+	location, err := time.LoadLocation(timezone)
 	if err != nil {
 		slog.Warn("Invalid location.timezone retrieved from the database", slog.String("error", err.Error()))
 		return nil, err
