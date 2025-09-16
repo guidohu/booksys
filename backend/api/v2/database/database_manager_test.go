@@ -200,7 +200,6 @@ func TestManager_Disconnect(t *testing.T) {
 		waitForDisconnect.Done()
 	}()
 
-	// TODO check that the db is still unclosed
 	if !fakeDB2.IsConnected {
 		t.Errorf("DB2 is still connected")
 	}

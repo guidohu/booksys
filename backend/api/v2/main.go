@@ -187,7 +187,6 @@ func registerHandlers(mux *http.ServeMux, h *handlers.Handler) {
 	mux.Handle("/api/v2/heat/delete", h.WithAdminAuthentication(handlers.WithRequestBody(h.DeleteHeat)))
 	mux.Handle("/api/v2/heats/create", h.WithAdminAuthentication(handlers.WithRequestBody(h.AddHeats)))
 
-	// TODO comtinue here with WithRequestBody wrappers
 	mux.Handle("/api/v2/session/get", h.WithAdminAuthentication(handlers.WithRequestBody(h.GetSession)))
 	mux.Handle("/api/v2/session/create", h.WithAdminAuthentication(handlers.WithRequestBody(h.CreateSession, handlers.SessionValidationErrors)))
 	mux.Handle("/api/v2/session/delete", h.WithAdminAuthentication(handlers.WithRequestBody(h.DeleteSession, handlers.DeleteSessionValidationErrors)))
@@ -314,7 +313,7 @@ func main() {
 
 	wg.Add(1)
 	go func() {
-		slog.Info(fmt.Sprintf("Server listening on address %s\n", server.Addr))
+		slog.Info(fmt.Sprintf("Server listening on address %s", server.Addr))
 		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 			slog.Error("HTTP server failure", slog.String("error", err.Error()))
 			os.Exit(1)

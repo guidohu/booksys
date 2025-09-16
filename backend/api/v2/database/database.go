@@ -233,9 +233,6 @@ func NewDBMysql(settings Settings) *Mysql {
 // Connect establishes a connection to the database. It also starts a DB migration
 // or initialization.
 func (d *Mysql) Connect() error {
-	// Premigration steps if needed
-	// - TODO change all session_type occurrences to have ID 1 and 2 instead of 0 and 1
-
 	datetimePrecision := 2
 	dsn := d.getDSN( /*hidePassword=*/ false)
 	orm, err := gorm.Open(gormMysql.New(gormMysql.Config{

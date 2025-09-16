@@ -532,52 +532,48 @@ func (c *Config) WatchProperties(ctx context.Context, notifyCh chan struct{}) {
 			return
 		case <-ticker.C:
 			slog.Info("WatchProperties: attempt to read properties from database.")
-			c.mu.Lock()
-			dbm := c.db
-			if dbm == nil {
-				slog.Warn("WatchProperties: no database manager available.")
-				c.mu.Unlock()
-				continue
-			}
-			db, done := dbm.GetHandler()
-			if db == nil {
-				slog.Warn("WatchProperties: no database available.")
-				c.mu.Unlock()
-				continue
-			}
-			version, err := db.GetConfigurationVersion()
-			if err != nil {
-				slog.Warn("WatchProperties: cannot retrieve configuration version from database", slog.String("error", err.Error()))
-				// TODO this could be because there is no db connection
-				c.mu.Unlock()
-				done()
-				continue
-			}
-			done()
-
-			if lastVersion.Version != version.Version || len(c.properties) == 0 {
-				if version.Timestamp == nil {
-					version.Timestamp = &time.Time{}
+			func() {
+				c.mu.Lock()
+				defer c.mu.Unlock()
+				dbm := c.db
+				if dbm == nil {
+					slog.Warn("WatchProperties: no database manager available.")
+					return
 				}
-				slog.Info("WatchProperties: new config version detected", slog.Uint64("version", uint64(version.Version)), slog.String("date", version.Timestamp.String()))
-				err = c.readConfigProperties()
+				db, done := dbm.GetHandler()
+				defer done()
+				if db == nil {
+					slog.Warn("WatchProperties: no database available.")
+					return
+				}
+				version, err := db.GetConfigurationVersion()
 				if err != nil {
-					c.mu.Unlock()
-					slog.Warn("WatchProperties: cannot read config properties", slog.String("error", err.Error()))
-					continue
+					slog.Warn("WatchProperties: cannot retrieve configuration version from database", slog.String("error", err.Error()))
+					return
 				}
-				lastVersion = version
-				select {
-				case notifyCh <- struct{}{}:
-					// write was successful
-				default:
-					// channel is not ready to receive update
-					break
+				if lastVersion.Version != version.Version || len(c.properties) == 0 {
+					if version.Timestamp == nil {
+						version.Timestamp = &time.Time{}
+					}
+					slog.Info("WatchProperties: new config version detected", slog.Uint64("version", uint64(version.Version)), slog.String("date", version.Timestamp.String()))
+					err = c.readConfigProperties()
+					if err != nil {
+						slog.Warn("WatchProperties: cannot read config properties", slog.String("error", err.Error()))
+						return
+					}
+					lastVersion = version
+					// Notify the potential listeners in a non-blocking way.
+					select {
+					case notifyCh <- struct{}{}:
+						// write was successful
+					default:
+						// channel is not ready to receive update
+					}
+				} else {
+					slog.Info("WatchProperties: no changes")
 				}
-			} else {
-				slog.Info("WatchProperties: no changes")
-			}
-			c.mu.Unlock()
+			}()
+
 		}
 	}
 }

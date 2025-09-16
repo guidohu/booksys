@@ -196,7 +196,7 @@ func (d *Mysql) migrationPreflight() error {
 		return err
 	}
 
-	// TODO further fixes come here
+	// Note: further fixes come here
 	return nil
 }
 

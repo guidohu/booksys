@@ -13,6 +13,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const HiddenSecret = "hidden"
+
 var AllowedProperties = map[string]interface{}{
 	"currency":                 nil,
 	"engine.hour.format":       nil,
@@ -107,9 +109,9 @@ func (d *Mysql) UpdateOrInsertPropertyValues(conf []Configuration) error {
 				}
 			}
 
-			// Handle hidden values.
-			if c.Value == "hidden" {
-				// TODO document special meaning of hidden in API
+			// The value "hidden" is used for sensitive data that should not be returned by the API.
+			// If the value is hidden, we do not update it.
+			if c.Value == HiddenSecret {
 				continue
 			}
 
