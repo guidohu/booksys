@@ -570,25 +570,12 @@ func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetLogoPath(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
-	dbh := hCtx.Database
-	conf, err := dbh.GetPropertyValue("logo.file")
-	if err != nil {
-		slog.Warn("Cannot get logo file", slog.String("error", err.Error()))
-		WriteFailureResponse("Cannot get logo path from server.", w)
-		return
-	}
-
-	// get upload directory
+	conf, _ := h.config.GetString("logo.file")
 	uploadDir, _ := h.config.GetString("http.uploadpath")
 	slog.Warn("DEBUG: uploadDir", slog.String("dir", uploadDir))
 	resp := &GetLogoPathResponse{}
-	if conf.Value != "" {
-		resp.URI = filepath.Join(uploadDir, conf.Value)
+	if conf != "" {
+		resp.URI = filepath.Join(uploadDir, conf)
 	}
 	WriteSuccessResponse("logo path", resp, w)
 }
@@ -596,19 +583,8 @@ func (h *Handler) GetLogoPath(w http.ResponseWriter, r *http.Request) {
 // TODO implement file removal
 
 func (h *Handler) GetRecaptchaKey(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
-	dbh := hCtx.Database
-	conf, err := dbh.GetPropertyValue("recaptcha.publickey")
-	if err != nil {
-		slog.Warn("Cannot get recaptcha public key", slog.String("error", err.Error()))
-		WriteFailureResponse("Cannot get recaptcha key from server.", w)
-		return
-	}
+	key, _ := h.config.GetString("recaptcha.publickey")
 	resp := &GetRecaptchaKeyResponse{}
-	resp.Key = conf.Value
+	resp.Key = key
 	WriteSuccessResponse("recaptcha key", resp, w)
 }
