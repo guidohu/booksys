@@ -81,8 +81,7 @@ func (h *Handler) GetBookingSeries(w http.ResponseWriter, r *http.Request, req G
 		}
 		resp = append(resp, b)
 	}
-	var response GetBookingSeriesResponse
-	response = GetBookingSeriesResponse(resp)
+	response := GetBookingSeriesResponse(resp)
 	WriteSuccessResponse("bookings", &response, w)
 }
 

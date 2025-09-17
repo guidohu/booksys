@@ -86,7 +86,3 @@ func (h *Handler) GetBoatTelemetry(w http.ResponseWriter, r *http.Request, req G
 	}
 	WriteSuccessResponse("boat telemetry", resp, w)
 }
-
-func (h *Handler) isMyNautiqueConfigured() bool {
-	return h.config.GetBool("mynautique.enabled")
-}

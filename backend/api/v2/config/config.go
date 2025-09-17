@@ -124,11 +124,6 @@ type Config struct {
 	db          *database.Manager
 }
 
-type DBConfigWatcher struct {
-	mu             sync.Mutex
-	cancelPrevious context.CancelFunc
-}
-
 // MandatoryConfigKeys are the minimum set of configuration
 // settings that need to be present in the configuration.
 var MandatoryConfigKeys = []string{
@@ -262,11 +257,9 @@ func (c *Config) ReadConfigFile() error {
 		}
 		c.file.SetConfigFile(configFile)
 		err = c.file.ReadInConfig()
-		if err != nil {
-			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-				slog.Error("No config file found", slog.String("config", configFile))
-				return err
-			}
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			slog.Error("No config file found", slog.String("config", configFile))
+			return err
 		}
 		// Verify that the configuration matches the Configuration struct.
 		conf := &Configuration{}

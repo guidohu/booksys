@@ -959,19 +959,19 @@ func (h *Handler) getUserBalance(dbh database.Database, userID uint) (*GetMyBala
 	_, cost, err := dbh.GetUserHeatStats(userID, time.Time{}, now)
 	if err != nil {
 		slog.Error("Cannot get total costs", slog.Int("user", int(userID)), slog.String("error", err.Error()))
-		return nil, errors.New("Cannot get balance for user.")
+		return nil, errors.New("cannot get balance for user")
 	}
 
 	payment, err := dbh.GetUserSessionPayments(userID)
 	if err != nil {
 		slog.Error("Cannot get total payments for", slog.Int("user", int(userID)), slog.String("error", err.Error()))
-		return nil, errors.New("Cannot get balance for user.")
+		return nil, errors.New("cannot get balance for user")
 	}
 
 	payback, err := dbh.GetUserSessionPaybacks(userID)
 	if err != nil {
 		slog.Error("Cannot get total paybacks for", slog.Int("user", int(userID)), slog.String("error", err.Error()))
-		return nil, errors.New("Cannot get balance for user.")
+		return nil, errors.New("cannot get balance for user")
 	}
 
 	resp := &GetMyBalanceResponse{

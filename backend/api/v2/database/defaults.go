@@ -160,7 +160,7 @@ func (d *Mysql) migrationPreflight() error {
 			slog.Error("migration preflight table `expenditure_type` - failed to create transaction")
 			return err
 		}
-		for i, _ := range DefaultExpenseTypes {
+		for i := range DefaultExpenseTypes {
 			newID := len(DefaultExpenseTypes) - i // idx is current ID + 1
 			_, err = t.Query("UPDATE expenditure_type SET id = ? WHERE id = ?", newID, newID-1)
 			if err != nil {

@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"errors"
+	"expvar"
 	"fmt"
 	"net/http"
+	"net/http/pprof"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -215,6 +217,16 @@ func registerHandlers(mux *http.ServeMux, h *handlers.Handler) {
 	mux.Handle("/api/v2/admin/configuration/set", h.WithAdminAuthentication(handlers.WithRequestBody(h.SetConfiguration, handlers.ConfigurationMessageValidationErrors)))
 	mux.Handle("/api/v2/admin/logs", h.WithAdminAuthentication(h.GetLogs))
 	mux.Handle("/api/v2/admin/upload/logo", h.WithAdminAuthentication(h.UploadLogoFile))
+
+	// Register pprof handlers manually
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
+	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+
+	// Register expvar handler manually
+	mux.Handle("/debug/vars", expvar.Handler())
 }
 
 func main() {
