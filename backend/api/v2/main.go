@@ -310,19 +310,22 @@ func main() {
 					err = dbm.ConnectAndReplace(nil)
 					if err != nil {
 						slog.Warn("Cannot reconnect database", slog.String("error", err.Error()))
-					} else {
-						slog.Info("Reconnected database.")
+						return
 					}
-					// TODO update conf with latest DB values
+					slog.Info("Reconnected database.")
+					conf.ReadConfigProperties()
 				}()
 			case <-chConfigFileUpdate:
-				slog.Info("Reconnect database after config change.")
-				dbSettings := getDBSettings(conf)
-				err = dbm.ConnectAndReplace(&dbSettings)
-				if err != nil {
-					slog.Warn("Cannot connect with new database settings after config file update", slog.String("error", err.Error()))
-				}
-				// TODO inform conf to load data from database in case it caches config
+				func() {
+					slog.Info("Reconnect database after config change.")
+					dbSettings := getDBSettings(conf)
+					err = dbm.ConnectAndReplace(&dbSettings)
+					if err != nil {
+						slog.Warn("Cannot connect with new database settings after config file update", slog.String("error", err.Error()))
+						return
+					}
+					conf.ReadConfigProperties()
+				}()
 			}
 		}
 	}()

@@ -288,9 +288,6 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 		SMTPServer:             smtpServer,
 		SMTPUsername:           smtpUsername,
 	}
-	// TODO return if we have a myNautique API key. This is to
-	// decide whether to show the myNautique settings section in the
-	// UI.
 	WriteSuccessResponse("configuration", resp, w)
 }
 
