@@ -73,6 +73,18 @@ func (h *Handler) GetMyNautiqueClient() *mynautique.Client {
 	return h.myNautiqueClient.Load()
 }
 
+func (h *Handler) WithFlagGuarded(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !h.config.GetBool("http.websetup") {
+			slog.Warn("Web setup is not enabled preventing access to.", slog.String("path", r.URL.Path))
+			w.WriteHeader(http.StatusForbidden)
+			WriteFailureResponse("Web setup is not enabled.", w)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (h *Handler) WithAdminAuthentication(next http.HandlerFunc) http.HandlerFunc {
 	return h.WithAuthentication(next, database.UserRoleAdmin)
 }

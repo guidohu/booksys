@@ -129,7 +129,7 @@ func registerUploadsServer(mux *http.ServeMux, c *config.Config) {
 func registerHandlers(mux *http.ServeMux, h *handlers.Handler) {
 	// Handlers without any authentication handling or middle ware.
 	//-------------------------------------------------------------------
-	mux.Handle("/api/v2/database/setup", http.HandlerFunc(h.SetupDBConfig))
+	mux.Handle("/api/v2/database/setup", h.WithFlagGuarded(h.SetupDBConfig))
 	mux.Handle("/api/v2/health/status", http.HandlerFunc(h.HealthStatus))
 	mux.Handle("/api/v2/ping", http.HandlerFunc(h.Ping))
 
@@ -140,8 +140,7 @@ func registerHandlers(mux *http.ServeMux, h *handlers.Handler) {
 	mux.Handle("/api/v2/configuration/logo", h.WithNoAuthentication(h.GetLogoPath))
 	mux.Handle("/api/v2/configuration/recaptcha-key", h.WithNoAuthentication(h.GetRecaptchaKey))
 	mux.Handle("/api/v2/user/signup", h.WithNoAuthentication(handlers.WithRequestBody(h.SignUp, handlers.SignUpRequestValidationErrors)))
-	// TODO protect this by a --self_service flag or similar.
-	mux.Handle("/api/v2/user/create-admin", h.WithNoAuthentication(handlers.WithRequestBody(h.MakeAdmin)))
+	mux.Handle("/api/v2/user/create-admin", h.WithFlagGuarded(h.WithNoAuthentication(handlers.WithRequestBody(h.MakeAdmin))))
 	mux.Handle("/api/v2/user/password/reset-by-token", h.WithNoAuthentication(handlers.WithRequestBody(h.SetPasswordWithToken, handlers.SetPasswordWithTokenValidationErrors)))
 	mux.Handle("/api/v2/user/password/token-request", h.WithNoAuthentication(handlers.WithRequestBody(h.GetPasswordResetToken, handlers.GetPasswordResetTokenValidationErrors)))
 

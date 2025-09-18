@@ -139,11 +139,6 @@ type GetRecaptchaKeyResponse struct {
 }
 
 func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
-	if !h.config.GetBool("http.websetup") {
-		slog.Warn("Setup DB called but http.websetup is not enabled.")
-		WriteFailureResponse("Web based application setup is not enabled", w)
-		return
-	}
 	configFile, _ := h.config.GetString("config")
 	if configFile == "" {
 		slog.Warn("No config file path provided to store configuration. Database setup not possible.")
