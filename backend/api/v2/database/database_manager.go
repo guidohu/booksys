@@ -46,7 +46,6 @@ func (dbm *Manager) Connect(settings *Settings) error {
 	if settings != nil {
 		dbSettings = *settings
 	}
-	// newDB := NewDB(dbSettings)
 	newDB := InstanceCreator(dbSettings)
 	err := newDB.Connect()
 	if err != nil {

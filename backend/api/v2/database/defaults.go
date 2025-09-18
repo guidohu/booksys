@@ -220,7 +220,6 @@ func (d *Mysql) migrationPostflight() error {
 		if err != nil {
 			// We do not really care whether this request is successful or not,
 			// as we do need to delete it, but it's fine if it is not there.
-			// TODO: check whether column is there, then delete.
 			slog.Error("migration postflight table `configuration` - failed to ALTER TABLE", slog.String("error", err.Error()))
 			return err
 		}

@@ -66,11 +66,11 @@
           Payment Information. This information is displayed to users in case
           they want to top-up their balance.
         </div>
-        <input-text
-          id="currency"
+        <InputSelect
+          :options="allCurrencies"
+          v-model="form.currency"
           label="Currency"
           size="small"
-          v-model="form.currency"
         />
         <input-text
           id="account-owner"
@@ -233,6 +233,7 @@ const engineHourLogFormats = ref([
   { value: "hh:mm", text: "hh:mm - such as 9:42" },
 ]);
 const allTimezones = ref(getAllTimezones());
+const allCurrencies = ref(getAllCurrencies());
 
 const getAdminConfiguration = computed(
   () => store.getters["configuration/getAdminConfiguration"],
@@ -273,6 +274,13 @@ function getAllTimezones() {
     return { value: str, text: str };
   });
   return selectTimezones;
+}
+
+function getAllCurrencies() {
+  const currencyNames = new Intl.DisplayNames("en", { type: "currency" });
+  return Intl.supportedValuesOf("currency").map((str) => {
+    return { value: str, text: currencyNames.of(str) };
+  })
 }
 
 function getSanitizedConfiguration() {

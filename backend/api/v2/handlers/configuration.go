@@ -15,18 +15,10 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-// type GetDBConfigResponse struct {
-// 	IsConfigured bool   `json:"is_configured"`
-// 	DBServer     string `json:"db_server"`
-// 	DBName       string `json:"db_name"`
-// 	DBUser       string `json:"db_user"`
-// 	DBPassword   string `json:"db_password,omitempty"`
-// }
-
 // PublicConfigurationMessage represents the public configuration of the server.
 // It is available to regular users that are logged in.
 type PublicConfigurationMessage struct {
-	Currency               string  `json:"currency" validate:"required,excludesall={} []!()<>"`
+	Currency               string  `json:"currency" validate:"required,currency,excludesall={} []!()<>"`
 	EngineHourFormat       string  `json:"engine_hour_format" validate:"required,oneof=hh.h hh:mm"`    // check if really needed
 	FuelPaymentType        string  `json:"fuel_payment_type" validate:"required,oneof=billed instant"` // check if really needed
 	LocationAddress        string  `json:"location_address" validate:"excludesall={}[]!><"`
@@ -46,7 +38,7 @@ type PublicConfigurationMessage struct {
 }
 
 type ConfigurationMessage struct {
-	Currency               string  `json:"currency" validate:"required,excludesall={} []!()<>"`
+	Currency               string  `json:"currency" validate:"required,currency,excludesall={} []!()<>"`
 	EngineHourFormat       string  `json:"engine_hour_format" validate:"required,oneof=hh.h hh:mm"`
 	FuelPaymentType        string  `json:"fuel_payment_type" validate:"required,oneof=billed instant"`
 	LocationAddress        string  `json:"location_address" validate:"excludesall={}[]!><"`

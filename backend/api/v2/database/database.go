@@ -44,7 +44,7 @@ type Database interface {
 }
 
 type LogsView interface {
-	GetLogs() ([]Log, error)
+	GetLogs(string) ([]Log, error)
 }
 
 type AccountingCollection interface {

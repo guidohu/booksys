@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"regexp"
+	iso4217 "server/validator/currency"
 
 	"golang.org/x/exp/slog"
 )
@@ -14,17 +15,14 @@ type Log struct {
 	Type       string `json:"type"`
 }
 
-func (d *Mysql) GetLogs() ([]Log, error) {
-	currency, err := d.GetPropertyValue("currency")
-	if err != nil {
-		slog.Warn("Cannot get currency from configuration table", slog.String("error", err.Error()))
-		return []Log{}, err
+func (d *Mysql) GetLogs(currency string) ([]Log, error) {
+	if !iso4217.IsCurrency(currency) {
+		slog.Warn("Currency is not a safe and valid string to build the SQL statement for retrieving logs")
+		return []Log{}, fmt.Errorf("currency is no valid value log text cannot be built")
 	}
-	// make sure the currency is a valid value
-	// TODO make this a validator and only allow the same values
-	// to be written to configuration.
-	r, _ := regexp.Compile(`[A-Za-z]{2,5}|\$`)
-	if !r.MatchString(currency.Value) {
+	// make sure the currency is indeed a safe value
+	r, _ := regexp.Compile(`^[A-Za-z]{3}$`)
+	if !r.MatchString(currency) {
 		slog.Warn("Currency is not a safe and valid string to build the SQL statement for retrieving logs")
 		return []Log{}, fmt.Errorf("currency is no valid value log text cannot be built")
 	}
@@ -60,8 +58,8 @@ func (d *Mysql) GetLogs() ([]Log, error) {
 					  FORMAT(bf.liters, 2), 'L fuel for ', FORMAT(cost_chf, 2), ' %s (on credit)') as log_message 
 			FROM user u, boat_fuel bf 
 			WHERE bf.user_id = u.id AND bf.contributes_to_balance = 0
-	  ) as c_log ORDER BY time DESC`, currency.Value, currency.Value, currency.Value, currency.Value, currency.Value)
+	  ) as c_log ORDER BY time DESC`, currency, currency, currency, currency, currency)
 	var logs []Log
-	err = d.orm.Raw(query).Find(&logs).Error
+	err := d.orm.Raw(query).Find(&logs).Error
 	return logs, err
 }

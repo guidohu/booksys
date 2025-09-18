@@ -90,6 +90,10 @@ func maybeConnectedDatabaseManager(c *config.Config) *database.Manager {
 	dbm := database.NewManager(settings)
 	if err := dbm.Connect(nil); err != nil {
 		slog.Warn("Could not connect to database", slog.String("error", err.Error()))
+	} else {
+		slog.Info("Connected to database")
+		c.SetDB(dbm)
+		c.ReadConfigProperties()
 	}
 	return dbm
 }

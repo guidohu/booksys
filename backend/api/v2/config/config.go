@@ -115,7 +115,7 @@ const (
 )
 
 type Config struct {
-	mu          sync.Mutex
+	mu          sync.RWMutex
 	properties  map[string]database.Configuration
 	flags       *viper.Viper
 	environment *viper.Viper
@@ -242,10 +242,9 @@ func findConfigFile() string {
 // - ${PWD}/config.yaml
 // - /etc/booksys/config.yaml
 func (c *Config) ReadConfigFile() error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
+	c.mu.RLock()
 	configFile, _ := c.GetString("config")
+	c.mu.RUnlock()
 	if configFile == "" {
 		configFile = findConfigFile()
 	}
@@ -255,6 +254,8 @@ func (c *Config) ReadConfigFile() error {
 		if err != nil {
 			slog.Error("File does not exist", slog.String("config", configFile), slog.String("error", err.Error()))
 		}
+		c.mu.Lock()
+		defer c.mu.Unlock()
 		c.file.SetConfigFile(configFile)
 		err = c.file.ReadInConfig()
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
@@ -444,6 +445,8 @@ func (c *Config) ToStringFull() string {
 // GetString returns a given configuration value as string respecting
 // the priority of the configuration sources.
 func (c *Config) GetString(key string) (string, ConfigSource) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	propValue, propOk := c.properties[key]
 	switch {
 	case c.flags.IsSet(key):

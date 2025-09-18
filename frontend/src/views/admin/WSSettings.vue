@@ -38,10 +38,10 @@
 import { ref } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-import SettingsCard from "booksys/components/SettingsCard.vue";
-import SubpageContainer from "booksys/components/bricks/SubpageContainer.vue";
-import ShowForDesktop from "booksys/components/bricks/ShowForDesktop.vue";
-import ShowForMobile from "booksys/components/bricks/ShowForMobile.vue";
+import SettingsCard from "../../components/SettingsCard.vue";
+import SubpageContainer from "../../components/bricks/SubpageContainer.vue";
+import ShowForDesktop from "../../components/bricks/ShowForDesktop.vue";
+import ShowForMobile from "../../components/bricks/ShowForMobile.vue";
 import WarningBox from "../../components/WarningBox.vue";
 
 const store = useStore();

@@ -16,7 +16,13 @@ func (h *Handler) GetLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	dbh := hCtx.Database
-	logs, err := dbh.GetLogs()
+	currency, _ := h.config.GetString("currency")
+	if currency == "" {
+		slog.Warn("Cannot get currency from configuration")
+		WriteFailureResponse("cannot get currency", w)
+		return
+	}
+	logs, err := dbh.GetLogs(currency)
 	if err != nil {
 		slog.Warn("cannot get logs", slog.String("error", err.Error()))
 		WriteFailureResponse("cannot get logs", w)

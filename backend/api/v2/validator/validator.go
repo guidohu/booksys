@@ -3,6 +3,7 @@ package validator
 import (
 	"regexp"
 	"server/database"
+	"server/validator/currency"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
@@ -75,4 +76,9 @@ func ExpenseType(fl validator.FieldLevel) bool {
 func TableID(fl validator.FieldLevel) bool {
 	_, found := database.TableIDMap[fl.Field().Uint()]
 	return found
+}
+
+// Currency checks if the currency is an ISO4217 code.
+func Currency(fl validator.FieldLevel) bool {
+	return currency.IsCurrency(fl.Field().String())
 }
