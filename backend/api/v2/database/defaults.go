@@ -43,10 +43,10 @@ func (d *Mysql) Migrate() error {
 		return err
 	}
 
-	// post schema update tasks
+	// post initialization tasks
 	err = d.cleanup()
 	if err != nil {
-		slog.Error("post migration tasks failed:", err)
+		slog.Error("cleanup tasks failed:", err)
 	}
 
 	return nil
@@ -268,7 +268,7 @@ func (d *Mysql) initializeContent() error {
 		{DefaultPricing},
 		{DefaultInvitationStatus},
 		{DefaultExpenseTypes},
-		{DefaultConfiguration}, // TODO, do only update in case a value really changes
+		{DefaultConfiguration},
 		{DefaultConfigurationVersion},
 	}
 
@@ -283,30 +283,22 @@ func (d *Mysql) initializeContent() error {
 	}
 
 	// Set the schema.version to our new value.
-	// dbProps, err := d.GetAllPropertyValuesMap()
-	// if err != nil {
-	// 	return err
-	// }
 	for _, i := range DefaultConfiguration {
 		if i.Property == "schema.version" {
-			// Do not change the ID
-			// i.ID = dbProps["schema.version"].ID
-			err := d.orm.Save(&i).Error
+			err := d.UpdateOrInsertPropertyValues([]Configuration{i})
 			if err != nil {
 				return err
 			}
 		}
 	}
 
-	// Update configuration values.
-	// Delete all configurations that do not exist.
-	// d.orm.Find()
 	return nil
 }
 
 func (d *Mysql) cleanup() error {
 	// set is_discounted where a discount was provided
 	// for boat_fuel
+	slog.Info("migration cleanup table `boat_fuel` - set is_discounted")
 	err := d.orm.Exec(`
 	    UPDATE boat_fuel 
 		SET is_discounted = 1
@@ -318,6 +310,27 @@ func (d *Mysql) cleanup() error {
 		return err
 	}
 	slog.Info("migration cleanup table `boat_fuel` - set is_discounted done")
+
+	slog.Info("migration cleanup table `configuration` - remove unsupported values")
+	liveValues, err := d.GetAllPropertyValues()
+	if err != nil {
+		slog.Error("migration cleanup table `configuration` - remove unsupported values failed", slog.String("error", err.Error()))
+		return err
+	}
+	for _, liveValue := range liveValues {
+		if liveValue.Property == "schema.version" {
+			continue
+		}
+		if _, ok := AllowedProperties[liveValue.Property]; !ok {
+			slog.Info("migration cleanup table `configuration` - remove unsupported values: remove ", slog.String("property", liveValue.Property))
+			err = d.DeleteProperty(liveValue.Property)
+			if err != nil {
+				slog.Error("migration cleanup table `configuration` - remove unsupported values failed", slog.String("error", err.Error()))
+				return err
+			}
+		}
+	}
+	slog.Info("migration cleanup table `configuration` - remove unsupported values done")
 
 	return nil
 }
@@ -571,24 +584,12 @@ var DefaultConfiguration = []Configuration{
 		Value:    "2.0",
 	},
 	{
-		Property: "browser.session.timeout.default",
-		Value:    "10800",
-	},
-	{
-		Property: "browser.session.timeout.max",
-		Value:    "604800",
-	},
-	{
 		Property: "location.longitude",
 		Value:    "8.542939",
 	},
 	{
 		Property: "location.latitude",
 		Value:    "47.367658",
-	},
-	{
-		Property: "location.gmt_offset",
-		Value:    "1",
 	},
 	{
 		Property: "location.timezone",
@@ -609,10 +610,6 @@ var DefaultConfiguration = []Configuration{
 	{
 		Property: "business.day.endatsunset",
 		Value:    "false",
-	},
-	{
-		Property: "session.cancel.graceperiod",
-		Value:    "86400",
 	},
 	{
 		Property: "recaptcha.privatekey",

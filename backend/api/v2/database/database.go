@@ -89,6 +89,7 @@ type BrowserSessionTable interface {
 }
 
 type ConfigurationTable interface {
+	DeleteProperty(key string) error
 	GetPropertyValue(key string) (Configuration, error)
 	GetAllPropertyValues() ([]Configuration, error)
 	GetAllPropertyValuesMap() (map[string]Configuration, error)

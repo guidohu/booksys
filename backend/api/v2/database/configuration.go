@@ -16,31 +16,35 @@ import (
 const HiddenSecret = "hidden"
 
 var AllowedProperties = map[string]interface{}{
-	"currency":                 nil,
-	"engine.hour.format":       nil,
-	"fuel.payment.type":        nil,
-	"location.address":         nil,
-	"location.latitude":        nil,
-	"location.longitude":       nil,
-	"location.map":             nil,
-	"location.timezone":        nil,
-	"logo.file":                nil,
-	"mynautique.boat.id":       nil,
-	"mynautique.enabled":       nil,
-	"mynautique.fuel.capacity": nil,
-	"mynautique.password":      nil,
-	"mynautique.user":          nil,
-	"mynautique.api.key":       nil,
-	"payment.account.bic":      nil,
-	"payment.account.comment":  nil,
-	"payment.account.iban":     nil,
-	"payment.account.owner":    nil,
-	"recaptcha.privatekey":     nil,
-	"recaptcha.publickey":      nil,
-	"smtp.password":            nil,
-	"smtp.sender":              nil,
-	"smtp.server":              nil,
-	"smtp.username":            nil,
+	"currency":                    nil,
+	"engine.hour.format":          nil,
+	"fuel.payment.type":           nil,
+	"location.address":            nil,
+	"location.latitude":           nil,
+	"location.longitude":          nil,
+	"location.map":                nil,
+	"location.timezone":           nil,
+	"logo.file":                   nil,
+	"mynautique.boat.id":          nil,
+	"mynautique.enabled":          nil,
+	"mynautique.fuel.capacity":    nil,
+	"mynautique.password":         nil,
+	"mynautique.user":             nil,
+	"mynautique.api.key":          nil,
+	"payment.account.bic":         nil,
+	"payment.account.comment":     nil,
+	"payment.account.iban":        nil,
+	"payment.account.owner":       nil,
+	"recaptcha.privatekey":        nil,
+	"recaptcha.publickey":         nil,
+	"smtp.password":               nil,
+	"smtp.sender":                 nil,
+	"smtp.server":                 nil,
+	"smtp.username":               nil,
+	"business.day.start":          nil,
+	"business.day.end":            nil,
+	"business.day.startatsunrise": nil,
+	"business.day.endatsunset":    nil,
 }
 
 type MyNautiqueConfiguration struct {
@@ -63,6 +67,10 @@ type EmailConfiguration struct {
 
 func (e *EmailConfiguration) Empty() bool {
 	return reflect.DeepEqual(e, &EmailConfiguration{})
+}
+
+func (d *Mysql) DeleteProperty(key string) error {
+	return d.orm.Delete(&Configuration{}, "property = ?", key).Error
 }
 
 func (d *Mysql) GetPropertyValue(key string) (Configuration, error) {

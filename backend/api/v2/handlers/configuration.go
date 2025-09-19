@@ -514,7 +514,6 @@ func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) GetLogoPath(w http.ResponseWriter, r *http.Request) {
 	conf, _ := h.config.GetString("logo.file")
 	uploadDir, _ := h.config.GetString("http.uploadpath")
-	slog.Warn("DEBUG: uploadDir", slog.String("dir", uploadDir))
 	resp := &GetLogoPathResponse{}
 	if conf != "" {
 		resp.URI = filepath.Join(uploadDir, conf)
