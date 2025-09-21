@@ -94,11 +94,14 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request, req LoginRequest
 		return
 	}
 	sessionSecretString := fmt.Sprintf("%x", sessionSecret)
-	validUntil := time.Now().Add(time.Duration(h.config.GetInt64("http.sessioninactivitytimeout")) * time.Second)
+	now := time.Now()
+	validUntil := now.Add(time.Duration(h.config.GetInt64("http.sessioninactivitytimeout")) * time.Second)
+	maxValidUntil := now.Add(time.Duration(h.config.GetInt64("http.sessiontimeout")) * time.Second)
 	slog.Info("Create new session for", slog.String("user", u.Username), slog.String("validUntil", validUntil.String()))
 	session := database.BrowserSession{
 		SessionSecret: sessionSecretString,
 		ValidUntil:    validUntil,
+		MaxValidUntil: maxValidUntil,
 		LastActivity:  time.Now(),
 		UserID:        u.ID,
 		Username:      u.Username,
@@ -142,7 +145,11 @@ func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 
 	// update valid until of browser session
 	session.ValidUntil = time.Now().Add(time.Duration(h.config.GetInt64("http.sessioninactivitytimeout")) * time.Second)
-	// TODO only update if creation time is not older than max session time
+	if session.ValidUntil.After(session.MaxValidUntil) {
+		WriteSuccessResponse("not logged in", resp, w)
+		DeleteSessionCookie(w)
+		return
+	}
 
 	resp.LoggedIn = true
 	err = dbh.UpdateBrowserSession(*session)

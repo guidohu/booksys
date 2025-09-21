@@ -54,6 +54,7 @@ func (BoatMaintenance) TableName() string {
 type BrowserSession struct {
 	SessionSecret string       `gorm:"primaryKey;type:varchar(512) NOT NULL"`
 	ValidUntil    time.Time    `gorm:"column:valid_thru;type:datetime DEFAULT NULL"`
+	MaxValidUntil time.Time    `gorm:"column:max_valid_thru;type:datetime DEFAULT NULL"`
 	LastActivity  time.Time    `gorm:"type:datetime DEFAULT NULL"`
 	UserID        uint         `gorm:"type:mediumint(9) DEFAULT NULL"`
 	User          User         `gorm:"foreignKey:UserID;references:ID"`

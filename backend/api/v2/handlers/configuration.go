@@ -236,8 +236,6 @@ func (h *Handler) GetPublicConfiguration(w http.ResponseWriter, r *http.Request)
 	WriteSuccessResponse("configuration", resp, w)
 }
 
-// TODO create public and non public version of this
-// E.g. Public version should not contain private info like mynautique, db, ... things.
 func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 	currency, _ := h.config.GetString("currency")
 	engineHourFormat, _ := h.config.GetString("engine.hour.format")

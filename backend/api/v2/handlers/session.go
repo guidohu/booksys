@@ -250,6 +250,8 @@ func (h *Handler) DeleteSession(w http.ResponseWriter, r *http.Request, req Dele
 	}
 	// TODO
 	// inform riders
+	// get users for a session
+	// inform them that the session has been cancelled
 
 	// remove riders from session
 	err = dbh.DeleteUsersFromSession(req.SessionID)
