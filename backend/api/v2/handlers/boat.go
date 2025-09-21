@@ -119,11 +119,7 @@ var AddMaintenanceEntryValidationErrors = map[string]string{
 }
 
 func (h *Handler) GetEngineHourLatest(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	b, err := dbh.GetEngineHourLatest()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -147,11 +143,7 @@ func (h *Handler) GetEngineHourLatest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetEngineHoursList(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	engineHours, err := dbh.GetEngineHours()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -187,11 +179,7 @@ func (h *Handler) UpdateEngineHours(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 
 	// get latest entry
@@ -264,11 +252,7 @@ func (h *Handler) UpdateEngineHoursEntry(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	entry, err := dbh.GetEngineHoursEntry(req.ID)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -288,11 +272,7 @@ func (h *Handler) UpdateEngineHoursEntry(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *Handler) GetFuelEntries(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	fuelEntries, err := dbh.GetFuelEntries()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -410,11 +390,7 @@ func (h *Handler) RemoveFuelEntry(w http.ResponseWriter, r *http.Request, req Re
 }
 
 func (h *Handler) GetMaintenanceEntries(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	logs, err := dbh.GetMaintenance()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {

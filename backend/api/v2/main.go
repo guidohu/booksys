@@ -217,7 +217,7 @@ func registerHandlers(mux *http.ServeMux, h *handlers.Handler) {
 	mux.Handle("/api/v2/user/roles/get", h.WithAdminAuthentication(h.GetUserRoles))
 
 	mux.Handle("/api/v2/admin/configuration/list", h.WithAdminAuthentication(h.GetConfiguration))
-	mux.Handle("/api/v2/admin/configuration/set", h.WithAdminAuthentication(handlers.WithRequestBody(h.SetConfiguration, handlers.ConfigurationMessageValidationErrors)))
+	mux.Handle("/api/v2/admin/configuration/set", h.WithAdminAuthentication(h.WithConfigContext(handlers.WithRequestBody(h.SetConfiguration, handlers.ConfigurationMessageValidationErrors))))
 	mux.Handle("/api/v2/admin/logs", h.WithAdminAuthentication(h.GetLogs))
 	mux.Handle("/api/v2/admin/upload/logo", h.WithAdminAuthentication(h.UploadLogoFile))
 

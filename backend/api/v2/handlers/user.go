@@ -388,11 +388,7 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request, req DeleteU
 }
 
 func (h *Handler) UpdateMyUser(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	session := hCtx.ValidSession
 	if session.UserID == 0 {
 		slog.Warn("Unknown user accessing GetMyHeats")
@@ -401,7 +397,7 @@ func (h *Handler) UpdateMyUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req := &UpdateMyUserRequest{}
-	err = ReadBodyAndValidate(r, req, UpdateMyUserValidationErrors)
+	err := ReadBodyAndValidate(r, req, UpdateMyUserValidationErrors)
 	if err != nil {
 		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
 		WriteFailureResponse(err.Error(), w)
@@ -444,11 +440,7 @@ func (h *Handler) UpdateMyUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	session := hCtx.ValidSession
 	if session.UserID == 0 {
 		slog.Warn("Unknown user accessing UpdateMyPassword")
@@ -457,7 +449,7 @@ func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req := &UpdateMyPasswordRequest{}
-	err = ReadBodyAndValidate(r, req, UpdateMyPasswordValidationErrors)
+	err := ReadBodyAndValidate(r, req, UpdateMyPasswordValidationErrors)
 	if err != nil {
 		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
 		WriteFailureResponse(err.Error(), w)
@@ -506,11 +498,7 @@ func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetMySessions(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	session := hCtx.ValidSession
 	if session.UserID == 0 {
 		slog.Warn("Unknown user accessing GetMyHeats")
@@ -569,11 +557,7 @@ func (h *Handler) GetMySessions(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetMyHeats(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	session := hCtx.ValidSession
 	if session.UserID == 0 {
 		slog.Warn("Unknown user accessing GetMyHeats")
@@ -607,11 +591,7 @@ func (h *Handler) GetMyHeats(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetMyHeatStats(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	session := hCtx.ValidSession
 	if session.UserID == 0 {
 		slog.Warn("Unknown user accessing GetMyHeatStats")
@@ -651,11 +631,7 @@ func (h *Handler) GetMyHeatStats(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetMyBalance(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	session := hCtx.ValidSession
 	if session.UserID == 0 {
 		slog.Warn("Unknown user accessing GetMyBalance")
@@ -673,11 +649,7 @@ func (h *Handler) GetMyBalance(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetAllUsersShort(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	users, err := dbh.GetUsers( /*includeDeleted=*/ false)
 	if err != nil {
@@ -698,11 +670,7 @@ func (h *Handler) GetAllUsersShort(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetAllUsersDetailed(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	users, err := dbh.GetUsers( /*includeDeleted=*/ false)
 	if err != nil {
@@ -754,11 +722,7 @@ func (h *Handler) GetAllUsersDetailed(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetUserGroups(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	pricings, err := dbh.GetPricings()
 	if err != nil {
@@ -894,11 +858,7 @@ func (h *Handler) SetUserGroup(w http.ResponseWriter, r *http.Request, req SetUs
 }
 
 func (h *Handler) GetUserRoles(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	roles, err := dbh.GetUserRoles()
 	if err != nil {

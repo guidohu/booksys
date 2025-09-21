@@ -11,6 +11,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 
 // Override bootstrap styling
 import "booksys/assets/bootstrap/css/bootstrap-theme-bc.css";
+// import "./asset  s/bootstrap/css/bootstrap-theme-glass.css";
 import "booksys/assets/css/style.css";
 
 // Deactivate normal logging in production

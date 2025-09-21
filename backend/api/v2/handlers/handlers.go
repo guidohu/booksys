@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"server/config"
 	"server/database"
@@ -30,6 +29,7 @@ const (
 type HandlerCtx struct {
 	ValidSession *database.BrowserSession
 	Database     database.Database
+	Config       *config.Config
 }
 
 type Handler struct {
@@ -82,6 +82,15 @@ func (h *Handler) WithFlagGuarded(next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		next.ServeHTTP(w, r)
+	})
+}
+
+func (h *Handler) WithConfigContext(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		hCtx := GetHandlerContext(r)
+		hCtx.Config = h.config
+		ctxWithConfig := context.WithValue(r.Context(), HandlerContextKey, hCtx)
+		next.ServeHTTP(w, r.WithContext(ctxWithConfig))
 	})
 }
 
@@ -159,9 +168,6 @@ func (h *Handler) WithAuthentication(next http.HandlerFunc, requiredRole databas
 			ValidSession: session,
 			Database:     dbh,
 		})
-
-		// ctx := r.WithContext(context.WithValue(r.Context(), SessionContextKey, *session))
-
 		next.ServeHTTP(w, r.WithContext(ctxWithSessionAndHandler))
 	})
 }
@@ -174,15 +180,7 @@ type Next[T any] func(w http.ResponseWriter, r *http.Request, body T, hCtx *Hand
 // and error handling.
 func WithRequestBody[T any](next Next[T], validationErrorMessages ...map[string]string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Get handler context
-		hCtx, err := GetHandlerContext(w, r)
-		if err != nil {
-			slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-			w.WriteHeader(http.StatusInternalServerError)
-			WriteFailureResponse("Internal error.", w)
-			return
-		}
-
+		var err error
 		// Read and validate request body
 		var body T
 		if validationErrorMessages == nil {
@@ -197,7 +195,7 @@ func WithRequestBody[T any](next Next[T], validationErrorMessages ...map[string]
 		}
 
 		// Call the actual handler
-		next(w, r, body, hCtx)
+		next(w, r, body, GetHandlerContext(r))
 	}
 }
 
@@ -215,21 +213,18 @@ func GetSessionFromContext(r *http.Request) database.BrowserSession {
 	return r.Context().Value(SessionContextKey).(database.BrowserSession)
 }
 
-// GetHandlerContext returns the HandlerCtx in case it exists or an error in case it does not.
-// It directly sets a FailureResponse and sets the HTTP Status code to 500.
-func GetHandlerContext(w http.ResponseWriter, r *http.Request) (*HandlerCtx, error) {
+// GetHandlerContext returns the HandlerCtx, it returns an empty one in case non exists.
+func GetHandlerContext(r *http.Request) *HandlerCtx {
 	if r.Context().Value(HandlerContextKey) == nil {
-		slog.Warn("No handler context is available.")
-		w.WriteHeader(http.StatusInternalServerError)
-		WriteFailureResponse("Internal error.", w)
-		return nil, fmt.Errorf("no handler context is available")
+		return &HandlerCtx{}
 	}
-	return r.Context().Value(HandlerContextKey).(*HandlerCtx), nil
+	return r.Context().Value(HandlerContextKey).(*HandlerCtx)
 }
 
 func ReadBodyAndValidate(r *http.Request, s any, errorMap ...map[string]string) error {
+	hCtx := GetHandlerContext(r)
 	// Get the content of the body
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		slog.Warn("Cannot read the request body", slog.String("error", err.Error()))
 		return err
@@ -252,6 +247,16 @@ func ReadBodyAndValidate(r *http.Request, s any, errorMap ...map[string]string) 
 	validate.RegisterValidation("expensetype", customvalidator.ExpenseType)
 	validate.RegisterValidation("tableid", customvalidator.TableID)
 	validate.RegisterValidation("currency", customvalidator.Currency)
+	validate.RegisterValidation("uploadfile", func(fl validator.FieldLevel) bool {
+		if hCtx.Config == nil {
+			slog.Error("uploadfile validator called without configuration access.")
+			return false
+		}
+		path, _ := hCtx.Config.GetString("http.uploadpath")
+		hCtx.Config.GetString("http.uploadpath")
+		return customvalidator.UploadedFilePath(fl, path)
+	})
+
 	err = validate.Struct(s)
 	if err != nil {
 		slog.Warn("Struct does not validate", slog.String("error", err.Error()))

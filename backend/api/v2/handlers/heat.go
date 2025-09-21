@@ -116,11 +116,7 @@ func (h *Handler) AddHeat(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("Invalid request.", w)
 		return
 	}
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	err = h.addHeat(dbh, *req)
 	if err != nil {

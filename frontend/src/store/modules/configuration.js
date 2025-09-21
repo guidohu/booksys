@@ -198,6 +198,7 @@ const mutations = {
     state.fuelPaymentType = value.fuel_payment_type;
     state.myNautiqueEnabled = value.mynautique_enabled;
     state.myNautiqueBoatId = value.mynautique_boat_id;
+    state.url = value.url;
     console.log("admin configuration set to", value);
   },
   setRecaptchaKey(state, response) {

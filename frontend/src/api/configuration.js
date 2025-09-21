@@ -65,6 +65,7 @@ export default class Configuration {
       recaptcha_privatekey: params.recaptcha_privatekey,
       recaptcha_publickey: params.recaptcha_publickey,
       mynautique_enabled: params.mynautique_enabled,
+      url: params.url,
     };
 
     if (params.mynautique_enabled === true) {

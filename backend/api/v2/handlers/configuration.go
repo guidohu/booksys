@@ -26,7 +26,7 @@ type PublicConfigurationMessage struct {
 	LocationLongitude      float32 `json:"location_longitude" validate:"required,longitude"`
 	LocationMap            string  `json:"location_map" validate:"omitempty,googlemapsurl"`
 	LocationTimeZone       string  `json:"location_time_zone" validate:"required"`
-	LogoFilePath           string  `json:"logo_file" validate:"omitempty,filepath"`                                                      // TODO: validator for uploaded file | check if really needed
+	LogoFilePath           string  `json:"logo_file" validate:"omitempty,filepath"`
 	MyNautiqueEnabled      bool    `json:"mynautique_enabled" validate:"omitempty,boolean"`                                              // check if really needed
 	MyNautiqueFuelCapacity int     `json:"mynautique_fuel_capacity" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=1"` // check if really needed
 	MyNautiqueBoatID       int     `json:"mynautique_boat_id" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=1"`       // required to query mynautique telemetry
@@ -46,7 +46,7 @@ type ConfigurationMessage struct {
 	LocationLongitude      float32 `json:"location_longitude" validate:"required,longitude"`
 	LocationMap            string  `json:"location_map" validate:"omitempty,googlemapsurl"`
 	LocationTimeZone       string  `json:"location_time_zone" validate:"required"`
-	LogoFilePath           string  `json:"logo_file" validate:"omitempty,filepath"` // TODO: validator for uploaded file
+	LogoFilePath           string  `json:"logo_file" validate:"omitempty,uploadfile"`
 	MyNautiqueBoatID       int     `json:"mynautique_boat_id" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=10"`
 	MyNautiqueEnabled      bool    `json:"mynautique_enabled" validate:"omitempty,boolean"`
 	MyNautiqueFuelCapacity int     `json:"mynautique_fuel_capacity" validate:"required_if=MyNautiqueEnabled true,omitempty,number,gt=10"`
@@ -62,6 +62,7 @@ type ConfigurationMessage struct {
 	SMTPSender             string  `json:"smtp_sender" validate:"omitempty,required_with=SMTPSender,email"`
 	SMTPServer             string  `json:"smtp_server" validate:"required_with=SMTPSender"`
 	SMTPUsername           string  `json:"smtp_username" validate:"required_with=SMTPSender"`
+	URL                    string  `json:"url" validate:"omitempty,fqdn"`
 }
 
 type ConfigSource int
@@ -102,6 +103,7 @@ var ConfigurationMessageValidationErrors = map[string]string{
 	"SMTPSender":             "SMTP sender is not a valid email address.",
 	"SMTPServer":             "SMTP server is not a valid  address.",
 	"SMTPUsername":           "No or invalid SMTP username provided",
+	"URL":                    "URL is not a valid domain name such as `www.example.com`",
 }
 
 type SetupDBConfigRequest struct {
@@ -261,6 +263,7 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 	smtpSender, _ := h.config.GetString("smtp.sender")
 	smtpServer, _ := h.config.GetString("smtp.server")
 	smtpUsername, _ := h.config.GetString("smtp.username")
+	url, _ := h.config.GetString("url")
 
 	resp := &ConfigurationMessage{
 		Currency:               currency,
@@ -287,6 +290,7 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 		SMTPSender:             smtpSender,
 		SMTPServer:             smtpServer,
 		SMTPUsername:           smtpUsername,
+		URL:                    url,
 	}
 	WriteSuccessResponse("configuration", resp, w)
 }
@@ -394,6 +398,10 @@ func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request, req C
 			Property: "smtp.username",
 			Value:    req.SMTPUsername,
 		},
+		{
+			Property: "url",
+			Value:    req.URL,
+		},
 	}
 	dbh := hCtx.Database
 	err := dbh.UpdateOrInsertPropertyValues(props)
@@ -401,6 +409,10 @@ func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request, req C
 		slog.Warn("Cannot update configuration", slog.String("error", err.Error()))
 		WriteFailureResponse(err.Error(), w)
 		return
+	}
+	err = h.config.ReadConfigProperties()
+	if err != nil {
+		slog.Warn("Cannot read configuration properties to config representation", slog.String("error", err.Error()))
 	}
 
 	WriteSuccessResponse("config updated", nil, w)

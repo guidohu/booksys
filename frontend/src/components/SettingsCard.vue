@@ -27,6 +27,13 @@
           timezone defined by these settings, also sunrise and sunset will be
           calculated based on these settings.
         </div>
+        <input-text
+          id="url"
+          label="URL"
+          description="Define the URL of this application. Used for links and notifications."
+          size="small"
+          v-model="form.url"
+        />
         <InputSelect
           :options="allTimezones"
           v-model="form.timezone"
@@ -321,6 +328,7 @@ function getSanitizedConfiguration() {
     mynautique_password: v.myNautiquePassword,
     mynautique_boat_id: v.myNautiqueBoatId,
     mynautique_fuel_capacity: v.myNautiqueFuelCapacity,
+    url: v.url,
   };
 
   return newConfiguration;
@@ -383,6 +391,7 @@ function setFormDefaults(defaultValues) {
     myNautiquePassword: defaultValues.mynautique_password,
     myNautiqueBoatId: defaultValues.mynautique_boat_id,
     myNautiqueFuelCapacity: defaultValues.mynautique_fuel_capacity,
+    url: defaultValues.url,
   };
 }
 

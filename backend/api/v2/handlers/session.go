@@ -343,8 +343,7 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request, req A
 				s,
 				emailConfig.Sender,
 				"You are invited for a session on the lake.",
-				// TODO: make the URL configurable.
-				"www.wakeandsurf.ch",
+				h.getURLOrEmpty(),
 			)
 			if err != nil {
 				slog.Error("Cannot send session notification email", slog.String("error", err.Error()))
@@ -411,14 +410,18 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request, 
 			s,
 			emailConfig.Sender,
 			"Session has been cancelled.",
-			// TODO: make the URL configurable.
-			"www.wakeandsurf.ch",
+			h.getURLOrEmpty(),
 		)
 		if err != nil {
 			slog.Error("Cannot send session cancellation email", slog.String("error", err.Error()))
 		}
 	}
 	WriteSuccessResponse("user removed", nil, w)
+}
+
+func (h *Handler) getURLOrEmpty() string {
+	url, _ := h.config.GetString("url")
+	return url
 }
 
 func (h *Handler) RemoveMyUserFromSession(w http.ResponseWriter, r *http.Request, req RemoveSessionMyUserRequest, hCtx *HandlerCtx) {

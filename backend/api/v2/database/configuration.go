@@ -45,6 +45,7 @@ var AllowedProperties = map[string]interface{}{
 	"business.day.end":            nil,
 	"business.day.startatsunrise": nil,
 	"business.day.endatsunset":    nil,
+	"url":                         nil,
 }
 
 type MyNautiqueConfiguration struct {

@@ -84,11 +84,7 @@ var AddTransactionValidationErrors = map[string]string{
 }
 
 func (h *Handler) GetAccountingYears(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	years, err := dbh.GetYears()
 	if err != nil {
@@ -105,11 +101,7 @@ func (h *Handler) GetAccountingYears(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetExpenseTypes(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	expenseTypes, err := dbh.GetExpenseTypes()
 	if err != nil {
@@ -124,11 +116,7 @@ func (h *Handler) GetExpenseTypes(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetIncomeTypes(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	expenseTypes, err := dbh.GetExpenseTypes()
 	if err != nil {

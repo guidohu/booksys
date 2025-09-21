@@ -10,11 +10,7 @@ import (
 type GetLogsResponse []database.Log
 
 func (h *Handler) GetLogs(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	currency, _ := h.config.GetString("currency")
 	if currency == "" {

@@ -129,11 +129,7 @@ func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 
 	// Check if we know of that session and whether it is not expired yet
@@ -158,13 +154,9 @@ func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 
 // Logout logs out a user
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
-	err = dbh.DeleteBrowserSession(*hCtx.ValidSession)
+	err := dbh.DeleteBrowserSession(*hCtx.ValidSession)
 	if err != nil {
 		slog.Error("Cannot delete browser session", slog.String("error", err.Error()))
 	}
@@ -175,11 +167,7 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) User(w http.ResponseWriter, r *http.Request) {
-	hCtx, err := GetHandlerContext(w, r)
-	if err != nil {
-		slog.Warn("Cannot get handler context", slog.String("error", err.Error()))
-		return
-	}
+	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	user, err := dbh.GetUserById(hCtx.ValidSession.UserID)
 	if err != nil {

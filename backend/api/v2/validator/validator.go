@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"path/filepath"
 	"regexp"
 	"server/database"
 	"server/validator/currency"
@@ -9,6 +10,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/exp/slog"
 )
+
+var hexRegex = regexp.MustCompile("^[0-9a-fA-F]+$")
 
 // GoogleMapsURL is a custom validator for `googlemapsurl` tag
 func GoogleMapsURL(fl validator.FieldLevel) bool {
@@ -81,4 +84,24 @@ func TableID(fl validator.FieldLevel) bool {
 // Currency checks if the currency is an ISO4217 code.
 func Currency(fl validator.FieldLevel) bool {
 	return currency.IsCurrency(fl.Field().String())
+}
+
+// UploadFilePath sanitizes the file path to be safe for usage
+// within the app.
+func UploadedFilePath(fl validator.FieldLevel, baseDir string) bool {
+	// Safe filename:
+	// - filename (extension removed) only contains hexadecimal characters.
+	filename := strings.TrimSuffix(fl.Field().String(), filepath.Ext(fl.Field().String()))
+	if !hexRegex.MatchString(filename) {
+		return false
+	}
+	// No directory traversal tricks.
+	sanitizedPath := filepath.Join(baseDir, fl.Field().String())
+	sanitizedPath = filepath.Clean(sanitizedPath)
+	finalPath, err := filepath.Abs(sanitizedPath)
+	if err != nil {
+		return false
+	}
+	absBaseDir, _ := filepath.Abs(baseDir)
+	return strings.HasPrefix(finalPath, absBaseDir)
 }

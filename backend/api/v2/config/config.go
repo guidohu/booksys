@@ -57,52 +57,6 @@ type MyNautique struct {
 	APIKey string `yaml:"api.key"`
 }
 
-// GetKeys returns a sorted list of all the configuration fields that are supported by
-// the Configuration struct.
-func GetKeys() []string {
-	var c *Configuration
-	tags := yaml.GetKeys(c, "")
-	sort.Strings(tags)
-	return tags
-}
-
-// GetKeysMap returns a map that contains all the supported keys for the Configuration
-// struct.
-func GetKeysMap() map[string]bool {
-	keys := GetKeys()
-	kmap := make(map[string]bool)
-	for _, k := range keys {
-		kmap[k] = true
-	}
-	return kmap
-}
-
-// IsDBConfigured returns false in case any of the mandatory database settings is not provided
-// through the configuration.
-func (c *Config) IsDBConfigured() bool {
-	if !c.IsSet("database.protocol") {
-		slog.Info("Database protocol is not set in configuration")
-		return false
-	}
-	if !c.IsSet("database.user") {
-		slog.Info("Databse user is not set in configuration")
-		return false
-	}
-	if !c.IsSet("database.host") {
-		slog.Info("Database host is not set in configuration")
-		return false
-	}
-	if !c.IsSet("database.port") {
-		slog.Info("Database port is not set in configuration")
-		return false
-	}
-	if !c.IsSet("database.dbname") {
-		slog.Info("Database name is not set in configuration")
-		return false
-	}
-	return true
-}
-
 type ConfigSource int
 
 const (
@@ -155,6 +109,54 @@ var ConfigDefaults map[string]string = map[string]string{
 	"database.port":                 "3306",
 	"database.dbname":               "",
 	"mynautique.api.key":            "",
+}
+
+// GetKeys returns a sorted list of all the configuration fields that are supported by
+// the Configuration struct.
+func GetKeys() []string {
+	var c *Configuration
+	tags := yaml.GetKeys(c, "")
+	sort.Strings(tags)
+	return tags
+}
+
+// GetKeysMap returns a map that contains all the supported keys for the Configuration
+// struct.
+func GetKeysMap() map[string]bool {
+	keys := GetKeys()
+	kmap := make(map[string]bool)
+	for _, k := range keys {
+		kmap[k] = true
+	}
+	return kmap
+}
+
+// IsDBConfigured returns false in case any of the mandatory database settings is not provided
+// through the configuration.
+func (c *Config) IsDBConfigured() bool {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	if !c.IsSet("database.protocol") {
+		slog.Info("Database protocol is not set in configuration")
+		return false
+	}
+	if !c.IsSet("database.user") {
+		slog.Info("Databse user is not set in configuration")
+		return false
+	}
+	if !c.IsSet("database.host") {
+		slog.Info("Database host is not set in configuration")
+		return false
+	}
+	if !c.IsSet("database.port") {
+		slog.Info("Database port is not set in configuration")
+		return false
+	}
+	if !c.IsSet("database.dbname") {
+		slog.Info("Database name is not set in configuration")
+		return false
+	}
+	return true
 }
 
 // NewConfig creates a new Config instance that is initialized with the
@@ -289,6 +291,8 @@ func (c *Config) SetConfigFileValue(key string, value interface{}) error {
 	if _, ok := allowedKeys[key]; !ok {
 		return fmt.Errorf("cannot set config key/value pair, invalid key %s", key)
 	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	c.file.Set(key, value)
 	return nil
 }
@@ -307,6 +311,9 @@ func (c *Config) SetPropertyValue(key string, value string) error {
 	}
 	defer done()
 	err := db.UpdateOrInsertPropertyValues(properties)
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	c.readConfigProperties()
 	return err
 }
 
@@ -318,6 +325,8 @@ func (c *Config) WriteConfigFile() error {
 	if location == "" {
 		return fmt.Errorf("no config file path provided to store config")
 	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	if _, err := os.Stat(location); err != nil {
 		if os.IsNotExist(err) {
 			err = os.MkdirAll(filepath.Dir(location), 0755)
@@ -480,6 +489,8 @@ func (c *Config) GetBool(key string) bool {
 
 // IsSet returns whether a given configuration value is set.
 func (c *Config) IsSet(key string) bool {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	_, propOk := c.properties[key]
 	switch {
 	case c.flags.IsSet(key):
