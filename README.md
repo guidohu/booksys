@@ -19,7 +19,7 @@ It is strongly recommended to run the application behind a simple reverse proxy 
 
 To have a simple deployment scenario it is suggested to run the application in a docker container as described below.
 
-### Setup (TODO rewrite)
+### Setup (TODO outdated)
 To run it on your local machine, follow these steps:
 
 ```
