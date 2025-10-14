@@ -16,9 +16,7 @@ COPY api/v2 api/v2
 COPY api/v2/sample_config.yaml /sample_config.yaml
 RUN cd api/v2; go mod download && go mod verify
 RUN cd api/v2; go build -v -a -trimpath -o /build/app \
-    -ldflags="-X ${MODULE_PATH}.Release=${BOOKSYS_VERSION} \
-              -X ${MODULE_PATH}.Commit=${BOOKSYS_COMMIT} \
-              -X ${MODULE_PATH}.BuildDate=${BOOKSYS_DATE}" \
+    -ldflags="-X ${MODULE_PATH}.Release=${BOOKSYS_VERSION} -X ${MODULE_PATH}.Commit=${BOOKSYS_COMMIT} -X ${MODULE_PATH}.BuildDate=${BOOKSYS_DATE}" \
     ./main.go
 
 FROM alpine:3.21 AS final
