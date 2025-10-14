@@ -18,6 +18,7 @@ import (
 	"server/config"
 	"server/database"
 	"server/handlers"
+	"server/version"
 
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
@@ -47,8 +48,11 @@ var (
 	databaseUser     = pflag.String("database_user", "", "The user for the DB connection.")
 	// MyNautique settings
 	myNautiqueAPIKey = pflag.String("mynautique_api_key", "", "The API key for the mynautique integration.")
+	// Display settings
+	environment = pflag.String("environment", "", "The environment this app is running as.")
 	// Additional control flags
-	printConfig = pflag.Bool("print_config", false, "Prints the config an exits.")
+	printConfig  = pflag.Bool("print_config", false, "Prints the config an exits.")
+	printVersion = pflag.Bool("version", false, "Prints the version an exits.")
 )
 
 func getFlags(v *viper.Viper) {
@@ -65,6 +69,7 @@ func getFlags(v *viper.Viper) {
 	v.BindPFlag("database.port", pflag.Lookup("database_port"))
 	v.BindPFlag("database.dbname", pflag.Lookup("database_dbname"))
 	v.BindPFlag("mynautique.api.key", pflag.Lookup("mynautique_api_key"))
+	v.BindPFlag("environment", pflag.Lookup("environment"))
 	pflag.Parse()
 }
 
@@ -232,12 +237,23 @@ func registerHandlers(mux *http.ServeMux, h *handlers.Handler) {
 	mux.Handle("/debug/vars", expvar.Handler())
 }
 
+func printVersionAndExit() {
+	version.PrintVersion()
+	os.Exit(0)
+}
+
 func main() {
 	setupLogger()
 
-	// Get startup configuration.
 	v := viper.New()
 	getFlags(v)
+
+	// If requested, print version and exit.
+	if *printVersion {
+		printVersionAndExit()
+	}
+
+	// Get startup configuration.
 	conf, err := config.NewConfig(v)
 	if err != nil {
 		slog.Error("Invalid config", slog.String("error", err.Error()))

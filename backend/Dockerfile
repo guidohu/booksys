@@ -1,5 +1,10 @@
 FROM golang:1.24-alpine AS builder
 
+ARG BOOKSYS_VERSION
+ARG BOOKSYS_COMMIT
+ARG BOOKSYS_DATE
+ARG MODULE_PATH="server"
+
 # Set environment variables
 ENV CGO_ENABLED=0 \
     GOOS=linux \
@@ -10,7 +15,11 @@ WORKDIR /build
 COPY api/v2 api/v2
 COPY api/v2/sample_config.yaml /sample_config.yaml
 RUN cd api/v2; go mod download && go mod verify
-RUN cd api/v2; go build -v -o /build/app ./main.go
+RUN cd api/v2; go build -v -a -trimpath -o /build/app \
+    -ldflags="-X ${MODULE_PATH}.Release=${BOOKSYS_VERSION} \
+              -X ${MODULE_PATH}.Commit=${BOOKSYS_COMMIT} \
+              -X ${MODULE_PATH}.BuildDate=${BOOKSYS_DATE}" \
+    ./main.go
 
 FROM alpine:3.21 AS final
 

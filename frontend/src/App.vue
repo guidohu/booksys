@@ -6,8 +6,10 @@
     />
     <router-view id="router-view" v-else />
     <footer class="legal-footer d-none d-lg-block">
-      developed 2013-2025 by Guido Hungerbuehler
+      developed 2013-2025 by Guido Hungerbuehler 
       <a href="https://github.com/guidohu/booksys">Find me on Github</a>
+      {{ environment ? "Environment: " + environment + " ": "" }}
+      {{ commit ? "Git-Commit: " + commit + " " : "" }}
     </footer>
   </div>
 </template>
@@ -16,8 +18,8 @@
 import { ref, computed, watch, onMounted } from "vue";
 import { useStore } from "vuex";
 import { useRouter } from "vue-router";
-import { getBackendStatus } from "booksys/api/backend";
-import AlertMessage from "booksys/components/AlertMessage.vue";
+import { getBackendStatus } from "./api/backend";
+import AlertMessage from "./components/AlertMessage.vue";
 
 const store = useStore();
 const router = useRouter();
@@ -27,6 +29,8 @@ const backendReachable = ref(true);
 const backendNotReachableAlertMsg = ref(
   "The webpage is currently not working due to the backend not being available. Please let the Administrator know and this will get fixed as soon as possible. You might try to simply refresh the page if you feel lucky.",
 );
+const environment = ref("")
+const commit = ref("")
 
 const isLoggedIn = computed(() => store.getters["loginStatus/isLoggedIn"]);
 
@@ -54,6 +58,8 @@ onMounted(() => {
   // it is up and configured
   getBackendStatus()
     .then((status) => {
+      environment.value = status.environment
+      commit.value = status.commit
       if (!status.configDb || !status.usersExist) {
         console.log("App Setup Done: no (automated forward to setup)");
         if (router.currentRoute.value.path !== "/setup") {

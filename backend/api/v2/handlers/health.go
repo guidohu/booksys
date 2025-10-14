@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"os"
 
+	"server/version"
+
 	"golang.org/x/exp/slog"
 )
 
@@ -16,10 +18,24 @@ type HealthStatusResponse struct {
 	DBReachable bool `json:"dbReachable"`
 	// True if users are present in the users table.
 	UsersExist bool `json:"usersExist"`
+	// Version is the backend version.
+	Version string `json:"version"`
+	// Commit is the git commit.
+	Commit string `json:"commit"`
+	// BuildDate is the date of this build.
+	Built string `json:"buildDate"`
+	// Environment is the environment this application is running under (e.g. prod, dev)
+	Environment string `json:"environment"`
 }
 
 func (h *Handler) HealthStatus(w http.ResponseWriter, r *http.Request) {
-	healthStatus := HealthStatusResponse{}
+	environment, _ := h.config.GetString("environment")
+	healthStatus := HealthStatusResponse{
+		Version:     version.Release,
+		Commit:      version.Commit,
+		Built:       version.BuildDate,
+		Environment: environment,
+	}
 
 	// Check if configuration file exists or if one
 	// should exist.
