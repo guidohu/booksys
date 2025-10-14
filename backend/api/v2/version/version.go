@@ -10,7 +10,7 @@ var (
 	Release = "unknown"
 
 	// Commit holds the short git commit hash
-	Commit = "none"
+	Commit = "unknown"
 
 	// BuildDate holds the date the binary was built
 	BuildDate = "unknown"
