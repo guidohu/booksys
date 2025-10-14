@@ -6,8 +6,8 @@ import (
 
 // BuildDate, Commit, and Release are populated by go build -ldflags
 var (
-	// Release holds the SemVer version tag (e.g., "v1.2.3")
-	Release = "development"
+	// Release holds the version tag (e.g., "v1.2.3")
+	Release = "unknown"
 
 	// Commit holds the short git commit hash
 	Commit = "none"
