@@ -5,11 +5,13 @@
       :alert-message="backendNotReachableAlertMsg"
     />
     <router-view id="router-view" v-else />
-    <footer class="legal-footer d-none d-lg-block">
+    <footer class="legal-footer d-none d-lg-block text-end">
+      {{ environment ? "Environment: " + environment + " |": "" }}
+      <br v-if="environment.length > 0"></br>
+      {{ commit ? "Git-Commit: " + commit + " |" : "" }}
+      <br v-if="commit.length > 0"></br>
       developed 2013-2025 by Guido Hungerbuehler 
       <a href="https://github.com/guidohu/booksys">Find me on Github</a>
-      {{ environment ? "Environment: " + environment + " ": "" }}
-      {{ commit ? "Git-Commit: " + commit + " " : "" }}
     </footer>
   </div>
 </template>
