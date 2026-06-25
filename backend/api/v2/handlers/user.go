@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"crypto/rand"
 	"errors"
 	"math"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"server/database"
 	"server/notifications/email"
@@ -15,6 +16,14 @@ import (
 	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
 )
+
+func secureRandomInt(max int64) (int, error) {
+	n, err := rand.Int(rand.Reader, big.NewInt(max))
+	if err != nil {
+		return 0, err
+	}
+	return int(n.Int64()), nil
+}
 
 type SignUpRequest struct {
 	Username       string `json:"username" validate:"required,excludesall=!<>{}[]()^"`
@@ -279,10 +288,15 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request, req SignUpReque
 	}
 
 	// Crypt the password
-	salt := rand.Intn(math.MaxUint16)
+	salt, err := secureRandomInt(math.MaxUint16)
+	if err != nil {
+		slog.Warn("Password salt could not be generated", slog.String("error", err.Error()))
+		WriteFailureResponse("user cannot be created, please contact the administrator", w)
+		return
+	}
 	hashedPassword, err := hash.CryptSha512(hash.Sha256(req.Password), strconv.Itoa(salt))
 	if err != nil {
-		slog.Warn("Password hash could no be generated", slog.String("error", err.Error()))
+		slog.Warn("Password hash could not be generated", slog.String("error", err.Error()))
 		WriteFailureResponse("user cannot be created, please contact the administrator", w)
 		return
 	}
@@ -477,10 +491,15 @@ func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// update new password
-	salt := rand.Intn(math.MaxUint16)
+	salt, err := secureRandomInt(math.MaxUint16)
+	if err != nil {
+		slog.Warn("Password salt could not be generated", slog.String("error", err.Error()))
+		WriteFailureResponse("password cannot be changed", w)
+		return
+	}
 	newPasswordHash, err := hash.CryptSha512(hash.Sha256(req.PasswordNew), strconv.Itoa(salt))
 	if err != nil {
-		slog.Warn("Password hash could no be generated", slog.String("error", err.Error()))
+		slog.Warn("Password hash could not be generated", slog.String("error", err.Error()))
 		WriteFailureResponse("password cannot be changed", w)
 		return
 	}
@@ -964,9 +983,15 @@ func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request, 
 	}
 
 	// Generate token.
+	tokenInt, err := secureRandomInt(999999)
+	if err != nil {
+		slog.Warn("Password reset token could not be generated", slog.String("error", err.Error()))
+		WriteFailureResponse("Password reset cannot be initiated.", w)
+		return
+	}
 	tokenEntry := database.PasswordReset{
 		UserID:    user.ID,
-		Token:     strconv.Itoa(rand.Intn(999999)),
+		Token:     strconv.Itoa(tokenInt),
 		Timestamp: time.Now().Add(1 * time.Hour),
 		Valid:     true,
 	}
@@ -1040,10 +1065,15 @@ func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request, r
 	// Create new password hash and
 	// update new password.
 	// Note: We hash the passworrd, this was previously done in the UI.
-	salt := rand.Intn(math.MaxUint16)
+	salt, err := secureRandomInt(math.MaxUint16)
+	if err != nil {
+		slog.Warn("Password salt could not be generated", slog.String("error", err.Error()))
+		WriteFailureResponse("Internal error. Password cannot be changed.", w)
+		return
+	}
 	newPasswordHash, err := hash.CryptSha512(hash.Sha256(req.Password), strconv.Itoa(salt))
 	if err != nil {
-		slog.Warn("Password hash could no be generated", slog.String("error", err.Error()))
+		slog.Warn("Password hash could not be generated", slog.String("error", err.Error()))
 		WriteFailureResponse("Internal error. Password cannot be changed.", w)
 		return
 	}
