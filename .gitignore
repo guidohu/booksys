@@ -14,3 +14,4 @@ backend/api/v2/main
 !backend/api/v2/main.go
 frontend/bundle-analysis.html
 frontend/package-lock.json
+backend/scratch
