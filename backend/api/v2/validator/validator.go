@@ -2,12 +2,14 @@ package validator
 
 import (
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"server/database"
 	"server/validator/currency"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
 )
 
@@ -105,3 +107,23 @@ func UploadedFilePath(fl validator.FieldLevel, baseDir string) bool {
 	absBaseDir, _ := filepath.Abs(baseDir)
 	return strings.HasPrefix(finalPath, absBaseDir)
 }
+
+// Decimal checks if the provided field is a valid decimal.Decimal (or *decimal.Decimal) value or string representation.
+func Decimal(fl validator.FieldLevel) bool {
+	field := fl.Field()
+	if field.Kind() == reflect.Ptr {
+		if field.IsNil() {
+			return true
+		}
+		field = field.Elem()
+	}
+	if _, ok := field.Interface().(decimal.Decimal); ok {
+		return true
+	}
+	if field.Kind() == reflect.String {
+		_, err := decimal.NewFromString(field.String())
+		return err == nil
+	}
+	return false
+}
+

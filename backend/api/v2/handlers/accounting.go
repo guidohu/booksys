@@ -68,7 +68,7 @@ var DeleteTransactionValidationErrors = map[string]string{
 }
 
 type AddTransactionRequest struct {
-	Amount  *decimal.Decimal `json:"amount" validate:"numeric"`
+	Amount  *decimal.Decimal `json:"amount" validate:"decimal"`
 	Comment string           `json:"comment"`
 	Date    string           `json:"date" validate:"required"`
 	TypeID  uint64           `json:"type_id" validate:"expensetype"`
