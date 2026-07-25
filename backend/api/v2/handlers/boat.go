@@ -27,8 +27,8 @@ type GetEngineHourLatestResponse struct {
 type GetEngineHoursResponse []GetEngineHourLatestResponse
 
 type UpdateEngineHoursRequest struct {
-	BeforeHours decimal.Decimal `json:"engine_hours_before" validate:"required,decimal"`
-	AfterHours  decimal.Decimal `json:"engine_hours_after,omitempty" validate:"omitempty,decimal"`
+	BeforeHours decimal.Decimal `json:"engine_hours_before" validate:"required"`
+	AfterHours  decimal.Decimal `json:"engine_hours_after,omitempty" validate:"omitempty"`
 	UsageType   uint8           `json:"type" validate:"required,sessiontype"`
 	UserID      uint            `json:"user_id" validate:"required,numeric"`
 }
@@ -66,9 +66,9 @@ type GetFuelEntriesResponse struct {
 }
 
 type AddFuelEntryRequest struct {
-	Cost        *decimal.Decimal `json:"cost" validate:"required,decimal"`
-	EngineHours *decimal.Decimal `json:"engine_hours" validate:"required,decimal"`
-	Liters      *decimal.Decimal `json:"liters" validate:"required,decimal"`
+	Cost        *decimal.Decimal `json:"cost" validate:"required"`
+	EngineHours *decimal.Decimal `json:"engine_hours" validate:"required"`
+	Liters      *decimal.Decimal `json:"liters" validate:"required"`
 	UserID      uint             `json:"user_id" validate:"required"`
 }
 
@@ -85,10 +85,10 @@ var FuelEntryValidationErrors = map[string]string{
 
 type ChangeFuelEntryRequest struct {
 	ID           uint             `json:"id"`
-	CostNet      *decimal.Decimal `json:"cost" validate:"required,decimal"`
-	CostGros     *decimal.Decimal `json:"cost_brutto,omitempty" validate:"omitempty,decimal"`
-	EngineHours  *decimal.Decimal `json:"engine_hours" validate:"required,decimal"`
-	Liters       *decimal.Decimal `json:"liters" validate:"required,decimal"`
+	CostNet      *decimal.Decimal `json:"cost" validate:"required"`
+	CostGros     *decimal.Decimal `json:"cost_brutto,omitempty" validate:"omitempty"`
+	EngineHours  *decimal.Decimal `json:"engine_hours" validate:"required"`
+	Liters       *decimal.Decimal `json:"liters" validate:"required"`
 	IsDiscounted bool             `json:"is_discounted"`
 }
 
@@ -108,7 +108,7 @@ type GetMaintenanceEntriesResponse struct {
 
 type AddMaintenanceEntryRequest struct {
 	Description string          `json:"description" validate:"required"`
-	EngineHours decimal.Decimal `json:"engine_hours" validate:"required,decimal"`
+	EngineHours decimal.Decimal `json:"engine_hours" validate:"required"`
 	UserID      uint            `json:"user_id" validate:"required"`
 }
 

@@ -247,7 +247,6 @@ func ReadBodyAndValidate(r *http.Request, s any, errorMap ...map[string]string) 
 	validate.RegisterValidation("expensetype", customvalidator.ExpenseType)
 	validate.RegisterValidation("tableid", customvalidator.TableID)
 	validate.RegisterValidation("currency", customvalidator.Currency)
-	validate.RegisterValidation("decimal", customvalidator.Decimal)
 	validate.RegisterValidation("uploadfile", func(fl validator.FieldLevel) bool {
 		if hCtx.Config == nil {
 			slog.Error("uploadfile validator called without configuration access.")

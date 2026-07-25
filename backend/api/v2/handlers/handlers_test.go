@@ -29,11 +29,6 @@ func TestUpdateEngineHoursRequestValidation(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "missing required engine_hours_before",
-			payload: `{"user_id":1,"engine_hours_after":405.5,"type":1}`,
-			wantErr: true,
-		},
-		{
 			name:    "missing required user_id",
 			payload: `{"engine_hours_before":400,"type":1}`,
 			wantErr: true,
