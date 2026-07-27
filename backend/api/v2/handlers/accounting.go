@@ -68,7 +68,7 @@ var DeleteTransactionValidationErrors = map[string]string{
 }
 
 type AddTransactionRequest struct {
-	Amount  *decimal.Decimal `json:"amount"`
+	Amount  *decimal.Decimal `json:"amount" validate:"required"`
 	Comment string           `json:"comment"`
 	Date    string           `json:"date" validate:"required"`
 	TypeID  uint64           `json:"type_id" validate:"expensetype"`
@@ -327,7 +327,7 @@ func (h *Handler) AddIncome(w http.ResponseWriter, r *http.Request, req AddTrans
 }
 
 func (h *Handler) AddExpense(w http.ResponseWriter, r *http.Request, req AddTransactionRequest, hCtx *HandlerCtx) {
-	expenseEntry := database.Income{
+	expenseEntry := database.Expense{
 		UserID:        uint(req.UserID),
 		Amount:        *req.Amount,
 		ExpenseTypeID: uint(req.TypeID),
@@ -368,7 +368,7 @@ func (h *Handler) AddExpense(w http.ResponseWriter, r *http.Request, req AddTran
 		}
 	}
 
-	err = dbh.AddIncome(expenseEntry)
+	err = dbh.AddExpense(expenseEntry)
 	if err != nil {
 		slog.Warn("Cannot add expense transaction", slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot write expense transaction to database because of an error.", w)
