@@ -295,7 +295,7 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request, req A
 
 	// check if all users are valid, skip invalid ones
 	// and the ones already listed in the session.
-	existingUsers := []uint{}
+	usersToAdd := []database.User{}
 	for _, userID := range req.UserIDs {
 		user, err := dbh.GetUserById(userID)
 		if err != nil {
@@ -310,25 +310,25 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request, req A
 			slog.Warn("User already exists in this session, do not add again", slog.Uint64("userID", uint64(userID)), slog.Uint64("sessionID", uint64(req.SessionID)))
 			continue
 		}
-		existingUsers = append(existingUsers, userID)
+		usersToAdd = append(usersToAdd, user)
 	}
 
-	if s.FreeSpaces < uint(len(existingUsers)) {
-		slog.Info("Session does not have enough capacity for all users.", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Uint64("free", uint64(s.FreeSpaces)), slog.Uint64("required", uint64(len(existingUsers))))
+	if s.FreeSpaces < uint(len(usersToAdd)) {
+		slog.Info("Session does not have enough capacity for all users.", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Uint64("free", uint64(s.FreeSpaces)), slog.Uint64("required", uint64(len(usersToAdd))))
 		WriteFailureResponse("There is not enough space to add all the users.", w)
 		return
 	}
 
 	// add existing users to session
-	for _, u := range existingUsers {
+	for _, u := range usersToAdd {
 		entry := database.UserToSession{
 			SessionID: s.ID,
-			UserID:    u,
+			UserID:    u.ID,
 			TimeAdded: time.Now(),
 		}
 		err = dbh.AddSessionToUserEntry(entry)
 		if err != nil {
-			slog.Warn("Cannot add user to session. Skipped", slog.Uint64("userID", uint64(u)), slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
+			slog.Warn("Cannot add user to session. Skipped", slog.Uint64("userID", uint64(u.ID)), slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
 		}
 
 		// Inform user about the session.
@@ -341,7 +341,7 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request, req A
 		if !emailConfig.Empty() {
 			client := email.NewClient(emailConfig)
 			err = client.SendUserAddedToSessionMessage(
-				sessionUsersMap[u],
+				u,
 				s,
 				emailConfig.Sender,
 				"You are invited for a session on the lake.",
@@ -375,16 +375,15 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request, 
 
 	// A user is not allowed to be removed from a session in case
 	// there are already heats.
-	session := hCtx.ValidSession
 	heats, err := dbh.GetUserHeatsBySession(req.SessionID, user.ID, 0)
 	if err != nil {
-		slog.Warn("Cannot get heats for session and user", slog.Uint64("session", uint64(req.SessionID)), slog.Uint64("user", uint64(session.UserID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot get heats for session and user", slog.Uint64("session", uint64(req.SessionID)), slog.Uint64("user", uint64(user.ID)), slog.String("error", err.Error()))
 		WriteFailureResponse("Cannot access users for the provided session.", w)
 		return
 	}
 	for _, heat := range heats {
-		if heat.UserID == session.UserID {
-			slog.Warn("Cannot delete user for session, user has heats assigned ", slog.Uint64("user", uint64(session.UserID)), slog.Uint64("session", uint64(req.SessionID)))
+		if heat.UserID == user.ID {
+			slog.Warn("Cannot delete user for session, user has heats assigned ", slog.Uint64("user", uint64(user.ID)), slog.Uint64("session", uint64(req.SessionID)))
 			WriteFailureResponse("Error, cannot remove user from session. The user has heats in this session.", w)
 			return
 		}

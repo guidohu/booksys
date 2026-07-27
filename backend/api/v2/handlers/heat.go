@@ -68,9 +68,13 @@ func (h *Handler) addHeat(dbh database.Database, heat AddHeatRequest) error {
 	// Check that session exists.
 	if heat.SessionID != 0 {
 		session, err := dbh.GetSession(heat.SessionID)
-		if err != nil || session.ID == 0 {
-			slog.Warn("Cannot find session", slog.Uint64("session", uint64(heat.SessionID)), slog.String("error", err.Error()))
-			return fmt.Errorf("cannot get pricing information for user")
+		if err != nil {
+			slog.Warn("Failed to retrieve session", slog.Uint64("session", uint64(heat.SessionID)), slog.Any("error", err))
+			return fmt.Errorf("cannot get pricing information for user: %w", err)
+		}
+		if session.ID == 0 {
+			slog.Warn("Session not found", slog.Uint64("session", uint64(heat.SessionID)))
+			return fmt.Errorf("cannot get pricing information for user: session not found")
 		}
 	}
 
@@ -170,8 +174,13 @@ func (h *Handler) ChangeHeat(w http.ResponseWriter, r *http.Request, req ChangeH
 
 	// get existing heat
 	heat, err := dbh.GetHeat(req.HeatID)
-	if err != nil || heat.ID == 0 {
-		slog.Warn("Cannot find existing heat", slog.Uint64("heat", uint64(req.HeatID)), slog.String("error", err.Error()))
+	if err != nil {
+		slog.Warn("Failed to retrieve existing heat", slog.Uint64("heat", uint64(req.HeatID)), slog.Any("error", err))
+		WriteFailureResponse("Cannot find existing heat.", w)
+		return
+	}
+	if heat.ID == 0 {
+		slog.Warn("Existing heat not found", slog.Uint64("heat", uint64(req.HeatID)))
 		WriteFailureResponse("Cannot find existing heat.", w)
 		return
 	}

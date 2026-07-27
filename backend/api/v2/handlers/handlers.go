@@ -140,8 +140,14 @@ func (h *Handler) WithAuthentication(next http.HandlerFunc, requiredRole databas
 			return
 		}
 		session, err := dbh.GetBrowserSession(cookie.Value)
-		if err != nil || session == nil {
-			slog.Warn("No session found for given cookie", slog.String("error", err.Error()))
+		if err != nil {
+			slog.Warn("Failed to retrieve session for given cookie", slog.Any("error", err))
+			w.WriteHeader(http.StatusUnauthorized)
+			WriteFailureResponse("not authenticated", w)
+			return
+		}
+		if session == nil {
+			slog.Warn("No session found for given cookie")
 			w.WriteHeader(http.StatusUnauthorized)
 			WriteFailureResponse("not authenticated", w)
 			return
@@ -287,7 +293,7 @@ func WriteFailureResponse(message string, w http.ResponseWriter) {
 		slog.Error("Cannot create a FailureResponse", slog.String("error", err.Error()))
 		http.Error(w, "failed to create failure response", http.StatusInternalServerError)
 	}
-	w.Header().Set("Conntent-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 	io.Copy(w, bytes.NewReader(j))
 }
 

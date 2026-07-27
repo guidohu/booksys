@@ -284,22 +284,31 @@ func (h *Handler) GetFuelEntries(w http.ResponseWriter, r *http.Request) {
 	var lastEngineHour decimal.Decimal
 	for i := len(fuelEntries) - 1; i >= 0; i-- {
 		e := fuelEntries[i]
+		// Liters and engine hours are nullable in the database, so they can
+		// be missing on older or incomplete entries.
+		var entryLiters, entryEngineHours decimal.Decimal
+		if e.Liters != nil {
+			entryLiters = *e.Liters
+		}
+		if e.EngineHours != nil {
+			entryEngineHours = *e.EngineHours
+		}
 		entry := GetFuelEntriesResponse{
 			ID:            e.ID,
 			CostNet:       e.Cost,
 			CostGros:      e.CostBrutto,
 			IsDiscounted:  e.IsDiscounted,
 			EngineHours:   e.EngineHours,
-			Liters:        *e.Liters,
+			Liters:        entryLiters,
 			Timestamp:     e.Timestamp.Unix(),
 			UserFirstName: e.User.FirstName,
 			UserLastName:  e.User.LastName,
 			UserID:        e.UserID,
 		}
 		if !lastEngineHour.IsZero() {
-			diffHours := e.EngineHours.Sub(lastEngineHour)
+			diffHours := entryEngineHours.Sub(lastEngineHour)
 			if !diffHours.IsNegative() {
-				liters, _ := e.Liters.Float64()
+				liters, _ := entryLiters.Float64()
 				hours, _ := diffHours.Float64()
 				var avgFuelPerHour float64 = 0
 				if hours > 0.001 {
@@ -309,7 +318,7 @@ func (h *Handler) GetFuelEntries(w http.ResponseWriter, r *http.Request) {
 				entry.AverageLitersPerHour = decimal.NewFromFloat(avgFuelPerHour)
 			}
 		}
-		lastEngineHour = *e.EngineHours
+		lastEngineHour = entryEngineHours
 		resp = append([]GetFuelEntriesResponse{entry}, resp...)
 	}
 	WriteSuccessResponse("fuel entries", resp, w)
