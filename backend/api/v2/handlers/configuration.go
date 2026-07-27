@@ -56,13 +56,16 @@ type ConfigurationMessage struct {
 	PaymentAccountComment  string  `json:"payment_account_comment"`
 	PaymentAccountIBAN     string  `json:"payment_account_iban" validate:"omitempty,printascii"`
 	PaymentAccountOwner    string  `json:"payment_account_owner"`
-	RecaptchaPrivateKey    string  `json:"recaptcha_privatekey" validate:"omitempty,recaptchakey,required_with=RecaptchaPublicKey"`
-	RecaptchaPublicKey     string  `json:"recaptcha_publickey" validate:"omitempty,recaptchakey,required_with=RecaptchaPrivateKey"`
-	SMTPPassword           string  `json:"smtp_password" validate:"omitempty"`
-	SMTPSender             string  `json:"smtp_sender" validate:"omitempty,required_with=SMTPSender,email"`
-	SMTPServer             string  `json:"smtp_server" validate:"required_with=SMTPSender"`
-	SMTPUsername           string  `json:"smtp_username" validate:"required_with=SMTPSender"`
-	URL                    string  `json:"url" validate:"omitempty,fqdn"`
+	// Note: required_with has to come before omitempty, otherwise omitempty
+	// short circuits the whole chain for an empty value and the key pair is
+	// never enforced.
+	RecaptchaPrivateKey string `json:"recaptcha_privatekey" validate:"required_with=RecaptchaPublicKey,omitempty,recaptchakey"`
+	RecaptchaPublicKey  string `json:"recaptcha_publickey" validate:"required_with=RecaptchaPrivateKey,omitempty,recaptchakey"`
+	SMTPPassword        string `json:"smtp_password" validate:"omitempty"`
+	SMTPSender          string `json:"smtp_sender" validate:"omitempty,required_with=SMTPSender,email"`
+	SMTPServer          string `json:"smtp_server" validate:"required_with=SMTPSender"`
+	SMTPUsername        string `json:"smtp_username" validate:"required_with=SMTPSender"`
+	URL                 string `json:"url" validate:"omitempty,fqdn"`
 }
 
 type ConfigSource int

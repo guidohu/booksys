@@ -54,7 +54,7 @@ func (h *Handler) GetBoatTelemetry(w http.ResponseWriter, r *http.Request, req G
 		return
 	}
 	config.Password, _ = h.config.GetString("mynautique.password")
-	if config.User == "" {
+	if config.Password == "" {
 		slog.Warn("mynautique password is missing but GetBoatInfo was called")
 		WriteFailureResponse("myNautique password missing", w)
 		return
