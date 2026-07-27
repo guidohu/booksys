@@ -1,4 +1,4 @@
-FROM golang:1.24-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 ARG BOOKSYS_VERSION
 ARG BOOKSYS_COMMIT
@@ -20,7 +20,7 @@ RUN cd api/v2; go build -v -a -trimpath -o /build/app \
     -ldflags="-X '${MODULE_PATH}/version.Release=${BOOKSYS_VERSION}' -X '${MODULE_PATH}/version.Commit=${BOOKSYS_COMMIT}' -X '${MODULE_PATH}/version.BuildDate=${BOOKSYS_DATE}'" \
     ./main.go
 
-FROM alpine:3.21 AS final
+FROM alpine:3.24 AS final
 
 RUN addgroup -S booksys && adduser -S -G booksys booksys
 
