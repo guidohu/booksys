@@ -26,7 +26,7 @@ func TestCryptSha512(t *testing.T) {
 	tests := []struct {
 		password string
 		salt     string
-		want string
+		want     string
 	}{
 		{
 			"password",
