@@ -37,7 +37,6 @@ const showChart = ref(false);
 const visualizationLabel = ref("Show Visualization");
 
 watch(showChart, (newValue) => {
-  console.log("showChart changed");
   if (newValue === false) {
     visualizationLabel.value = "Show Visualization";
   } else {
