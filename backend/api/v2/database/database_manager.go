@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"sync"
 
 	"golang.org/x/exp/slog"
@@ -76,7 +75,14 @@ func (dbm *Manager) ConnectAndReplace(settings *Settings) error {
 	}
 	go func() {
 		slog.Info("Closing database handles in background")
-		for _, dbh := range dbm.previousDatabases {
+		// Work on a snapshot, the list can grow while we wait for the
+		// clients of the old connections to finish.
+		dbm.mu.RLock()
+		pending := make([]*Handle, len(dbm.previousDatabases))
+		copy(pending, dbm.previousDatabases)
+		dbm.mu.RUnlock()
+
+		for _, dbh := range pending {
 			dbh.wg.Wait()
 			slog.Info("Closing database handle", slog.Int64("id", dbh.id))
 			dbm.mu.Lock()
@@ -86,9 +92,7 @@ func (dbm *Manager) ConnectAndReplace(settings *Settings) error {
 		}
 		dbm.mu.Lock()
 		remainingDatabases := []*Handle{}
-
 		for i, dbh := range dbm.previousDatabases {
-			fmt.Printf("DEBUG - i: %d, dbh: %+v", i, dbh)
 			if dbh.db != nil {
 				remainingDatabases = append(remainingDatabases, dbm.previousDatabases[i])
 			}

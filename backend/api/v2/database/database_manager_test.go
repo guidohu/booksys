@@ -3,6 +3,7 @@ package database
 import (
 	"sync"
 	"testing"
+	"time"
 )
 
 type FakeDB struct {
@@ -145,16 +146,42 @@ func TestManager_GetHandler(t *testing.T) {
 	if dbh2.(*FakeDB).ID != 1 {
 		t.Errorf("Error returning correct handler with one handler.")
 	}
-	if len(dbm.previousDatabases) != 1 && dbm.previousDatabases[0].db.(*FakeDB).ID != 0 {
-		t.Errorf("Error keeping connection 0 around while clients are still connected.")
+	if got := previousDatabaseIDs(dbm); len(got) != 1 || got[0] != 0 {
+		t.Errorf("Error keeping connection 0 around while clients are still connected, got %v.", got)
 	}
 
 	// Finish all transactions on DB 1 -> ready for disconnect
 	done1()
 	fakeDB1.DisconnectWg.Wait()
-	if len(dbm.previousDatabases) > 0 {
+	// The cleanup of the handle list happens after the disconnect, so give the
+	// background routine a moment to finish.
+	if !eventually(func() bool { return len(previousDatabaseIDs(dbm)) == 0 }) {
 		t.Errorf("Connection 0 was not cleaned up.")
 	}
+}
+
+// previousDatabaseIDs returns the IDs of the connections the manager still
+// keeps around, reading them under the manager lock.
+func previousDatabaseIDs(dbm *Manager) []int64 {
+	dbm.mu.RLock()
+	defer dbm.mu.RUnlock()
+	ids := []int64{}
+	for _, dbh := range dbm.previousDatabases {
+		ids = append(ids, dbh.id)
+	}
+	return ids
+}
+
+// eventually waits for a condition to become true.
+func eventually(condition func() bool) bool {
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		if condition() {
+			return true
+		}
+		time.Sleep(time.Millisecond)
+	}
+	return condition()
 }
 
 func TestManager_Disconnect(t *testing.T) {

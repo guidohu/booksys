@@ -133,28 +133,22 @@ func GetKeysMap() map[string]bool {
 
 // IsDBConfigured returns false in case any of the mandatory database settings is not provided
 // through the configuration.
+//
+// Note: The settings have to carry an actual value. Several of them have an
+// empty string as a default, so checking for their mere presence would always
+// report the database as configured.
 func (c *Config) IsDBConfigured() bool {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-	if !c.IsSet("database.protocol") {
-		slog.Info("Database protocol is not set in configuration")
-		return false
-	}
-	if !c.IsSet("database.user") {
-		slog.Info("Databse user is not set in configuration")
-		return false
-	}
-	if !c.IsSet("database.host") {
-		slog.Info("Database host is not set in configuration")
-		return false
-	}
-	if !c.IsSet("database.port") {
-		slog.Info("Database port is not set in configuration")
-		return false
-	}
-	if !c.IsSet("database.dbname") {
-		slog.Info("Database name is not set in configuration")
-		return false
+	for _, key := range []string{
+		"database.protocol",
+		"database.user",
+		"database.host",
+		"database.port",
+		"database.dbname",
+	} {
+		if value, _ := c.GetString(key); value == "" {
+			slog.Info("Database setting is not set in configuration", slog.String("setting", key))
+			return false
+		}
 	}
 	return true
 }
@@ -244,9 +238,9 @@ func findConfigFile() string {
 // - ${PWD}/config.yaml
 // - /etc/booksys/config.yaml
 func (c *Config) ReadConfigFile() error {
-	c.mu.RLock()
+	// Note: GetString takes the read lock itself, taking it here as well
+	// would be a recursive read lock, which can deadlock.
 	configFile, _ := c.GetString("config")
-	c.mu.RUnlock()
 	if configFile == "" {
 		configFile = findConfigFile()
 	}
@@ -305,14 +299,18 @@ func (c *Config) SetPropertyValue(key string, value string) error {
 			Value:    value,
 		},
 	}
+	if c.db == nil {
+		return fmt.Errorf("no database manager present yet")
+	}
 	db, done := c.db.GetHandler()
 	if db == nil {
 		return fmt.Errorf("no database connection available")
 	}
 	defer done()
 	err := db.UpdateOrInsertPropertyValues(properties)
-	c.mu.RLock()
-	defer c.mu.RUnlock()
+	// readConfigProperties replaces the property map, so it needs the write lock.
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	c.readConfigProperties()
 	return err
 }
