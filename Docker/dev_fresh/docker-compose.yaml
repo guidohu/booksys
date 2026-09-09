@@ -38,6 +38,7 @@ services:
             dockerfile: Dockerfile
         container_name: fresh_backend_api_v2
         environment:
+            BOOKSYS_DEBUG_PORT: 9091
             BOOKSYS_DATABASE_HOST: 'db'
             BOOKSYS_DATABASE_PORT: 3306
             BOOKSYS_DATABASE_USER: "${MYSQL_USER}"
@@ -48,7 +49,9 @@ services:
             - "traefik.enable=true"
             - "traefik.http.routers.api_v2.entrypoints=web"
             - "traefik.http.routers.api_v2.rule=PathPrefix(`/api/v2`) || PathPrefix(`/uploads`)"
-            - "traefik.http.services.api_v2.loadbalancer.server.port=9090" 
+            - "traefik.http.services.api_v2.loadbalancer.server.port=9090"
+        ports:
+            - '9091:9091' 
     frontend:
         build: "./frontend"
         container_name: "fresh_frontend"

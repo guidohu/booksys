@@ -1,4 +1,7 @@
-FROM golang:1.25-alpine AS builder
+# Keep this in step with the go directive in api/v2/go.mod. The golang images
+# set GOTOOLCHAIN=local, so a builder older than that directive fails at
+# `go mod download` rather than fetching a newer toolchain.
+FROM golang:1.26-alpine AS builder
 
 ARG BOOKSYS_VERSION
 ARG BOOKSYS_COMMIT
@@ -30,6 +33,9 @@ RUN mkdir -p /var/lib/booksys/uploads && chown -R booksys:booksys /var/lib/books
 
 USER booksys
 
-EXPOSE 9090
+# 9090 serves the API. 9091 is the debug listener (pprof, expvar) and is only
+# opened when BOOKSYS_DEBUG_PORT is set, because a heap profile taken through
+# it contains session secrets and the database password. Never publish it.
+EXPOSE 9090 9091
 
 CMD ["/bin/booksys", "--http_port", "9090"]

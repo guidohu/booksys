@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -47,6 +48,8 @@ var (
 	databaseUser     = pflag.String("database_user", "", "The user for the DB connection.")
 	// MyNautique settings
 	myNautiqueAPIKey = pflag.String("mynautique_api_key", "", "The API key for the mynautique integration.")
+	// Debug settings
+	debugPort = pflag.Int("debug_port", 0, "The port the debug listener (pprof, expvar) serves on. 0 disables it.")
 	// Display settings
 	environment = pflag.String("environment", "", "The environment this app is running as.")
 	// Additional control flags
@@ -60,6 +63,7 @@ var (
 func getFlags(v *viper.Viper) error {
 	bindings := map[string]string{
 		"config":                        "config",
+		"debug.port":                    "debug_port",
 		"http.port":                     "http_port",
 		"http.sessioninactivitytimeout": "http_session_inactivity_timeout",
 		"http.sessiontimeout":           "http_session_timeout",
@@ -243,7 +247,15 @@ func registerHandlers(mux *http.ServeMux, h *handlers.Handler) {
 	mux.Handle("/api/v2/admin/configuration/set", h.WithAdminAuthentication(h.WithConfigContext(handlers.WithRequestBody(h.SetConfiguration, handlers.ConfigurationMessageValidationErrors))))
 	mux.Handle("/api/v2/admin/logs", h.WithAdminAuthentication(h.GetLogs))
 	mux.Handle("/api/v2/admin/upload/logo", h.WithAdminAuthentication(h.UploadLogoFile))
+}
 
+// registerDebugHandlers registers the profiling and metrics endpoints. They are
+// deliberately kept off the API mux and served on a port of their own: a heap
+// profile contains session secrets and the database password, and
+// /debug/pprof/profile pins a CPU profiler for 30 seconds per request. Keeping
+// them on a separate port makes reachability a deployment decision instead of
+// something a reverse proxy has to remember to filter out.
+func registerDebugHandlers(mux *http.ServeMux) {
 	// Register pprof handlers manually
 	mux.HandleFunc("/debug/pprof/", pprof.Index)
 	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
@@ -253,6 +265,39 @@ func registerHandlers(mux *http.ServeMux, h *handlers.Handler) {
 
 	// Register expvar handler manually
 	mux.Handle("/debug/vars", expvar.Handler())
+}
+
+// newDebugServer returns the debug listener for the configured debug.port, or
+// nil if no port is set. Note that it has no WriteTimeout: a CPU profile runs
+// for 30 seconds by default, so any write deadline shorter than that would
+// truncate the very profile it was asked for.
+func newDebugServer(c *config.Config) (*http.Server, error) {
+	// Read the raw value instead of going through GetInt64, which discards the
+	// parse error and so cannot tell "not set" apart from "not a number". A
+	// typo in BOOKSYS_DEBUG_PORT would otherwise disable the listener silently,
+	// and that only becomes apparent when someone needs to profile a live
+	// incident.
+	value, _ := c.GetString("debug.port")
+	if value == "" {
+		return nil, nil
+	}
+	port, err := strconv.Atoi(value)
+	if err != nil {
+		return nil, fmt.Errorf("debug.port %q is not a number: %w", value, err)
+	}
+	if port == 0 {
+		return nil, nil
+	}
+	if port < 0 || port > 65535 {
+		return nil, fmt.Errorf("debug.port %d is not a valid port", port)
+	}
+	mux := http.NewServeMux()
+	registerDebugHandlers(mux)
+	return &http.Server{
+		Addr:              fmt.Sprintf(":%d", port),
+		Handler:           mux,
+		ReadHeaderTimeout: 10 * time.Second,
+	}, nil
 }
 
 func printVersionAndExit() {
@@ -380,6 +425,23 @@ func main() {
 	registerUploadsServer(mux, conf)
 	registerHandlers(mux, h)
 
+	debugServer, err := newDebugServer(conf)
+	if err != nil {
+		slog.Error("Cannot set up the debug listener", slog.Any("error", err))
+		os.Exit(1)
+	}
+	if debugServer != nil {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			slog.Warn("Debug listener enabled, this port must not be reachable publicly", slog.String("address", debugServer.Addr))
+			if err := debugServer.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+				slog.Error("Debug server failure", slog.Any("error", err))
+			}
+			slog.Info("Debug listener stopped.")
+		}()
+	}
+
 	// TODO remove
 	// jss := http.FileServer(http.Dir("../../../frontend/dist/"))
 	// mux.Handle("/", jss)
@@ -402,6 +464,11 @@ func main() {
 	// Wait for last requests to get served before shutting down.
 	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
 	defer shutdownRelease()
+	if debugServer != nil {
+		if err := debugServer.Shutdown(shutdownCtx); err != nil {
+			slog.Error("Debug server shutdown failure", slog.Any("error", err))
+		}
+	}
 	if err := server.Shutdown(shutdownCtx); err != nil {
 		slog.Error("HTTP shutdown failure", slog.Any("error", err))
 		os.Exit(1)

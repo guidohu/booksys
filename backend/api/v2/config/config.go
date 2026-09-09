@@ -35,9 +35,16 @@ import (
 // that the supported keys can be derived from its `yaml` tags and so that a
 // file can be checked for unknown keys.
 type Configuration struct {
-	Database   DBConfig   `yaml:"database"`
-	HTTP       HTTPConfig `yaml:"http"`
-	MyNautique MyNautique `yaml:"mynautique"`
+	Database   DBConfig    `yaml:"database"`
+	Debug      DebugConfig `yaml:"debug"`
+	HTTP       HTTPConfig  `yaml:"http"`
+	MyNautique MyNautique  `yaml:"mynautique"`
+}
+
+// DebugConfig holds the settings of the debug listener, which serves the
+// profiling and metrics endpoints on a port of its own.
+type DebugConfig struct {
+	Port uint `yaml:"port"`
 }
 
 // DBConfig holds the database connection settings.
@@ -108,6 +115,7 @@ var MandatoryConfigKeys = []string{
 // applied if none of the higher priority configuration sources define this.
 var ConfigDefaults = map[string]string{
 	"config":                        "",
+	"debug.port":                    "0",
 	"http.port":                     "80",
 	"http.sessioninactivitytimeout": "604800",
 	"http.sessiontimeout":           "31536000",
