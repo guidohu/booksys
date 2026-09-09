@@ -339,10 +339,13 @@ const (
 )
 
 // passwordResetRequested is the answer GetPasswordResetToken gives on every
-// path. An unknown address, an address in its cooldown window and a token that
-// was really just sent all look the same from outside, so the endpoint cannot
-// be used to find out whether an account exists or whether a reset is already
-// under way.
+// path, so that an unknown address, an address in its cooldown window and a
+// token that was really just sent are indistinguishable in the response body.
+//
+// Note that this hides the difference in the payload only. The three paths do
+// different amounts of work, and the issuing one sends mail synchronously, so
+// response time still tells them apart. Closing that needs the mail to move off
+// the request path.
 const passwordResetRequested = "Token requested, please check your email inbox."
 
 // passwordResetRejected is the answer SetPasswordWithToken gives on every

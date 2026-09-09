@@ -416,8 +416,10 @@ func main() {
 
 	mux := http.NewServeMux()
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%d", v.GetUint16("http.port")),
-		Handler:      mux,
+		Addr: fmt.Sprintf(":%d", v.GetUint16("http.port")),
+		// Cap the request body once, around the whole mux, so that every route
+		// is covered including the ones registered without other middleware.
+		Handler:      handlers.WithMaxBodySize(mux, handlers.MaxRequestBodyBytes),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  30 * time.Second,

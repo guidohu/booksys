@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -84,6 +85,30 @@ func (h *Handler) SetMyNautiqueClient(m mynautique.Client) {
 // has been set.
 func (h *Handler) GetMyNautiqueClient() *mynautique.Client {
 	return h.myNautiqueClient.Load()
+}
+
+// MaxRequestBodyBytes is how much of a request body a handler may be made to
+// read. Handlers read the body with io.ReadAll, and multipart uploads let
+// net/http buffer and spill to disk, so without a cap a single unauthenticated
+// caller can make the server hold arbitrarily much for as long as the read
+// timeout allows.
+//
+// The largest legitimate request is the logo upload, which the handler itself
+// caps at 512kB, so 1MiB leaves room for the multipart framing around it while
+// staying three orders of magnitude below what an attacker could otherwise
+// send.
+const MaxRequestBodyBytes = 1 << 20
+
+// WithMaxBodySize is middleware that caps the request body. It is applied once
+// around the whole mux rather than per handler, so that routes registered
+// without any other middleware, and routes added later, are covered too.
+func WithMaxBodySize(next http.Handler, limit int64) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Body != nil {
+			r.Body = http.MaxBytesReader(w, r.Body, limit)
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 // WithFlagGuarded is middleware that rejects the request unless web setup is
@@ -218,6 +243,13 @@ func WithRequestBody[T any](next Next[T], validationErrorMessages ...map[string]
 			err = ReadBodyAndValidate(r, &body, validationErrorMessages[0])
 		}
 		if err != nil {
+			var tooLarge *http.MaxBytesError
+			if errors.As(err, &tooLarge) {
+				slog.Warn("Request body exceeds the limit", slog.Int64("limit_bytes", tooLarge.Limit), slog.String("path", r.URL.Path))
+				w.WriteHeader(http.StatusRequestEntityTooLarge)
+				WriteFailureResponse("Request body is too large.", w)
+				return
+			}
 			slog.Warn("Request payload is not valid", slog.Any("error", err))
 			WriteFailureResponse(err.Error(), w)
 			return
