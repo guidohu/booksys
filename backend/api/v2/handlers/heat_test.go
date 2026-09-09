@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/shopspring/decimal"
-
 	"server/database"
 	"server/database/dbtest"
 )

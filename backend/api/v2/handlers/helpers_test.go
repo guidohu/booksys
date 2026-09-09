@@ -18,7 +18,6 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/spf13/viper"
-
 	"server/config"
 	"server/database"
 	"server/database/dbtest"

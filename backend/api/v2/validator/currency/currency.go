@@ -1,3 +1,4 @@
+// Package currency provides ISO 4217 currency code validation.
 package currency
 
 import (

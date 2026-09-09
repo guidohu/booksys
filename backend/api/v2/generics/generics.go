@@ -1,3 +1,5 @@
+// Package generics provides small generic helpers that are not covered by the
+// standard library.
 package generics
 
 // Unique removes duplicates from a slice and returns it.

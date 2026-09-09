@@ -1,3 +1,5 @@
+// Package hash provides the password hashing primitives used by the
+// application.
 package hash
 
 import (

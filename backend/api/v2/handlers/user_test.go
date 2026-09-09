@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
-
 	"server/database"
 	"server/database/dbtest"
 	"server/util/hash"

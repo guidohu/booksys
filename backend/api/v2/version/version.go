@@ -1,3 +1,5 @@
+// Package version holds the build information of the binary. Its values are
+// populated at link time.
 package version
 
 import (
@@ -16,6 +18,7 @@ var (
 	BuildDate = "unknown"
 )
 
+// PrintVersion writes the build information to standard output.
 func PrintVersion() {
 	fmt.Printf("Version: %s\n", Release)
 	fmt.Printf("Commit: %s\n", Commit)
