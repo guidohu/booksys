@@ -175,13 +175,23 @@ func (InvitationStatus) TableName() string {
 }
 
 // PasswordReset is a password reset token issued to a user.
+// A user has at most one live token: issuing a new one invalidates the
+// previous ones. IssuedAt drives the cooldown between requests, ValidUntil the
+// expiry, and Attempts counts wrong guesses so that a token can be burned long
+// before its keyspace could be searched.
+//
+// Note that the superseded `timestamp` column is deliberately not mapped here.
+// It carries ON UPDATE CURRENT_TIMESTAMP, so every write to a row rewrote it,
+// which makes it unusable both as an issue time and as an expiry.
 type PasswordReset struct {
-	ID        uint
-	UserID    uint      `gorm:"type:mediumint(9) DEFAULT NULL"`
-	User      User      `gorm:"foreignKey:UserID;references:ID"`
-	Token     string    `gorm:"type:varchar(255) NOT NULL"`
-	Timestamp time.Time `gorm:"type:timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"`
-	Valid     bool      `gorm:"type:tinyint(1) DEFAULT '0'"`
+	ID         uint
+	UserID     uint      `gorm:"type:mediumint(9) DEFAULT NULL"`
+	User       User      `gorm:"foreignKey:UserID;references:ID"`
+	Token      string    `gorm:"type:varchar(255) NOT NULL"`
+	IssuedAt   time.Time `gorm:"type:datetime DEFAULT NULL"`
+	ValidUntil time.Time `gorm:"type:datetime DEFAULT NULL"`
+	Attempts   uint      `gorm:"type:int(11) NOT NULL DEFAULT 0"`
+	Valid      bool      `gorm:"type:tinyint(1) DEFAULT '0'"`
 }
 
 // TableName returns the name of the table PasswordReset maps to.

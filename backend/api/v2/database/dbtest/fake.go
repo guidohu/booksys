@@ -101,9 +101,10 @@ type FakeDB struct {
 	ChangeHeatFn            func(*database.Heat) error
 
 	// Password reset
-	AddPasswordResetTokenFn          func(database.PasswordReset) error
-	GetPasswordResetEntryFn          func(userID uint, token string) (database.PasswordReset, error)
-	InvalidatePasswordResetEntriesFn func(userID uint) error
+	AddPasswordResetTokenFn              func(database.PasswordReset) error
+	GetActivePasswordResetEntryFn        func(userID uint) (database.PasswordReset, error)
+	RegisterFailedPasswordResetAttemptFn func(id uint, maxAttempts uint) error
+	InvalidatePasswordResetEntriesFn     func(userID uint) error
 
 	// Pricing
 	GetPricingsFn                func() ([]database.Pricing, error)
@@ -540,11 +541,18 @@ func (f *FakeDB) AddPasswordResetToken(entry database.PasswordReset) error {
 	return nil
 }
 
-func (f *FakeDB) GetPasswordResetEntry(userID uint, token string) (database.PasswordReset, error) {
-	if f.GetPasswordResetEntryFn != nil {
-		return f.GetPasswordResetEntryFn(userID, token)
+func (f *FakeDB) GetActivePasswordResetEntry(userID uint) (database.PasswordReset, error) {
+	if f.GetActivePasswordResetEntryFn != nil {
+		return f.GetActivePasswordResetEntryFn(userID)
 	}
 	return database.PasswordReset{}, nil
+}
+
+func (f *FakeDB) RegisterFailedPasswordResetAttempt(id uint, maxAttempts uint) error {
+	if f.RegisterFailedPasswordResetAttemptFn != nil {
+		return f.RegisterFailedPasswordResetAttemptFn(id, maxAttempts)
+	}
+	return nil
 }
 
 func (f *FakeDB) InvalidatePasswordResetEntries(userID uint) error {

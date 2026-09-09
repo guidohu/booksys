@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http/httptest"
+	"reflect"
 	"strconv"
 	"strings"
 	"testing"
@@ -1419,8 +1420,14 @@ func TestGetPasswordResetToken(t *testing.T) {
 		if !stored.Valid {
 			t.Error("a fresh token has to be valid")
 		}
-		if !stored.Timestamp.After(time.Now()) {
+		if !stored.ValidUntil.After(time.Now()) {
 			t.Error("the token expiry has to be in the future")
+		}
+		if got := stored.ValidUntil.Sub(stored.IssuedAt); got != passwordResetValidity {
+			t.Errorf("token validity = %s, want %s", got, passwordResetValidity)
+		}
+		if len(stored.Token) != 6 {
+			t.Errorf("token = %q, want six digits so the whole keyspace is used", stored.Token)
 		}
 		// The email configuration is broken in this case, so the request fails.
 		if resp := decodeResponse(t, rec); resp.OK {
@@ -1500,18 +1507,20 @@ func TestSetPasswordWithToken(t *testing.T) {
 	const newPassword = "N3wSecret!Password"
 	user := database.User{ID: 8, Email: "user@example.com"}
 	validToken := database.PasswordReset{
-		UserID:    8,
-		Token:     "123456",
-		Timestamp: time.Now().Add(time.Hour),
-		Valid:     true,
+		ID:         3,
+		UserID:     8,
+		Token:      "123456",
+		IssuedAt:   time.Now(),
+		ValidUntil: time.Now().Add(passwordResetValidity),
+		Valid:      true,
 	}
 
 	t.Run("sets the password and invalidates the tokens", func(t *testing.T) {
 		var stored database.User
 		invalidated := false
 		db := &dbtest.FakeDB{
-			GetUserByNameFn:         func(string) (database.User, error) { return user, nil },
-			GetPasswordResetEntryFn: func(uint, string) (database.PasswordReset, error) { return validToken, nil },
+			GetUserByNameFn:               func(string) (database.User, error) { return user, nil },
+			GetActivePasswordResetEntryFn: func(uint) (database.PasswordReset, error) { return validToken, nil },
 			UpdatePasswordFn: func(_ uint, u database.User) error {
 				stored = u
 				return nil
@@ -1545,7 +1554,7 @@ func TestSetPasswordWithToken(t *testing.T) {
 
 	t.Run("rejects invalid tokens", func(t *testing.T) {
 		expired := validToken
-		expired.Timestamp = time.Now().Add(-time.Minute)
+		expired.ValidUntil = time.Now().Add(-time.Minute)
 		invalid := validToken
 		invalid.Valid = false
 		mismatched := validToken
@@ -1564,41 +1573,41 @@ func TestSetPasswordWithToken(t *testing.T) {
 			{
 				name: "token not found",
 				db: &dbtest.FakeDB{
-					GetUserByNameFn:         func(string) (database.User, error) { return user, nil },
-					GetPasswordResetEntryFn: func(uint, string) (database.PasswordReset, error) { return database.PasswordReset{}, errNotFound },
+					GetUserByNameFn:               func(string) (database.User, error) { return user, nil },
+					GetActivePasswordResetEntryFn: func(uint) (database.PasswordReset, error) { return database.PasswordReset{}, errNotFound },
 				},
 				token: validToken.Token,
 			},
 			{
 				name: "token mismatch",
 				db: &dbtest.FakeDB{
-					GetUserByNameFn:         func(string) (database.User, error) { return user, nil },
-					GetPasswordResetEntryFn: func(uint, string) (database.PasswordReset, error) { return mismatched, nil },
+					GetUserByNameFn:               func(string) (database.User, error) { return user, nil },
+					GetActivePasswordResetEntryFn: func(uint) (database.PasswordReset, error) { return mismatched, nil },
 				},
 				token: validToken.Token,
 			},
 			{
 				name: "token invalidated",
 				db: &dbtest.FakeDB{
-					GetUserByNameFn:         func(string) (database.User, error) { return user, nil },
-					GetPasswordResetEntryFn: func(uint, string) (database.PasswordReset, error) { return invalid, nil },
+					GetUserByNameFn:               func(string) (database.User, error) { return user, nil },
+					GetActivePasswordResetEntryFn: func(uint) (database.PasswordReset, error) { return invalid, nil },
 				},
 				token: validToken.Token,
 			},
 			{
 				name: "token expired",
 				db: &dbtest.FakeDB{
-					GetUserByNameFn:         func(string) (database.User, error) { return user, nil },
-					GetPasswordResetEntryFn: func(uint, string) (database.PasswordReset, error) { return expired, nil },
+					GetUserByNameFn:               func(string) (database.User, error) { return user, nil },
+					GetActivePasswordResetEntryFn: func(uint) (database.PasswordReset, error) { return expired, nil },
 				},
 				token: validToken.Token,
 			},
 			{
 				name: "password cannot be stored",
 				db: &dbtest.FakeDB{
-					GetUserByNameFn:         func(string) (database.User, error) { return user, nil },
-					GetPasswordResetEntryFn: func(uint, string) (database.PasswordReset, error) { return validToken, nil },
-					UpdatePasswordFn:        func(uint, database.User) error { return errNotFound },
+					GetUserByNameFn:               func(string) (database.User, error) { return user, nil },
+					GetActivePasswordResetEntryFn: func(uint) (database.PasswordReset, error) { return validToken, nil },
+					UpdatePasswordFn:              func(uint, database.User) error { return errNotFound },
 				},
 				token: validToken.Token,
 			},
@@ -1653,4 +1662,182 @@ func TestSetPasswordWithTokenValidation(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPasswordResetTokenLifecycle(t *testing.T) {
+	user := database.User{ID: 8, Email: "user@example.com", FirstName: "Ann"}
+
+	// newDB returns a fake wired for a successful token request, plus the call
+	// log the assertions below inspect.
+	newDB := func(active database.PasswordReset, activeErr error) (*dbtest.FakeDB, *[]string, *database.PasswordReset) {
+		var calls []string
+		var stored database.PasswordReset
+		emailConfig, _ := startFakeSMTP(t)
+		db := &dbtest.FakeDB{
+			GetUserByNameFn: func(string) (database.User, error) { return user, nil },
+			GetActivePasswordResetEntryFn: func(uint) (database.PasswordReset, error) {
+				return active, activeErr
+			},
+			InvalidatePasswordResetEntriesFn: func(uint) error {
+				calls = append(calls, "invalidate")
+				return nil
+			},
+			AddPasswordResetTokenFn: func(p database.PasswordReset) error {
+				calls = append(calls, "add")
+				stored = p
+				return nil
+			},
+			GetEmailConfigurationFn: func() (database.EmailConfiguration, error) { return emailConfig, nil },
+		}
+		return db, &calls, &stored
+	}
+
+	request := func(t *testing.T, db *dbtest.FakeDB) apiResponse {
+		t.Helper()
+		h := newTestHandler(t, db, nil)
+		rec := httptest.NewRecorder()
+		r := newRequest("", &HandlerCtx{Database: db})
+		h.GetPasswordResetToken(rec, r, GetPasswordResetTokenRequest{UserEmail: user.Email}, GetHandlerContext(r))
+		return decodeResponse(t, rec)
+	}
+
+	t.Run("retires the previous tokens before issuing a new one", func(t *testing.T) {
+		stale := database.PasswordReset{ID: 1, UserID: user.ID, IssuedAt: time.Now().Add(-time.Hour), Valid: true}
+		db, calls, _ := newDB(stale, nil)
+
+		if resp := request(t, db); !resp.OK {
+			t.Fatalf("unexpected failure: %s", resp.Msg)
+		}
+		want := []string{"invalidate", "add"}
+		if !reflect.DeepEqual(*calls, want) {
+			t.Errorf("calls = %v, want %v (a stacked token shrinks the space an attacker has to search)", *calls, want)
+		}
+	})
+
+	t.Run("keeps the live token inside the cooldown window", func(t *testing.T) {
+		fresh := database.PasswordReset{ID: 1, UserID: user.ID, IssuedAt: time.Now().Add(-30 * time.Second), Valid: true}
+		db, calls, _ := newDB(fresh, nil)
+
+		resp := request(t, db)
+		if !resp.OK {
+			t.Fatalf("a request inside the cooldown still has to look successful, got: %s", resp.Msg)
+		}
+		if len(*calls) != 0 {
+			t.Errorf("calls = %v, want none: invalidating here would destroy a token that was just mailed", *calls)
+		}
+	})
+
+	t.Run("issues again once the cooldown has passed", func(t *testing.T) {
+		old := database.PasswordReset{ID: 1, UserID: user.ID, IssuedAt: time.Now().Add(-passwordResetCooldown - time.Second), Valid: true}
+		db, calls, stored := newDB(old, nil)
+
+		if resp := request(t, db); !resp.OK {
+			t.Fatalf("unexpected failure: %s", resp.Msg)
+		}
+		if len(*calls) != 2 {
+			t.Fatalf("calls = %v, want invalidate then add", *calls)
+		}
+		if stored.Token == "" {
+			t.Error("a replacement token has to be issued after the cooldown")
+		}
+	})
+
+	t.Run("answers identically for unknown, cooled down and issued", func(t *testing.T) {
+		fresh := database.PasswordReset{ID: 1, UserID: user.ID, IssuedAt: time.Now(), Valid: true}
+		cooling, _, _ := newDB(fresh, nil)
+		issuing, _, _ := newDB(database.PasswordReset{}, errNotFound)
+		unknown := &dbtest.FakeDB{}
+
+		messages := map[string]string{
+			"cooldown": request(t, cooling).Msg,
+			"issued":   request(t, issuing).Msg,
+			"unknown":  request(t, unknown).Msg,
+		}
+		for name, msg := range messages {
+			if msg != messages["issued"] {
+				t.Errorf("%s answered %q, want %q: a differing answer reveals whether the account exists", name, msg, messages["issued"])
+			}
+		}
+	})
+}
+
+func TestSetPasswordWithTokenAttemptBudget(t *testing.T) {
+	user := database.User{ID: 8, Email: "user@example.com"}
+	live := database.PasswordReset{
+		ID:         3,
+		UserID:     user.ID,
+		Token:      "123456",
+		IssuedAt:   time.Now(),
+		ValidUntil: time.Now().Add(passwordResetValidity),
+		Valid:      true,
+	}
+
+	redeem := func(t *testing.T, db *dbtest.FakeDB, token string) apiResponse {
+		t.Helper()
+		h := newTestHandler(t, db, nil)
+		rec := httptest.NewRecorder()
+		r := newRequest("", &HandlerCtx{Database: db})
+		req := SetPasswordWithTokenRequest{UserEmail: user.Email, Password: "N3wSecret!Password", Token: token}
+		h.SetPasswordWithToken(rec, r, req, GetHandlerContext(r))
+		return decodeResponse(t, rec)
+	}
+
+	t.Run("spends an attempt on a wrong token", func(t *testing.T) {
+		var gotID, gotMax uint
+		registered := false
+		db := &dbtest.FakeDB{
+			GetUserByNameFn:               func(string) (database.User, error) { return user, nil },
+			GetActivePasswordResetEntryFn: func(uint) (database.PasswordReset, error) { return live, nil },
+			RegisterFailedPasswordResetAttemptFn: func(id uint, maxAttempts uint) error {
+				registered, gotID, gotMax = true, id, maxAttempts
+				return nil
+			},
+			UpdatePasswordFn: func(uint, database.User) error {
+				t.Error("the password must not change on a wrong token")
+				return nil
+			},
+		}
+
+		if resp := redeem(t, db, "999999"); resp.OK {
+			t.Fatal("a wrong token must not reset the password")
+		}
+		if !registered {
+			t.Fatal("a wrong token has to be counted, otherwise the keyspace can be searched")
+		}
+		if gotID != live.ID || gotMax != passwordResetMaxAttempts {
+			t.Errorf("registered attempt against (id=%d, max=%d), want (id=%d, max=%d)", gotID, gotMax, live.ID, passwordResetMaxAttempts)
+		}
+	})
+
+	t.Run("refuses a token whose attempts are used up", func(t *testing.T) {
+		burned := live
+		burned.Attempts = passwordResetMaxAttempts
+		db := &dbtest.FakeDB{
+			GetUserByNameFn:               func(string) (database.User, error) { return user, nil },
+			GetActivePasswordResetEntryFn: func(uint) (database.PasswordReset, error) { return burned, nil },
+			UpdatePasswordFn: func(uint, database.User) error {
+				t.Error("a burned token must not reset the password, even with the right value")
+				return nil
+			},
+		}
+
+		if resp := redeem(t, db, burned.Token); resp.OK {
+			t.Error("a token that used up its attempts has to be refused")
+		}
+	})
+
+	t.Run("does not count an attempt when there is no live token", func(t *testing.T) {
+		db := &dbtest.FakeDB{
+			GetUserByNameFn:               func(string) (database.User, error) { return user, nil },
+			GetActivePasswordResetEntryFn: func(uint) (database.PasswordReset, error) { return database.PasswordReset{}, errNotFound },
+			RegisterFailedPasswordResetAttemptFn: func(uint, uint) error {
+				t.Error("there is no token to count an attempt against")
+				return nil
+			},
+		}
+
+		if resp := redeem(t, db, "123456"); resp.OK {
+			t.Error("expected a failure when no token is live")
+		}
+	})
 }

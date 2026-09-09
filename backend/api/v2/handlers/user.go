@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"crypto/rand"
+	"crypto/subtle"
 	"errors"
+	"fmt"
 	"log/slog"
 	"math"
 	"math/big"
@@ -10,11 +12,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/shopspring/decimal"
 	"server/database"
 	"server/notifications/email"
 	"server/recaptcha"
 	"server/util/hash"
+
+	"github.com/shopspring/decimal"
 )
 
 // SignUpRequest is the request body of SignUp, which serves
@@ -314,6 +317,37 @@ var SetPasswordWithTokenValidationErrors = map[string]string{
 	"Password":  "A new password has to be provided. It needs to be at least 12 characters and contain a capital letter, a lower case letter and a digit or special character.",
 	"Token":     "Please provide the token that was sent to you.",
 }
+
+// The rules that make a six digit reset token safe. The token itself is only
+// 10^6 wide, so what bounds an attacker is not its entropy but how many guesses
+// they can make: one live token per user, burned after passwordResetMaxAttempts
+// wrong guesses, and a new one obtainable only once per passwordResetCooldown.
+// That caps a determined attacker at 60 guesses an hour, and every one of those
+// tokens puts a mail in the victim's inbox.
+const (
+	// passwordResetValidity is how long a freshly issued token can be redeemed.
+	passwordResetValidity = 15 * time.Minute
+	// passwordResetCooldown is the minimum time between two token requests for
+	// the same user.
+	passwordResetCooldown = 2 * time.Minute
+	// passwordResetMaxAttempts is how many wrong tokens may be submitted
+	// against a live token before it is invalidated.
+	passwordResetMaxAttempts = 2
+	// passwordResetTokenSpace is the exclusive upper bound of the token value.
+	// Tokens are rendered zero padded, so the whole space is six digits wide.
+	passwordResetTokenSpace = 1000000
+)
+
+// passwordResetRequested is the answer GetPasswordResetToken gives on every
+// path. An unknown address, an address in its cooldown window and a token that
+// was really just sent all look the same from outside, so the endpoint cannot
+// be used to find out whether an account exists or whether a reset is already
+// under way.
+const passwordResetRequested = "Token requested, please check your email inbox."
+
+// passwordResetRejected is the answer SetPasswordWithToken gives on every
+// failure, for the same reason.
+const passwordResetRejected = "Cannot reset password username or token are not valid."
 
 // randomInt returns a uniformly distributed random integer in [0, max), drawn
 // from the operating system entropy source. Password salts and reset tokens
@@ -1108,22 +1142,42 @@ func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request, 
 	user, err := dbh.GetUserByName(req.UserEmail)
 	if err != nil {
 		slog.Warn("Cannot find user for password token request", slog.Any("error", err))
-		WriteSuccessResponse("Token requested, please check your email inbox.", nil, w)
+		WriteSuccessResponse(passwordResetRequested, nil, w)
+		return
+	}
+
+	// Enforce the cooldown before touching the existing token.
+	active, err := dbh.GetActivePasswordResetEntry(user.ID)
+	if err == nil && time.Since(active.IssuedAt) < passwordResetCooldown {
+		slog.Info("Password reset requested inside the cooldown window, keeping the live token",
+			slog.Uint64("user_id", uint64(user.ID)))
+		WriteSuccessResponse(passwordResetRequested, nil, w)
+		return
+	}
+
+	// A user has at most one live token, so retire the previous ones before
+	// issuing a replacement. Without this an attacker could stack tokens and
+	// shrink the space they have to search by the number they hold.
+	if err := dbh.InvalidatePasswordResetEntries(user.ID); err != nil {
+		slog.Error("Cannot invalidate the previous password reset tokens", slog.Any("error", err))
+		WriteFailureResponse("Internal error, cannot send reset token.", w)
 		return
 	}
 
 	// Generate token.
-	token, err := randomInt(999999)
+	token, err := randomInt(passwordResetTokenSpace)
 	if err != nil {
 		slog.Error("Cannot generate a password reset token", slog.Any("error", err))
 		WriteFailureResponse("Internal error, cannot send reset token.", w)
 		return
 	}
+	now := time.Now()
 	tokenEntry := database.PasswordReset{
-		UserID:    user.ID,
-		Token:     strconv.Itoa(token),
-		Timestamp: time.Now().Add(1 * time.Hour),
-		Valid:     true,
+		UserID:     user.ID,
+		Token:      fmt.Sprintf("%06d", token),
+		IssuedAt:   now,
+		ValidUntil: now.Add(passwordResetValidity),
+		Valid:      true,
 	}
 
 	// Store token in database.
@@ -1164,34 +1218,44 @@ func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request, r
 	user, err := dbh.GetUserByName(req.UserEmail)
 	if err != nil {
 		slog.Warn("User cannot be found", slog.Any("error", err))
-		WriteFailureResponse("Cannot reset password username or token are not valid.", w)
+		WriteFailureResponse(passwordResetRejected, w)
 		return
 	}
 
-	// Check that we have a password reset token for this email.
-	// That did not expire and is valid.
-	dbToken, err := dbh.GetPasswordResetEntry(user.ID, req.Token)
+	// Look the token up by user rather than by the value that was submitted. A
+	// wrong guess matches no row when the value is part of the query, and there
+	// would be nothing left to count the failed attempt against.
+	dbToken, err := dbh.GetActivePasswordResetEntry(user.ID)
 	if err != nil {
-		slog.Warn("Token cannot be found", slog.Any("error", err))
-		WriteFailureResponse("Cannot reset password username or token are not valid.", w)
+		slog.Warn("No live password reset token for this user", slog.Uint64("user_id", uint64(user.ID)), slog.Any("error", err))
+		WriteFailureResponse(passwordResetRejected, w)
 		return
 	}
 
-	// Verify that token is valid (we did this in the SQL statement already, though
-	// better be sure)
-	if dbToken.Token != req.Token {
-		slog.Warn("Token do not match", slog.String("db", dbToken.Token), slog.String("request", req.Token))
-		WriteFailureResponse("Cannot reset password username or token are not valid.", w)
+	// The query already filters on all three of these. Re-checking them here is
+	// cheap insurance against a later change to that query, and it enforces the
+	// attempt budget even if the write that burns a spent token failed.
+	if !dbToken.Valid || dbToken.ValidUntil.Before(time.Now()) || dbToken.Attempts >= passwordResetMaxAttempts {
+		slog.Warn("Password reset token is no longer usable",
+			slog.Uint64("user_id", uint64(user.ID)),
+			slog.Bool("valid", dbToken.Valid),
+			slog.Uint64("attempts", uint64(dbToken.Attempts)))
+		WriteFailureResponse(passwordResetRejected, w)
 		return
 	}
-	if !dbToken.Valid {
-		slog.Warn("Token is not valid.", slog.String("user", req.UserEmail), slog.String("token", dbToken.Token))
-		WriteFailureResponse("Cannot reset password username or token are not valid.", w)
-		return
-	}
-	if dbToken.Timestamp.Before(time.Now()) {
-		slog.Warn("Token is expired", slog.String("timestamp", dbToken.Timestamp.String()), slog.String("now", time.Now().String()))
-		WriteFailureResponse("Cannot reset password username or token are not valid.", w)
+
+	// Compare in constant time and spend one of the attempts on a mismatch. The
+	// token is only six digits wide, so the attempt budget is what keeps it out
+	// of reach rather than its entropy.
+	if subtle.ConstantTimeCompare([]byte(dbToken.Token), []byte(req.Token)) != 1 {
+		slog.Warn("Wrong password reset token submitted",
+			slog.Uint64("user_id", uint64(user.ID)),
+			slog.Uint64("attempts_used", uint64(dbToken.Attempts+1)),
+			slog.Int("attempts_allowed", passwordResetMaxAttempts))
+		if err := dbh.RegisterFailedPasswordResetAttempt(dbToken.ID, passwordResetMaxAttempts); err != nil {
+			slog.Error("Cannot record the failed password reset attempt", slog.Any("error", err))
+		}
+		WriteFailureResponse(passwordResetRejected, w)
 		return
 	}
 
@@ -1221,8 +1285,11 @@ func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request, r
 		return
 	}
 
-	// Invalidate password reset tokens for this user.
-	dbh.InvalidatePasswordResetEntries(user.ID)
+	// Invalidate password reset tokens for this user. A failure here leaves the
+	// just used token redeemable until it expires, so it must not stay silent.
+	if err := dbh.InvalidatePasswordResetEntries(user.ID); err != nil {
+		slog.Error("Cannot invalidate the used password reset token", slog.Uint64("user_id", uint64(user.ID)), slog.Any("error", err))
+	}
 
 	WriteSuccessResponse("password reset", nil, w)
 }

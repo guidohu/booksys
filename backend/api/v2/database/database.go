@@ -147,7 +147,8 @@ type HeatTable interface {
 // PasswordResetTable accesses the password_reset table.
 type PasswordResetTable interface {
 	AddPasswordResetToken(entry PasswordReset) error
-	GetPasswordResetEntry(userID uint, token string) (PasswordReset, error)
+	GetActivePasswordResetEntry(userID uint) (PasswordReset, error)
+	RegisterFailedPasswordResetAttempt(id uint, maxAttempts uint) error
 	InvalidatePasswordResetEntries(userID uint) error
 }
 
