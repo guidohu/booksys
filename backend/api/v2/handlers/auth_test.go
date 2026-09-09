@@ -297,7 +297,7 @@ func TestUser(t *testing.T) {
 		db := &dbtest.FakeDB{
 			GetUserByIdFn: func(id uint) (database.User, error) {
 				if id != 9 {
-					t.Errorf("GetUserById(%d), want 9", id)
+					t.Errorf("GetUserByID(%d), want 9", id)
 				}
 				return user, nil
 			},
@@ -316,8 +316,8 @@ func TestUser(t *testing.T) {
 		if data.ID != user.ID || data.Email != user.Email || data.City != user.City {
 			t.Errorf("response = %+v, does not match the user %+v", data, user)
 		}
-		if data.UserRoleId != database.UserRoleMember || data.UserRoleName != "member" {
-			t.Errorf("role = %d/%q, want %d/member", data.UserRoleId, data.UserRoleName, database.UserRoleMember)
+		if data.UserRoleID != database.UserRoleMember || data.UserRoleName != "member" {
+			t.Errorf("role = %d/%q, want %d/member", data.UserRoleID, data.UserRoleName, database.UserRoleMember)
 		}
 		if data.Status != database.UserStatusMember {
 			t.Errorf("status = %d, want %d", data.Status, database.UserStatusMember)

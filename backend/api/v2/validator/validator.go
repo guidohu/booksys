@@ -1,36 +1,34 @@
+// Package validator provides the custom validation rules that are registered
+// with github.com/go-playground/validator for request payload validation.
 package validator
 
 import (
+	"log/slog"
 	"path/filepath"
 	"regexp"
-	"server/database"
-	"server/validator/currency"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
-	"golang.org/x/exp/slog"
+	"server/database"
+	"server/validator/currency"
 )
 
-var hexRegex = regexp.MustCompile("^[0-9a-fA-F]+$")
+// The patterns are compiled once at package initialization, they are constant
+// and a failure to compile them is a programming error.
+var (
+	hexRegex           = regexp.MustCompile(`^[0-9a-fA-F]+$`)
+	googleMapsURLRegex = regexp.MustCompile(`^https://www\.google\.com/maps/embed\?pb=[^"\s]+$`)
+	recaptchaKeyRegex  = regexp.MustCompile(`^[0-9a-zA-Z_-]{40}$`)
+)
 
-// GoogleMapsURL is a custom validator for `googlemapsurl` tag
+// GoogleMapsURL is a custom validator for the `googlemapsurl` tag.
 func GoogleMapsURL(fl validator.FieldLevel) bool {
-	r, err := regexp.Compile(`^https:\/\/www\.google\.com\/maps\/embed\?pb=[^"\s]+$`)
-	if err != nil {
-		slog.Error("cannot compile GoogleMapsURL regex")
-		return false
-	}
-	return r.Match([]byte(fl.Field().String()))
+	return googleMapsURLRegex.MatchString(fl.Field().String())
 }
 
-// RecaptchaKey is a custom validator for the `recaptchakey` tag
+// RecaptchaKey is a custom validator for the `recaptchakey` tag.
 func RecaptchaKey(fl validator.FieldLevel) bool {
-	r, err := regexp.Compile(`^[0-9a-zA-Z_-]{40}$`)
-	if err != nil {
-		slog.Error("cannot compile RecaptchaKey regex")
-		return false
-	}
-	return r.Match([]byte(fl.Field().String()))
+	return recaptchaKeyRegex.MatchString(fl.Field().String())
 }
 
 // PasswordStrength validates if the password has at least:
@@ -86,7 +84,7 @@ func Currency(fl validator.FieldLevel) bool {
 	return currency.IsCurrency(fl.Field().String())
 }
 
-// UploadFilePath sanitizes the file path to be safe for usage
+// UploadedFilePath sanitizes the file path to be safe for usage
 // within the app.
 func UploadedFilePath(fl validator.FieldLevel, baseDir string) bool {
 	// Safe filename:
@@ -105,5 +103,3 @@ func UploadedFilePath(fl validator.FieldLevel, baseDir string) bool {
 	absBaseDir, _ := filepath.Abs(baseDir)
 	return strings.HasPrefix(finalPath, absBaseDir)
 }
-
-

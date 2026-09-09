@@ -1,3 +1,6 @@
+// Package handlers implements the HTTP handlers of the v2 API together with
+// the middleware that provides them with authentication, a database handle
+// and a validated request body.
 package handlers
 
 import (
@@ -6,32 +9,40 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
+	"sync/atomic"
+	"time"
+
+	"github.com/go-playground/validator/v10"
 	"server/config"
 	"server/database"
 	"server/mynautique"
 	"server/notifications/email"
 	customvalidator "server/validator"
-	"sync/atomic"
-	"time"
-
-	"github.com/go-playground/validator/v10"
-	"golang.org/x/exp/slog"
 )
 
+// HandlerContextID identifies the values this package stores in a request
+// context. It is a distinct type so that the keys cannot collide with keys
+// from other packages.
 type HandlerContextID uint
 
+// The keys under which the middleware stores its values in a request context.
 const (
 	SessionContextKey HandlerContextID = iota + 1
 	HandlerContextKey
 )
 
+// HandlerCtx carries everything the middleware prepared for a handler: the
+// authenticated session, a database handle and, where requested, the
+// application configuration.
 type HandlerCtx struct {
 	ValidSession *database.BrowserSession
 	Database     database.Database
 	Config       *config.Config
 }
 
+// Handler holds the dependencies shared by all HTTP handlers.
 type Handler struct {
 	Database         *database.Manager
 	config           *config.Config
@@ -39,11 +50,13 @@ type Handler struct {
 	myNautiqueClient atomic.Pointer[mynautique.Client]
 }
 
+// HandlerParams are the dependencies NewHandler needs.
 type HandlerParams struct {
 	Database      *database.Manager
 	Configuration *config.Config
 }
 
+// NewHandler returns a Handler that uses the given dependencies.
 func NewHandler(params HandlerParams) *Handler {
 	h := &Handler{
 		config:   params.Configuration,
@@ -52,27 +65,29 @@ func NewHandler(params HandlerParams) *Handler {
 	return h
 }
 
+// SetEmailClient replaces the email client used to send notifications.
 func (h *Handler) SetEmailClient(e email.Client) {
 	h.emailClient.Store(&e)
 }
 
+// GetEmailClient returns the currently configured email client.
 func (h *Handler) GetEmailClient() email.Client {
-	// client := *(h.emailClient.Load())
-	// if client == nil {
-	// 	// Try to create a client
-	// 	h.GetDB().GetMyNautiqueConfiguration()
-	// }
 	return *(h.emailClient.Load())
 }
 
+// SetMyNautiqueClient replaces the client used to talk to the MyNautique API.
 func (h *Handler) SetMyNautiqueClient(m mynautique.Client) {
 	h.myNautiqueClient.Store(&m)
 }
 
+// GetMyNautiqueClient returns the current MyNautique client, or nil if none
+// has been set.
 func (h *Handler) GetMyNautiqueClient() *mynautique.Client {
 	return h.myNautiqueClient.Load()
 }
 
+// WithFlagGuarded is middleware that rejects the request unless web setup is
+// enabled in the configuration.
 func (h *Handler) WithFlagGuarded(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !h.config.GetBool("http.websetup") {
@@ -85,6 +100,9 @@ func (h *Handler) WithFlagGuarded(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
+// WithConfigContext is middleware that adds the application configuration to
+// the handler context. Only handlers that validate configuration dependent
+// payloads need it.
 func (h *Handler) WithConfigContext(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		hCtx := GetHandlerContext(r)
@@ -94,14 +112,19 @@ func (h *Handler) WithConfigContext(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
+// WithAdminAuthentication is middleware that only lets administrators through.
 func (h *Handler) WithAdminAuthentication(next http.HandlerFunc) http.HandlerFunc {
 	return h.WithAuthentication(next, database.UserRoleAdmin)
 }
 
+// WithAnyAuthentication is middleware that lets any authenticated user
+// through, regardless of their role.
 func (h *Handler) WithAnyAuthentication(next http.HandlerFunc) http.HandlerFunc {
 	return h.WithAuthentication(next, database.UserRoleUnknown)
 }
 
+// WithNoAuthentication is middleware for endpoints that unauthenticated users
+// may call. It still provides the handler with a database handle.
 func (h *Handler) WithNoAuthentication(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		dbh, done := h.Database.GetHandler()
@@ -119,14 +142,14 @@ func (h *Handler) WithNoAuthentication(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
-// Authentication middleware that gets the user session and calls the next Handler.
-// It makes sure the user is authenticated and adds this information ready for the next call.
+// WithAuthentication is middleware that gets the user session and calls the
+// next handler. It makes sure the user is authenticated and adds this information ready for the next call.
 func (h *Handler) WithAuthentication(next http.HandlerFunc, requiredRole database.UserRoleType) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// get user from cookie
 		cookie, err := r.Cookie("SESSION")
 		if err != nil {
-			slog.Warn("Cannot read cookie", slog.String("error", err.Error()))
+			slog.Warn("Cannot read cookie", slog.Any("error", err))
 			w.WriteHeader(http.StatusUnauthorized)
 			WriteFailureResponse("not authenticated", w)
 			return
@@ -182,7 +205,7 @@ func (h *Handler) WithAuthentication(next http.HandlerFunc, requiredRole databas
 // It receives the parsed and validated request body of type T and the handler context.
 type Next[T any] func(w http.ResponseWriter, r *http.Request, body T, hCtx *HandlerCtx)
 
-// WithBody is a generic handler wrapper that handles request body parsing, validation,
+// WithRequestBody is a generic handler wrapper that handles request body parsing, validation,
 // and error handling.
 func WithRequestBody[T any](next Next[T], validationErrorMessages ...map[string]string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -195,7 +218,7 @@ func WithRequestBody[T any](next Next[T], validationErrorMessages ...map[string]
 			err = ReadBodyAndValidate(r, &body, validationErrorMessages[0])
 		}
 		if err != nil {
-			slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+			slog.Warn("Request payload is not valid", slog.Any("error", err))
 			WriteFailureResponse(err.Error(), w)
 			return
 		}
@@ -205,13 +228,17 @@ func WithRequestBody[T any](next Next[T], validationErrorMessages ...map[string]
 	}
 }
 
+// WithLogging is middleware that logs the method and URL of every request
+// after it has been served.
 func (h *Handler) WithLogging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		next.ServeHTTP(w, r)
-		fmt.Println(time.Now(), r.Method, r.URL)
+		slog.Info("Request served", slog.String("method", r.Method), slog.String("url", r.URL.String()))
 	})
 }
 
+// GetSessionFromContext returns the browser session stored in the request
+// context, or the zero session if the request is not authenticated.
 func GetSessionFromContext(r *http.Request) database.BrowserSession {
 	if r.Context().Value(SessionContextKey) == nil {
 		return database.BrowserSession{}
@@ -219,7 +246,7 @@ func GetSessionFromContext(r *http.Request) database.BrowserSession {
 	return r.Context().Value(SessionContextKey).(database.BrowserSession)
 }
 
-// GetHandlerContext returns the HandlerCtx, it returns an empty one in case non exists.
+// GetHandlerContext returns the HandlerCtx, or an empty one if none exists.
 func GetHandlerContext(r *http.Request) *HandlerCtx {
 	if r.Context().Value(HandlerContextKey) == nil {
 		return &HandlerCtx{}
@@ -227,45 +254,48 @@ func GetHandlerContext(r *http.Request) *HandlerCtx {
 	return r.Context().Value(HandlerContextKey).(*HandlerCtx)
 }
 
+// ReadBodyAndValidate parses the JSON request body into s and validates it
+// against its `validate` struct tags. If an errorMap is given, the message it
+// holds for the first failing field is returned instead of the raw validation
+// error.
 func ReadBodyAndValidate(r *http.Request, s any, errorMap ...map[string]string) error {
 	hCtx := GetHandlerContext(r)
 	// Get the content of the body
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		slog.Warn("Cannot read the request body", slog.String("error", err.Error()))
+		slog.Warn("Cannot read the request body", slog.Any("error", err))
 		return err
 	}
 
 	// Parse the content into the provided struct
 	err = json.Unmarshal(body, s)
 	if err != nil {
-		slog.Warn("Cannot parse the request body JSON", slog.String("error", err.Error()))
+		slog.Warn("Cannot parse the request body JSON", slog.Any("error", err))
 		return err
 	}
 
 	// Validate the struct
 	validate := validator.New()
 	// Add custom validators
-	validate.RegisterValidation("googlemapsurl", customvalidator.GoogleMapsURL)
-	validate.RegisterValidation("recaptchakey", customvalidator.RecaptchaKey)
-	validate.RegisterValidation("strongpassword", customvalidator.PasswordStrength)
-	validate.RegisterValidation("sessiontype", customvalidator.SessionType)
-	validate.RegisterValidation("expensetype", customvalidator.ExpenseType)
-	validate.RegisterValidation("tableid", customvalidator.TableID)
-	validate.RegisterValidation("currency", customvalidator.Currency)
-	validate.RegisterValidation("uploadfile", func(fl validator.FieldLevel) bool {
+	_ = validate.RegisterValidation("googlemapsurl", customvalidator.GoogleMapsURL)
+	_ = validate.RegisterValidation("recaptchakey", customvalidator.RecaptchaKey)
+	_ = validate.RegisterValidation("strongpassword", customvalidator.PasswordStrength)
+	_ = validate.RegisterValidation("sessiontype", customvalidator.SessionType)
+	_ = validate.RegisterValidation("expensetype", customvalidator.ExpenseType)
+	_ = validate.RegisterValidation("tableid", customvalidator.TableID)
+	_ = validate.RegisterValidation("currency", customvalidator.Currency)
+	_ = validate.RegisterValidation("uploadfile", func(fl validator.FieldLevel) bool {
 		if hCtx.Config == nil {
 			slog.Error("uploadfile validator called without configuration access.")
 			return false
 		}
 		path, _ := hCtx.Config.GetString("http.uploadpath")
-		hCtx.Config.GetString("http.uploadpath")
 		return customvalidator.UploadedFilePath(fl, path)
 	})
 
 	err = validate.Struct(s)
 	if err != nil {
-		slog.Warn("Struct does not validate", slog.String("error", err.Error()))
+		slog.Warn("Struct does not validate", slog.Any("error", err))
 		errs := err.(validator.ValidationErrors)
 
 		// return plain error if no error mapping is provided
@@ -285,16 +315,19 @@ func ReadBodyAndValidate(r *http.Request, s any, errorMap ...map[string]string) 
 	return nil
 }
 
+// WriteFailureResponse writes a JSON failure response with the given message.
+// It does not set a status code, the caller does that.
 func WriteFailureResponse(message string, w http.ResponseWriter) {
 	// Get a JSON representation of the failure response
 	response := FailureResponse(message)
 	j, err := json.Marshal(&response)
 	if err != nil {
-		slog.Error("Cannot create a FailureResponse", slog.String("error", err.Error()))
+		slog.Error("Cannot create a FailureResponse", slog.Any("error", err))
 		http.Error(w, "failed to create failure response", http.StatusInternalServerError)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	io.Copy(w, bytes.NewReader(j))
+	_, _ = io.Copy(w, bytes.NewReader(j))
 }
 
 // WriteSuccessResponse writes a success message that contains data.
@@ -309,14 +342,17 @@ func WriteSuccessResponse(message string, data any, w http.ResponseWriter) {
 
 	j, err := json.Marshal(&resp)
 	if err != nil {
-		slog.Error("Cannot marshal the response", slog.String("error", err.Error()))
+		slog.Error("Cannot marshal the response", slog.Any("error", err))
 		http.Error(w, "creating response failed", http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	io.Copy(w, bytes.NewReader(j))
+	_, _ = io.Copy(w, bytes.NewReader(j))
 }
 
+// SetSessionCookie sets the session cookie to the given secret, expiring at
+// validUntil.
 func SetSessionCookie(w http.ResponseWriter, s string, validUntil time.Time) {
 	cookie := http.Cookie{
 		Name:     "SESSION",
@@ -331,6 +367,7 @@ func SetSessionCookie(w http.ResponseWriter, s string, validUntil time.Time) {
 	http.SetCookie(w, &cookie)
 }
 
+// DeleteSessionCookie expires the session cookie on the client.
 func DeleteSessionCookie(w http.ResponseWriter) {
 	cookie := http.Cookie{
 		Name:    "SESSION",

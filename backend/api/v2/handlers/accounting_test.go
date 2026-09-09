@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
-
 	"server/database"
 	"server/database/dbtest"
 )
@@ -230,7 +229,7 @@ func TestGetAccountingTransactions(t *testing.T) {
 			GetTransactionsFn: func(year uint64) ([]database.TransactionRow, error) {
 				gotYear = year
 				return []database.TransactionRow{
-					{ID: 1, Amount: &amount, TableID: database.TableIdExpenditure, Comment: "fuel"},
+					{ID: 1, Amount: &amount, TableID: database.TableIDExpenditure, Comment: "fuel"},
 				}, nil
 			},
 		}
@@ -281,13 +280,13 @@ func TestDeleteTransaction(t *testing.T) {
 
 		rec := httptest.NewRecorder()
 		r := newRequest("", &HandlerCtx{Database: db})
-		h.DeleteTransaction(rec, r, DeleteTransactionRequest{TableID: database.TableIdPayment, RowID: 12}, GetHandlerContext(r))
+		h.DeleteTransaction(rec, r, DeleteTransactionRequest{TableID: database.TableIDPayment, RowID: 12}, GetHandlerContext(r))
 
 		if resp := decodeResponse(t, rec); !resp.OK {
 			t.Fatalf("unexpected failure: %s", resp.Msg)
 		}
-		if gotTable != database.TableIdPayment || gotRow != 12 {
-			t.Errorf("DeleteTransaction(%d, %d), want (%d, 12)", gotTable, gotRow, database.TableIdPayment)
+		if gotTable != database.TableIDPayment || gotRow != 12 {
+			t.Errorf("DeleteTransaction(%d, %d), want (%d, 12)", gotTable, gotRow, database.TableIDPayment)
 		}
 	})
 

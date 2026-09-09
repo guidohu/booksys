@@ -1,13 +1,15 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
-	"server/mynautique"
 
 	"github.com/shopspring/decimal"
-	"golang.org/x/exp/slog"
+	"server/mynautique"
 )
 
+// Config is the booking configuration of a day: the window in which sessions
+// can be booked and how long a slot is.
 type Config struct {
 	Enabled      bool
 	APIKey       string
@@ -17,20 +19,26 @@ type Config struct {
 	FuelCapacity decimal.Decimal
 }
 
+// GetBoatInfoRequest is the request body of GetBoatTelemetry.
 type GetBoatInfoRequest struct {
 	BoatID int64 `json:"boat_id" validate:"required"`
 }
 
+// GetBoatInfoResponse is the payload returned by GetBoatTelemetry.
 type GetBoatInfoResponse struct {
 	Telemetry    Telemetry       `json:"telemetry"`
 	FuelCapacity decimal.Decimal `json:"fuel_capacity"`
 }
 
+// Telemetry is the boat state reported in a GetBoatInfoResponse.
 type Telemetry struct {
 	FuelLevel   int64           `json:"fuel_level"`
 	EngineHours decimal.Decimal `json:"engine_hours"`
 }
 
+// GetBoatTelemetry returns the current telemetry of the boat from the MyNautique API.
+//
+// It serves /api/v2/boat/mynautique/telemetry/get and is open to administrators.
 func (h *Handler) GetBoatTelemetry(w http.ResponseWriter, r *http.Request, req GetBoatInfoRequest, hCtx *HandlerCtx) {
 	client := h.GetMyNautiqueClient()
 	config := Config{}
@@ -62,7 +70,7 @@ func (h *Handler) GetBoatTelemetry(w http.ResponseWriter, r *http.Request, req G
 
 	if client == nil {
 		slog.Info("Creating new myNautique Client")
-		client = mynautique.NewMyNautiqueClient(&mynautique.Options{
+		client = mynautique.NewClient(&mynautique.Options{
 			User:       config.User,
 			Password:   config.Password,
 			AuthAPIKey: config.APIKey,
@@ -72,7 +80,7 @@ func (h *Handler) GetBoatTelemetry(w http.ResponseWriter, r *http.Request, req G
 
 	t, err := client.GetBoatTelemetry(req.BoatID)
 	if err != nil {
-		slog.Warn("cannot get boat telemetry from my nautique", slog.String("error", err.Error()))
+		slog.Warn("cannot get boat telemetry from my nautique", slog.Any("error", err))
 		WriteFailureResponse("cannot get boat information from myNautique", w)
 		return
 	}

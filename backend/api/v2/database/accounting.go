@@ -7,6 +7,9 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// TransactionRow is a single money transaction as reported by GetTransactions.
+// It merges rows from the expenditure, payment and boat_fuel tables, TableID
+// says which one a row came from.
 type TransactionRow struct {
 	ID        uint64           `json:"id"`
 	Amount    *decimal.Decimal `json:"amount"`
@@ -20,10 +23,12 @@ type TransactionRow struct {
 	TypeName  string           `json:"type_name"`
 }
 
+// The tables that hold money transactions. They are exposed to clients so that
+// a transaction can be addressed by table and row.
 const (
-	TableIdExpenditure = iota
-	TableIdPayment
-	TableIdBoatFuel
+	TableIDExpenditure = iota
+	TableIDPayment
+	TableIDBoatFuel
 )
 
 // TableIDMap contains the IDs of tables that are used for
@@ -32,20 +37,21 @@ var TableIDMap = map[uint64]struct {
 	TableID   uint64
 	TableName string
 }{
-	TableIdExpenditure: {
-		TableID:   TableIdExpenditure,
+	TableIDExpenditure: {
+		TableID:   TableIDExpenditure,
 		TableName: "expenditure",
 	},
-	TableIdPayment: {
-		TableID:   TableIdPayment,
+	TableIDPayment: {
+		TableID:   TableIDPayment,
 		TableName: "payment",
 	},
-	TableIdBoatFuel: {
-		TableID:   TableIdBoatFuel,
+	TableIDBoatFuel: {
+		TableID:   TableIDBoatFuel,
 		TableName: "boat_fuel",
 	},
 }
 
+// GetYears returns every year that has at least one money transaction.
 func (d *Mysql) GetYears() ([]uint64, error) {
 	var years []uint64
 	err := d.orm.Raw(`
@@ -69,6 +75,8 @@ func (d *Mysql) GetPaymentTotal(year uint64) (decimal.Decimal, error) {
 	`, year, year)
 }
 
+// GetExpenseTotal returns the total expenses for a given year, fuel included.
+// If year is 0 it returns the total over all years.
 func (d *Mysql) GetExpenseTotal(year uint64) (decimal.Decimal, error) {
 	return d.getSingleDecimalResult(`
 		SELECT SUM(t.tot) as result
@@ -86,6 +94,8 @@ func (d *Mysql) GetExpenseTotal(year uint64) (decimal.Decimal, error) {
 	`, year, year, year, year)
 }
 
+// GetExpenseNoRefundsTotal is GetExpenseTotal without the refunds paid back to
+// owners. If year is 0 it returns the total over all years.
 func (d *Mysql) GetExpenseNoRefundsTotal(year uint64) (decimal.Decimal, error) {
 	return d.getSingleDecimalResult(`
 		SELECT SUM(t.tot) as result
@@ -104,6 +114,8 @@ func (d *Mysql) GetExpenseNoRefundsTotal(year uint64) (decimal.Decimal, error) {
 	`, year, year, ExpenseTypeOwnersRefund, year, year)
 }
 
+// GetHeatCostTotal returns the total cost of all rides in a given year. If
+// year is 0 it returns the total over all years.
 func (d *Mysql) GetHeatCostTotal(year uint64) (decimal.Decimal, error) {
 	return d.getSingleDecimalResult(`
 		SELECT coalesce(sum(cost_chf),0) as result
@@ -111,6 +123,8 @@ func (d *Mysql) GetHeatCostTotal(year uint64) (decimal.Decimal, error) {
 	`, year, year)
 }
 
+// GetSessionPaymentTotal returns the total the users paid for sessions in a
+// given year. If year is 0 it returns the total over all years.
 func (d *Mysql) GetSessionPaymentTotal(year uint64) (decimal.Decimal, error) {
 	return d.getSingleDecimalResult(`
 		SELECT coalesce(sum(amount_chf),0) as result
@@ -119,6 +133,8 @@ func (d *Mysql) GetSessionPaymentTotal(year uint64) (decimal.Decimal, error) {
 	`, ExpenseTypeSession, year, year)
 }
 
+// GetSessionRefundsTotal returns the total refunded for sessions in a given
+// year. If year is 0 it returns the total over all years.
 func (d *Mysql) GetSessionRefundsTotal(year uint64) (decimal.Decimal, error) {
 	return d.getSingleDecimalResult(`
 		SELECT coalesce(sum(amount_chf),0) as result
@@ -127,13 +143,15 @@ func (d *Mysql) GetSessionRefundsTotal(year uint64) (decimal.Decimal, error) {
 	`, ExpenseTypeSession, year, year)
 }
 
+// GetTransactions returns all money transactions of a given year, most recent
+// first. If year is 0 it returns the transactions of all years.
 func (d *Mysql) GetTransactions(year uint64) ([]TransactionRow, error) {
-	r := []TransactionRow{}
+	var r []TransactionRow
 	// Table IDs are
 	// 0: expenditure
 	// 1: payment
 	// 2: boat_fuel
-	err := d.orm.Debug().Raw(`
+	err := d.orm.Raw(`
 		SELECT acc.tbl as table_id, acc.id as id, acc.user_id as user_id, u.first_name as first_name, u.last_name as last_name, 
 			acc.type_id as type_id, et.name as type_name, acc.timestamp as timestamp, 
 			acc.amount as amount, acc.comment as comment
@@ -160,19 +178,21 @@ func (d *Mysql) GetTransactions(year uint64) ([]TransactionRow, error) {
 	return r, err
 }
 
+// DeleteTransaction removes a single transaction, addressed by the table it
+// lives in and its row ID.
 func (d *Mysql) DeleteTransaction(tableID uint64, rowID uint64) error {
 	switch tableID {
-	case TableIdExpenditure:
+	case TableIDExpenditure:
 		e := Expense{
 			ID: uint(rowID),
 		}
 		return d.orm.Delete(&e).Error
-	case TableIdPayment:
+	case TableIDPayment:
 		p := Income{
 			ID: uint(rowID),
 		}
 		return d.orm.Delete(&p).Error
-	case TableIdBoatFuel:
+	case TableIDBoatFuel:
 		b := BoatFuel{
 			ID: uint(rowID),
 		}
@@ -182,20 +202,22 @@ func (d *Mysql) DeleteTransaction(tableID uint64, rowID uint64) error {
 	}
 }
 
+// AddIncome records an incoming payment.
 func (d *Mysql) AddIncome(data Income) error {
 	return d.orm.Create(&data).Error
 }
 
+// AddExpense records an expense.
 func (d *Mysql) AddExpense(data Expense) error {
 	return d.orm.Create(&data).Error
 }
 
-func (d *Mysql) getSingleDecimalResult(rawQuery string, values ...interface{}) (decimal.Decimal, error) {
+func (d *Mysql) getSingleDecimalResult(rawQuery string, values ...any) (decimal.Decimal, error) {
 	p := struct {
 		Result *decimal.Decimal
 	}{
 		Result: &decimal.Zero,
 	}
-	err := d.orm.Debug().Raw(rawQuery, values...).First(&p).Error
+	err := d.orm.Raw(rawQuery, values...).First(&p).Error
 	return *p.Result, err
 }

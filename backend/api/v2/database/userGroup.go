@@ -7,6 +7,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// CreateUserGroup adds a user group together with its pricing. It fails if a
+// group with that ID or name exists already, or if the role does not exist.
 func (d *Mysql) CreateUserGroup(us UserStatus, p Pricing) error {
 	return d.orm.Transaction(func(tx *gorm.DB) error {
 		// check that group does not exist already
@@ -16,12 +18,12 @@ func (d *Mysql) CreateUserGroup(us UserStatus, p Pricing) error {
 			return err
 		}
 		if len(groups) > 0 {
-			return fmt.Errorf("user group already exists with that ID or name")
+			return errors.New("user group already exists with that ID or name")
 		}
 
 		// check that the user role exists
 		var roles []UserRole
-		err = tx.Debug().Where("id = ?", us.UserRoleID).Find(&roles).Error
+		err = tx.Where("id = ?", us.UserRoleID).Find(&roles).Error
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return err
 		}
@@ -46,6 +48,8 @@ func (d *Mysql) CreateUserGroup(us UserStatus, p Pricing) error {
 	})
 }
 
+// ChangeUserGroup updates a user group and its pricing. It fails if the new
+// name collides with another group, or if the pricing or role does not exist.
 func (d *Mysql) ChangeUserGroup(us UserStatus, p Pricing) error {
 	return d.orm.Transaction(func(tx *gorm.DB) error {
 		// check that group does exist
@@ -62,7 +66,7 @@ func (d *Mysql) ChangeUserGroup(us UserStatus, p Pricing) error {
 				return err
 			}
 			if collidingGroup.ID != 0 {
-				return fmt.Errorf("a group with this name already exists")
+				return errors.New("a group with this name already exists")
 			}
 		}
 		// check that the price ID already exists
@@ -94,6 +98,8 @@ func (d *Mysql) ChangeUserGroup(us UserStatus, p Pricing) error {
 	})
 }
 
+// DeleteUserGroup removes a user group and its pricing. It fails while users
+// are still assigned to the group.
 func (d *Mysql) DeleteUserGroup(id uint) error {
 	return d.orm.Transaction(func(tx *gorm.DB) error {
 		// check that group does exist
@@ -131,6 +137,7 @@ func (d *Mysql) DeleteUserGroup(id uint) error {
 	})
 }
 
+// SetUserGroup moves a user into a user group.
 func (d *Mysql) SetUserGroup(userID uint, groupID uint) error {
 	return d.orm.Model(&User{}).Where("id = ?", userID).Update("status", groupID).Error
 }

@@ -1,21 +1,24 @@
 package handlers
 
 import (
+	"crypto/rand"
 	"errors"
+	"log/slog"
 	"math"
-	"math/rand"
+	"math/big"
 	"net/http"
-	"server/database"
-	"server/notifications/email"
-	"server/recaptcha"
-	"server/util/hash"
 	"strconv"
 	"time"
 
 	"github.com/shopspring/decimal"
-	"golang.org/x/exp/slog"
+	"server/database"
+	"server/notifications/email"
+	"server/recaptcha"
+	"server/util/hash"
 )
 
+// SignUpRequest is the request body of SignUp, which serves
+// /api/v2/user/signup.
 type SignUpRequest struct {
 	Username       string `json:"username" validate:"required,excludesall=!<>{}[]()^"`
 	Password       string `json:"password" validate:"required,strongpassword"`
@@ -31,10 +34,14 @@ type SignUpRequest struct {
 	RecaptchaToken string `json:"recaptcha_token" validate:"omitempty"`
 }
 
+// SignUpResponse is the payload returned by SignUp, which serves
+// /api/v2/user/signup.
 type SignUpResponse struct {
 	UserID int `json:"user_id"`
 }
 
+// SignUpRequestValidationErrors maps the field names of SignUpRequest to the message the API
+// returns when that field fails validation.
 var SignUpRequestValidationErrors = map[string]string{
 	"Username":       "a username has to be provided (e.g. email)",
 	"Password":       "A password has to be provided. It needs to be at least 12 characters and contain a capital letter, a lower case letter and a digit or special character.",
@@ -50,10 +57,14 @@ var SignUpRequestValidationErrors = map[string]string{
 	"RecaptchaToken": "recaptcha token has an invalid format",
 }
 
+// MakeAdminRequest is the request body of MakeAdmin, which serves
+// /api/v2/user/create-admin.
 type MakeAdminRequest struct {
 	UserID int `json:"user_id" validate:"required,number"`
 }
 
+// UpdateMyUserRequest is the request body of UpdateMyUser, which serves
+// /api/v2/user/my/update.
 type UpdateMyUserRequest struct {
 	FirstName string `json:"first_name" validate:"required,excludesall=!<>{}[]()^"`
 	LastName  string `json:"last_name" validate:"required,excludesall=!<>{}[]()^"`
@@ -65,6 +76,8 @@ type UpdateMyUserRequest struct {
 	License   bool   `json:"license" validate:"boolean"`
 }
 
+// UpdateMyUserValidationErrors maps the field names of UpdateMyUserRequest to the message the API
+// returns when that field fails validation.
 var UpdateMyUserValidationErrors = map[string]string{
 	"FirstName": "first name is missing or uses invalid characters",
 	"LastName":  "last name is missing or uses invalid characters",
@@ -76,21 +89,28 @@ var UpdateMyUserValidationErrors = map[string]string{
 	"License":   "license information is missing",
 }
 
+// UpdateMyPasswordRequest is the request body of UpdateMyPassword, which serves
+// /api/v2/user/my/password/update.
 type UpdateMyPasswordRequest struct {
 	PasswordOld string `json:"password_old" validate:"required"`
 	PasswordNew string `json:"password_new" validate:"required,strongpassword"`
 }
 
+// UpdateMyPasswordValidationErrors maps the field names of UpdateMyPasswordRequest to the message the API
+// returns when that field fails validation.
 var UpdateMyPasswordValidationErrors = map[string]string{
 	"PasswordOld": "an old password has to be provided",
 	"PasswordNew": "A new password has to be provided. It needs to be at least 12 characters and contain a capital letter, a lower case letter and a digit or special character.",
 }
 
+// GetMySessionsResponse is the payload returned by GetMySessions, which serves
+// /api/v2/user/my/sessions.
 type GetMySessionsResponse struct {
 	UpcomingSessions []MySessionResponse `json:"sessions"`
 	PastSessions     []MySessionResponse `json:"sessions_old"`
 }
 
+// MySessionResponse is a single session in a GetMySessionsResponse.
 type MySessionResponse struct {
 	ID        uint        `json:"id"`
 	Title     string      `json:"title"`
@@ -101,10 +121,13 @@ type MySessionResponse struct {
 	Riders    []UserShort `json:"riders"`
 }
 
+// GetMyHeatsResponse is the payload returned by GetMyHeats, which serves
+// /api/v2/user/my/heats.
 type GetMyHeatsResponse struct {
 	Heats []HeatResponse `json:"heats"`
 }
 
+// HeatResponse is a single ride in a GetMyHeatsResponse.
 type HeatResponse struct {
 	Date            string          `json:"date"` // dd.mm.YYYY representation
 	DateUnixMillis  int64           `json:"date_unix_millis"`
@@ -113,6 +136,8 @@ type HeatResponse struct {
 	DurationSeconds int64           `json:"duration_seconds"`
 }
 
+// GetMyHeatStatsResponse is the payload returned by GetMyHeatStats, which serves
+// /api/v2/user/my/heats/statistics.
 type GetMyHeatStatsResponse struct {
 	HeatTimeMinutesTotal int64           `json:"heat_time_min"`
 	HeatCostTotal        decimal.Decimal `json:"heat_cost"`
@@ -120,20 +145,25 @@ type GetMyHeatStatsResponse struct {
 	HeatCostYTD          decimal.Decimal `json:"heat_cost_ytd"`
 }
 
+// GetMyBalanceResponse is the payload returned by GetMyBalance, which serves
+// /api/v2/user/my/balance.
 type GetMyBalanceResponse struct {
 	PaymentTotal decimal.Decimal `json:"payment_total"`
 	PaybackTotal decimal.Decimal `json:"payback_total"`
 	Balance      decimal.Decimal `json:"balance_current"`
 }
 
+// GetAllUsersShortResponse is the payload returned by GetAllUsersShort.
 type GetAllUsersShortResponse []UserShort
 
+// UserShort is a user reduced to ID and name.
 type UserShort struct {
 	ID        uint   `json:"id"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 }
 
+// UserDetailed is a user together with their ride and payment totals.
 type UserDetailed struct {
 	ID               uint            `json:"id"`
 	Username         string          `json:"username"`
@@ -153,6 +183,8 @@ type UserDetailed struct {
 	TotalPayment     decimal.Decimal `json:"total_payment"`
 }
 
+// GetUserGroupsResponse is the payload returned by GetUserGroups, which serves
+// /api/v2/user/groups/get.
 type GetUserGroupsResponse struct {
 	PriceDescription     string                `json:"price_description"`
 	PriceID              uint                  `json:"price_id"`
@@ -165,6 +197,7 @@ type GetUserGroupsResponse struct {
 	UserRoleName         string                `json:"user_role_name"`
 }
 
+// CreateUserGroupsRequest is the request body of CreateUserGroup.
 type CreateUserGroupsRequest struct {
 	PriceDescription     string                `json:"price_description"`
 	PricePerMinute       decimal.Decimal       `json:"price_min" validate:"required"`
@@ -173,6 +206,8 @@ type CreateUserGroupsRequest struct {
 	UserRoleID           database.UserRoleType `json:"user_role_id"`
 }
 
+// ChangeUserGroupRequest is the request body of ChangeUserGroup, which serves
+// /api/v2/user/group/edit.
 type ChangeUserGroupRequest struct {
 	PriceDescription     string                `json:"price_description" validate:"required"`
 	PriceID              uint                  `json:"price_id" validate:"required"`
@@ -183,10 +218,14 @@ type ChangeUserGroupRequest struct {
 	UserRoleID           database.UserRoleType `json:"user_role_id" validate:"required"`
 }
 
+// DeleteUserGroupRequest is the request body of DeleteUserGroup, which serves
+// /api/v2/user/group/delete.
 type DeleteUserGroupRequest struct {
 	UserGroupID uint `json:"user_group_id" validate:"required"`
 }
 
+// UserGroupsValidationErrors maps the field names of the user group requests to the message the API
+// returns when that field fails validation.
 var UserGroupsValidationErrors = map[string]string{
 	"PriceDescription":     "Please add a short description for the pricing.",
 	"PriceID":              "Invalid price_id provided.",
@@ -199,62 +238,100 @@ var UserGroupsValidationErrors = map[string]string{
 	"UserRoleName":         "Please provide a user role name.",
 }
 
+// SetUserGroupRequest is the request body of SetUserGroup.
 type SetUserGroupRequest struct {
 	UserID      uint `json:"user_id" validate:"required"`
 	UserGroupID uint `json:"status_id" validate:"required"`
 }
 
+// SetUserGroupsValidationErrors maps the field names of SetUserGroupRequest to the message the API
+// returns when that field fails validation.
 var SetUserGroupsValidationErrors = map[string]string{
 	"UserID":      "The user ID is invalid.",
 	"UserGroupID": "The user group ID is invalid.",
 }
 
+// GetUserRolesResponse is the payload returned by GetUserRoles, which serves
+// /api/v2/user/roles/get.
 type GetUserRolesResponse struct {
 	UserRoleDescription string                `json:"user_role_description"`
 	UserRoleID          database.UserRoleType `json:"user_role_id"`
 	UserRoleName        string                `json:"user_role_name"`
 }
 
+// SetUserLockRequest is the request body of SetUserLock, which serves
+// /api/v2/user/lock/set.
 type SetUserLockRequest struct {
 	UserID uint `json:"user_id" validate:"required"`
 	Locked bool `json:"locked"`
 }
 
+// SetUserLockValidationErrors maps the field names of SetUserLockRequest to the message the API
+// returns when that field fails validation.
 var SetUserLockValidationErrors = map[string]string{
 	"UserID": "The user ID is invalid.",
 	"Locked": "The value for 'Locked' is invalid.",
 }
 
+// DeleteUserRequest is the request body of DeleteUser, which serves
+// /api/v2/user/delete.
 type DeleteUserRequest struct {
 	UserID uint `json:"user_id" validate:"required"`
 }
 
+// DeleteUserValidationErrors maps the field names of DeleteUserRequest to the message the API
+// returns when that field fails validation.
 var DeleteUserValidationErrors = map[string]string{
 	"UserID": "The user ID is invalid.",
 }
 
+// GetPasswordResetTokenRequest is the request body of GetPasswordResetToken, which serves
+// /api/v2/user/password/token-request.
 type GetPasswordResetTokenRequest struct {
 	UserEmail      string `json:"email" validate:"email,required"`
 	RecaptchaToken string `json:"recaptcha_token"`
 }
 
+// GetPasswordResetTokenValidationErrors maps the field names of GetPasswordResetTokenRequest to the message the API
+// returns when that field fails validation.
 var GetPasswordResetTokenValidationErrors = map[string]string{
 	"UserEmail":      "Please provide a valid email address.",
 	"RecaptchaToken": "Please provide a recaptcha token to prove you are not a silly robot.",
 }
 
+// SetPasswordWithTokenRequest is the request body of SetPasswordWithToken, which serves
+// /api/v2/user/password/reset-by-token.
 type SetPasswordWithTokenRequest struct {
 	UserEmail string `json:"email" validate:"email,required"`
 	Password  string `json:"password" validate:"required,strongpassword"`
 	Token     string `json:"token" validate:"required"`
 }
 
+// SetPasswordWithTokenValidationErrors maps the field names of SetPasswordWithTokenRequest to the message the API
+// returns when that field fails validation.
 var SetPasswordWithTokenValidationErrors = map[string]string{
 	"UserEmail": "Please provide a valid email address.",
 	"Password":  "A new password has to be provided. It needs to be at least 12 characters and contain a capital letter, a lower case letter and a digit or special character.",
 	"Token":     "Please provide the token that was sent to you.",
 }
 
+// randomInt returns a uniformly distributed random integer in [0, max), drawn
+// from the operating system entropy source. Password salts and reset tokens
+// have to be unpredictable, so math/rand is not good enough for them.
+//
+// max has to be positive.
+func randomInt(max int) (int, error) {
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(max)))
+	if err != nil {
+		return 0, err
+	}
+	return int(n.Int64()), nil
+}
+
+// SignUp registers a new user. The account is created locked, an administrator
+// has to unlock it.
+//
+// It serves /api/v2/user/signup and is open to unauthenticated callers.
 func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request, req SignUpRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// Get recaptcha keys
@@ -279,10 +356,15 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request, req SignUpReque
 	}
 
 	// Crypt the password
-	salt := rand.Intn(math.MaxUint16)
+	salt, err := randomInt(math.MaxUint16)
+	if err != nil {
+		slog.Error("Cannot generate a password salt", slog.Any("error", err))
+		WriteFailureResponse("user cannot be created, please contact the administrator", w)
+		return
+	}
 	hashedPassword, err := hash.CryptSha512(hash.Sha256(req.Password), strconv.Itoa(salt))
 	if err != nil {
-		slog.Warn("Password hash could no be generated", slog.String("error", err.Error()))
+		slog.Warn("Password hash could no be generated", slog.Any("error", err))
 		WriteFailureResponse("user cannot be created, please contact the administrator", w)
 		return
 	}
@@ -305,7 +387,7 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request, req SignUpReque
 	}
 	id, err := dbh.AddUser(user)
 	if err != nil {
-		slog.Warn("User could not be added to database", slog.String("error", err.Error()))
+		slog.Warn("User could not be added to database", slog.Any("error", err))
 		WriteFailureResponse("user cannot be created, please contact the administrator", w)
 		return
 	}
@@ -316,6 +398,10 @@ func (h *Handler) SignUp(w http.ResponseWriter, r *http.Request, req SignUpReque
 	WriteSuccessResponse("success", resp, w)
 }
 
+// MakeAdmin promotes a user to administrator and unlocks them. It only works while
+// no administrator exists.
+//
+// It serves /api/v2/user/create-admin and is open to callers when web setup is enabled/unauthenticated callers.
 func (h *Handler) MakeAdmin(w http.ResponseWriter, r *http.Request, req MakeAdminRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// check if an admin user exists already
@@ -329,7 +415,7 @@ func (h *Handler) MakeAdmin(w http.ResponseWriter, r *http.Request, req MakeAdmi
 	// change the actual user status
 	err := dbh.ChangeUserStatus(uint(req.UserID), database.UserStatusAdmin)
 	if err != nil {
-		slog.Warn("Cannot make the user an 'administrator', database action failed", slog.String("ID", strconv.Itoa(req.UserID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot make the user an 'administrator', database action failed", slog.String("ID", strconv.Itoa(req.UserID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot make user an administrator. Call to DB failed.", w)
 		return
 	}
@@ -337,13 +423,17 @@ func (h *Handler) MakeAdmin(w http.ResponseWriter, r *http.Request, req MakeAdmi
 	// unlock the user (users get created locked by default)
 	err = dbh.ChangeLock(uint(req.UserID), false)
 	if err != nil {
-		slog.Warn("Cannot unlock the new user, database action failed", slog.String("ID", strconv.Itoa(req.UserID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot unlock the new user, database action failed", slog.String("ID", strconv.Itoa(req.UserID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot make user an administrator. Call to DB failed.", w)
 		return
 	}
 	WriteSuccessResponse("success", nil, w)
 }
 
+// DeleteUser anonymizes a user. It refuses to delete the caller, administrators, and
+// users with a non-zero balance.
+//
+// It serves /api/v2/user/delete and is open to administrators.
 func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request, req DeleteUserRequest, hCtx *HandlerCtx) {
 	// balance has to be zero
 	// delete user (zeroing out personal info)
@@ -354,9 +444,9 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request, req DeleteU
 	}
 
 	dbh := hCtx.Database
-	user, err := dbh.GetUserById(req.UserID)
+	user, err := dbh.GetUserByID(req.UserID)
 	if err != nil {
-		slog.Warn("Cannot find", slog.Int("user_id", int(req.UserID)), ":", err.Error())
+		slog.Warn("Cannot find user", slog.Uint64("user_id", uint64(req.UserID)), slog.Any("error", err))
 		WriteFailureResponse("User not found.", w)
 		return
 	}
@@ -374,19 +464,22 @@ func (h *Handler) DeleteUser(w http.ResponseWriter, r *http.Request, req DeleteU
 		return
 	}
 	if !balance.Balance.IsZero() {
-		slog.Warn("Balance is not 0 for", slog.Int("user_id", int(req.UserID)), ": Cannot delete user.")
+		slog.Warn("Cannot delete user with a non-zero balance", slog.Uint64("user_id", uint64(req.UserID)))
 		WriteFailureResponse("Cannot delete user with non-zero balance.", w)
 		return
 	}
-	err = dbh.DeleteUserById(req.UserID)
+	err = dbh.DeleteUserByID(req.UserID)
 	if err != nil {
-		slog.Error("Cannot delete user", slog.String("error", err.Error()))
+		slog.Error("Cannot delete user", slog.Any("error", err))
 		WriteFailureResponse("Cannot delete user.", w)
 		return
 	}
 	WriteSuccessResponse("user deleted", nil, w)
 }
 
+// UpdateMyUser updates the profile of the currently logged in user.
+//
+// It serves /api/v2/user/my/update and is open to authenticated users.
 func (h *Handler) UpdateMyUser(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	session := hCtx.ValidSession
@@ -399,7 +492,7 @@ func (h *Handler) UpdateMyUser(w http.ResponseWriter, r *http.Request) {
 	req := &UpdateMyUserRequest{}
 	err := ReadBodyAndValidate(r, req, UpdateMyUserValidationErrors)
 	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		slog.Warn("Request payload is not valid", slog.Any("error", err))
 		WriteFailureResponse(err.Error(), w)
 		return
 	}
@@ -432,13 +525,17 @@ func (h *Handler) UpdateMyUser(w http.ResponseWriter, r *http.Request) {
 	dbh := hCtx.Database
 	err = dbh.UpdateUser(session.UserID, user)
 	if err != nil {
-		slog.Warn("Cannot update user", slog.Uint64("userID", uint64(session.UserID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot update user", slog.Uint64("userID", uint64(session.UserID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot update user", w)
 		return
 	}
 	WriteSuccessResponse("user updated", nil, w)
 }
 
+// UpdateMyPassword changes the password of the currently logged in user, after checking
+// the old one.
+//
+// It serves /api/v2/user/my/password/update and is open to authenticated users.
 func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	session := hCtx.ValidSession
@@ -451,22 +548,22 @@ func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
 	req := &UpdateMyPasswordRequest{}
 	err := ReadBodyAndValidate(r, req, UpdateMyPasswordValidationErrors)
 	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		slog.Warn("Request payload is not valid", slog.Any("error", err))
 		WriteFailureResponse(err.Error(), w)
 		return
 	}
 
 	dbh := hCtx.Database
 	// verify that old password is correct
-	user, err := dbh.GetUserById(session.UserID)
+	user, err := dbh.GetUserByID(session.UserID)
 	if err != nil {
-		slog.Warn("Cannot find existing user by ID", slog.String("error", err.Error()))
+		slog.Warn("Cannot find existing user by ID", slog.Any("error", err))
 		WriteFailureResponse("password cannot be changed", w)
 		return
 	}
 	hashedPassword, err := hash.CryptSha512(hash.Sha256(req.PasswordOld), strconv.Itoa(user.PasswordSalt))
 	if err != nil {
-		slog.Warn("Password hash could no be generated", slog.String("error", err.Error()))
+		slog.Warn("Password hash could no be generated", slog.Any("error", err))
 		WriteFailureResponse("password cannot be changed", w)
 		return
 	}
@@ -477,10 +574,15 @@ func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// update new password
-	salt := rand.Intn(math.MaxUint16)
+	salt, err := randomInt(math.MaxUint16)
+	if err != nil {
+		slog.Error("Cannot generate a password salt", slog.Any("error", err))
+		WriteFailureResponse("password cannot be changed", w)
+		return
+	}
 	newPasswordHash, err := hash.CryptSha512(hash.Sha256(req.PasswordNew), strconv.Itoa(salt))
 	if err != nil {
-		slog.Warn("Password hash could no be generated", slog.String("error", err.Error()))
+		slog.Warn("Password hash could no be generated", slog.Any("error", err))
 		WriteFailureResponse("password cannot be changed", w)
 		return
 	}
@@ -490,13 +592,17 @@ func (h *Handler) UpdateMyPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	err = dbh.UpdatePassword(session.UserID, user)
 	if err != nil {
-		slog.Warn("Password could no be stored in user table", slog.String("error", err.Error()))
+		slog.Warn("Password could no be stored in user table", slog.Any("error", err))
 		WriteFailureResponse("Password could not be changed.", w)
 		return
 	}
 	WriteSuccessResponse("password changed", nil, w)
 }
 
+// GetMySessions returns the sessions of the currently logged in user, split into
+// upcoming and past ones.
+//
+// It serves /api/v2/user/my/sessions and is open to authenticated users.
 func (h *Handler) GetMySessions(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	session := hCtx.ValidSession
@@ -509,22 +615,22 @@ func (h *Handler) GetMySessions(w http.ResponseWriter, r *http.Request) {
 	dbh := hCtx.Database
 	sessions, err := dbh.GetSessionsByUser(session.UserID)
 	if err != nil {
-		slog.Error("Cannot get user sessions", slog.String("error", err.Error()))
+		slog.Error("Cannot get user sessions", slog.Any("error", err))
 		WriteFailureResponse("Cannot get user sessions", w)
 		return
 	}
 
 	// split into past and future
-	upcoming := []MySessionResponse{}
-	past := []MySessionResponse{}
+	upcoming := make([]MySessionResponse, 0, len(sessions))
+	past := make([]MySessionResponse, 0, len(sessions))
 	now := time.Now()
 	for _, s := range sessions {
 		// get riders for session
 		users, err := dbh.GetUsersForSession(s.ID)
 		if err != nil {
-			slog.Error("Cannot get users for session", slog.String("error", err.Error()))
+			slog.Error("Cannot get users for session", slog.Any("error", err))
 		}
-		sessionUsers := []UserShort{}
+		sessionUsers := make([]UserShort, 0, len(users))
 		for _, u := range users {
 			sessionUsers = append(sessionUsers, UserShort{
 				ID:        u.ID,
@@ -556,6 +662,9 @@ func (h *Handler) GetMySessions(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("user sessions", resp, w)
 }
 
+// GetMyHeats returns the rides of the currently logged in user.
+//
+// It serves /api/v2/user/my/heats and is open to authenticated users.
 func (h *Handler) GetMyHeats(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	session := hCtx.ValidSession
@@ -568,7 +677,7 @@ func (h *Handler) GetMyHeats(w http.ResponseWriter, r *http.Request) {
 	dbh := hCtx.Database
 	heats, err := dbh.GetUserHeats(session.UserID, 100)
 	if err != nil {
-		slog.Error("Cannot get user heats", slog.String("error", err.Error()))
+		slog.Error("Cannot get user heats", slog.Any("error", err))
 		WriteFailureResponse("Cannot get user heats", w)
 		return
 	}
@@ -590,6 +699,10 @@ func (h *Handler) GetMyHeats(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("heats", resp, w)
 }
 
+// GetMyHeatStats returns the total and year-to-date ride time and cost of the
+// currently logged in user.
+//
+// It serves /api/v2/user/my/heats/statistics and is open to authenticated users.
 func (h *Handler) GetMyHeatStats(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	session := hCtx.ValidSession
@@ -609,7 +722,7 @@ func (h *Handler) GetMyHeatStats(w http.ResponseWriter, r *http.Request) {
 	}
 	loc, err := dbh.GetTimezoneLocation()
 	if err != nil {
-		slog.Error("Cannot get location", slog.String("error", err.Error()))
+		slog.Error("Cannot get location", slog.Any("error", err))
 		WriteFailureResponse("Cannot get stats from database", w)
 		return
 	}
@@ -630,6 +743,10 @@ func (h *Handler) GetMyHeatStats(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("stats", resp, w)
 }
 
+// GetMyBalance returns what the currently logged in user paid, got back, and still
+// owes.
+//
+// It serves /api/v2/user/my/balance and is open to authenticated users.
 func (h *Handler) GetMyBalance(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	session := hCtx.ValidSession
@@ -641,24 +758,27 @@ func (h *Handler) GetMyBalance(w http.ResponseWriter, r *http.Request) {
 	dbh := hCtx.Database
 	resp, err := h.getUserBalance(dbh, session.UserID)
 	if err != nil {
-		slog.Error("Cannot get user balance", err.Error())
+		slog.Error("Cannot get user balance", slog.Any("error", err))
 		WriteFailureResponse("Cannot get user balance.", w)
 		return
 	}
 	WriteSuccessResponse("balance", resp, w)
 }
 
+// GetAllUsersShort returns every user reduced to ID and name.
+//
+// It serves /api/v2/user/list-short and is open to administrators.
 func (h *Handler) GetAllUsersShort(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	users, err := dbh.GetUsers( /*includeDeleted=*/ false)
 	if err != nil {
-		slog.Error("Cannot get users", slog.String("error", err.Error()))
+		slog.Error("Cannot get users", slog.Any("error", err))
 		WriteFailureResponse("cannot get users", w)
 		return
 	}
 
-	usersShort := []UserShort{}
+	usersShort := make([]UserShort, 0, len(users))
 	for _, u := range users {
 		usersShort = append(usersShort, UserShort{
 			ID:        u.ID,
@@ -669,33 +789,36 @@ func (h *Handler) GetAllUsersShort(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("users", usersShort, w)
 }
 
+// GetAllUsersDetailed returns every user together with their ride and payment totals.
+//
+// It serves /api/v2/user/list-detailed and is open to administrators.
 func (h *Handler) GetAllUsersDetailed(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	users, err := dbh.GetUsers( /*includeDeleted=*/ false)
 	if err != nil {
-		slog.Error("Cannot get users", slog.String("error", err.Error()))
+		slog.Error("Cannot get users", slog.Any("error", err))
 		WriteFailureResponse("cannot get users", w)
 		return
 	}
 
-	usersDetailed := []UserDetailed{}
+	usersDetailed := make([]UserDetailed, 0, len(users))
 	for _, u := range users {
 		duration, cost, err := dbh.GetUserHeatStats(u.ID, time.Time{}, time.Now())
 		if err != nil {
-			slog.Error("Cannot get user heat duration and cost", slog.String("error", err.Error()))
+			slog.Error("Cannot get user heat duration and cost", slog.Any("error", err))
 			WriteFailureResponse("cannot get heat duration and cost", w)
 			return
 		}
 		paybacks, err := dbh.GetUserSessionPaybacks(u.ID)
 		if err != nil {
-			slog.Error("Cannot get user paybacks", slog.String("error", err.Error()))
+			slog.Error("Cannot get user paybacks", slog.Any("error", err))
 			WriteFailureResponse("cannot get user paybacks", w)
 			return
 		}
 		payments, err := dbh.GetUserSessionPayments(u.ID)
 		if err != nil {
-			slog.Error("Cannot get user payments", slog.String("error", err.Error()))
+			slog.Error("Cannot get user payments", slog.Any("error", err))
 			WriteFailureResponse("cannot get user payments", w)
 			return
 		}
@@ -721,17 +844,20 @@ func (h *Handler) GetAllUsersDetailed(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("users detailed", usersDetailed, w)
 }
 
+// GetUserGroups returns every user group with its pricing and role.
+//
+// It serves /api/v2/user/groups/get and is open to administrators.
 func (h *Handler) GetUserGroups(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	pricings, err := dbh.GetPricings()
 	if err != nil {
-		slog.Error("Cannot get user groups", slog.String("error", err.Error()))
+		slog.Error("Cannot get user groups", slog.Any("error", err))
 		WriteFailureResponse("cannot get user groups", w)
 		return
 	}
 
-	userGroups := []GetUserGroupsResponse{}
+	userGroups := make([]GetUserGroupsResponse, 0, len(pricings))
 	for _, p := range pricings {
 		userGroups = append(userGroups, GetUserGroupsResponse{
 			PriceDescription:     p.Comment,
@@ -748,6 +874,9 @@ func (h *Handler) GetUserGroups(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("user groups", userGroups, w)
 }
 
+// CreateUserGroup adds a user group together with its pricing.
+//
+// It serves /api/v2/user/group/create and is open to administrators.
 func (h *Handler) CreateUserGroup(w http.ResponseWriter, r *http.Request, req CreateUserGroupsRequest, hCtx *HandlerCtx) {
 	// this request consists of creating a user pricing
 	// and a user group in a single request.
@@ -764,13 +893,16 @@ func (h *Handler) CreateUserGroup(w http.ResponseWriter, r *http.Request, req Cr
 	dbh := hCtx.Database
 	err := dbh.CreateUserGroup(u, p)
 	if err != nil {
-		slog.Error("Cannot create new user group", slog.String("error", err.Error()))
+		slog.Error("Cannot create new user group", slog.Any("error", err))
 		WriteFailureResponse("cannot get create new user group", w)
 		return
 	}
 	WriteSuccessResponse("user group created", nil, w)
 }
 
+// ChangeUserGroup updates a user group and its pricing.
+//
+// It serves /api/v2/user/group/edit and is open to administrators.
 func (h *Handler) ChangeUserGroup(w http.ResponseWriter, r *http.Request, req ChangeUserGroupRequest, hCtx *HandlerCtx) {
 	// this request consists of creating a user pricing
 	// and a user group in one go
@@ -789,35 +921,41 @@ func (h *Handler) ChangeUserGroup(w http.ResponseWriter, r *http.Request, req Ch
 	dbh := hCtx.Database
 	err := dbh.ChangeUserGroup(u, p)
 	if err != nil {
-		slog.Error("Cannot update user group", slog.String("error", err.Error()))
+		slog.Error("Cannot update user group", slog.Any("error", err))
 		WriteFailureResponse("Cannot update user group.", w)
 		return
 	}
 	WriteSuccessResponse("user group changed", nil, w)
 }
 
+// DeleteUserGroup removes a user group. It fails while users are still in it.
+//
+// It serves /api/v2/user/group/delete and is open to administrators.
 func (h *Handler) DeleteUserGroup(w http.ResponseWriter, r *http.Request, req DeleteUserGroupRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	err := dbh.DeleteUserGroup(req.UserGroupID)
 	if err != nil {
-		slog.Error("Cannot delete user group", slog.String("error", err.Error()))
+		slog.Error("Cannot delete user group", slog.Any("error", err))
 		WriteFailureResponse("Cannot delete user group.", w)
 		return
 	}
 	WriteSuccessResponse("user group deleted", nil, w)
 }
 
+// SetUserGroup moves a user into a user group.
+//
+// It serves /api/v2/user/group/set and is open to administrators.
 func (h *Handler) SetUserGroup(w http.ResponseWriter, r *http.Request, req SetUserGroupRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
-	user, err := dbh.GetUserById(req.UserID)
+	user, err := dbh.GetUserByID(req.UserID)
 	if err != nil {
-		slog.Error("Cannot find user", slog.String("error", err.Error()))
+		slog.Error("Cannot find user", slog.Any("error", err))
 		WriteFailureResponse("Cannot find user.", w)
 		return
 	}
 	userGroups, err := dbh.GetPricings()
 	if err != nil {
-		slog.Error("Cannot get valid groups", slog.String("error", err.Error()))
+		slog.Error("Cannot get valid groups", slog.Any("error", err))
 		WriteFailureResponse("Cannot get valid groups.", w)
 		return
 	}
@@ -838,7 +976,7 @@ func (h *Handler) SetUserGroup(w http.ResponseWriter, r *http.Request, req SetUs
 	// check that his user is not the only remaining admin
 	admins, err := dbh.GetAdminUsers()
 	if err != nil {
-		slog.Error("Cannot get admin users", slog.String("error", err.Error()))
+		slog.Error("Cannot get admin users", slog.Any("error", err))
 		WriteFailureResponse("Internal error, cannot lock/unlock user.", w)
 		return
 	}
@@ -850,24 +988,27 @@ func (h *Handler) SetUserGroup(w http.ResponseWriter, r *http.Request, req SetUs
 
 	err = dbh.SetUserGroup(user.ID, req.UserGroupID)
 	if err != nil {
-		slog.Error("Cannot change user group for user", slog.Int("user_id", int(req.UserID)), slog.Int("user_group_id", int(req.UserGroupID)), slog.String("error", err.Error()))
+		slog.Error("Cannot change user group for user", slog.Int("user_id", int(req.UserID)), slog.Int("user_group_id", int(req.UserGroupID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot change user group for user.", w)
 		return
 	}
 	WriteSuccessResponse("user group set", nil, w)
 }
 
+// GetUserRoles returns the available access levels.
+//
+// It serves /api/v2/user/roles/get and is open to administrators.
 func (h *Handler) GetUserRoles(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	roles, err := dbh.GetUserRoles()
 	if err != nil {
-		slog.Error("Cannot get user roles", slog.String("error", err.Error()))
+		slog.Error("Cannot get user roles", slog.Any("error", err))
 		WriteFailureResponse("cannot get user roles", w)
 		return
 	}
 
-	userRoles := []GetUserRolesResponse{}
+	userRoles := make([]GetUserRolesResponse, 0, len(roles))
 	for _, u := range roles {
 		userRoles = append(userRoles, GetUserRolesResponse{
 			UserRoleDescription: u.Description,
@@ -878,11 +1019,14 @@ func (h *Handler) GetUserRoles(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("user roles", userRoles, w)
 }
 
+// SetUserLock locks or unlocks a user account.
+//
+// It serves /api/v2/user/lock/set and is open to administrators.
 func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request, req SetUserLockRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
-	user, err := dbh.GetUserById(req.UserID)
+	user, err := dbh.GetUserByID(req.UserID)
 	if err != nil {
-		slog.Error("Cannot find user", slog.String("error", err.Error()))
+		slog.Error("Cannot find user", slog.Any("error", err))
 		WriteFailureResponse("Cannot find user.", w)
 		return
 	}
@@ -890,7 +1034,7 @@ func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request, req SetUse
 	// check that this user is not the only remaining admin
 	admins, err := dbh.GetAdminUsers()
 	if err != nil {
-		slog.Error("Cannot get admin users", slog.String("error", err.Error()))
+		slog.Error("Cannot get admin users", slog.Any("error", err))
 		WriteFailureResponse("Internal error, cannot lock/unlock user.", w)
 		return
 	}
@@ -902,7 +1046,7 @@ func (h *Handler) SetUserLock(w http.ResponseWriter, r *http.Request, req SetUse
 
 	err = dbh.ChangeLock(user.ID, req.Locked)
 	if err != nil {
-		slog.Error("Cannot change lock status for user", slog.Int("user_id", int(req.UserID)), slog.Bool("locked", req.Locked), slog.String("error", err.Error()))
+		slog.Error("Cannot change lock status for user", slog.Int("user_id", int(req.UserID)), slog.Bool("locked", req.Locked), slog.Any("error", err))
 		WriteFailureResponse("Cannot change user group for user.", w)
 		return
 	}
@@ -913,19 +1057,19 @@ func (h *Handler) getUserBalance(dbh database.Database, userID uint) (*GetMyBala
 	now := time.Now()
 	_, cost, err := dbh.GetUserHeatStats(userID, time.Time{}, now)
 	if err != nil {
-		slog.Error("Cannot get total costs", slog.Int("user", int(userID)), slog.String("error", err.Error()))
+		slog.Error("Cannot get total costs", slog.Int("user", int(userID)), slog.Any("error", err))
 		return nil, errors.New("cannot get balance for user")
 	}
 
 	payment, err := dbh.GetUserSessionPayments(userID)
 	if err != nil {
-		slog.Error("Cannot get total payments for", slog.Int("user", int(userID)), slog.String("error", err.Error()))
+		slog.Error("Cannot get total payments for", slog.Int("user", int(userID)), slog.Any("error", err))
 		return nil, errors.New("cannot get balance for user")
 	}
 
 	payback, err := dbh.GetUserSessionPaybacks(userID)
 	if err != nil {
-		slog.Error("Cannot get total paybacks for", slog.Int("user", int(userID)), slog.String("error", err.Error()))
+		slog.Error("Cannot get total paybacks for", slog.Int("user", int(userID)), slog.Any("error", err))
 		return nil, errors.New("cannot get balance for user")
 	}
 
@@ -937,6 +1081,11 @@ func (h *Handler) getUserBalance(dbh database.Database, userID uint) (*GetMyBala
 	return resp, nil
 }
 
+// GetPasswordResetToken emails a password reset token to the given address. An
+// unknown address is still reported as a success, so that the endpoint cannot
+// be used to probe for accounts.
+//
+// It serves /api/v2/user/password/token-request and is open to unauthenticated callers.
 func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request, req GetPasswordResetTokenRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// Check whether recaptcha is enabled.
@@ -958,15 +1107,21 @@ func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request, 
 	// Check whether user exists.
 	user, err := dbh.GetUserByName(req.UserEmail)
 	if err != nil {
-		slog.Warn("Cannot find user for password token request", slog.String("error", err.Error()))
+		slog.Warn("Cannot find user for password token request", slog.Any("error", err))
 		WriteSuccessResponse("Token requested, please check your email inbox.", nil, w)
 		return
 	}
 
 	// Generate token.
+	token, err := randomInt(999999)
+	if err != nil {
+		slog.Error("Cannot generate a password reset token", slog.Any("error", err))
+		WriteFailureResponse("Internal error, cannot send reset token.", w)
+		return
+	}
 	tokenEntry := database.PasswordReset{
 		UserID:    user.ID,
-		Token:     strconv.Itoa(rand.Intn(999999)),
+		Token:     strconv.Itoa(token),
 		Timestamp: time.Now().Add(1 * time.Hour),
 		Valid:     true,
 	}
@@ -974,7 +1129,7 @@ func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request, 
 	// Store token in database.
 	err = dbh.AddPasswordResetToken(tokenEntry)
 	if err != nil {
-		slog.Error("Cannot store password reset token", slog.String("error", err.Error()))
+		slog.Error("Cannot store password reset token", slog.Any("error", err))
 		WriteFailureResponse("Internal error, cannot send reset token.", w)
 		return
 	}
@@ -982,7 +1137,7 @@ func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request, 
 	// Send email with token to user.
 	emailConfig, err := dbh.GetEmailConfiguration()
 	if err != nil {
-		slog.Error("Cannot get email configuration to reset token", slog.String("error", err.Error()))
+		slog.Error("Cannot get email configuration to reset token", slog.Any("error", err))
 		WriteFailureResponse("Internal error, cannot send reset token.", w)
 		return
 	}
@@ -993,19 +1148,22 @@ func (h *Handler) GetPasswordResetToken(w http.ResponseWriter, r *http.Request, 
 		emailConfig.Sender,
 		"Password Reset Token")
 	if err != nil {
-		slog.Error("Cannot send email", slog.String("error", err.Error()))
+		slog.Error("Cannot send email", slog.Any("error", err))
 		WriteFailureResponse("Internal error, cannot send reset token.", w)
 		return
 	}
 	WriteSuccessResponse("Token requested, please check your email inbox.", nil, w)
 }
 
+// SetPasswordWithToken sets a new password for a user that presents a valid reset token.
+//
+// It serves /api/v2/user/password/reset-by-token and is open to unauthenticated callers.
 func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request, req SetPasswordWithTokenRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// Get user by email
 	user, err := dbh.GetUserByName(req.UserEmail)
 	if err != nil {
-		slog.Warn("User cannot be found", slog.String("error", err.Error()))
+		slog.Warn("User cannot be found", slog.Any("error", err))
 		WriteFailureResponse("Cannot reset password username or token are not valid.", w)
 		return
 	}
@@ -1014,7 +1172,7 @@ func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request, r
 	// That did not expire and is valid.
 	dbToken, err := dbh.GetPasswordResetEntry(user.ID, req.Token)
 	if err != nil {
-		slog.Warn("Token cannot be found", slog.String("error", err.Error()))
+		slog.Warn("Token cannot be found", slog.Any("error", err))
 		WriteFailureResponse("Cannot reset password username or token are not valid.", w)
 		return
 	}
@@ -1040,10 +1198,15 @@ func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request, r
 	// Create new password hash and
 	// update new password.
 	// Note: We hash the passworrd, this was previously done in the UI.
-	salt := rand.Intn(math.MaxUint16)
+	salt, err := randomInt(math.MaxUint16)
+	if err != nil {
+		slog.Error("Cannot generate a password salt", slog.Any("error", err))
+		WriteFailureResponse("Internal error. Password cannot be changed.", w)
+		return
+	}
 	newPasswordHash, err := hash.CryptSha512(hash.Sha256(req.Password), strconv.Itoa(salt))
 	if err != nil {
-		slog.Warn("Password hash could no be generated", slog.String("error", err.Error()))
+		slog.Warn("Password hash could no be generated", slog.Any("error", err))
 		WriteFailureResponse("Internal error. Password cannot be changed.", w)
 		return
 	}
@@ -1053,7 +1216,7 @@ func (h *Handler) SetPasswordWithToken(w http.ResponseWriter, r *http.Request, r
 	}
 	err = dbh.UpdatePassword(user.ID, userPassword)
 	if err != nil {
-		slog.Warn("Password could no be stored in user table", slog.String("error", err.Error()))
+		slog.Warn("Password could no be stored in user table", slog.Any("error", err))
 		WriteFailureResponse("Internal error. Password could not be changed.", w)
 		return
 	}

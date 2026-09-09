@@ -1,18 +1,23 @@
+// Package database provides the persistence layer of the application. It
+// defines the Database interface, the gorm backed schema and the Mysql
+// implementation of that interface.
 package database
 
 import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/shopspring/decimal"
-	"golang.org/x/exp/slog"
-
 	gormMysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
+// Database is the persistence interface of the application. It is composed of
+// one interface per table, view or group of related queries so that tests can
+// reason about the parts they need.
 type Database interface {
 	Connect() error
 	Disconnect() error
@@ -43,10 +48,13 @@ type Database interface {
 	UserToSessionTable
 }
 
+// LogsView reads the activity log view.
 type LogsView interface {
 	GetLogs(string) ([]Log, error)
 }
 
+// AccountingCollection groups the queries that report on and modify money
+// transactions.
 type AccountingCollection interface {
 	GetYears() ([]uint64, error)
 	GetPaymentTotal(uint64) (decimal.Decimal, error)
@@ -61,6 +69,7 @@ type AccountingCollection interface {
 	AddIncome(Income) error
 }
 
+// BoatEngineHoursTable accesses the boat_engine_hours table.
 type BoatEngineHoursTable interface {
 	GetEngineHourLatest() (BoatEngineHour, error)
 	GetEngineHours() ([]BoatEngineHour, error)
@@ -69,6 +78,7 @@ type BoatEngineHoursTable interface {
 	UpdateEngineHours(b BoatEngineHour) error
 }
 
+// BoatFuelTable accesses the boat_fuel table.
 type BoatFuelTable interface {
 	GetFuelEntries() ([]BoatFuel, error)
 	GetFuelEntry(id uint) (BoatFuel, error)
@@ -77,10 +87,14 @@ type BoatFuelTable interface {
 	RemoveFuelEntry(id uint) error
 }
 
+// BoatMaintenanceTable accesses the boat_maintenance table.
 type BoatMaintenanceTable interface {
 	GetMaintenance() ([]BoatMaintenance, error)
 	AddMaintenanceEntry(m BoatMaintenance) error
 }
+
+// BrowserSessionTable accesses the browser_session table, which holds the
+// login sessions.
 type BrowserSessionTable interface {
 	AddBrowserSession(b BrowserSession) (string, error)
 	GetBrowserSession(id string) (*BrowserSession, error)
@@ -88,6 +102,8 @@ type BrowserSessionTable interface {
 	DeleteBrowserSession(b BrowserSession) error
 }
 
+// ConfigurationTable accesses the configuration table, which holds the
+// settings that are stored in the database rather than in the config file.
 type ConfigurationTable interface {
 	DeleteProperty(key string) error
 	GetPropertyValue(key string) (Configuration, error)
@@ -99,18 +115,23 @@ type ConfigurationTable interface {
 	GetMyNautiqueConfiguration() (MyNautiqueConfiguration, error)
 }
 
+// ConfigurationVersionTable accesses the configuration_version table, which is
+// bumped whenever a property changes so that readers can detect updates.
 type ConfigurationVersionTable interface {
 	GetConfigurationVersion() (ConfigurationVersion, error)
 }
 
+// ExpenditureTable accesses the expenditure table.
 type ExpenditureTable interface {
 	GetUserSessionPaybacks(userID uint) (decimal.Decimal, error)
 }
 
+// ExpenditureTypeTable accesses the expenditure_type table.
 type ExpenditureTypeTable interface {
 	GetExpenseTypes() ([]ExpenseType, error)
 }
 
+// HeatTable accesses the heat table, which records the individual rides.
 type HeatTable interface {
 	GetUserHeats(userID uint, size int) ([]Heat, error)
 	GetUserHeatsBySession(sessionID uint, userID uint, size int) ([]Heat, error)
@@ -123,21 +144,26 @@ type HeatTable interface {
 	ChangeHeat(h *Heat) error
 }
 
+// PasswordResetTable accesses the password_reset table.
 type PasswordResetTable interface {
 	AddPasswordResetToken(entry PasswordReset) error
 	GetPasswordResetEntry(userID uint, token string) (PasswordReset, error)
 	InvalidatePasswordResetEntries(userID uint) error
 }
 
+// PaymentTable accesses the payment table.
 type PaymentTable interface {
 	GetUserSessionPayments(userID uint) (decimal.Decimal, error)
 }
 
+// PricingTable accesses the pricing table, which holds the price per minute
+// for each user group.
 type PricingTable interface {
 	GetPricings() ([]Pricing, error)
 	GetUserStatusToPricingsMap() (map[uint]Pricing, error)
 }
 
+// SessionTable accesses the session table, which holds the bookable slots.
 type SessionTable interface {
 	GetSession(sessionID uint) (Session, error)
 	// GetSessionsBetween returns all sessions between start and end time
@@ -149,6 +175,8 @@ type SessionTable interface {
 	UpdateSession(s Session) error
 }
 
+// UserGroupTable manages user groups, which the schema calls user status,
+// together with the pricing attached to them.
 type UserGroupTable interface {
 	CreateUserGroup(us UserStatus, p Pricing) error
 	ChangeUserGroup(us UserStatus, p Pricing) error
@@ -156,10 +184,13 @@ type UserGroupTable interface {
 	SetUserGroup(userID uint, groupID uint) error
 }
 
+// UserRoleTable accesses the user_role table.
 type UserRoleTable interface {
 	GetUserRoles() ([]UserRole, error)
 }
 
+// UserToSessionTable accesses the user_to_session table, which records which
+// users take part in which session.
 type UserToSessionTable interface {
 	// GetUsersForSession returns all users from a specific session
 	GetUsersForSession(id uint) ([]UserToSession, error)
@@ -167,11 +198,12 @@ type UserToSessionTable interface {
 	DeleteSessionToUserEntry(userID uint, sessionID uint) error
 }
 
+// UserTable accesses the user table.
 type UserTable interface {
 	// AddUser adds a user to the database and returns an error if it failed
 	AddUser(u User) (uint, error)
 	// Flags a user as deleted and removes all personal data.
-	DeleteUserById(id uint) error
+	DeleteUserByID(id uint) error
 	// Returns all the admin users
 	GetAdminUsers() ([]User, error)
 	// Returns true if a user is an admin user.
@@ -179,9 +211,9 @@ type UserTable interface {
 	// GetUserByUsername find the user that has either the given username
 	// or the given email address. Returns an error in case the user was not found.
 	GetUserByName(name string) (User, error)
-	GetUserById(id uint) (User, error)
+	GetUserByID(id uint) (User, error)
 	// ChangUserStatus changes the status of a single user.
-	ChangeUserStatus(id uint, userStatusId uint) error
+	ChangeUserStatus(id uint, userStatusID uint) error
 	// ChangeLock changes the locked status of a single user.
 	ChangeLock(id uint, locked bool) error
 	// Count users that have status_id of an admin
@@ -196,6 +228,7 @@ type UserTable interface {
 	GetUsers(includeDeleted bool) ([]User, error)
 }
 
+// Settings are the parameters of a database connection.
 type Settings struct {
 	User     string
 	Password string
@@ -205,6 +238,7 @@ type Settings struct {
 	DBName   string
 }
 
+// Mysql is the MySQL backed implementation of Database.
 type Mysql struct {
 	db  *sql.DB
 	orm *gorm.DB
@@ -225,7 +259,7 @@ func (d *Mysql) getDSN(hidePassword bool) string {
 	return fmt.Sprintf("%s:%s@%s(%s:%s)/%s?charset=utf8&parseTime=True&loc=UTC", d.User, password, d.Protocol, d.Host, d.Port, d.DBName)
 }
 
-// NewDBMysql returns a Mysql instange.
+// NewDBMysql returns a Mysql instance.
 func NewDBMysql(settings Settings) *Mysql {
 	return &Mysql{
 		Settings: settings,
@@ -247,13 +281,13 @@ func (d *Mysql) Connect() error {
 		SkipInitializeWithVersion: false,              // smart configure based on used version
 	}), &gorm.Config{})
 	if err != nil {
-		slog.Warn("Cannot connect with gorm", slog.String("error", err.Error()))
+		slog.Warn("Cannot connect with gorm", slog.Any("error", err))
 		return err
 	}
 	d.orm = orm
 	d.db, err = orm.DB()
 	if err != nil {
-		slog.Error("Cannot assign db handler", slog.String("error", err.Error()))
+		slog.Error("Cannot assign db handler", slog.Any("error", err))
 		return err
 	}
 	d.db.SetMaxIdleConns(10)
@@ -263,20 +297,19 @@ func (d *Mysql) Connect() error {
 	// If db exists we migrate otherwise we setup the tables
 	dbIsSetup, err := d.IsInitialized()
 	if err != nil {
-		slog.Error("Cannot check if table 'user' exists", slog.String("error", err.Error()))
+		slog.Error("Cannot check if table 'user' exists", slog.Any("error", err))
 		return err
 	}
 
-	switch {
-	case !dbIsSetup:
-		slog.Info("DB Setup check: New database setup detected.")
-		err = d.Initialize()
-	case dbIsSetup:
+	if dbIsSetup {
 		slog.Info("DB Setup check: Existing database setup detected.")
 		err = d.Migrate()
+	} else {
+		slog.Info("DB Setup check: New database setup detected.")
+		err = d.Initialize()
 	}
 	if err != nil {
-		slog.Error("Database setup or migration failed", err)
+		slog.Error("Database setup or migration failed", slog.Any("error", err))
 		return err
 	}
 	slog.Info("Updated DB schema")
@@ -296,8 +329,9 @@ func (d *Mysql) Disconnect() error {
 	}
 	if d.db != nil {
 		slog.Info("Closing database handle (direct)")
+		db := d.db
 		d.db = nil
-		return d.db.Close()
+		return db.Close()
 	}
 	slog.Info("No database to be closed (nil pointers only).")
 	return nil
@@ -332,6 +366,7 @@ func (d *Mysql) IsConfigured() bool {
 	return true
 }
 
+// IsInitialized reports whether the schema has been created already.
 func (d *Mysql) IsInitialized() (bool, error) {
 	return d.tableExists("user")
 }

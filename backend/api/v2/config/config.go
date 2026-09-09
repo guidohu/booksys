@@ -1,4 +1,4 @@
-// This package handles configuration. It follows the following principle.
+// Package config handles configuration. It follows the following principle.
 //
 // Configuration required globally is stored in a configuration file and can be provided
 // with environment variables or flags alternatively.
@@ -13,29 +13,34 @@ package config
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
-	"server/database"
-	"server/yaml"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"golang.org/x/exp/slog"
+	"server/database"
+	"server/yaml"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
 
+// Configuration mirrors the layout of the configuration file. It exists so
+// that the supported keys can be derived from its `yaml` tags and so that a
+// file can be checked for unknown keys.
 type Configuration struct {
 	Database   DBConfig   `yaml:"database"`
-	Http       HttpConfig `yaml:"http"`
+	HTTP       HTTPConfig `yaml:"http"`
 	MyNautique MyNautique `yaml:"mynautique"`
 }
 
+// DBConfig holds the database connection settings.
 type DBConfig struct {
 	Protocol string `yaml:"protocol"`
 	Host     string `yaml:"host"`
@@ -45,7 +50,8 @@ type DBConfig struct {
 	DBName   string `yaml:"dbname"`
 }
 
-type HttpConfig struct {
+// HTTPConfig holds the settings of the HTTP server.
+type HTTPConfig struct {
 	Port                     uint   `yaml:"port"`
 	SessionInactivityTimeout uint   `yaml:"sessionInactivityTimeout"`
 	SessionTimeout           uint   `yaml:"sessionTimeout"`
@@ -53,12 +59,15 @@ type HttpConfig struct {
 	WebSetup                 bool   `yaml:"webSetup"`
 }
 
+// MyNautique holds the settings of the MyNautique integration.
 type MyNautique struct {
 	APIKey string `yaml:"api.key"`
 }
 
+// ConfigSource identifies where a configuration value came from.
 type ConfigSource int
 
+// The configuration sources, in decreasing order of priority.
 const (
 	Unknown ConfigSource = iota
 	Flags
@@ -68,6 +77,8 @@ const (
 	Defaults
 )
 
+// Config is the merged view over all configuration sources. It is safe for
+// concurrent use.
 type Config struct {
 	mu          sync.RWMutex
 	properties  map[string]database.Configuration
@@ -95,7 +106,7 @@ var MandatoryConfigKeys = []string{
 
 // ConfigDefaults are the defaults for each of the parameters and will be
 // applied if none of the higher priority configuration sources define this.
-var ConfigDefaults map[string]string = map[string]string{
+var ConfigDefaults = map[string]string{
 	"config":                        "",
 	"http.port":                     "80",
 	"http.sessioninactivitytimeout": "604800",
@@ -180,7 +191,10 @@ func NewConfig(flagConfig *viper.Viper) (*Config, error) {
 	c.environment.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	c.environment.AutomaticEnv()
 	for _, key := range GetKeys() {
-		c.environment.BindEnv(key)
+		err := c.environment.BindEnv(key)
+		if err != nil {
+			return c, err
+		}
 	}
 
 	// parse configuration file.
@@ -211,7 +225,7 @@ func NewConfig(flagConfig *viper.Viper) (*Config, error) {
 func findConfigFile() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		slog.Error("Cannot get user home directory", slog.String("error", err.Error()))
+		slog.Error("Cannot get user home directory", slog.Any("error", err))
 	}
 	pathsToSearch := []string{
 		filepath.Join(homeDir, ".booksys"),
@@ -248,13 +262,14 @@ func (c *Config) ReadConfigFile() error {
 		slog.Info("Read config from", slog.String("config", configFile))
 		_, err := os.Stat(configFile)
 		if err != nil {
-			slog.Error("File does not exist", slog.String("config", configFile), slog.String("error", err.Error()))
+			slog.Error("File does not exist", slog.String("config", configFile), slog.Any("error", err))
 		}
 		c.mu.Lock()
 		defer c.mu.Unlock()
 		c.file.SetConfigFile(configFile)
 		err = c.file.ReadInConfig()
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+		var notFoundErr viper.ConfigFileNotFoundError
+		if errors.As(err, &notFoundErr) {
 			slog.Error("No config file found", slog.String("config", configFile))
 			return err
 		}
@@ -262,7 +277,7 @@ func (c *Config) ReadConfigFile() error {
 		conf := &Configuration{}
 		err = c.file.Unmarshal(conf)
 		if err != nil {
-			slog.Error("Invalid configuration. Cannot decode configuration.", slog.String("error", err.Error()))
+			slog.Error("Invalid configuration. Cannot decode configuration.", slog.Any("error", err))
 			return err
 		}
 	} else {
@@ -271,16 +286,16 @@ func (c *Config) ReadConfigFile() error {
 	return nil
 }
 
-// SetDB the database that should be used to read the configuration properties from.
+// SetDB sets the database that the configuration properties are read from.
 func (c *Config) SetDB(db *database.Manager) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.db = db
 }
 
-// SetConfigFileValue this will set the in memory representation of a config value. To persist it to
-// disk, you should call WriteConfigFile afterwards.
-func (c *Config) SetConfigFileValue(key string, value interface{}) error {
+// SetConfigFileValue sets the in memory representation of a config value. To
+// persist it to disk, call WriteConfigFile afterwards.
+func (c *Config) SetConfigFileValue(key string, value any) error {
 	allowedKeys := GetKeysMap()
 	if _, ok := allowedKeys[key]; !ok {
 		return fmt.Errorf("cannot set config key/value pair, invalid key %s", key)
@@ -300,11 +315,11 @@ func (c *Config) SetPropertyValue(key string, value string) error {
 		},
 	}
 	if c.db == nil {
-		return fmt.Errorf("no database manager present yet")
+		return errors.New("no database manager present yet")
 	}
 	db, done := c.db.GetHandler()
 	if db == nil {
-		return fmt.Errorf("no database connection available")
+		return errors.New("no database connection available")
 	}
 	defer done()
 	err := db.UpdateOrInsertPropertyValues(properties)
@@ -321,7 +336,7 @@ func (c *Config) WriteConfigFile() error {
 	// if file does not exist, we try to create it first.
 	location, _ := c.GetString("config")
 	if location == "" {
-		return fmt.Errorf("no config file path provided to store config")
+		return errors.New("no config file path provided to store config")
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -356,12 +371,12 @@ func (c *Config) ReadConfigProperties() error {
 // The caller MUST hold mu.
 func (c *Config) readConfigProperties() error {
 	if c.db == nil {
-		return fmt.Errorf("no database manager present yet")
+		return errors.New("no database manager present yet")
 	}
 	db, done := c.db.GetHandler()
 	defer done()
 	if db == nil {
-		return fmt.Errorf("no database configured")
+		return errors.New("no database configured")
 	}
 	err := db.Ping()
 	if err != nil {
@@ -379,7 +394,7 @@ func (c *Config) readConfigProperties() error {
 func (c *Config) ToStringFull() string {
 	s := strings.Builder{}
 
-	selectedKeys := map[string]bool{}
+	selectedKeys := make(map[string]bool)
 	selectedIdentifier := "[selected]"
 
 	// Get all the config keys according to
@@ -427,7 +442,7 @@ func (c *Config) ToStringFull() string {
 	// print database properties
 	s.WriteString("\nDatabase properties:\n")
 	s.WriteString("-----------\n")
-	dbKeys := []string{}
+	dbKeys := make([]string, 0, len(database.AllowedProperties))
 	for key := range database.AllowedProperties {
 		dbKeys = append(dbKeys, key)
 	}
@@ -465,7 +480,7 @@ func (c *Config) GetString(key string) (string, ConfigSource) {
 	case propOk:
 		return propValue.Value, Database
 	case c.defaults.IsSet(key):
-		return c.defaults.GetString(key), File
+		return c.defaults.GetString(key), Defaults
 	}
 	return "", Unknown
 }
@@ -514,15 +529,15 @@ func (c *Config) WatchFile() chan struct{} {
 		slog.Info("Configuration file changed", slog.String("file", e.Name))
 		err := c.ReadConfigFile()
 		if err != nil {
-			slog.Warn("Configuration cannot be read", slog.String("error", err.Error()))
+			slog.Warn("Configuration cannot be read", slog.Any("error", err))
 		}
 		notifyCh <- struct{}{}
 	})
 	return notifyCh
 }
 
-// Watch the properties in the database and update the configuration state in case
-// the database content gets updated. This function runs until the context is cancelled.
+// WatchProperties watches the properties in the database and updates the
+// configuration state in case the database content gets updated. This function runs until the context is cancelled.
 // If it cannot connect to the database it keeps trying.
 func (c *Config) WatchProperties(ctx context.Context, notifyCh chan struct{}) {
 	ticker := time.NewTicker(10 * time.Second)
@@ -550,7 +565,7 @@ func (c *Config) WatchProperties(ctx context.Context, notifyCh chan struct{}) {
 				}
 				version, err := db.GetConfigurationVersion()
 				if err != nil {
-					slog.Warn("WatchProperties: cannot retrieve configuration version from database", slog.String("error", err.Error()))
+					slog.Warn("WatchProperties: cannot retrieve configuration version from database", slog.Any("error", err))
 					return
 				}
 				if lastVersion.Version != version.Version || len(c.properties) == 0 {
@@ -560,7 +575,7 @@ func (c *Config) WatchProperties(ctx context.Context, notifyCh chan struct{}) {
 					slog.Info("WatchProperties: new config version detected", slog.Uint64("version", uint64(version.Version)), slog.String("date", version.Timestamp.String()))
 					err = c.readConfigProperties()
 					if err != nil {
-						slog.Warn("WatchProperties: cannot read config properties", slog.String("error", err.Error()))
+						slog.Warn("WatchProperties: cannot read config properties", slog.Any("error", err))
 						return
 					}
 					lastVersion = version

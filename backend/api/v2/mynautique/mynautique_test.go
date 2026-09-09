@@ -43,14 +43,14 @@ func TestLogin(t *testing.T) {
 		ExpiresIn:        "3600",
 		ExpiresInSeconds: 3600,
 		Kind:             "identitytoolkit#VerifyPasswordResponse",
-		LocalId:          "foo.localId",
+		LocalID:          "foo.localId",
 		Email:            "foo@bar.com",
 		DisplayName:      "",
 		Registered:       true,
 		RefreshToken:     "foo.refreshToken",
 	}
 
-	m := NewMyNautiqueClient(&Options{
+	m := NewClient(&Options{
 		User:       "foo",
 		Password:   "bar",
 		AuthAPIKey: "foobar",
@@ -99,13 +99,14 @@ func TestGetFleet(t *testing.T) {
 			Hin:               99999,
 		},
 	}
-	m := NewMyNautiqueClient(&Options{
+	m := NewClient(&Options{
 		User:       "foo",
 		Password:   "bar",
 		AuthAPIKey: "foobar",
 		Client:     mockClient,
 	})
 	m.auth.IDToken = "foo-bar-id-token"
+	m.AuthUntil = time.Now().Add(time.Hour)
 	err := m.GetFleet()
 	if err != nil {
 		t.Logf("got '%v', want '%v'", err.Error(), nil)
@@ -119,8 +120,8 @@ func TestGetBoatTelemetry(t *testing.T) {
 		"deviceSerial":21000099999,
 		"serviceMessage":"",
 		"serviceDetailsMessage":"",
-		"gps_long":12.749070779275361,
-		"gps_lat":23.38980444927536,
+		"gps_long":"12.749070779275361",
+		"gps_lat":"23.38980444927536",
 		"isWebSocketConnected":false,
 		"Accel_XYZ_Magnitude":"0.124000",
 		"BALLAST_BELLY":"0",
@@ -161,8 +162,8 @@ func TestGetBoatTelemetry(t *testing.T) {
 		"SERVICE_REMINDER_ENABLE":"1"
 	}`)
 	AccelXYZMagnitude, _ := decimal.NewFromString("0.124000")
-	GPSLongitude := decimal.NewFromFloat(12.749070779275361)
-	GPSLatitude := decimal.NewFromFloat(23.38980444927536)
+	GPSLongitude, _ := decimal.NewFromString("12.749070779275361")
+	GPSLatitude, _ := decimal.NewFromString("23.38980444927536")
 	EngineHoursLinc, _ := decimal.NewFromString("187.300003")
 	GPSCourse, _ := decimal.NewFromString("0.000000")
 	TemperatureCelsius, _ := decimal.NewFromString("51.750004")
@@ -224,13 +225,14 @@ func TestGetBoatTelemetry(t *testing.T) {
 		ServiceHoursCapture:           ServiceHoursCapture,
 		ServiceReminderEnabled:        true,
 	}
-	m := NewMyNautiqueClient(&Options{
+	m := NewClient(&Options{
 		User:       "foo",
 		Password:   "bar",
 		AuthAPIKey: "foobar",
 		Client:     mockClient,
 	})
 	m.auth.IDToken = "foo-bar-id-token"
+	m.AuthUntil = time.Now().Add(time.Hour)
 	telemetry, err := m.GetBoatTelemetry(999)
 	if err != nil {
 		t.Logf("got %v, want %v", err.Error(), nil)

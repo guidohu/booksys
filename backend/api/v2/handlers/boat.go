@@ -2,15 +2,17 @@ package handlers
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
-	"server/database"
 	"time"
 
 	"github.com/shopspring/decimal"
-	"golang.org/x/exp/slog"
 	"gorm.io/gorm"
+	"server/database"
 )
 
+// GetEngineHourLatestResponse is the payload returned by GetEngineHourLatest, which serves
+// /api/v2/boat/engine-hour/latest/get.
 type GetEngineHourLatestResponse struct {
 	ID            uint            `json:"id"`
 	Timestamp     int64           `json:"timestamp"`
@@ -24,8 +26,11 @@ type GetEngineHourLatestResponse struct {
 	UserID        uint            `json:"user_id"`
 }
 
+// GetEngineHoursResponse is the payload returned by GetEngineHoursList.
 type GetEngineHoursResponse []GetEngineHourLatestResponse
 
+// UpdateEngineHoursRequest is the request body of UpdateEngineHours, which serves
+// /api/v2/boat/engine-hour/update.
 type UpdateEngineHoursRequest struct {
 	BeforeHours decimal.Decimal `json:"engine_hours_before" validate:"required"`
 	AfterHours  decimal.Decimal `json:"engine_hours_after,omitempty" validate:"omitempty"`
@@ -33,6 +38,8 @@ type UpdateEngineHoursRequest struct {
 	UserID      uint            `json:"user_id" validate:"required,numeric"`
 }
 
+// UpdateEngineHoursValidationErrors maps the field names of UpdateEngineHoursRequest to the message the API
+// returns when that field fails validation.
 var UpdateEngineHoursValidationErrors = map[string]string{
 	"BeforeHours": "Please provide engine hours before.",
 	"AfterHours":  "Please provide engine hourse after.",
@@ -40,16 +47,22 @@ var UpdateEngineHoursValidationErrors = map[string]string{
 	"UserID":      "Please provide a valid user.",
 }
 
+// UpdateEngineHoursEntryRequest is the request body of UpdateEngineHoursEntry, which serves
+// /api/v2/boat/engine-hour/entry/update.
 type UpdateEngineHoursEntryRequest struct {
 	ID        uint  `json:"id" validate:"required"`
 	UsageType uint8 `json:"type" validate:"required,sessiontype"`
 }
 
+// UpdateEngineHoursEntryValidationErrors maps the field names of UpdateEngineHoursEntryRequest to the message the API
+// returns when that field fails validation.
 var UpdateEngineHoursEntryValidationErrors = map[string]string{
 	"ID":        "Please provide an ID for the entry.",
 	"UsageType": "Please provide the type of the session.",
 }
 
+// GetFuelEntriesResponse is a single refuelling in the payload returned by
+// GetFuelEntries.
 type GetFuelEntriesResponse struct {
 	ID                   uint             `json:"id"`
 	AverageLitersPerHour decimal.Decimal  `json:"avg_liters_per_hour"`
@@ -65,6 +78,8 @@ type GetFuelEntriesResponse struct {
 	UserID               uint             `json:"user_id"`
 }
 
+// AddFuelEntryRequest is the request body of AddFuelEntry, which serves
+// /api/v2/boat/fuel-entry/add.
 type AddFuelEntryRequest struct {
 	Cost        *decimal.Decimal `json:"cost" validate:"required"`
 	EngineHours *decimal.Decimal `json:"engine_hours" validate:"required"`
@@ -72,6 +87,8 @@ type AddFuelEntryRequest struct {
 	UserID      uint             `json:"user_id" validate:"required"`
 }
 
+// FuelEntryValidationErrors maps the field names of the fuel entry requests to the message the API
+// returns when that field fails validation.
 var FuelEntryValidationErrors = map[string]string{
 	"UserID":       "Please provide an user ID.",
 	"Cost":         "Please provide the cost.",
@@ -83,6 +100,8 @@ var FuelEntryValidationErrors = map[string]string{
 	"IsDiscounted": "Please provide whether this entry is discounted or not.",
 }
 
+// ChangeFuelEntryRequest is the request body of ChangeFuelEntry, which serves
+// /api/v2/boat/fuel-entry/edit.
 type ChangeFuelEntryRequest struct {
 	ID           uint             `json:"id"`
 	CostNet      *decimal.Decimal `json:"cost" validate:"required"`
@@ -92,10 +111,14 @@ type ChangeFuelEntryRequest struct {
 	IsDiscounted bool             `json:"is_discounted"`
 }
 
+// RemoveFuelEntryRequest is the request body of RemoveFuelEntry, which serves
+// /api/v2/boat/fuel-entry/remove.
 type RemoveFuelEntryRequest struct {
 	ID uint `json:"id" validate:"required"`
 }
 
+// GetMaintenanceEntriesResponse is a single maintenance job in the payload
+// returned by GetMaintenanceEntries.
 type GetMaintenanceEntriesResponse struct {
 	ID            uint            `json:"id"`
 	Description   string          `json:"description"`
@@ -106,24 +129,31 @@ type GetMaintenanceEntriesResponse struct {
 	UserID        uint            `json:"user_id"`
 }
 
+// AddMaintenanceEntryRequest is the request body of AddMaintenanceEntry, which serves
+// /api/v2/boat/maintenance-entry/add.
 type AddMaintenanceEntryRequest struct {
 	Description string          `json:"description" validate:"required"`
 	EngineHours decimal.Decimal `json:"engine_hours" validate:"required"`
 	UserID      uint            `json:"user_id" validate:"required"`
 }
 
+// AddMaintenanceEntryValidationErrors maps the field names of AddMaintenanceEntryRequest to the message the API
+// returns when that field fails validation.
 var AddMaintenanceEntryValidationErrors = map[string]string{
 	"Description": "Please provide a description of the maintenance.",
 	"EngineHours": "Please provide the engine hours at which you performed maintenance.",
 	"UserID":      "Please provide a valid user ID.",
 }
 
+// GetEngineHourLatest returns the most recent engine hour reading.
+//
+// It serves /api/v2/boat/engine-hour/latest/get and is open to administrators.
 func (h *Handler) GetEngineHourLatest(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	b, err := dbh.GetEngineHourLatest()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		slog.Warn("Cannot get latest engine hour entry", slog.String("error", err.Error()))
+		slog.Warn("Cannot get latest engine hour entry", slog.Any("error", err))
 		WriteFailureResponse("Cannot get latest engine hour entry.", w)
 		return
 	}
@@ -142,12 +172,15 @@ func (h *Handler) GetEngineHourLatest(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("boat engine hour entry", resp, w)
 }
 
+// GetEngineHoursList returns the engine hour readings.
+//
+// It serves /api/v2/boat/engine-hours/list and is open to administrators.
 func (h *Handler) GetEngineHoursList(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	engineHours, err := dbh.GetEngineHours()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		slog.Warn("Cannot get engine hours", slog.String("error", err.Error()))
+		slog.Warn("Cannot get engine hours", slog.Any("error", err))
 		WriteFailureResponse("Cannot get engine hours.", w)
 		return
 	}
@@ -170,11 +203,14 @@ func (h *Handler) GetEngineHoursList(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("boat engine hours", resp, w)
 }
 
+// UpdateEngineHours records a new engine hour reading.
+//
+// It serves /api/v2/boat/engine-hour/update and is open to administrators.
 func (h *Handler) UpdateEngineHours(w http.ResponseWriter, r *http.Request) {
 	req := &UpdateEngineHoursRequest{}
 	err := ReadBodyAndValidate(r, req, UpdateEngineHoursValidationErrors)
 	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		slog.Warn("Request payload is not valid", slog.Any("error", err))
 		WriteFailureResponse(err.Error(), w)
 		return
 	}
@@ -185,7 +221,7 @@ func (h *Handler) UpdateEngineHours(w http.ResponseWriter, r *http.Request) {
 	// get latest entry
 	latest, err := dbh.GetEngineHourLatest()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		slog.Warn("Cannot get latest engine hour entry", slog.String("error", err.Error()))
+		slog.Warn("Cannot get latest engine hour entry", slog.Any("error", err))
 		WriteFailureResponse("Cannot get latest engine hour entry.", w)
 		return
 	}
@@ -236,18 +272,21 @@ func (h *Handler) UpdateEngineHours(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		slog.Warn("Cannot add new engine hours", slog.String("error", err.Error()))
+		slog.Warn("Cannot add new engine hours", slog.Any("error", err))
 		WriteFailureResponse("Cannot add new engine hours", w)
 		return
 	}
 	WriteSuccessResponse("engine hours added", nil, w)
 }
 
+// UpdateEngineHoursEntry updates an existing engine hour reading.
+//
+// It serves /api/v2/boat/engine-hour/entry/update and is open to administrators.
 func (h *Handler) UpdateEngineHoursEntry(w http.ResponseWriter, r *http.Request) {
 	req := &UpdateEngineHoursEntryRequest{}
 	err := ReadBodyAndValidate(r, req, UpdateEngineHoursEntryValidationErrors)
 	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		slog.Warn("Request payload is not valid", slog.Any("error", err))
 		WriteFailureResponse(err.Error(), w)
 		return
 	}
@@ -256,7 +295,7 @@ func (h *Handler) UpdateEngineHoursEntry(w http.ResponseWriter, r *http.Request)
 	dbh := hCtx.Database
 	entry, err := dbh.GetEngineHoursEntry(req.ID)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		slog.Warn("Cannot get engine hour entry", slog.String("error", err.Error()))
+		slog.Warn("Cannot get engine hour entry", slog.Any("error", err))
 		WriteFailureResponse("Cannot find engine hour entry.", w)
 		return
 	}
@@ -264,23 +303,26 @@ func (h *Handler) UpdateEngineHoursEntry(w http.ResponseWriter, r *http.Request)
 	entry.TypeID = req.UsageType
 	err = dbh.UpdateEngineHours(entry)
 	if err != nil {
-		slog.Warn("Cannot update engine hour entry", slog.String("error", err.Error()))
+		slog.Warn("Cannot update engine hour entry", slog.Any("error", err))
 		WriteFailureResponse("Cannot update engine hour entry.", w)
 		return
 	}
 	WriteSuccessResponse("entry updated", nil, w)
 }
 
+// GetFuelEntries returns the refuelling log.
+//
+// It serves /api/v2/boat/fuel-entries/get and is open to administrators.
 func (h *Handler) GetFuelEntries(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	fuelEntries, err := dbh.GetFuelEntries()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		slog.Warn("Cannot get fuel entries", slog.String("error", err.Error()))
+		slog.Warn("Cannot get fuel entries", slog.Any("error", err))
 		WriteFailureResponse("Cannot get fuel entries.", w)
 		return
 	}
-	resp := []GetFuelEntriesResponse{}
+	resp := make([]GetFuelEntriesResponse, 0, len(fuelEntries))
 	var lastEngineHour decimal.Decimal
 	for i := len(fuelEntries) - 1; i >= 0; i-- {
 		e := fuelEntries[i]
@@ -324,6 +366,9 @@ func (h *Handler) GetFuelEntries(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("fuel entries", resp, w)
 }
 
+// AddFuelEntry records a refuelling.
+//
+// It serves /api/v2/boat/fuel-entry/add and is open to administrators.
 func (h *Handler) AddFuelEntry(w http.ResponseWriter, r *http.Request, req AddFuelEntryRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	billType, _ := h.config.GetString("fuel.payment.type")
@@ -344,18 +389,21 @@ func (h *Handler) AddFuelEntry(w http.ResponseWriter, r *http.Request, req AddFu
 	}
 	err := dbh.AddFuelEntry(entry)
 	if err != nil {
-		slog.Warn("Cannot add fuel entry", slog.String("error", err.Error()))
+		slog.Warn("Cannot add fuel entry", slog.Any("error", err))
 		WriteFailureResponse("Cannot add fuel entry.", w)
 		return
 	}
 	WriteSuccessResponse("fuel entry added", nil, w)
 }
 
+// ChangeFuelEntry updates a refuelling.
+//
+// It serves /api/v2/boat/fuel-entry/edit and is open to administrators.
 func (h *Handler) ChangeFuelEntry(w http.ResponseWriter, r *http.Request, req ChangeFuelEntryRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	entry, err := dbh.GetFuelEntry(req.ID)
 	if err != nil {
-		slog.Warn("Cannot find fuel entry", slog.Uint64("id", uint64(req.ID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot find fuel entry", slog.Uint64("id", uint64(req.ID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot find existing fuel entry.", w)
 		return
 	}
@@ -373,42 +421,48 @@ func (h *Handler) ChangeFuelEntry(w http.ResponseWriter, r *http.Request, req Ch
 	}
 	err = dbh.ChangeFuelEntry(newEntry)
 	if err != nil {
-		slog.Warn("Cannot change fuel entry", slog.Uint64("id", uint64(req.ID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot change fuel entry", slog.Uint64("id", uint64(req.ID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot change existing fuel entry.", w)
 		return
 	}
 	WriteSuccessResponse("fuel entry saved", nil, w)
 }
 
+// RemoveFuelEntry removes a refuelling.
+//
+// It serves /api/v2/boat/fuel-entry/remove and is open to administrators.
 func (h *Handler) RemoveFuelEntry(w http.ResponseWriter, r *http.Request, req RemoveFuelEntryRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	entry, err := dbh.GetFuelEntry(req.ID)
 	if err != nil {
-		slog.Warn("Cannot find fuel entry", slog.Uint64("id", uint64(req.ID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot find fuel entry", slog.Uint64("id", uint64(req.ID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot find existing fuel entry.", w)
 		return
 	}
 
 	err = dbh.RemoveFuelEntry(entry.ID)
 	if err != nil {
-		slog.Warn("Cannot remove fuel entry", slog.Uint64("id", uint64(req.ID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot remove fuel entry", slog.Uint64("id", uint64(req.ID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot remove existing fuel entry.", w)
 		return
 	}
 	WriteSuccessResponse("fuel entry saved", nil, w)
 }
 
+// GetMaintenanceEntries returns the maintenance log.
+//
+// It serves /api/v2/boat/maintenance-entries/get and is open to administrators.
 func (h *Handler) GetMaintenanceEntries(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	logs, err := dbh.GetMaintenance()
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		slog.Warn("Cannot get fuel entries", slog.String("error", err.Error()))
+		slog.Warn("Cannot get fuel entries", slog.Any("error", err))
 		WriteFailureResponse("Cannot get fuel entries.", w)
 		return
 	}
 
-	resp := []GetMaintenanceEntriesResponse{}
+	resp := make([]GetMaintenanceEntriesResponse, 0, len(logs))
 	for _, l := range logs {
 		resp = append(resp, GetMaintenanceEntriesResponse{
 			ID:            l.ID,
@@ -423,6 +477,9 @@ func (h *Handler) GetMaintenanceEntries(w http.ResponseWriter, r *http.Request) 
 	WriteSuccessResponse("maintenance entries", &resp, w)
 }
 
+// AddMaintenanceEntry records a maintenance job.
+//
+// It serves /api/v2/boat/maintenance-entry/add and is open to administrators.
 func (h *Handler) AddMaintenanceEntry(w http.ResponseWriter, r *http.Request, req AddMaintenanceEntryRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	if !dbh.UserExists(req.UserID) {
@@ -440,7 +497,7 @@ func (h *Handler) AddMaintenanceEntry(w http.ResponseWriter, r *http.Request, re
 	}
 	err := dbh.AddMaintenanceEntry(entry)
 	if err != nil {
-		slog.Warn("Cannot add maintenance entry", slog.String("error", err.Error()))
+		slog.Warn("Cannot add maintenance entry", slog.Any("error", err))
 		WriteFailureResponse("Cannot add maintenance entry.", w)
 		return
 	}

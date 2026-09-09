@@ -1,13 +1,49 @@
 package database
 
 import (
-	"fmt"
-	"regexp"
-	iso4217 "server/validator/currency"
+	"errors"
+	"log/slog"
 
-	"golang.org/x/exp/slog"
+	iso4217 "server/validator/currency"
 )
 
+// getLogsQuery renders the log view. The currency is bound once per amount, so
+// it never becomes part of the statement text.
+const getLogsQuery = `SELECT c_log.id as id, c_log.type as type, c_log.time as time, c_log.log_message as log_message FROM (
+	SELECT h.id as id, "heat" as type, h.timestamp as time, 
+		   CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, 
+				  ' was riding for ', FORMAT(h.duration_s/60,1), 
+				  ' min and ', FORMAT(h.cost_chf, 2), ' ', ?) as log_message 
+		FROM user u, heat h 
+		WHERE u.id = h.user_id AND h.comment IS NULL
+	UNION ALL
+	SELECT h.id as id, "heat" as type, h.timestamp as time, 
+		   CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, 
+				  ' was riding for ', FORMAT(h.duration_s/60,1), 
+				  ' min and ', FORMAT(h.cost_chf, 2), ' ', ?, ' (Comment: ', h.comment, ')') as log_message 
+		FROM user u, heat h 
+		WHERE u.id = h.user_id AND NOT h.comment IS NULL
+	UNION ALL
+	SELECT p.id as id, "payment" as type, p.timestamp as time, 
+		   CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, 
+				  ' paid for sessions ', FORMAT(p.amount_chf, 2), ' ', ?) as log_message 
+		FROM user u, payment p 
+		WHERE u.id = p.user_id AND p.type_id = 5
+	UNION ALL
+	SELECT bf.id as id, "boat_fuel" as type, bf.timestamp as time, 
+		   CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, ' added ', 
+				  FORMAT(bf.liters, 2), 'L fuel for ', FORMAT(cost_chf, 2), ' ', ?) as log_message 
+		FROM user u, boat_fuel bf 
+		WHERE bf.user_id = u.id AND bf.contributes_to_balance = 1
+	UNION ALL
+	SELECT bf.id as id, "boat_fuel" as type, bf.timestamp as time, 
+		   CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, ' added ', 
+				  FORMAT(bf.liters, 2), 'L fuel for ', FORMAT(cost_chf, 2), ' ', ?, ' (on credit)') as log_message 
+		FROM user u, boat_fuel bf 
+		WHERE bf.user_id = u.id AND bf.contributes_to_balance = 0
+  ) as c_log ORDER BY time DESC`
+
+// Log is a single row of the log view.
 type Log struct {
 	ID         uint   `json:"id"`
 	LogMessage string `json:"log"`
@@ -15,51 +51,14 @@ type Log struct {
 	Type       string `json:"type"`
 }
 
+// GetLogs returns the log view, with amounts rendered in the given ISO 4217
+// currency.
 func (d *Mysql) GetLogs(currency string) ([]Log, error) {
 	if !iso4217.IsCurrency(currency) {
-		slog.Warn("Currency is not a safe and valid string to build the SQL statement for retrieving logs")
-		return []Log{}, fmt.Errorf("currency is no valid value log text cannot be built")
+		slog.Warn("Cannot build the log text for an unknown currency", slog.String("currency", currency))
+		return []Log{}, errors.New("currency is no valid value log text cannot be built")
 	}
-	// make sure the currency is indeed a safe value
-	r, _ := regexp.Compile(`^[A-Za-z]{3}$`)
-	if !r.MatchString(currency) {
-		slog.Warn("Currency is not a safe and valid string to build the SQL statement for retrieving logs")
-		return []Log{}, fmt.Errorf("currency is no valid value log text cannot be built")
-	}
-	query := fmt.Sprintf(`SELECT c_log.id as id, c_log.type as type, c_log.time as time, c_log.log_message as log_message FROM (
-		SELECT h.id as id, "heat" as type, h.timestamp as time, 
-			   CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, 
-					  ' was riding for ', FORMAT(h.duration_s/60,1), 
-					  ' min and ', FORMAT(h.cost_chf, 2), ' %s') as log_message 
-			FROM user u, heat h 
-			WHERE u.id = h.user_id AND h.comment IS NULL
-		UNION ALL
-		SELECT h.id as id, "heat" as type, h.timestamp as time, 
-			   CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, 
-					  ' was riding for ', FORMAT(h.duration_s/60,1), 
-					  ' min and ', FORMAT(h.cost_chf, 2), ' %s (Comment: ', h.comment, ')') as log_message 
-			FROM user u, heat h 
-			WHERE u.id = h.user_id AND NOT h.comment IS NULL
-		UNION ALL
-		SELECT p.id as id, "payment" as type, p.timestamp as time, 
-			   CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, 
-					  ' paid for sessions ', FORMAT(p.amount_chf, 2), ' %s') as log_message 
-			FROM user u, payment p 
-			WHERE u.id = p.user_id AND p.type_id = 5
-		UNION ALL
-		SELECT bf.id as id, "boat_fuel" as type, bf.timestamp as time, 
-			   CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, ' added ', 
-					  FORMAT(bf.liters, 2), 'L fuel for ', FORMAT(cost_chf, 2), ' %s') as log_message 
-			FROM user u, boat_fuel bf 
-			WHERE bf.user_id = u.id AND bf.contributes_to_balance = 1
-		UNION ALL
-		SELECT bf.id as id, "boat_fuel" as type, bf.timestamp as time, 
-			   CONCAT(u.first_name COLLATE utf8_general_ci, ' ', u.last_name, ' added ', 
-					  FORMAT(bf.liters, 2), 'L fuel for ', FORMAT(cost_chf, 2), ' %s (on credit)') as log_message 
-			FROM user u, boat_fuel bf 
-			WHERE bf.user_id = u.id AND bf.contributes_to_balance = 0
-	  ) as c_log ORDER BY time DESC`, currency, currency, currency, currency, currency)
 	var logs []Log
-	err := d.orm.Raw(query).Find(&logs).Error
+	err := d.orm.Raw(getLogsQuery, currency, currency, currency, currency, currency).Find(&logs).Error
 	return logs, err
 }

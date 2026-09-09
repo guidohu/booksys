@@ -1,26 +1,33 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
-	"server/database"
 	"strconv"
 	"time"
 	_ "time/tzdata"
 
 	sunrise "github.com/nathan-osman/go-sunrise"
-	"golang.org/x/exp/slog"
+	"server/database"
 )
 
+// GetBookingDayRequest is the request body of GetBookingDay, which serves
+// /api/v2/booking/day/list.
 type GetBookingDayRequest struct {
 	Start int64 `json:"start" validate:"required,number"`
 	End   int64 `json:"end" validate:"required,number"`
 }
 
+// GetBookingSeriesRequest is the request body of GetBookingSeries, which serves
+// /api/v2/booking/series/list.
 type GetBookingSeriesRequest struct {
 	TimeWindows []GetBookingDayRequest `json:"time_windows" validate:"required"`
 }
 
+// GetBookingResponse is the bookings of one time window, as returned by
+// GetBookingDay and, repeatedly, by GetBookingSeries.
 type GetBookingResponse struct {
 	Start            int64             `json:"window_start"`
 	StartText        string            `json:"window_start_text"`
@@ -36,8 +43,11 @@ type GetBookingResponse struct {
 	Sessions         []SessionResponse `json:"sessions"`
 }
 
+// GetBookingSeriesResponse is the payload returned by GetBookingSeries, which serves
+// /api/v2/booking/series/list.
 type GetBookingSeriesResponse []GetBookingResponse
 
+// SessionResponse is a single session in a GetBookingResponse.
 type SessionResponse struct {
 	ID               uint            `json:"id"`
 	Start            int64           `json:"start"`
@@ -52,6 +62,7 @@ type SessionResponse struct {
 	Riders           []RiderResponse `json:"riders"`
 }
 
+// RiderResponse is a participant of a session.
 type RiderResponse struct {
 	ID        uint   `json:"id"`
 	Name      string `json:"name"`
@@ -59,24 +70,31 @@ type RiderResponse struct {
 	LastName  string `json:"last_name"`
 }
 
+// GetBookingDay returns the sessions of a single day together with the bookable
+// window for that day.
+//
+// It serves /api/v2/booking/day/list and is open to authenticated users.
 func (h *Handler) GetBookingDay(w http.ResponseWriter, r *http.Request, req GetBookingDayRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	b, err := h.getBooking(dbh, time.Unix(req.Start, 0), time.Unix(req.End, 0))
 	if err != nil {
-		slog.Warn("Cannot retrieve bookings", slog.String("error", err.Error()))
+		slog.Warn("Cannot retrieve bookings", slog.Any("error", err))
 		WriteFailureResponse("Cannot get bookings", w)
 		return
 	}
 	WriteSuccessResponse("bookings retrieved", &b, w)
 }
 
+// GetBookingSeries returns the bookings for several time windows in one call.
+//
+// It serves /api/v2/booking/series/list and is open to administrators.
 func (h *Handler) GetBookingSeries(w http.ResponseWriter, r *http.Request, req GetBookingSeriesRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
-	resp := []GetBookingResponse{}
+	resp := make([]GetBookingResponse, 0, len(req.TimeWindows))
 	for _, window := range req.TimeWindows {
 		b, err := h.getBooking(dbh, time.Unix(window.Start, 0), time.Unix(window.End, 0))
 		if err != nil {
-			slog.Warn("Cannot retrieve bookings for window", slog.Int64("start", window.Start), slog.Int64("end", window.End), slog.String("error", err.Error()))
+			slog.Warn("Cannot retrieve bookings for window", slog.Int64("start", window.Start), slog.Int64("end", window.End), slog.Any("error", err))
 			b = GetBookingResponse{}
 		}
 		resp = append(resp, b)
@@ -88,7 +106,7 @@ func (h *Handler) GetBookingSeries(w http.ResponseWriter, r *http.Request, req G
 func (h *Handler) getBooking(db database.Database, start time.Time, end time.Time) (GetBookingResponse, error) {
 	location, err := h.getLocation()
 	if err != nil {
-		slog.Warn("Cannot get timezone for sunrise/sunset calculations", slog.String("error", err.Error()))
+		slog.Warn("Cannot get timezone for sunrise/sunset calculations", slog.Any("error", err))
 		return GetBookingResponse{}, err
 	}
 	sunrise, sunset := h.getSunriseSunset(start, location)
@@ -96,11 +114,11 @@ func (h *Handler) getBooking(db database.Database, start time.Time, end time.Tim
 	businessDayEnd, _ := h.config.GetString("business.day.end")
 	if businessDayStart == "" {
 		slog.Warn("business.day.start not configured")
-		return GetBookingResponse{}, fmt.Errorf("business.day.start not configured")
+		return GetBookingResponse{}, errors.New("business.day.start not configured")
 	}
 	if businessDayEnd == "" {
 		slog.Warn("business.day.end not configured")
-		return GetBookingResponse{}, fmt.Errorf("business.day.end not configured")
+		return GetBookingResponse{}, errors.New("business.day.end not configured")
 	}
 	b := &GetBookingResponse{
 		Start:            start.Unix(),
@@ -120,7 +138,7 @@ func (h *Handler) getBooking(db database.Database, start time.Time, end time.Tim
 	// get sessions for that timeframe
 	s, err := db.GetSessionsBetween(start, end)
 	if err != nil {
-		slog.Warn("Cannot retrieve the sessions from the database", slog.String("error", err.Error()))
+		slog.Warn("Cannot retrieve the sessions from the database", slog.Any("error", err))
 		return GetBookingResponse{}, err
 	}
 
@@ -140,7 +158,7 @@ func (h *Handler) getBooking(db database.Database, start time.Time, end time.Tim
 		}
 		riders, err := h.getRiders(session.ID)
 		if err != nil {
-			slog.Warn("Cannot retrieve users for", slog.Uint64("session", uint64(session.ID)), slog.String("error", err.Error()))
+			slog.Warn("Cannot retrieve users for", slog.Uint64("session", uint64(session.ID)), slog.Any("error", err))
 			return GetBookingResponse{}, err
 		}
 		for _, rider := range riders {
@@ -157,16 +175,16 @@ func (h *Handler) getBooking(db database.Database, start time.Time, end time.Tim
 }
 
 func (h *Handler) getRiders(sessionID uint) ([]database.User, error) {
-	users := []database.User{}
+	users := make([]database.User, 0)
 	dbh, done := h.Database.GetHandler()
 	defer done()
 	if dbh == nil {
 		slog.Warn("No database connection is available.")
-		return users, fmt.Errorf("no database connection available")
+		return users, errors.New("no database connection available")
 	}
 	usersToSession, err := dbh.GetUsersForSession(sessionID)
 	if err != nil {
-		slog.Warn("Cannot retrieve users for", slog.Uint64("session", uint64(sessionID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot retrieve users for", slog.Uint64("session", uint64(sessionID)), slog.Any("error", err))
 		return users, err
 	}
 	for _, entry := range usersToSession {
@@ -200,7 +218,7 @@ func (h *Handler) getLocation() (*time.Location, error) {
 	timezone, _ := h.config.GetString("location.timezone")
 	location, err := time.LoadLocation(timezone)
 	if err != nil {
-		slog.Warn("Invalid location.timezone retrieved from the database", slog.String("error", err.Error()))
+		slog.Warn("Invalid location.timezone retrieved from the database", slog.Any("error", err))
 		return nil, err
 	}
 	return location, nil

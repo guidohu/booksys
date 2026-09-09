@@ -1,9 +1,9 @@
 package database
 
 import (
-	"github.com/shopspring/decimal"
-	"golang.org/x/exp/slog"
+	"log/slog"
 
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm/clause"
 )
 
@@ -16,21 +16,21 @@ func (d *Mysql) Migrate() error {
 	// prepare database for migration
 	err := d.migrationPreflight()
 	if err != nil {
-		slog.Error("migrationPreflight failed:", err)
+		slog.Error("migrationPreflight failed", slog.Any("error", err))
 		return err
 	}
 
 	// run schema update
 	err = d.autoMigrate()
 	if err != nil {
-		slog.Error("autoMigrate failed:", err)
+		slog.Error("autoMigrate failed", slog.Any("error", err))
 		return err
 	}
 
 	// run schema update manual tasks
 	err = d.migrationPostflight()
 	if err != nil {
-		slog.Error("migrationPostflight failed:", err)
+		slog.Error("migrationPostflight failed", slog.Any("error", err))
 		return err
 	}
 
@@ -39,14 +39,14 @@ func (d *Mysql) Migrate() error {
 	// initialize values
 	err = d.initializeContent()
 	if err != nil {
-		slog.Error("initialize database failed:", err)
+		slog.Error("initialize database failed", slog.Any("error", err))
 		return err
 	}
 
 	// post initialization tasks
 	err = d.cleanup()
 	if err != nil {
-		slog.Error("cleanup tasks failed:", err)
+		slog.Error("cleanup tasks failed", slog.Any("error", err))
 	}
 
 	return nil
@@ -58,14 +58,14 @@ func (d *Mysql) Initialize() error {
 	// create schema
 	err := d.autoMigrate()
 	if err != nil {
-		slog.Error("autoMigrate failed:", err)
+		slog.Error("autoMigrate failed", slog.Any("error", err))
 		return err
 	}
 
 	// initialize values
 	err = d.initializeContent()
 	if err != nil {
-		slog.Error("initialize database failed:", err)
+		slog.Error("initialize database failed", slog.Any("error", err))
 		return err
 	}
 
@@ -96,42 +96,42 @@ func (d *Mysql) migrationPreflight() error {
 			slog.Error("migration preflight table `session_type` - failed to create transaction")
 			return err
 		}
-		_, err = t.Query("UPDATE session SET type = 2 WHERE type = 1")
+		_, err = t.Exec("UPDATE session SET type = 2 WHERE type = 1")
 		if err != nil {
 			slog.Error("migration preflight table `session_type` - failed to move session id 1 to id 2")
 			return err
 		}
 		slog.Info("migration preflight table `session_type` - move session id 1 to id 2 done")
 
-		_, err = t.Query("UPDATE boat_engine_hours SET type = 2 WHERE type = 1")
+		_, err = t.Exec("UPDATE boat_engine_hours SET type = 2 WHERE type = 1")
 		if err != nil {
 			slog.Error("migration preflight table `boat_engine_hours` - failed to move session id 1 to id 2")
 			return err
 		}
 		slog.Info("migration preflight table `boat_engine_hours` - move session id 1 to id 2 done")
 
-		_, err = t.Query("UPDATE session SET type = 1 WHERE type = 0")
+		_, err = t.Exec("UPDATE session SET type = 1 WHERE type = 0")
 		if err != nil {
 			slog.Error("migration preflight table `session_type` - failed to move session id 0 to id 1")
 			return err
 		}
 		slog.Info("migration preflight table `session_type` - move session id 0 to id 1 done")
 
-		_, err = t.Query("UPDATE boat_engine_hours SET type = 1 WHERE type = 0")
+		_, err = t.Exec("UPDATE boat_engine_hours SET type = 1 WHERE type = 0")
 		if err != nil {
 			slog.Error("migration preflight table `boat_engine_hours` - failed to move session id 0 to id 1")
 			return err
 		}
 		slog.Info("migration preflight table `boat_engine_hours` - move session id 0 to id 1 done")
 
-		_, err = t.Query("DELETE FROM session_type WHERE id = 0")
+		_, err = t.Exec("DELETE FROM session_type WHERE id = 0")
 		if err != nil {
 			slog.Error("migration preflight table `session_type` - failed to remove id 0")
 			return err
 		}
 
 		slog.Info("migration preflight table `session_type` - rename original session_type 1")
-		_, err = t.Query("UPDATE session_type SET name = ?, comment = ? WHERE id = ?", DefaultSessionTypes[0].Name, DefaultSessionTypes[0].Comment, DefaultSessionTypes[0].ID)
+		_, err = t.Exec("UPDATE session_type SET name = ?, comment = ? WHERE id = ?", DefaultSessionTypes[0].Name, DefaultSessionTypes[0].Comment, DefaultSessionTypes[0].ID)
 		if err != nil {
 			slog.Error("migration preflight table `session_type` - failed to rename original session_type 1")
 			return err
@@ -162,19 +162,19 @@ func (d *Mysql) migrationPreflight() error {
 		}
 		for i := range DefaultExpenseTypes {
 			newID := len(DefaultExpenseTypes) - i // idx is current ID + 1
-			_, err = t.Query("UPDATE expenditure_type SET id = ? WHERE id = ?", newID, newID-1)
+			_, err = t.Exec("UPDATE expenditure_type SET id = ? WHERE id = ?", newID, newID-1)
 			if err != nil {
 				slog.Error("migration preflight table `expenditure_type` - failed to move type ID from N to N+1 with", slog.Int("N", newID-1))
 				return err
 			}
 			slog.Info("migration preflight table `expenditure_type` - move type ID from N to N+1 with", slog.Int("N", newID-1))
-			_, err = t.Query("UPDATE expenditure SET type_id = ? WHERE type_id = ?", newID, newID-1)
+			_, err = t.Exec("UPDATE expenditure SET type_id = ? WHERE type_id = ?", newID, newID-1)
 			if err != nil {
 				slog.Error("migration preflight table `expenditure` - failed to move type ID from N to N+1 with", slog.Int("N", newID-1))
 				return err
 			}
 			slog.Info("migration preflight table `payment` - move type ID from N to N+1 with", slog.Int("N", newID-1))
-			_, err = t.Query("UPDATE payment SET type_id = ? WHERE type_id = ?", newID, newID-1)
+			_, err = t.Exec("UPDATE payment SET type_id = ? WHERE type_id = ?", newID, newID-1)
 			if err != nil {
 				slog.Error("migration preflight table `payment_type` - failed to move type ID from N to N+1 with", slog.Int("N", newID-1))
 				return err
@@ -190,9 +190,9 @@ func (d *Mysql) migrationPreflight() error {
 	}
 
 	// explicitly change type for browser_session.session_secret
-	_, err = d.db.Query("ALTER TABLE browser_session MODIFY COLUMN session_secret VARCHAR(512)")
+	_, err = d.db.Exec("ALTER TABLE browser_session MODIFY COLUMN session_secret VARCHAR(512)")
 	if err != nil {
-		slog.Error("migration preflight table `browser_session` - failed to MODIFY COLUMN", slog.String("error", err.Error()))
+		slog.Error("migration preflight table `browser_session` - failed to MODIFY COLUMN", slog.Any("error", err))
 		return err
 	}
 
@@ -210,7 +210,7 @@ func (d *Mysql) migrationPostflight() error {
 		Pluck("column_name", &idColumnResults).
 		Error
 	if err != nil {
-		slog.Error("migration postflight table `configuration` - failed to query", slog.String("error", err.Error()))
+		slog.Error("migration postflight table `configuration` - failed to query", slog.Any("error", err))
 		return err
 	}
 
@@ -220,7 +220,7 @@ func (d *Mysql) migrationPostflight() error {
 		if err != nil {
 			// We do not really care whether this request is successful or not,
 			// as we do need to delete it, but it's fine if it is not there.
-			slog.Error("migration postflight table `configuration` - failed to ALTER TABLE", slog.String("error", err.Error()))
+			slog.Error("migration postflight table `configuration` - failed to ALTER TABLE", slog.Any("error", err))
 			return err
 		}
 	} else {
@@ -275,7 +275,7 @@ func (d *Mysql) initializeContent() error {
 	// Setup default values
 	for _, i := range defaultValues {
 		for _, r := range i {
-			result := d.orm.Debug().Clauses(clause.OnConflict{DoNothing: true}).Create(r)
+			result := d.orm.Clauses(clause.OnConflict{DoNothing: true}).Create(r)
 			if result.Error != nil {
 				return result.Error
 			}
@@ -314,7 +314,7 @@ func (d *Mysql) cleanup() error {
 	slog.Info("migration cleanup table `configuration` - remove unsupported values")
 	liveValues, err := d.GetAllPropertyValues()
 	if err != nil {
-		slog.Error("migration cleanup table `configuration` - remove unsupported values failed", slog.String("error", err.Error()))
+		slog.Error("migration cleanup table `configuration` - remove unsupported values failed", slog.Any("error", err))
 		return err
 	}
 	for _, liveValue := range liveValues {
@@ -325,7 +325,7 @@ func (d *Mysql) cleanup() error {
 			slog.Info("migration cleanup table `configuration` - remove unsupported values: remove ", slog.String("property", liveValue.Property))
 			err = d.DeleteProperty(liveValue.Property)
 			if err != nil {
-				slog.Error("migration cleanup table `configuration` - remove unsupported values failed", slog.String("error", err.Error()))
+				slog.Error("migration cleanup table `configuration` - remove unsupported values failed", slog.Any("error", err))
 				return err
 			}
 		}
@@ -335,8 +335,11 @@ func (d *Mysql) cleanup() error {
 	return nil
 }
 
+// UserRoleType is the access level of a user.
 type UserRoleType uint
 
+// The access levels. UserRoleUnknown is the zero value and is used to mean
+// "any role" where a role is required.
 const (
 	UserRoleUnknown UserRoleType = iota
 	UserRoleGuest
@@ -369,6 +372,7 @@ var DefaultUserRoles = []UserRole{
 
 // TODO minimum set of user status required for the app to work
 
+// The IDs of the default user groups, which the schema calls user status.
 const (
 	UserStatusGuest = iota + 1
 	UserStatusMember
@@ -377,6 +381,7 @@ const (
 	UserStatusPartner
 )
 
+// DefaultUserStatus are the user groups a fresh database is seeded with.
 var DefaultUserStatus = []UserStatus{
 	{
 		ID:          UserStatusGuest,
@@ -410,11 +415,13 @@ var DefaultUserStatus = []UserStatus{
 	},
 }
 
+// The IDs of the default session types.
 const (
 	DefaultSessionType = iota + 1
 	CourseSessionType
 )
 
+// DefaultSessionTypes are the session types a fresh database is seeded with.
 var DefaultSessionTypes = []SessionType{
 	{
 		ID:      DefaultSessionType,
@@ -428,16 +435,21 @@ var DefaultSessionTypes = []SessionType{
 	},
 }
 
+// DefaultSessionTypesMap indexes DefaultSessionTypes by ID.
 var DefaultSessionTypesMap = map[int]SessionType{
 	DefaultSessionType: DefaultSessionTypes[0],
 	CourseSessionType:  DefaultSessionTypes[1],
 }
 
-var DefaultPriceGuest, _ = decimal.NewFromString("2.80")
-var DefaultPriceMember, _ = decimal.NewFromString("2.80")
-var DefaultPriceCommunity, _ = decimal.NewFromString("1.30")
-var DefaultPriceCourse, _ = decimal.NewFromString("0.00")
+// The prices per minute a fresh database is seeded with.
+var (
+	DefaultPriceGuest, _     = decimal.NewFromString("2.80")
+	DefaultPriceMember, _    = decimal.NewFromString("2.80")
+	DefaultPriceCommunity, _ = decimal.NewFromString("1.30")
+	DefaultPriceCourse, _    = decimal.NewFromString("0.00")
+)
 
+// DefaultPricing is the price per user group a fresh database is seeded with.
 var DefaultPricing = []Pricing{
 	{
 		ID:             1,
@@ -471,6 +483,8 @@ var DefaultPricing = []Pricing{
 	},
 }
 
+// DefaultInvitationStatus are the invitation states a fresh database is seeded
+// with.
 var DefaultInvitationStatus = []InvitationStatus{
 	{
 		ID:      1,
@@ -499,6 +513,7 @@ var DefaultInvitationStatus = []InvitationStatus{
 	},
 }
 
+// The IDs of the default expense types.
 const (
 	ExpenseTypeFuelDirect = iota + 1
 	ExpenseTypeMaintenance
@@ -512,6 +527,7 @@ const (
 	ExpenseTypeFuelBill
 )
 
+// DefaultExpenseTypes are the expense types a fresh database is seeded with.
 var DefaultExpenseTypes = []ExpenseType{
 	{
 		ID:      ExpenseTypeFuelDirect,
@@ -565,6 +581,7 @@ var DefaultExpenseTypes = []ExpenseType{
 	},
 }
 
+// DefaultExpenseTypesMap indexes DefaultExpenseTypes by ID.
 var DefaultExpenseTypesMap = map[int]ExpenseType{
 	ExpenseTypeFuelDirect:    DefaultExpenseTypes[0],
 	ExpenseTypeMaintenance:   DefaultExpenseTypes[1],
@@ -578,6 +595,8 @@ var DefaultExpenseTypesMap = map[int]ExpenseType{
 	ExpenseTypeFuelBill:      DefaultExpenseTypes[9],
 }
 
+// DefaultConfiguration are the configuration properties a fresh database is
+// seeded with.
 var DefaultConfiguration = []Configuration{
 	{
 		Property: "schema.version",
@@ -677,6 +696,7 @@ var DefaultConfiguration = []Configuration{
 	},
 }
 
+// DefaultConfigurationVersion is the initial configuration version row.
 var DefaultConfigurationVersion = []ConfigurationVersion{
 	{
 		ID:      1,

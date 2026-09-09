@@ -1,4 +1,3 @@
-backend/api/v2/notifications/email/email_test.go
 docker/booksys_dummy_db/testdata.sql
 Docker/dev_fresh_external_backend/booksys_export.sql
 TODO

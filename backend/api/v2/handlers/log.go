@@ -1,14 +1,17 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
-	"server/database"
 
-	"golang.org/x/exp/slog"
+	"server/database"
 )
 
+// GetLogsResponse is the payload returned by GetLogs.
 type GetLogsResponse []database.Log
 
+// GetLogs serves the activity log, with amounts rendered in the configured
+// currency.
 func (h *Handler) GetLogs(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
@@ -20,7 +23,7 @@ func (h *Handler) GetLogs(w http.ResponseWriter, r *http.Request) {
 	}
 	logs, err := dbh.GetLogs(currency)
 	if err != nil {
-		slog.Warn("cannot get logs", slog.String("error", err.Error()))
+		slog.Warn("cannot get logs", slog.Any("error", err))
 		WriteFailureResponse("cannot get logs", w)
 		return
 	}

@@ -1,11 +1,13 @@
 package database
 
 import (
+	"log/slog"
 	"sync"
-
-	"golang.org/x/exp/slog"
 )
 
+// Manager owns the database connections. It hands out the most recent
+// connection to callers and keeps superseded ones alive until their last
+// client is done with them.
 type Manager struct {
 	generations    int64
 	settings       Settings
@@ -16,30 +18,39 @@ type Manager struct {
 	mu                sync.RWMutex
 }
 
+// Handle is a single database connection together with a wait group that
+// tracks how many callers are still using it.
 type Handle struct {
 	id int64
 	db Database
 	wg sync.WaitGroup
 }
 
-// NewDB function that gets called when a new Database
-// is created by the DBManager. Can be overridden for testing.
-var InstanceCreator func(settings Settings) Database = func(settings Settings) Database {
+// InstanceCreator creates the Database used by a Manager. It is a variable so
+// that tests can substitute a fake implementation.
+var InstanceCreator = func(settings Settings) Database {
 	return NewDBMysql(settings)
 }
 
+// NewManager returns a Manager for the given settings. It does not connect,
+// call Connect for that.
 func NewManager(settings Settings) *Manager {
 	return &Manager{
 		settings: settings,
 	}
 }
 
+// UpdateSettings replaces the settings used for the next connection attempt.
+// It does not affect connections that are already established.
 func (dbm *Manager) UpdateSettings(settings Settings) {
 	dbm.mu.Lock()
 	defer dbm.mu.Unlock()
 	dbm.settings = settings
 }
 
+// Connect establishes a new connection and makes it the one GetHandler returns.
+// If settings is nil the settings the Manager was created with are used,
+// otherwise the given settings are used and remembered.
 func (dbm *Manager) Connect(settings *Settings) error {
 	dbSettings := dbm.settings
 	if settings != nil {
@@ -68,6 +79,8 @@ func (dbm *Manager) Connect(settings *Settings) error {
 	return nil
 }
 
+// ConnectAndReplace connects like Connect and then closes the superseded
+// connections in the background, once their last client is done with them.
 func (dbm *Manager) ConnectAndReplace(settings *Settings) error {
 	err := dbm.Connect(settings)
 	if err != nil {
@@ -91,7 +104,7 @@ func (dbm *Manager) ConnectAndReplace(settings *Settings) error {
 			dbm.mu.Unlock()
 		}
 		dbm.mu.Lock()
-		remainingDatabases := []*Handle{}
+		var remainingDatabases []*Handle
 		for i, dbh := range dbm.previousDatabases {
 			if dbh.db != nil {
 				remainingDatabases = append(remainingDatabases, dbm.previousDatabases[i])
@@ -104,7 +117,7 @@ func (dbm *Manager) ConnectAndReplace(settings *Settings) error {
 	return nil
 }
 
-// Disconnect disconnects all database connections handled by the DBManager
+// Disconnect disconnects all database connections handled by the Manager.
 func (dbm *Manager) Disconnect() {
 	dbm.mu.Lock()
 	defer dbm.mu.Unlock()
@@ -113,19 +126,15 @@ func (dbm *Manager) Disconnect() {
 	dbm.latestDatabase = nil
 	for _, dbh := range dbm.previousDatabases {
 		disconnectWg.Add(1)
-		go func(h *Handle) {
-			slog.Info("Wait for clients to close database handle", slog.Int64("id", h.id))
-			h.wg.Wait()
-			slog.Info("Closing database handle", slog.Int64("id", h.id))
-			h.db.Disconnect()
-			disconnectWg.Done()
-		}(dbh)
+		go func() {
+			defer disconnectWg.Done()
+			slog.Info("Wait for clients to close database handle", slog.Int64("id", dbh.id))
+			dbh.wg.Wait()
+			slog.Info("Closing database handle", slog.Int64("id", dbh.id))
+			dbh.db.Disconnect()
+		}()
 	}
 	disconnectWg.Wait()
-}
-
-func (dbm *Manager) IsInitialized() {
-
 }
 
 // GetHandler returns a database instance and a callback to call when

@@ -7,6 +7,8 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+// BoatEngineHour is a reading of the engine hour meter, taken before and
+// after a session.
 type BoatEngineHour struct {
 	ID          uint            `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
 	Timestamp   time.Time       `gorm:"type:datetime DEFAULT NULL"`
@@ -21,6 +23,8 @@ type BoatEngineHour struct {
 	CheckedIn   bool            `gorm:"column:checked_in;type:int(8) DEFAULT 0"`
 }
 
+// BoatFuel is a refuelling of the boat. ContributeToBalance says whether the
+// person who paid gets credited for it.
 type BoatFuel struct {
 	ID                  uint             `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
 	Timestamp           time.Time        `gorm:"type:datetime DEFAULT NULL"`
@@ -34,10 +38,12 @@ type BoatFuel struct {
 	IsDiscounted        bool             `gorm:"column:is_discounted;type:int(8) DEFAULT 0"`
 }
 
+// TableName returns the name of the table BoatFuel maps to.
 func (BoatFuel) TableName() string {
 	return "boat_fuel"
 }
 
+// BoatMaintenance is a maintenance job carried out on the boat.
 type BoatMaintenance struct {
 	ID          uint            `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
 	Timestamp   time.Time       `gorm:"type:timestamp DEFAULT CURRENT_TIMESTAMP"`
@@ -47,10 +53,13 @@ type BoatMaintenance struct {
 	Description string          `gorm:"type:text CHARACTER SET utf8"`
 }
 
+// TableName returns the name of the table BoatMaintenance maps to.
 func (BoatMaintenance) TableName() string {
 	return "boat_maintenance"
 }
 
+// BrowserSession is a login session. It denormalizes the parts of the user
+// that the middleware needs so that authentication costs a single lookup.
 type BrowserSession struct {
 	SessionSecret string       `gorm:"primaryKey;type:varchar(512) NOT NULL"`
 	ValidUntil    time.Time    `gorm:"column:valid_thru;type:datetime DEFAULT NULL"`
@@ -66,11 +75,12 @@ type BrowserSession struct {
 	SessionData   string       `gorm:"type:text CHARACTER SET utf8"`
 }
 
+// TableName returns the name of the table BrowserSession maps to.
 func (BrowserSession) TableName() string {
 	return "browser_session"
 }
 
-// IsEmpty returns whether this oobject is empty.
+// IsEmpty returns whether this object is empty.
 func (b *BrowserSession) IsEmpty() bool {
 	emptySession := BrowserSession{}
 	return reflect.DeepEqual(*b, emptySession)
@@ -81,11 +91,12 @@ func (b *BrowserSession) Expired() bool {
 	return b.ValidUntil.Before(time.Now())
 }
 
-// Valid returns true if a session is both, not empty and
+// Valid returns true if a session is neither expired nor empty.
 func (b *BrowserSession) Valid() bool {
 	return !b.Expired() && !b.IsEmpty()
 }
 
+// Expense is money that left the account.
 type Expense struct {
 	ID            uint            `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
 	UserID        uint            `gorm:"type:mediumint(9) DEFAULT NULL"`
@@ -97,20 +108,24 @@ type Expense struct {
 	Comment       string          `gorm:"type:text CHARACTER SET utf8"`
 }
 
+// TableName returns the name of the table Expense maps to.
 func (Expense) TableName() string {
 	return "expenditure"
 }
 
+// ExpenseType categorizes an Expense or an Income.
 type ExpenseType struct {
 	ID      uint   `gorm:"type:int(11) NOT NULL AUTO_INCREMENT" json:"id"`
 	Name    string `gorm:"type:text CHARACTER SET utf8" json:"name"`
 	Comment string `gorm:"type:text CHARACTER SET utf8" json:"comment"`
 }
 
+// TableName returns the name of the table ExpenseType maps to.
 func (ExpenseType) TableName() string {
 	return "expenditure_type"
 }
 
+// Heat is a single ride, the unit users are billed for.
 type Heat struct {
 	ID              uint            `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
 	UserID          uint            `gorm:"type:mediumint(9) DEFAULT NULL"`
@@ -123,10 +138,12 @@ type Heat struct {
 	Comment         string          `gorm:"type:text CHARACTER SET utf8 DEFAULT NULL"`
 }
 
+// TableName returns the name of the table Heat maps to.
 func (Heat) TableName() string {
 	return "heat"
 }
 
+// Invitation is an invite of one user to another user's session.
 type Invitation struct {
 	ID        uint             `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
 	SessionID uint             `gorm:"type:mediumint(9) DEFAULT NULL"`
@@ -140,20 +157,24 @@ type Invitation struct {
 	Status    InvitationStatus `gorm:"foreignKey:StatusID;references:ID"`
 }
 
+// TableName returns the name of the table Invitation maps to.
 func (Invitation) TableName() string {
 	return "invitation"
 }
 
+// InvitationStatus is the state an Invitation is in.
 type InvitationStatus struct {
 	ID      uint   `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
 	Name    string `gorm:"type:text CHARACTER SET utf8"`
 	Comment string `gorm:"type:text CHARACTER SET utf8"`
 }
 
+// TableName returns the name of the table InvitationStatus maps to.
 func (InvitationStatus) TableName() string {
 	return "invitation_status"
 }
 
+// PasswordReset is a password reset token issued to a user.
 type PasswordReset struct {
 	ID        uint
 	UserID    uint      `gorm:"type:mediumint(9) DEFAULT NULL"`
@@ -163,10 +184,13 @@ type PasswordReset struct {
 	Valid     bool      `gorm:"type:tinyint(1) DEFAULT '0'"`
 }
 
+// TableName returns the name of the table PasswordReset maps to.
 func (PasswordReset) TableName() string {
 	return "password_reset"
 }
 
+// Income is money that entered the account. It shares the type table with
+// Expense.
 type Income struct {
 	ID            uint            `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
 	UserID        uint            `gorm:"type:mediumint(9) DEFAULT NULL"`
@@ -178,10 +202,12 @@ type Income struct {
 	Comment       string          `gorm:"type:text CHARACTER SET utf8"`
 }
 
+// TableName returns the name of the table Income maps to.
 func (Income) TableName() string {
 	return "payment"
 }
 
+// Pricing is the price per minute charged to a user group.
 type Pricing struct {
 	ID             uint            `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
 	UserStatusID   uint            `gorm:"type:int(11) DEFAULT NULL"`
@@ -190,10 +216,12 @@ type Pricing struct {
 	Comment        string          `gorm:"type:text CHARACTER SET utf8"`
 }
 
+// TableName returns the name of the table Pricing maps to.
 func (Pricing) TableName() string {
 	return "pricing"
 }
 
+// Session is a bookable slot on the water.
 type Session struct {
 	ID            uint        `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
 	StartTime     time.Time   `gorm:"type:timestamp DEFAULT CURRENT_TIMESTAMP"`
@@ -207,24 +235,31 @@ type Session struct {
 	Creator       User        `gorm:"foreignKey:CreatorID;references:ID"`
 }
 
+// TableName returns the name of the table Session maps to.
 func (Session) TableName() string {
 	return "session"
 }
 
+// Equal reports whether two sessions are identical in every field.
 func (s Session) Equal(t Session) bool {
 	return reflect.DeepEqual(s, t)
 }
 
+// SessionType categorizes a Session.
 type SessionType struct {
 	ID      uint   `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
 	Name    string `gorm:"type:text CHARACTER SET utf8"`
 	Comment string `gorm:"type:text CHARACTER SET utf8"`
 }
 
+// TableName returns the name of the table SessionType maps to.
 func (SessionType) TableName() string {
 	return "session_type"
 }
 
+// User is a person using the application. Deleting a user clears the personal
+// fields and sets IsDeleted rather than removing the row, so that the
+// transactions that reference it stay intact.
 type User struct {
 	ID            uint       `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
 	Username      string     `gorm:"type:varchar(255) DEFAULT NULL"`
@@ -245,20 +280,25 @@ type User struct {
 	IsDeleted     bool       `gorm:"column:deleted;type:tinyint(1) DEFAULT '0'"`
 }
 
+// TableName returns the name of the table User maps to.
 func (User) TableName() string {
 	return "user"
 }
 
+// UserRole is an access level.
 type UserRole struct {
 	ID          UserRoleType `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
 	Name        string       `gorm:"type:text COLLATE utf8_bin NOT NULL"`
 	Description string       `gorm:"type:text COLLATE utf8_bin NOT NULL"`
 }
 
+// TableName returns the name of the table UserRole maps to.
 func (UserRole) TableName() string {
 	return "user_role"
 }
 
+// UserStatus is a user group. It ties a set of users to a UserRole and,
+// through Pricing, to a price.
 type UserStatus struct {
 	ID          uint         `gorm:"type:int(11) NOT NULL AUTO_INCREMENT"`
 	Name        string       `gorm:"type:text CHARACTER SET utf8"`
@@ -267,10 +307,12 @@ type UserStatus struct {
 	UserRole    UserRole     `gorm:"foreignKey:UserRoleID;references:ID"`
 }
 
+// TableName returns the name of the table UserStatus maps to.
 func (UserStatus) TableName() string {
 	return "user_status"
 }
 
+// UserToSession records that a user takes part in a session.
 type UserToSession struct {
 	ID        uint      `gorm:"type:mediumint(9) NOT NULL AUTO_INCREMENT"`
 	UserID    uint      `gorm:"type:mediumint(9) DEFAULT NULL"`
@@ -280,26 +322,32 @@ type UserToSession struct {
 	TimeAdded time.Time `gorm:"column:time;type:datetime DEFAULT NULL"`
 }
 
+// TableName returns the name of the table UserToSession maps to.
 func (UserToSession) TableName() string {
 	return "user_to_session"
 }
 
+// Configuration is a single configuration property stored in the database.
 type Configuration struct {
 	// ID       uint   `gorm:"type:int(11) DEFAULT 0"`
 	Property string `gorm:"primaryKey;type:VARCHAR(255) NOT NULL"`
 	Value    string `gorm:"type:TEXT"`
 }
 
+// TableName returns the name of the table Configuration maps to.
 func (Configuration) TableName() string {
 	return "configuration"
 }
 
+// ConfigurationVersion is bumped whenever a property changes, so that readers
+// can detect updates without re-reading every property.
 type ConfigurationVersion struct {
 	ID        uint       `gorm:"type:int(11);autoIncrement:false"`
 	Version   uint       `gorm:"type:int(11) NOT NULL DEFAULT 1"`
 	Timestamp *time.Time `gorm:"column:time;type:datetime DEFAULT NULL"`
 }
 
+// TableName returns the name of the table ConfigurationVersion maps to.
 func (ConfigurationVersion) TableName() string {
 	return "configuration_version"
 }

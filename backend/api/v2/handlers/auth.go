@@ -3,26 +3,29 @@ package handlers
 import (
 	"crypto/rand"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
-
-	"golang.org/x/exp/slog"
 
 	"server/database"
 	"server/util/hash"
 )
 
+// LoginRequest is the request body of Login, which serves
+// /api/v2/auth/login.
 type LoginRequest struct {
 	Password     string `json:"password" validate:"required"`
 	PasswordHash string `json:"passwordHash" validate:"omitempty,sha256"`
 	Username     string `json:"username" validate:"required,email|alphanum"`
 }
 
+// IsLoggedInResponse is the payload returned by IsLoggedIn.
 type IsLoggedInResponse struct {
 	LoggedIn bool `json:"loggedIn"`
 }
 
+// UserResponse is the profile of a user as returned by User.
 type UserResponse struct {
 	ID            uint                  `json:"id"`
 	Username      string                `json:"username"`
@@ -35,17 +38,20 @@ type UserResponse struct {
 	Email         string                `json:"email"`
 	BoatLicense   bool                  `json:"license"`
 	Status        uint                  `json:"status"`
-	UserRoleId    database.UserRoleType `json:"user_role_id"`
+	UserRoleID    database.UserRoleType `json:"user_role_id"`
 	UserRoleName  string                `json:"user_role_name"`
 	Locked        bool                  `json:"locked"`
 	Comment       string                `json:"comment"`
 }
 
+// Login authenticates a user and starts a browser session.
+//
+// It serves /api/v2/auth/login and is open to unauthenticated callers.
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request, req LoginRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	lookupUser, err := dbh.GetUserByName(req.Username)
 	if err != nil {
-		slog.Warn("User not found", slog.String("username", req.Username), slog.String("error", err.Error()))
+		slog.Warn("User not found", slog.String("username", req.Username), slog.Any("error", err))
 		WriteFailureResponse("invalid username/password", w)
 		return
 	}
@@ -64,22 +70,22 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request, req LoginRequest
 	passwordHash := hash.Sha256(req.Password)
 
 	// crypt the password
-	hash, err := hash.CryptSha512(passwordHash, strconv.Itoa(lookupUser.PasswordSalt))
+	cryptedPassword, err := hash.CryptSha512(passwordHash, strconv.Itoa(lookupUser.PasswordSalt))
 	if err != nil {
-		slog.Warn("Cannot calculate password hash for", slog.String("user", lookupUser.Username))
+		slog.Warn("Cannot calculate password hash for user", slog.String("user", lookupUser.Username))
 		WriteFailureResponse("invalid username/password", w)
 		return
 	}
 
 	// compare if password is identical
-	if hash != lookupUser.PasswordHash {
+	if cryptedPassword != lookupUser.PasswordHash {
 		slog.Warn("Password not correct for", slog.String("user", lookupUser.Username))
 		WriteFailureResponse("invalid username/password", w)
 		return
 	}
 
 	// generate a browser session that we store in the sessions db
-	u, err := dbh.GetUserById(lookupUser.ID)
+	u, err := dbh.GetUserByID(lookupUser.ID)
 	if err != nil {
 		slog.Warn("Cannot retrieve user details for", slog.String("user", lookupUser.Username))
 		WriteFailureResponse("invalid username/password", w)
@@ -89,7 +95,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request, req LoginRequest
 	sessionSecret := make([]byte, 256)
 	_, err = rand.Read(sessionSecret)
 	if err != nil {
-		slog.Error("Cannot generate random number for session secret", slog.String("error", err.Error()))
+		slog.Error("Cannot generate random number for session secret", slog.Any("error", err))
 		WriteFailureResponse("invalid username/password", w)
 		return
 	}
@@ -112,7 +118,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request, req LoginRequest
 	}
 	_, err = dbh.AddBrowserSession(session)
 	if err != nil {
-		slog.Error("Cannot add browser session to database", slog.String("error", err.Error()))
+		slog.Error("Cannot add browser session to database", slog.Any("error", err))
 		WriteFailureResponse("invalid username/password", w)
 		return
 	}
@@ -122,6 +128,9 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request, req LoginRequest
 	WriteSuccessResponse("login successful", nil, w)
 }
 
+// IsLoggedIn reports whether the caller has a valid session and, if so, extends it.
+//
+// It serves /api/v2/auth/isloggedin and is open to unauthenticated callers.
 func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 	resp := IsLoggedInResponse{}
 	// Get cookie SESSION
@@ -154,18 +163,20 @@ func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 	resp.LoggedIn = true
 	err = dbh.UpdateBrowserSession(*session)
 	if err != nil {
-		slog.Info("Cannot update browser session", slog.String("user", session.Username), slog.String("session", session.SessionSecret), slog.String("error", err.Error()))
+		slog.Info("Cannot update browser session", slog.String("user", session.Username), slog.String("session", session.SessionSecret), slog.Any("error", err))
 	}
 	WriteSuccessResponse("logged in", resp, w)
 }
 
-// Logout logs out a user
+// Logout ends the caller's browser session.
+//
+// It serves /api/v2/auth/logout and is open to authenticated users.
 func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
 	err := dbh.DeleteBrowserSession(*hCtx.ValidSession)
 	if err != nil {
-		slog.Error("Cannot delete browser session", slog.String("error", err.Error()))
+		slog.Error("Cannot delete browser session", slog.Any("error", err))
 	}
 
 	DeleteSessionCookie(w)
@@ -173,12 +184,15 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 	slog.Info("User logged out", slog.String("user", hCtx.ValidSession.Username))
 }
 
+// User returns the profile of the currently logged in user.
+//
+// It serves /api/v2/auth/user and is open to authenticated users.
 func (h *Handler) User(w http.ResponseWriter, r *http.Request) {
 	hCtx := GetHandlerContext(r)
 	dbh := hCtx.Database
-	user, err := dbh.GetUserById(hCtx.ValidSession.UserID)
+	user, err := dbh.GetUserByID(hCtx.ValidSession.UserID)
 	if err != nil {
-		slog.Error("Cannot retrieve user information", slog.String("error", err.Error()))
+		slog.Error("Cannot retrieve user information", slog.Any("error", err))
 		WriteFailureResponse("Cannot retrieve user informaiton", w)
 		return
 	}
@@ -195,7 +209,7 @@ func (h *Handler) User(w http.ResponseWriter, r *http.Request) {
 		Email:         user.Email,
 		BoatLicense:   user.BoatLicense,
 		Status:        user.UserStatusID,
-		UserRoleId:    user.UserStatus.UserRoleID,
+		UserRoleID:    user.UserStatus.UserRoleID,
 		UserRoleName:  user.UserStatus.UserRole.Name,
 		Locked:        user.Locked,
 		Comment:       user.Comment,

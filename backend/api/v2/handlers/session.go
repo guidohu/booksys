@@ -2,19 +2,23 @@ package handlers
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
-	"server/database"
-	"server/notifications/email"
 	"time"
 
 	"github.com/shopspring/decimal"
-	"golang.org/x/exp/slog"
+	"server/database"
+	"server/notifications/email"
 )
 
+// GetSessionRequest is the request body of GetSession, which serves
+// /api/v2/session/get.
 type GetSessionRequest struct {
 	SessionID uint64 `json:"id" validate:"required"`
 }
 
+// CreateSessionRequest is the request body of CreateSession, which serves
+// /api/v2/session/create.
 type CreateSessionRequest struct {
 	Title     string `json:"title" validate:"omitempty"`
 	Comment   string `json:"comment" validate:"omitempty"`
@@ -24,6 +28,8 @@ type CreateSessionRequest struct {
 	Type      uint8  `json:"type" validate:"required,sessiontype"`
 }
 
+// SessionValidationErrors maps the field names of the create and edit session requests to the message the API
+// returns when that field fails validation.
 var SessionValidationErrors = map[string]string{
 	"Start":     "Start time needs to be provided and needs to be a valid time value.",
 	"End":       "End time needs to be provided and needs to be a valid time value.",
@@ -31,10 +37,14 @@ var SessionValidationErrors = map[string]string{
 	"Type":      "Please provide a valid type for this session.",
 }
 
+// CreateSessionResponse is the payload returned by CreateSession, which serves
+// /api/v2/session/create.
 type CreateSessionResponse struct {
 	SessionID uint `json:"session_id"`
 }
 
+// EditSessionRequest is the request body of EditSession, which serves
+// /api/v2/session/edit.
 type EditSessionRequest struct {
 	SessionID uint   `json:"id"`
 	Title     string `json:"title" validate:"omitempty"`
@@ -45,37 +55,51 @@ type EditSessionRequest struct {
 	Type      uint8  `json:"type" validate:"required,sessiontype"`
 }
 
+// DeleteSessionRequest is the request body of DeleteSession, which serves
+// /api/v2/session/delete.
 type DeleteSessionRequest struct {
 	SessionID uint `json:"session_id" validate:"required,numeric"`
 }
 
+// DeleteSessionValidationErrors maps the field names of DeleteSessionRequest to the message the API
+// returns when that field fails validation.
 var DeleteSessionValidationErrors = map[string]string{
 	"SessionID": "Please provide a valid session id.",
 }
 
+// AddSessionUserRequest is the request body of AddUserToSession.
 type AddSessionUserRequest struct {
 	SessionID uint   `json:"session_id" validate:"required"`
 	UserIDs   []uint `json:"user_ids" validate:"required"`
 }
 
+// RemoveSessionUserRequest is the request body of RemoveUserFromSession.
 type RemoveSessionUserRequest struct {
 	SessionID uint `json:"session_id" validate:"required,numeric"`
 	UserID    uint `json:"user_id" validate:"required,numeric"`
 }
 
+// RemoveSessionMyUserRequest is the request body of
+// RemoveMyUserFromSession.
 type RemoveSessionMyUserRequest struct {
 	SessionID uint `json:"session_id" validate:"required,numeric"`
 }
 
+// GetSessionMetadataResponse is the payload returned by GetSessionMetadata, which serves
+// /api/v2/session/metadata/get.
 type GetSessionMetadataResponse struct {
 	SunriseTime int64 `json:"sunrise"`
 	SunsetTime  int64 `json:"sunset"`
 }
 
+// GetSessionHeatsRequest is the request body of GetSessionHeats, which serves
+// /api/v2/session/heats/get.
 type GetSessionHeatsRequest struct {
 	SessionID uint `json:"session_id" validate:"required,numeric"`
 }
 
+// GetSessionHeatsResponse is a single ride in the payload returned by
+// GetSessionHeats.
 type GetSessionHeatsResponse struct {
 	HeatID    uint            `json:"heat_id"`
 	UserID    uint            `json:"user_id"`
@@ -89,22 +113,25 @@ type GetSessionHeatsResponse struct {
 	Comment   string          `json:"comment"`
 }
 
+// GetSession returns a single session with its participants.
+//
+// It serves /api/v2/session/get and is open to administrators.
 func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request, req GetSessionRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	s, err := dbh.GetSession(uint(req.SessionID))
 	if err != nil {
-		slog.Warn("Cannot get session", slog.Uint64("sessionID", req.SessionID), slog.String("error", err.Error()))
+		slog.Warn("Cannot get session", slog.Uint64("sessionID", req.SessionID), slog.Any("error", err))
 		WriteFailureResponse("Cannot get session from server.", w)
 		return
 	}
 
 	riders, err := h.getRiders(s.ID)
 	if err != nil {
-		slog.Warn("Cannot get riders for session", slog.Uint64("sessionID", req.SessionID), slog.String("error", err.Error()))
+		slog.Warn("Cannot get riders for session", slog.Uint64("sessionID", req.SessionID), slog.Any("error", err))
 		WriteFailureResponse("Cannot get rider information for session.", w)
 		return
 	}
-	ridersShort := []RiderResponse{}
+	ridersShort := make([]RiderResponse, 0, len(riders))
 	for _, rider := range riders {
 		ridersShort = append(ridersShort, RiderResponse{
 			ID:        rider.ID,
@@ -130,17 +157,20 @@ func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request, req GetSess
 	WriteSuccessResponse("session info", &resp, w)
 }
 
+// GetSessionMetadata returns the session types and the pricing that apply to a session.
+//
+// It serves /api/v2/session/metadata/get and is open to administrators.
 func (h *Handler) GetSessionMetadata(w http.ResponseWriter, r *http.Request, req GetSessionRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	s, err := dbh.GetSession(uint(req.SessionID))
 	if err != nil {
-		slog.Warn("Cannot get session", slog.Uint64("sessionID", req.SessionID), slog.String("error", err.Error()))
+		slog.Warn("Cannot get session", slog.Uint64("sessionID", req.SessionID), slog.Any("error", err))
 		WriteFailureResponse("Cannot get session from server.", w)
 		return
 	}
 	location, err := h.getLocation()
 	if err != nil {
-		slog.Warn("Cannot get timezone for sunrise/sunset calculations", slog.String("error", err.Error()))
+		slog.Warn("Cannot get timezone for sunrise/sunset calculations", slog.Any("error", err))
 		WriteFailureResponse("Cannot get timezone for sunrise/sunset calculations.", w)
 		return
 	}
@@ -152,13 +182,16 @@ func (h *Handler) GetSessionMetadata(w http.ResponseWriter, r *http.Request, req
 	WriteSuccessResponse("session metadata", resp, w)
 }
 
+// CreateSession creates a session.
+//
+// It serves /api/v2/session/create and is open to administrators.
 func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request, req CreateSessionRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	start := time.Unix(req.Start, 0)
 	end := time.Unix(req.End, 0)
 	collidingSessions, err := dbh.GetSessionsBetween(start, end)
 	if err != nil {
-		slog.Warn("Cannot query existing sessions and check for collisions", slog.String("error", err.Error()))
+		slog.Warn("Cannot query existing sessions and check for collisions", slog.Any("error", err))
 		WriteFailureResponse(err.Error(), w)
 		return
 	}
@@ -180,7 +213,7 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request, req Crea
 	}
 	id, err := dbh.CreateSession(newSession)
 	if err != nil {
-		slog.Warn("Cannot create new session", slog.String("error", err.Error()))
+		slog.Warn("Cannot create new session", slog.Any("error", err))
 		WriteFailureResponse("New session could not be created", w)
 		return
 	}
@@ -190,11 +223,14 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request, req Crea
 	WriteSuccessResponse("session created", &resp, w)
 }
 
+// EditSession updates a session.
+//
+// It serves /api/v2/session/edit and is open to administrators.
 func (h *Handler) EditSession(w http.ResponseWriter, r *http.Request, req EditSessionRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	oldSession, err := dbh.GetSession(req.SessionID)
 	if err != nil {
-		slog.Warn("Cannot check existence of session", slog.String("error", err.Error()))
+		slog.Warn("Cannot check existence of session", slog.Any("error", err))
 		WriteFailureResponse("Cannot find the session you like to edit.", w)
 		return
 	}
@@ -203,7 +239,7 @@ func (h *Handler) EditSession(w http.ResponseWriter, r *http.Request, req EditSe
 	end := time.Unix(req.End, 0)
 	collidingSessions, err := dbh.GetSessionsBetween(start, end)
 	if err != nil {
-		slog.Warn("Cannot query existing sessions and check for collisions", slog.String("error", err.Error()))
+		slog.Warn("Cannot query existing sessions and check for collisions", slog.Any("error", err))
 		WriteFailureResponse(err.Error(), w)
 		return
 	}
@@ -228,19 +264,22 @@ func (h *Handler) EditSession(w http.ResponseWriter, r *http.Request, req EditSe
 	}
 	err = dbh.UpdateSession(editSession)
 	if err != nil {
-		slog.Warn("Cannot update session", slog.String("error", err.Error()))
+		slog.Warn("Cannot update session", slog.Any("error", err))
 		WriteFailureResponse("Session could not be updated.", w)
 		return
 	}
 	WriteSuccessResponse("session updated", nil, w)
 }
 
+// DeleteSession removes a session and its participants.
+//
+// It serves /api/v2/session/delete and is open to administrators.
 func (h *Handler) DeleteSession(w http.ResponseWriter, r *http.Request, req DeleteSessionRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// check if session does not have heats
 	heats, err := dbh.GetHeatInSessionCount(req.SessionID)
 	if err != nil {
-		slog.Warn("Cannot get whether heats exist for session", slog.Int("session_id", int(req.SessionID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot get whether heats exist for session", slog.Int("session_id", int(req.SessionID)), slog.Any("error", err))
 		WriteFailureResponse(err.Error(), w)
 		return
 	}
@@ -256,7 +295,7 @@ func (h *Handler) DeleteSession(w http.ResponseWriter, r *http.Request, req Dele
 	// remove riders from session
 	err = dbh.DeleteUsersFromSession(req.SessionID)
 	if err != nil {
-		slog.Warn("Cannot remove users for session", slog.Int("session_id", int(req.SessionID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot remove users for session", slog.Int("session_id", int(req.SessionID)), slog.Any("error", err))
 		WriteFailureResponse("Users could not be removed from the session.", w)
 		return
 	}
@@ -264,19 +303,22 @@ func (h *Handler) DeleteSession(w http.ResponseWriter, r *http.Request, req Dele
 	// delete session
 	err = dbh.DeleteSession(req.SessionID)
 	if err != nil {
-		slog.Warn("Cannot delete session", slog.Int("session_id", int(req.SessionID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot delete session", slog.Int("session_id", int(req.SessionID)), slog.Any("error", err))
 		WriteFailureResponse("Session could not be removed.", w)
 		return
 	}
 	WriteSuccessResponse("session removed", nil, w)
 }
 
+// AddUserToSession adds users to a session and notifies them by email.
+//
+// It serves /api/v2/session/user/add and is open to administrators.
 func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request, req AddSessionUserRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// check if session exists
 	s, err := dbh.GetSession(req.SessionID)
 	if err != nil {
-		slog.Warn("Session cannot be found", slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
+		slog.Warn("Session cannot be found", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Any("error", err))
 		WriteFailureResponse("Session does not exist.", w)
 		return
 	}
@@ -284,7 +326,7 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request, req A
 	// get users that are already part of the session
 	sessionUsers, err := dbh.GetUsersForSession(req.SessionID)
 	if err != nil {
-		slog.Warn("Existing session users cannot be found", slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
+		slog.Warn("Existing session users cannot be found", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot scan session for users.", w)
 		return
 	}
@@ -295,11 +337,11 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request, req A
 
 	// check if all users are valid, skip invalid ones
 	// and the ones already listed in the session.
-	usersToAdd := []database.User{}
+	var usersToAdd []database.User
 	for _, userID := range req.UserIDs {
-		user, err := dbh.GetUserById(userID)
+		user, err := dbh.GetUserByID(userID)
 		if err != nil {
-			slog.Warn("Adding user that does not exist to session is skipped", slog.Uint64("userID", uint64(userID)), slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
+			slog.Warn("Adding user that does not exist to session is skipped", slog.Uint64("userID", uint64(userID)), slog.Uint64("sessionID", uint64(req.SessionID)), slog.Any("error", err))
 			continue
 		}
 		if user.ID == 0 {
@@ -328,13 +370,13 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request, req A
 		}
 		err = dbh.AddSessionToUserEntry(entry)
 		if err != nil {
-			slog.Warn("Cannot add user to session. Skipped", slog.Uint64("userID", uint64(u.ID)), slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
+			slog.Warn("Cannot add user to session. Skipped", slog.Uint64("userID", uint64(u.ID)), slog.Uint64("sessionID", uint64(req.SessionID)), slog.Any("error", err))
 		}
 
 		// Inform user about the session.
 		emailConfig, err := dbh.GetEmailConfiguration()
 		if err != nil {
-			slog.Error("Cannot get email configuration to reset token", slog.String("error", err.Error()))
+			slog.Error("Cannot get email configuration to reset token", slog.Any("error", err))
 			WriteFailureResponse("Internal error, cannot send reset token.", w)
 			return
 		}
@@ -348,19 +390,22 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request, req A
 				h.getURLOrEmpty(),
 			)
 			if err != nil {
-				slog.Error("Cannot send session notification email", slog.String("error", err.Error()))
+				slog.Error("Cannot send session notification email", slog.Any("error", err))
 			}
 		}
 	}
 	WriteSuccessResponse("users added", nil, w)
 }
 
+// RemoveUserFromSession removes a user from a session and notifies them by email.
+//
+// It serves /api/v2/session/user/remove and is open to administrators.
 func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request, req RemoveSessionUserRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// Get the user.
-	user, err := dbh.GetUserById(req.UserID)
+	user, err := dbh.GetUserByID(req.UserID)
 	if err != nil {
-		slog.Warn("Cannot remove user from session, user not found", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Uint64("userID", uint64(req.UserID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot remove user from session, user not found", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Uint64("userID", uint64(req.UserID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot remove user from session, user does not exist.", w)
 		return
 	}
@@ -368,7 +413,7 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request, 
 	// Get the session.
 	s, err := dbh.GetSession(req.SessionID)
 	if err != nil {
-		slog.Warn("Cannot load session information, session not found", slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot load session information, session not found", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot remove user from session, session does not exist.", w)
 		return
 	}
@@ -377,7 +422,7 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request, 
 	// there are already heats.
 	heats, err := dbh.GetUserHeatsBySession(req.SessionID, user.ID, 0)
 	if err != nil {
-		slog.Warn("Cannot get heats for session and user", slog.Uint64("session", uint64(req.SessionID)), slog.Uint64("user", uint64(user.ID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot get heats for session and user", slog.Uint64("session", uint64(req.SessionID)), slog.Uint64("user", uint64(user.ID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot access users for the provided session.", w)
 		return
 	}
@@ -392,7 +437,7 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request, 
 	// remove entry
 	err = dbh.DeleteSessionToUserEntry(req.UserID, req.SessionID)
 	if err != nil {
-		slog.Warn("User to Session entry not found for", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Uint64("userID", uint64(req.UserID)), slog.String("error", err.Error()))
+		slog.Warn("User to Session entry not found for", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Uint64("userID", uint64(req.UserID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot remove user from session.", w)
 		return
 	}
@@ -400,7 +445,7 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request, 
 	// Inform user about the cancellation of the session.
 	emailConfig, err := dbh.GetEmailConfiguration()
 	if err != nil {
-		slog.Error("Cannot get email configuration to reset token", slog.String("error", err.Error()))
+		slog.Error("Cannot get email configuration to reset token", slog.Any("error", err))
 		WriteFailureResponse("Internal error, cannot send reset token.", w)
 		return
 	}
@@ -414,7 +459,7 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request, 
 			h.getURLOrEmpty(),
 		)
 		if err != nil {
-			slog.Error("Cannot send session cancellation email", slog.String("error", err.Error()))
+			slog.Error("Cannot send session cancellation email", slog.Any("error", err))
 		}
 	}
 	WriteSuccessResponse("user removed", nil, w)
@@ -425,12 +470,15 @@ func (h *Handler) getURLOrEmpty() string {
 	return url
 }
 
+// RemoveMyUserFromSession removes the currently logged in user from a session.
+//
+// It serves /api/v2/user/my/session/delete and is open to authenticated users.
 func (h *Handler) RemoveMyUserFromSession(w http.ResponseWriter, r *http.Request, req RemoveSessionMyUserRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// Get users for this session
 	users, err := dbh.GetUsersForSession(req.SessionID)
 	if err != nil {
-		slog.Warn("Cannot get users for session", slog.String("error", err.Error()))
+		slog.Warn("Cannot get users for session", slog.Any("error", err))
 		WriteFailureResponse("Cannot get users for the provided session.", w)
 		return
 	}
@@ -440,7 +488,7 @@ func (h *Handler) RemoveMyUserFromSession(w http.ResponseWriter, r *http.Request
 	session := hCtx.ValidSession
 	heats, err := dbh.GetUserHeatsBySession(req.SessionID, session.UserID, 0)
 	if err != nil {
-		slog.Warn("Cannot get heats for session and user", slog.Uint64("session", uint64(req.SessionID)), slog.Uint64("user", uint64(session.UserID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot get heats for session and user", slog.Uint64("session", uint64(req.SessionID)), slog.Uint64("user", uint64(session.UserID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot get users for the provided session.", w)
 		return
 	}
@@ -457,7 +505,7 @@ func (h *Handler) RemoveMyUserFromSession(w http.ResponseWriter, r *http.Request
 		if u.UserID == session.UserID {
 			err = dbh.DeleteSessionToUserEntry(u.UserID, req.SessionID)
 			if err != nil {
-				slog.Warn("Cannot delete user for session", slog.String("error", err.Error()))
+				slog.Warn("Cannot delete user for session", slog.Any("error", err))
 				WriteFailureResponse("Error, cannot remove user from session.", w)
 				return
 			}
@@ -467,11 +515,14 @@ func (h *Handler) RemoveMyUserFromSession(w http.ResponseWriter, r *http.Request
 	WriteSuccessResponse("user removed", nil, w)
 }
 
+// GetSessionHeats returns the rides of a session together with their cost.
+//
+// It serves /api/v2/session/heats/get and is open to administrators.
 func (h *Handler) GetSessionHeats(w http.ResponseWriter, r *http.Request, req GetSessionHeatsRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	heats, err := dbh.GetHeatsInSession(req.SessionID)
 	if err != nil {
-		slog.Warn("Cannot get heats for session", slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot get heats for session", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot get heats for session.", w)
 		return
 	}
@@ -479,12 +530,12 @@ func (h *Handler) GetSessionHeats(w http.ResponseWriter, r *http.Request, req Ge
 	// get pricing for each user
 	pricingMap, err := dbh.GetUserStatusToPricingsMap()
 	if err != nil {
-		slog.Warn("Cannot get pricing information for session", slog.Uint64("sessionID", uint64(req.SessionID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot get pricing information for session", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot get pricing information for heats.", w)
 		return
 	}
 
-	resp := []GetSessionHeatsResponse{}
+	resp := make([]GetSessionHeatsResponse, 0, len(heats))
 	for _, heat := range heats {
 		if _, exists := pricingMap[heat.User.UserStatusID]; !exists {
 			slog.Warn("Cannot get pricing information for", slog.Uint64("user", uint64(heat.User.ID)))

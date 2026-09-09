@@ -1,14 +1,15 @@
 package handlers
 
 import (
+	"log/slog"
 	"net/http"
 	"os"
 
 	"server/version"
-
-	"golang.org/x/exp/slog"
 )
 
+// HealthStatusResponse reports how far the application is set up and whether
+// its dependencies are reachable.
 type HealthStatusResponse struct {
 	// True if no config file provided or if config file exists.
 	ConfigFile bool `json:"configFile"`
@@ -28,6 +29,7 @@ type HealthStatusResponse struct {
 	Environment string `json:"environment"`
 }
 
+// HealthStatus serves the setup and dependency health of the application.
 func (h *Handler) HealthStatus(w http.ResponseWriter, r *http.Request) {
 	environment, _ := h.config.GetString("environment")
 	healthStatus := HealthStatusResponse{
@@ -67,12 +69,12 @@ func (h *Handler) HealthStatus(w http.ResponseWriter, r *http.Request) {
 		if !dbh.IsConfigured() {
 			slog.Warn("Database handler is not configured.")
 		} else if err := dbh.Ping(); err != nil {
-			slog.Warn("Database handler is configured but cannot connect", slog.String("error", err.Error()))
+			slog.Warn("Database handler is configured but cannot connect", slog.Any("error", err))
 		} else {
 			healthStatus.DBReachable = true
 			usersExist, err := dbh.UsersExist()
 			if err != nil {
-				slog.Error("Cannot check for users:", err)
+				slog.Error("Cannot check for users", slog.Any("error", err))
 				http.Error(w, "health status response", http.StatusInternalServerError)
 				return
 			}

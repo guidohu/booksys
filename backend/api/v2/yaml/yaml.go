@@ -1,3 +1,5 @@
+// Package yaml provides helpers to inspect structs that are tagged with
+// `yaml` struct tags.
 package yaml
 
 import (
@@ -7,8 +9,8 @@ import (
 
 // GetKeys returns all the YAML keys from a struct that is tagged
 // with `yaml` tags.
-func GetKeys(s interface{}, parentKey string) []string {
-	tags := []string{}
+func GetKeys(s any, parentKey string) []string {
+	var tags []string
 	if parentKey != "" {
 		parentKey = fmt.Sprintf("%s.", parentKey)
 	}

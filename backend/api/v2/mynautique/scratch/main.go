@@ -5,14 +5,17 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"server/mynautique"
 	"strconv"
+
+	"server/mynautique"
 )
 
+// ErrorResponse is an error reply from the API.
 type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
+// SuccessResponse is a successful reply from the API.
 type SuccessResponse struct {
 	Success   bool   `json:"success"`
 	AuthUntil string `json:"auth_until"`
@@ -73,7 +76,7 @@ func main() {
 		apiKey = "AIzaSyAb8S3Owvo8k-gI8eK_DEztFOn0FcZFRxw"
 	}
 
-	client := mynautique.NewMyNautiqueClient(&mynautique.Options{
+	client := mynautique.NewClient(&mynautique.Options{
 		User:       *userFlag,
 		Password:   *passwordFlag,
 		AuthAPIKey: apiKey,

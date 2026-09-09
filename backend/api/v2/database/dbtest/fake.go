@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
-
 	"server/database"
 )
 
@@ -150,6 +149,11 @@ type FakeDB struct {
 
 // Compile time check that the fake covers the whole interface.
 var _ database.Database = (*FakeDB)(nil)
+
+// The methods below implement database.Database. They all follow the contract
+// documented on FakeDB: call the matching function field if the test set one,
+// otherwise return the documented default. They are not documented one by one,
+// the behaviour of each is fully described by the interface it implements.
 
 func (f *FakeDB) Connect() error {
 	if f.ConnectFn != nil {
@@ -676,7 +680,7 @@ func (f *FakeDB) AddUser(u database.User) (uint, error) {
 	return 0, nil
 }
 
-func (f *FakeDB) DeleteUserById(id uint) error {
+func (f *FakeDB) DeleteUserByID(id uint) error {
 	if f.DeleteUserByIdFn != nil {
 		return f.DeleteUserByIdFn(id)
 	}
@@ -704,7 +708,7 @@ func (f *FakeDB) GetUserByName(name string) (database.User, error) {
 	return database.User{}, ErrNotFound
 }
 
-func (f *FakeDB) GetUserById(id uint) (database.User, error) {
+func (f *FakeDB) GetUserByID(id uint) (database.User, error) {
 	if f.GetUserByIdFn != nil {
 		return f.GetUserByIdFn(id)
 	}

@@ -1,5 +1,6 @@
 package database
 
+// GetPricings returns the pricing of every user group.
 func (d *Mysql) GetPricings() ([]Pricing, error) {
 	var pricing []Pricing
 	err := d.orm.Model(&Pricing{}).
@@ -9,8 +10,10 @@ func (d *Mysql) GetPricings() ([]Pricing, error) {
 	return pricing, err
 }
 
+// GetUserStatusToPricingsMap returns the pricing of every user group, keyed by
+// user group ID.
 func (d *Mysql) GetUserStatusToPricingsMap() (map[uint]Pricing, error) {
-	pMap := map[uint]Pricing{}
+	pMap := make(map[uint]Pricing)
 	pricings, err := d.GetPricings()
 	if err != nil {
 		return pMap, err

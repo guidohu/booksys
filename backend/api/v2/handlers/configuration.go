@@ -4,15 +4,15 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
 	"path/filepath"
-	"server/database"
 	"strconv"
 	"time"
 
-	"golang.org/x/exp/slog"
+	"server/database"
 )
 
 // PublicConfigurationMessage represents the public configuration of the server.
@@ -37,6 +37,9 @@ type PublicConfigurationMessage struct {
 	RecaptchaPublicKey     string  `json:"recaptcha_publickey" validate:"omitempty,recaptchakey,required_with=RecaptchaPrivateKey"` // check if really needed
 }
 
+// ConfigurationMessage is the full configuration. It is both the payload
+// GetConfiguration returns and the body SetConfiguration accepts. Secrets read
+// back as database.HiddenSecret.
 type ConfigurationMessage struct {
 	Currency               string  `json:"currency" validate:"required,currency,excludesall={} []!()<>"`
 	EngineHourFormat       string  `json:"engine_hour_format" validate:"required,oneof=hh.h hh:mm"`
@@ -68,18 +71,23 @@ type ConfigurationMessage struct {
 	URL                 string `json:"url" validate:"omitempty,fqdn"`
 }
 
+// ConfigSource identifies where a configuration value came from.
 type ConfigSource int
 
+// The places a configuration value can come from.
 const (
 	SourceCLI ConfigSource = iota
 	SourceDatabase
 )
 
+// StringConfigValue is a configuration value together with its source.
 type StringConfigValue struct {
 	Value  string
 	Source ConfigSource
 }
 
+// ConfigurationMessageValidationErrors maps the field names of ConfigurationMessage to the message the API
+// returns when that field fails validation.
 var ConfigurationMessageValidationErrors = map[string]string{
 	"Currency":               "Use the 3 letter currency representation. E.g., USD, EUR, CHF.",
 	"EngineHourFormat":       "Engine hour format can only be hh.m or hh:mm.",
@@ -109,6 +117,8 @@ var ConfigurationMessageValidationErrors = map[string]string{
 	"URL":                    "URL is not a valid domain name such as `www.example.com`",
 }
 
+// SetupDBConfigRequest is the request body of SetupDBConfig, which serves
+// /api/v2/database/setup.
 type SetupDBConfigRequest struct {
 	DBServer   string `json:"db_server" validate:"required,hostname_port"`
 	DBName     string `json:"db_name" validate:"required,alphanum"`
@@ -116,25 +126,37 @@ type SetupDBConfigRequest struct {
 	DBPassword string `json:"db_password" validate:"required"`
 }
 
+// SetupMyNautiqueCredentialsRequest is the request body of SetupMyNautiqueCredentials, which serves
+// /api/v2/mynautique/credentials/setup.
 type SetupMyNautiqueCredentialsRequest struct {
 	Enabled  bool   `json:"mynautique_enabled" validate:"boolean"`
 	User     string `json:"mynautique_user" validate:"omitempty,email"`
 	Password string `json:"mynautique_password"`
 }
 
+// UploadLogoFileResponse is the payload returned by UploadLogoFile, which serves
+// /api/v2/admin/upload/logo.
 type UploadLogoFileResponse struct {
 	URI      string `json:"uri"`
 	FileName string `json:"filename"`
 }
 
+// GetLogoPathResponse is the payload returned by GetLogoPath, which serves
+// /api/v2/configuration/logo.
 type GetLogoPathResponse struct {
 	URI string `json:"uri"`
 }
 
+// GetRecaptchaKeyResponse is the payload returned by GetRecaptchaKey, which serves
+// /api/v2/configuration/recaptcha-key.
 type GetRecaptchaKeyResponse struct {
 	Key string `json:"key"`
 }
 
+// SetupDBConfig stores the database connection settings in the config file, after
+// verifying that they work. It refuses to run once the database is configured.
+//
+// It serves /api/v2/database/setup and is open to callers when web setup is enabled.
 func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 	configFile, _ := h.config.GetString("config")
 	if configFile == "" {
@@ -153,14 +175,14 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 	var req SetupDBConfigRequest
 	err := ReadBodyAndValidate(r, &req)
 	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		slog.Warn("Request payload is not valid", slog.Any("error", err))
 		WriteFailureResponse("Invalid request payload", w)
 		return
 	}
 
 	host, port, err := net.SplitHostPort(req.DBServer)
 	if err != nil {
-		slog.Warn("Request payload is not valid, invalid DBServer", slog.String("error", err.Error()))
+		slog.Warn("Request payload is not valid, invalid DBServer", slog.Any("error", err))
 		WriteFailureResponse("Invalid hostname (should be host:port)", w)
 		return
 	}
@@ -175,21 +197,29 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 		DBName:   req.DBName,
 	})
 	if err != nil {
-		slog.Warn(fmt.Sprintf("New database parameters are not valid. Error returned from Connet(): %s", err))
+		slog.Warn("New database parameters are not valid", slog.Any("error", err))
 		WriteFailureResponse("Cannot connect to database. Please make sure that the credentials are correct and the database is accepting connections.", w)
 		return
 	}
 
 	// If database access was successful, we store the configuration.
-	h.config.SetConfigFileValue("database.user", req.DBUser)
-	h.config.SetConfigFileValue("database.password", req.DBPassword)
-	h.config.SetConfigFileValue("database.protocol", "tcp")
-	h.config.SetConfigFileValue("database.host", host)
-	h.config.SetConfigFileValue("database.port", port)
-	h.config.SetConfigFileValue("database.dbname", req.DBName)
+	for key, value := range map[string]string{
+		"database.user":     req.DBUser,
+		"database.password": req.DBPassword,
+		"database.protocol": "tcp",
+		"database.host":     host,
+		"database.port":     port,
+		"database.dbname":   req.DBName,
+	} {
+		if err := h.config.SetConfigFileValue(key, value); err != nil {
+			slog.Warn("Cannot set database configuration value", slog.String("key", key), slog.Any("error", err))
+			WriteFailureResponse("Database was setup, but the configuration could not be stored.", w)
+			return
+		}
+	}
 	err = h.config.WriteConfigFile()
 	if err != nil {
-		slog.Warn("Cannot store new configuration", slog.String("error", err.Error()))
+		slog.Warn("Cannot store new configuration", slog.Any("error", err))
 		WriteFailureResponse("Database was setup. No config file path provided to store database configuration, please start application by providing a config file.", w)
 		return
 	}
@@ -197,6 +227,9 @@ func (h *Handler) SetupDBConfig(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("config written", nil, w)
 }
 
+// GetPublicConfiguration returns the configuration that regular users may see.
+//
+// It serves /api/v2/configuration/list and is open to authenticated users.
 func (h *Handler) GetPublicConfiguration(w http.ResponseWriter, r *http.Request) {
 	currency, _ := h.config.GetString("currency")
 	engineHourFormat, _ := h.config.GetString("engine.hour.format")
@@ -239,6 +272,10 @@ func (h *Handler) GetPublicConfiguration(w http.ResponseWriter, r *http.Request)
 	WriteSuccessResponse("configuration", resp, w)
 }
 
+// GetConfiguration returns the full configuration. Secrets are replaced with
+// database.HiddenSecret.
+//
+// It serves /api/v2/admin/configuration/list and is open to administrators.
 func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 	currency, _ := h.config.GetString("currency")
 	engineHourFormat, _ := h.config.GetString("engine.hour.format")
@@ -279,7 +316,7 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 		MyNautiqueBoatID:       int(myNautiqueBoatID),
 		MyNautiqueEnabled:      myNautiqueEnabled,
 		MyNautiqueFuelCapacity: int(myNautiqueFuelCapacity),
-		MyNautiquePassword:     "hidden",
+		MyNautiquePassword:     database.HiddenSecret,
 		MyNautiqueUser:         myNautiqueUser,
 		PaymentAccountBIC:      paymentAccountBIC,
 		PaymentAccountComment:  paymentAccountComment,
@@ -287,7 +324,7 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 		PaymentAccountOwner:    paymentAccountOwner,
 		RecaptchaPrivateKey:    recaptchePrivateKey,
 		RecaptchaPublicKey:     recaptchePublicKey,
-		SMTPPassword:           "hidden",
+		SMTPPassword:           database.HiddenSecret,
 		SMTPSender:             smtpSender,
 		SMTPServer:             smtpServer,
 		SMTPUsername:           smtpUsername,
@@ -296,6 +333,10 @@ func (h *Handler) GetConfiguration(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("configuration", resp, w)
 }
 
+// SetConfiguration writes the configuration. Values that are still
+// database.HiddenSecret are left untouched.
+//
+// It serves /api/v2/admin/configuration/set and is open to administrators.
 func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request, req ConfigurationMessage, hCtx *HandlerCtx) {
 	// TODO check smtp.password
 	// - needs to be set in case there is other smtp configuration
@@ -407,18 +448,22 @@ func (h *Handler) SetConfiguration(w http.ResponseWriter, r *http.Request, req C
 	dbh := hCtx.Database
 	err := dbh.UpdateOrInsertPropertyValues(props)
 	if err != nil {
-		slog.Warn("Cannot update configuration", slog.String("error", err.Error()))
+		slog.Warn("Cannot update configuration", slog.Any("error", err))
 		WriteFailureResponse(err.Error(), w)
 		return
 	}
 	err = h.config.ReadConfigProperties()
 	if err != nil {
-		slog.Warn("Cannot read configuration properties to config representation", slog.String("error", err.Error()))
+		slog.Warn("Cannot read configuration properties to config representation", slog.Any("error", err))
 	}
 
 	WriteSuccessResponse("config updated", nil, w)
 }
 
+// SetupMyNautiqueCredentials stores the MyNautique credentials. It only works while they
+// are not configured yet.
+//
+// It serves /api/v2/mynautique/credentials/setup and is open to administrators.
 func (h *Handler) SetupMyNautiqueCredentials(w http.ResponseWriter, r *http.Request, req SetupMyNautiqueCredentialsRequest, _ *HandlerCtx) {
 	// in case the configuration is already present, we do not
 	// allow to edit it
@@ -429,19 +474,19 @@ func (h *Handler) SetupMyNautiqueCredentials(w http.ResponseWriter, r *http.Requ
 
 	err := h.config.SetPropertyValue("mynautique.enabled", fmt.Sprintf("%t", req.Enabled))
 	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		slog.Warn("Request payload is not valid", slog.Any("error", err))
 		WriteFailureResponse("Invalid request payload", w)
 		return
 	}
 	err = h.config.SetPropertyValue("mynautique.user", req.User)
 	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		slog.Warn("Request payload is not valid", slog.Any("error", err))
 		WriteFailureResponse("Invalid request payload", w)
 		return
 	}
 	err = h.config.SetPropertyValue("mynautique.password", req.Password)
 	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		slog.Warn("Request payload is not valid", slog.Any("error", err))
 		WriteFailureResponse("Invalid request payload", w)
 		return
 	}
@@ -449,6 +494,10 @@ func (h *Handler) SetupMyNautiqueCredentials(w http.ResponseWriter, r *http.Requ
 	WriteSuccessResponse("config written", nil, w)
 }
 
+// UploadLogoFile stores an uploaded logo image under a content derived filename. It
+// accepts png, jpeg and gif up to 512kB.
+//
+// It serves /api/v2/admin/upload/logo and is open to administrators.
 func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
 	file, fileHeader, err := r.FormFile("logo")
 	if err != nil {
@@ -471,7 +520,7 @@ func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
 	buff := make([]byte, 512)
 	_, err = file.Read(buff)
 	if err != nil {
-		slog.Warn("Cannot read uploaded file to determine content type", slog.String("error", err.Error()))
+		slog.Warn("Cannot read uploaded file to determine content type", slog.Any("error", err))
 		WriteFailureResponse("Cannot read the uploaded file.", w)
 		return
 	}
@@ -484,9 +533,9 @@ func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
 		WriteFailureResponse("The uploaded file needs to be an image of type png, jpg or gif.", w)
 		return
 	}
-	_, err = file.Seek(0, 0)
+	_, err = file.Seek(0, io.SeekStart)
 	if err != nil {
-		slog.Warn("Reset file pointer", slog.String("error", err.Error()))
+		slog.Warn("Reset file pointer", slog.Any("error", err))
 		WriteFailureResponse("Cannot read the uploaded file.", w)
 		return
 	}
@@ -499,20 +548,20 @@ func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
 	storageDir, _ := h.config.GetString("http.uploadpath")
 	localFileName := filepath.Join(storageDir, fileHash)
 	if err := os.MkdirAll(filepath.Dir(localFileName), 0770); err != nil {
-		slog.Warn("Cannot create directory for file", slog.String("file", localFileName), slog.String("error", err.Error()))
+		slog.Warn("Cannot create directory for file", slog.String("file", localFileName), slog.Any("error", err))
 		WriteFailureResponse("File cannot get stored on server.", w)
 		return
 	}
 	out, err := os.Create(localFileName)
 	if err != nil {
-		slog.Warn("Cannot create file on server for file", slog.String("file", localFileName), slog.String("error", err.Error()))
+		slog.Warn("Cannot create file on server for file", slog.String("file", localFileName), slog.Any("error", err))
 		WriteFailureResponse("File cannot get stored on server.", w)
 		return
 	}
 	defer out.Close()
 	_, err = io.Copy(out, file)
 	if err != nil {
-		slog.Warn("Cannot write to file on server for file", slog.String("file", localFileName), slog.String("error", err.Error()))
+		slog.Warn("Cannot write to file on server for file", slog.String("file", localFileName), slog.Any("error", err))
 		WriteFailureResponse("File cannot get stored on server.", w)
 		return
 	}
@@ -524,6 +573,9 @@ func (h *Handler) UploadLogoFile(w http.ResponseWriter, r *http.Request) {
 	WriteSuccessResponse("file uploaded", resp, w)
 }
 
+// GetLogoPath returns the path the logo is served from.
+//
+// It serves /api/v2/configuration/logo and is open to unauthenticated callers.
 func (h *Handler) GetLogoPath(w http.ResponseWriter, r *http.Request) {
 	conf, _ := h.config.GetString("logo.file")
 	uploadDir, _ := h.config.GetString("http.uploadpath")
@@ -536,6 +588,9 @@ func (h *Handler) GetLogoPath(w http.ResponseWriter, r *http.Request) {
 
 // TODO implement file removal
 
+// GetRecaptchaKey returns the public reCAPTCHA key.
+//
+// It serves /api/v2/configuration/recaptcha-key and is open to unauthenticated callers.
 func (h *Handler) GetRecaptchaKey(w http.ResponseWriter, r *http.Request) {
 	key, _ := h.config.GetString("recaptcha.publickey")
 	resp := &GetRecaptchaKeyResponse{}

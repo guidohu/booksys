@@ -1,3 +1,5 @@
+// Package mynautique is a client for the MyNautique API, which provides boat
+// telemetry such as engine hours and fuel level.
 package mynautique
 
 import (
@@ -5,17 +7,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/shopspring/decimal"
-	"golang.org/x/exp/slog"
 )
 
-var api_url = "https://mynautique.azurewebsites.net/api/v2"
-var AuthURL = "https://identitytoolkit.googleapis.com/v1"
+// The API endpoints. They are variables so that tests can point them at a
+// stub server.
+var (
+	apiURL  = "https://mynautique.azurewebsites.net/api/v2"
+	AuthURL = "https://identitytoolkit.googleapis.com/v1"
+)
 
+// Client talks to the MyNautique API. It holds the credentials and the login
+// token, and refreshes the token when it has expired.
 type Client struct {
 	auth      loginResponse
 	AuthUntil time.Time
@@ -23,6 +31,8 @@ type Client struct {
 	Options   *Options
 }
 
+// Options are the parameters NewClient needs. Client is the HTTP client to
+// use; if it is nil a default one is created.
 type Options struct {
 	User       string
 	Password   string
@@ -35,13 +45,14 @@ type loginResponse struct {
 	ExpiresIn        string `json:"expiresIn"`
 	ExpiresInSeconds int64
 	Kind             string `json:"kind"`
-	LocalId          string `json:"localId"`
+	LocalID          string `json:"localId"`
 	Email            string `json:"email"`
 	DisplayName      string `json:"displayName"`
 	Registered       bool   `json:"registered"`
 	RefreshToken     string `json:"refreshToken"`
 }
 
+// BoatInfo describes a boat in the account's fleet.
 type BoatInfo struct {
 	Owner             string
 	ModelYear         int64
@@ -72,6 +83,8 @@ type boatInfoRaw struct {
 	Hin                     string `json:"hin"`
 }
 
+// Telemetry is the current state of a boat, as reported by its onboard
+// system.
 type Telemetry struct {
 	DeviceSerial                  int64
 	ServiceMessage                string
@@ -169,17 +182,19 @@ type sDate struct {
 	Nanoseconds int64 `json:"_nanoseconds"`
 }
 
+// UnmarshalJSON implements json.Unmarshaler. The API sends every telemetry
+// value as a string, so the values are parsed into their real types here.
 func (t *Telemetry) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" || string(data) == `""` {
 		return nil
 	}
 	var r telemetryRaw
 	if err := json.Unmarshal(data, &r); err != nil {
-		return fmt.Errorf("cannot parse telemetryRaw: %q", err)
+		return fmt.Errorf("cannot parse telemetryRaw: %w", err)
 	}
 
 	// parse all the strings into meaningful types
-	errs := []error{}
+	var errs []error
 	accelXYZ, err := decimal.NewFromString(r.AccelXYZMagnitude)
 	errs = append(errs, err)
 	ballastBelly, err := strconv.Atoi(r.BallastBelly)
@@ -261,8 +276,8 @@ func (t *Telemetry) UnmarshalJSON(data []byte) error {
 	var lastError error
 	for i, e := range errs {
 		if e != nil {
-			lastError = fmt.Errorf("cannot parse raw telemetry (internal ref: %d): %s", i, e.Error())
-			slog.Error(fmt.Sprintf("cannot parse raw telemetry (internal ref: %d): %s", i, e.Error()))
+			lastError = fmt.Errorf("cannot parse raw telemetry (internal ref: %d): %w", i, e)
+			slog.Error("Cannot parse raw telemetry", slog.Int("ref", i), slog.Any("error", e))
 		}
 	}
 	if lastError != nil {
@@ -318,6 +333,9 @@ func (t *Telemetry) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// UnmarshalJSON implements json.Unmarshaler. The API sends the boat fields as
+// strings and the dates as second/nanosecond pairs, so they are converted into
+// their real types here.
 func (b *BoatInfo) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" || string(data) == `""` {
 		return nil
@@ -328,7 +346,7 @@ func (b *BoatInfo) UnmarshalJSON(data []byte) error {
 	}
 
 	// parse all the strings into meaningful types
-	errs := []error{}
+	var errs []error
 	modelYear, err := strconv.Atoi(r.ModelYear)
 	errs = append(errs, err)
 	date := time.Unix(r.Date.Seconds, r.Date.Nanoseconds).UTC()
@@ -342,7 +360,7 @@ func (b *BoatInfo) UnmarshalJSON(data []byte) error {
 	// check all the errors
 	for i, e := range errs {
 		if e != nil {
-			return fmt.Errorf("cannot parse raw boat info (internal ref: %d): %s", i, e.Error())
+			return fmt.Errorf("cannot parse raw boat info (internal ref: %d): %w", i, e)
 		}
 	}
 
@@ -363,7 +381,9 @@ func (b *BoatInfo) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func NewMyNautiqueClient(opts *Options) *Client {
+// NewClient returns a Client for the given options. If opts is nil the client
+// has no credentials and cannot log in.
+func NewClient(opts *Options) *Client {
 	c := &Client{
 		Options: &Options{
 			Client: &http.Client{},
@@ -385,6 +405,7 @@ func NewMyNautiqueClient(opts *Options) *Client {
 	return c
 }
 
+// Login exchanges the credentials for a token and records when it expires.
 func (m *Client) Login() error {
 	slog.Info("New myNautique login attempt.")
 	now := time.Now()
@@ -397,11 +418,11 @@ func (m *Client) Login() error {
 	url := fmt.Sprintf("%s/accounts:signInWithPassword?key=%s", AuthURL, m.Options.AuthAPIKey)
 	req, err := http.NewRequest(http.MethodPost, url, requestBody)
 	if err != nil {
-		return fmt.Errorf("cannot build request: %s", err.Error())
+		return fmt.Errorf("cannot build request: %w", err)
 	}
 	resp, err := m.Options.Client.Do(req)
 	if err != nil {
-		return fmt.Errorf("cannot login: %s", err.Error())
+		return fmt.Errorf("cannot login: %w", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
@@ -409,13 +430,13 @@ func (m *Client) Login() error {
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("cannot read login response: %s", err.Error())
+		return fmt.Errorf("cannot read login response: %w", err)
 	}
 
 	var response loginResponse
 	err = json.Unmarshal(body, &response)
 	if err != nil {
-		return fmt.Errorf("cannot parse login response: %s", err.Error())
+		return fmt.Errorf("cannot parse login response: %w", err)
 	}
 	expIn, err := strconv.Atoi(response.ExpiresIn)
 	if err == nil {
@@ -423,10 +444,12 @@ func (m *Client) Login() error {
 	}
 	m.AuthUntil = now.Add(time.Second * time.Duration(response.ExpiresInSeconds-10))
 	m.auth = response
-	slog.Info("New myNautique login successful, auth until:", slog.String("time", m.AuthUntil.String()))
+	slog.Info("New myNautique login successful", slog.String("time", m.AuthUntil.String()))
 	return nil
 }
 
+// GetFleet loads the account's fleet into the client, logging in first if the
+// token has expired.
 func (m *Client) GetFleet() error {
 	if m.isAuthExpired() {
 		err := m.Login()
@@ -435,12 +458,12 @@ func (m *Client) GetFleet() error {
 		}
 	}
 
-	url := fmt.Sprintf("%s/fleet/get-fleet", api_url)
+	url := fmt.Sprintf("%s/fleet/get-fleet", apiURL)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	req.Header.Add("token", m.auth.IDToken)
 	resp, err := m.Options.Client.Do(req)
 	if err != nil {
-		return fmt.Errorf("cannot get fleet: %s", err.Error())
+		return fmt.Errorf("cannot get fleet: %w", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
@@ -451,18 +474,20 @@ func (m *Client) GetFleet() error {
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("cannot read response from get fleet: %s", err.Error())
+		return fmt.Errorf("cannot read response from get fleet: %w", err)
 	}
 
-	boats := []BoatInfo{}
+	var boats []BoatInfo
 	err = json.Unmarshal(body, &boats)
 	if err != nil {
-		return fmt.Errorf("cannot parse fleet response: %s", err.Error())
+		return fmt.Errorf("cannot parse fleet response: %w", err)
 	}
 	m.Fleet = boats
 	return nil
 }
 
+// GetBoatTelemetry returns the current state of a boat, logging in first if
+// the token has expired.
 func (m *Client) GetBoatTelemetry(id int64) (Telemetry, error) {
 	t := Telemetry{}
 	if m.isAuthExpired() {
@@ -471,12 +496,12 @@ func (m *Client) GetBoatTelemetry(id int64) (Telemetry, error) {
 			return t, err
 		}
 	}
-	url := fmt.Sprintf("%s/boat/get-boat-telemetry/%d", api_url, id)
+	url := fmt.Sprintf("%s/boat/get-boat-telemetry/%d", apiURL, id)
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	req.Header.Add("token", m.auth.IDToken)
 	resp, err := m.Options.Client.Do(req)
 	if err != nil {
-		return t, fmt.Errorf("cannot get telemetry: %s", err.Error())
+		return t, fmt.Errorf("cannot get telemetry: %w", err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
@@ -487,12 +512,12 @@ func (m *Client) GetBoatTelemetry(id int64) (Telemetry, error) {
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return t, fmt.Errorf("cannot read response from get telemetry: %s", err.Error())
+		return t, fmt.Errorf("cannot read response from get telemetry: %w", err)
 	}
 
 	err = json.Unmarshal(body, &t)
 	if err != nil {
-		return t, fmt.Errorf("cannot parse telemetry response: %s", err.Error())
+		return t, fmt.Errorf("cannot parse telemetry response: %w", err)
 	}
 	return t, nil
 }

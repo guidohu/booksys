@@ -13,9 +13,9 @@ func withVerifyServer(t *testing.T, handler http.HandlerFunc) {
 	t.Helper()
 	server := httptest.NewServer(handler)
 	t.Cleanup(server.Close)
-	previous := recaptchaSiteVerifyUrl
-	t.Cleanup(func() { recaptchaSiteVerifyUrl = previous })
-	recaptchaSiteVerifyUrl = server.URL
+	previous := siteVerifyURL
+	t.Cleanup(func() { siteVerifyURL = previous })
+	siteVerifyURL = server.URL
 }
 
 func TestValid(t *testing.T) {
@@ -71,11 +71,11 @@ func TestValid(t *testing.T) {
 	})
 
 	t.Run("reports an unreachable endpoint", func(t *testing.T) {
-		previous := recaptchaSiteVerifyUrl
-		t.Cleanup(func() { recaptchaSiteVerifyUrl = previous })
+		previous := siteVerifyURL
+		t.Cleanup(func() { siteVerifyURL = previous })
 		// A closed server yields a connection error.
 		server := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
-		recaptchaSiteVerifyUrl = server.URL
+		siteVerifyURL = server.URL
 		server.Close()
 
 		valid, err := Valid("the-token", "the-secret")

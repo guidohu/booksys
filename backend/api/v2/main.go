@@ -5,6 +5,7 @@ import (
 	"errors"
 	"expvar"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/http/pprof"
 	"os"
@@ -15,14 +16,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 	"server/config"
 	"server/database"
 	"server/handlers"
 	"server/version"
-
-	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
-	"golang.org/x/exp/slog"
 )
 
 // Flag definition
@@ -55,22 +54,39 @@ var (
 	printVersion = pflag.Bool("version", false, "Prints the version an exits.")
 )
 
-func getFlags(v *viper.Viper) {
-	v.BindPFlag("config", pflag.Lookup("config"))
-	v.BindPFlag("http.port", pflag.Lookup("http_port"))
-	v.BindPFlag("http.sessioninactivitytimeout", pflag.Lookup("http_session_inactivity_timeout"))
-	v.BindPFlag("http.sessiontimeout", pflag.Lookup("http_session_timeout"))
-	v.BindPFlag("http.uploadpath", pflag.Lookup("http_uploadpath"))
-	v.BindPFlag("http.websetup", pflag.Lookup("http_websetup"))
-	v.BindPFlag("database.user", pflag.Lookup("database_user"))
-	v.BindPFlag("database.password", pflag.Lookup("database_password"))
-	v.BindPFlag("database.protocol", pflag.Lookup("database_protocol"))
-	v.BindPFlag("database.host", pflag.Lookup("database_host"))
-	v.BindPFlag("database.port", pflag.Lookup("database_port"))
-	v.BindPFlag("database.dbname", pflag.Lookup("database_dbname"))
-	v.BindPFlag("mynautique.api.key", pflag.Lookup("mynautique_api_key"))
-	v.BindPFlag("environment", pflag.Lookup("environment"))
+// getFlags binds the command line flags to their configuration keys and parses
+// them. A binding failure means a flag name and its key have drifted apart,
+// which is a programming error, so it is reported rather than ignored.
+func getFlags(v *viper.Viper) error {
+	bindings := map[string]string{
+		"config":                        "config",
+		"http.port":                     "http_port",
+		"http.sessioninactivitytimeout": "http_session_inactivity_timeout",
+		"http.sessiontimeout":           "http_session_timeout",
+		"http.uploadpath":               "http_uploadpath",
+		"http.websetup":                 "http_websetup",
+		"database.user":                 "database_user",
+		"database.password":             "database_password",
+		"database.protocol":             "database_protocol",
+		"database.host":                 "database_host",
+		"database.port":                 "database_port",
+		"database.dbname":               "database_dbname",
+		"mynautique.api.key":            "mynautique_api_key",
+		"environment":                   "environment",
+	}
+
+	for viperKey, flagName := range bindings {
+		flag := pflag.Lookup(flagName)
+		if flag == nil {
+			return fmt.Errorf("flag %q not found", flagName)
+		}
+		if err := v.BindPFlag(viperKey, flag); err != nil {
+			return fmt.Errorf("cannot bind flag %q to %q: %w", flagName, viperKey, err)
+		}
+	}
+
 	pflag.Parse()
+	return nil
 }
 
 func getDBSettings(c *config.Config) database.Settings {
@@ -94,11 +110,13 @@ func maybeConnectedDatabaseManager(c *config.Config) *database.Manager {
 	settings := getDBSettings(c)
 	dbm := database.NewManager(settings)
 	if err := dbm.Connect(nil); err != nil {
-		slog.Warn("Could not connect to database", slog.String("error", err.Error()))
+		slog.Warn("Could not connect to database", slog.Any("error", err))
 	} else {
 		slog.Info("Connected to database")
 		c.SetDB(dbm)
-		c.ReadConfigProperties()
+		if err := c.ReadConfigProperties(); err != nil {
+			slog.Warn("Cannot read config properties", slog.Any("error", err))
+		}
 	}
 	return dbm
 }
@@ -246,7 +264,10 @@ func main() {
 	setupLogger()
 
 	v := viper.New()
-	getFlags(v)
+	if err := getFlags(v); err != nil {
+		slog.Error("Cannot process the command line flags", slog.Any("error", err))
+		os.Exit(1)
+	}
 
 	// If requested, print version and exit.
 	if *printVersion {
@@ -256,7 +277,7 @@ func main() {
 	// Get startup configuration.
 	conf, err := config.NewConfig(v)
 	if err != nil {
-		slog.Error("Invalid config", slog.String("error", err.Error()))
+		slog.Error("Invalid config", slog.Any("error", err))
 		os.Exit(1)
 	}
 
@@ -323,24 +344,26 @@ func main() {
 						return
 					}
 					slog.Info("Initiate connection attempt to db.")
-					err = dbm.ConnectAndReplace(nil)
-					if err != nil {
-						slog.Warn("Cannot reconnect database", slog.String("error", err.Error()))
+					if err := dbm.ConnectAndReplace(nil); err != nil {
+						slog.Warn("Cannot reconnect database", slog.Any("error", err))
 						return
 					}
 					slog.Info("Reconnected database.")
-					conf.ReadConfigProperties()
+					if err := conf.ReadConfigProperties(); err != nil {
+						slog.Warn("Cannot read config properties after reconnect", slog.Any("error", err))
+					}
 				}()
 			case <-chConfigFileUpdate:
 				func() {
 					slog.Info("Reconnect database after config change.")
 					dbSettings := getDBSettings(conf)
-					err = dbm.ConnectAndReplace(&dbSettings)
-					if err != nil {
-						slog.Warn("Cannot connect with new database settings after config file update", slog.String("error", err.Error()))
+					if err := dbm.ConnectAndReplace(&dbSettings); err != nil {
+						slog.Warn("Cannot connect with new database settings after config file update", slog.Any("error", err))
 						return
 					}
-					conf.ReadConfigProperties()
+					if err := conf.ReadConfigProperties(); err != nil {
+						slog.Warn("Cannot read config properties after config file update", slog.Any("error", err))
+					}
 				}()
 			}
 		}
@@ -363,9 +386,9 @@ func main() {
 
 	wg.Add(1)
 	go func() {
-		slog.Info(fmt.Sprintf("Server listening on address %s", server.Addr))
+		slog.Info("Server listening", slog.String("address", server.Addr))
 		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
-			slog.Error("HTTP server failure", slog.String("error", err.Error()))
+			slog.Error("HTTP server failure", slog.Any("error", err))
 			os.Exit(1)
 		}
 		slog.Info("Stopped serving new connections.")
@@ -380,7 +403,7 @@ func main() {
 	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
 	defer shutdownRelease()
 	if err := server.Shutdown(shutdownCtx); err != nil {
-		slog.Error("HTTP shutdown failure", slog.String("error", err.Error()))
+		slog.Error("HTTP shutdown failure", slog.Any("error", err))
 		os.Exit(1)
 	}
 	slog.Info("HTTP server stopped.")

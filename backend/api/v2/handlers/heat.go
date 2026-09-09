@@ -1,20 +1,24 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
+	"log/slog"
 	"math"
 	"net/http"
-	"server/database"
 	"time"
 
 	"github.com/shopspring/decimal"
-	"golang.org/x/exp/slog"
+	"server/database"
 )
 
+// AddHeatsRequest is the request body of AddHeats, which serves
+// /api/v2/heats/create.
 type AddHeatsRequest struct {
 	Heats []AddHeatRequest `json:"heats" validation:"dive"`
 }
 
+// AddHeatRequest is a single ride in an AddHeatsRequest.
 type AddHeatRequest struct {
 	UID             string `json:"uid" validation:"required"`
 	SessionID       uint   `json:"session_id" validation:"required"`
@@ -23,12 +27,18 @@ type AddHeatRequest struct {
 	Comment         string `json:"comment"`
 }
 
+// AddHeatsRequestResponse reports, per submitted ride, whether it could be
+// recorded. It is keyed by the UID the client sent with that ride.
 type AddHeatsRequestResponse map[string]Status
 
+// DeleteHeatRequest is the request body of DeleteHeat, which serves
+// /api/v2/heat/delete.
 type DeleteHeatRequest struct {
 	HeatID uint `json:"heat_id" validation:"required"`
 }
 
+// ChangeHeatRequest is the request body of ChangeHeat, which serves
+// /api/v2/heat/change.
 type ChangeHeatRequest struct {
 	HeatID          uint   `json:"heat_id" validation:"required"`
 	UserID          uint   `json:"user_id" validation:"required"`
@@ -36,11 +46,14 @@ type ChangeHeatRequest struct {
 	Comment         string `json:"comment"`
 }
 
+// AddHeats records the rides of a session.
+//
+// It serves /api/v2/heats/create and is open to administrators.
 func (h *Handler) AddHeats(w http.ResponseWriter, r *http.Request, req AddHeatsRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 
 	resp := AddHeatsRequestResponse{}
-	for _, heat := range []AddHeatRequest(req.Heats) {
+	for _, heat := range req.Heats {
 		err := h.addHeat(dbh, heat)
 		if err != nil {
 			resp[heat.UID] = Status{
@@ -59,10 +72,10 @@ func (h *Handler) AddHeats(w http.ResponseWriter, r *http.Request, req AddHeatsR
 
 func (h *Handler) addHeat(dbh database.Database, heat AddHeatRequest) error {
 	// Get user
-	user, err := dbh.GetUserById(heat.UserID)
+	user, err := dbh.GetUserByID(heat.UserID)
 	if err != nil {
-		slog.Warn("Cannot get user information for", slog.Uint64("user", uint64(heat.UserID)), slog.String("error", err.Error()))
-		return fmt.Errorf("cannot get user")
+		slog.Warn("Cannot get user information for", slog.Uint64("user", uint64(heat.UserID)), slog.Any("error", err))
+		return errors.New("cannot get user")
 	}
 
 	// Check that session exists.
@@ -74,25 +87,25 @@ func (h *Handler) addHeat(dbh database.Database, heat AddHeatRequest) error {
 		}
 		if session.ID == 0 {
 			slog.Warn("Session not found", slog.Uint64("session", uint64(heat.SessionID)))
-			return fmt.Errorf("cannot get pricing information for user: session not found")
+			return errors.New("cannot get pricing information for user: session not found")
 		}
 	}
 
 	// Get pricing
 	pricing, err := dbh.GetUserStatusToPricingsMap()
 	if err != nil {
-		slog.Warn("Cannot get pricing information for user", slog.Uint64("user", uint64(heat.UserID)), slog.String("error", err.Error()))
-		return fmt.Errorf("cannot get pricing information for user")
+		slog.Warn("Cannot get pricing information for user", slog.Uint64("user", uint64(heat.UserID)), slog.Any("error", err))
+		return errors.New("cannot get pricing information for user")
 	}
 	p, ok := pricing[user.UserStatusID]
 	if !ok {
 		slog.Warn("Cannot get pricing information for user, user status ID not found", slog.Uint64("user", uint64(heat.UserID)))
-		return fmt.Errorf("cannot get pricing information for user")
+		return errors.New("cannot get pricing information for user")
 	}
 	price := p.PricePerMinute
 	if price.IsZero() {
 		slog.Warn("Cannot get a pricing for user, price is zero", slog.Uint64("user", uint64(heat.UserID)))
-		return fmt.Errorf("cannot get a pricing for this user")
+		return errors.New("cannot get a pricing for this user")
 	}
 
 	newHeat := database.Heat{
@@ -106,17 +119,19 @@ func (h *Handler) addHeat(dbh database.Database, heat AddHeatRequest) error {
 	}
 	err = dbh.AddHeat(&newHeat)
 	if err != nil {
-		slog.Warn("Cannot add heat", slog.String("error", err.Error()))
-		return fmt.Errorf("cannot add the heat to the database")
+		slog.Warn("Cannot add heat", slog.Any("error", err))
+		return errors.New("cannot add the heat to the database")
 	}
 	return nil
 }
 
+// AddHeat records a single ride. It is not routed, AddHeats is the endpoint
+// the API exposes.
 func (h *Handler) AddHeat(w http.ResponseWriter, r *http.Request) {
 	req := &AddHeatRequest{}
 	err := ReadBodyAndValidate(r, req)
 	if err != nil {
-		slog.Warn("Request payload is not valid", slog.String("error", err.Error()))
+		slog.Warn("Request payload is not valid", slog.Any("error", err))
 		WriteFailureResponse("Invalid request.", w)
 		return
 	}
@@ -124,30 +139,36 @@ func (h *Handler) AddHeat(w http.ResponseWriter, r *http.Request) {
 	dbh := hCtx.Database
 	err = h.addHeat(dbh, *req)
 	if err != nil {
-		slog.Warn("Could not add heat", slog.String("error", err.Error()))
+		slog.Warn("Could not add heat", slog.Any("error", err))
 		WriteFailureResponse(err.Error(), w)
 		return
 	}
 	WriteSuccessResponse("heat added", nil, w)
 }
 
+// DeleteHeat removes a ride.
+//
+// It serves /api/v2/heat/delete and is open to administrators.
 func (h *Handler) DeleteHeat(w http.ResponseWriter, r *http.Request, req DeleteHeatRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	err := dbh.DeleteHeat(req.HeatID)
 	if err != nil {
-		slog.Warn("Could not delete heat", slog.String("error", err.Error()))
+		slog.Warn("Could not delete heat", slog.Any("error", err))
 		WriteFailureResponse("Could not delete heat, heat not valid.", w)
 		return
 	}
 	WriteSuccessResponse("heat deleted", nil, w)
 }
 
+// ChangeHeat updates a ride and recalculates its cost.
+//
+// It serves /api/v2/heat/change and is open to administrators.
 func (h *Handler) ChangeHeat(w http.ResponseWriter, r *http.Request, req ChangeHeatRequest, hCtx *HandlerCtx) {
 	dbh := hCtx.Database
 	// Get user
-	user, err := dbh.GetUserById(req.UserID)
+	user, err := dbh.GetUserByID(req.UserID)
 	if err != nil {
-		slog.Warn("Cannot get user information for", slog.Uint64("user", uint64(req.UserID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot get user information for", slog.Uint64("user", uint64(req.UserID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot find user.", w)
 		return
 	}
@@ -155,7 +176,7 @@ func (h *Handler) ChangeHeat(w http.ResponseWriter, r *http.Request, req ChangeH
 	// Get pricing
 	pricing, err := dbh.GetUserStatusToPricingsMap()
 	if err != nil {
-		slog.Warn("Cannot get pricing information for user", slog.Uint64("user", uint64(user.ID)), slog.String("error", err.Error()))
+		slog.Warn("Cannot get pricing information for user", slog.Uint64("user", uint64(user.ID)), slog.Any("error", err))
 		WriteFailureResponse("Cannot get pricing information.", w)
 		return
 	}
@@ -197,7 +218,7 @@ func (h *Handler) ChangeHeat(w http.ResponseWriter, r *http.Request, req ChangeH
 	}
 	err = dbh.ChangeHeat(&newHeat)
 	if err != nil {
-		slog.Warn("Cannot change heat", slog.String("error", err.Error()))
+		slog.Warn("Cannot change heat", slog.Any("error", err))
 		WriteFailureResponse("Cannot update existing heat.", w)
 		return
 	}

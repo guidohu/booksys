@@ -1,20 +1,21 @@
+// Package email sends the notification emails of the application over SMTP.
 package email
 
 import (
+	"embed"
 	"fmt"
+	"log/slog"
 	"net/smtp"
-	"server/database"
 	"strings"
 	"text/template"
 
-	"golang.org/x/exp/slog"
-
-	"embed"
+	"server/database"
 )
 
 //go:embed templates/*
 var templatesFS embed.FS
 
+// Client sends email through an SMTP server.
 type Client struct {
 	Host     string
 	Port     string
@@ -22,6 +23,7 @@ type Client struct {
 	Password string
 }
 
+// Email is a single message to be sent.
 type Email struct {
 	Recipient string
 	Sender    string
@@ -29,6 +31,7 @@ type Email struct {
 	Subject   string
 }
 
+// NewClient returns a Client for the SMTP server described by config.
 func NewClient(config database.EmailConfiguration) *Client {
 	return &Client{
 		Host:     config.Server,
@@ -38,17 +41,20 @@ func NewClient(config database.EmailConfiguration) *Client {
 	}
 }
 
+// Send delivers a single message.
 func (c *Client) Send(e *Email) error {
 	auth := smtp.PlainAuth("", c.Username, c.Password, c.Host)
 	err := smtp.SendMail(fmt.Sprintf("%s:%s", c.Host, c.Port), auth, e.Sender, []string{e.Recipient}, []byte(e.Message))
 	if err != nil {
-		slog.Error("Email not sent", slog.String("to", e.Recipient), slog.String("error", err.Error()))
+		slog.Error("Email not sent", slog.String("to", e.Recipient), slog.Any("error", err))
 		return err
 	}
 	slog.Info("Email sent", slog.String("to", e.Recipient), slog.String("subject", e.Subject))
 	return nil
 }
 
+// SendTokenResetMessage sends the user the token they need to set a new
+// password.
 func (c *Client) SendTokenResetMessage(user database.User, token string, senderAddress string, subject string) error {
 	var out strings.Builder
 	tmplFile := "tokenReset.tmpl"
@@ -70,7 +76,7 @@ func (c *Client) SendTokenResetMessage(user database.User, token string, senderA
 	}
 	err := tmpl.Execute(&out, vars)
 	if err != nil {
-		slog.Error("Cannot generate output from template file", slog.String("error", err.Error()))
+		slog.Error("Cannot generate output from template file", slog.Any("error", err))
 		return err
 	}
 	return c.Send(&Email{
@@ -81,6 +87,8 @@ func (c *Client) SendTokenResetMessage(user database.User, token string, senderA
 	})
 }
 
+// SendUserAddedToSessionMessage notifies the user that they were added to a
+// session.
 func (c *Client) SendUserAddedToSessionMessage(user database.User, session database.Session, senderAddress string, subject string, URL string) error {
 	var out strings.Builder
 	tmplFile := "userAddedToSession.tmpl"
@@ -108,7 +116,7 @@ func (c *Client) SendUserAddedToSessionMessage(user database.User, session datab
 	}
 	err := tmpl.Execute(&out, vars)
 	if err != nil {
-		slog.Error("Cannot generate output from template file", slog.String("error", err.Error()))
+		slog.Error("Cannot generate output from template file", slog.Any("error", err))
 		return err
 	}
 	return c.Send(&Email{
@@ -119,6 +127,8 @@ func (c *Client) SendUserAddedToSessionMessage(user database.User, session datab
 	})
 }
 
+// SendUserRemovedFromSessionMessage notifies the user that they were removed
+// from a session.
 func (c *Client) SendUserRemovedFromSessionMessage(user database.User, session database.Session, senderAddress string, subject string, URL string) error {
 	var out strings.Builder
 	tmplFile := "userRemovedFromSession.tmpl"
@@ -146,7 +156,7 @@ func (c *Client) SendUserRemovedFromSessionMessage(user database.User, session d
 	}
 	err := tmpl.Execute(&out, vars)
 	if err != nil {
-		slog.Error("Cannot generate output from template file", slog.String("error", err.Error()))
+		slog.Error("Cannot generate output from template file", slog.Any("error", err))
 		return err
 	}
 	return c.Send(&Email{
