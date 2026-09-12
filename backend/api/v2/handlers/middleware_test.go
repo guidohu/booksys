@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -120,6 +121,7 @@ func TestWithAuthentication(t *testing.T) {
 		requiredRole database.UserRoleType
 		wantCalled   bool
 		wantStatus   int
+		wantMsg      string
 	}{
 		{
 			name:         "valid admin session",
@@ -138,12 +140,16 @@ func TestWithAuthentication(t *testing.T) {
 			wantStatus:   http.StatusOK,
 		},
 		{
+			// The session is valid, it just does not carry the required
+			// role, so the caller is told they are not permitted instead of
+			// being sent to authenticate again.
 			name:         "insufficient role",
 			cookie:       &http.Cookie{Name: secureSessionCookieName, Value: "secret"},
 			session:      validSession(7, database.UserRoleMember),
 			requiredRole: database.UserRoleAdmin,
 			wantCalled:   false,
-			wantStatus:   http.StatusUnauthorized,
+			wantStatus:   http.StatusForbidden,
+			wantMsg:      "insufficient permissions for this operation",
 		},
 		{
 			name:         "no cookie",
@@ -213,6 +219,9 @@ func TestWithAuthentication(t *testing.T) {
 			if rec.Code != tt.wantStatus {
 				t.Errorf("status = %d, want %d", rec.Code, tt.wantStatus)
 			}
+			if tt.wantMsg != "" && !strings.Contains(rec.Body.String(), tt.wantMsg) {
+				t.Errorf("body = %q, want it to contain %q", rec.Body.String(), tt.wantMsg)
+			}
 		})
 	}
 }
@@ -232,6 +241,9 @@ func TestWithAdminAndAnyAuthenticationRoles(t *testing.T) {
 	h.WithAdminAuthentication(func(http.ResponseWriter, *http.Request) { adminCalled = true }).ServeHTTP(rec, r)
 	if adminCalled {
 		t.Error("a member must not pass the admin authentication")
+	}
+	if rec.Code != http.StatusForbidden {
+		t.Errorf("status = %d, want %d", rec.Code, http.StatusForbidden)
 	}
 
 	anyCalled := false

@@ -15,12 +15,13 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"server/config"
 	"server/database"
 	"server/mynautique"
 	"server/notifications/email"
 	customvalidator "server/validator"
+
+	"github.com/go-playground/validator/v10"
 )
 
 // HandlerContextID identifies the values this package stores in a request
@@ -210,8 +211,8 @@ func (h *Handler) WithAuthentication(next http.HandlerFunc, requiredRole databas
 		if requiredRole != database.UserRoleUnknown {
 			if session.UserRoleID != requiredRole {
 				slog.Warn("User does not have the required role", slog.String("user", session.Username), slog.Uint64("role", uint64(session.UserRoleID)), slog.Uint64("required_role", uint64(requiredRole)))
-				w.WriteHeader(http.StatusUnauthorized)
-				WriteFailureResponse("Operation cannot be performed. Database connection is not established properly.", w)
+				w.WriteHeader(http.StatusForbidden)
+				WriteFailureResponse("insufficient permissions for this operation", w)
 				return
 			}
 		}
