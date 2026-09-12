@@ -4,6 +4,8 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -121,7 +123,7 @@ func TestWithAuthentication(t *testing.T) {
 	}{
 		{
 			name:         "valid admin session",
-			cookie:       &http.Cookie{Name: "SESSION", Value: "secret"},
+			cookie:       &http.Cookie{Name: secureSessionCookieName, Value: "secret"},
 			session:      validSession(7, database.UserRoleAdmin),
 			requiredRole: database.UserRoleAdmin,
 			wantCalled:   true,
@@ -129,7 +131,7 @@ func TestWithAuthentication(t *testing.T) {
 		},
 		{
 			name:         "any role accepted",
-			cookie:       &http.Cookie{Name: "SESSION", Value: "secret"},
+			cookie:       &http.Cookie{Name: secureSessionCookieName, Value: "secret"},
 			session:      validSession(7, database.UserRoleGuest),
 			requiredRole: database.UserRoleUnknown,
 			wantCalled:   true,
@@ -137,7 +139,7 @@ func TestWithAuthentication(t *testing.T) {
 		},
 		{
 			name:         "insufficient role",
-			cookie:       &http.Cookie{Name: "SESSION", Value: "secret"},
+			cookie:       &http.Cookie{Name: secureSessionCookieName, Value: "secret"},
 			session:      validSession(7, database.UserRoleMember),
 			requiredRole: database.UserRoleAdmin,
 			wantCalled:   false,
@@ -153,7 +155,7 @@ func TestWithAuthentication(t *testing.T) {
 		},
 		{
 			name:         "unknown session",
-			cookie:       &http.Cookie{Name: "SESSION", Value: "secret"},
+			cookie:       &http.Cookie{Name: secureSessionCookieName, Value: "secret"},
 			sessionErr:   errNotFound,
 			requiredRole: database.UserRoleAdmin,
 			wantCalled:   false,
@@ -161,7 +163,7 @@ func TestWithAuthentication(t *testing.T) {
 		},
 		{
 			name:         "session not found without error",
-			cookie:       &http.Cookie{Name: "SESSION", Value: "secret"},
+			cookie:       &http.Cookie{Name: secureSessionCookieName, Value: "secret"},
 			session:      nil,
 			sessionErr:   nil,
 			requiredRole: database.UserRoleAdmin,
@@ -170,7 +172,7 @@ func TestWithAuthentication(t *testing.T) {
 		},
 		{
 			name:         "expired session",
-			cookie:       &http.Cookie{Name: "SESSION", Value: "secret"},
+			cookie:       &http.Cookie{Name: secureSessionCookieName, Value: "secret"},
 			session:      expiredSession,
 			requiredRole: database.UserRoleAdmin,
 			wantCalled:   false,
@@ -226,7 +228,7 @@ func TestWithAdminAndAnyAuthenticationRoles(t *testing.T) {
 	adminCalled := false
 	rec := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodPost, "/", nil)
-	r.AddCookie(&http.Cookie{Name: "SESSION", Value: "secret"})
+	r.AddCookie(&http.Cookie{Name: secureSessionCookieName, Value: "secret"})
 	h.WithAdminAuthentication(func(http.ResponseWriter, *http.Request) { adminCalled = true }).ServeHTTP(rec, r)
 	if adminCalled {
 		t.Error("a member must not pass the admin authentication")
@@ -235,7 +237,7 @@ func TestWithAdminAndAnyAuthenticationRoles(t *testing.T) {
 	anyCalled := false
 	rec = httptest.NewRecorder()
 	r = httptest.NewRequest(http.MethodPost, "/", nil)
-	r.AddCookie(&http.Cookie{Name: "SESSION", Value: "secret"})
+	r.AddCookie(&http.Cookie{Name: secureSessionCookieName, Value: "secret"})
 	h.WithAnyAuthentication(func(http.ResponseWriter, *http.Request) { anyCalled = true }).ServeHTTP(rec, r)
 	if !anyCalled {
 		t.Error("a member has to pass the 'any role' authentication")
@@ -402,39 +404,193 @@ func TestWriteFailureResponse(t *testing.T) {
 }
 
 func TestSetAndDeleteSessionCookie(t *testing.T) {
-	rec := httptest.NewRecorder()
-	validUntil := time.Now().Add(time.Hour).UTC().Truncate(time.Second)
-	SetSessionCookie(rec, "the-secret", validUntil)
+	tests := []struct {
+		name       string
+		config     map[string]string
+		wantName   string
+		wantSecure bool
+	}{
+		{
+			name:       "secure by default",
+			config:     nil,
+			wantName:   secureSessionCookieName,
+			wantSecure: true,
+		},
+		{
+			name:       "secure cookies explicitly enabled",
+			config:     map[string]string{"http.securecookie": "true"},
+			wantName:   secureSessionCookieName,
+			wantSecure: true,
+		},
+		{
+			name:       "secure cookies turned off for plain HTTP development",
+			config:     map[string]string{"http.securecookie": "false"},
+			wantName:   insecureSessionCookieName,
+			wantSecure: false,
+		},
+		{
+			name:       "an unparsable value keeps the cookie secure",
+			config:     map[string]string{"http.securecookie": "nope"},
+			wantName:   secureSessionCookieName,
+			wantSecure: true,
+		},
+	}
 
-	cookies := (&http.Response{Header: rec.Header()}).Cookies()
-	if len(cookies) != 1 {
-		t.Fatalf("expected exactly one cookie, got %d", len(cookies))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			h := newTestHandler(t, &dbtest.FakeDB{}, tt.config)
+			if got := h.SessionCookieName(); got != tt.wantName {
+				t.Errorf("cookie name = %q, want %q", got, tt.wantName)
+			}
+
+			rec := httptest.NewRecorder()
+			validUntil := time.Now().Add(time.Hour).UTC().Truncate(time.Second)
+			h.SetSessionCookie(rec, "the-secret", validUntil)
+
+			cookies := (&http.Response{Header: rec.Header()}).Cookies()
+			if len(cookies) != 1 {
+				t.Fatalf("expected exactly one cookie, got %d", len(cookies))
+			}
+			c := cookies[0]
+			if c.Name != tt.wantName || c.Value != "the-secret" {
+				t.Errorf("cookie = %s=%s, want %s=the-secret", c.Name, c.Value, tt.wantName)
+			}
+			if !c.HttpOnly {
+				t.Error("session cookie has to be HttpOnly")
+			}
+			if c.Secure != tt.wantSecure {
+				t.Errorf("cookie Secure = %v, want %v", c.Secure, tt.wantSecure)
+			}
+			// The `__Host-` prefix is only accepted by a browser if the
+			// cookie is secure, host bound and valid for the whole site.
+			if c.Path != "/" {
+				t.Errorf("cookie path = %q, want %q", c.Path, "/")
+			}
+			if c.Domain != "" {
+				t.Errorf("cookie domain = %q, want it to be unset", c.Domain)
+			}
+			if !c.Expires.Equal(validUntil) {
+				t.Errorf("cookie expiry = %v, want %v", c.Expires, validUntil)
+			}
+
+			rec = httptest.NewRecorder()
+			h.DeleteSessionCookie(rec)
+			cookies = (&http.Response{Header: rec.Header()}).Cookies()
+			// A secure deployment also expires the cookie that sessions from
+			// before the rename are stored under.
+			wantCookies := 1
+			if tt.wantSecure {
+				wantCookies = 2
+			}
+			if len(cookies) != wantCookies {
+				t.Fatalf("expected %d cookies, got %d: %+v", wantCookies, len(cookies), cookies)
+			}
+			// The browser only replaces the cookie that was set before if
+			// the attributes of the two match.
+			deleted := cookies[0]
+			if deleted.Name != tt.wantName {
+				t.Errorf("deleted cookie name = %q, want %q", deleted.Name, tt.wantName)
+			}
+			if deleted.Path != c.Path || deleted.Domain != c.Domain || deleted.Secure != c.Secure {
+				t.Errorf("deleted cookie attributes = %+v, do not match the ones it was set with %+v", deleted, c)
+			}
+			for _, deleted := range cookies {
+				if deleted.Value != "" {
+					t.Errorf("deleted cookie %q value = %q, want empty", deleted.Name, deleted.Value)
+				}
+				if !deleted.Expires.Before(time.Now()) {
+					t.Errorf("deleted cookie %q has to be expired", deleted.Name)
+				}
+			}
+			if tt.wantSecure && cookies[1].Name != insecureSessionCookieName {
+				t.Errorf("second deleted cookie = %q, want %q", cookies[1].Name, insecureSessionCookieName)
+			}
+		})
 	}
-	c := cookies[0]
-	if c.Name != "SESSION" || c.Value != "the-secret" {
-		t.Errorf("cookie = %s=%s, want SESSION=the-secret", c.Name, c.Value)
-	}
-	if !c.HttpOnly {
-		t.Error("session cookie has to be HttpOnly")
-	}
-	if c.Path != "/" {
-		t.Errorf("cookie path = %q, want %q", c.Path, "/")
-	}
-	if !c.Expires.Equal(validUntil) {
-		t.Errorf("cookie expiry = %v, want %v", c.Expires, validUntil)
+}
+
+// TestSecureCookieConfigSources makes sure that the cookie setting can be
+// turned off through a configuration file and through the environment, which
+// is how the development setups configure it.
+func TestSecureCookieConfigSources(t *testing.T) {
+	t.Run("configuration file", func(t *testing.T) {
+		configFile := filepath.Join(t.TempDir(), "config.yaml")
+		if err := os.WriteFile(configFile, []byte("http:\n  port: 8080\n  secureCookie: false\n"), 0o600); err != nil {
+			t.Fatalf("cannot write test config file: %v", err)
+		}
+		conf := newTestConfigFromFile(t, configFile, nil)
+		h := NewHandler(HandlerParams{Database: dbtest.NewManager(t, &dbtest.FakeDB{}), Configuration: conf})
+
+		if got := h.SessionCookieName(); got != insecureSessionCookieName {
+			t.Errorf("cookie name = %q, want %q", got, insecureSessionCookieName)
+		}
+	})
+
+	t.Run("environment", func(t *testing.T) {
+		t.Setenv("BOOKSYS_HTTP_SECURECOOKIE", "false")
+		conf := newTestConfigWithoutFile(t, nil)
+		h := NewHandler(HandlerParams{Database: dbtest.NewManager(t, &dbtest.FakeDB{}), Configuration: conf})
+
+		if got := h.SessionCookieName(); got != insecureSessionCookieName {
+			t.Errorf("cookie name = %q, want %q", got, insecureSessionCookieName)
+		}
+	})
+
+	t.Run("default", func(t *testing.T) {
+		conf := newTestConfigWithoutFile(t, nil)
+		h := NewHandler(HandlerParams{Database: dbtest.NewManager(t, &dbtest.FakeDB{}), Configuration: conf})
+
+		if got := h.SessionCookieName(); got != secureSessionCookieName {
+			t.Errorf("cookie name = %q, want %q", got, secureSessionCookieName)
+		}
+	})
+}
+
+// TestWithAuthenticationIgnoresTheOtherCookieName makes sure that the session
+// is only read from the cookie that belongs to the configured cookie mode. A
+// secure deployment that also accepted the unprefixed cookie would give up the
+// protection the `__Host-` prefix provides.
+func TestWithAuthenticationIgnoresTheOtherCookieName(t *testing.T) {
+	tests := []struct {
+		name       string
+		config     map[string]string
+		cookieName string
+	}{
+		{
+			name:       "secure deployment gets the unprefixed cookie",
+			config:     map[string]string{"http.securecookie": "true"},
+			cookieName: insecureSessionCookieName,
+		},
+		{
+			name:       "plain HTTP deployment gets the prefixed cookie",
+			config:     map[string]string{"http.securecookie": "false"},
+			cookieName: secureSessionCookieName,
+		},
 	}
 
-	rec = httptest.NewRecorder()
-	DeleteSessionCookie(rec)
-	cookies = (&http.Response{Header: rec.Header()}).Cookies()
-	if len(cookies) != 1 {
-		t.Fatalf("expected exactly one cookie, got %d", len(cookies))
-	}
-	if cookies[0].Value != "" {
-		t.Errorf("deleted cookie value = %q, want empty", cookies[0].Value)
-	}
-	if !cookies[0].Expires.Before(time.Now()) {
-		t.Error("deleted cookie has to be expired")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db := &dbtest.FakeDB{
+				GetBrowserSessionFn: func(string) (*database.BrowserSession, error) {
+					return validSession(7, database.UserRoleAdmin), nil
+				},
+			}
+			h := newTestHandler(t, db, tt.config)
+			called := false
+			next := h.WithAnyAuthentication(func(http.ResponseWriter, *http.Request) { called = true })
+
+			rec := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodPost, "/", nil)
+			r.AddCookie(&http.Cookie{Name: tt.cookieName, Value: "secret"})
+			next.ServeHTTP(rec, r)
+
+			if called {
+				t.Error("a cookie of the other cookie mode must not authenticate a request")
+			}
+			if rec.Code != http.StatusUnauthorized {
+				t.Errorf("status = %d, want %d", rec.Code, http.StatusUnauthorized)
+			}
+		})
 	}
 }
 

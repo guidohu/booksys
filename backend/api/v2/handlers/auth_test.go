@@ -230,7 +230,7 @@ func TestIsLoggedIn(t *testing.T) {
 			rec := httptest.NewRecorder()
 			r := newRequest("", &HandlerCtx{Database: db})
 			if tt.cookie {
-				r.AddCookie(&http.Cookie{Name: "SESSION", Value: "secret"})
+				r.AddCookie(&http.Cookie{Name: h.SessionCookieName(), Value: "secret"})
 			}
 			h.IsLoggedIn(rec, r)
 
@@ -247,8 +247,8 @@ func TestIsLoggedIn(t *testing.T) {
 				t.Error("the session activity timestamp was not refreshed")
 			}
 			cookies := (&http.Response{Header: rec.Header()}).Cookies()
-			if !tt.wantLoggedIn && len(cookies) != 1 {
-				t.Error("a request without a valid session has to clear the session cookie")
+			if !tt.wantLoggedIn && !cookieCleared(cookies, h.SessionCookieName()) {
+				t.Errorf("a request without a valid session has to clear the session cookie, got %+v", cookies)
 			}
 		})
 	}
@@ -279,7 +279,7 @@ func TestLogout(t *testing.T) {
 		t.Error("the browser session was not deleted")
 	}
 	cookies := (&http.Response{Header: rec.Header()}).Cookies()
-	if len(cookies) != 1 || cookies[0].Value != "" {
+	if !cookieCleared(cookies, h.SessionCookieName()) {
 		t.Errorf("the session cookie was not cleared: %+v", cookies)
 	}
 }

@@ -20,5 +20,5 @@ export BOOKSYS_ENVIRONMENT="local_dev"
 dir=`pwd`
 cd ../../backend/api/v2
 go run -ldflags="-X '${MODULE_PATH}/version.Release=${BOOKSYS_VERSION}' -X ${MODULE_PATH}/version.Commit=${BOOKSYS_COMMIT} -X ${MODULE_PATH}/version.BuildDate=${BOOKSYS_DATE}" \
-   main.go --http_port 9090 --http_websetup
+   main.go --http_port 9090 --http_websetup --http_secure_cookie=false
 cd ${dir}

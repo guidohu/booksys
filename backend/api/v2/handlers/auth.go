@@ -124,7 +124,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request, req LoginRequest
 	}
 
 	// set cookie and create response
-	SetSessionCookie(w, sessionSecretString, validUntil)
+	h.SetSessionCookie(w, sessionSecretString, validUntil)
 	WriteSuccessResponse("login successful", nil, w)
 }
 
@@ -133,11 +133,11 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request, req LoginRequest
 // It serves /api/v2/auth/isloggedin and is open to unauthenticated callers.
 func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 	resp := IsLoggedInResponse{}
-	// Get cookie SESSION
-	cookie, err := r.Cookie("SESSION")
+	// Get the session cookie
+	cookie, err := r.Cookie(h.SessionCookieName())
 	if err != nil {
 		WriteSuccessResponse("not logged in", resp, w)
-		DeleteSessionCookie(w)
+		h.DeleteSessionCookie(w)
 		return
 	}
 
@@ -148,7 +148,7 @@ func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 	session, err := dbh.GetBrowserSession(cookie.Value)
 	if err != nil || !session.Valid() {
 		WriteSuccessResponse("not logged in", resp, w)
-		DeleteSessionCookie(w)
+		h.DeleteSessionCookie(w)
 		return
 	}
 
@@ -156,7 +156,7 @@ func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 	session.ValidUntil = time.Now().Add(time.Duration(h.config.GetInt64("http.sessioninactivitytimeout")) * time.Second)
 	if session.ValidUntil.After(session.MaxValidUntil) {
 		WriteSuccessResponse("not logged in", resp, w)
-		DeleteSessionCookie(w)
+		h.DeleteSessionCookie(w)
 		return
 	}
 
@@ -179,7 +179,7 @@ func (h *Handler) Logout(w http.ResponseWriter, r *http.Request) {
 		slog.Error("Cannot delete browser session", slog.Any("error", err))
 	}
 
-	DeleteSessionCookie(w)
+	h.DeleteSessionCookie(w)
 	WriteSuccessResponse("logged out", nil, w)
 	slog.Info("User logged out", slog.String("user", hCtx.ValidSession.Username))
 }

@@ -35,6 +35,7 @@ var (
 	configFile = pflag.String("config", "", "The configuration file to use.")
 	// HTTP server settings
 	httpPort                     = pflag.Int("http_port", 0, "The port the HTTP server listens on.")
+	httpSecureCookie             = pflag.Bool("http_secure_cookie", true, "If enabled the session cookie is only sent over HTTPS. Only disable this for local development over plain HTTP.")
 	httpSessionInactivityTimeout = pflag.Uint("http_session_inactivity_timeout", 0, "Time until a HTTP session with no activity will be cancelled and a user gets logged out.")
 	httpSessionTimeout           = pflag.Uint("http_session_timeout", 0, "Time in seconds until a user is logged out.")
 	httpUploadPath               = pflag.String("http_uploadpath", "", "Path where content is uploaded to.")
@@ -53,8 +54,9 @@ var (
 	// Display settings
 	environment = pflag.String("environment", "", "The environment this app is running as.")
 	// Additional control flags
-	printConfig  = pflag.Bool("print_config", false, "Prints the config an exits.")
-	printVersion = pflag.Bool("version", false, "Prints the version an exits.")
+	printConfig       = pflag.Bool("print_config", false, "Prints the config with the secrets redacted and exits.")
+	printConfigUnsafe = pflag.Bool("print_config_unsafe", false, "Prints the config with the secrets in plaintext and exits. Only for debugging a credential itself, the output must not be shared.")
+	printVersion      = pflag.Bool("version", false, "Prints the version an exits.")
 )
 
 // getFlags binds the command line flags to their configuration keys and parses
@@ -65,6 +67,7 @@ func getFlags(v *viper.Viper) error {
 		"config":                        "config",
 		"debug.port":                    "debug_port",
 		"http.port":                     "http_port",
+		"http.securecookie":             "http_secure_cookie",
 		"http.sessioninactivitytimeout": "http_session_inactivity_timeout",
 		"http.sessiontimeout":           "http_session_timeout",
 		"http.uploadpath":               "http_uploadpath",
@@ -326,7 +329,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	// If requested, print config and exit.
+	// If requested, print config and exit. The plaintext dump has to be asked
+	// for explicitly, so that the common case of sharing a config dump does
+	// not hand out the database password along with it.
+	if *printConfigUnsafe {
+		fmt.Fprintln(os.Stderr, "WARNING: --print_config_unsafe prints secrets in plaintext, do not share this output.")
+		fmt.Println(conf.ToStringFullUnsafe())
+		os.Exit(0)
+	}
 	if *printConfig {
 		fmt.Println(conf.ToStringFull())
 		os.Exit(0)

@@ -42,6 +42,7 @@ Go to [http://localhost](http://localhost). You will be guided through the setup
 
 - Change passwords in `docker/booksys_db/Dockerfile` before building the container.
 - Expose the application through a reverse proxy to enforce HTTPS.
+- The session cookie is handed out with the `Secure` attribute and the `__Host-` prefix, so it is only ever sent back over HTTPS. Turn this off with `http.secureCookie: false` (`BOOKSYS_HTTP_SECURECOOKIE=false`, `--http_secure_cookie=false`) only to develop against a server that serves plain HTTP.
 - Restrict access to `classes` and `config` folders, in case you do not run the default docker containers.
 
 ## Limitations

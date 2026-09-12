@@ -44,6 +44,11 @@ services:
             # through. Fine here because this stack only listens on loopback;
             # it must stay off in production.
             BOOKSYS_HTTP_WEBSETUP: "true"
+            # This stack is served over plain HTTP, where a browser would
+            # discard a cookie that carries the `Secure` attribute. It must
+            # stay on in production, otherwise the session cookie travels
+            # over the network in the clear.
+            BOOKSYS_HTTP_SECURECOOKIE: "false"
             BOOKSYS_DATABASE_HOST: 'db'
             BOOKSYS_DATABASE_PORT: 3306
             BOOKSYS_DATABASE_USER: "${MYSQL_USER}"

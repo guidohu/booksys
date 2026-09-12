@@ -172,7 +172,7 @@ func (h *Handler) WithNoAuthentication(next http.HandlerFunc) http.HandlerFunc {
 func (h *Handler) WithAuthentication(next http.HandlerFunc, requiredRole database.UserRoleType) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// get user from cookie
-		cookie, err := r.Cookie("SESSION")
+		cookie, err := r.Cookie(h.SessionCookieName())
 		if err != nil {
 			slog.Warn("Cannot read cookie", slog.Any("error", err))
 			w.WriteHeader(http.StatusUnauthorized)
@@ -383,31 +383,80 @@ func WriteSuccessResponse(message string, data any, w http.ResponseWriter) {
 	_, _ = io.Copy(w, bytes.NewReader(j))
 }
 
-// SetSessionCookie sets the session cookie to the given secret, expiring at
-// validUntil.
-func SetSessionCookie(w http.ResponseWriter, s string, validUntil time.Time) {
-	cookie := http.Cookie{
-		Name:     "SESSION",
-		Value:    s,
-		Expires:  validUntil,
+// The names of the session cookie. A cookie whose name carries the `__Host-`
+// prefix is only accepted by a browser if it was set over HTTPS, without a
+// `Domain` attribute and with `Path=/`, which keeps another host under the
+// same registrable domain (or a network attacker on a plain HTTP sibling)
+// from planting a session cookie for this application.
+//
+// The prefix requires the `Secure` attribute, so a deployment that serves
+// plain HTTP has to fall back to the unprefixed name.
+const (
+	secureSessionCookieName   = "__Host-SESSION"
+	insecureSessionCookieName = "SESSION"
+)
+
+// useSecureCookies reports whether the session cookie is handed out with the
+// `Secure` attribute. It is only turned off to develop against a server that
+// serves plain HTTP, so anything but an explicit `false` keeps the cookie
+// secure.
+func (h *Handler) useSecureCookies() bool {
+	value, source := h.config.GetString("http.securecookie")
+	if source == config.Unknown {
+		return true
+	}
+	return value != "false"
+}
+
+// sessionCookie returns the session cookie of the configured cookie mode,
+// without a value. Setting and expiring the cookie both start from here: a
+// browser only replaces a cookie it already holds if the name, the domain and
+// the path of the two match.
+func (h *Handler) sessionCookie() http.Cookie {
+	secure := h.useSecureCookies()
+	name := insecureSessionCookieName
+	if secure {
+		name = secureSessionCookieName
+	}
+	return http.Cookie{
+		Name:     name,
 		Path:     "/",
 		Domain:   "",
-		Secure:   false,
+		Secure:   secure,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	}
+}
+
+// SessionCookieName returns the name the session cookie is stored under for
+// the configured cookie mode.
+func (h *Handler) SessionCookieName() string {
+	return h.sessionCookie().Name
+}
+
+// SetSessionCookie sets the session cookie to the given secret, expiring at
+// validUntil.
+func (h *Handler) SetSessionCookie(w http.ResponseWriter, s string, validUntil time.Time) {
+	cookie := h.sessionCookie()
+	cookie.Value = s
+	cookie.Expires = validUntil
 	http.SetCookie(w, &cookie)
 }
 
 // DeleteSessionCookie expires the session cookie on the client.
-func DeleteSessionCookie(w http.ResponseWriter) {
-	cookie := http.Cookie{
-		Name:    "SESSION",
-		Value:   "",
-		Path:    "/",
-		Expires: time.Unix(0, 0),
-
-		HttpOnly: true,
-	}
+func (h *Handler) DeleteSessionCookie(w http.ResponseWriter) {
+	cookie := h.sessionCookie()
+	cookie.Expires = time.Unix(0, 0)
 	http.SetCookie(w, &cookie)
+
+	if cookie.Secure {
+		// A session that was handed out before the cookie was made secure
+		// sits under the unprefixed name and without the `Secure` attribute,
+		// so the browser would keep sending it, in the clear, until it
+		// expires. Expire it here, where the client is told that it is not
+		// logged in anyway.
+		legacy := cookie
+		legacy.Name = insecureSessionCookieName
+		http.SetCookie(w, &legacy)
+	}
 }

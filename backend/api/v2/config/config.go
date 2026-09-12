@@ -60,6 +60,7 @@ type DBConfig struct {
 // HTTPConfig holds the settings of the HTTP server.
 type HTTPConfig struct {
 	Port                     uint   `yaml:"port"`
+	SecureCookie             bool   `yaml:"secureCookie"`
 	SessionInactivityTimeout uint   `yaml:"sessionInactivityTimeout"`
 	SessionTimeout           uint   `yaml:"sessionTimeout"`
 	UploadPath               string `yaml:"uploadPath"`
@@ -100,6 +101,7 @@ type Config struct {
 // settings that need to be present in the configuration.
 var MandatoryConfigKeys = []string{
 	"http.port",
+	"http.securecookie",
 	"http.sessioninactivitytimeout",
 	"http.sessiontimeout",
 	"http.uploadpath",
@@ -117,6 +119,7 @@ var ConfigDefaults = map[string]string{
 	"config":                        "",
 	"debug.port":                    "0",
 	"http.port":                     "80",
+	"http.securecookie":             "true",
 	"http.sessioninactivitytimeout": "604800",
 	"http.sessiontimeout":           "31536000",
 	"http.uploadpath":               "./uploads",
@@ -128,6 +131,32 @@ var ConfigDefaults = map[string]string{
 	"database.port":                 "3306",
 	"database.dbname":               "",
 	"mynautique.api.key":            "",
+}
+
+// Redacted is printed in place of a secret configuration value.
+const Redacted = "<redacted>"
+
+// secretKeys are the configuration keys that hold a credential. Their values
+// are hidden whenever the configuration gets printed, so that a config dump
+// can be pasted into a bug report without leaking anything.
+//
+// Note: This covers the keys of the Configuration struct as well as the
+// properties stored in the database, because both get printed.
+var secretKeys = map[string]bool{
+	"database.password":    true,
+	"mynautique.api.key":   true,
+	"mynautique.password":  true,
+	"recaptcha.privatekey": true,
+	"smtp.password":        true,
+}
+
+// IsSecret reports whether the value of a configuration key is a credential
+// that has to be kept out of logs and terminal output.
+func IsSecret(key string) bool {
+	// The keys of the Configuration struct carry the casing of their `yaml`
+	// tag, while viper itself treats keys case insensitively. Normalize, so
+	// that a key does not escape the set through its spelling.
+	return secretKeys[strings.ToLower(key)]
 }
 
 // GetKeys returns a sorted list of all the configuration fields that are supported by
@@ -398,9 +427,36 @@ func (c *Config) readConfigProperties() error {
 	return nil
 }
 
-// ToStringFull returns a string representation of the entire configuration.
+// ToStringFull returns a string representation of the entire configuration
+// with every secret value replaced by Redacted, which makes the output safe to
+// share.
 func (c *Config) ToStringFull() string {
+	return c.toStringFull(false)
+}
+
+// ToStringFullUnsafe returns a string representation of the entire
+// configuration with the secrets in plaintext. It exists for the case where a
+// credential itself is what is being debugged, e.g. a trailing newline in a
+// password; its output must not be logged, shared or pasted anywhere.
+func (c *Config) ToStringFullUnsafe() string {
+	return c.toStringFull(true)
+}
+
+// toStringFull renders the entire configuration. Secrets are replaced by
+// Redacted unless revealSecrets is set.
+func (c *Config) toStringFull(revealSecrets bool) string {
 	s := strings.Builder{}
+
+	// display renders a value for printing. An empty value is passed through
+	// rather than redacted: whether a credential is configured at all is
+	// exactly what a config dump gets consulted for, and an empty string
+	// gives nothing away.
+	display := func(key string, value string) string {
+		if revealSecrets || value == "" || !IsSecret(key) {
+			return value
+		}
+		return Redacted
+	}
 
 	selectedKeys := make(map[string]bool)
 	selectedIdentifier := "[selected]"
@@ -419,7 +475,7 @@ func (c *Config) ToStringFull() string {
 				selectedKeys[key] = true
 			}
 			if v.IsSet(key) {
-				value = v.GetString(key)
+				value = display(key, v.GetString(key))
 			} else {
 				value = "<not set>"
 			}
@@ -457,7 +513,7 @@ func (c *Config) ToStringFull() string {
 	sort.Strings(dbKeys)
 	for _, key := range dbKeys {
 		v := c.properties[key]
-		value := v.Value
+		value := display(key, v.Value)
 		if value == "" {
 			value = "<not set>"
 		}

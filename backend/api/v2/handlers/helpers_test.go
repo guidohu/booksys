@@ -102,6 +102,16 @@ func newTestHandler(t *testing.T, db *dbtest.FakeDB, values map[string]string) *
 	})
 }
 
+// cookieCleared reports whether the given cookies expire the named cookie.
+func cookieCleared(cookies []*http.Cookie, name string) bool {
+	for _, c := range cookies {
+		if c.Name == name && c.Value == "" && c.Expires.Before(time.Now()) {
+			return true
+		}
+	}
+	return false
+}
+
 // newRequest builds a POST request carrying the given JSON body and handler
 // context (both the HandlerCtx and, if a session is set, the session value).
 func newRequest(body string, hCtx *HandlerCtx) *http.Request {

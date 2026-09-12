@@ -8,6 +8,10 @@ database:
   dbName: booksys
 http:
   port: 9090
+  # Hands the session cookie out with the `Secure` attribute and the `__Host-`
+  # prefix, so that it is only ever sent over HTTPS. Set this to false only to
+  # develop against a server that serves plain HTTP.
+  secureCookie: true
   sessionInactivityTimeout: 604800
   sessionTimeout: 31536000
   uploadPath: /var/lib/booksys/uploads
