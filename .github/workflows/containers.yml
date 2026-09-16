@@ -1,0 +1,101 @@
+name: Containers
+
+# Both containers get built for every push and pull request, so that a broken
+# image shows up before someone tags a release. They are only published when a
+# tag is pushed: the tag name becomes the image tag and, for the backend, the
+# version the binary reports through --version.
+on:
+  push:
+    branches: [ master, develop ]
+    tags: [ '*' ]
+  pull_request:
+    branches: [ master, develop ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # To push to ghcr.io. Only used on a tag.
+    strategy:
+      # Publish whichever image builds. A frontend failure should not hide a
+      # working backend image, or the other way round.
+      fail-fast: false
+      matrix:
+        include:
+          - image: frontend
+            context: frontend
+          - image: backend
+            context: backend
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Collect the build information for the backend binary
+        # The backend bakes version, commit and build date into the binary
+        # through ldflags. This step is skipped for the frontend, which leaves
+        # build-args below empty rather than passing arguments that the
+        # frontend Dockerfile does not declare.
+        #
+        # Note: On a branch build GITHUB_REF_NAME is the branch, not a
+        # version. That only ends up in an image that is never published.
+        id: build-info
+        if: matrix.image == 'backend'
+        run: |
+          {
+            echo "args<<EOF"
+            echo "BOOKSYS_VERSION=${GITHUB_REF_NAME}"
+            echo "BOOKSYS_COMMIT=${GITHUB_SHA:0:8}"
+            echo "BOOKSYS_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Derive the image name and tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/${{ matrix.image }}
+          # A tag like v3.5.0 or 3.5.0 publishes 3.5.0 and 3.5, plus the tag
+          # as it was written so that a tag which is not strict semver (3.5,
+          # like some of the existing tags) still ends up as an image tag.
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=ref,event=tag
+            type=ref,event=branch
+            type=ref,event=pr
+          # latest=auto moves `latest` only for a semver tag that is not a
+          # prerelease, so tagging 3.6.0-rc1 does not make it the default.
+          flavor: latest=auto
+
+      - name: Log in to ghcr.io
+        # Only on a tag. A pull request from a fork gets a read only token,
+        # and nothing is published from a branch anyway.
+        if: github.ref_type == 'tag'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish the ${{ matrix.image }} container
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          # The backend Dockerfile hardcodes GOARCH=amd64, so an arm64 image
+          # would end up carrying an amd64 binary. Both images stay on one
+          # platform until that is parameterized.
+          platforms: linux/amd64
+          push: ${{ github.ref_type == 'tag' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: ${{ steps.build-info.outputs.args }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
