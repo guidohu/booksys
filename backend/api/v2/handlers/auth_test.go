@@ -201,12 +201,14 @@ func TestIsLoggedIn(t *testing.T) {
 			wantLoggedIn: false,
 		},
 		{
+			// The inactivity window is still open, the absolute lifetime of
+			// the session is not.
 			name:   "session beyond the absolute timeout",
 			cookie: true,
 			session: &database.BrowserSession{
 				SessionSecret: "too old",
-				ValidUntil:    time.Now().Add(time.Minute),
-				MaxValidUntil: time.Now().Add(time.Minute),
+				ValidUntil:    time.Now().Add(time.Hour),
+				MaxValidUntil: time.Now().Add(-time.Minute),
 				UserID:        1,
 			},
 			wantLoggedIn: false,
@@ -243,8 +245,8 @@ func TestIsLoggedIn(t *testing.T) {
 			if data.LoggedIn != tt.wantLoggedIn {
 				t.Errorf("loggedIn = %v, want %v", data.LoggedIn, tt.wantLoggedIn)
 			}
-			if tt.wantLoggedIn && !updated {
-				t.Error("the session activity timestamp was not refreshed")
+			if updated {
+				t.Error("IsLoggedIn only reads, sessions are kept alive by the authentication middleware")
 			}
 			cookies := (&http.Response{Header: rec.Header()}).Cookies()
 			if !tt.wantLoggedIn && !cookieCleared(cookies, h.SessionCookieName()) {

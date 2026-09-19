@@ -86,9 +86,18 @@ func (b *BrowserSession) IsEmpty() bool {
 	return reflect.DeepEqual(*b, emptySession)
 }
 
-// Expired returns whether the session is still valid or expired.
+// Expired returns whether the session is still valid or expired. A session
+// expires when the inactivity window elapses and, regardless of activity, when
+// the absolute lifetime that was fixed at login is reached.
+//
+// Both bounds are checked here so that every caller enforces them. A client
+// that never asks whether it is still logged in must not be able to hold on to
+// a session past MaxValidUntil. A session that predates the absolute timeout
+// has no MaxValidUntil stored and therefore counts as expired; its owner logs
+// in again and gets one.
 func (b *BrowserSession) Expired() bool {
-	return b.ValidUntil.Before(time.Now())
+	now := time.Now()
+	return b.ValidUntil.Before(now) || b.MaxValidUntil.Before(now)
 }
 
 // Valid returns true if a session is neither expired nor empty.

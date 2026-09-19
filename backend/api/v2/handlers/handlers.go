@@ -168,6 +168,40 @@ func (h *Handler) WithNoAuthentication(next http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
+// sessionRefreshInterval is how often an authenticated request writes the
+// session activity back to the database. Doing it on every request would turn
+// every API call into a write, and the inactivity window is measured in days,
+// so a minute of granularity loses nothing.
+const sessionRefreshInterval = time.Minute
+
+// refreshSession extends the inactivity window of a session that is being
+// used. Without it a user working through the API is logged out on the
+// inactivity timer, because only requests refresh the session and none of them
+// used to.
+//
+// The refresh is throttled through LastActivity so that a busy client does not
+// cause a write per request, and it never moves ValidUntil past the absolute
+// lifetime the session was given at login.
+func (h *Handler) refreshSession(w http.ResponseWriter, dbh database.Database, session *database.BrowserSession) {
+	now := time.Now()
+	if now.Sub(session.LastActivity) < sessionRefreshInterval {
+		return
+	}
+	validUntil := now.Add(time.Duration(h.config.GetInt64("http.sessioninactivitytimeout")) * time.Second)
+	if validUntil.After(session.MaxValidUntil) {
+		validUntil = session.MaxValidUntil
+	}
+	session.ValidUntil = validUntil
+	session.LastActivity = now
+	if err := dbh.UpdateBrowserSession(*session); err != nil {
+		slog.Warn("Cannot refresh browser session", slog.String("user", session.Username), slog.Any("error", err))
+		return
+	}
+	// The cookie expires together with the session, so it has to be extended
+	// as well. Otherwise the browser drops it while the session is still good.
+	h.SetSessionCookie(w, session.SessionSecret, validUntil)
+}
+
 // WithAuthentication is middleware that gets the user session and calls the
 // next handler. It makes sure the user is authenticated and adds this information ready for the next call.
 func (h *Handler) WithAuthentication(next http.HandlerFunc, requiredRole database.UserRoleType) http.HandlerFunc {
@@ -216,6 +250,10 @@ func (h *Handler) WithAuthentication(next http.HandlerFunc, requiredRole databas
 				return
 			}
 		}
+
+		// The request is served, so the user is active: keep the session
+		// alive for another inactivity window.
+		h.refreshSession(w, dbh, session)
 
 		// Add session information to context
 		ctxWithSession := context.WithValue(r.Context(), SessionContextKey, *session)

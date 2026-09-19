@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -112,6 +113,15 @@ func TestWithAuthentication(t *testing.T) {
 		UserID:        7,
 		UserRoleID:    database.UserRoleAdmin,
 	}
+	// A session that was kept inside its inactivity window but has reached the
+	// absolute lifetime it was given at login.
+	cappedSession := &database.BrowserSession{
+		SessionSecret: "capped",
+		ValidUntil:    time.Now().Add(time.Hour),
+		MaxValidUntil: time.Now().Add(-time.Minute),
+		UserID:        7,
+		UserRoleID:    database.UserRoleAdmin,
+	}
 
 	tests := []struct {
 		name         string
@@ -184,6 +194,14 @@ func TestWithAuthentication(t *testing.T) {
 			wantCalled:   false,
 			wantStatus:   http.StatusUnauthorized,
 		},
+		{
+			name:         "session beyond the absolute timeout",
+			cookie:       &http.Cookie{Name: secureSessionCookieName, Value: "secret"},
+			session:      cappedSession,
+			requiredRole: database.UserRoleAdmin,
+			wantCalled:   false,
+			wantStatus:   http.StatusUnauthorized,
+		},
 	}
 
 	for _, tt := range tests {
@@ -221,6 +239,112 @@ func TestWithAuthentication(t *testing.T) {
 			}
 			if tt.wantMsg != "" && !strings.Contains(rec.Body.String(), tt.wantMsg) {
 				t.Errorf("body = %q, want it to contain %q", rec.Body.String(), tt.wantMsg)
+			}
+		})
+	}
+}
+
+// TestWithAuthenticationRefreshesTheSession covers the inactivity window being
+// measured from the last request a user made. Only the authentication
+// middleware sees those requests, so if it does not extend the session, a user
+// who works through the API without ever asking whether they are logged in is
+// eventually thrown out mid-work.
+func TestWithAuthenticationRefreshesTheSession(t *testing.T) {
+	const inactivityTimeout = time.Hour
+
+	tests := []struct {
+		name         string
+		lastActivity time.Time
+		maxValidHrs  time.Duration
+		wantWrite    bool
+		wantValidFor time.Duration
+	}{
+		{
+			name:         "a session that has not been refreshed recently is extended",
+			lastActivity: time.Now().Add(-time.Hour),
+			maxValidHrs:  24 * time.Hour,
+			wantWrite:    true,
+			wantValidFor: inactivityTimeout,
+		},
+		{
+			// Every request writing the session back would make a busy client
+			// hammer the database for no gain.
+			name:         "a session that was just refreshed is left alone",
+			lastActivity: time.Now(),
+			maxValidHrs:  24 * time.Hour,
+			wantWrite:    false,
+		},
+		{
+			// The inactivity window may never carry a session past the
+			// absolute lifetime it was given at login.
+			name:         "the refresh is capped by the absolute timeout",
+			lastActivity: time.Now().Add(-time.Hour),
+			maxValidHrs:  10 * time.Minute,
+			wantWrite:    true,
+			wantValidFor: 10 * time.Minute,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			session := validSession(7, database.UserRoleAdmin)
+			session.LastActivity = tt.lastActivity
+			session.ValidUntil = time.Now().Add(time.Minute)
+			session.MaxValidUntil = time.Now().Add(tt.maxValidHrs)
+
+			var written *database.BrowserSession
+			db := &dbtest.FakeDB{
+				GetBrowserSessionFn: func(string) (*database.BrowserSession, error) {
+					return session, nil
+				},
+				UpdateBrowserSessionFn: func(b database.BrowserSession) error {
+					written = &b
+					return nil
+				},
+			}
+			h := newTestHandler(t, db, map[string]string{
+				"http.sessioninactivitytimeout": strconv.Itoa(int(inactivityTimeout.Seconds())),
+			})
+
+			called := false
+			next := h.WithAnyAuthentication(func(http.ResponseWriter, *http.Request) { called = true })
+			rec := httptest.NewRecorder()
+			r := httptest.NewRequest(http.MethodPost, "/", nil)
+			r.AddCookie(&http.Cookie{Name: secureSessionCookieName, Value: "secret"})
+			next.ServeHTTP(rec, r)
+
+			if !called {
+				t.Fatal("the request was not authenticated")
+			}
+			cookies := (&http.Response{Header: rec.Header()}).Cookies()
+			if !tt.wantWrite {
+				if written != nil {
+					t.Errorf("the session was written back although it is still fresh: %+v", written)
+				}
+				if len(cookies) != 0 {
+					t.Errorf("a session that is not refreshed must not set a cookie, got %+v", cookies)
+				}
+				return
+			}
+			if written == nil {
+				t.Fatal("the session was not refreshed")
+			}
+			want := time.Now().Add(tt.wantValidFor)
+			if written.ValidUntil.Sub(want).Abs() > time.Minute {
+				t.Errorf("session valid until %v, want around %v", written.ValidUntil, want)
+			}
+			if written.ValidUntil.After(written.MaxValidUntil) {
+				t.Error("the refreshed session outlives the absolute session timeout")
+			}
+			if written.LastActivity.Before(tt.lastActivity) {
+				t.Error("the activity timestamp was not moved forward")
+			}
+			// The cookie expires with the session, so it has to follow it.
+			if len(cookies) != 1 || cookies[0].Value != session.SessionSecret {
+				t.Fatalf("the refreshed session did not renew the cookie: %+v", cookies)
+			}
+			if cookies[0].Expires.Sub(written.ValidUntil).Abs() > time.Minute {
+				t.Errorf("cookie expires %v, want it to follow the session until %v", cookies[0].Expires, written.ValidUntil)
 			}
 		})
 	}

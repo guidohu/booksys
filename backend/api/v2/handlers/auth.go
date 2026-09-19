@@ -128,9 +128,12 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request, req LoginRequest
 	WriteSuccessResponse("login successful", nil, w)
 }
 
-// IsLoggedIn reports whether the caller has a valid session and, if so, extends it.
+// IsLoggedIn reports whether the caller has a valid session.
 //
-// It serves /api/v2/auth/isloggedin and is open to unauthenticated callers.
+// It serves /api/v2/auth/isloggedin and is open to unauthenticated callers. It
+// only reads: sessions are kept alive by the authentication middleware as the
+// user works, and both timeouts are enforced there too, so nothing depends on
+// a client calling this endpoint.
 func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 	resp := IsLoggedInResponse{}
 	// Get the session cookie
@@ -146,25 +149,13 @@ func (h *Handler) IsLoggedIn(w http.ResponseWriter, r *http.Request) {
 
 	// Check if we know of that session and whether it is not expired yet
 	session, err := dbh.GetBrowserSession(cookie.Value)
-	if err != nil || !session.Valid() {
-		WriteSuccessResponse("not logged in", resp, w)
-		h.DeleteSessionCookie(w)
-		return
-	}
-
-	// update valid until of browser session
-	session.ValidUntil = time.Now().Add(time.Duration(h.config.GetInt64("http.sessioninactivitytimeout")) * time.Second)
-	if session.ValidUntil.After(session.MaxValidUntil) {
+	if err != nil || session == nil || !session.Valid() {
 		WriteSuccessResponse("not logged in", resp, w)
 		h.DeleteSessionCookie(w)
 		return
 	}
 
 	resp.LoggedIn = true
-	err = dbh.UpdateBrowserSession(*session)
-	if err != nil {
-		slog.Info("Cannot update browser session", slog.String("user", session.Username), slog.String("session", session.SessionSecret), slog.Any("error", err))
-	}
 	WriteSuccessResponse("logged in", resp, w)
 }
 
