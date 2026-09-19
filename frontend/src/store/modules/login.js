@@ -47,17 +47,32 @@ const actions = {
     });
   },
   logout({ commit, dispatch }) {
+    // Vuex binds `this` to the store instance inside an action.
+    const store = this;
+
+    // Wipe everything the session left behind. This runs whether or not the
+    // backend call succeeds, because the user is shown the logged-out screen
+    // either way and no session data may survive it.
+    const clearSession = () => {
+      commit("setUsername", "");
+      commit("setUserInfo", null);
+      commit("setIsLoggedIn", false);
+      dispatch("loginStatus/setIsLoggedIn", false, { root: true });
+      // 'login' stays registered: this action lives in it and the three
+      // commits above already reset its state.
+      store.resetModules(["login"]);
+    };
+
     return new Promise((resolve, reject) => {
       ApiLogin.logout()
         .then(() => {
-          commit("setUserInfo", null);
-          commit("setIsLoggedIn", false);
-          dispatch("loginStatus/setIsLoggedIn", false, { root: true });
+          clearSession();
           resolve();
           console.log("Logout successful");
         })
         .catch((errors) => {
           console.error("Logout failed:", errors);
+          clearSession();
           reject(errors);
         });
     });

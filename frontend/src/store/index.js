@@ -12,7 +12,14 @@ export const store = createStore({
   },
 });
 
-const allStoreModules = import.meta.glob("./modules/*.js"); // Adjust path to be relative to index.js
+// The default modules above are statically imported, so exclude them here.
+// Otherwise Vite warns that they are both statically and dynamically imported
+// and cannot be split into their own chunks.
+const allStoreModules = import.meta.glob([
+  "./modules/*.js",
+  "!./modules/loginStatus.js",
+  "!./modules/screenSize.js",
+]);
 
 // Function to dynamically load and register specific modules
 store.loadModules = async function (moduleNames, to, from) {
@@ -20,6 +27,11 @@ store.loadModules = async function (moduleNames, to, from) {
     `Attempt to load modules ${moduleNames} while navigating to ${to.path}`,
   );
   for (const moduleName of moduleNames) {
+    if (store.hasModule(moduleName)) {
+      console.log(`Module '${moduleName}' already registered.`);
+      continue;
+    }
+
     // Construct the expected path within the glob result
     // The key will be relative to the project root for aliases, or relative to the current file for relative paths
     let modulePath;
@@ -34,19 +46,15 @@ store.loadModules = async function (moduleNames, to, from) {
       continue;
     }
 
-    if (!store.hasModule(moduleName) && allStoreModules[modulePath]) {
-      try {
-        const importModule = allStoreModules[modulePath];
-        const module = await importModule(); // Call the dynamic import function
-        store.registerModule(moduleName, module.default || module);
-        console.log(`Module '${moduleName}' registered.`);
-        // Ensure reactivity updates if needed
-        await nextTick(); // Allows Vue to process reactivity updates
-      } catch (error) {
-        console.error(`Failed to load module '${moduleName}':`, error);
-      }
-    } else if (store.hasModule(moduleName)) {
-      console.log(`Module '${moduleName}' already registered.`);
+    try {
+      const importModule = allStoreModules[modulePath];
+      const module = await importModule(); // Call the dynamic import function
+      store.registerModule(moduleName, module.default || module);
+      console.log(`Module '${moduleName}' registered.`);
+      // Ensure reactivity updates if needed
+      await nextTick(); // Allows Vue to process reactivity updates
+    } catch (error) {
+      console.error(`Failed to load module '${moduleName}':`, error);
     }
   }
 };

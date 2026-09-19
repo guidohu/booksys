@@ -1,5 +1,11 @@
 FROM node:24
 
+# npm's version is pinned by the `node:24` tag above, so that the dev stack and
+# the production build (frontend/Dockerfile) use the same one. Upgrading npm
+# from inside the container would drift from that, so silence the notice it
+# prints on every container start, where `npm install` runs (docker-compose.yaml).
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false
+
 # The frontend sources are bind mounted from the host into /home/node/app
 # (see docker-compose.yaml). The node_modules of the host contain platform
 # specific binaries (e.g. @rollup/rollup-darwin-arm64, @esbuild/darwin-arm64)
