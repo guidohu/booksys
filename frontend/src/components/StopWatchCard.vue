@@ -30,7 +30,7 @@
         </div>
       </div>
     </div>
-    <div class="row mx-1">
+    <div class="row mx-1 mb-2">
       <input-select
         id="rider-select"
         v-model="selectedRiderId"
