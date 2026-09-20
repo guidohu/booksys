@@ -1,5 +1,3 @@
-version: '3.3'
-
 services:
     traefik:
         image: "traefik:latest"
@@ -28,28 +26,6 @@ services:
             - '3306:3306'
         expose:
             - '3306'
-    api_v1:
-        build:
-            context: ../../backend
-            dockerfile: Dockerfile_api_v1
-        container_name: dev_dummy_backend_api_v1
-        depends_on:
-            - db
-        environment:
-            DB_SERVER: 'db:3306'
-            DB_NAME: 'booksys'
-            DB_USER: 'user'
-            DB_PASSWORD: 'userpassword'
-        labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.api_v1.rule=PathPrefix(`/api/v1`) || PathPrefix(`/api/v1`) || PathPrefix(`/uploads/`) || PathPrefix(`/uploads`)"
-            - "traefik.http.services.api_v1.loadbalancer.server.port=80"
-        volumes:
-            - ${PWD}/../../backend/api/v1:/var/www/html/api/v1
-            - ${PWD}/../../backend/classes:/var/www/html/classes
-            - ${PWD}/config.php:/var/www/html/config/config.php
-            - ${PWD}/../../backend/config/db:/var/www/html/config/db
-            - ${PWD}/backend/etc/apache2/000-default.conf:/etc/apache2/sites-available/000-default.conf
     api_v2:
         build:
             context: ../../backend
@@ -57,17 +33,16 @@ services:
         container_name: dev_dummy_backend_api_v2
         depends_on:
             - db
-        environment:
-            DB_SERVER: 'db:3306'
-            DB_NAME: 'booksys'
-            DB_USER: 'user'
-            DB_PASSWORD: 'userpassword'
         volumes:
-            - ${PWD}/config.yaml:/config.yaml
+            # The database credentials and the rest of the startup
+            # configuration come from this file, the backend picks it up as
+            # ./config.yaml relative to its working directory (/).
+            - ./config.yaml:/config.yaml
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.api_v2.rule=PathPrefix(`/api/v2`) || PathPrefix(`/api/v2`)"
-            - "traefik.http.services.api_v2.loadbalancer.server.port=9090" 
+            - "traefik.http.routers.api_v2.entrypoints=web"
+            - "traefik.http.routers.api_v2.rule=PathPrefix(`/api/v2`) || PathPrefix(`/uploads`)"
+            - "traefik.http.services.api_v2.loadbalancer.server.port=9090"
     frontend:
         # We use a development instance and not the
         # real container.
@@ -75,7 +50,6 @@ services:
         container_name: "dev_dummy_frontend"
         depends_on:
             - db
-            - api_v1
             - api_v2
         user: "node"
         working_dir: /home/node/app
@@ -83,8 +57,17 @@ services:
             - NODE_ENV=development
         volumes:
             - ../../frontend:/home/node/app
+            # node_modules of the host are built for the host platform, use a
+            # separate volume with the packages for this container instead
+            - frontend_node_modules:/home/node/app/node_modules
         labels:
             - "traefik.enable=true"
+            - "traefik.http.routers.frontend.entrypoints=web"
             - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
             - "traefik.http.services.frontend.loadbalancer.server.port=8080"
-        command: "npm run serve"
+        # serve-port binds vite to 0.0.0.0:8080, the plain `serve` script only
+        # listens on localhost and would not be reachable from traefik.
+        command: "sh -c 'npm install && npm run serve-port'"
+
+volumes:
+    frontend_node_modules:

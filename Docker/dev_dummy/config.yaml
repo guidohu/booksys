@@ -12,3 +12,6 @@ http:
   secureCookie: false
   sessionInactivityTimeout: 604800
   sessionTimeout: 31536000
+  # The api_v2 image creates this directory for the booksys user, uploaded
+  # logos are stored and served from here.
+  uploadPath: /var/lib/booksys/uploads
