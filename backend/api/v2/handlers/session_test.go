@@ -577,6 +577,71 @@ func TestAddUserToSession(t *testing.T) {
 		}
 	})
 
+	t.Run("adds the users when the email configuration cannot be read", func(t *testing.T) {
+		// Notifying the riders is a courtesy. An unusable SMTP configuration
+		// costs the invitation, it does not fail the request, and it must not
+		// stop after the first rider either.
+		_, mails := startFakeSMTP(t)
+		var added []database.UserToSession
+		db := &dbtest.FakeDB{
+			GetSessionFn:         func(uint) (database.Session, error) { return session, nil },
+			GetUsersForSessionFn: func(uint) ([]database.UserToSession, error) { return nil, nil },
+			GetUserByIdFn:        func(id uint) (database.User, error) { return database.User{ID: id}, nil },
+			GetEmailConfigurationFn: func() (database.EmailConfiguration, error) {
+				return database.EmailConfiguration{}, errNotFound
+			},
+			AddSessionToUserEntryFn: func(u database.UserToSession) error {
+				added = append(added, u)
+				return nil
+			},
+		}
+		h := newTestHandler(t, db, nil)
+
+		rec := httptest.NewRecorder()
+		r := newRequest("", &HandlerCtx{Database: db})
+		h.AddUserToSession(rec, r, AddSessionUserRequest{SessionID: 3, UserIDs: []uint{5, 6}}, GetHandlerContext(r))
+
+		if resp := decodeResponse(t, rec); !resp.OK {
+			t.Fatalf("unexpected failure: %s", resp.Msg)
+		}
+		if len(added) != 2 {
+			t.Errorf("added users = %+v, want both riders", added)
+		}
+		if sent := mails(); len(sent) != 0 {
+			t.Errorf("delivered mails = %d, want none without a configuration", len(sent))
+		}
+	})
+
+	t.Run("does not invite a user that could not be added", func(t *testing.T) {
+		emailConfig, mails := startFakeSMTP(t)
+		db := &dbtest.FakeDB{
+			GetSessionFn:         func(uint) (database.Session, error) { return session, nil },
+			GetUsersForSessionFn: func(uint) ([]database.UserToSession, error) { return nil, nil },
+			GetUserByIdFn: func(id uint) (database.User, error) {
+				return database.User{ID: id, Email: "rider@example.com"}, nil
+			},
+			GetEmailConfigurationFn: func() (database.EmailConfiguration, error) { return emailConfig, nil },
+			AddSessionToUserEntryFn: func(u database.UserToSession) error {
+				if u.UserID == 5 {
+					return errNotFound
+				}
+				return nil
+			},
+		}
+		h := newTestHandler(t, db, nil)
+
+		rec := httptest.NewRecorder()
+		r := newRequest("", &HandlerCtx{Database: db})
+		h.AddUserToSession(rec, r, AddSessionUserRequest{SessionID: 3, UserIDs: []uint{5, 6}}, GetHandlerContext(r))
+
+		if resp := decodeResponse(t, rec); !resp.OK {
+			t.Fatalf("unexpected failure: %s", resp.Msg)
+		}
+		if sent := mails(); len(sent) != 1 {
+			t.Fatalf("delivered mails = %d, want only the invitation of the rider that was added", len(sent))
+		}
+	})
+
 	t.Run("failures", func(t *testing.T) {
 		tests := []struct {
 			name string
@@ -594,17 +659,6 @@ func TestAddUserToSession(t *testing.T) {
 					GetSessionFn: func(uint) (database.Session, error) { return session, nil },
 					GetUsersForSessionFn: func(uint) ([]database.UserToSession, error) {
 						return nil, errNotFound
-					},
-				},
-			},
-			{
-				name: "email configuration cannot be read",
-				db: &dbtest.FakeDB{
-					GetSessionFn:         func(uint) (database.Session, error) { return session, nil },
-					GetUsersForSessionFn: func(uint) ([]database.UserToSession, error) { return nil, nil },
-					GetUserByIdFn:        func(id uint) (database.User, error) { return database.User{ID: id}, nil },
-					GetEmailConfigurationFn: func() (database.EmailConfiguration, error) {
-						return database.EmailConfiguration{}, errNotFound
 					},
 				},
 			},
@@ -675,6 +729,35 @@ func TestRemoveUserFromSession(t *testing.T) {
 		}
 	})
 
+	t.Run("removes the user when the email configuration cannot be read", func(t *testing.T) {
+		// The rider is already out of the session at that point, so a broken
+		// SMTP configuration only costs the cancellation notice.
+		var removedUser, removedSession uint
+		db := &dbtest.FakeDB{
+			GetUserByIdFn: func(id uint) (database.User, error) { return database.User{ID: id}, nil },
+			GetSessionFn:  func(uint) (database.Session, error) { return session, nil },
+			DeleteSessionToUserEntryFn: func(userID, sessionID uint) error {
+				removedUser, removedSession = userID, sessionID
+				return nil
+			},
+			GetEmailConfigurationFn: func() (database.EmailConfiguration, error) {
+				return database.EmailConfiguration{}, errNotFound
+			},
+		}
+		h := newTestHandler(t, db, nil)
+
+		rec := httptest.NewRecorder()
+		r := newRequest("", &HandlerCtx{Database: db, ValidSession: validSession(1, database.UserRoleAdmin)})
+		h.RemoveUserFromSession(rec, r, RemoveSessionUserRequest{SessionID: 3, UserID: 5}, GetHandlerContext(r))
+
+		if resp := decodeResponse(t, rec); !resp.OK {
+			t.Fatalf("unexpected failure: %s", resp.Msg)
+		}
+		if removedUser != 5 || removedSession != 3 {
+			t.Errorf("DeleteSessionToUserEntry(%d, %d), want (5, 3)", removedUser, removedSession)
+		}
+	})
+
 	t.Run("failures", func(t *testing.T) {
 		tests := []struct {
 			name string
@@ -707,16 +790,6 @@ func TestRemoveUserFromSession(t *testing.T) {
 					GetUserByIdFn:              func(id uint) (database.User, error) { return database.User{ID: id}, nil },
 					GetSessionFn:               func(uint) (database.Session, error) { return session, nil },
 					DeleteSessionToUserEntryFn: func(uint, uint) error { return errNotFound },
-				},
-			},
-			{
-				name: "email configuration cannot be read",
-				db: &dbtest.FakeDB{
-					GetUserByIdFn: func(id uint) (database.User, error) { return database.User{ID: id}, nil },
-					GetSessionFn:  func(uint) (database.Session, error) { return session, nil },
-					GetEmailConfigurationFn: func() (database.EmailConfiguration, error) {
-						return database.EmailConfiguration{}, errNotFound
-					},
 				},
 			},
 		}

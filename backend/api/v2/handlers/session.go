@@ -361,6 +361,15 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request, req A
 		return
 	}
 
+	// The notification is a courtesy, adding the users is the actual purpose
+	// of this endpoint. Without a usable configuration we skip the emails
+	// instead of failing the request.
+	emailConfig, emailConfigErr := dbh.GetEmailConfiguration()
+	if emailConfigErr != nil {
+		slog.Error("Cannot get email configuration, users are added without notifying them", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Any("error", emailConfigErr))
+	}
+	notify := emailConfigErr == nil && !emailConfig.Empty()
+
 	// add existing users to session
 	for _, u := range usersToAdd {
 		entry := database.UserToSession{
@@ -371,16 +380,13 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request, req A
 		err = dbh.AddSessionToUserEntry(entry)
 		if err != nil {
 			slog.Warn("Cannot add user to session. Skipped", slog.Uint64("userID", uint64(u.ID)), slog.Uint64("sessionID", uint64(req.SessionID)), slog.Any("error", err))
+			// The user is not part of the session, so there is nothing to
+			// invite them to.
+			continue
 		}
 
 		// Inform user about the session.
-		emailConfig, err := dbh.GetEmailConfiguration()
-		if err != nil {
-			slog.Error("Cannot get email configuration to reset token", slog.Any("error", err))
-			WriteFailureResponse("Internal error, cannot send reset token.", w)
-			return
-		}
-		if !emailConfig.Empty() {
+		if notify {
 			client := email.NewClient(emailConfig)
 			err = client.SendUserAddedToSessionMessage(
 				u,
@@ -390,7 +396,7 @@ func (h *Handler) AddUserToSession(w http.ResponseWriter, r *http.Request, req A
 				h.getURLOrEmpty(),
 			)
 			if err != nil {
-				slog.Error("Cannot send session notification email", slog.Any("error", err))
+				slog.Error("Cannot send session notification email", slog.Uint64("userID", uint64(u.ID)), slog.Uint64("sessionID", uint64(req.SessionID)), slog.Any("error", err))
 			}
 		}
 	}
@@ -442,14 +448,14 @@ func (h *Handler) RemoveUserFromSession(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	// Inform user about the cancellation of the session.
+	// Inform user about the cancellation of the session. The user is already
+	// removed at this point, so a missing configuration only costs the
+	// notification and must not fail the request.
 	emailConfig, err := dbh.GetEmailConfiguration()
 	if err != nil {
-		slog.Error("Cannot get email configuration to reset token", slog.Any("error", err))
-		WriteFailureResponse("Internal error, cannot send reset token.", w)
-		return
+		slog.Error("Cannot get email configuration, user is removed without notifying them", slog.Uint64("sessionID", uint64(req.SessionID)), slog.Uint64("userID", uint64(req.UserID)), slog.Any("error", err))
 	}
-	if !emailConfig.Empty() {
+	if err == nil && !emailConfig.Empty() {
 		client := email.NewClient(emailConfig)
 		err = client.SendUserRemovedFromSessionMessage(
 			user,

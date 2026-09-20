@@ -145,6 +145,18 @@ watch(usersToAdd, (newUsersToAdd) => {
   console.log("usersToAdd", newUsersToAdd);
 });
 
+// The modal stays mounted between openings, so it has to start from a clean
+// state every time it is shown. Otherwise the errors and the riders of the
+// previous round are still there.
+watch(
+  () => props.visible,
+  (isVisible) => {
+    if (isVisible) {
+      reset();
+    }
+  },
+);
+
 const queryUserList = () => store.dispatch("user/queryUserList");
 const addUsersToSession = (data) =>
   store.dispatch("sessions/addUsersToSession", data);
@@ -196,8 +208,18 @@ function saveMobile() {
     .catch((errs) => (errors.value = errs));
 }
 
-function close() {
+function reset() {
+  errors.value = [];
+  selected.value = [];
   usersToAdd.value = [];
+  // The search term belongs to the selection that is being cleared. Keeping it
+  // would leave the search field and the rider list out of sync.
+  search.value = "";
+  filteredOptions.value = userOptions.value;
+}
+
+function close() {
+  reset();
   emit("update:visible", false);
 }
 
