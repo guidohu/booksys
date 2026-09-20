@@ -1,6 +1,6 @@
 <template>
   <subpage-container title="Location">
-    <card-module :nobody="true" class="mx-1 card-height">
+    <card-module :nobody="true" fill class="mx-1 card-height">
       <div class="info-content">
         <div class="address-section text-center mt-5">
           <div
@@ -68,7 +68,7 @@ onMounted(() => {
 .info-content {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1 1 auto;
   min-height: 0;
 }
 
@@ -81,12 +81,14 @@ onMounted(() => {
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   padding-bottom: 0.5rem;
 }
 
 .map-frame {
   border: 0;
+  flex: 0 0 auto;
   width: 600px;
   max-width: 100%;
   height: 300px;
@@ -113,9 +115,12 @@ onMounted(() => {
     padding: 0 0.5rem 0.5rem;
   }
 
+  /* Grow into the leftover space instead of a fixed height */
   .map-frame {
+    flex: 1 1 auto;
+    min-height: 0;
     width: 100%;
-    height: 100%;
+    height: auto;
   }
 }
 </style>

@@ -54,7 +54,9 @@ function toggleChart() {
 .box {
   display: flex;
   flex-flow: column;
-  height: 100%;
-  overflow: scroll;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 </style>

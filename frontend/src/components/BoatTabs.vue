@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="boat-tabs">
     <ul class="nav nav-tabs">
       <li class="nav-item">
         <a
@@ -94,13 +94,45 @@ onMounted(() => {
 <style scoped>
 .nav-link {
   color: #bdbdbd;
+  /* The icon is a block element on mobile, where it sits above the label,
+     so center both of them within the tab */
+  text-align: center;
 }
 
 a {
   color: #bdbdbd;
 }
 
+/* The tab strip keeps its own height, the active pane takes the rest */
+.boat-tabs {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.nav-tabs {
+  flex: 0 0 auto;
+}
+
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 .tab-class {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Bootstrap sets `display: block` on the active pane, this selector is
+   specific enough to turn it into a flex container so that the content
+   inside can stretch over the pane instead of overflowing it */
+.tab-content > .tab-class.active {
+  display: flex;
+  flex-direction: column;
 }
 
 .nav-tab-icon {
@@ -108,11 +140,6 @@ a {
 }
 
 @media (max-width: 992px) {
-  .tab-class {
-    max-height: 400px;
-    height: 400px;
-  }
-
   .nav-tab-icon {
     display: block;
   }
