@@ -80,6 +80,10 @@
         </div>
       </div>
     </div>
+    <user-details-modal
+      v-model:visible="showUserDetailsModal"
+      :user="selectedItems[0]"
+    />
   </div>
 </template>
 
@@ -90,7 +94,8 @@ import { sprintf } from "sprintf-js";
 import WarningBox from "booksys/components/WarningBox.vue";
 import TableModule from "./bricks/TableModule.vue";
 import InputSelect from "./forms/inputs/InputSelect.vue";
-import { confirm, info } from "./bricks/DialogModal.js";
+import UserDetailsModal from "./UserDetailsModal.vue";
+import { confirm } from "./bricks/DialogModal.js";
 
 const store = useStore();
 
@@ -98,6 +103,7 @@ const errors = ref([]);
 const userGroupList = ref([]);
 const items = ref([]);
 const selectedItems = ref([]);
+const showUserDetailsModal = ref(false);
 
 const fields = ref([
   {
@@ -224,10 +230,7 @@ function showDeleteUserDialog() {
 }
 
 function showDetails() {
-  info({
-    title: "Not implemented.",
-    message: "This functionality is still missing.",
-  });
+  showUserDetailsModal.value = true;
 }
 
 function userGroupToList(groups) {

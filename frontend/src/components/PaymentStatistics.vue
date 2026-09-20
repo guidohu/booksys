@@ -2,8 +2,13 @@
   <div class="text-begin">
     <warning-box v-if="errors.length > 0" :errors="errors" dismissible="true" />
     <div v-if="errors.length == 0" class="box box-fix-height">
-      <div class="row box-fix-content mb-2 mx-1">
-        <div class="col-3 col-lg-2 offset-9 offset-lg-10 text-right pe-1">
+      <div class="box-fix-content stats-header">
+        <span class="stats-title">Overview</span>
+        <div class="stats-filter">
+          <label for="year" class="stats-filter-label">
+            <i class="bi bi-calendar3"></i>
+            Year
+          </label>
           <input-select
             v-if="form.years.length > 0"
             id="year"
@@ -14,68 +19,75 @@
           />
         </div>
       </div>
-      <div class="row box-flex-content text-end">
-        <div class="col-6 col-md-4">
-          <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{ formatNumber(getTotalPayments) }}</span>
-            {{ getCurrency }}
-            <br />
-            Income
-            <span v-if="form.selectedYear != 'any'"
-              >({{ form.selectedYear }})</span
-            >
-          </card-module>
-        </div>
-        <div class="col-6 col-md-4">
-          <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{ formatNumber(getTotalExpenditures) }}</span>
-            {{ getCurrency }}
-            <br />
-            Expenses
-            <span v-if="form.selectedYear != 'any'"
-              >({{ form.selectedYear }})</span
-            >
-          </card-module>
-        </div>
-        <div class="col-6 col-md-4">
-          <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{
-              formatNumber(getTotalSessionPayments)
-            }}</span>
-            {{ getCurrency }}
-            <br />
-            Sessions Income
-            <span v-if="form.selectedYear != 'any'"
-              >({{ form.selectedYear }})</span
-            >
-          </card-module>
-        </div>
-        <div class="col-6 col-md-4">
-          <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{ formatNumber(getSessionsBalance) }}</span>
-            {{ getCurrency }}
-            <br />
-            Sessions Credits
-          </card-module>
-        </div>
-        <div class="col-6 col-md-4">
-          <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{ formatNumber(getBalance) }}</span>
-            {{ getCurrency }}
-            <br />
-            Balance
-          </card-module>
-        </div>
-        <div class="col-6 col-md-4">
-          <card-module nobody class="mx-1 my-1 pt-3">
-            <span class="lead">{{ formatNumber(getSessionProfit) }}</span>
-            {{ getCurrency }}
-            <br />
-            Session Profit
-            <span v-if="form.selectedYear != 'any'"
-              >({{ form.selectedYear }})</span
-            >
-          </card-module>
+      <div class="box-flex-content stats-plane">
+        <div class="row g-2">
+          <div class="col-12 col-md-6">
+            <stat-tile
+              hero
+              tone-value
+              label="Balance"
+              icon="bi-bank"
+              :value="formatNumber(getBalance)"
+              :unit="getCurrency"
+              :tone="signTone(getBalance)"
+              context="All time"
+            />
+          </div>
+          <div class="col-12 col-md-6">
+            <stat-tile
+              label="Sessions Credits"
+              icon="bi-wallet2"
+              tone="neutral"
+              :value="formatNumber(getSessionsBalance)"
+              :unit="getCurrency"
+              context="Outstanding, all time"
+            />
+          </div>
+          <div class="col-6 col-md-3">
+            <stat-tile
+              label="Income"
+              icon="bi-arrow-down-left-circle"
+              tone="positive"
+              :value="formatNumber(getTotalPayments)"
+              :unit="getCurrency"
+              :context="periodLabel"
+            />
+          </div>
+          <div class="col-6 col-md-3">
+            <stat-tile
+              label="Expenses"
+              icon="bi-arrow-up-right-circle"
+              tone="negative"
+              :value="formatNumber(getTotalExpenditures)"
+              :unit="getCurrency"
+              :context="periodLabel"
+            />
+          </div>
+          <div class="col-6 col-md-3">
+            <stat-tile
+              label="Sessions Income"
+              icon="bi-cash-coin"
+              tone="positive"
+              :value="formatNumber(getTotalSessionPayments)"
+              :unit="getCurrency"
+              :context="periodLabel"
+            />
+          </div>
+          <div class="col-6 col-md-3">
+            <stat-tile
+              tone-value
+              label="Session Profit"
+              :icon="
+                isNegative(getSessionProfit)
+                  ? 'bi-graph-down-arrow'
+                  : 'bi-graph-up-arrow'
+              "
+              :value="formatNumber(getSessionProfit)"
+              :unit="getCurrency"
+              :tone="signTone(getSessionProfit)"
+              :context="periodLabel"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -88,7 +100,7 @@ import { useStore } from "vuex";
 import reverse from "lodash/reverse";
 import dayjs from "dayjs";
 import WarningBox from "booksys/components/WarningBox.vue";
-import CardModule from "booksys/components/bricks/CardModule.vue";
+import StatTile from "booksys/components/bricks/StatTile.vue";
 import InputSelect from "booksys/components/forms/inputs/InputSelect.vue";
 import { formatNumber as formatNumberLib } from "booksys/libs/formatters.js";
 
@@ -119,6 +131,13 @@ const getSessionProfit = computed(
 );
 const getCurrency = computed(() => store.getters["configuration/getCurrency"]);
 
+// The period the year-bound figures cover, shown on those tiles.
+const periodLabel = computed(() =>
+  form.value.selectedYear == "any"
+    ? "All time"
+    : String(form.value.selectedYear),
+);
+
 watch(getYears, (newValue) => {
   const availableYears = reverse(newValue);
   console.log(availableYears);
@@ -144,6 +163,14 @@ function yearSelectionChangeHandler() {
 
 function formatNumber(number) {
   return formatNumberLib(number);
+}
+
+function isNegative(number) {
+  return Number(number) < 0;
+}
+
+function signTone(number) {
+  return isNegative(number) ? "negative" : "positive";
 }
 
 queryConfiguration();
@@ -180,6 +207,45 @@ queryStatistics(currentYear).catch((errs) => (errors.value = errs));
 
 .box-flex-content {
   flex: 1 1 auto;
-  overflow: scroll;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Filter row, sits above the tiles */
+.stats-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0 0.25rem 0.6rem;
+}
+
+.stats-title {
+  color: #6c757d;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.stats-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.stats-filter-label {
+  margin-bottom: 0;
+  color: #6c757d;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+/* Faint plane so the white tiles read as cards sitting on the dashboard */
+.stats-plane {
+  padding: 0.6rem;
+  background-color: #f5f5f4;
+  border: 1px solid rgba(11, 11, 11, 0.07);
+  border-radius: 0.6rem;
 }
 </style>
