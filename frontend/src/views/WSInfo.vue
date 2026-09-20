@@ -1,11 +1,10 @@
 <template>
   <subpage-container title="Location">
     <card-module :nobody="true" class="mx-1 card-height">
-      <div class="row">
-        <div class="col-12 mt-5 text-center">
+      <div class="info-content">
+        <div class="address-section text-center mt-5">
           <div
             v-if="getLocationAddress != null && getLocationAddress.length > 0"
-            cols="12"
             class="main-color"
             v-html="getLocationAddress"
           />
@@ -13,18 +12,14 @@
             [ no address set by the site-owner ]
           </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col-12 text-center mt-3">
+        <div class="map-section mt-3">
           <iframe
             v-if="getLocationMap != null && getLocationMap.length > 0"
+            class="map-frame"
             :src="getLocationMap"
             frameborder="0"
-            style="border: 0"
-            :width="mapWidth"
-            :height="mapHeight"
           />
-          <div class="main-color" v-else>[ no map configured ]</div>
+          <div class="main-color text-center" v-else>[ no map configured ]</div>
         </div>
       </div>
     </card-module>
@@ -40,7 +35,6 @@
 <script setup>
 import { useStore, mapGetters } from "vuex";
 import { onMounted, computed } from "vue";
-import { BooksysBrowser } from "booksys/libs/browser";
 import CardModule from "booksys/components/bricks/CardModule.vue";
 import SubpageContainer from "booksys/components/bricks/SubpageContainer.vue";
 
@@ -57,22 +51,6 @@ const getLocationMap = computed(
   }),
 );
 
-const mapHeight = computed(() => {
-  if (BooksysBrowser.isMobileResponsive()) {
-    return 350;
-  } else {
-    return 300;
-  }
-});
-
-const mapWidth = computed(() => {
-  if (BooksysBrowser.isMobileResponsive()) {
-    return 340;
-  } else {
-    return 600;
-  }
-});
-
 onMounted(() => {
   console.log("Info.vue: Try to get all information required");
   store.dispatch("configuration/queryConfiguration");
@@ -84,14 +62,60 @@ onMounted(() => {
   max-height: 500px;
   min-height: 500px;
   height: 500px;
-  overflow-y: scroll;
-  overflow-x: hidden;
+  overflow: auto;
+}
+
+.info-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.address-section {
+  flex: 0 0 auto;
+}
+
+/* Takes up whatever vertical space is left over below the address */
+.map-section {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 0.5rem;
+}
+
+.map-frame {
+  border: 0;
+  width: 600px;
+  max-width: 100%;
+  height: 300px;
 }
 
 @media (max-width: 992px) {
+  /* Fill the whole phone screen below the fixed navbar (60px padding-top) */
   .card-height {
-    min-height: 500px;
-    overflow-y: scroll;
+    min-height: calc(100vh - 66px);
+    max-height: calc(100vh - 66px);
+    height: calc(100vh - 66px);
+    min-height: calc(100dvh - 66px - env(safe-area-inset-bottom, 0px));
+    max-height: calc(100dvh - 66px - env(safe-area-inset-bottom, 0px));
+    height: calc(100dvh - 66px - env(safe-area-inset-bottom, 0px));
+    /* Everything fits through flex sizing, no inner scrolling needed */
+    overflow: hidden;
+  }
+
+  .address-section {
+    margin-top: 1.5rem !important;
+  }
+
+  .map-section {
+    padding: 0 0.5rem 0.5rem;
+  }
+
+  .map-frame {
+    width: 100%;
+    height: 100%;
   }
 }
 </style>
