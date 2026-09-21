@@ -7,7 +7,7 @@ name: Containers
 on:
   push:
     branches: [ master, develop ]
-    tags: [ '*' ]
+    tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ master, develop ]
 
@@ -38,22 +38,24 @@ jobs:
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Collect the build information for the backend binary
-        # The backend bakes version, commit and build date into the binary
-        # through ldflags. This step is skipped for the frontend, which leaves
-        # build-args below empty rather than passing arguments that the
-        # frontend Dockerfile does not declare.
+      - name: Collect the build information
+        # Both images take their version from the git ref name: the backend
+        # bakes it into the binary through ldflags, the frontend writes it to
+        # package.json. Commit and build date go to the backend alone, because
+        # only its Dockerfile declares those arguments and buildx warns about
+        # build-args the Dockerfile never consumes.
         #
         # Note: On a branch build GITHUB_REF_NAME is the branch, not a
         # version. That only ends up in an image that is never published.
         id: build-info
-        if: matrix.image == 'backend'
         run: |
           {
             echo "args<<EOF"
             echo "BOOKSYS_VERSION=${GITHUB_REF_NAME}"
-            echo "BOOKSYS_COMMIT=${GITHUB_SHA:0:8}"
-            echo "BOOKSYS_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            if [ "${{ matrix.image }}" = "backend" ]; then
+              echo "BOOKSYS_COMMIT=${GITHUB_SHA:0:8}"
+              echo "BOOKSYS_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            fi
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
@@ -62,9 +64,10 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository }}/${{ matrix.image }}
-          # A tag like v3.5.0 or 3.5.0 publishes 3.5.0 and 3.5, plus the tag
-          # as it was written so that a tag which is not strict semver (3.5,
-          # like some of the existing tags) still ends up as an image tag.
+          # Only v*.*.* tags reach this job, so v3.5.0 publishes 3.5.0 and
+          # 3.5, plus the tag as it was written (v3.5.0) so that the image tag
+          # matches the git tag verbatim. The older unprefixed tags (3.4.0 and
+          # friends) no longer trigger a build; tag releases as vX.Y.Z.
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
