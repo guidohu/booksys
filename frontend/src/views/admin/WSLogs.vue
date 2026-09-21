@@ -1,6 +1,6 @@
 <template>
   <subpage-container title="Logs">
-    <log-card class="mx-1 scroll" />
+    <log-card class="mx-1 card-height" />
     <template v-slot:bottom>
       <router-link tag="button" class="btn btn-outline-light" to="/admin">
         <i class="bi bi-gear"></i>
@@ -16,15 +16,17 @@ import SubpageContainer from "booksys/components/bricks/SubpageContainer.vue";
 </script>
 
 <style scoped>
-/* responsive, for small screens, scrolling */
 @media (max-width: 992px) {
-  .scroll {
-    overflow-x: scroll;
+  /* Fill the whole phone screen below the fixed navbar (60px padding-top) */
+  .card-height {
+    min-height: calc(100vh - 66px);
+    max-height: calc(100vh - 66px);
+    height: calc(100vh - 66px);
+    min-height: calc(100dvh - 66px - env(safe-area-inset-bottom, 0px));
+    max-height: calc(100dvh - 66px - env(safe-area-inset-bottom, 0px));
+    height: calc(100dvh - 66px - env(safe-area-inset-bottom, 0px));
+    /* The log table scrolls internally, the card itself never does */
+    overflow: hidden;
   }
-}
-
-.scroll {
-  max-height: 480px;
-  overflow: scroll;
 }
 </style>

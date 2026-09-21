@@ -1,8 +1,10 @@
 <template>
-  <card-module :nobody="true">
-    <overlay-spinner :active="showOverlay" :full-page="false">
+  <card-module :nobody="true" fill>
+    <overlay-spinner :active="showOverlay" :full-page="false" fill>
       <warning-box v-if="errors.length > 0" :errors="errors" />
-      <table-module :columns="columns" :rows="getLogLines" />
+      <div class="log-table">
+        <table-module :columns="columns" :rows="getLogLines" />
+      </div>
     </overlay-spinner>
   </card-module>
 </template>
@@ -42,3 +44,12 @@ queryLogLines()
     errors.value = errs;
   });
 </script>
+
+<style scoped>
+/* Only the table scrolls, so the card itself can be sized by its parent */
+.log-table {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+</style>
