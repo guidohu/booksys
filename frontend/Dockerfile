@@ -1,5 +1,5 @@
-# build the app with node 24
-FROM node:24-alpine AS build-stage
+# build the app with node 26
+FROM node:26-alpine AS build-stage
 
 WORKDIR /home/node/app
 

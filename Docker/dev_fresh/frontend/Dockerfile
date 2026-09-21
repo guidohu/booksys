@@ -1,6 +1,6 @@
-FROM node:24
+FROM node:26
 
-# npm's version is pinned by the `node:24` tag above, so that the dev stack and
+# npm's version is pinned by the `node:26` tag above, so that the dev stack and
 # the production build (frontend/Dockerfile) use the same one. Upgrading npm
 # from inside the container would drift from that, so silence the notice it
 # prints on every container start, where `npm install` runs (docker-compose.yaml).
