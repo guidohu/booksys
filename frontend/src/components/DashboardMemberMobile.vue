@@ -1,40 +1,21 @@
 <template>
   <div>
     <navbar-mobile title="Dashboard" role="member-home" />
-    <div class="row navbar-padding">
-      <div class="col-3" />
-      <div class="col-6 text-center">
-        <div class="row mt-3">
-          <dashboard-button to="/schedule">
-            <div class="bc_icon bc_icon_dashboard bc_icon_calendar" />
-            MY CAL
-          </dashboard-button>
-        </div>
-        <div class="row mt-3">
-          <dashboard-button to="/account">
-            <div class="bc_icon bc_icon_dashboard bc_icon_user" />
-            ACCOUNT
-          </dashboard-button>
-        </div>
-        <div class="row mt-3">
-          <dashboard-button to="/info">
-            <div class="bc_icon bc_icon_dashboard bc_icon_info" />
-            INFO
-          </dashboard-button>
-        </div>
-      </div>
-      <div class="col-3" />
+    <div class="bk-page bk-bento">
+      <dashboard-tile
+        to="/schedule"
+        label="My calendar"
+        hint="Your upcoming sessions"
+        icon="bi-calendar-week"
+        wide
+      />
+      <dashboard-tile to="/account" label="Account" icon="bi-person" />
+      <dashboard-tile to="/info" label="Info" icon="bi-geo-alt" />
     </div>
   </div>
 </template>
 
 <script setup>
 import NavbarMobile from "booksys/components/NavbarMobile.vue";
-import DashboardButton from "booksys/components/bricks/DashboardButton.vue";
+import DashboardTile from "booksys/components/bricks/DashboardTile.vue";
 </script>
-
-<style scoped>
-.navbar-padding {
-  padding-top: 60px;
-}
-</style>

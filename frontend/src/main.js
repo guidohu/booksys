@@ -8,10 +8,15 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.esm";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
+// Design tokens first, everything below reads from them
+import "booksys/assets/css/theme.css";
+
 // Override bootstrap styling
 import "booksys/assets/bootstrap/css/bootstrap-theme-bc.css";
-// import "./asset  s/bootstrap/css/bootstrap-theme-glass.css";
 import "booksys/assets/css/style.css";
+
+// Mobile refresh, last so it wins over the bootstrap defaults it restyles
+import "booksys/assets/css/mobile.css";
 
 // Deactivate normal logging in production
 if (process.env.NODE_ENV === "production") {

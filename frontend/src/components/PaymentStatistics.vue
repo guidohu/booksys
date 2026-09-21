@@ -248,4 +248,19 @@ queryStatistics(currentYear).catch((errs) => (errors.value = errs));
   border: 1px solid rgba(11, 11, 11, 0.07);
   border-radius: 0.6rem;
 }
+
+@media (max-width: 992px) {
+  .stats-title,
+  .stats-filter-label {
+    color: var(--bk-on-dark-soft);
+  }
+
+  /* The plane recedes instead of lifting: on dark, a lighter backing behind
+     already-light tiles just muddies both. */
+  .stats-plane {
+    border-color: rgba(255, 255, 255, 0.08);
+    background-color: rgba(0, 0, 0, 0.16);
+    border-radius: var(--bk-r-md);
+  }
+}
 </style>

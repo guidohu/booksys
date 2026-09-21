@@ -161,6 +161,44 @@ defineProps({
   font-weight: 400;
 }
 
+/* On mobile the tile joins the single panel material like everything else.
+   The tone rails and icon chips keep their colours, which is the whole point
+   of the component, they just sit on glass instead of white. */
+@media (max-width: 992px) {
+  .stat-tile {
+    border: 1px solid var(--bk-surface-edge);
+    border-radius: var(--bk-r-lg);
+    background-color: transparent;
+    background-image: var(--bk-surface-fill);
+  }
+
+  .stat-label,
+  .stat-unit,
+  .stat-context {
+    color: var(--bk-on-dark-soft);
+  }
+
+  .stat-value {
+    color: var(--bk-on-dark);
+  }
+
+  /* The muted grey tone disappears on the dark canvas. */
+  .tone-neutral {
+    --tone: var(--bk-on-dark-soft);
+    --tone-bg: rgba(255, 255, 255, 0.1);
+  }
+
+  .tone-positive {
+    --tone: var(--bk-success);
+    --tone-bg: rgba(61, 220, 145, 0.16);
+  }
+
+  .tone-negative {
+    --tone: var(--bk-danger);
+    --tone-bg: rgba(255, 122, 133, 0.16);
+  }
+}
+
 /* Keep long amounts inside the tile on narrow phones */
 @media (max-width: 400px) {
   .stat-tile:not(.stat-tile-hero) .stat-value {

@@ -148,4 +148,20 @@ function navigateSessionStart() {
   line-height: 1;
   border-radius: 0.2rem;
 }
+
+@media (max-width: 992px) {
+  /* The mobile 44px minimum height applies to every button; without a
+     matching width these icon-only day arrows stretch into tall slivers.
+     Square them off into a proper round tap target instead. */
+  .btn-xs {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: var(--bk-r-pill);
+    font-size: 1.5rem;
+  }
+}
 </style>

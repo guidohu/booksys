@@ -1,18 +1,26 @@
 <template>
-  <div
-    class="modal fade"
-    ref="modalRef"
-    :id="name"
-    data-bs-target="static"
-    aria-hidden="false"
-    tabindex="-1"
-  >
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <slot></slot>
+  <!--
+    Teleported to the #dialog container index.html provides. A modal is
+    declared inside whichever component owns it, which is normally inside a
+    card; left there, it inherits that card's stacking and clipping context
+    and can end up positioned against the card instead of the viewport.
+  -->
+  <Teleport to="#dialog">
+    <div
+      class="modal fade"
+      ref="modalRef"
+      :id="name"
+      data-bs-target="static"
+      aria-hidden="false"
+      tabindex="-1"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <slot></slot>
+        </div>
       </div>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <script setup>

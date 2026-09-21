@@ -1,0 +1,128 @@
+/*
+ * Booksys design tokens.
+ *
+ * The palette is built around the water the app is actually used on: a deep
+ * lake at the top of the screen, light coming in from above, spray-aqua for
+ * anything interactive and a low sun tone reserved for the rare warning.
+ *
+ * On mobile there is exactly ONE surface material (--bk-surface-*), shared by
+ * content cards, dashboard tiles and every other panel. That is deliberate:
+ * a menu tile and a card full of data are the same kind of object sitting on
+ * the same water, and giving them different materials made the app look like
+ * two apps stitched together.
+ */
+
+:root {
+  /* Water, deepest first. The canvas on mobile is mixed from these. */
+  --bk-abyss: #05192e;
+  --bk-deep: #0a2440;
+  --bk-water: #15497d;
+  --bk-shallow: #103758;
+
+  /* Spray aqua carries every interactive state. */
+  --bk-aqua: #34d0d8;
+  --bk-aqua-bright: #6ee7ec;
+  --bk-teal: #1c8da8;
+  --bk-teal-deep: #14657a;
+
+  /* Low sun, used sparingly so it stays an accent and not a second brand. */
+  --bk-sun: #ff8a5b;
+
+  /* Status, picked to stay legible on the dark canvas. Danger carries button
+     and alert text, and at its old value it fell under even the 3:1 floor
+     for large text on the brightest panels. */
+  --bk-success: #3ddc91;
+  --bk-danger: #ffa2a9;
+  --bk-warning: #ffc266;
+
+  /* Ink for light surfaces (desktop, and print) */
+  --bk-ink: #10232e;
+  --bk-ink-soft: #5a7183;
+  --bk-ink-faint: #8fa3b1;
+
+  /* Text on the dark canvas.
+     Measured against the worst-case surface, which is the top of a card
+     sitting where the water radial peaks (#2c5b8a). The earlier ladder read
+     fine on the darker parts of the page and quietly failed up there: the
+     secondary tier sat at 3.31 and the tertiary at 1.92, both under the 4.5
+     WCAG AA needs for body text. */
+  --bk-on-dark: #f2f8ff; /* 6.6 worst case, 10.9 typical */
+  --bk-on-dark-soft: #c2d5e8; /* 4.7 worst case, 7.8 typical  */
+  --bk-on-dark-faint: #a8bed4; /* 3.7 worst case, 6.1 typical  */
+
+  /* Light surfaces, still used by the untouched desktop layout */
+  --bk-surface: #ffffff;
+  --bk-surface-sunk: #f4f8fa;
+  --bk-hairline: rgba(16, 35, 46, 0.09);
+
+  /* ---- The one mobile surface material -------------------------------
+     Lighter at the top edge so every panel catches the same light the
+     canvas does. Cards, tiles, sheets and bars all draw from these. */
+  --bk-surface-fill: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.04) 45%,
+    rgba(255, 255, 255, 0.025) 100%
+  );
+  --bk-surface-edge: rgba(255, 255, 255, 0.12);
+  /* Recessed areas *inside* a panel: inputs, table stripes, tab tracks. */
+  --bk-surface-sunk-dark: rgba(0, 0, 0, 0.22);
+  /* Opaque stand-in for the panel colour, for sticky table headers that
+     must hide the rows scrolling beneath them. */
+  --bk-surface-solid: #123356;
+
+  /* Bars sit above content, so they are denser than a panel. */
+  --bk-glass-strong: rgba(8, 28, 50, 0.72);
+
+  /* Sessions pie. Read by libs/pie.js from its container, so the chart
+     follows the surface it sits on. These are the desktop (white card)
+     values; mobile.css swaps them for the dark panel. */
+  --bk-pie-noslot: #424242;
+  --bk-pie-offhour: #212121;
+  --bk-pie-slot: #5cb85b;
+  --bk-pie-full: #d9534e;
+  --bk-pie-course: #d9534e;
+  --bk-pie-stroke: #ffffff;
+  /* --bk-pie-label is deliberately not set: unset means each label keeps its
+     own sector's colour, which is what reads correctly on the white desktop
+     card. mobile.css sets it, because the darker sectors would otherwise
+     paint their label straight into the background. */
+
+  /* Radii: consistent and soft, but dialled back from the original scale --
+     at 26px the panels read closer to pills than to cards, and the roundness
+     was competing with the content for attention. Roughly a third off the
+     larger tiers; --bk-r-pill stays, since the things using it (the back
+     button, the day arrows) are meant to be true circles. */
+  --bk-r-sm: 8px;
+  --bk-r-md: 10px;
+  --bk-r-lg: 14px;
+  --bk-r-xl: 18px;
+  --bk-r-pill: 999px;
+
+  /* Shadows stay soft and blue-tinted so they read as depth, not dirt. */
+  --bk-shadow-sm: 0 1px 2px rgba(3, 12, 25, 0.2);
+  --bk-shadow-md: 0 8px 22px -8px rgba(3, 12, 25, 0.5);
+  --bk-shadow-lg: 0 20px 44px -18px rgba(3, 12, 25, 0.7);
+
+  /* Mobile shell metrics: every layout that has to fit the viewport
+     references these instead of hard-coding pixel values. */
+  --bk-topbar-h: 56px;
+  --bk-bottomnav-h: 62px;
+  /* The tab bar floats clear of the screen edge, so the space it occupies
+     is its own height plus that inset. */
+  --bk-bottomnav-inset: 10px;
+  --bk-safe-top: env(safe-area-inset-top, 0px);
+  --bk-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --bk-shell-top: calc(var(--bk-topbar-h) + var(--bk-safe-top));
+  --bk-shell-bottom: calc(
+    var(--bk-bottomnav-h) + var(--bk-bottomnav-inset) + var(--bk-safe-bottom)
+  );
+
+  --bk-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* The system stack: no webfont round-trip, and it already looks native on
+     the phones this is used from. */
+  --bk-font:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    "Noto Sans", Arial, sans-serif;
+}

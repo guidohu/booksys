@@ -1,0 +1,563 @@
+/*
+ * Mobile refresh.
+ *
+ * Everything here is inside `max-width: 992px`, the same breakpoint
+ * BooksysBrowser.isMobileResponsive() uses to pick the mobile components, so
+ * the CSS and the JS always agree on what "mobile" means. The desktop layout
+ * is deliberately left alone.
+ *
+ * One material, one canvas. Content cards, dashboard tiles, modals and bars
+ * are all cut from --bk-surface-fill over the deep-water gradient, because a
+ * menu tile and a card full of data are the same kind of object. Anything
+ * recessed *inside* a panel (inputs, tab tracks, table stripes) darkens
+ * instead of lightening, which is what keeps the depth readable.
+ */
+
+@media (max-width: 992px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  body {
+    position: relative;
+    width: 100%;
+    /* Fixed heights fight the mobile URL bar, a minimum does not. */
+    height: auto;
+    min-height: 100dvh;
+    padding-left: 0;
+    padding-right: 0;
+    font-family: var(--bk-font);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--bk-on-dark);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Light from above, deeper water towards the bottom corners. The photo
+       background is dropped here: it competed with the content and cost a
+       full-size image download on a phone connection. */
+    background-color: var(--bk-deep);
+    background-image:
+      radial-gradient(
+        120% 75% at 50% -15%,
+        var(--bk-water) 0%,
+        transparent 62%
+      ),
+      radial-gradient(
+        90% 55% at 105% 102%,
+        var(--bk-shallow) 0%,
+        transparent 58%
+      ),
+      linear-gradient(180deg, var(--bk-deep) 0%, var(--bk-abyss) 100%);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+  }
+
+  /* The sessions pie sits on a dark panel here, so its greys inverted:
+     unbooked time lifts slightly off the panel and closed hours sink below
+     it, which is the opposite of what reads correctly on a white card. The
+     separator turns dark for the same reason a white ring would glare. */
+  :root {
+    --bk-pie-noslot: #20456b;
+    --bk-pie-offhour: #0d2742;
+    --bk-pie-slot: #3ddc91;
+    --bk-pie-full: #ffa2a9;
+    --bk-pie-course: #ffa2a9;
+    --bk-pie-stroke: #0e2c4a;
+    /* The sector already carries the colour coding, so the label only has to
+       be readable; tying it to the fill made the time window of an unbooked
+       slot near-invisible against the panel. */
+    --bk-pie-label: #f2f8ff;
+  }
+
+  /* Taps should feel instant, not flash a grey box. */
+  a,
+  button,
+  .btn,
+  [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  a:not(.btn):not(.nav-link):not(.bk-tile):not(.bk-tab) {
+    color: var(--bk-aqua-bright);
+    text-decoration: none;
+  }
+
+  /* ---- Page shell ------------------------------------------------------
+     Every mobile screen sits between the fixed top bar and the floating tab
+     bar. Both offsets come from the shell tokens, so changing a bar's height
+     in theme.css moves every screen with it. */
+  .bk-page {
+    padding-top: calc(var(--bk-shell-top) + 0.65rem);
+    padding-bottom: calc(var(--bk-shell-bottom) + 0.65rem);
+    padding-right: 0.65rem;
+    padding-left: 0.65rem;
+  }
+
+  /* Bento grid: two even columns, with tiles opting into the full width to
+     break the rhythm. */
+  .bk-bento {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+    align-content: start;
+  }
+
+  /* Small phones get more room per tile than a second column is worth. */
+  @media (max-width: 340px) {
+    .bk-bento {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* ---- Panels ----------------------------------------------------------
+     The shared material. .bk-tile in DashboardTile.vue draws from the same
+     tokens, so a menu tile and a content card are the same object. */
+  .card {
+    border: 1px solid var(--bk-surface-edge);
+    border-radius: var(--bk-r-xl);
+    background-color: transparent;
+    background-image: var(--bk-surface-fill);
+    color: var(--bk-on-dark);
+    box-shadow: none;
+    /* Deliberately NOT backdrop-filter. A filtered element becomes the
+       containing block for position: fixed descendants, which trapped every
+       modal rendered inside a card inside that card. The canvas underneath
+       is a smooth gradient, so blurring it changed nothing visually while
+       costing a GPU pass per card on scroll. The bars keep their blur,
+       because content genuinely scrolls under those. */
+    overflow: hidden;
+  }
+
+  /* No divider under the header: the spacing already separates it, and a
+     rule across a translucent panel reads as a crack. */
+  .card-header {
+    padding: 0.9rem 1rem 0.2rem;
+    border-bottom: 0;
+    background-color: transparent;
+    color: var(--bk-on-dark-soft);
+  }
+
+  .card-header .card-title,
+  .card-header h5 {
+    margin: 0;
+    color: var(--bk-on-dark);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-transform: none;
+  }
+
+  .card-body {
+    color: var(--bk-on-dark);
+  }
+
+  .card-title {
+    color: var(--bk-on-dark);
+    font-weight: 700;
+  }
+
+  .card-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: rgba(0, 0, 0, 0.12);
+    color: var(--bk-on-dark-soft);
+  }
+
+  /* Muted helper text has to climb off the light-surface greys. */
+  .text-muted,
+  .form-text,
+  small.text-muted {
+    color: var(--bk-on-dark-soft) !important;
+  }
+
+  /* ---- Buttons ---------------------------------------------------------
+     44px is the smallest target that stays comfortable one-handed. */
+  .btn {
+    --bs-btn-border-radius: var(--bk-r-md);
+    min-height: 44px;
+    padding: 0.55rem 1rem;
+    border-radius: var(--bk-r-md);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition:
+      transform 0.12s var(--bk-ease),
+      box-shadow 0.12s var(--bk-ease),
+      background-color 0.12s var(--bk-ease);
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .btn-sm {
+    min-height: 36px;
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--bk-r-sm);
+    font-size: 0.8rem;
+  }
+
+  .btn-primary {
+    --bs-btn-bg: var(--bk-teal);
+    --bs-btn-border-color: var(--bk-teal);
+    --bs-btn-hover-bg: var(--bk-teal-deep);
+    --bs-btn-hover-border-color: var(--bk-teal-deep);
+    --bs-btn-active-bg: var(--bk-teal-deep);
+    --bs-btn-active-border-color: var(--bk-teal-deep);
+  }
+
+  /* btn-outline-info is this app's standard action button (56 of them), so
+     it gets the aqua treatment rather than bootstrap's raw cyan. */
+  .btn-outline-info {
+    --bs-btn-color: var(--bk-aqua-bright);
+    --bs-btn-border-color: rgba(52, 208, 216, 0.45);
+    --bs-btn-bg: rgba(52, 208, 216, 0.1);
+    --bs-btn-hover-color: #04222b;
+    --bs-btn-hover-bg: var(--bk-aqua);
+    --bs-btn-hover-border-color: var(--bk-aqua);
+    --bs-btn-active-color: #04222b;
+    --bs-btn-active-bg: var(--bk-aqua);
+    --bs-btn-active-border-color: var(--bk-aqua);
+  }
+
+  /* Dark-on-dark would vanish, so the neutral outlines all read as light. */
+  .btn-outline-dark,
+  .btn-outline-secondary,
+  .btn-outline-light {
+    --bs-btn-color: var(--bk-on-dark);
+    --bs-btn-border-color: var(--bk-surface-edge);
+    --bs-btn-bg: rgba(255, 255, 255, 0.07);
+    --bs-btn-hover-bg: rgba(255, 255, 255, 0.14);
+    --bs-btn-hover-border-color: rgba(255, 255, 255, 0.22);
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-active-bg: rgba(255, 255, 255, 0.18);
+    --bs-btn-active-color: #ffffff;
+  }
+
+  .btn-success {
+    --bs-btn-bg: var(--bk-success);
+    --bs-btn-border-color: var(--bk-success);
+    --bs-btn-color: #04261a;
+    --bs-btn-hover-bg: #57e7a4;
+    --bs-btn-hover-border-color: #57e7a4;
+    --bs-btn-hover-color: #04261a;
+    --bs-btn-active-bg: #57e7a4;
+    --bs-btn-active-color: #04261a;
+  }
+
+  .btn-outline-success {
+    --bs-btn-color: var(--bk-success);
+    --bs-btn-border-color: rgba(61, 220, 145, 0.45);
+    --bs-btn-bg: rgba(61, 220, 145, 0.1);
+    --bs-btn-hover-bg: var(--bk-success);
+    --bs-btn-hover-border-color: var(--bk-success);
+    --bs-btn-hover-color: #04261a;
+    --bs-btn-active-bg: var(--bk-success);
+    --bs-btn-active-color: #04261a;
+  }
+
+  .btn-danger {
+    --bs-btn-bg: var(--bk-danger);
+    --bs-btn-border-color: var(--bk-danger);
+    --bs-btn-color: #2b060a;
+    --bs-btn-hover-bg: #ff9aa3;
+    --bs-btn-hover-border-color: #ff9aa3;
+    --bs-btn-hover-color: #2b060a;
+  }
+
+  .btn-outline-danger {
+    --bs-btn-color: var(--bk-danger);
+    --bs-btn-border-color: rgba(255, 122, 133, 0.45);
+    --bs-btn-bg: rgba(255, 122, 133, 0.1);
+    --bs-btn-hover-bg: var(--bk-danger);
+    --bs-btn-hover-border-color: var(--bk-danger);
+    --bs-btn-hover-color: #2b060a;
+  }
+
+  .btn-light {
+    --bs-btn-bg: rgba(255, 255, 255, 0.1);
+    --bs-btn-border-color: var(--bk-surface-edge);
+    --bs-btn-color: var(--bk-on-dark);
+    --bs-btn-hover-bg: rgba(255, 255, 255, 0.18);
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-hover-border-color: rgba(255, 255, 255, 0.24);
+  }
+
+  /* ---- Forms -----------------------------------------------------------
+     16px is not a style choice: below it, iOS Safari zooms the page on
+     focus and the user has to pinch back out. */
+  .form-control,
+  .form-select {
+    min-height: 46px;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: var(--bk-r-md);
+    background-color: var(--bk-surface-sunk-dark);
+    color: var(--bk-on-dark);
+    font-size: 16px;
+  }
+
+  .form-control::placeholder {
+    color: var(--bk-on-dark-faint);
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: var(--bk-aqua);
+    background-color: rgba(0, 0, 0, 0.3);
+    color: var(--bk-on-dark);
+    box-shadow: 0 0 0 3px rgba(52, 208, 216, 0.22);
+  }
+
+  /* A disabled field keeps bootstrap's light --bs-secondary-bg unless it is
+     named explicitly. .form-select was missing here, so the rider picker on
+     a running stopwatch rendered near-white text on a near-white pill.
+     -webkit-text-fill-color is not redundant: iOS Safari washes out disabled
+     text with its own fill colour and ignores `color`. */
+  .form-control:disabled,
+  .form-control[readonly],
+  .form-select:disabled,
+  textarea:disabled {
+    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.32);
+    color: var(--bk-on-dark-soft);
+    -webkit-text-fill-color: var(--bk-on-dark-soft);
+    opacity: 1;
+  }
+
+  /* Bootstrap's chevron is a dark SVG; on a dark field it disappears. */
+  .form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23c2d5e8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  }
+
+  /* Bootstrap's floating label is positioned against a specific input
+     height and padding, so the sizing above has to be handed back inside a
+     .form-floating or the label never lifts clear of the text. */
+  .form-floating > .form-control {
+    min-height: calc(3.5rem + 2px);
+    height: calc(3.5rem + 2px);
+    padding: 1rem 0.8rem;
+  }
+
+  .form-floating > .form-control:focus,
+  .form-floating > .form-control:not(:placeholder-shown) {
+    padding-top: 1.625rem;
+    padding-bottom: 0.625rem;
+  }
+
+  .form-floating > label {
+    padding: 1rem 0.8rem;
+    color: var(--bk-on-dark-faint);
+  }
+
+  .form-label,
+  .col-form-label {
+    color: var(--bk-on-dark-soft);
+  }
+
+  .input-group-text {
+    border-color: rgba(255, 255, 255, 0.14);
+    background-color: rgba(255, 255, 255, 0.07);
+    color: var(--bk-on-dark-soft);
+  }
+
+  /* Checkboxes and switches ship with white fills and a near-black knob. */
+  .form-check-input {
+    border-color: rgba(255, 255, 255, 0.28);
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .form-check-input:checked {
+    border-color: var(--bk-aqua);
+    background-color: var(--bk-aqua);
+  }
+
+  .form-switch .form-check-input {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba%28255,255,255,0.75%29'/%3e%3c/svg%3e");
+  }
+
+  .form-switch .form-check-input:checked {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%2304222b'/%3e%3c/svg%3e");
+  }
+
+  /* ---- Tabs ------------------------------------------------------------
+     A segmented control: a recessed track with a raised active chip, which
+     is far easier to read at a glance than underlined links. The selectors
+     carry three classes so they win against the per-component scoped
+     .nav-link colours several tab components still set. */
+  .nav-tabs {
+    gap: 0.25rem;
+    padding: 0.3rem;
+    border: 0;
+    border-radius: var(--bk-r-md);
+    background-color: var(--bk-surface-sunk-dark);
+  }
+
+  .nav-tabs .nav-item {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .nav-tabs > .nav-item > .nav-link {
+    width: 100%;
+    padding: 0.45rem 0.35rem;
+    border: 0;
+    border-radius: var(--bk-r-sm);
+    background-color: transparent;
+    color: var(--bk-on-dark-soft);
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.25;
+    text-align: center;
+  }
+
+  .nav-tabs > .nav-item > .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    box-shadow: var(--bk-shadow-sm);
+  }
+
+  /* ---- Tables ----------------------------------------------------------- */
+  .table {
+    --bs-table-color: var(--bk-on-dark);
+    --bs-table-bg: transparent;
+    --bs-table-border-color: rgba(255, 255, 255, 0.09);
+    --bs-table-striped-color: var(--bk-on-dark);
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.035);
+    --bs-table-hover-color: var(--bk-on-dark);
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.07);
+    color: var(--bk-on-dark);
+    font-size: 0.85rem;
+  }
+
+  .table > thead th {
+    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--bk-on-dark-soft);
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+  }
+
+  /* TableModule stamps bootstrap's .fw-lighter on every cell. That utility is
+     `font-weight: lighter !important`, which against the 400 body weight
+     computes to Thin (100) -- at 13.6px those hairline strokes are what made
+     the table look washed out even after the text colour was already at the
+     brightest tier. Light-on-dark blooms, so plain 400 is enough; the
+     !important is needed only to answer the utility's own.
+     Desktop keeps the thin cells: on a white card they hold up. */
+  .table td.fw-lighter,
+  .table th.fw-lighter {
+    font-weight: 400 !important;
+  }
+
+  .table > thead th.fw-lighter {
+    font-weight: 600 !important;
+  }
+
+  /* ---- Feedback --------------------------------------------------------- */
+  .alert {
+    border: 0;
+    border-radius: var(--bk-r-md);
+    font-size: 0.85rem;
+  }
+
+  .alert-info {
+    background-color: rgba(52, 208, 216, 0.12);
+    color: var(--bk-aqua-bright);
+  }
+
+  .alert-secondary {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--bk-on-dark-soft);
+  }
+
+  .alert-danger {
+    background-color: rgba(255, 122, 133, 0.14);
+    color: var(--bk-danger);
+  }
+
+  .alert-warning {
+    background-color: rgba(255, 194, 102, 0.14);
+    color: var(--bk-warning);
+  }
+
+  .alert-success {
+    background-color: rgba(61, 220, 145, 0.14);
+    color: var(--bk-success);
+  }
+
+  /* ---- Overlays --------------------------------------------------------- */
+  /* Keep the sheet clear of the notch and the home indicator. */
+  .modal-dialog {
+    margin: calc(var(--bk-safe-top) + 0.75rem) 0.6rem
+      calc(var(--bk-safe-bottom) + 0.75rem);
+  }
+
+  .modal-content {
+    border: 1px solid var(--bk-surface-edge);
+    border-radius: var(--bk-r-xl);
+    background-color: var(--bk-surface-solid);
+    background-image: var(--bk-surface-fill);
+    color: var(--bk-on-dark);
+    box-shadow: var(--bk-shadow-lg);
+  }
+
+  .modal-header,
+  .modal-footer {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .modal-title {
+    color: var(--bk-on-dark);
+    font-weight: 700;
+  }
+
+  /* The close glyph is a dark SVG baked into bootstrap. */
+  .btn-close {
+    filter: invert(1) grayscale(1) brightness(2.2);
+  }
+
+  .dropdown-menu {
+    border: 1px solid var(--bk-surface-edge);
+    border-radius: var(--bk-r-md);
+    background-color: var(--bk-surface-solid);
+    box-shadow: var(--bk-shadow-lg);
+  }
+
+  .dropdown-item {
+    color: var(--bk-on-dark);
+  }
+
+  .dropdown-item:hover,
+  .dropdown-item:focus {
+    background-color: rgba(255, 255, 255, 0.09);
+    color: #ffffff;
+  }
+
+  .dropdown-divider {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .list-group-item {
+    border-color: rgba(255, 255, 255, 0.09);
+    background-color: transparent;
+    color: var(--bk-on-dark);
+  }
+
+  /* MainTitle exports this globally and WSInfo leans on it for body copy. */
+  .main-color {
+    color: var(--bk-on-dark-soft);
+  }
+}
+
+/* Motion is decoration here, never the only cue, so it can all go. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

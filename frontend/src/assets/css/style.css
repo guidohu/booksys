@@ -11,21 +11,7 @@ body {
   width: 100vw;
 }
 
-@media (max-width: 992px) {
-  html,
-  body {
-    overflow-x: hidden;
-  }
-
-  body {
-    position: relative;
-    padding-left: 2px;
-    padding-right: 2px;
-    background-color: rgb(95, 95, 95);
-    background-image: none;
-    background-size: 100% auto;
-  }
-}
+/* The mobile canvas is owned by assets/css/mobile.css. */
 
 h5 {
   font-weight: lighter;

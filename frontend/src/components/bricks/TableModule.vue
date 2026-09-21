@@ -305,4 +305,23 @@ thead th {
 .selected {
   background-color: rgb(127, 218, 224);
 }
+
+@media (max-width: 992px) {
+  /* A sticky header has to be opaque to hide the rows sliding under it, so
+     it cannot use the translucent panel fill and takes the solid stand-in. */
+  thead th {
+    background-color: var(--bk-surface-solid);
+  }
+
+  /* currentColor is near-white on the dark canvas, which turned this into a
+     bright rule across the table. */
+  .table > :not(:first-child) {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .selected {
+    background-color: rgba(52, 208, 216, 0.22);
+    color: #ffffff;
+  }
+}
 </style>

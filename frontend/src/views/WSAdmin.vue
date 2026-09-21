@@ -26,36 +26,13 @@
       </div>
       <div class="col-1 col-lg-3" />
     </div>
-    <div class="row mt-3 d-flex d-lg-none text-center">
-      <div class="col-1" />
-      <div class="col-5 text-center">
-        <div class="row">
-          <dashboard-button to="/users" colWidth="12" offsetWidth="0">
-            <div class="bc_icon bc_icon_dashboard bc_icon_users" />
-            USERS
-          </dashboard-button>
-        </div>
-        <div class="row mt-3">
-          <dashboard-button to="/settings" colWidth="12" offsetWidth="0">
-            <div class="bc_icon bc_icon_dashboard bc_icon_wrench" />
-            SETTINGS
-          </dashboard-button>
-        </div>
-      </div>
-      <div class="col-5 text-center">
-        <div class="row">
-          <dashboard-button to="/accounting" colWidth="12">
-            <div class="bc_icon bc_icon_dashboard bc_icon_money" />
-            FINANCE
-          </dashboard-button>
-        </div>
-        <div class="row mt-3">
-          <dashboard-button to="/logs" colWidth="12">
-            <div class="bc_icon bc_icon_dashboard bc_icon_statistics" />
-            LOGS
-          </dashboard-button>
-        </div>
-      </div>
+    <!-- Mobile: the same bento grid the dashboard uses, so /admin does not
+         drop back to the old square buttons halfway through a journey. -->
+    <div class="bk-bento d-lg-none">
+      <dashboard-tile to="/users" label="Users" icon="bi-people" />
+      <dashboard-tile to="/accounting" label="Finance" icon="bi-cash-stack" />
+      <dashboard-tile to="/settings" label="Settings" icon="bi-gear" />
+      <dashboard-tile to="/logs" label="Logs" icon="bi-journal-text" />
     </div>
   </subpage-container>
 </template>
@@ -63,4 +40,5 @@
 <script setup>
 import SubpageContainer from "booksys/components/bricks/SubpageContainer.vue";
 import DashboardButton from "booksys/components/bricks/DashboardButton.vue";
+import DashboardTile from "booksys/components/bricks/DashboardTile.vue";
 </script>

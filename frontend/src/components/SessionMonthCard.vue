@@ -193,4 +193,40 @@ function mouseOver(daySessionData) {
   line-height: 1;
   border-radius: 0.2rem;
 }
+
+@media (max-width: 992px) {
+  /* The day grid was a sheet of light greys, which on the dark panel read as
+     a white block punched out of the card. Days recess instead, and the
+     out-of-month ones recede further rather than going brighter. */
+  .calendar-day-box {
+    border-radius: var(--bk-r-sm);
+    background: rgba(255, 255, 255, 0.09);
+  }
+
+  .calendar-day-box:hover {
+    background: rgba(255, 255, 255, 0.16);
+  }
+
+  .different-month {
+    border-radius: var(--bk-r-sm);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .day-number {
+    color: var(--bk-on-dark-soft);
+  }
+
+  /* Same fix as the day arrows elsewhere: the 44px minimum height needs a
+     matching width or an icon-only button stretches into a sliver. */
+  .btn-xs {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: var(--bk-r-pill);
+    font-size: 1.5rem;
+  }
+}
 </style>

@@ -165,6 +165,15 @@ tr.highlight {
   background-color: rgb(91, 192, 222);
 }
 
+@media (max-width: 992px) {
+  /* A solid light-blue band is far too loud against the dark panel; a tint
+     plus the brighter text carries the same emphasis. */
+  tr.highlight {
+    color: var(--bk-aqua-bright);
+    background-color: rgba(52, 208, 216, 0.14);
+  }
+}
+
 tr.clickable {
   cursor: pointer;
 }

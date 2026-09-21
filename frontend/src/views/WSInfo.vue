@@ -95,14 +95,25 @@ onMounted(() => {
 }
 
 @media (max-width: 992px) {
-  /* Fill the whole phone screen below the fixed navbar (60px padding-top) */
+  /* Fill what is left of the phone screen once the top bar, the tab bar and
+     the page padding (.bk-page, 0.65rem top and bottom) have taken theirs. */
   .card-height {
-    min-height: calc(100vh - 66px);
-    max-height: calc(100vh - 66px);
-    height: calc(100vh - 66px);
-    min-height: calc(100dvh - 66px - env(safe-area-inset-bottom, 0px));
-    max-height: calc(100dvh - 66px - env(safe-area-inset-bottom, 0px));
-    height: calc(100dvh - 66px - env(safe-area-inset-bottom, 0px));
+    min-height: calc(
+      100vh - var(--bk-shell-top) - var(--bk-shell-bottom) - 1.3rem
+    );
+    max-height: calc(
+      100vh - var(--bk-shell-top) - var(--bk-shell-bottom) - 1.3rem
+    );
+    height: calc(100vh - var(--bk-shell-top) - var(--bk-shell-bottom) - 1.3rem);
+    min-height: calc(
+      100dvh - var(--bk-shell-top) - var(--bk-shell-bottom) - 1.3rem
+    );
+    max-height: calc(
+      100dvh - var(--bk-shell-top) - var(--bk-shell-bottom) - 1.3rem
+    );
+    height: calc(
+      100dvh - var(--bk-shell-top) - var(--bk-shell-bottom) - 1.3rem
+    );
     /* Everything fits through flex sizing, no inner scrolling needed */
     overflow: hidden;
   }

@@ -3,7 +3,7 @@
     <template v-slot:body>
       <user-heats-modal v-model:visible="showUserHeatsModal" />
       <div class="row">
-        <div class="col-6">
+        <div class="col-12 col-lg-6">
           <div class="row">
             <div class="col-12">
               Riding Time: {{ formatDuration(heatTimeMinutesYTD) }}
@@ -23,7 +23,7 @@
             </div>
           </div>
         </div>
-        <div class="col-6">
+        <div class="col-12 col-lg-6 mt-2 mt-lg-0">
           <button
             type="button"
             class="btn btn-outline-info btn-sm"

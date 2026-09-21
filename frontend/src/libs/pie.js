@@ -16,6 +16,7 @@ export default class BooksysPie {
       stroke,
       animate,
       clickCallBack,
+      labelColor,
     ) {
       var paper = this,
         rad = Math.PI / 180,
@@ -106,18 +107,40 @@ export default class BooksysPie {
 
         // Check if labels are defined, if yes we create the labels
         if (labels[j]) {
-          var txt = paper
-            .text(
-              cx + (r + delta + 55) * Math.cos(-popangle * rad),
-              cy + (r + delta + 25) * Math.sin(-popangle * rad),
-              labels[j],
-            )
-            .attr({
-              fill: colors[j],
-              stroke: "none",
-              opacity: 0,
-              "font-size": 18,
-            });
+          var labelX = cx + (r + delta + 55) * Math.cos(-popangle * rad);
+          var labelY = cy + (r + delta + 25) * Math.sin(-popangle * rad);
+          var txt = paper.text(labelX, labelY, labels[j]).attr({
+            // Falls back to the sector's own colour, which is what reads on
+            // the white desktop card. On the dark mobile panel the unbooked
+            // sectors would paint their label straight into the background,
+            // so the caller passes an explicit one.
+            fill: labelColor || colors[j],
+            stroke: "none",
+            opacity: 0,
+            "font-size": 18,
+          });
+
+          // The label hangs at a fixed distance from the centre, which on a
+          // narrow container puts it past the edge of the paper and clips the
+          // time window mid-text. Nudge any overhanging label back inside
+          // using its real metrics.
+          var box = txt.getBBox();
+          var pad = 2;
+          var shiftX = 0;
+          var shiftY = 0;
+          if (box.x < pad) {
+            shiftX = pad - box.x;
+          } else if (box.x + box.width > paper.width - pad) {
+            shiftX = paper.width - pad - (box.x + box.width);
+          }
+          if (box.y < pad) {
+            shiftY = pad - box.y;
+          } else if (box.y + box.height > paper.height - pad) {
+            shiftY = paper.height - pad - (box.y + box.height);
+          }
+          if (shiftX !== 0 || shiftY !== 0) {
+            txt.attr({ x: labelX + shiftX, y: labelY + shiftY });
+          }
         }
 
         // If the pie has some functionality/animation we add events
@@ -193,12 +216,31 @@ export default class BooksysPie {
       timezoneStr = properties.timezone;
     }
 
-    // define colors (hardcode for now)
-    const colorNoSlot = "#424242";
-    const colorCourse = "#d9534e"; //"#3AAFA9"; // "#FC4445";
-    const colorSlot = "#5cb85b";
-    const colorSlotFull = "#d9534e";
-    const colorOffHour = "#212121";
+    // The pie is drawn on a white card on desktop and on a dark glass panel
+    // on mobile, so the palette comes from CSS custom properties resolved
+    // against the container. The fallbacks are the original hard-coded
+    // values, which is what desktop still resolves to.
+    const themeColor = (name, fallback) => {
+      try {
+        const value = window
+          .getComputedStyle(location)
+          .getPropertyValue(name)
+          .trim();
+        return value.length > 0 ? value : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    };
+
+    const colorNoSlot = themeColor("--bk-pie-noslot", "#424242");
+    const colorCourse = themeColor("--bk-pie-course", "#d9534e");
+    const colorSlot = themeColor("--bk-pie-slot", "#5cb85b");
+    const colorSlotFull = themeColor("--bk-pie-full", "#d9534e");
+    const colorOffHour = themeColor("--bk-pie-offhour", "#212121");
+    const colorStroke = themeColor("--bk-pie-stroke", "#fff");
+    // Intentionally empty on desktop: no value means the label keeps using
+    // its sector's colour, which is the right answer on a white card.
+    const colorLabel = themeColor("--bk-pie-label", "");
 
     // reset current content
     location.html = "";
@@ -457,9 +499,10 @@ export default class BooksysPie {
       values,
       labels,
       colors,
-      "#fff",
+      colorStroke,
       animate,
       callback,
+      colorLabel,
     );
 
     return pieSessions;

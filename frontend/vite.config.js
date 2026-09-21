@@ -29,8 +29,10 @@ export default defineConfig({
         name: "Wake and Surf Booksys",
         short_name: "Booksys",
         description: "Wake and Surf Booking System for boat communities.",
-        theme_color: "#ffffff",
-        background_color: "#ffffff",
+        // Matches --bk-deep, the top of the mobile canvas, so the splash
+        // and the task switcher do not flash white before the app paints.
+        theme_color: "#0a1c27",
+        background_color: "#0a1c27",
         display: "standalone",
         scope: "/",
         start_url: "/",

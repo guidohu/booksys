@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex flex-column justify-content-center">
     <div class="container">
-      <div class="row text-center mb-3 mt-5">
+      <div class="row text-center mb-4 mt-0 mt-lg-5">
         <div class="col-12">
           <img
             class="img-fluid custom-height"
@@ -114,5 +114,22 @@ onMounted(() => {
 <style scoped>
 .custom-height {
   max-height: 100px;
+}
+
+@media (max-width: 992px) {
+  /* Sit the card in the middle of the screen rather than pinned under the
+     status bar, and keep it clear of the notch and the home indicator. */
+  .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100dvh;
+    padding: calc(var(--bk-safe-top) + 1.25rem) 1.1rem
+      calc(var(--bk-safe-bottom) + 1.25rem);
+  }
+
+  .custom-height {
+    max-height: 84px;
+  }
 }
 </style>

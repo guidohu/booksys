@@ -23,12 +23,8 @@
     </show-for-desktop>
     <show-for-mobile id="subpage-container-show-for-mobile">
       <navbar-mobile :title="title" />
-      <div class="navbar-padding">
-        <div class="row">
-          <div class="col-12">
-            <slot></slot>
-          </div>
-        </div>
+      <div class="bk-page">
+        <slot></slot>
       </div>
     </show-for-mobile>
   </div>
@@ -49,10 +45,6 @@ defineProps({
 </script>
 
 <style scoped>
-.navbar-padding {
-  padding-top: 60px;
-}
-
 .content-max-height {
   min-height: 480px;
   max-height: 480px;

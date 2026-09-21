@@ -3,14 +3,14 @@
     <template v-slot:body>
       <payment-info-modal v-model:visible="showPaymentInfoModal" />
       <div class="row">
-        <div class="col-6">
+        <div class="col-12 col-lg-6">
           <div class="row">
             <div class="col-12">
               Current Balance: {{ formatBalance(balanceRounded) }}
             </div>
           </div>
         </div>
-        <div class="col-6">
+        <div class="col-12 col-lg-6 mt-2 mt-lg-0">
           <button
             type="button"
             class="btn btn-outline-info btn-sm"
